@@ -33,14 +33,24 @@ class InteractiveMap {
     
     async init() {
         try {
+            console.log('InteractiveMap: Starting initialization...');
             await this.loadStationsData();
+            console.log(`InteractiveMap: Loaded ${this.stationsData.length} stations and ${this.platformsData.length} platforms`);
+            
             this.initializeMap();
+            console.log('InteractiveMap: Map initialized');
+            
             this.addStationsToMap();
+            console.log('InteractiveMap: Stations added to map');
+            
             this.setupControls();
+            console.log('InteractiveMap: Controls setup complete');
+            
             this.hideLoading();
+            console.log('InteractiveMap: Initialization complete');
         } catch (error) {
             console.error('Failed to initialize interactive map:', error);
-            this.showError('Failed to load map data');
+            this.showError('Failed to load map data: ' + error.message);
         }
     }
     

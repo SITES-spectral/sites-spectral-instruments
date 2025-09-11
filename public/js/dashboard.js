@@ -33,13 +33,16 @@ class Dashboard {
         }
         
         // Wait for InteractiveMap class to be available
+        let retryCount = 0;
+        const maxRetries = 50; // 5 seconds max
+        
         const tryInitializeMap = () => {
             if (typeof InteractiveMap !== 'undefined') {
                 try {
-                    console.log('Initializing InteractiveMap...');
+                    console.log('Dashboard: Initializing InteractiveMap...');
                     this.interactiveMap = new InteractiveMap('stations-map');
                 } catch (error) {
-                    console.error('Failed to initialize interactive map:', error);
+                    console.error('Dashboard: Failed to initialize interactive map:', error);
                     // Show error in map container
                     mapContainer.innerHTML = `
                         <div class="map-error">
@@ -55,8 +58,25 @@ class Dashboard {
                     `;
                 }
             } else {
-                console.log('InteractiveMap class not yet available, retrying...');
-                setTimeout(tryInitializeMap, 100);
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    console.log(`Dashboard: InteractiveMap class not yet available, retrying... (${retryCount}/${maxRetries})`);
+                    setTimeout(tryInitializeMap, 100);
+                } else {
+                    console.error('Dashboard: Timeout waiting for InteractiveMap class');
+                    mapContainer.innerHTML = `
+                        <div class="map-error">
+                            <div class="error-content">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Map Loading Timeout</h3>
+                                <p>The interactive map failed to load within the expected time. This could be due to a slow network connection or script loading issue.</p>
+                                <button class="btn btn-outline" onclick="location.reload()">
+                                    <i class="fas fa-redo"></i> Refresh Page
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
             }
         };
         
