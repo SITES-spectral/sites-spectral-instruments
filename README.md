@@ -2,7 +2,7 @@
 
 A comprehensive web-based management system for SITES Spectral monitoring stations and instruments across Sweden. This professional-grade application provides secure, role-based access to manage research infrastructure with an intuitive interface and powerful data management capabilities.
 
-![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.4.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-orange.svg)
 ![Database](https://img.shields.io/badge/database-D1%20SQLite-green.svg)
 

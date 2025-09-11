@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-09-11
+
+### Fixed
+- **🔧 Version Consistency** - Fixed version display inconsistencies across all pages
+  - Updated all HTML pages to show correct v0.4.0 in status bar and meta tags
+  - Fixed version manifest file with correct cache-busting parameters
+  - Updated default version fallback in version.js from 0.2.0 to 0.4.0
+  - Synchronized all CSS and JavaScript resource versions (v=0.4.0)
+  - Ensured consistent version display across login, admin, station, and documentation pages
+
 ## [0.4.0] - 2025-09-11
 
 ### Added
