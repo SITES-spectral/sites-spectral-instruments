@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-09-11
+
+### Added
+- **🏛️ Individual Station Detail Pages** - Comprehensive station information views
+  - Clickable station cards on dashboard now navigate to individual station pages
+  - Real-time loading of station-specific platforms and instruments
+  - Interactive station maps with coordinates and metadata
+  - Professional layout with breadcrumb navigation and responsive design
+
+- **🗺️ Interactive Map System** - Fixed and enhanced map functionality
+  - Resolved "Failed to load map data" error on dashboard interactive map
+  - Added proper map initialization in dashboard with error handling
+  - Map displays all 18 official SITES Spectral platforms with coordinates
+  - Integrated satellite, topographic, and OpenStreetMap tile layers
+
+- **📱 Navigation Template System** - Unified navigation with authentication support
+  - Created reusable NavigationManager for consistent navigation across all pages
+  - Authentication-aware navigation with user role display
+  - Mobile-responsive navigation with hamburger menu support
+  - Automatic login/logout state management with token validation
+
+- **🔌 Enhanced API Endpoints** - Improved data access and filtering
+  - Added `station_id` query parameter filtering for platforms API
+  - Created unified instruments API combining phenocams and multispectral sensors
+  - Enhanced stations API with detailed individual station information
+  - Proper error handling and response formatting for all endpoints
+
+### Removed
+- **🗑️ Broken Station Pages** - Cleaned up non-functional components
+  - Removed broken `/stations.html` page that showed infinite loading
+  - Eliminated non-working Quick Actions section from dashboard
+  - Streamlined navigation to only show functional, working links
+
+### Technical
+- **🏗️ Harmonized Data Architecture** - Unified instrument handling
+  - Combined phenocams and mspectral_sensors tables in instruments API
+  - Proper handling of different instrument types on same platforms
+  - Support for different mounting heights and viewing directions
+- **🔧 Enhanced Error Handling** - Better user experience and debugging
+  - Added comprehensive error states for map loading failures
+  - Improved API error messages and logging for development
+  - Graceful fallbacks for missing data and network issues
+
 ## [0.1.1] - 2025-09-11
 
 ### Fixed

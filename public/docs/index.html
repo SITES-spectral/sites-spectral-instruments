@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - SITES Spectral</title>
+    <link rel="stylesheet" href="/css/styles.css?v=0.2.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="/js/navigation.js?v=0.2.0"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="brand-logo">
+                <span>SITES Spectral</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/stations.html" class="nav-link">
+                        <i class="fas fa-map"></i> Interactive Map
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/login.html" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Station Login
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/docs/" class="nav-link active">
+                        <i class="fas fa-book"></i> Documentation
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="content-wrapper">
+                <h1><i class="fas fa-book"></i> Documentation</h1>
+                <p class="lead">Complete guides and references for the SITES Spectral management system.</p>
+
+                <div class="docs-grid">
+                    <div class="doc-card">
+                        <h3><i class="fas fa-user-cog"></i> Station Management Guide</h3>
+                        <p>Step-by-step workdown for station managers to easily add, update, and manage platforms and instruments.</p>
+                        <a href="https://github.com/anthropics/sites-spectral/blob/main/docs/STATION_MANAGEMENT_GUIDE.md" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Read Guide
+                        </a>
+                    </div>
+
+                    <div class="doc-card">
+                        <h3><i class="fas fa-shield-alt"></i> Authentication Setup</h3>
+                        <p>Security architecture, authentication workflows, and best practices for system access.</p>
+                        <a href="https://github.com/anthropics/sites-spectral/blob/main/docs/AUTHENTICATION_SETUP.md" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Read Guide
+                        </a>
+                    </div>
+
+                    <div class="doc-card">
+                        <h3><i class="fas fa-database"></i> Platform Status</h3>
+                        <p>Real platform data implementation status and mapping requirements.</p>
+                        <a href="https://github.com/anthropics/sites-spectral/blob/main/docs/PLATFORM_STATUS_REAL_DATA.md" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Read Status
+                        </a>
+                    </div>
+
+                    <div class="doc-card">
+                        <h3><i class="fas fa-chart-line"></i> System Status</h3>
+                        <p>Overall system analysis, database status, and implementation roadmap.</p>
+                        <a href="https://github.com/anthropics/sites-spectral/blob/main/docs/SYSTEM_STATUS_SUMMARY.md" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Read Summary
+                        </a>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h2><i class="fas fa-info-circle"></i> Quick Start</h2>
+                    <ol>
+                        <li><strong>Station Managers:</strong> Use your station credentials to <a href="/login.html">login</a></li>
+                        <li><strong>View Network:</strong> Explore the <a href="/stations.html">Interactive Map</a></li>
+                        <li><strong>Manage Platforms:</strong> Add and update your station's platforms and instruments</li>
+                        <li><strong>Get Help:</strong> Consult the documentation guides above</li>
+                    </ol>
+                </div>
+
+                <div class="api-info">
+                    <h2><i class="fas fa-code"></i> API Endpoints</h2>
+                    <div class="api-grid">
+                        <div class="api-endpoint">
+                            <code>GET /api/stations</code>
+                            <span>List all research stations</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <code>GET /api/platforms</code>
+                            <span>List all platforms (18 active)</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <code>POST /api/auth/login</code>
+                            <span>Station authentication</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <style>
+    .docs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .doc-card {
+        background: white;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: box-shadow 0.2s;
+    }
+
+    .doc-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .doc-card h3 {
+        color: #2c5282;
+        margin-bottom: 0.5rem;
+    }
+
+    .doc-card p {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .info-section {
+        background: #f7fafc;
+        padding: 2rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+    }
+
+    .info-section h2 {
+        color: #2d3748;
+        margin-bottom: 1rem;
+    }
+
+    .info-section ol {
+        line-height: 1.8;
+    }
+
+    .api-info {
+        margin: 2rem 0;
+    }
+
+    .api-grid {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .api-endpoint {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #1a202c;
+        color: white;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .api-endpoint code {
+        color: #68d391;
+        font-weight: bold;
+    }
+
+    .api-endpoint span {
+        color: #cbd5e0;
+        font-size: 0.9rem;
+    }
+    </style>
+</body>
+</html>

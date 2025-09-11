@@ -564,17 +564,293 @@ class StationDashboard {
         window.location.href = '/';
     }
     
-    // Placeholder methods for future implementation
+    // Instrument management methods
     addInstrument(type) {
-        Utils.showToast(`Add ${type} functionality coming soon`, 'info');
+        this.showAddInstrumentModal(type);
     }
     
-    bulkUpdateStatus(type) {
-        Utils.showToast(`Bulk update for ${type} coming soon`, 'info');
+    async bulkUpdateStatus(type) {
+        const selectedIds = this.getSelectedIds(type);
+        if (selectedIds.length === 0) {
+            Utils.showToast('Please select instruments to update', 'warning');
+            return;
+        }
+        
+        this.showBulkUpdateModal(type, selectedIds);
     }
     
-    bulkExport(type) {
-        Utils.showToast(`Export ${type} functionality coming soon`, 'info');
+    async bulkExport(type) {
+        const selectedIds = this.getSelectedIds(type);
+        if (selectedIds.length === 0) {
+            Utils.showToast('Please select instruments to export', 'warning');
+            return;
+        }
+        
+        try {
+            const data = type === 'phenocams' ? this.phenocams : this.sensors;
+            const selectedItems = data.filter(item => selectedIds.includes(item.id.toString()));
+            
+            const csv = this.generateCSV(selectedItems, type);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            Utils.showToast(`Exported ${selectedItems.length} ${type}`, 'success');
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            Utils.showToast('Export failed', 'error');
+        }
+    }
+    
+    getSelectedIds(type) {
+        const checkboxes = document.querySelectorAll(`#${type}-table .row-select:checked`);
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+    
+    generateCSV(items, type) {
+        if (items.length === 0) return '';
+        
+        const headers = type === 'phenocams' 
+            ? ['ID', 'Canonical ID', 'Legacy Acronym', 'Status', 'Ecosystem', 'Location', 'Thematic Program', 'Latitude', 'Longitude']
+            : ['ID', 'Canonical ID', 'Legacy Name', 'Status', 'Ecosystem', 'Location', 'Thematic Program', 'Center Wavelength', 'Usage Type', 'Brand Model'];
+        
+        const rows = items.map(item => {
+            if (type === 'phenocams') {
+                return [
+                    item.id, item.canonical_id || '', item.legacy_acronym || '', 
+                    item.status || '', item.ecosystem || '', item.location || '',
+                    item.thematic_program || '', item.latitude || '', item.longitude || ''
+                ];
+            } else {
+                return [
+                    item.id, item.canonical_id || '', item.legacy_name || '', 
+                    item.status || '', item.ecosystem || '', item.location || '',
+                    item.thematic_program || '', item.center_wavelength_nm || '', 
+                    item.usage_type || '', `${item.brand || ''} ${item.model || ''}`.trim()
+                ];
+            }
+        });
+        
+        return [headers, ...rows].map(row => 
+            row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+    }
+    
+    showAddInstrumentModal(type) {
+        const modal = this.createModal(`Add ${type === 'phenocam' ? 'Phenocam' : 'Multispectral Sensor'}`, this.getAddInstrumentForm(type));
+        
+        modal.querySelector('.btn-primary').addEventListener('click', async () => {
+            await this.handleAddInstrument(type, modal);
+        });
+    }
+    
+    getAddInstrumentForm(type) {
+        const commonFields = `
+            <div class="form-group">
+                <label for="canonical_id">Canonical ID *</label>
+                <input type="text" id="canonical_id" name="canonical_id" required>
+            </div>
+            <div class="form-group">
+                <label for="ecosystem">Ecosystem</label>
+                <input type="text" id="ecosystem" name="ecosystem">
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location">
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="Active" selected>Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Maintenance">Maintenance</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="thematic_program">Thematic Program</label>
+                <select id="thematic_program" name="thematic_program">
+                    <option value="SITES_Spectral" selected>SITES Spectral</option>
+                    <option value="ICOS">ICOS</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        `;
+        
+        if (type === 'phenocam') {
+            return `
+                <form id="add-instrument-form">
+                    <div class="form-group">
+                        <label for="legacy_acronym">Legacy Acronym</label>
+                        <input type="text" id="legacy_acronym" name="legacy_acronym">
+                    </div>
+                    ${commonFields}
+                </form>
+            `;
+        } else {
+            return `
+                <form id="add-instrument-form">
+                    <div class="form-group">
+                        <label for="legacy_name">Legacy Name</label>
+                        <input type="text" id="legacy_name" name="legacy_name">
+                    </div>
+                    ${commonFields}
+                    <div class="form-group">
+                        <label for="center_wavelength_nm">Center Wavelength (nm)</label>
+                        <input type="number" id="center_wavelength_nm" name="center_wavelength_nm">
+                    </div>
+                    <div class="form-group">
+                        <label for="usage_type">Usage Type</label>
+                        <input type="text" id="usage_type" name="usage_type">
+                    </div>
+                    <div class="form-group">
+                        <label for="brand_model">Brand/Model</label>
+                        <input type="text" id="brand_model" name="brand_model">
+                    </div>
+                </form>
+            `;
+        }
+    }
+    
+    async handleAddInstrument(type, modal) {
+        const form = modal.querySelector('#add-instrument-form');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Add station ID
+        data.station_id = this.station.id;
+        
+        try {
+            const endpoint = type === 'phenocam' ? '/api/phenocams' : '/api/mspectral';
+            const response = await this.authenticatedFetch(endpoint, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to create instrument');
+            }
+            
+            Utils.showToast(`${type === 'phenocam' ? 'Phenocam' : 'Sensor'} created successfully`, 'success');
+            this.closeModal(modal);
+            
+            // Reload data
+            await this.loadInstrumentData();
+            this.updateUI();
+            
+        } catch (error) {
+            console.error('Failed to create instrument:', error);
+            Utils.showToast(error.message || 'Failed to create instrument', 'error');
+        }
+    }
+    
+    showBulkUpdateModal(type, selectedIds) {
+        const modal = this.createModal(`Update ${selectedIds.length} ${type}`, `
+            <form id="bulk-update-form">
+                <div class="form-group">
+                    <label for="bulk_status">Status</label>
+                    <select id="bulk_status" name="status">
+                        <option value="">-- No Change --</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="Maintenance">Maintenance</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bulk_thematic_program">Thematic Program</label>
+                    <select id="bulk_thematic_program" name="thematic_program">
+                        <option value="">-- No Change --</option>
+                        <option value="SITES_Spectral">SITES Spectral</option>
+                        <option value="ICOS">ICOS</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </form>
+        `);
+        
+        modal.querySelector('.btn-primary').addEventListener('click', async () => {
+            await this.handleBulkUpdate(type, selectedIds, modal);
+        });
+    }
+    
+    async handleBulkUpdate(type, selectedIds, modal) {
+        const form = modal.querySelector('#bulk-update-form');
+        const formData = new FormData(form);
+        const updates = {};
+        
+        for (const [key, value] of formData.entries()) {
+            if (value) updates[key] = value;
+        }
+        
+        if (Object.keys(updates).length === 0) {
+            Utils.showToast('Please select at least one field to update', 'warning');
+            return;
+        }
+        
+        try {
+            const endpoint = type === 'phenocams' ? '/api/phenocams' : '/api/mspectral';
+            
+            // Update each selected item
+            const promises = selectedIds.map(id => 
+                this.authenticatedFetch(`${endpoint}/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(updates)
+                })
+            );
+            
+            await Promise.all(promises);
+            
+            Utils.showToast(`Updated ${selectedIds.length} ${type}`, 'success');
+            this.closeModal(modal);
+            
+            // Reload data
+            await this.loadInstrumentData();
+            this.updateUI();
+            
+        } catch (error) {
+            console.error('Bulk update failed:', error);
+            Utils.showToast('Bulk update failed', 'error');
+        }
+    }
+    
+    createModal(title, content) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    ${content}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        `;
+        
+        modal.querySelector('.modal-close').addEventListener('click', () => this.closeModal(modal));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) this.closeModal(modal);
+        });
+        
+        document.body.appendChild(modal);
+        return modal;
+    }
+    
+    closeModal(modal) {
+        modal.remove();
     }
 }
 
@@ -600,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.dashboard = new StationDashboard();
 });
 
-// Additional CSS for action buttons
+// Additional CSS for action buttons and modals
 const additionalStyles = `
     .action-buttons {
         display: flex;
@@ -640,6 +916,103 @@ const additionalStyles = `
     .btn-icon:disabled:hover {
         background: none;
         color: #6b7280;
+    }
+    
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .modal {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        color: #1f2937;
+        font-weight: 600;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-close:hover {
+        color: #374151;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        background: #f9fafb;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 `;
 

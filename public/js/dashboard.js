@@ -14,11 +14,37 @@ class Dashboard {
         try {
             await this.loadDashboardData();
             this.renderStations();
+            this.initializeMap();
             this.setupEventListeners();
             await this.loadRecentActivity();
         } catch (error) {
             console.error('Dashboard initialization failed:', error);
             Utils.showToast('Failed to load dashboard data', 'error');
+        }
+    }
+
+    initializeMap() {
+        // Initialize the interactive map if the container exists
+        const mapContainer = document.getElementById('stations-map');
+        if (mapContainer && typeof InteractiveMap !== 'undefined') {
+            try {
+                this.interactiveMap = new InteractiveMap('stations-map');
+            } catch (error) {
+                console.error('Failed to initialize interactive map:', error);
+                // Show error in map container
+                mapContainer.innerHTML = `
+                    <div class="map-error">
+                        <div class="error-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Map Loading Error</h3>
+                            <p>Unable to load the interactive map. Please refresh the page.</p>
+                            <button class="btn btn-outline" onclick="location.reload()">
+                                <i class="fas fa-redo"></i> Refresh Page
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
         }
     }
 

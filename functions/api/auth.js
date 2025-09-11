@@ -1,5 +1,7 @@
 // Authentication API endpoints for SITES Spectral
+// Enhanced with Cloudflare secrets support for station-based authentication
 import { hashPassword, verifyPassword, generateToken, verifyToken, createSession, deleteSession, logActivity } from '../../src/auth.js';
+import { authenticateUser, generateToken as generateSecretToken } from '../../src/auth-secrets.js';
 
 export async function onRequestPost({ request, env }) {
     const url = new URL(request.url);
@@ -43,7 +45,70 @@ async function handleLogin(request, env) {
             });
         }
 
-        // Get user from database
+        // Try secrets-based authentication first (for station users)
+        const secretUser = await authenticateUser(username, password, env);
+        
+        if (secretUser) {
+            // Generate token using secrets-based system
+            const token = await generateSecretToken(secretUser, env);
+            
+            // Log successful login
+            await logActivity(env, secretUser.id, 'login', 'auth', null, null, { 
+                ip: request.headers.get('CF-Connecting-IP'),
+                auth_method: 'secrets'
+            }, request);
+
+            // Get station information if applicable
+            let stationInfo = {};
+            if (secretUser.station_id && env.DB) {
+                try {
+                    const station = await env.DB.prepare(
+                        'SELECT display_name, acronym FROM stations WHERE id = ?'
+                    ).bind(secretUser.station_id).first();
+                    
+                    if (station) {
+                        stationInfo = {
+                            station_name: station.display_name,
+                            station_acronym: station.acronym
+                        };
+                    }
+                } catch (dbError) {
+                    console.warn('Could not fetch station info:', dbError);
+                }
+            }
+
+            // Return user info and token
+            const userResponse = {
+                id: secretUser.id,
+                username: secretUser.username,
+                role: secretUser.role,
+                station_id: secretUser.station_id,
+                ...stationInfo,
+                full_name: secretUser.username, // Use username as display name
+                auth_method: 'secrets'
+            };
+
+            return new Response(JSON.stringify({
+                success: true,
+                user: userResponse,
+                token,
+                expires_in: 24 * 60 * 60 // 24 hours in seconds
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        // Fallback to database authentication (legacy users)
+        if (!env.DB) {
+            return new Response(JSON.stringify({ 
+                error: 'Invalid credentials' 
+            }), {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         const user = await env.DB.prepare(`
             SELECT u.*, s.display_name as station_name, s.acronym as station_acronym
             FROM users u
@@ -53,7 +118,11 @@ async function handleLogin(request, env) {
 
         if (!user) {
             // Log failed attempt
-            await logActivity(env, null, 'login_failed', 'auth', null, null, { username, reason: 'user_not_found' }, request);
+            await logActivity(env, null, 'login_failed', 'auth', null, null, { 
+                username, 
+                reason: 'user_not_found',
+                auth_method: 'database'
+            }, request);
             
             return new Response(JSON.stringify({ 
                 error: 'Invalid credentials' 
@@ -65,7 +134,10 @@ async function handleLogin(request, env) {
 
         // Check if account is active
         if (!user.active) {
-            await logActivity(env, user.id, 'login_failed', 'auth', null, null, { reason: 'account_disabled' }, request);
+            await logActivity(env, user.id, 'login_failed', 'auth', null, null, { 
+                reason: 'account_disabled',
+                auth_method: 'database'
+            }, request);
             
             return new Response(JSON.stringify({ 
                 error: 'Account disabled' 
@@ -105,7 +177,11 @@ async function handleLogin(request, env) {
                 WHERE id = ?
             `).bind(failedAttempts, lockUntil, user.id).run();
             
-            await logActivity(env, user.id, 'login_failed', 'auth', null, null, { reason: 'invalid_password', attempts: failedAttempts }, request);
+            await logActivity(env, user.id, 'login_failed', 'auth', null, null, { 
+                reason: 'invalid_password', 
+                attempts: failedAttempts,
+                auth_method: 'database'
+            }, request);
             
             return new Response(JSON.stringify({ 
                 error: 'Invalid credentials' 
@@ -128,7 +204,10 @@ async function handleLogin(request, env) {
         await createSession(env, user.id, token, request);
         
         // Log successful login
-        await logActivity(env, user.id, 'login', 'auth', null, null, { ip: request.headers.get('CF-Connecting-IP') }, request);
+        await logActivity(env, user.id, 'login', 'auth', null, null, { 
+            ip: request.headers.get('CF-Connecting-IP'),
+            auth_method: 'database'
+        }, request);
 
         // Return user info and token
         const userResponse = {
@@ -140,7 +219,8 @@ async function handleLogin(request, env) {
             station_name: user.station_name,
             station_acronym: user.station_acronym,
             full_name: user.full_name,
-            organization: user.organization
+            organization: user.organization,
+            auth_method: 'database'
         };
 
         return new Response(JSON.stringify({

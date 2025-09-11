@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="/css/styles.css?v=0.2.0">
     
     <!-- Version Meta -->
-    <meta name="app-version" content="0.2.0">
+    <meta name="app-version" content="0.3.0">
     <meta name="build-date" content="2025-09-11">
 </head>
 <body>
@@ -38,22 +38,22 @@
             <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="/" class="nav-link active">
-                        <i class="fas fa-home"></i> Dashboard
+                        <i class="fas fa-home"></i> Home
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="/stations.html" class="nav-link">
-                        <i class="fas fa-map-marker-alt"></i> Stations
+                        <i class="fas fa-map"></i> Interactive Map
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/instruments.html" class="nav-link">
-                        <i class="fas fa-microscope"></i> Instruments
+                    <a href="/login.html" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Station Login
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/export.html" class="nav-link">
-                        <i class="fas fa-download"></i> Export
+                    <a href="/docs/" class="nav-link">
+                        <i class="fas fa-book"></i> Documentation
                     </a>
                 </li>
             </ul>
@@ -157,45 +157,6 @@
             </div>
         </section>
 
-        <!-- Quick Actions -->
-        <section class="quick-actions">
-            <div class="container">
-                <h2 class="section-title">Quick Actions</h2>
-                <div class="actions-grid">
-                    <div class="action-card" onclick="window.location.href='/instruments.html?action=add'">
-                        <div class="action-icon">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <h3>Add Instrument</h3>
-                        <p>Register a new instrument to a station</p>
-                    </div>
-                    
-                    <div class="action-card" onclick="window.location.href='/instruments.html?filter=maintenance'">
-                        <div class="action-icon">
-                            <i class="fas fa-tools"></i>
-                        </div>
-                        <h3>Maintenance Due</h3>
-                        <p>View instruments requiring maintenance</p>
-                    </div>
-                    
-                    <div class="action-card" onclick="window.location.href='/export.html'">
-                        <div class="action-icon">
-                            <i class="fas fa-file-export"></i>
-                        </div>
-                        <h3>Export Data</h3>
-                        <p>Download station and instrument data</p>
-                    </div>
-                    
-                    <div class="action-card" onclick="showStatusModal()">
-                        <div class="action-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <h3>Status Overview</h3>
-                        <p>View network-wide status summary</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Recent Activity -->
         <section class="recent-activity">
@@ -240,7 +201,7 @@
                     <p>&copy; 2025 SITES Spectral. All rights reserved.</p>
                 </div>
                 <div class="footer-right">
-                    <p>Version <span id="app-version">0.2.0</span> | Built on <span id="build-date">2025-09-11</span></p>
+                    <p>Version <span id="app-version">0.3.0</span> | Built on <span id="build-date">2025-09-11</span></p>
                 </div>
             </div>
         </div>
@@ -254,6 +215,7 @@
     <script src="/js/utils.js?v=0.2.0"></script>
     <script src="/js/api.js?v=0.2.0"></script>
     <script src="/js/components.js?v=0.2.0"></script>
+    <script src="/js/navigation.js?v=0.2.0"></script>
     <script src="/js/interactive-map.js?v=0.2.0"></script>
     <script src="/js/dashboard.js?v=0.2.0"></script>
 </body>

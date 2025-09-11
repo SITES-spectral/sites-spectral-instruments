@@ -1,5 +1,7 @@
 // API Route Handler for SITES Spectral application
 
+import { getUserFromRequest, hasPermission, requireAuth } from './auth-secrets.js';
+
 export async function handleApiRequest(request, env, ctx) {
   const url = new URL(request.url);
   const pathSegments = url.pathname.split('/').filter(segment => segment);
@@ -421,17 +423,31 @@ async function handlePhenocams(method, pathSegments, request, env) {
   try {
     switch (method) {
       case 'GET':
-        const query = `
+        // Public read access for phenocams data
+        const user = await getUserFromRequest(request, env);
+        
+        let query = `
           SELECT 
             p.*,
             s.display_name as station_name,
             s.acronym as station_acronym
           FROM phenocams p
           LEFT JOIN stations s ON p.station_id = s.id
-          ORDER BY p.canonical_id
         `;
         
-        const result = await env.DB.prepare(query).all();
+        const queryParams = [];
+        
+        // Apply station filtering based on user role
+        if (user && user.role === 'station') {
+          query += ' WHERE p.station_id = ?';
+          queryParams.push(user.station_id);
+        }
+        
+        query += ' ORDER BY p.priority, p.canonical_id';
+        
+        const result = queryParams.length > 0 
+          ? await env.DB.prepare(query).bind(...queryParams).all()
+          : await env.DB.prepare(query).all();
         
         return new Response(JSON.stringify({
           phenocams: result.results || []
@@ -440,10 +456,35 @@ async function handlePhenocams(method, pathSegments, request, env) {
         });
         
       case 'PATCH':
+        // Require authentication for modifications
+        const patchUser = await getUserFromRequest(request, env);
+        if (!patchUser) {
+          return new Response(JSON.stringify({ error: 'Authentication required' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
         // Extract ID from pathSegments
         const id = pathSegments[1];
         if (!id) {
           return new Response('ID required', { status: 400 });
+        }
+        
+        // Check if user has permission to modify this phenocam
+        const phenocamCheck = await env.DB.prepare(
+          'SELECT station_id FROM phenocams WHERE id = ?'
+        ).bind(id).first();
+        
+        if (!phenocamCheck) {
+          return new Response('Phenocam not found', { status: 404 });
+        }
+        
+        if (!hasPermission(patchUser, 'write', 'instrument', phenocamCheck.station_id)) {
+          return new Response(JSON.stringify({ error: 'Permission denied' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
         }
         
         const body = await request.json();
@@ -497,15 +538,27 @@ async function handleMspectralSensors(method, pathSegments, request, env) {
   try {
     switch (method) {
       case 'GET':
-        const query = `
+        // Public read access for sensor data
+        const user = await getUserFromRequest(request, env);
+        
+        let query = `
           SELECT 
             m.*,
             s.display_name as station_name,
             s.acronym as station_acronym
           FROM mspectral_sensors m
           LEFT JOIN stations s ON m.station_id = s.id
-          ORDER BY m.canonical_id
         `;
+        
+        const queryParams = [];
+        
+        // Apply station filtering based on user role
+        if (user && user.role === 'station') {
+          query += ' WHERE m.station_id = ?';
+          queryParams.push(user.station_id);
+        }
+        
+        query += ' ORDER BY m.priority, m.canonical_id';
         
         const result = await env.DB.prepare(query).all();
         
@@ -516,10 +569,35 @@ async function handleMspectralSensors(method, pathSegments, request, env) {
         });
         
       case 'PATCH':
+        // Require authentication for modifications
+        const sensorPatchUser = await getUserFromRequest(request, env);
+        if (!sensorPatchUser) {
+          return new Response(JSON.stringify({ error: 'Authentication required' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
         // Extract ID from pathSegments
         const sensorId = pathSegments[1];
         if (!sensorId) {
           return new Response('ID required', { status: 400 });
+        }
+        
+        // Check if user has permission to modify this sensor
+        const sensorCheck = await env.DB.prepare(
+          'SELECT station_id FROM mspectral_sensors WHERE id = ?'
+        ).bind(sensorId).first();
+        
+        if (!sensorCheck) {
+          return new Response('Sensor not found', { status: 404 });
+        }
+        
+        if (!hasPermission(sensorPatchUser, 'write', 'instrument', sensorCheck.station_id)) {
+          return new Response(JSON.stringify({ error: 'Permission denied' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
         }
         
         const sensorBody = await request.json();
@@ -602,25 +680,223 @@ async function handleAuth(method, pathSegments, request, env) {
   }
 }
 
-// Users API handler (placeholder)
+// Users API handler
 async function handleUsers(method, id, request, env) {
-  return new Response(JSON.stringify({ 
-    message: 'User management API coming soon',
-    method,
-    id
-  }), {
-    status: 501,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  try {
+    // Require authentication for all user operations
+    const user = await getUserFromRequest(request, env);
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    switch (method) {
+      case 'GET':
+        // Only admins can view user lists, users can view their own profile
+        if (id) {
+          // Get specific user profile
+          if (user.role !== 'admin' && user.sub !== id) {
+            return new Response(JSON.stringify({ error: 'Permission denied' }), {
+              status: 403,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+          
+          const userProfile = await env.DB.prepare(`
+            SELECT id, username, role, station_id, active, created_at, last_login
+            FROM users WHERE id = ?
+          `).bind(id).first();
+          
+          if (!userProfile) {
+            return new Response('User not found', { status: 404 });
+          }
+          
+          return new Response(JSON.stringify(userProfile), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        } else {
+          // List all users (admin only)
+          if (user.role !== 'admin') {
+            return new Response(JSON.stringify({ error: 'Admin access required' }), {
+              status: 403,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+          
+          const users = await env.DB.prepare(`
+            SELECT u.id, u.username, u.role, u.station_id, u.active, u.created_at, u.last_login,
+                   s.display_name as station_name
+            FROM users u
+            LEFT JOIN stations s ON u.station_id = s.id
+            ORDER BY u.created_at DESC
+          `).all();
+          
+          return new Response(JSON.stringify({
+            users: users.results || []
+          }), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+      case 'POST':
+        // Create new user (admin only)
+        if (user.role !== 'admin') {
+          return new Response(JSON.stringify({ error: 'Admin access required' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const userData = await request.json();
+        const requiredFields = ['username', 'password', 'role'];
+        const missingFields = requiredFields.filter(field => !userData[field]);
+        
+        if (missingFields.length > 0) {
+          return new Response(JSON.stringify({
+            error: `Missing required fields: ${missingFields.join(', ')}`
+          }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        // Validate role
+        const validRoles = ['admin', 'station', 'readonly'];
+        if (!validRoles.includes(userData.role)) {
+          return new Response(JSON.stringify({
+            error: 'Invalid role. Must be one of: admin, station, readonly'
+          }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        // Hash password and create user
+        const { hashPassword } = await import('./auth.js');
+        const hashedPassword = await hashPassword(userData.password);
+        
+        const insertResult = await env.DB.prepare(`
+          INSERT INTO users (username, password_hash, role, station_id, active, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        `).bind(
+          userData.username,
+          hashedPassword,
+          userData.role,
+          userData.station_id || null,
+          userData.active !== undefined ? userData.active : true
+        ).run();
+        
+        return new Response(JSON.stringify({
+          success: true,
+          id: insertResult.meta.last_row_id
+        }), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+      case 'PATCH':
+        // Update user (admin only, or users can update their own profile)
+        if (!id) {
+          return new Response('User ID required', { status: 400 });
+        }
+        
+        if (user.role !== 'admin' && user.sub !== id) {
+          return new Response(JSON.stringify({ error: 'Permission denied' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const updateData = await request.json();
+        const updateFields = [];
+        const updateValues = [];
+        
+        // Different fields allowed for admin vs regular users
+        const allowedFields = user.role === 'admin' 
+          ? ['username', 'role', 'station_id', 'active']
+          : ['username']; // Regular users can only update their username
+          
+        if (updateData.password && user.sub === id) {
+          // Users can update their own password
+          const { hashPassword } = await import('./auth.js');
+          const hashedPassword = await hashPassword(updateData.password);
+          updateFields.push('password_hash = ?');
+          updateValues.push(hashedPassword);
+        }
+        
+        for (const [field, value] of Object.entries(updateData)) {
+          if (allowedFields.includes(field)) {
+            updateFields.push(`${field} = ?`);
+            updateValues.push(value);
+          }
+        }
+        
+        if (updateFields.length === 0) {
+          return new Response('No valid fields to update', { status: 400 });
+        }
+        
+        updateValues.push(id);
+        
+        const updateQuery = `
+          UPDATE users 
+          SET ${updateFields.join(', ')}, updated_at = datetime('now') 
+          WHERE id = ?
+        `;
+        
+        await env.DB.prepare(updateQuery).bind(...updateValues).run();
+        
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+      case 'DELETE':
+        // Delete user (admin only)
+        if (!id) {
+          return new Response('User ID required', { status: 400 });
+        }
+        
+        if (user.role !== 'admin') {
+          return new Response(JSON.stringify({ error: 'Admin access required' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        // Prevent self-deletion
+        if (user.sub === id) {
+          return new Response(JSON.stringify({ error: 'Cannot delete your own account' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+        
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+      default:
+        return new Response('Method not allowed', { status: 405 });
+    }
+  } catch (error) {
+    console.error('Users API error:', error);
+    return new Response(JSON.stringify({ 
+      error: 'User operation failed',
+      message: error.message 
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
 
 // Platforms API handler
-async function handlePlatforms(method, pathSegments, request, env) {
+async function handlePlatforms(method, id, request, env) {
   try {
+    // Get user for access control
+    const user = await getUserFromRequest(request, env);
+    
     switch (method) {
       case 'GET':
         // If there's an ID, get single platform, otherwise get all platforms
-        const platformId = pathSegments[1];
+        const platformId = id;
         if (platformId) {
           const query = `
             SELECT 
@@ -637,21 +913,46 @@ async function handlePlatforms(method, pathSegments, request, env) {
             return new Response('Platform not found', { status: 404 });
           }
           
+          // Check access for single platform
+          if (user && user.role === 'station' && result.station_id !== user.station_id) {
+            return new Response(JSON.stringify({ error: 'Access denied' }), {
+              status: 403,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+          
           return new Response(JSON.stringify(result), {
             headers: { 'Content-Type': 'application/json' }
           });
         } else {
-          const query = `
+          // Get all platforms with optional station filtering
+          let query = `
             SELECT 
               p.*,
               s.display_name as station_name,
               s.acronym as station_acronym
             FROM platforms p
             LEFT JOIN stations s ON p.station_id = s.id
-            ORDER BY p.station_id, p.platform_id
           `;
           
-          const result = await env.DB.prepare(query).all();
+          const queryParams = [];
+          const url = new URL(request.url);
+          const stationIdFilter = url.searchParams.get('station_id');
+          
+          // Apply station filtering for station users or query parameter
+          if (user && user.role === 'station') {
+            query += ' WHERE p.station_id = ?';
+            queryParams.push(user.station_id);
+          } else if (stationIdFilter) {
+            query += ' WHERE p.station_id = ?';
+            queryParams.push(stationIdFilter);
+          }
+          
+          query += ' ORDER BY p.station_id, p.platform_id';
+          
+          const result = queryParams.length > 0 
+            ? await env.DB.prepare(query).bind(...queryParams).all()
+            : await env.DB.prepare(query).all();
           
           return new Response(JSON.stringify({
             platforms: result.results || []
@@ -661,7 +962,23 @@ async function handlePlatforms(method, pathSegments, request, env) {
         }
         
       case 'POST':
+        // Require authentication for creating platforms
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'Authentication required' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
         const platformData = await request.json();
+        
+        // Check if user has permission to create platform for this station
+        if (!hasPermission(user, 'write', 'platform', platformData.station_id)) {
+          return new Response(JSON.stringify({ error: 'Permission denied' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
         
         // Required fields validation
         const requiredFields = ['station_id', 'platform_id', 'canonical_id', 'name', 'type'];
@@ -716,9 +1033,34 @@ async function handlePlatforms(method, pathSegments, request, env) {
         });
         
       case 'PATCH':
-        const updatePlatformId = pathSegments[1];
+        // Require authentication for platform updates
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'Authentication required' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const updatePlatformId = id;
         if (!updatePlatformId) {
           return new Response('Platform ID required', { status: 400 });
+        }
+        
+        // Check if platform exists and get its station_id for permission check
+        const existingPlatform = await env.DB.prepare(
+          'SELECT station_id FROM platforms WHERE id = ?'
+        ).bind(updatePlatformId).first();
+        
+        if (!existingPlatform) {
+          return new Response('Platform not found', { status: 404 });
+        }
+        
+        // Check if user has permission to update this platform
+        if (!hasPermission(user, 'write', 'platform', existingPlatform.station_id)) {
+          return new Response(JSON.stringify({ error: 'Permission denied' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
         }
         
         const updateData = await request.json();
@@ -758,9 +1100,34 @@ async function handlePlatforms(method, pathSegments, request, env) {
         });
         
       case 'DELETE':
-        const deletePlatformId = pathSegments[1];
+        // Require authentication for platform deletion
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'Authentication required' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const deletePlatformId = id;
         if (!deletePlatformId) {
           return new Response('Platform ID required', { status: 400 });
+        }
+        
+        // Check if platform exists and get its station_id for permission check
+        const platformToDelete = await env.DB.prepare(
+          'SELECT station_id FROM platforms WHERE id = ?'
+        ).bind(deletePlatformId).first();
+        
+        if (!platformToDelete) {
+          return new Response('Platform not found', { status: 404 });
+        }
+        
+        // Check if user has permission to delete this platform
+        if (!hasPermission(user, 'delete', 'platform', platformToDelete.station_id)) {
+          return new Response(JSON.stringify({ error: 'Permission denied' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          });
         }
         
         // Check if platform has associated instruments

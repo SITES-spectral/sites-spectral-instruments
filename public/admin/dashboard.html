@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SITES Spectral</title>
+    <meta name="description" content="Administrative dashboard for SITES Spectral system management">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css?v=0.2.0">
+    
+    <!-- Version Meta -->
+    <meta name="app-version" content="0.2.0">
+    <meta name="build-date" content="2025-09-11">
+    
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .admin-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .admin-stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .admin-stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--danger-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .admin-nav {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        
+        .admin-nav-item {
+            display: block;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .admin-nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--danger-color);
+        }
+        
+        .admin-nav-item:last-child {
+            border-bottom: none;
+        }
+        
+        .admin-nav-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--danger-color);
+        }
+        
+        .admin-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-top: 2rem;
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .admin-section h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .admin-table th,
+        .admin-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .admin-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .admin-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .admin-actions .btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .danger-zone {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .danger-zone h3 {
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .danger-zone p {
+            color: #7f1d1d;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="brand-logo">
+                <span>SITES Spectral</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i> Public Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/login.html" class="nav-link" id="auth-link">
+                        <i class="fas fa-sign-in-alt"></i> <span id="auth-text">Login</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="user-menu">
+                <button class="user-dropdown" onclick="toggleUserMenu()">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="admin-user-name">Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-dropdown-menu" id="user-menu">
+                    <a href="/station/dashboard.html" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Header -->
+    <section class="admin-header">
+        <div class="container">
+            <h1><i class="fas fa-shield-alt"></i> System Administration</h1>
+            <p>Complete system management and oversight</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Admin Statistics -->
+            <div class="admin-stats">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-number" id="total-users">-</div>
+                    <div class="admin-stat-label">System Users</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-number" id="active-sessions">-</div>
+                    <div class="admin-stat-label">Active Sessions</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-number" id="total-stations-admin">-</div>
+                    <div class="admin-stat-label">Total Stations</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-number" id="total-platforms-admin">-</div>
+                    <div class="admin-stat-label">Total Platforms</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-number" id="total-instruments-admin">-</div>
+                    <div class="admin-stat-label">Total Instruments</div>
+                </div>
+            </div>
+
+            <!-- Admin Navigation -->
+            <nav class="admin-nav">
+                <a href="#users" class="admin-nav-item" onclick="showSection('users')">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="#stations" class="admin-nav-item" onclick="showSection('stations')">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>Stations Overview</span>
+                </a>
+                <a href="#platforms" class="admin-nav-item" onclick="showSection('platforms')">
+                    <i class="fas fa-building"></i>
+                    <span>Platform Management</span>
+                </a>
+                <a href="#instruments" class="admin-nav-item" onclick="showSection('instruments')">
+                    <i class="fas fa-microscope"></i>
+                    <span>Instrument Overview</span>
+                </a>
+                <a href="#activity" class="admin-nav-item" onclick="showSection('activity')">
+                    <i class="fas fa-history"></i>
+                    <span>Activity Logs</span>
+                </a>
+                <a href="#system" class="admin-nav-item" onclick="showSection('system')">
+                    <i class="fas fa-cogs"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+
+            <!-- Admin Content Sections -->
+            <div class="admin-content">
+                <!-- User Management -->
+                <div id="users" class="admin-section active">
+                    <h2><i class="fas fa-users"></i> User Management</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="addUser()">
+                            <i class="fas fa-plus"></i> Add User
+                        </button>
+                        <button class="btn btn-outline" onclick="exportUsers()">
+                            <i class="fas fa-download"></i> Export Users
+                        </button>
+                    </div>
+                    
+                    <table class="admin-table" id="users-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Station</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">
+                                    <div class="spinner"></div>
+                                    <p>Loading users...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Stations Overview -->
+                <div id="stations" class="admin-section">
+                    <h2><i class="fas fa-broadcast-tower"></i> Stations Overview</h2>
+                    <p>Complete overview of all research stations and their status.</p>
+                    
+                    <div class="admin-placeholder">
+                        <i class="fas fa-broadcast-tower" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <p>Detailed station management interface coming soon.</p>
+                    </div>
+                </div>
+
+                <!-- Platform Management -->
+                <div id="platforms" class="admin-section">
+                    <h2><i class="fas fa-building"></i> Platform Management</h2>
+                    <p>Manage all platforms across the SITES network.</p>
+                    
+                    <div class="admin-placeholder">
+                        <i class="fas fa-building" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <p>Platform management interface coming soon.</p>
+                    </div>
+                </div>
+
+                <!-- Instrument Overview -->
+                <div id="instruments" class="admin-section">
+                    <h2><i class="fas fa-microscope"></i> Instrument Overview</h2>
+                    <p>System-wide view of all instruments and their status.</p>
+                    
+                    <div class="admin-placeholder">
+                        <i class="fas fa-microscope" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <p>Comprehensive instrument overview coming soon.</p>
+                    </div>
+                </div>
+
+                <!-- Activity Logs -->
+                <div id="activity" class="admin-section">
+                    <h2><i class="fas fa-history"></i> Activity Logs</h2>
+                    <p>System activity, user actions, and audit trails.</p>
+                    
+                    <div class="admin-placeholder">
+                        <i class="fas fa-history" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <p>Activity logging and audit trails coming soon.</p>
+                    </div>
+                </div>
+
+                <!-- System Settings -->
+                <div id="system" class="admin-section">
+                    <h2><i class="fas fa-cogs"></i> System Settings</h2>
+                    <p>System configuration, maintenance, and advanced settings.</p>
+                    
+                    <div class="danger-zone">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                        <p>These actions can have serious consequences. Use with extreme caution.</p>
+                        
+                        <button class="btn btn-danger" onclick="confirmSystemReset()">
+                            <i class="fas fa-exclamation-triangle"></i> Reset System Data
+                        </button>
+                        
+                        <button class="btn btn-danger" onclick="confirmDatabaseBackup()" style="margin-left: 1rem;">
+                            <i class="fas fa-database"></i> Backup Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/js/utils.js?v=0.2.0"></script>
+    <script src="/js/api.js?v=0.2.0"></script>
+    <script>
+        class AdminDashboard {
+            constructor() {
+                this.currentUser = null;
+                this.init();
+            }
+            
+            async init() {
+                await this.checkAuthentication();
+                this.loadStatistics();
+                this.loadUsers();
+                this.setupEventListeners();
+            }
+            
+            async checkAuthentication() {
+                const token = localStorage.getItem('sites_spectral_token');
+                if (!token) {
+                    window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/auth/verify', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.valid && data.user.role === 'admin') {
+                            this.currentUser = data.user;
+                            document.getElementById('admin-user-name').textContent = data.user.full_name || data.user.username;
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Auth verification failed:', error);
+                }
+                
+                // Not admin or invalid token
+                Utils.showToast('Admin access required', 'error');
+                setTimeout(() => {
+                    localStorage.removeItem('sites_spectral_token');
+                    window.location.href = '/login.html';
+                }, 2000);
+            }
+            
+            async loadStatistics() {
+                try {
+                    // This would connect to admin-specific statistics endpoints
+                    // For now, using placeholder data
+                    document.getElementById('total-users').textContent = '5';
+                    document.getElementById('active-sessions').textContent = '3';
+                    document.getElementById('total-stations-admin').textContent = '9';
+                    document.getElementById('total-platforms-admin').textContent = '12';
+                    document.getElementById('total-instruments-admin').textContent = '83';
+                } catch (error) {
+                    console.error('Failed to load statistics:', error);
+                }
+            }
+            
+            async loadUsers() {
+                try {
+                    // This would load users from the API
+                    // For now, show test users
+                    const users = [
+                        { username: 'admin', full_name: 'System Administrator', email: 'admin@sites.se', role: 'admin', station: 'All Stations', status: 'Active', last_login: '2025-09-11' },
+                        { username: 'svartberget', full_name: 'Svartberget Manager', email: 'svb@sites.se', role: 'station', station: 'Svartberget', status: 'Active', last_login: '2025-09-10' },
+                        { username: 'skogaryd', full_name: 'Skogaryd Manager', email: 'skc@sites.se', role: 'station', station: 'Skogaryd', status: 'Active', last_login: '2025-09-09' },
+                        { username: 'lonnstorp', full_name: 'Lönnstorp Manager', email: 'lon@sites.se', role: 'station', station: 'Lönnstorp', status: 'Active', last_login: '2025-09-08' },
+                        { username: 'readonly', full_name: 'Read Only User', email: 'readonly@sites.se', role: 'readonly', station: 'N/A', status: 'Active', last_login: 'Never' }
+                    ];
+                    
+                    this.renderUsersTable(users);
+                } catch (error) {
+                    console.error('Failed to load users:', error);
+                }
+            }
+            
+            renderUsersTable(users) {
+                const tbody = document.getElementById('users-tbody');
+                
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td><strong>${user.username}</strong></td>
+                        <td>${user.full_name}</td>
+                        <td>${user.email}</td>
+                        <td><span class="status-badge ${user.role}">${user.role}</span></td>
+                        <td>${user.station}</td>
+                        <td><span class="status-badge ${user.status.toLowerCase()}">${user.status}</span></td>
+                        <td>${user.last_login}</td>
+                        <td>
+                            <div class="admin-actions">
+                                <button class="btn btn-sm btn-outline" onclick="editUser('${user.username}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.username}')" ${user.username === 'admin' ? 'disabled' : ''}>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            setupEventListeners() {
+                // Add event listeners for admin functionality
+            }
+        }
+        
+        // Global functions
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update nav active state
+            document.querySelectorAll('.admin-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`a[href="#${sectionId}"]`).classList.add('active');
+        }
+        
+        function addUser() {
+            Utils.showToast('Add user functionality coming soon', 'info');
+        }
+        
+        function editUser(username) {
+            Utils.showToast(`Edit user: ${username} (coming soon)`, 'info');
+        }
+        
+        function deleteUser(username) {
+            if (confirm(`Are you sure you want to delete user: ${username}?`)) {
+                Utils.showToast(`Delete user functionality coming soon`, 'info');
+            }
+        }
+        
+        function exportUsers() {
+            Utils.showToast('Export users functionality coming soon', 'info');
+        }
+        
+        function confirmSystemReset() {
+            if (confirm('This will reset all system data. This action cannot be undone. Are you absolutely sure?')) {
+                Utils.showToast('System reset functionality disabled for safety', 'warning');
+            }
+        }
+        
+        function confirmDatabaseBackup() {
+            Utils.showToast('Database backup functionality coming soon', 'info');
+        }
+        
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu');
+            menu.classList.toggle('show');
+        }
+        
+        function logout() {
+            localStorage.removeItem('sites_spectral_token');
+            localStorage.removeItem('sites_spectral_user');
+            window.location.href = '/login.html';
+        }
+        
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            new AdminDashboard();
+        });
+    </script>
+</body>
+</html>
