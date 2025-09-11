@@ -38,8 +38,16 @@ class InteractiveMap {
             console.log(`InteractiveMap: Loaded ${this.stationsData.length} stations and ${this.platformsData.length} platforms`);
             
             this.initializeMap();
-            console.log('InteractiveMap: Map initialized');
+            console.log('InteractiveMap: Map initialization started');
             
+        } catch (error) {
+            console.error('Failed to initialize interactive map:', error);
+            this.showError('Failed to load map data: ' + error.message);
+        }
+    }
+    
+    finishInitialization() {
+        try {
             this.addStationsToMap();
             console.log('InteractiveMap: Stations added to map');
             
@@ -49,8 +57,8 @@ class InteractiveMap {
             this.hideLoading();
             console.log('InteractiveMap: Initialization complete');
         } catch (error) {
-            console.error('Failed to initialize interactive map:', error);
-            this.showError('Failed to load map data: ' + error.message);
+            console.error('InteractiveMap: Failed to complete initialization:', error);
+            this.showError('Failed to complete map setup: ' + error.message);
         }
     }
     
@@ -106,13 +114,54 @@ class InteractiveMap {
     }
     
     initializeMap() {
-        // Initialize map centered on Sweden
-        this.map = L.map(this.containerId, {
-            center: [62.0, 15.0], // Approximate center of Sweden
-            zoom: 6,
-            zoomControl: true
-        });
+        // Check if map is already initialized
+        if (this.map) {
+            console.log('InteractiveMap: Map already initialized, skipping...');
+            return;
+        }
         
+        // Check if container already has a Leaflet map
+        const container = document.getElementById(this.containerId);
+        if (!container) {
+            throw new Error(`Map container '${this.containerId}' not found`);
+        }
+        
+        // Remove any existing Leaflet map instance from the container
+        if (container._leaflet_id) {
+            console.log('InteractiveMap: Clearing existing Leaflet instance...');
+            // Remove the existing map instance if it exists
+            if (window[this.containerId + '_map']) {
+                window[this.containerId + '_map'].remove();
+                delete window[this.containerId + '_map'];
+            }
+            delete container._leaflet_id;
+            container.innerHTML = '';
+        }
+        
+        // Add a small delay to ensure DOM is ready
+        setTimeout(() => {
+            try {
+                console.log('InteractiveMap: Creating new Leaflet map instance...');
+                this.map = L.map(this.containerId, {
+                    center: [62.0, 15.0], // Approximate center of Sweden
+                    zoom: 6,
+                    zoomControl: true
+                });
+                
+                // Store map reference to prevent duplicate initialization
+                window[this.containerId + '_map'] = this.map;
+                
+                // Continue with the rest of initialization
+                this.completeMapSetup();
+                this.finishInitialization();
+            } catch (error) {
+                console.error('InteractiveMap: Failed to initialize map:', error);
+                this.showError('Failed to initialize map: ' + error.message);
+            }
+        }, 100);
+    }
+    
+    completeMapSetup() {
         // Add default satellite layer
         this.currentLayer = this.mapLayers.satellite;
         this.currentLayer.addTo(this.map);

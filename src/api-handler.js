@@ -53,6 +53,9 @@ export async function handleApiRequest(request, env, ctx) {
       case 'platforms':
         return await handlePlatforms(method, id, request, env);
         
+      case 'geojson':
+        return await handleGeoJSON(method, pathSegments, request, env);
+        
       case 'health':
         return handleHealthCheck(env);
         
@@ -75,7 +78,7 @@ export async function handleApiRequest(request, env, ctx) {
 }
 
 async function handleStations(method, id, request, env) {
-  const { onRequestGet, onRequestPost, onRequestPut, onRequestDelete } = await import('../functions/api/stations.js');
+  const { onRequestGet, onRequestPost, onRequestPut, onRequestDelete } = await import('../functions/api/stations/index.js');
   
   const params = { id };
   const mockRequest = { request, env, params };
@@ -118,7 +121,7 @@ async function handleInstruments(method, id, pathSegments, request, env) {
   
   // Import instrument handlers (we'll need to create this)
   try {
-    const { onRequestGet, onRequestPost, onRequestPut, onRequestDelete } = await import('../functions/api/instruments.js');
+    const { onRequestGet, onRequestPost, onRequestPut, onRequestDelete } = await import('../functions/api/instruments/index.js');
     
     switch (method) {
       case 'GET':
@@ -1162,6 +1165,35 @@ async function handlePlatforms(method, id, request, env) {
     console.error('Platforms API error:', error);
     return new Response(JSON.stringify({ 
       error: 'Platform operation failed',
+      message: error.message 
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Handle GeoJSON endpoints
+async function handleGeoJSON(method, pathSegments, request, env) {
+  try {
+    if (method !== 'GET') {
+      return new Response('Method not allowed', { status: 405 });
+    }
+    
+    // Import the GeoJSON handler
+    const { onRequestGet } = await import('../functions/api/geojson/index.js');
+    
+    // Set up params for type routing (all, stations, platforms)
+    const type = pathSegments[1] || 'all'; // geojson/[type]
+    const params = { type };
+    const mockRequest = { request, env, params };
+    
+    return await onRequestGet(mockRequest);
+    
+  } catch (error) {
+    console.error('GeoJSON API error:', error);
+    return new Response(JSON.stringify({ 
+      error: 'GeoJSON request failed',
       message: error.message 
     }), {
       status: 500,

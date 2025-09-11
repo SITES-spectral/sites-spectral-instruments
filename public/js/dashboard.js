@@ -39,6 +39,12 @@ class Dashboard {
         const tryInitializeMap = () => {
             if (typeof InteractiveMap !== 'undefined') {
                 try {
+                    // Check if map is already initialized
+                    if (this.interactiveMap) {
+                        console.log('Dashboard: InteractiveMap already exists, skipping initialization');
+                        return;
+                    }
+                    
                     console.log('Dashboard: Initializing InteractiveMap...');
                     this.interactiveMap = new InteractiveMap('stations-map');
                 } catch (error) {

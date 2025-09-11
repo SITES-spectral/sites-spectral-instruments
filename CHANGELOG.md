@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2025-09-11
+
+### Fixed
+- **🗺️ Interactive Map Double Initialization** - Resolved map loading conflicts
+  - Fixed "Map container is already initialized" error on main dashboard
+  - Enhanced container cleanup with proper Leaflet instance removal
+  - Added global reference tracking to prevent duplicate map instances
+  - Implemented asynchronous initialization with DOM readiness checks
+  - Improved error handling and graceful degradation for map loading failures
+  - Restructured initialization flow to separate map creation from data loading
+
 ## [0.4.1] - 2025-09-11
 
 ### Fixed

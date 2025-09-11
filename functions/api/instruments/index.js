@@ -1,5 +1,5 @@
 // API handlers for instruments endpoint
-import { getUserFromRequest, hasPermission } from '../../src/auth-secrets.js';
+import { getUserFromRequest, hasPermission } from '../../../src/auth-secrets.js';
 
 export async function onRequestGet({ request, env, params }) {
   try {
