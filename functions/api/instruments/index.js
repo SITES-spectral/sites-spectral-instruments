@@ -11,11 +11,11 @@ export async function onRequestGet({ request, env, params }) {
       let instrument = await env.DB.prepare(`
         SELECT 
           'phenocam' as type,
-          p.id, p.canonical_id, p.station_id, null as platform_id, p.status,
-          p.location, p.thematic_program, p.priority, p.created_at, p.updated_at,
+          p.id, p.canonical_id, p.canonical_id as name, p.station_id, null as platform_id, p.status,
+          p.location, p.location as platform_name, p.thematic_program, p.priority, p.created_at, p.updated_at,
           s.display_name as station_name, s.acronym as station_acronym,
-          p.ecosystem, null as platform_name, null as model, null as serial_number,
-          p.deployment_date
+          p.ecosystem, 'Camera' as model, p.canonical_id as serial_number,
+          p.deployment_date as installed_date
         FROM phenocams p
         LEFT JOIN stations s ON p.station_id = s.id
         WHERE p.id = ?
@@ -25,11 +25,11 @@ export async function onRequestGet({ request, env, params }) {
         instrument = await env.DB.prepare(`
           SELECT 
             'mspectral_sensor' as type,
-            m.id, m.canonical_id, m.station_id, null as platform_id, m.status,
-            m.location, m.thematic_program, m.priority, m.created_at, m.updated_at,
+            m.id, m.canonical_id, m.canonical_id as name, m.station_id, null as platform_id, m.status,
+            m.location, m.location as platform_name, m.thematic_program, m.priority, m.created_at, m.updated_at,
             s.display_name as station_name, s.acronym as station_acronym,
-            m.ecosystem, null as platform_name, m.model, null as serial_number,
-            null as installed_date
+            m.ecosystem, m.model, m.canonical_id as serial_number,
+            m.created_at as installed_date
           FROM mspectral_sensors m
           LEFT JOIN stations s ON m.station_id = s.id
           WHERE m.id = ?
@@ -74,10 +74,12 @@ export async function onRequestGet({ request, env, params }) {
           'phenocam' as type,
           p.id,
           p.canonical_id,
+          p.canonical_id as name,
           p.station_id,
           null as platform_id,
           p.status,
           p.location,
+          p.location as platform_name,
           p.thematic_program,
           p.priority,
           p.created_at,
@@ -85,10 +87,9 @@ export async function onRequestGet({ request, env, params }) {
           s.display_name as station_name,
           s.acronym as station_acronym,
           p.ecosystem,
-          null as platform_name,
-          null as model,
-          null as serial_number,
-          p.deployment_date
+          'Camera' as model,
+          p.canonical_id as serial_number,
+          p.deployment_date as installed_date
         FROM phenocams p
         LEFT JOIN stations s ON p.station_id = s.id
         ${stationCondition}
@@ -97,10 +98,12 @@ export async function onRequestGet({ request, env, params }) {
           'mspectral_sensor' as type,
           m.id,
           m.canonical_id,
+          m.canonical_id as name,
           m.station_id,
           null as platform_id,
           m.status,
           m.location,
+          m.location as platform_name,
           m.thematic_program,
           m.priority,
           m.created_at,
@@ -108,10 +111,9 @@ export async function onRequestGet({ request, env, params }) {
           s.display_name as station_name,
           s.acronym as station_acronym,
           m.ecosystem,
-          null as platform_name,
           m.model,
-          null as serial_number,
-          null as installed_date
+          m.canonical_id as serial_number,
+          m.created_at as installed_date
         FROM mspectral_sensors m
         LEFT JOIN stations s ON m.station_id = s.id
         ${stationCondition.replace('p.station_id', 'm.station_id')}

@@ -220,10 +220,16 @@ async function getStation(db, id) {
         ...(sensors.results || [])
     ];
 
-    return new Response(JSON.stringify({
+    // Map fields to match frontend expectations
+    const stationResponse = {
         ...station,
+        name: station.display_name, // Map display_name to name for frontend compatibility
+        location: station.region || station.country || 'Unknown', // Provide location field
+        status: 'Active', // Default status
         instruments
-    }), {
+    };
+
+    return new Response(JSON.stringify(stationResponse), {
         headers: { 'Content-Type': 'application/json' }
     });
 }

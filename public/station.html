@@ -545,7 +545,8 @@
                 const response = await fetch(`/api/instruments?station_id=${stationId}`);
                 if (!response.ok) throw new Error('Failed to fetch instruments');
                 
-                const instruments = await response.json();
+                const instrumentsData = await response.json();
+                const instruments = instrumentsData.instruments || instrumentsData; // Handle both formats
                 const contentEl = document.getElementById('instruments-content');
                 const countEl = document.getElementById('instrument-count');
                 
