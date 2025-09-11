@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-09-11
+
+### Fixed
+- **🔧 Interactive Map Data Loading** - Resolved platforms API intermittent errors
+  - Fixed `TypeError: Cannot read properties of undefined (reading '1')` in platforms handler
+  - Ensured stable API responses for stations and platforms endpoints
+  - Interactive map now loads properly without "Failed to load map data" error
+  - Verified all API endpoints return correct JSON responses
+
+### Technical
+- Enhanced API error handling and logging for better debugging
+- Improved platforms API stability and response consistency
+
 ## [0.2.0] - 2025-09-11
 
 ### Added
