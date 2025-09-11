@@ -26,26 +26,41 @@ class Dashboard {
     initializeMap() {
         // Initialize the interactive map if the container exists
         const mapContainer = document.getElementById('stations-map');
-        if (mapContainer && typeof InteractiveMap !== 'undefined') {
-            try {
-                this.interactiveMap = new InteractiveMap('stations-map');
-            } catch (error) {
-                console.error('Failed to initialize interactive map:', error);
-                // Show error in map container
-                mapContainer.innerHTML = `
-                    <div class="map-error">
-                        <div class="error-content">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Map Loading Error</h3>
-                            <p>Unable to load the interactive map. Please refresh the page.</p>
-                            <button class="btn btn-outline" onclick="location.reload()">
-                                <i class="fas fa-redo"></i> Refresh Page
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
+        
+        if (!mapContainer) {
+            console.warn('No map container found');
+            return;
         }
+        
+        // Wait for InteractiveMap class to be available
+        const tryInitializeMap = () => {
+            if (typeof InteractiveMap !== 'undefined') {
+                try {
+                    console.log('Initializing InteractiveMap...');
+                    this.interactiveMap = new InteractiveMap('stations-map');
+                } catch (error) {
+                    console.error('Failed to initialize interactive map:', error);
+                    // Show error in map container
+                    mapContainer.innerHTML = `
+                        <div class="map-error">
+                            <div class="error-content">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Map Loading Error</h3>
+                                <p>Unable to load the interactive map. Error: ${error.message}</p>
+                                <button class="btn btn-outline" onclick="location.reload()">
+                                    <i class="fas fa-redo"></i> Refresh Page
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                console.log('InteractiveMap class not yet available, retrying...');
+                setTimeout(tryInitializeMap, 100);
+            }
+        };
+        
+        tryInitializeMap();
     }
 
     async loadDashboardData() {
