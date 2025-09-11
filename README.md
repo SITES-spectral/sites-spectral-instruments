@@ -1,338 +1,323 @@
 # SITES Spectral Stations & Instruments Management System
 
-A comprehensive web application for managing SITES (Swedish Infrastructure for Ecosystem Science) spectral monitoring stations and instruments. Built with Cloudflare Workers, D1 Database, and vanilla JavaScript.
+A comprehensive web-based management system for SITES Spectral monitoring stations and instruments across Sweden. This professional-grade application provides secure, role-based access to manage research infrastructure with an intuitive interface and powerful data management capabilities.
 
-**Version**: 0.1.0-dev  
-**Status**: ✅ Active Development  
-**Live Site**: https://sites.jobelab.com
+![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-orange.svg)
+![Database](https://img.shields.io/badge/database-D1%20SQLite-green.svg)
 
-## 📊 Current Data
+## 🌟 Features
 
-- **9 Research Stations** across Sweden
-- **83 Total Instruments** (82 active)
-- **21 Phenocams** with ROI data
-- **62 Multispectral Sensors** with detailed specifications
-- **Real-time Data** from YAML and CSV sources
+### 🔐 Authentication & Access Control
+- **JWT-based Authentication** with secure token management and refresh
+- **Three-tier Access Control**: Public, Station, and Admin roles
+- **Role-based Permissions** for granular data access and management
+- **Session Management** with automatic token validation and expiration
+- **Test Accounts** provided for development and demonstration
 
-## 📋 Features
+### 🗺️ Interactive Mapping System
+- **Professional Leaflet.js Integration** with high-resolution satellite imagery
+- **Multi-layer Support**: Satellite (Esri ArcGIS), topographic, and OpenStreetMap
+- **Custom Markers**: Color-coded station and platform markers with type distinction
+- **Rich Popups**: Detailed information panels with direct management links
+- **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
+- **Layer Controls**: Easy switching between different map visualizations
 
-### 🏛️ Station Management
-- **Complete CRUD operations** for research stations
-- **Geographic visualization** with interactive maps
-- **Station metadata** including coordinates, elevations, contact information
-- **Region-based filtering** and search capabilities
-- **Station statistics** and instrument counts
+### 📊 Data Management
+- **Dynamic Tables** with inline editing capabilities for real-time updates
+- **Hierarchical Structure**: Stations → Platforms → Instruments organization
+- **Thematic Program Tracking**: SITES Spectral, ICOS, and Other classifications
+- **Priority-based Organization** with automatic sorting and visual indicators
+- **Advanced Filtering**: Search and filter by program, status, location, and more
+- **Bulk Operations**: Multi-select framework for efficient data management
 
-### 🔬 Instrument Management
-- **Comprehensive instrument database** with phenocams and fixed sensors
-- **Legacy name tracking** with canonical ID mapping
-- **Status management** (Active, Inactive, Maintenance, Removed, Planned, Unknown)
-- **Equipment specifications** (brand, model, serial numbers, wavelengths)
-- **Platform mounting details** with heights and orientations
-- **ROI (Region of Interest)** management for phenocams
+### 🎨 Professional UI/UX
+- **SITES Spectral Branding** with official logos, colors, and visual identity
+- **Responsive Design** optimized for all screen sizes and devices
+- **Loading States** and comprehensive error handling throughout
+- **Toast Notifications** for user feedback and status updates
+- **Professional Footer** with version tracking and build information
 
-### 📊 Data Export & Integration
-- **Multiple export formats**: CSV, YAML, JSON
-- **Flexible filtering** by station, type, status, ecosystem
-- **Custom field selection** for targeted exports
-- **Complete dataset exports** with full metadata
-- **Export history tracking** with download links
+### 🏗️ Technical Architecture
+- **Cloudflare Workers** serverless backend with global edge deployment
+- **D1 SQLite Database** with automatic scaling and backup
+- **RESTful API** with comprehensive CRUD operations
+- **Version Management** with automatic cache busting for reliable deployments
+- **Security First** approach with input validation and SQL injection prevention
 
-### 🔄 Change Tracking
-- **Instrument history** with deployment, maintenance, and status changes
-- **Data quality flags** with severity levels and resolution tracking
-- **Activity feed** showing recent system changes
-- **Audit trails** for all modifications
+## 🏗️ Architecture Overview
 
-### 🎯 Professional UI/UX
-- **Responsive design** optimized for desktop and mobile
-- **Modern interface** with professional styling
-- **Real-time validation** and error handling
-- **Toast notifications** for user feedback
-- **Loading states** and progress indicators
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Cloudflare     │    │   Database      │
+│   (Vanilla JS)  │◄──►│   Workers        │◄──►│   (D1 SQLite)   │
+│   + Leaflet.js  │    │   + JWT Auth     │    │   + Migrations  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 
-## 🏗️ Architecture
-
-### Frontend
-- **Vanilla JavaScript** - No framework dependencies
-- **Modern CSS** with CSS Grid and Flexbox
-- **Font Awesome** icons
-- **Inter** font family
-- **Responsive design** principles
-
-### Backend
-- **Cloudflare Workers** with Static Assets for hosting
-- **Cloudflare D1** SQLite database with migrations
-- **RESTful API** design with comprehensive error handling
-- **CORS Support** for cross-origin requests
-
-### Database Schema (Current v0.1.0-dev)
-```sql
--- Core tables
-- stations (9 Swedish research stations with coordinates)
-- phenocams (21 instruments with ROI polygon data)
-- mspectral_sensors (62 sensors with detailed specifications)
-
--- Reference tables  
-- ecosystems (FOR, AGR, MIR, LAK, WET, HEA, SFO, CEM)
-- instrument_types (PHE, SPECTRAL, etc.)
-- platform_types (PL, BL, TW, MS, UC, GR, FL, EC)
+┌─────────────────────────────────────────────────────────────────┐
+│                    Data Structure                               │
+│  Stations (9) → Platforms (Variable) → Instruments (83)        │
+│  • Phenocams (21)     • Multispectral Sensors (62)            │
+│  • Program Classification (SITES/ICOS/Other)                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### API Endpoints
-```
-GET  /api/stations          # List all stations with instrument counts
-GET  /api/phenocams         # List all phenocams with ROI data
-GET  /api/mspectral         # List all multispectral sensors
-GET  /api/stats/network     # Network statistics (83 instruments, 82 active)
-GET  /api/stats/instruments # Instrument status breakdown
-GET  /api/reference/*       # Reference data (ecosystems, types)
-GET  /api/activity         # Recent system activity
-GET  /api/health           # System health check
-```
-
-## 🚀 Deployment
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- Cloudflare account
-- Wrangler CLI installed
+- **Node.js 18+** and npm
+- **Cloudflare Workers CLI** (`wrangler`)
+- **Access to Cloudflare D1** database
 
-### Setup Steps
+### Installation & Setup
 
-1. **Clone and install dependencies**
-```bash
-cd sites-spectral-stations-instruments  
-npm install
-```
+1. **Clone and Install Dependencies**
+   ```bash
+   git clone <repository-url>
+   cd spectral-stations-instruments
+   npm install
+   ```
 
-2. **Create Cloudflare D1 database**
-```bash
-npm run db:create
-```
+2. **Database Setup**
+   ```bash
+   # Create D1 database
+   npx wrangler d1 create sites-spectral-db
+   
+   # Apply all migrations
+   npx wrangler d1 migrations apply sites-spectral-db --local
+   npx wrangler d1 migrations apply sites-spectral-db --remote
+   ```
 
-3. **Update wrangler.toml with database ID**
-```bash
-# Copy the database ID from the creation output
-# Update database_id in wrangler.toml
-```
+3. **Configuration**
+   ```bash
+   # Configure wrangler.toml with your database details
+   # Set up environment variables for JWT secrets
+   echo "JWT_SECRET=your-secure-random-secret" > .env
+   ```
 
-4. **Run database migrations**
-```bash
-npm run db:migrate
-```
+4. **Local Development**
+   ```bash
+   npm run dev
+   ```
 
-5. **Populate database with real data**
-```bash
-npm run populate:all  # Runs both phenocams and mspectral population scripts
-```
+5. **Build and Deploy**
+   ```bash
+   # Build with version management
+   npm run build
+   
+   # Deploy to production
+   npm run deploy
+   
+   # Or bump version and deploy
+   npm run deploy:bump
+   ```
 
-6. **Deploy to Cloudflare Workers**
-```bash
-npm run deploy
-```
+## 🎯 User Roles & Access
 
-### Environment Configuration
+### 👤 User Types
 
-The application uses Cloudflare's environment variables:
-- `DB` - D1 database binding
-- `ENVIRONMENT` - Production/development flag
-- `APP_NAME` - Application display name
+| Role | Access Level | Capabilities |
+|------|-------------|-------------|
+| **Public** | View Only | Browse stations, view instrument data, use interactive map |
+| **Station** | Station Specific | Manage instruments at assigned station, edit data inline |
+| **Admin** | Full System | Complete system access, user management, all stations |
 
-## 📁 Project Structure
+### 🔑 Test Accounts (Development)
 
-```
-spectral-stations-instruments/
-├── public/                 # Frontend assets
-│   ├── index.html         # Dashboard
-│   ├── stations.html      # Station management
-│   ├── instruments.html   # Instrument management  
-│   ├── export.html        # Data export
-│   ├── css/
-│   │   ├── styles.css     # Main styles
-│   │   ├── forms.css      # Form styles
-│   │   └── export.css     # Export page styles
-│   └── js/
-│       ├── utils.js       # Utility functions
-│       ├── api.js         # API client
-│       ├── dashboard.js   # Dashboard logic
-│       ├── stations.js    # Station management
-│       ├── instruments.js # Instrument management
-│       └── export.js      # Export functionality
-├── functions/             # Cloudflare Workers API
-│   └── api/
-│       ├── stations.js    # Station CRUD operations
-│       ├── instruments.js # Instrument CRUD operations
-│       ├── export.js      # Data export handlers
-│       └── stats.js       # Statistics endpoints
-├── migrations/            # Database migrations
-│   ├── 0001_initial_schema.sql
-│   ├── 0002_seed_data.sql
-│   ├── 0003_phenocams_table.sql
-│   └── 0004_mspectral_sensors_table.sql
-├── populate_phenocams.js  # YAML to DB population script
-├── populate_mspectral.js  # YAML+CSV to DB population script
-├── package.json
-├── wrangler.toml         # Cloudflare configuration
-└── README.md
-```
+| Username | Password | Role | Station Access |
+|----------|----------|------|---------------|
+| `admin` | `admin123` | Administrator | All stations |
+| `svartberget` | `svb123` | Station Manager | Svartberget only |
+| `skogaryd` | `skc123` | Station Manager | Skogaryd only |
+| `lonnstorp` | `lon123` | Station Manager | Lönnstorp only |
+| `readonly` | `readonly123` | Read-only | View access only |
 
-## 🔧 Development
+## 🗺️ Interactive Map Features
 
-### Local Development
-```bash
-# Start local development server
-npm run dev
+### Map Layers
+- **Satellite**: High-resolution imagery (Esri ArcGIS World Imagery)
+- **Topographic**: Detailed topographical maps (Esri World Topo)
+- **Street Map**: OpenStreetMap for reference and navigation
 
-# Open database studio
-npm run db:studio
-
-# Run migrations locally
-npm run db:migrate
-```
-
-### Database Management
-```bash
-# Apply migrations
-npm run db:migrate
-
-# Populate with real data
-npm run populate:phenocams    # Load 21 phenocams from YAML
-npm run populate:mspectral    # Load 62 multispectral sensors from YAML+CSV  
-npm run populate:all          # Load all data
-
-# Open database studio for inspection
-npm run db:studio
-
-# Execute raw SQL commands
-npm run db:console "SELECT COUNT(*) FROM phenocams"
-```
-
-## 📊 Data Model
-
-### Station Naming Convention
-**Format**: `{STATION}_{ECOSYSTEM}_{PLATFORM}_{INSTRUMENT}`
-
-**Examples**:
-- `ANS_FOR_BL01_PHE01` - Abisko Forest Building phenocam
-- `LON_AGR_PL01_PHE01` - Lönnstorp Agriculture Platform phenocam
-- `RBD_AGR_F01_MS01` - Röbäcksdalen Agriculture Fixed multispectral sensor
-
-### Legacy Name Mapping
-The system maintains backward compatibility with legacy naming:
-- `ANS-FOR-P01` → `ANS_FOR_BL01_PHE01`
-- `SFA-AGR-P01` → `LON_AGR_PL01_PHE01`
-- `RBD-AGR-F01` → `RBD_AGR_F01_MS01`
-
-### Status Tracking
-Instruments can have the following statuses:
-- **Active** - Currently operational
-- **Inactive** - Not currently operational but not removed
-- **Maintenance** - Under maintenance or repair
-- **Removed** - Permanently removed from station
-- **Planned** - Planned for installation
-- **Unknown** - Status unclear or unverified
-
-## 🌍 SITES Network Stations (Current v0.1.0-dev)
-
-Currently supporting **83 instruments** across **6 active stations**:
-
-### Active Stations with Instruments
-- **Svartberget** (SVB) - 54 instruments (5 phenocams + 49 multispectral sensors)
-- **Skogaryd** (SKC) - 15 instruments (9 phenocams + 6 multispectral sensors) 
-- **Lönnstorp** (LON) - 5 instruments (3 phenocams + 2 multispectral sensors)
-- **Abisko** (ANS) - 4 instruments (1 phenocam + 3 multispectral sensors)
-- **Röbäcksdalen** (RBD) - 4 instruments (2 phenocams + 2 multispectral sensors)
-- **Grimsö** (GRI) - 1 instrument (1 phenocam)
-
-### Stations in Database (No Current Instruments)
-- **Asa** (ASA) - Forest and lake research
-- **Hyltemossa** (HTM) - Forest research  
-- **Tarfala** (TAR) - Alpine and glacier research
-
-### Rich Sensor Data
-- **Precise coordinates** with high-precision lat/lon
-- **Technical specifications** (wavelengths, bandwidths, field of view)
-- **Equipment details** (SKYE, Decagon brands with model numbers)
-- **Usage types** (PRI, NDVI, PAR measurements)
-- **Installation details** (tower heights, azimuths, mounting configurations)
-
-## 🔒 Security Features
-
-- **Input sanitization** to prevent XSS attacks
-- **SQL injection prevention** through parameterized queries  
-- **CSRF protection** through Cloudflare's built-in features
-- **Rate limiting** via Cloudflare Workers
-- **Data validation** on both client and server side
-
-## 🎨 UI Components
-
-### Form Elements
-- **Validation feedback** with real-time error messages
-- **Dropdown selects** with dynamic option loading
-- **Date pickers** for temporal data
-- **Checkbox groups** for multi-select options
-- **File upload** with drag-and-drop support
+### Marker System
+- **🏢 Station Markers**: Blue broadcast tower icons with station details
+- **📡 Platform Markers**: Color-coded by type and program
+  - **Tower**: Blue (#0891b2) - Tall structures >1.5m
+  - **Mast**: Green (#059669) - Medium height poles  
+  - **Building**: Orange (#d97706) - Roof-mounted installations
+  - **Ground**: Gray (#64748b) - Ground-level instruments
 
 ### Interactive Features
-- **Modal dialogs** for form editing and confirmations
-- **Toast notifications** for user feedback
-- **Loading spinners** and progress bars
-- **Sortable tables** with pagination
-- **Search and filtering** with debounced input
+- **Click to Navigate**: Station markers link to management dashboards
+- **Detailed Popups**: Rich information panels with instrument counts
+- **Program Indicators**: Visual badges showing SITES/ICOS/Other classification
+- **Zoom Controls**: Automatic bounds fitting and manual zoom controls
 
-## 📈 Performance
+## 🔧 API Documentation
 
-### Optimization Features
-- **Lazy loading** of large datasets
-- **Pagination** for table views
-- **Debounced search** to reduce API calls
-- **Caching** at Cloudflare edge locations
-- **Minified assets** for faster loading
-- **Progressive enhancement** for offline capability
+### 🔐 Authentication Endpoints
+
+| Endpoint | Method | Description |
+|----------|---------|-------------|
+| `/api/auth/login` | POST | User authentication with JWT token generation |
+| `/api/auth/verify` | GET | Token validation and user info retrieval |
+| `/api/auth/logout` | POST | Session termination and token invalidation |
+| `/api/auth/refresh` | POST | JWT token refresh for session extension |
+
+### 📊 Data Management Endpoints
+
+| Endpoint | Methods | Description |
+|----------|---------|-------------|
+| `/api/stations` | GET | List all research stations with metadata |
+| `/api/platforms` | GET, POST, PATCH, DELETE | Platform CRUD operations |
+| `/api/phenocams` | GET, PATCH | Phenocam instrument management |
+| `/api/mspectral` | GET, PATCH | Multispectral sensor management |
+| `/api/search` | GET | Global search across all data types |
+
+### 📈 Statistics & Monitoring
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/stats/network` | Network-wide statistics and counts |
+| `/api/stats/stations` | Per-station instrument breakdowns |
+| `/api/health` | System health and status monitoring |
+
+## 🔄 Version Management & Deployment
+
+### Build System
+```bash
+# Update version parameters without bumping
+npm run build
+
+# Bump patch version and update all references
+npm run build:bump
+
+# Deploy with current version
+npm run deploy
+
+# Bump version and deploy in one command
+npm run deploy:bump
+```
+
+### Cache Busting Strategy
+- **Query Parameters** on all CSS and JavaScript assets
+- **Version Meta Tags** in HTML for deployment tracking
+- **Version Manifest** (`public/version-manifest.json`) for verification
+- **Footer Display** shows current version to users
+
+## 🛡️ Security Features
+
+### Authentication Security
+- **JWT Tokens** with configurable expiration and refresh
+- **Password Hashing** using secure algorithms
+- **Session Management** with automatic cleanup
+- **Role-based Access** with granular permissions
+
+### Data Protection
+- **SQL Injection Prevention** through prepared statements
+- **XSS Protection** via input sanitization
+- **CORS Configuration** for secure cross-origin requests
+- **Input Validation** on both client and server sides
+
+## 📱 Responsive Design
+
+The interface adapts seamlessly across all devices:
+
+### Desktop Experience (>1024px)
+- **Full Feature Set** with sidebar layouts and comprehensive tables
+- **Multi-panel Views** for efficient data management
+- **Keyboard Shortcuts** and power-user features
+
+### Tablet Experience (768px - 1024px)
+- **Optimized Grid Layouts** for touch interactions
+- **Condensed Tables** with horizontal scrolling
+- **Touch-friendly Controls** with larger tap targets
+
+### Mobile Experience (<768px)
+- **Stack Layouts** for vertical navigation
+- **Simplified Interface** focusing on essential functions
+- **Thumb-friendly Navigation** with bottom-aligned actions
+
+## 🧪 Development
+
+### Code Structure
+```
+├── public/                 # Static assets and HTML pages
+│   ├── css/               # Stylesheets with responsive design
+│   ├── js/                # Client-side JavaScript modules
+│   ├── images/            # SITES branding and visual assets
+│   └── station/           # Station-specific interfaces
+├── src/                   # Server-side Cloudflare Workers code
+│   ├── api-handler.js     # RESTful API route handling
+│   ├── auth.js           # Authentication and JWT management
+│   └── worker.js         # Main Cloudflare Worker entry point
+├── migrations/           # Database schema and data migrations
+├── scripts/             # Build and deployment automation
+└── wrangler.toml        # Cloudflare Workers configuration
+```
+
+### Development Commands
+```bash
+# Local development with hot reloading
+npm run dev
+
+# Database management
+npm run db:migrate:local    # Apply migrations locally
+npm run db:migrate          # Apply migrations to production
+npm run db:studio          # Open database browser interface
+
+# Data population (development)
+npm run populate:phenocams  # Load phenocam data
+npm run populate:mspectral  # Load sensor data
+npm run populate:all       # Load all test data
+```
+
+## 🌍 SITES Network Integration
+
+This system serves as the central management hub for the **Swedish Infrastructure for Ecosystem Science (SITES) Spectral** monitoring network, supporting:
+
+### Research Stations
+- **9 Active Stations** across Sweden's diverse ecosystems
+- **Multiple Ecosystems**: Forest, Agricultural, Lake, Wetland, Heath, and more
+- **Geographic Coverage** from Abisko in the north to Lönnstorp in the south
+
+### Instrument Network
+- **83 Total Instruments** providing continuous environmental monitoring
+- **21 Phenocams** capturing visual ecosystem changes
+- **62 Multispectral Sensors** measuring detailed spectral characteristics
+- **Real-time Data Integration** with SITES data infrastructure
+
+### Program Integration
+- **SITES Spectral Priority** with automatic classification and sorting
+- **ICOS Compatibility** for international carbon observation cooperation
+- **Multi-program Support** for diverse research collaborations
 
 ## 🤝 Contributing
 
+This project was developed with assistance from Claude AI for the SITES Spectral research network. The codebase follows professional standards and is designed for maintainability and extensibility.
+
 ### Development Guidelines
-1. Follow **semantic HTML** structure
-2. Use **BEM methodology** for CSS naming
-3. Implement **progressive enhancement**
-4. Write **accessible** interfaces
-5. Include **error handling** for all operations
-6. Add **loading states** for async operations
-
-### Code Style
-- **ES6+** JavaScript features
-- **Async/await** for promises
-- **Destructuring** for cleaner code
-- **Template literals** for string formatting
-- **Consistent indentation** (2 spaces)
-
-## 📞 Support
-
-For issues, feature requests, or questions:
-- Create an issue in the repository
-- Contact the SITES Spectral team
-- Check live application at https://sites.jobelab.com
-- API health check: https://sites.jobelab.com/api/health
-
-## 📄 Version Information
-
-- **Current Version**: 0.1.0-dev
-- **Release Date**: 2025-09-10
-- **Database Schema**: v4 (4 migrations applied)
-- **Data Sources**: YAML configuration files + CSV metadata
-- **Deployment**: Cloudflare Workers with D1 database
-
-## 📝 Recent Updates
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+- **Follow Existing Patterns** for consistency and maintainability
+- **Test Thoroughly** before committing changes
+- **Update Documentation** for new features and changes  
+- **Maintain Responsive Design** across all screen sizes
+- **Security First** approach for all user-facing features
 
 ## 📄 License
 
-This project is developed for the Swedish Infrastructure for Ecosystem Science (SITES) research network.
+Proprietary software developed for the SITES Spectral research network. All rights reserved.
+
+## 📞 Contact & Support
+
+**Technical Lead**: José Beltrán  
+**Email**: jose.beltran@nateko.lu.se  
+**Organization**: SITES Spectral, Lund University  
+**Network**: [SITES - Swedish Infrastructure for Ecosystem Science](https://www.fieldsites.se/)
+
+**System Status**: Production Ready  
+**Last Updated**: September 2025  
+**Version**: 0.2.0
 
 ---
 
-**Built with ❤️ for the SITES research community**  
-**Version 0.1.0-dev** • **Database: 83 instruments across 9 stations** • **Status: ✅ Active Development**
+*This system enables researchers and station managers to efficiently oversee the SITES Spectral monitoring network, ensuring high-quality data collection and equipment maintenance across Sweden's diverse ecosystems.*
