@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "buildDate": "2025-09-11",
+  "timestamp": 1757586622099,
+  "files": {
+    "/css/styles.css?v=0.2.0": "0.2.0",
+    "/js/utils.js?v=0.2.0": "0.2.0",
+    "/js/api.js?v=0.2.0": "0.2.0",
+    "/js/components.js?v=0.2.0": "0.2.0",
+    "/js/interactive-map.js?v=0.2.0": "0.2.0",
+    "/js/dashboard.js?v=0.2.0": "0.2.0",
+    "/js/station-dashboard.js?v=0.2.0": "0.2.0"
+  }
+}

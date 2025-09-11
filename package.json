@@ -1,0 +1,44 @@
+{
+  "name": "sites-spectral-stations-instruments",
+  "version": "0.2.0",
+  "description": "SITES Spectral Stations & Instruments Management System - Web application for managing Swedish research station instruments including phenocams and multispectral sensors",
+  "main": "src/worker.js",
+  "scripts": {
+    "dev": "wrangler dev --local --persist-to=.wrangler/state",
+    "build": "node scripts/build.js",
+    "build:bump": "node scripts/build.js --bump-version",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:bump": "npm run build:bump && wrangler deploy",
+    "db:create": "wrangler d1 create spectral_stations_db",
+    "db:migrate": "wrangler d1 migrations apply spectral_stations_db --remote",
+    "db:migrate:local": "wrangler d1 migrations apply spectral_stations_db --local",
+    "db:studio": "wrangler d1 studio spectral_stations_db",
+    "db:console": "wrangler d1 execute spectral_stations_db --command",
+    "populate:phenocams": "node populate_phenocams.js",
+    "populate:mspectral": "node populate_mspectral.js",
+    "populate:all": "npm run populate:phenocams && npm run populate:mspectral"
+  },
+  "keywords": [
+    "sites",
+    "spectral",
+    "research",
+    "stations",
+    "instruments",
+    "phenocams",
+    "multispectral",
+    "sensors",
+    "cloudflare",
+    "workers",
+    "d1",
+    "sweden"
+  ],
+  "author": "SITES Spectral Team",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.35.0"
+  },
+  "dependencies": {
+    "jose": "^5.10.0",
+    "js-yaml": "^4.1.0"
+  }
+}

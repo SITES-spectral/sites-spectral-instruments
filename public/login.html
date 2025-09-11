@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SITES Spectral</title>
+    <meta name="description" content="Login to SITES Spectral Stations & Instruments Management System">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css?v=0.2.0">
+    
+    <!-- Version Meta -->
+    <meta name="app-version" content="0.2.0">
+    <meta name="build-date" content="2025-09-11">
+    
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            background: #5a67d8;
+        }
+
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .login-btn .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        .login-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .role-info {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .role-info h4 {
+            color: #0369a1;
+            margin: 0 0 8px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .role-info ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #0c4a6e;
+            font-size: 0.85rem;
+        }
+
+        .role-info ul li {
+            margin-bottom: 4px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #5a67d8;
+        }
+
+        .back-link i {
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+            
+            .login-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="height: 80px; width: auto;">
+            </div>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to access your SITES Spectral dashboard</p>
+            
+            <div class="error-message" id="error-message"></div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username or Email</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        placeholder="Enter your username or email"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <button type="submit" class="login-btn" id="login-btn">
+                    <div class="spinner"></div>
+                    <span>Sign In</span>
+                </button>
+            </form>
+            
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Public Dashboard
+            </a>
+            
+            <div class="role-info">
+                <h4><i class="fas fa-info-circle"></i> Access Levels</h4>
+                <ul>
+                    <li><strong>Station Users:</strong> Manage instruments at your assigned station</li>
+                    <li><strong>Administrators:</strong> Full system access and user management</li>
+                    <li><strong>Public:</strong> View-only access without login</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/js/utils.js?v=0.2.0"></script>
+    <script>
+        class LoginManager {
+            constructor() {
+                this.form = document.getElementById('login-form');
+                this.usernameInput = document.getElementById('username');
+                this.passwordInput = document.getElementById('password');
+                this.submitBtn = document.getElementById('login-btn');
+                this.errorMessage = document.getElementById('error-message');
+                
+                this.init();
+            }
+            
+            init() {
+                // Check if already logged in
+                const token = localStorage.getItem('sites_spectral_token');
+                if (token) {
+                    this.verifyTokenAndRedirect(token);
+                }
+                
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                // Clear error message when user starts typing
+                [this.usernameInput, this.passwordInput].forEach(input => {
+                    input.addEventListener('input', () => {
+                        this.clearError();
+                        input.classList.remove('error');
+                    });
+                });
+            }
+            
+            async verifyTokenAndRedirect(token) {
+                try {
+                    const response = await fetch('/api/auth/verify', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.valid) {
+                            this.redirectUser(data.user);
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Token verification failed:', error);
+                }
+                
+                // Remove invalid token
+                localStorage.removeItem('sites_spectral_token');
+                localStorage.removeItem('sites_spectral_user');
+            }
+            
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                const username = this.usernameInput.value.trim();
+                const password = this.passwordInput.value;
+                
+                if (!username || !password) {
+                    this.showError('Please enter both username and password');
+                    return;
+                }
+                
+                this.setLoading(true);
+                this.clearError();
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Store token and user info
+                        localStorage.setItem('sites_spectral_token', data.token);
+                        localStorage.setItem('sites_spectral_user', JSON.stringify(data.user));
+                        
+                        Utils.showToast('Login successful!', 'success');
+                        
+                        // Redirect after short delay
+                        setTimeout(() => {
+                            this.redirectUser(data.user);
+                        }, 1000);
+                        
+                    } else {
+                        this.showError(data.error || 'Login failed. Please try again.');
+                    }
+                    
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError('Login failed. Please check your connection and try again.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+            
+            redirectUser(user) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect');
+                
+                // Determine redirect URL based on user role
+                let targetUrl = '/';
+                
+                if (user.role === 'admin') {
+                    targetUrl = redirect || '/admin/dashboard.html';
+                } else if (user.role === 'station') {
+                    targetUrl = redirect || `/station/dashboard.html?station=${user.station_id}`;
+                } else {
+                    targetUrl = redirect || '/';
+                }
+                
+                window.location.href = targetUrl;
+            }
+            
+            setLoading(loading) {
+                this.submitBtn.disabled = loading;
+                if (loading) {
+                    this.submitBtn.classList.add('loading');
+                } else {
+                    this.submitBtn.classList.remove('loading');
+                }
+            }
+            
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+                this.usernameInput.classList.add('error');
+                this.passwordInput.classList.add('error');
+            }
+            
+            clearError() {
+                this.errorMessage.classList.remove('show');
+                this.errorMessage.textContent = '';
+            }
+        }
+        
+        // Initialize login manager when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
+        });
+    </script>
+</body>
+</html>
