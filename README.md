@@ -2,7 +2,7 @@
 
 A comprehensive web-based management system for SITES Spectral monitoring stations and instruments across Sweden. This professional-grade application provides secure, role-based access to manage research infrastructure with an intuitive interface and powerful data management capabilities.
 
-![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-orange.svg)
 ![Database](https://img.shields.io/badge/database-D1%20SQLite-green.svg)
 
@@ -22,6 +22,7 @@ A comprehensive web-based management system for SITES Spectral monitoring statio
 - **Rich Popups**: Detailed information panels with direct management links
 - **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
 - **Layer Controls**: Easy switching between different map visualizations
+- **GeoJSON API**: Standardized geospatial data endpoints for external integration
 
 ### 📊 Data Management
 - **Dynamic Tables** with inline editing capabilities for real-time updates
@@ -181,6 +182,19 @@ A comprehensive web-based management system for SITES Spectral monitoring statio
 | `/api/stats/network` | Network-wide statistics and counts |
 | `/api/stats/stations` | Per-station instrument breakdowns |
 | `/api/health` | System health and status monitoring |
+
+### 🌍 GeoJSON API Endpoints (v0.4.0)
+
+| Endpoint | Description |
+|----------|-------------|
+| `/api/geojson/all` | Complete GeoJSON FeatureCollection with both stations and platforms |
+| `/api/geojson/stations` | Stations only in GeoJSON format with metadata |
+| `/api/geojson/platforms` | Instruments/platforms only in GeoJSON format |
+
+**Query Parameters:**
+- `include_instruments=true` - Include detailed instrument data for stations
+- Standard GeoJSON format with `[longitude, latitude]` coordinates
+- Rich metadata properties for integration with mapping libraries
 
 ## 🔄 Version Management & Deployment
 

@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-09-11
+
+### Added
+- **🌍 GeoJSON API Endpoints** - Standardized geospatial data access
+  - New `/api/geojson/all` endpoint providing both stations and platforms in GeoJSON format
+  - Individual endpoints `/api/geojson/stations` and `/api/geojson/platforms` for specific data
+  - Proper GeoJSON FeatureCollection format with rich metadata properties
+  - Optional `?include_instruments=true` parameter for detailed station instrument data
+  - Optimized coordinate format `[longitude, latitude]` following GeoJSON standard
+
+- **⚡ Enhanced Interactive Map Performance** - Improved data loading and display
+  - Updated map to use single GeoJSON API call instead of multiple REST endpoints
+  - Added proper icon support for phenocam and mspectral_sensor platform types
+  - Enhanced platform popups with status badges and complete station information
+  - Improved marker clustering and performance with large datasets
+
+- **🚀 GitHub Integration & Auto-Deployment** - Streamlined development workflow
+  - GitHub Actions workflow for automatic Cloudflare Workers deployment
+  - Complete setup documentation in `CLOUDFLARE_SETUP.md` with step-by-step instructions
+  - Updated `wrangler.toml` configuration for GitHub integration support
+  - Automatic deployment on push to main branch with build validation
+
+### Removed
+- **📚 Documentation Navigation Links** - Hidden broken GitHub documentation references
+  - Commented out documentation links in main navigation (index.html, station.html)
+  - Removed access to `/docs/` section with broken GitHub links
+  - Clean navigation menu focusing on functional features only
+
+### Technical
+- **🗺️ Geospatial Data Architecture** - Modern GeoJSON-based mapping system
+  - Unified data loading through standardized GeoJSON endpoints
+  - Proper handling of both station and platform coordinates
+  - Rich metadata embedding in GeoJSON properties for enhanced map interactions
+- **🔧 CI/CD Pipeline** - Automated deployment and version management
+  - GitHub Actions integration with Cloudflare Workers deployment
+  - Automated testing and build validation on pull requests
+  - Version synchronization across package.json, wrangler.toml, and HTML meta tags
+
 ## [0.3.0] - 2025-09-11
 
 ### Added

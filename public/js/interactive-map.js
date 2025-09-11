@@ -56,15 +56,48 @@ class InteractiveMap {
     
     async loadStationsData() {
         try {
-            // Load stations data
-            const stationsResponse = await fetch('/api/stations');
-            const stationsResult = await stationsResponse.json();
-            this.stationsData = stationsResult.stations || [];
+            // Load GeoJSON data for both stations and platforms
+            const geoJsonResponse = await fetch('/api/geojson/all?include_instruments=true');
+            const geoJsonData = await geoJsonResponse.json();
             
-            // Load platforms data
-            const platformsResponse = await fetch('/api/platforms');
-            const platformsResult = await platformsResponse.json();
-            this.platformsData = platformsResult.platforms || [];
+            // Separate stations and platforms from GeoJSON features
+            this.stationsData = [];
+            this.platformsData = [];
+            
+            if (geoJsonData.features) {
+                geoJsonData.features.forEach(feature => {
+                    if (feature.properties.type === 'station') {
+                        this.stationsData.push({
+                            id: feature.properties.id,
+                            display_name: feature.properties.name,
+                            normalized_name: feature.properties.normalized_name,
+                            acronym: feature.properties.acronym,
+                            latitude: feature.geometry.coordinates[1],
+                            longitude: feature.geometry.coordinates[0],
+                            elevation_m: feature.properties.elevation_m,
+                            ecosystem: feature.properties.ecosystem,
+                            station_type: feature.properties.station_type,
+                            instrument_count: feature.properties.instrument_count,
+                            active_instruments: feature.properties.active_instruments,
+                            ...feature.properties
+                        });
+                    } else if (feature.properties.type === 'platform') {
+                        this.platformsData.push({
+                            id: feature.properties.id,
+                            platform_id: feature.properties.platform_id,
+                            name: feature.properties.name,
+                            type: feature.properties.platform_type,
+                            latitude: feature.geometry.coordinates[1],
+                            longitude: feature.geometry.coordinates[0],
+                            platform_height_m: feature.properties.platform_height_m,
+                            station_id: feature.properties.station_id,
+                            thematic_program: feature.properties.thematic_program,
+                            status: feature.properties.status,
+                            ...feature.properties
+                        });
+                    }
+                });
+            }
             
         } catch (error) {
             console.error('Failed to load map data:', error);
@@ -172,7 +205,10 @@ class InteractiveMap {
             tower: 'fas fa-tower-broadcast',
             mast: 'fas fa-radio',
             building: 'fas fa-building',
-            ground: 'fas fa-circle'
+            ground: 'fas fa-circle',
+            phenocam: 'fas fa-camera',
+            mspectral_sensor: 'fas fa-eye',
+            multispectral_sensor: 'fas fa-eye'
         };
         
         const platformIcon = L.divIcon({
@@ -194,17 +230,22 @@ class InteractiveMap {
         const popupContent = `
             <div class="map-popup platform-popup">
                 <h4>${platform.name}</h4>
-                <p><strong>Station:</strong> ${station.display_name}</p>
+                <p><strong>Station:</strong> ${platform.station_name || station?.display_name || 'Unknown'}</p>
                 <p><strong>Platform ID:</strong> ${platform.platform_id}</p>
                 <p><strong>Type:</strong> ${platform.type}</p>
                 <p><strong>Height:</strong> ${platform.platform_height_m ? platform.platform_height_m + 'm' : 'N/A'}</p>
+                <p><strong>Status:</strong> 
+                    <span class="status-badge ${(platform.status || '').toLowerCase()}">
+                        ${platform.status || 'Unknown'}
+                    </span>
+                </p>
                 <p><strong>Program:</strong> 
                     <span class="program-badge ${(platform.thematic_program || '').toLowerCase().replace('_', '-')}">
                         ${platform.thematic_program || 'SITES_Spectral'}
                     </span>
                 </p>
                 <div class="popup-actions">
-                    <button onclick="window.location.href='/station/dashboard.html?station=${station.id}&platform=${platform.id}'" class="btn btn-secondary btn-sm">
+                    <button onclick="window.location.href='/station/dashboard.html?station=${platform.station_id}&platform=${platform.id}'" class="btn btn-secondary btn-sm">
                         <i class="fas fa-eye"></i> View Details
                     </button>
                 </div>
