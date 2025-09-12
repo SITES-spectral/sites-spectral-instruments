@@ -599,6 +599,64 @@ body {
     }
 }
 
+/* Enhanced Table Styles */
+.admin-table th,
+.admin-table td,
+.data-table th,
+.data-table td,
+.instruments-data-table th,
+.instruments-data-table td {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+}
+
+/* Platform table specific styling for better spacing with long content */
+.instruments-data-table th,
+.instruments-data-table td {
+    padding: 1.5rem 1.25rem;
+    min-width: 120px;
+}
+
+/* Ensure proper spacing for platform table columns */
+.instruments-data-table .select-column {
+    width: 50px;
+    padding: 1.5rem 0.75rem;
+}
+
+.instruments-data-table .actions-column {
+    width: 150px;
+    padding: 1.5rem 1rem;
+}
+
+/* Responsive table improvements */
+@media (max-width: 1200px) {
+    .instruments-data-table th,
+    .instruments-data-table td {
+        padding: 1.25rem 1rem;
+        min-width: 100px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-table th,
+    .admin-table td,
+    .data-table th,
+    .data-table td,
+    .instruments-data-table th,
+    .instruments-data-table td {
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .instruments-data-table th,
+    .instruments-data-table td {
+        min-width: 80px;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-menu {

@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=0.5.1">
+    <link rel="stylesheet" href="/css/styles.css?v=0.5.2">
     
     <!-- Version Meta -->
-    <meta name="app-version" content="0.5.1">
-    <meta name="build-date" content="2025-09-11">
+    <meta name="app-version" content="0.5.2">
+    <meta name="build-date" content="2025-09-12">
     
     <style>
         .admin-header {
@@ -140,9 +140,10 @@
         
         .admin-table th,
         .admin-table td {
-            padding: 0.75rem;
+            padding: 1.25rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
         }
         
         .admin-table th {
@@ -399,8 +400,8 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=0.5.1"></script>
-    <script src="/js/api.js?v=0.5.1"></script>
+    <script src="/js/utils.js?v=0.5.2"></script>
+    <script src="/js/api.js?v=0.5.2"></script>
     <script>
         class AdminDashboard {
             constructor() {
@@ -468,7 +469,7 @@
                     // This would load users from the API
                     // For now, show test users
                     const users = [
-                        { username: 'admin', full_name: 'System Administrator', email: 'admin@sites.se', role: 'admin', station: 'All Stations', status: 'Active', last_login: '2025-09-11' },
+                        { username: 'admin', full_name: 'System Administrator', email: 'admin@sites.se', role: 'admin', station: 'All Stations', status: 'Active', last_login: '2025-09-12' },
                         { username: 'svartberget', full_name: 'Svartberget Manager', email: 'svb@sites.se', role: 'station', station: 'Svartberget', status: 'Active', last_login: '2025-09-10' },
                         { username: 'skogaryd', full_name: 'Skogaryd Manager', email: 'skc@sites.se', role: 'station', station: 'Skogaryd', status: 'Active', last_login: '2025-09-09' },
                         { username: 'lonnstorp', full_name: 'Lönnstorp Manager', email: 'lon@sites.se', role: 'station', station: 'Lönnstorp', status: 'Active', last_login: '2025-09-08' },

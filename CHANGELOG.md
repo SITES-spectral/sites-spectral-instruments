@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2025-09-12
+
+### Improved
+- **📊 Enhanced Table Spacing** - Improved readability across all data tables
+  - Increased cell padding from `1rem` to `1.25rem 1rem` for general data tables
+  - Enhanced platform table spacing with `1.5rem 1.25rem` padding for long content
+  - Added `vertical-align: top` for better multi-line content alignment
+  - Implemented responsive table spacing that scales down on smaller screens
+  - Applied consistent spacing across admin, station dashboard, and platform tables
+  - Improved visual hierarchy with proper column width constraints and min-widths
+
 ## [0.5.1] - 2025-09-12
 
 ### Added
