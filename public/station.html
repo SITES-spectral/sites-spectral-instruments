@@ -163,6 +163,9 @@
             background: #f8fafc;
             padding: 1.5rem;
             border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         
         .section-title {
@@ -170,6 +173,11 @@
             color: #2d3748;
             display: flex;
             align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-actions {
+            display: flex;
             gap: 0.5rem;
         }
         
@@ -236,6 +244,20 @@
             font-size: 0.9rem;
             color: #2d3748;
             font-weight: 500;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            justify-content: flex-end;
+        }
+
+        .item-actions .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
         
         .status-badge {
@@ -429,6 +451,11 @@
                             Platforms
                             <span id="platform-count" class="meta-value"></span>
                         </h2>
+                        <div class="section-actions">
+                            <button class="btn btn-primary" onclick="addPlatform()" id="add-platform-btn">
+                                <i class="fas fa-plus"></i> Add Platform
+                            </button>
+                        </div>
                     </div>
                     <div class="section-content" id="platforms-content">
                         <div class="loading-state">
@@ -446,6 +473,11 @@
                             Instruments
                             <span id="instrument-count" class="meta-value"></span>
                         </h2>
+                        <div class="section-actions">
+                            <button class="btn btn-primary" onclick="addInstrument()" id="add-instrument-btn">
+                                <i class="fas fa-plus"></i> Add Instrument
+                            </button>
+                        </div>
                     </div>
                     <div class="section-content" id="instruments-content">
                         <div class="loading-state">
@@ -706,6 +738,14 @@
                             </div>
                             ` : ''}
                         </div>
+                        <div class="item-actions">
+                            <button class="btn btn-sm btn-outline" onclick="editPlatform('${platform.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePlatform('${platform.id}', '${platform.name}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 `).join('');
 
@@ -768,6 +808,14 @@
                             </div>
                             ` : ''}
                         </div>
+                        <div class="item-actions">
+                            <button class="btn btn-sm btn-outline" onclick="editInstrument('${instrument.id || instrument.canonical_id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteInstrument('${instrument.id || instrument.canonical_id}', '${instrument.name}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 `).join('');
 
@@ -777,6 +825,42 @@
                 console.error('Error loading instruments:', error);
                 document.getElementById('instruments-content').innerHTML = 
                     '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load instruments</p></div>';
+            }
+        }
+
+        // CRUD Functions for Platforms
+        function addPlatform() {
+            showToast('Add Platform functionality coming soon', 'info');
+            // TODO: Implement platform creation modal/form
+        }
+
+        function editPlatform(platformId) {
+            showToast(`Edit Platform ${platformId} functionality coming soon`, 'info');
+            // TODO: Implement platform editing modal/form
+        }
+
+        function deletePlatform(platformId, platformName) {
+            if (confirm(`Are you sure you want to delete platform "${platformName}"?`)) {
+                showToast(`Delete Platform functionality coming soon`, 'info');
+                // TODO: Implement platform deletion API call
+            }
+        }
+
+        // CRUD Functions for Instruments
+        function addInstrument() {
+            showToast('Add Instrument functionality coming soon', 'info');
+            // TODO: Implement instrument creation modal/form
+        }
+
+        function editInstrument(instrumentId) {
+            showToast(`Edit Instrument ${instrumentId} functionality coming soon`, 'info');
+            // TODO: Implement instrument editing modal/form
+        }
+
+        function deleteInstrument(instrumentId, instrumentName) {
+            if (confirm(`Are you sure you want to delete instrument "${instrumentName}"?`)) {
+                showToast(`Delete Instrument functionality coming soon`, 'info');
+                // TODO: Implement instrument deletion API call
             }
         }
     </script>
