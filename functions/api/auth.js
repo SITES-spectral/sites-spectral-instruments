@@ -58,15 +58,25 @@ async function handleLogin(request, env) {
                 auth_method: 'secrets'
             }, request);
 
-            // Get station information if applicable
+            // Get station information and verify it's active
             let stationInfo = {};
             if (secretUser.station_id && env.DB) {
                 try {
                     const station = await env.DB.prepare(
-                        'SELECT display_name, acronym FROM stations WHERE id = ?'
+                        'SELECT display_name, acronym, status FROM stations WHERE id = ?'
                     ).bind(secretUser.station_id).first();
                     
                     if (station) {
+                        // Check if station is inactive/disabled in database
+                        if (station.status === 'Inactive') {
+                            return new Response(JSON.stringify({ 
+                                error: 'Station access is disabled' 
+                            }), {
+                                status: 403,
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+                        }
+                        
                         stationInfo = {
                             station_name: station.display_name,
                             station_acronym: station.acronym

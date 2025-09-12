@@ -5,24 +5,27 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 
 // Read and parse YAML files
-const phenocamsYaml = fs.readFileSync('/home/jobelund/lu2024-12-46/SITES/Spectral/apps/stations_dev/stations.yaml', 'utf8');
-const mspectralYaml = fs.readFileSync('/home/jobelund/lu2024-12-46/SITES/Spectral/apps/stations_dev/stations_mspectral.yaml', 'utf8');
+const phenocamsYaml = fs.readFileSync('/lunarc/nobackup/projects/sitesspec/SITES/Spectral/data/.sites_spectral/stations.yaml', 'utf8');
+const mspectralYaml = fs.readFileSync('/lunarc/nobackup/projects/sitesspec/SITES/Spectral/apps/stations_dev/stations_mspectral.yaml', 'utf8');
 
 const phenocamsData = yaml.load(phenocamsYaml);
 const mspectralData = yaml.load(mspectralYaml);
 
-// Station acronym mapping to resolve SKC/SKG conflict
+// Station acronym mapping to match credentials and database IDs
+// Based on station-credentials-SECURE.json and migration seed data
 const stationMapping = {
-  'ANS': 1, // Abisko
-  'GRI': 2, // Grimsö
-  'LON': 3, // Lönnstorp
-  'RBD': 4, // Röbäcksdalen
-  'SKC': 5, // Skogaryd (phenocams use SKC)
-  'SKG': 5, // Skogaryd (mspectral uses SKG, same station)
-  'SVB': 6, // Svartberget
-  'ASA': 7, // Asa
-  'HTM': 8, // Hyltemossa
-  'TAR': 9  // Tarfala
+  'ANS': 1,  // abisko
+  'ASA': 2,  // asa
+  'HTM': 3,  // hyltemossa (bolmen in credentials is incorrect)
+  'HTM': 4,  // erken (mapping placeholder)
+  'GRI': 5,  // grimso
+  'LON': 6,  // lonnstorp
+  'RBD': 7,  // robacksdalen
+  'SKC': 8,  // skogaryd (phenocams use SKC)
+  'SKG': 8,  // skogaryd (mspectral uses SKG, same station)
+  'SVB': 10, // svartberget
+  // Note: stordalen (station_id 9) and tarfala (station_id 11) need to be handled
+  'TAR': 11  // tarfala - should be disabled
 };
 
 // Generate SQL INSERT statements

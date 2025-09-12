@@ -103,6 +103,7 @@ async function getUserFromSecrets(username, env) {
                 role: station.role,
                 station_id: station.station_id,
                 active: station.active !== false,
+                disabled: station.disabled === true,
                 password_hash: await hashPassword(station.password) // Hash the stored password
             };
         }
@@ -122,6 +123,11 @@ export async function authenticateUser(username, password, env) {
         // First try to get user from secrets (new method)
         const secretUser = await getUserFromSecrets(username, env);
         if (secretUser) {
+            // Check if station is disabled
+            if (secretUser.disabled === true) {
+                return null; // Don't allow login for disabled stations
+            }
+            
             const isValid = await verifyPassword(password, secretUser.password_hash);
             if (isValid) {
                 // Update last login in database if available
