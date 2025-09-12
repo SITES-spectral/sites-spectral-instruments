@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-09-12
+
+### Added
+- **🛡️ Complete Admin CRUD System** - Full administrative interface for system management
+  - **User Management**: Complete user table with dropdown status editing (Active/Inactive/Disabled)
+  - **Station Management**: Full station CRUD with dropdown status control and view/edit/delete actions
+  - **Platform Management**: Comprehensive platform management with status controls and location tracking
+  - **Instrument Management**: Complete instrument overview with status dropdowns and management actions
+  - **Activity Logs**: Real-time activity monitoring with refresh/export/clear functionality
+  - **System Settings**: Dangerous operations in secure danger zone with confirmation dialogs
+
+### Enhanced
+- **🎮 Dropdown-Based Editing** - Reduce human input errors with structured choices
+  - **Status Controls**: Click-to-change status dropdowns for users, stations, platforms, and instruments
+  - **Confirmation Dialogs**: All status changes require confirmation to prevent accidental changes
+  - **Visual Feedback**: Color-coded status indicators (green/yellow/red) for quick status identification
+  - **Unified Interface**: Consistent CRUD operations across all management sections
+
+### Technical
+- **📊 Data Loading**: Test data integration for all management sections
+- **🔒 Security**: Admin-only access with proper authentication verification
+- **🎨 Professional UI**: Enterprise-grade admin interface with modern styling
+- **📱 Responsive Design**: Admin interface works seamlessly across all device sizes
+- **⚡ Performance**: Efficient data rendering with proper loading states
+
+### User Experience
+- **🎯 Error Prevention**: Dropdown selections eliminate typing errors and ensure data consistency
+- **✅ Confirmation Flow**: All destructive actions require explicit confirmation
+- **🔄 Status Management**: Easy enable/disable functionality for all system components
+- **📈 Activity Tracking**: Comprehensive logs for audit and troubleshooting purposes
+
 ## [0.5.7] - 2025-09-12
 
 ### Added
