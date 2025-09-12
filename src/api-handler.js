@@ -941,15 +941,3 @@ async function handleGeoJSON(method, pathSegments, request, env) {
     });
   }
 }
-
-function handleHealthCheck(env) {
-  return new Response(JSON.stringify({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    service: 'SITES Spectral Stations & Instruments',
-    version: env?.APP_VERSION || '0.1.0-dev',
-    environment: env?.ENVIRONMENT || 'development'
-  }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
