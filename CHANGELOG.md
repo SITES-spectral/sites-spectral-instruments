@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2025-09-12
+
+### Improved
+- **🗺️ Map Legend Visual Consistency** - Updated legend to match Google Maps style markers
+  - Replaced circular legend markers with Google Maps style pin markers
+  - Applied consistent color coding: Red pins for stations, Blue pins for platforms  
+  - Enhanced visual hierarchy with proper shadows and 3D pin effects
+  - Maintained backward compatibility with existing legend styles
+  - Achieved perfect visual consistency between interactive map markers and legend display
+
 ## [0.4.4] - 2025-09-12
 
 ### Fixed
