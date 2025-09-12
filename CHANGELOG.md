@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-09-12
+
+### Added
+- **🔧 Complete CRUD Management System** - Full create, read, update, delete functionality for all instruments
+  - Implemented comprehensive phenocam management (POST, PUT, PATCH, DELETE endpoints)
+  - Implemented comprehensive multispectral sensor management (POST, PUT, PATCH, DELETE endpoints)  
+  - Added full authentication and authorization checks with role-based access control
+  - Created station-aware permissions ensuring users can only modify their assigned station's instruments
+
+- **🎨 Enhanced Station Dashboard UI** - Professional management interface with modal forms
+  - Added sophisticated edit instrument modals with pre-populated forms
+  - Implemented delete confirmation dialogs with detailed instrument information
+  - Created comprehensive form validation and error handling
+  - Added visual feedback with success/error toasts and loading states
+
+- **🔒 Advanced Security Features** - Enterprise-grade permission system
+  - Station users can only manage instruments within their assigned station
+  - Admin users have full system access with proper audit trails
+  - Prevents duplicate canonical IDs across the entire system
+  - Validates station existence and user permissions before any operations
+
+- **✨ User Experience Improvements** - Polished interface and workflows
+  - Real-time data updates after create/edit/delete operations
+  - Smart form handling that removes empty fields to prevent data corruption
+  - Professional modal dialogs with proper styling and animations
+  - Consistent UI patterns across all management functions
+
+### Enhanced
+- **🗺️ Platform Management Architecture** - Refined virtual platform handling
+  - Platforms are now properly abstracted from phenocams and multispectral sensors
+  - Enhanced GeoJSON endpoint integration for map visualization
+  - Improved coordinate validation and geographic data handling
+
+- **⚡ API Performance & Reliability** - Optimized endpoint architecture
+  - Consolidated API routing with proper HTTP method support
+  - Enhanced error handling with detailed error messages
+  - Improved database query efficiency for large datasets
+  - Added proper content-type headers and status codes
+
 ## [0.4.5] - 2025-09-12
 
 ### Improved

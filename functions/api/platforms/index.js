@@ -1,5 +1,6 @@
 // API handlers for platforms endpoint
 // Returns platforms (instruments) grouped by unique platform combinations
+import { getUserFromRequest, requirePermission } from '../../../src/auth-secrets.js';
 
 export async function onRequestGet({ request, env, params }) {
   try {

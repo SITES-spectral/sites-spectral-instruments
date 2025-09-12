@@ -852,11 +852,216 @@ class StationDashboard {
     closeModal(modal) {
         modal.remove();
     }
+    
+    // Edit instrument modal
+    showEditInstrumentModal(id, type) {
+        const dataArray = type === 'phenocam' ? this.phenocams : this.sensors;
+        const instrument = dataArray.find(item => item.id == id);
+        
+        if (!instrument) {
+            Utils.showToast('Instrument not found', 'error');
+            return;
+        }
+        
+        const modal = this.createModal(`Edit ${type === 'phenocam' ? 'Phenocam' : 'Multispectral Sensor'}`, this.getEditInstrumentForm(type, instrument));
+        
+        modal.querySelector('.btn-primary').addEventListener('click', async () => {
+            await this.handleEditInstrument(id, type, modal);
+        });
+    }
+    
+    // Delete instrument confirmation
+    confirmDeleteInstrument(id, type) {
+        const dataArray = type === 'phenocam' ? this.phenocams : this.sensors;
+        const instrument = dataArray.find(item => item.id == id);
+        
+        if (!instrument) {
+            Utils.showToast('Instrument not found', 'error');
+            return;
+        }
+        
+        const name = instrument.canonical_id || `${type} ${id}`;
+        const modal = this.createModal(`Delete ${type === 'phenocam' ? 'Phenocam' : 'Multispectral Sensor'}`, `
+            <div class="delete-confirmation">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Are you sure?</h3>
+                <p>This action cannot be undone. The ${type === 'phenocam' ? 'phenocam' : 'multispectral sensor'} <strong>${name}</strong> will be permanently deleted.</p>
+                <div class="delete-details">
+                    <p><strong>ID:</strong> ${id}</p>
+                    <p><strong>Station:</strong> ${instrument.station_name || 'Unknown'}</p>
+                    <p><strong>Status:</strong> ${instrument.status || 'Unknown'}</p>
+                </div>
+            </div>
+        `);
+        
+        // Update button text for delete confirmation
+        const primaryBtn = modal.querySelector('.btn-primary');
+        primaryBtn.textContent = 'Delete';
+        primaryBtn.className = 'btn btn-danger';
+        
+        primaryBtn.addEventListener('click', async () => {
+            await this.handleDeleteInstrument(id, type, modal);
+        });
+    }
+    
+    // Generate edit form for instruments
+    getEditInstrumentForm(type, instrument) {
+        const commonFields = `
+            <div class="form-group">
+                <label for="edit_canonical_id">Canonical ID</label>
+                <input type="text" id="edit_canonical_id" name="canonical_id" value="${instrument.canonical_id || ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_status">Status</label>
+                <select id="edit_status" name="status">
+                    <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                    <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                    <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit_ecosystem">Ecosystem</label>
+                <input type="text" id="edit_ecosystem" name="ecosystem" value="${instrument.ecosystem || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_location">Location</label>
+                <input type="text" id="edit_location" name="location" value="${instrument.location || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit_thematic_program">Thematic Program</label>
+                <select id="edit_thematic_program" name="thematic_program">
+                    <option value="SITES_Spectral" ${instrument.thematic_program === 'SITES_Spectral' ? 'selected' : ''}>SITES Spectral</option>
+                    <option value="ICOS" ${instrument.thematic_program === 'ICOS' ? 'selected' : ''}>ICOS</option>
+                    <option value="Other" ${instrument.thematic_program === 'Other' ? 'selected' : ''}>Other</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_latitude">Latitude</label>
+                    <input type="number" step="0.000001" id="edit_latitude" name="latitude" value="${instrument.latitude || ''}">
+                </div>
+                <div class="form-group">
+                    <label for="edit_longitude">Longitude</label>
+                    <input type="number" step="0.000001" id="edit_longitude" name="longitude" value="${instrument.longitude || ''}">
+                </div>
+            </div>
+        `;
+        
+        if (type === 'phenocam') {
+            return `
+                <form id="edit-instrument-form">
+                    <div class="form-group">
+                        <label for="edit_legacy_acronym">Legacy Acronym</label>
+                        <input type="text" id="edit_legacy_acronym" name="legacy_acronym" value="${instrument.legacy_acronym || ''}">
+                    </div>
+                    ${commonFields}
+                </form>
+            `;
+        } else {
+            return `
+                <form id="edit-instrument-form">
+                    <div class="form-group">
+                        <label for="edit_legacy_name">Legacy Name</label>
+                        <input type="text" id="edit_legacy_name" name="legacy_name" value="${instrument.legacy_name || ''}">
+                    </div>
+                    ${commonFields}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_brand">Brand</label>
+                            <input type="text" id="edit_brand" name="brand" value="${instrument.brand || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_model">Model</label>
+                            <input type="text" id="edit_model" name="model" value="${instrument.model || ''}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_center_wavelength_nm">Center Wavelength (nm)</label>
+                            <input type="number" id="edit_center_wavelength_nm" name="center_wavelength_nm" value="${instrument.center_wavelength_nm || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_usage_type">Usage Type</label>
+                            <input type="text" id="edit_usage_type" name="usage_type" value="${instrument.usage_type || ''}">
+                        </div>
+                    </div>
+                </form>
+            `;
+        }
+    }
+    
+    // Handle edit instrument
+    async handleEditInstrument(id, type, modal) {
+        const form = modal.querySelector('#edit-instrument-form');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Remove empty values
+        Object.keys(data).forEach(key => {
+            if (data[key] === '') {
+                delete data[key];
+            }
+        });
+        
+        try {
+            const endpoint = type === 'phenocam' ? '/api/phenocams' : '/api/mspectral';
+            const response = await this.authenticatedFetch(`${endpoint}/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update instrument');
+            }
+            
+            Utils.showToast(`${type === 'phenocam' ? 'Phenocam' : 'Sensor'} updated successfully`, 'success');
+            this.closeModal(modal);
+            
+            // Reload data
+            await this.loadInstrumentData();
+            this.updateUI();
+            
+        } catch (error) {
+            console.error('Failed to update instrument:', error);
+            Utils.showToast(error.message || 'Failed to update instrument', 'error');
+        }
+    }
+    
+    // Handle delete instrument
+    async handleDeleteInstrument(id, type, modal) {
+        try {
+            const endpoint = type === 'phenocam' ? '/api/phenocams' : '/api/mspectral';
+            const response = await this.authenticatedFetch(`${endpoint}/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete instrument');
+            }
+            
+            Utils.showToast(`${type === 'phenocam' ? 'Phenocam' : 'Sensor'} deleted successfully`, 'success');
+            this.closeModal(modal);
+            
+            // Reload data
+            await this.loadInstrumentData();
+            this.updateUI();
+            
+        } catch (error) {
+            console.error('Failed to delete instrument:', error);
+            Utils.showToast(error.message || 'Failed to delete instrument', 'error');
+        }
+    }
 }
 
 // Global functions for HTML onclick handlers
 window.editInstrument = (id, type) => {
-    Utils.showToast(`Edit ${type} functionality coming soon`, 'info');
+    if (window.dashboard) {
+        window.dashboard.showEditInstrumentModal(id, type);
+    }
 };
 
 window.viewROI = (id) => {
@@ -868,7 +1073,9 @@ window.viewTechnicalSpecs = (id) => {
 };
 
 window.deleteInstrument = (id, type) => {
-    Utils.showToast(`Delete ${type} functionality coming soon`, 'info');
+    if (window.dashboard) {
+        window.dashboard.confirmDeleteInstrument(id, type);
+    }
 };
 
 // Initialize dashboard when DOM is ready
@@ -996,6 +1203,55 @@ const additionalStyles = `
         margin-bottom: 0.5rem;
         font-weight: 500;
         color: #374151;
+    }
+    
+    .delete-confirmation {
+        text-align: center;
+        padding: 1rem 0;
+    }
+    
+    .delete-confirmation .warning-icon {
+        font-size: 3rem;
+        color: #f59e0b;
+        margin-bottom: 1rem;
+    }
+    
+    .delete-confirmation h3 {
+        margin: 0 0 1rem 0;
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .delete-confirmation p {
+        color: #6b7280;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .delete-details {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        text-align: left;
+    }
+    
+    .delete-details p {
+        margin: 0.5rem 0;
+        color: #4b5563;
+        font-size: 0.875rem;
+    }
+    
+    .btn-danger {
+        background-color: #dc2626;
+        border-color: #dc2626;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background-color: #b91c1c;
+        border-color: #b91c1c;
     }
     
     .form-group input,
