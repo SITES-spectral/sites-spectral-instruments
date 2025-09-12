@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2025-09-12
+
+### Fixed
+- **🏥 Critical Station Data Consistency** - Resolved major station login and data mapping issues
+  - **Fixed Station Login Bug**: Logging into Lönnstorp now correctly shows Lönnstorp data instead of Svartberget
+  - **Removed Invalid Stations**: Eliminated non-existent stations (bolmen, erken, stordalen) from credentials
+  - **Disabled Tarfala**: Marked Tarfala as inactive since it's no longer part of SITES network
+  - **Updated Station Names**: Aligned display names with authoritative YAML configuration sources
+  - **Fixed Database Population**: Corrected file paths to use proper YAML sources as single source of truth
+
+### Enhanced
+- **🔐 Authentication Security** - Improved station access control
+  - Added validation to prevent login to disabled/inactive stations
+  - Enhanced station verification during authentication process
+  - Implemented disabled station checks in both secrets and database authentication
+
+### Database
+- **📋 Migration 0008**: Added comprehensive station data cleanup
+  - Added status column to stations table for active/inactive tracking
+  - Cleaned up station names and acronyms to match YAML sources
+  - Removed orphaned data from invalid stations
+  - Established YAML files as authoritative source for all station data
+
+## [0.5.3] - 2025-09-12
+
+### Changed
+- **🔗 Documentation Menu**: Hidden documentation menu link (was already commented out)
+- **📦 Version Bump**: Updated version across all HTML files and manifests
+
 ## [0.5.2] - 2025-09-12
 
 ### Improved
