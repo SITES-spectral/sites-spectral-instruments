@@ -869,3 +869,107 @@ body {
         text-align: center;
     }
 }
+
+/* Google Maps Style Markers */
+.google-maps-marker {
+    background: transparent;
+    border: none;
+}
+
+.google-marker-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.google-marker-pin {
+    width: 28px;
+    height: 28px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.google-marker-pin i {
+    transform: rotate(45deg);
+    font-size: 12px;
+    color: white;
+}
+
+.google-marker-shadow {
+    width: 28px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* Station marker - Red color */
+.station-pin {
+    background: #EA4335;
+}
+
+.station-marker .google-marker-pin {
+    width: 32px;
+    height: 32px;
+}
+
+.station-marker .google-marker-pin i {
+    font-size: 14px;
+}
+
+.station-marker .google-marker-shadow {
+    width: 32px;
+    height: 14px;
+    bottom: -6px;
+}
+
+/* Platform marker - Blue color */
+.platform-pin {
+    background: #4285F4;
+}
+
+.platform-marker .google-marker-pin {
+    width: 28px;
+    height: 28px;
+}
+
+.platform-marker .google-marker-pin i {
+    font-size: 12px;
+}
+
+.platform-marker .google-marker-shadow {
+    width: 28px;
+    height: 12px;
+    bottom: -5px;
+}
+
+/* Instrument marker - Green color (for future use) */
+.instrument-pin {
+    background: #34A853;
+}
+
+.instrument-marker .google-marker-pin {
+    width: 24px;
+    height: 24px;
+}
+
+.instrument-marker .google-marker-pin i {
+    font-size: 10px;
+}
+
+.instrument-marker .google-marker-shadow {
+    width: 24px;
+    height: 10px;
+    bottom: -4px;
+}

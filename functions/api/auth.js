@@ -301,6 +301,27 @@ async function handleVerify(request, env) {
         }
 
         const token = authHeader.substring(7);
+        
+        // Try secrets-based authentication first
+        const secretPayload = await import('../../src/auth-secrets.js').then(module => module.verifyToken(token, env));
+        
+        if (secretPayload) {
+            // Valid secrets-based token
+            return new Response(JSON.stringify({
+                valid: true,
+                user: {
+                    id: secretPayload.sub,
+                    username: secretPayload.username,
+                    role: secretPayload.role,
+                    station_id: secretPayload.station_id
+                }
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+        
+        // Fallback to database-based verification
         const payload = await verifyToken(token);
         
         if (!payload) {
@@ -313,33 +334,35 @@ async function handleVerify(request, env) {
             });
         }
 
-        // Check if session exists in database
-        const tokenHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
-        const tokenHashHex = Array.from(new Uint8Array(tokenHash))
-            .map(b => b.toString(16).padStart(2, '0')).join('');
-        
-        const session = await env.DB.prepare(`
-            SELECT s.*, u.active 
-            FROM user_sessions s
-            JOIN users u ON s.user_id = u.id
-            WHERE s.token_hash = ? AND s.expires_at > datetime('now')
-        `).bind(tokenHashHex).first();
+        // Check if session exists in database for database users
+        if (env.DB) {
+            const tokenHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+            const tokenHashHex = Array.from(new Uint8Array(tokenHash))
+                .map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            const session = await env.DB.prepare(`
+                SELECT s.*, u.active 
+                FROM user_sessions s
+                JOIN users u ON s.user_id = u.id
+                WHERE s.token_hash = ? AND s.expires_at > datetime('now')
+            `).bind(tokenHashHex).first();
 
-        if (!session || !session.active) {
-            return new Response(JSON.stringify({ 
-                valid: false,
-                error: 'Session expired or user disabled' 
-            }), {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' }
-            });
+            if (!session || !session.active) {
+                return new Response(JSON.stringify({ 
+                    valid: false,
+                    error: 'Session expired or user disabled' 
+                }), {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            // Update last activity
+            await env.DB.prepare(`
+                UPDATE user_sessions SET last_activity = CURRENT_TIMESTAMP 
+                WHERE token_hash = ?
+            `).bind(tokenHashHex).run();
         }
-
-        // Update last activity
-        await env.DB.prepare(`
-            UPDATE user_sessions SET last_activity = CURRENT_TIMESTAMP 
-            WHERE token_hash = ?
-        `).bind(tokenHashHex).run();
 
         return new Response(JSON.stringify({
             valid: true,

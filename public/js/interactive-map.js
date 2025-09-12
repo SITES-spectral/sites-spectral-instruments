@@ -65,8 +65,15 @@ class InteractiveMap {
     async loadStationsData() {
         try {
             // Load GeoJSON data for both stations and platforms
+            console.log('InteractiveMap: Fetching GeoJSON data from /api/geojson/all...');
             const geoJsonResponse = await fetch('/api/geojson/all?include_instruments=true');
+            
+            if (!geoJsonResponse.ok) {
+                throw new Error(`API request failed: ${geoJsonResponse.status} ${geoJsonResponse.statusText}`);
+            }
+            
             const geoJsonData = await geoJsonResponse.json();
+            console.log('InteractiveMap: Received GeoJSON data:', geoJsonData);
             
             // Separate stations and platforms from GeoJSON features
             this.stationsData = [];
@@ -178,46 +185,70 @@ class InteractiveMap {
     }
     
     addStationsToMap() {
+        console.log(`InteractiveMap: Adding ${this.stationsData.length} stations and ${this.platformsData.length} platforms to map`);
+        
         // Clear existing markers
         this.markersGroup.clearLayers();
         
+        let stationMarkersAdded = 0;
+        let platformMarkersAdded = 0;
+        
         // Add station markers
         this.stationsData.forEach(station => {
+            console.log(`InteractiveMap: Processing station ${station.display_name} at ${station.latitude}, ${station.longitude}`);
             if (station.latitude && station.longitude) {
                 const stationMarker = this.createStationMarker(station);
                 this.markersGroup.addLayer(stationMarker);
+                stationMarkersAdded++;
                 
                 // Add platform markers for this station
                 const stationPlatforms = this.platformsData.filter(p => p.station_id === station.id);
+                console.log(`InteractiveMap: Found ${stationPlatforms.length} platforms for station ${station.display_name}`);
                 stationPlatforms.forEach(platform => {
                     if (platform.latitude && platform.longitude) {
                         const platformMarker = this.createPlatformMarker(platform, station);
                         this.markersGroup.addLayer(platformMarker);
+                        platformMarkersAdded++;
                     }
                 });
             }
         });
         
+        console.log(`InteractiveMap: Added ${stationMarkersAdded} station markers and ${platformMarkersAdded} platform markers`);
+        
         // Auto-fit bounds if we have stations
-        if (this.stationsData.length > 0) {
-            const bounds = this.markersGroup.getBounds();
-            if (bounds.isValid()) {
-                this.map.fitBounds(bounds, { padding: [20, 20] });
+        if (this.stationsData.length > 0 && stationMarkersAdded > 0) {
+            try {
+                const bounds = this.markersGroup.getBounds();
+                console.log(`InteractiveMap: Marker bounds:`, bounds);
+                if (bounds.isValid()) {
+                    console.log(`InteractiveMap: Fitting map to bounds`);
+                    this.map.fitBounds(bounds, { padding: [20, 20] });
+                } else {
+                    console.warn('InteractiveMap: Bounds are not valid');
+                }
+            } catch (error) {
+                console.warn('InteractiveMap: Could not get bounds from markers group:', error);
+                // Fallback: center on Sweden
+                this.map.setView([62.0, 15.0], 6);
             }
         }
     }
     
     createStationMarker(station) {
-        // Custom station icon
+        // Google Maps style station icon with red color
         const stationIcon = L.divIcon({
-            className: 'custom-station-marker',
+            className: 'google-maps-marker station-marker',
             html: `
-                <div class="marker-icon station-icon">
-                    <i class="fas fa-broadcast-tower"></i>
+                <div class="google-marker-content">
+                    <div class="google-marker-pin station-pin">
+                        <i class="fas fa-broadcast-tower"></i>
+                    </div>
+                    <div class="google-marker-shadow"></div>
                 </div>
             `,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+            iconSize: [32, 45],
+            iconAnchor: [16, 45]
         });
         
         const marker = L.marker([station.latitude, station.longitude], {
@@ -260,15 +291,19 @@ class InteractiveMap {
             multispectral_sensor: 'fas fa-eye'
         };
         
+        // Google Maps style platform icon with blue color
         const platformIcon = L.divIcon({
-            className: 'custom-platform-marker',
+            className: 'google-maps-marker platform-marker',
             html: `
-                <div class="marker-icon platform-icon ${platform.type}">
-                    <i class="${typeIcons[platform.type] || 'fas fa-circle'}"></i>
+                <div class="google-marker-content">
+                    <div class="google-marker-pin platform-pin">
+                        <i class="${typeIcons[platform.type] || 'fas fa-circle'}"></i>
+                    </div>
+                    <div class="google-marker-shadow"></div>
                 </div>
             `,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+            iconSize: [28, 40],
+            iconAnchor: [14, 40]
         });
         
         const marker = L.marker([platform.latitude, platform.longitude], {
@@ -350,6 +385,13 @@ class InteractiveMap {
 // Initialize map when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('stations-map')) {
-        new InteractiveMap('stations-map');
+        // Check if this is the main dashboard page (which has dashboard.js)
+        const isDashboardPage = document.querySelector('#stations-grid') !== null;
+        if (!isDashboardPage) {
+            console.log('InteractiveMap: Standalone initialization (not dashboard page)');
+            new InteractiveMap('stations-map');
+        } else {
+            console.log('InteractiveMap: Dashboard page detected, skipping standalone init');
+        }
     }
 });

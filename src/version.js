@@ -16,10 +16,10 @@ class VersionManager {
         try {
             // In Cloudflare Workers, we'll embed the version during build
             // For local development, read from file
-            this.version = process.env.SITES_VERSION || '0.4.2';
+            this.version = process.env.SITES_VERSION || '0.4.4';
         } catch (error) {
             console.warn('Could not read VERSION file, using default');
-            this.version = '0.4.2';
+            this.version = '0.4.4';
         }
     }
     

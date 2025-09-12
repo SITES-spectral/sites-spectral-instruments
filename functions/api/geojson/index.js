@@ -67,8 +67,6 @@ async function getStationsGeoJSON(db, includeInstruments = false) {
             s.website_url,
             s.contact_email,
             s.timezone,
-            s.ecosystem,
-            s.station_type,
             COALESCE(p.phenocam_count, 0) + COALESCE(m.sensor_count, 0) as instrument_count,
             COALESCE(p.active_phenocams, 0) + COALESCE(m.active_sensors, 0) as active_instruments,
             COALESCE(p.phenocam_count, 0) as phenocam_count,
@@ -146,8 +144,8 @@ async function getStationsGeoJSON(db, includeInstruments = false) {
                 website_url: station.website_url,
                 contact_email: station.contact_email,
                 timezone: station.timezone,
-                ecosystem: station.ecosystem,
-                station_type: station.station_type,
+                ecosystem: null, // Not in database schema
+                station_type: 'Research Station', // Default value
                 instrument_count: station.instrument_count,
                 active_instruments: station.active_instruments,
                 phenocam_count: station.phenocam_count,

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2025-09-12
+
+### Fixed
+- **🔐 Login Session Management** - Fixed session persistence issues
+  - Updated authentication verification to support both secrets-based and database authentication
+  - Fixed navigation.js to use correct `/api/auth/verify` endpoint instead of non-existent `/api/auth/profile`
+  - Enhanced handleVerify function to properly handle dual authentication systems
+  - Resolved immediate logout issues after successful login for all users including admin
+
+### Added
+- **📚 Documentation System** - Enhanced local documentation access
+  - Created new API endpoint `/api/docs/[doc].js` for serving local documentation files
+  - Updated documentation page links to point to local docs instead of external GitHub links
+  - Added security controls to prevent unauthorized documentation file access
+  - Improved documentation page styling with better icons and navigation
+
+- **🗺️ Google Maps Style Markers** - Enhanced interactive map visualization
+  - Redesigned map markers with Google Maps style pin design
+  - Added distinct color coding: Red for stations, Blue for platforms, Green for instruments
+  - Implemented proper shadows and 3D pin effects for better visual hierarchy
+  - Updated CSS with scalable marker system supporting different sizes by type
+
+### Improved
+- **⚡ Dynamic Data Loading** - Verified and enhanced dashboard performance
+  - Confirmed all dashboard components load data dynamically from database
+  - Validated API integration for real-time station and instrument data
+  - Enhanced error handling and loading states for better user experience
+
 ## [0.4.2] - 2025-09-11
 
 ### Fixed

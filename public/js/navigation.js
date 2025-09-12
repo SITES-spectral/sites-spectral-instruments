@@ -28,18 +28,25 @@ class NavigationManager {
 
     async checkAuthentication() {
         try {
-            // Check if user is logged in by trying to get user profile
+            // Check if user is logged in by verifying token
             const token = localStorage.getItem('auth_token');
             if (token) {
-                const response = await fetch('/api/auth/profile', {
+                const response = await fetch('/api/auth/verify', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 
                 if (response.ok) {
-                    this.currentUser = await response.json();
-                    this.isAuthenticated = true;
+                    const data = await response.json();
+                    if (data.valid) {
+                        this.currentUser = data.user;
+                        this.isAuthenticated = true;
+                    } else {
+                        // Token is invalid, remove it
+                        localStorage.removeItem('auth_token');
+                        this.isAuthenticated = false;
+                    }
                 } else {
                     // Token is invalid, remove it
                     localStorage.removeItem('auth_token');

@@ -45,6 +45,13 @@ class Dashboard {
                         return;
                     }
                     
+                    // Check if container already has a Leaflet map
+                    if (mapContainer._leaflet_id) {
+                        console.log('Dashboard: Map container already has Leaflet instance, clearing...');
+                        delete mapContainer._leaflet_id;
+                        mapContainer.innerHTML = '';
+                    }
+                    
                     console.log('Dashboard: Initializing InteractiveMap...');
                     this.interactiveMap = new InteractiveMap('stations-map');
                 } catch (error) {
