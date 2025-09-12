@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=0.4.0">
+    <link rel="stylesheet" href="/css/styles.css?v=0.5.1">
     
     <!-- Version Meta -->
-    <meta name="app-version" content="0.4.1">
+    <meta name="app-version" content="0.5.1">
     <meta name="build-date" content="2025-09-11">
     
     <style>
@@ -613,10 +613,32 @@
                         </div>
                     </div>
                     
-                    <div style="text-align: center; padding: 3rem; color: #6b7280;">
-                        <i class="fas fa-tower-broadcast" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <h3>Platform Management</h3>
-                        <p>Platform management functionality will be available soon.</p>
+                    <div class="table-container">
+                        <table id="platforms-table" class="instruments-data-table">
+                            <thead>
+                                <tr>
+                                    <th class="select-column">
+                                        <input type="checkbox" id="platforms-select-all">
+                                    </th>
+                                    <th>Canonical ID</th>
+                                    <th>Platform ID</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Coordinates</th>
+                                    <th>Instruments</th>
+                                    <th class="actions-column">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="platforms-tbody">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                                        <p>Loading platforms...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -627,8 +649,8 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=0.4.0"></script>
-    <script src="/js/api.js?v=0.4.0"></script>
-    <script src="/js/station-dashboard.js?v=0.4.0"></script>
+    <script src="/js/utils.js?v=0.5.1"></script>
+    <script src="/js/api.js?v=0.5.1"></script>
+    <script src="/js/station-dashboard.js?v=0.5.1"></script>
 </body>
 </html>

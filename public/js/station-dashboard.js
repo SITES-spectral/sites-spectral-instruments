@@ -5,6 +5,7 @@ class StationDashboard {
         this.station = null;
         this.phenocams = [];
         this.sensors = [];
+        this.platforms = [];
         this.currentTab = 'phenocams';
         this.selectedItems = new Set();
         
@@ -89,13 +90,15 @@ class StationDashboard {
     
     async loadInstrumentData() {
         try {
-            const [phenocamsData, sensorsData] = await Promise.all([
+            const [phenocamsData, sensorsData, platformsData] = await Promise.all([
                 this.loadPhenocams(),
-                this.loadSensors()
+                this.loadSensors(),
+                this.loadPlatforms()
             ]);
             
             this.phenocams = phenocamsData;
             this.sensors = sensorsData;
+            this.platforms = platformsData;
             
         } catch (error) {
             console.error('Failed to load instrument data:', error);
@@ -143,6 +146,26 @@ class StationDashboard {
         }
     }
     
+    async loadPlatforms() {
+        try {
+            const response = await this.authenticatedFetch('/api/platforms');
+            const data = await response.json();
+            
+            // Filter by user's station if not admin
+            let platforms = data.platforms || [];
+            if (this.user.role !== 'admin') {
+                platforms = platforms.filter(p => p.station_id === this.user.station_id);
+            } else if (this.station) {
+                platforms = platforms.filter(p => p.station_id === this.station.id);
+            }
+            
+            return platforms;
+        } catch (error) {
+            console.error('Failed to load platforms:', error);
+            return [];
+        }
+    }
+    
     async authenticatedFetch(url, options = {}) {
         const token = localStorage.getItem('sites_spectral_token');
         const headers = {
@@ -163,11 +186,18 @@ class StationDashboard {
         // Update statistics
         const totalInstruments = this.phenocams.length + this.sensors.length;
         const activeInstruments = [...this.phenocams, ...this.sensors].filter(i => i.status === 'Active').length;
+        const activePlatforms = this.platforms.filter(p => p.status === 'Active').length;
         
         document.getElementById('total-instruments').textContent = totalInstruments;
         document.getElementById('active-instruments').textContent = activeInstruments;
         document.getElementById('phenocam-count').textContent = this.phenocams.length;
         document.getElementById('sensor-count').textContent = this.sensors.length;
+        
+        // Update platform count if element exists
+        const platformCountEl = document.getElementById('platform-count');
+        if (platformCountEl) {
+            platformCountEl.textContent = this.platforms.length;
+        }
         
         // Render current tab
         this.renderCurrentTab();
@@ -229,7 +259,7 @@ class StationDashboard {
                 this.renderSensorsTable();
                 break;
             case 'platforms':
-                // Platform management coming soon
+                this.renderPlatformsTable();
                 break;
         }
     }
@@ -1055,6 +1085,290 @@ class StationDashboard {
             Utils.showToast(error.message || 'Failed to delete instrument', 'error');
         }
     }
+    
+    renderPlatformsTable(filteredData = null) {
+        const data = filteredData || this.platforms;
+        const tbody = document.getElementById('platforms-tbody');
+        
+        if (!tbody) {
+            console.error('Platforms table body not found');
+            return;
+        }
+        
+        if (data.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <i class="fas fa-tower-broadcast" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No platforms found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = data.map(platform => `
+            <tr data-id="${platform.id}" data-type="platform">
+                <td><input type="checkbox" class="row-select" value="${platform.id}"></td>
+                <td class="editable-cell" data-field="canonical_id">${platform.canonical_id || '-'}</td>
+                <td class="editable-cell" data-field="platform_id">${platform.platform_id || '-'}</td>
+                <td class="editable-cell" data-field="name">${platform.name || '-'}</td>
+                <td class="editable-cell" data-field="type">
+                    <span class="platform-type-badge ${platform.type?.toLowerCase() || 'unknown'}">
+                        ${platform.type || 'Unknown'}
+                    </span>
+                </td>
+                <td class="editable-cell" data-field="status">
+                    <span class="status-badge ${platform.status?.toLowerCase() || 'unknown'}">
+                        ${platform.status || 'Unknown'}
+                    </span>
+                </td>
+                <td class="coordinates">
+                    ${platform.latitude && platform.longitude 
+                        ? `${platform.latitude.toFixed(4)}, ${platform.longitude.toFixed(4)}`
+                        : '-'
+                    }
+                </td>
+                <td class="instrument-count">
+                    <span class="instrument-badge">
+                        ${platform.total_instruments || 0} instruments
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon" onclick="editPlatform('${platform.id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon" onclick="viewPlatformDetails('${platform.id}')" title="View Details">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="btn-icon text-danger" onclick="deletePlatform('${platform.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        this.setupInlineEditing('platforms');
+        this.setupRowSelection('platforms');
+    }
+    
+    async showEditPlatformModal(id) {
+        const platform = this.platforms.find(p => p.id == id);
+        if (!platform) {
+            Utils.showToast('Platform not found', 'error');
+            return;
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-tower-broadcast"></i> Edit Platform</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-platform-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform_id">Platform ID *</label>
+                                <input type="text" id="platform_id" name="platform_id" value="${platform.platform_id || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="canonical_id">Canonical ID *</label>
+                                <input type="text" id="canonical_id" name="canonical_id" value="${platform.canonical_id || ''}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Name *</label>
+                                <input type="text" id="name" name="name" value="${platform.name || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="type">Type *</label>
+                                <select id="type" name="type" required>
+                                    <option value="tower" ${platform.type === 'tower' ? 'selected' : ''}>Tower</option>
+                                    <option value="mast" ${platform.type === 'mast' ? 'selected' : ''}>Mast</option>
+                                    <option value="building" ${platform.type === 'building' ? 'selected' : ''}>Building</option>
+                                    <option value="ground" ${platform.type === 'ground' ? 'selected' : ''}>Ground</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="latitude">Latitude</label>
+                                <input type="number" id="latitude" name="latitude" step="any" value="${platform.latitude || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="longitude">Longitude</label>
+                                <input type="number" id="longitude" name="longitude" step="any" value="${platform.longitude || ''}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="elevation_m">Elevation (m)</label>
+                                <input type="number" id="elevation_m" name="elevation_m" step="any" value="${platform.elevation_m || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="platform_height_m">Platform Height (m)</label>
+                                <input type="number" id="platform_height_m" name="platform_height_m" step="any" value="${platform.platform_height_m || ''}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select id="status" name="status">
+                                    <option value="Active" ${platform.status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${platform.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Maintenance" ${platform.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                    <option value="Removed" ${platform.status === 'Removed' ? 'selected' : ''}>Removed</option>
+                                    <option value="Planned" ${platform.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="max_instruments">Max Instruments</label>
+                                <input type="number" id="max_instruments" name="max_instruments" value="${platform.max_instruments || '10'}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" rows="3">${platform.description || ''}</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="window.dashboard.handleEditPlatform('${id}')">Save Changes</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    async handleEditPlatform(id) {
+        try {
+            const form = document.getElementById('edit-platform-form');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert numeric fields
+            if (data.latitude) data.latitude = parseFloat(data.latitude);
+            if (data.longitude) data.longitude = parseFloat(data.longitude);
+            if (data.elevation_m) data.elevation_m = parseFloat(data.elevation_m);
+            if (data.platform_height_m) data.platform_height_m = parseFloat(data.platform_height_m);
+            if (data.max_instruments) data.max_instruments = parseInt(data.max_instruments);
+            
+            // Remove empty values
+            Object.keys(data).forEach(key => {
+                if (data[key] === '') {
+                    delete data[key];
+                }
+            });
+            
+            const response = await this.authenticatedFetch(`/api/platforms/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update platform');
+            }
+            
+            const updatedPlatform = await response.json();
+            
+            // Update local data
+            const index = this.platforms.findIndex(p => p.id == id);
+            if (index !== -1) {
+                this.platforms[index] = { ...this.platforms[index], ...updatedPlatform };
+            }
+            
+            // Refresh display
+            this.renderCurrentTab();
+            this.updateUI();
+            
+            // Close modal
+            document.querySelector('.modal-overlay').remove();
+            
+            Utils.showToast('Platform updated successfully', 'success');
+            
+        } catch (error) {
+            console.error('Failed to update platform:', error);
+            Utils.showToast(error.message || 'Failed to update platform', 'error');
+        }
+    }
+    
+    async confirmDeletePlatform(id) {
+        const platform = this.platforms.find(p => p.id == id);
+        if (!platform) {
+            Utils.showToast('Platform not found', 'error');
+            return;
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content delete-confirmation">
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Delete Platform</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this platform?</p>
+                    <div class="delete-details">
+                        <p><strong>Canonical ID:</strong> ${platform.canonical_id}</p>
+                        <p><strong>Name:</strong> ${platform.name}</p>
+                        <p><strong>Type:</strong> ${platform.type}</p>
+                        <p><strong>Instruments:</strong> ${platform.total_instruments || 0}</p>
+                    </div>
+                    ${platform.total_instruments > 0 ? '<p style="color: #dc2626; font-weight: 600;">⚠️ This platform has attached instruments. They must be removed first.</p>' : ''}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="window.dashboard.handleDeletePlatform('${id}')" ${platform.total_instruments > 0 ? 'disabled' : ''}>Delete Platform</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    async handleDeletePlatform(id) {
+        try {
+            const response = await this.authenticatedFetch(`/api/platforms/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete platform');
+            }
+            
+            // Remove from local data
+            this.platforms = this.platforms.filter(p => p.id != id);
+            
+            // Refresh display
+            this.renderCurrentTab();
+            this.updateUI();
+            
+            // Close modal
+            document.querySelector('.modal-overlay').remove();
+            
+            Utils.showToast('Platform deleted successfully', 'success');
+            
+        } catch (error) {
+            console.error('Failed to delete platform:', error);
+            Utils.showToast(error.message || 'Failed to delete platform', 'error');
+        }
+    }
 }
 
 // Global functions for HTML onclick handlers
@@ -1076,6 +1390,29 @@ window.deleteInstrument = (id, type) => {
     if (window.dashboard) {
         window.dashboard.confirmDeleteInstrument(id, type);
     }
+};
+
+// Platform management global functions
+window.editPlatform = (id) => {
+    if (window.dashboard) {
+        window.dashboard.showEditPlatformModal(id);
+    }
+};
+
+window.deletePlatform = (id) => {
+    if (window.dashboard) {
+        window.dashboard.confirmDeletePlatform(id);
+    }
+};
+
+window.viewPlatformDetails = (id) => {
+    // Platform details view - placeholder for future enhancement
+    Utils.showToast('Platform details view coming soon', 'info');
+};
+
+window.addPlatform = () => {
+    // Add platform functionality - placeholder for future enhancement
+    Utils.showToast('Add platform functionality coming soon', 'info');
 };
 
 // Initialize dashboard when DOM is ready
@@ -1266,6 +1603,66 @@ const additionalStyles = `
     
     .form-group input:focus,
     .form-group select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .platform-type-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .platform-type-badge.tower {
+        background: #e0f2fe;
+        color: #0277bd;
+    }
+    
+    .platform-type-badge.mast {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .platform-type-badge.building {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .platform-type-badge.ground {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .platform-type-badge.unknown {
+        background: #f5f5f5;
+        color: #757575;
+    }
+    
+    .instrument-badge {
+        background: #f0f9ff;
+        color: #0369a1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 80px;
+        transition: border-color 0.2s;
+    }
+    
+    .form-group textarea:focus {
         outline: none;
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);

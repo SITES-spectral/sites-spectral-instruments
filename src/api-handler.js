@@ -890,286 +890,26 @@ async function handleUsers(method, id, request, env) {
   }
 }
 
-// Platforms API handler
+// Platforms API handler - Routes to CRUD endpoints
 async function handlePlatforms(method, id, request, env) {
-  try {
-    // Get user for access control
-    const user = await getUserFromRequest(request, env);
-    
-    switch (method) {
-      case 'GET':
-        // If there's an ID, get single platform, otherwise get all platforms
-        const platformId = id;
-        if (platformId) {
-          const query = `
-            SELECT 
-              p.*,
-              s.display_name as station_name,
-              s.acronym as station_acronym
-            FROM platforms p
-            LEFT JOIN stations s ON p.station_id = s.id
-            WHERE p.id = ?
-          `;
-          const result = await env.DB.prepare(query).bind(platformId).first();
-          
-          if (!result) {
-            return new Response('Platform not found', { status: 404 });
-          }
-          
-          // Check access for single platform
-          if (user && user.role === 'station' && result.station_id !== user.station_id) {
-            return new Response(JSON.stringify({ error: 'Access denied' }), {
-              status: 403,
-              headers: { 'Content-Type': 'application/json' }
-            });
-          }
-          
-          return new Response(JSON.stringify(result), {
-            headers: { 'Content-Type': 'application/json' }
-          });
-        } else {
-          // Get all platforms with optional station filtering
-          let query = `
-            SELECT 
-              p.*,
-              s.display_name as station_name,
-              s.acronym as station_acronym
-            FROM platforms p
-            LEFT JOIN stations s ON p.station_id = s.id
-          `;
-          
-          const queryParams = [];
-          const url = new URL(request.url);
-          const stationIdFilter = url.searchParams.get('station_id');
-          
-          // Apply station filtering for station users or query parameter
-          if (user && user.role === 'station') {
-            query += ' WHERE p.station_id = ?';
-            queryParams.push(user.station_id);
-          } else if (stationIdFilter) {
-            query += ' WHERE p.station_id = ?';
-            queryParams.push(stationIdFilter);
-          }
-          
-          query += ' ORDER BY p.station_id, p.platform_id';
-          
-          const result = queryParams.length > 0 
-            ? await env.DB.prepare(query).bind(...queryParams).all()
-            : await env.DB.prepare(query).all();
-          
-          return new Response(JSON.stringify({
-            platforms: result.results || []
-          }), {
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-      case 'POST':
-        // Require authentication for creating platforms
-        if (!user) {
-          return new Response(JSON.stringify({ error: 'Authentication required' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        const platformData = await request.json();
-        
-        // Check if user has permission to create platform for this station
-        if (!hasPermission(user, 'write', 'platform', platformData.station_id)) {
-          return new Response(JSON.stringify({ error: 'Permission denied' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        // Required fields validation
-        const requiredFields = ['station_id', 'platform_id', 'canonical_id', 'name', 'type'];
-        const missingFields = requiredFields.filter(field => !platformData[field]);
-        if (missingFields.length > 0) {
-          return new Response(JSON.stringify({
-            error: `Missing required fields: ${missingFields.join(', ')}`
-          }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        
-        // Validate platform type
-        const validTypes = ['tower', 'mast', 'building', 'ground'];
-        if (!validTypes.includes(platformData.type)) {
-          return new Response(JSON.stringify({
-            error: 'Invalid platform type. Must be one of: tower, mast, building, ground'
-          }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        
-        const insertQuery = `
-          INSERT INTO platforms (
-            station_id, platform_id, canonical_id, name, type,
-            latitude, longitude, elevation_m, platform_height_m,
-            structure_material, installation_date, status, notes,
-            thematic_program, priority, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-        `;
-        
-        const insertResult = await env.DB.prepare(insertQuery).bind(
-          platformData.station_id,
-          platformData.platform_id,
-          platformData.canonical_id,
-          platformData.name,
-          platformData.type,
-          platformData.latitude || null,
-          platformData.longitude || null,
-          platformData.elevation_m || null,
-          platformData.platform_height_m || 0,
-          platformData.structure_material || null,
-          platformData.installation_date || null,
-          platformData.status || 'Active',
-          platformData.notes || null,
-          platformData.thematic_program || 'SITES_Spectral',
-          platformData.priority || 1
-        ).run();
-        
-        return new Response(JSON.stringify({
-          success: true,
-          id: insertResult.meta.last_row_id
-        }), {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-      case 'PATCH':
-        // Require authentication for platform updates
-        if (!user) {
-          return new Response(JSON.stringify({ error: 'Authentication required' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        const updatePlatformId = id;
-        if (!updatePlatformId) {
-          return new Response('Platform ID required', { status: 400 });
-        }
-        
-        // Check if platform exists and get its station_id for permission check
-        const existingPlatform = await env.DB.prepare(
-          'SELECT station_id FROM platforms WHERE id = ?'
-        ).bind(updatePlatformId).first();
-        
-        if (!existingPlatform) {
-          return new Response('Platform not found', { status: 404 });
-        }
-        
-        // Check if user has permission to update this platform
-        if (!hasPermission(user, 'write', 'platform', existingPlatform.station_id)) {
-          return new Response(JSON.stringify({ error: 'Permission denied' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        const updateData = await request.json();
-        const updateFields = [];
-        const updateValues = [];
-        
-        // Allowed fields for update
-        const allowedUpdateFields = [
-          'platform_id', 'canonical_id', 'name', 'type', 'latitude', 'longitude', 
-          'elevation_m', 'platform_height_m', 'structure_material', 'installation_date', 
-          'status', 'notes', 'thematic_program', 'priority'
-        ];
-        
-        for (const [field, value] of Object.entries(updateData)) {
-          if (allowedUpdateFields.includes(field)) {
-            updateFields.push(`${field} = ?`);
-            updateValues.push(value);
-          }
-        }
-        
-        if (updateFields.length === 0) {
-          return new Response('No valid fields to update', { status: 400 });
-        }
-        
-        updateValues.push(updatePlatformId);
-        
-        const updateQuery = `
-          UPDATE platforms 
-          SET ${updateFields.join(', ')}, updated_at = datetime('now') 
-          WHERE id = ?
-        `;
-        
-        await env.DB.prepare(updateQuery).bind(...updateValues).run();
-        
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-      case 'DELETE':
-        // Require authentication for platform deletion
-        if (!user) {
-          return new Response(JSON.stringify({ error: 'Authentication required' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        const deletePlatformId = id;
-        if (!deletePlatformId) {
-          return new Response('Platform ID required', { status: 400 });
-        }
-        
-        // Check if platform exists and get its station_id for permission check
-        const platformToDelete = await env.DB.prepare(
-          'SELECT station_id FROM platforms WHERE id = ?'
-        ).bind(deletePlatformId).first();
-        
-        if (!platformToDelete) {
-          return new Response('Platform not found', { status: 404 });
-        }
-        
-        // Check if user has permission to delete this platform
-        if (!hasPermission(user, 'delete', 'platform', platformToDelete.station_id)) {
-          return new Response(JSON.stringify({ error: 'Permission denied' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        // Check if platform has associated instruments
-        const instrumentCheck = await env.DB.prepare(`
-          SELECT COUNT(*) as count FROM (
-            SELECT platform_id FROM phenocams WHERE platform_id = ?
-            UNION ALL
-            SELECT platform_id FROM mspectral_sensors WHERE platform_id = ?
-          )
-        `).bind(deletePlatformId, deletePlatformId).first();
-        
-        if (instrumentCheck.count > 0) {
-          return new Response(JSON.stringify({
-            error: 'Cannot delete platform with associated instruments. Remove instruments first.'
-          }), { 
-            status: 400, 
-            headers: { 'Content-Type': 'application/json' } 
-          });
-        }
-        
-        await env.DB.prepare('DELETE FROM platforms WHERE id = ?')
-          .bind(deletePlatformId).run();
-        
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-      default:
-        return new Response('Method not allowed', { status: 405 });
-    }
-  } catch (error) {
-    console.error('Platforms API error:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Platform operation failed',
-      message: error.message 
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  const { onRequestGet, onRequestPost, onRequestPut, onRequestPatch, onRequestDelete } = await import('../functions/api/platforms/index.js');
+  
+  const params = { id };
+  const mockRequest = { request, env, params };
+  
+  switch (method) {
+    case 'GET':
+      return await onRequestGet(mockRequest);
+    case 'POST':
+      return await onRequestPost(mockRequest);
+    case 'PUT':
+      return await onRequestPut(mockRequest);
+    case 'PATCH':
+      return await onRequestPatch(mockRequest);
+    case 'DELETE':
+      return await onRequestDelete(mockRequest);
+    default:
+      return new Response('Method not allowed', { status: 405 });
   }
 }
 
@@ -1200,4 +940,16 @@ async function handleGeoJSON(method, pathSegments, request, env) {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+}
+
+function handleHealthCheck(env) {
+  return new Response(JSON.stringify({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    service: 'SITES Spectral Stations & Instruments',
+    version: env?.APP_VERSION || '0.1.0-dev',
+    environment: env?.ENVIRONMENT || 'development'
+  }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
 }

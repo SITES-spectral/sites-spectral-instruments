@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2025-09-12
+
+### Added
+- **🏗️ Complete Platform Management System** - Full CRUD functionality for platforms
+  - Implemented comprehensive platforms API with all HTTP methods (GET, POST, PUT, PATCH, DELETE)
+  - Added platform-specific database operations using actual platforms table
+  - Created complete platform management UI with table view and modal forms
+  - Integrated platform type badges (tower, mast, building, ground) with color coding
+  - Added instrument count display showing attached phenocams and sensors
+  
+- **🎨 Enhanced Platform UI Components** - Professional platform management interface
+  - Created detailed platform edit modal with comprehensive form fields
+  - Implemented platform delete confirmation with dependency checking
+  - Added platform type selection with validation
+  - Created coordinate input handling for geographic positioning
+  - Added description and metadata fields for comprehensive platform documentation
+
+### Enhanced
+- **🔗 Improved Data Integration** - Platform-instrument relationships
+  - Platforms now display total instrument count with real-time updates
+  - Enhanced station dashboard to load and display platform data
+  - Integrated platform management with existing authentication system
+  - Added platform-specific permission checks and validation
+
+### Fixed
+- **🐛 Platform API Implementation** - Replaced virtual platform abstraction
+  - Fixed platforms endpoint to use actual platforms database table instead of virtual data
+  - Corrected platform CRUD operations to work with proper database schema
+  - Enhanced platform queries to include station information and instrument counts
+  - Resolved platform management functionality that was previously non-functional
+
 ## [0.5.0] - 2025-09-12
 
 ### Added
