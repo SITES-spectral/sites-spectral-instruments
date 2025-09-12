@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.6] - 2025-09-12
+
+### Fixed
+- **📚 Documentation Links Corrected** - Fixed all documentation page links to point to correct GitHub repository
+  - **Station Management Guide**: Now correctly points to GitHub repository documentation
+  - **Authentication Setup**: Fixed broken `/api/docs/` links that were returning 404 errors
+  - **Platform Status**: Updated to proper GitHub raw documentation URLs  
+  - **System Status Summary**: Corrected documentation endpoint links
+  - **Resource Versions**: Updated CSS and JavaScript version references to v0.5.6
+
+### Technical
+- **🔗 GitHub Integration**: All documentation links now properly reference `github.com/SITES-spectral/sites-spectral-instruments/blob/main/docs/`
+- **📄 Link Validation**: Verified all documentation files exist and are accessible
+- **🌐 External Access**: Documentation now opens in new tabs with proper `target="_blank"` attributes
+
 ## [0.5.5] - 2025-09-12
 
 ### Enhanced
