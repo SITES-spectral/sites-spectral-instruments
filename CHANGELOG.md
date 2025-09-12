@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5] - 2025-09-12
+
+### Enhanced
+- **🗺️ Improved Station Map Display** - Station-specific interactive maps with all instruments and platforms
+  - **Individual Station Focus**: Maps now show only the current station's platforms and instruments
+  - **Smart Marker Integration**: Utilizes existing GeoJSON API and filters data for current station
+  - **Visual Legend**: Added map legend showing different marker types (Station, Platform, Phenocam, Sensor)
+  - **Color-Coded Markers**: Different colors and icons for each element type
+  - **Auto-Fit Bounds**: Map automatically adjusts zoom to fit all station elements
+  - **Fallback Support**: Graceful fallback to station marker only if data loading fails
+
+### Technical
+- **🔄 Code Reuse**: Leveraged existing `/api/geojson/all` endpoint instead of creating redundant API calls
+- **🎯 Efficient Filtering**: Client-side filtering of GeoJSON data for station-specific display
+- **📍 Responsive Markers**: Different sized markers based on element importance (station > platform > instruments)
+
 ## [0.5.4] - 2025-09-12
 
 ### Fixed

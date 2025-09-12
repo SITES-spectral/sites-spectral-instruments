@@ -65,11 +65,84 @@
             font-size: 1.1rem;
         }
         
+        .map-container {
+            position: relative;
+        }
+
         .station-map {
             width: 300px;
             height: 200px;
             border-radius: 8px;
             border: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .map-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            min-width: 80px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .legend-marker {
+            flex-shrink: 0;
+        }
+
+        .legend-marker .marker-icon {
+            width: 16px;
+            height: 16px;
+            font-size: 8px;
+        }
+
+        /* Map marker styles */
+        .marker-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+
+        .station-marker .marker-icon {
+            background: #667eea;
+            font-size: 14px;
+        }
+
+        .platform-marker .marker-icon {
+            background: #48bb78;
+            font-size: 12px;
+        }
+
+        .phenocam-marker .marker-icon {
+            background: #4299e1;
+            font-size: 10px;
+        }
+
+        .fixed_sensor-marker .marker-icon,
+        .sensor-marker .marker-icon {
+            background: #9f7aea;
+            font-size: 10px;
         }
         
         .content-grid {
@@ -311,7 +384,36 @@
                             </div>
                         </div>
                     </div>
-                    <div id="station-map" class="station-map"></div>
+                    <div class="map-container">
+                        <div id="station-map" class="station-map"></div>
+                        <div class="map-legend">
+                            <div class="legend-title">Map Legend</div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon station-pin"><i class="fas fa-broadcast-tower"></i></div>
+                                </div>
+                                <span>Station</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon platform-pin"><i class="fas fa-tower-broadcast"></i></div>
+                                </div>
+                                <span>Platform</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon phenocam-marker"><i class="fas fa-camera"></i></div>
+                                </div>
+                                <span>Phenocam</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon fixed_sensor-marker"><i class="fas fa-microscope"></i></div>
+                                </div>
+                                <span>Sensor</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -432,7 +534,7 @@
 
                 // Initialize station map
                 if (station.latitude && station.longitude) {
-                    initializeStationMap(station);
+                    await initializeStationMap(station);
                 }
 
                 // Load platforms and instruments in parallel
@@ -455,31 +557,108 @@
         }
 
         // Initialize station map
-        function initializeStationMap(station) {
+        async function initializeStationMap(station) {
             const mapContainer = document.getElementById('station-map');
             
             stationMap = L.map(mapContainer, {
                 zoomControl: false,
                 attributionControl: false
-            }).setView([station.latitude, station.longitude], 10);
+            }).setView([station.latitude, station.longitude], 12);
 
             // Add tile layer
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles © Esri'
             }).addTo(stationMap);
 
-            // Add station marker
-            const marker = L.marker([station.latitude, station.longitude], {
-                icon: L.divIcon({
-                    className: 'station-marker',
-                    html: '<div class="marker-icon"><i class="fas fa-home"></i></div>',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                })
-            });
-            
-            marker.addTo(stationMap);
-            marker.bindPopup(`<strong>${station.name}</strong><br>${station.acronym || ''}`);
+            try {
+                // Load GeoJSON data for all stations and platforms with instruments
+                const geoJsonResponse = await fetch('/api/geojson/all?include_instruments=true');
+                if (!geoJsonResponse.ok) throw new Error('Failed to fetch GeoJSON data');
+                
+                const geoJsonData = await geoJsonResponse.json();
+                
+                // Filter features for this station only
+                const stationFeatures = geoJsonData.features.filter(feature => {
+                    return feature.properties.station_id === station.id;
+                });
+
+                // Add markers for each feature
+                stationFeatures.forEach(feature => {
+                    const [lng, lat] = feature.geometry.coordinates;
+                    const props = feature.properties;
+                    
+                    let markerIcon, popupContent, markerClass;
+                    
+                    // Determine marker type and styling
+                    switch (props.type) {
+                        case 'station':
+                            markerIcon = '<i class="fas fa-broadcast-tower"></i>';
+                            markerClass = 'station-marker';
+                            popupContent = `<strong>${props.name}</strong><br>Station ${props.acronym || ''}`;
+                            break;
+                        case 'platform':
+                            markerIcon = '<i class="fas fa-tower-broadcast"></i>';
+                            markerClass = 'platform-marker';
+                            popupContent = `<strong>${props.name}</strong><br>Platform ${props.platform_id}<br><small>Type: ${props.platform_type || 'Unknown'}</small>`;
+                            break;
+                        case 'phenocam':
+                            markerIcon = '<i class="fas fa-camera"></i>';
+                            markerClass = 'phenocam-marker';
+                            popupContent = `<strong>${props.instrument_id}</strong><br>Phenocam<br><small>Status: ${props.status || 'Unknown'}</small>`;
+                            break;
+                        case 'sensor':
+                        case 'multispectral_sensor':
+                        case 'fixed_sensor':
+                            markerIcon = '<i class="fas fa-microscope"></i>';
+                            markerClass = 'fixed_sensor-marker';
+                            popupContent = `<strong>${props.instrument_id}</strong><br>Sensor<br><small>Status: ${props.status || 'Unknown'}</small>`;
+                            break;
+                        default:
+                            markerIcon = '<i class="fas fa-circle"></i>';
+                            markerClass = 'default-marker';
+                            popupContent = `<strong>${props.name || props.instrument_id}</strong><br>${props.type}`;
+                    }
+                    
+                    // Create marker with appropriate icon
+                    const marker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: markerClass,
+                            html: `<div class="marker-icon ${markerClass}">${markerIcon}</div>`,
+                            iconSize: props.type === 'station' ? [35, 35] : 
+                                     props.type === 'platform' ? [28, 28] : [22, 22],
+                            iconAnchor: props.type === 'station' ? [17.5, 17.5] : 
+                                       props.type === 'platform' ? [14, 14] : [11, 11]
+                        })
+                    });
+                    
+                    marker.addTo(stationMap);
+                    marker.bindPopup(popupContent);
+                });
+
+                // Fit map bounds to include all markers if there are multiple points
+                if (stationFeatures.length > 1) {
+                    const group = new L.featureGroup(Object.values(stationMap._layers).filter(layer => layer instanceof L.Marker));
+                    if (group.getLayers().length > 0) {
+                        stationMap.fitBounds(group.getBounds().pad(0.1));
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error loading map data:', error);
+                
+                // Fallback: show just the station marker
+                const stationMarker = L.marker([station.latitude, station.longitude], {
+                    icon: L.divIcon({
+                        className: 'station-marker',
+                        html: '<div class="marker-icon station-marker"><i class="fas fa-broadcast-tower"></i></div>',
+                        iconSize: [35, 35],
+                        iconAnchor: [17.5, 17.5]
+                    })
+                });
+                
+                stationMarker.addTo(stationMap);
+                stationMarker.bindPopup(`<strong>${station.display_name || station.name}</strong><br>Station ${station.acronym || ''}`);
+            }
         }
 
         // Load platforms
