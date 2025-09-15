@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "0.5.7",
+  "version": "0.6.1",
   "description": "SITES Spectral Stations & Instruments Management System - Web application for managing Swedish research station instruments including phenocams and multispectral sensors",
   "main": "src/worker.js",
   "scripts": {

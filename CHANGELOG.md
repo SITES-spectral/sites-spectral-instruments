@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2025-09-15
+
+### Fixed
+- **🔒 Public Page Security** - Removed CRUD buttons from public station pages
+  - **Station Individual Pages**: Removed Add Platform/Instrument buttons from public view
+  - **Item Actions**: Removed Edit/Delete action buttons from platform and instrument items on public pages
+  - **Clean Public Interface**: Public station pages now show read-only information without management controls
+  - **Security Enhancement**: Prevents unauthorized access attempts to management functions
+
+### Technical
+- **📝 Code Cleanup**: Removed unnecessary CRUD JavaScript functions from public station pages
+- **🎨 UI Consistency**: Public pages now have clean, read-only interface without management controls
+- **🔧 Version Bump**: Updated to v0.6.1 with proper cache busting for CSS/JS assets
+
+### User Experience
+- **👥 Clear Separation**: Management functions only available in authenticated station/admin dashboards
+- **🔍 Read-Only Public View**: Public users can view station information without being tempted by non-functional buttons
+- **🎯 Role-Based Access**: CRUD operations properly restricted to authenticated users only
+
 ## [0.6.0] - 2025-09-12
 
 ### Added
