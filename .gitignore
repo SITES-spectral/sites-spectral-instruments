@@ -11,6 +11,20 @@ secrets/
 *.pem
 *.p12
 
+# Credential files - NEVER COMMIT THESE
+*credentials*.json
+*credential*.json
+*secrets*.json
+*secret*.json
+*password*.json
+*auth*.json
+station-credentials*.json
+user-credentials*.json
+api-credentials*.json
+*-SECURE.json
+*-SECRET.json
+*-CREDENTIALS.json
+
 # Dependencies
 node_modules/
 npm-debug.log*
