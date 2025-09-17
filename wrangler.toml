@@ -30,11 +30,5 @@ APP_NAME = "SITES Spectral Stations & Instruments"
 APP_VERSION = "2.0.0"
 USE_CLOUDFLARE_SECRETS = "true"
 
-# Custom domain routes  
-[[routes]]
-pattern = "sites.jobelab.com"
-zone_name = "jobelab.com"
-
-[[routes]]
-pattern = "sites.jobelab.com/*"
-zone_name = "jobelab.com"
+# Workers.dev subdomain deployment
+# Accessible at: sites-spectral-instruments.jose-e5f.workers.dev
