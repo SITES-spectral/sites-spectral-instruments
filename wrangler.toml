@@ -21,7 +21,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "spectral_stations_db"
-database_id = "3577571b-7a20-44a9-b089-37456877729d"
+database_id = "8eb8e1e6-ea4b-4feb-a303-6bce22638acf"
 
 [vars]
 ENVIRONMENT = "production"
