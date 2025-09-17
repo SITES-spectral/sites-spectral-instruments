@@ -24,39 +24,50 @@ class BuildManager {
         this.htmlFiles = [
             'public/index.html',
             'public/login.html',
-            'public/station/dashboard.html'
+            'public/station.html',
+            'public/export.html',
+            'public/station/dashboard.html',
+            'public/admin/dashboard.html',
+            'public/docs/index.html'
         ];
         
         this.jsFiles = [
             'utils.js',
-            'api.js', 
+            'api.js',
             'components.js',
             'interactive-map.js',
             'dashboard.js',
-            'station-dashboard.js'
+            'station-dashboard.js',
+            'navigation.js',
+            'export.js'
         ];
     }
     
     readVersion() {
-        const versionPath = path.join(this.rootDir, 'VERSION');
+        const packagePath = path.join(this.rootDir, 'package.json');
         try {
-            this.version = fs.readFileSync(versionPath, 'utf8').trim();
+            const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            this.version = packageData.version;
             console.log(`Current version: ${this.version}`);
         } catch (error) {
-            console.error('Could not read VERSION file:', error.message);
+            console.error('Could not read package.json:', error.message);
             process.exit(1);
         }
     }
     
     bumpVersion() {
         if (!this.shouldBumpVersion) return;
-        
+
         const parts = this.version.split('.');
         const patch = parseInt(parts[2]) + 1;
         this.version = `${parts[0]}.${parts[1]}.${patch}`;
-        
-        const versionPath = path.join(this.rootDir, 'VERSION');
-        fs.writeFileSync(versionPath, this.version);
+
+        // Update package.json
+        const packagePath = path.join(this.rootDir, 'package.json');
+        const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+        packageData.version = this.version;
+        fs.writeFileSync(packagePath, JSON.stringify(packageData, null, 2) + '\n');
+
         console.log(`Version bumped to: ${this.version}`);
     }
     
