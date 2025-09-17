@@ -9,7 +9,7 @@ preview_urls = true
 # Enable auto-deployment from GitHub when commits are pushed to main branch
 
 # Project metadata
-# Version: 0.7.0
+# Version: 2.0.0
 # Release: 2025-09-17
 # Database Schema: v11 (11 migrations) - Complete normalized schema rewrite
 
@@ -26,14 +26,14 @@ database_id = "3577571b-7a20-44a9-b089-37456877729d"
 [vars]
 ENVIRONMENT = "production"
 APP_NAME = "SITES Spectral Stations & Instruments"
-APP_VERSION = "0.7.0"
+APP_VERSION = "2.0.0"
 USE_CLOUDFLARE_SECRETS = "true"
 
 # Custom domain routes  
 [[routes]]
-pattern = "sites.jobelab.com"
-zone_name = "jobelab.com"
+pattern = "sites.jobelund.com"
+zone_name = "jobelund.com"
 
 [[routes]]
-pattern = "sites.jobelab.com/*"
-zone_name = "jobelab.com"
+pattern = "sites.jobelund.com/*"
+zone_name = "jobelund.com"
