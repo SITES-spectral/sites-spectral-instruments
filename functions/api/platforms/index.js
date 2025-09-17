@@ -10,17 +10,16 @@ export async function onRequestGet({ request, env, params }) {
     if (id) {
       // Get single platform
       const platform = await env.DB.prepare(`
-        SELECT 
+        SELECT
           p.*,
           s.display_name as station_name,
           s.acronym as station_acronym,
-          COUNT(ph.id) as phenocam_count,
-          COUNT(ms.id) as sensor_count,
-          COUNT(ph.id) + COUNT(ms.id) as total_instruments
+          COUNT(CASE WHEN i.instrument_type = 'phenocam' THEN 1 END) as phenocam_count,
+          COUNT(CASE WHEN i.instrument_type != 'phenocam' THEN 1 END) as sensor_count,
+          COUNT(i.id) as total_instruments
         FROM platforms p
         LEFT JOIN stations s ON p.station_id = s.id
-        LEFT JOIN phenocams ph ON p.id = ph.platform_id
-        LEFT JOIN mspectral_sensors ms ON p.id = ms.platform_id
+        LEFT JOIN instruments i ON p.id = i.platform_id
         WHERE p.id = ?
         GROUP BY p.id
       `).bind(id).first();
@@ -38,17 +37,16 @@ export async function onRequestGet({ request, env, params }) {
     } else {
       // Get all platforms with filtering
       let query = `
-        SELECT 
+        SELECT
           p.*,
           s.display_name as station_name,
           s.acronym as station_acronym,
-          COUNT(ph.id) as phenocam_count,
-          COUNT(ms.id) as sensor_count,
-          COUNT(ph.id) + COUNT(ms.id) as total_instruments
+          COUNT(CASE WHEN i.instrument_type = 'phenocam' THEN 1 END) as phenocam_count,
+          COUNT(CASE WHEN i.instrument_type != 'phenocam' THEN 1 END) as sensor_count,
+          COUNT(i.id) as total_instruments
         FROM platforms p
         LEFT JOIN stations s ON p.station_id = s.id
-        LEFT JOIN phenocams ph ON p.id = ph.platform_id
-        LEFT JOIN mspectral_sensors ms ON p.id = ms.platform_id
+        LEFT JOIN instruments i ON p.id = i.platform_id
       `;
       
       const params = [];

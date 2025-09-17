@@ -42,7 +42,15 @@ export async function handleApiRequest(request, env, ctx) {
         return await handlePhenocams(method, pathSegments, request, env);
         
       case 'mspectral':
-        return await handleMspectralSensors(method, pathSegments, request, env);
+        // Temporarily disabled during database migration
+        return new Response(JSON.stringify({
+          error: 'Multispectral sensors temporarily unavailable',
+          message: 'Multispectral sensor functionality is disabled during database migration',
+          details: 'Only phenocam instruments are currently supported. Multispectral sensors will be available after the database migration is complete.'
+        }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
         
       case 'auth':
         return await handleAuth(method, pathSegments, request, env);
@@ -348,31 +356,34 @@ async function getNetworkStats(env) {
     }
 
     try {
-      const phenocamsResult = await env.DB.prepare(`
+      // Use instruments table with phenocam filter only
+      const instrumentsResult = await env.DB.prepare(`
         SELECT
           COUNT(*) as total,
           COUNT(CASE WHEN status = 'Active' THEN 1 END) as active
-        FROM phenocams
+        FROM instruments
+        WHERE instrument_type = 'phenocam'
       `).first();
 
-      totalInstruments += phenocamsResult?.total || 0;
-      activeInstruments += phenocamsResult?.active || 0;
+      totalInstruments = instrumentsResult?.total || 0;
+      activeInstruments = instrumentsResult?.active || 0;
     } catch (e) {
-      console.warn('Failed to get phenocams count:', e.message);
-    }
+      console.warn('Failed to get instruments count from instruments table:', e.message);
 
-    try {
-      const mspectralResult = await env.DB.prepare(`
-        SELECT
-          COUNT(*) as total,
-          COUNT(CASE WHEN status = 'Active' THEN 1 END) as active
-        FROM mspectral_sensors
-      `).first();
+      // Fallback to phenocams table if instruments table doesn't exist yet
+      try {
+        const phenocamsResult = await env.DB.prepare(`
+          SELECT
+            COUNT(*) as total,
+            COUNT(CASE WHEN status = 'Active' THEN 1 END) as active
+          FROM phenocams
+        `).first();
 
-      totalInstruments += mspectralResult?.total || 0;
-      activeInstruments += mspectralResult?.active || 0;
-    } catch (e) {
-      console.warn('Failed to get multispectral sensors count:', e.message);
+        totalInstruments = phenocamsResult?.total || 0;
+        activeInstruments = phenocamsResult?.active || 0;
+      } catch (e2) {
+        console.warn('Failed to get phenocams count from phenocams table:', e2.message);
+      }
     }
 
     // If we have no data, provide some default values
@@ -439,29 +450,23 @@ async function getStationStats(stationId, env) {
 
 async function getInstrumentStats(env) {
   try {
-    const [phenocamsResult, mspectralResult] = await Promise.all([
-      env.DB.prepare(`
-        SELECT 
-          status,
-          COUNT(*) as count
-        FROM phenocams
-        GROUP BY status
-      `).all(),
-      env.DB.prepare(`
-        SELECT 
-          status,
-          COUNT(*) as count
-        FROM mspectral_sensors
-        GROUP BY status
-      `).all()
-    ]);
+    const result = await env.DB.prepare(`
+      SELECT
+        status,
+        COUNT(*) as count
+      FROM instruments
+      WHERE instrument_type = 'phenocam'
+      GROUP BY status
+    `).all();
 
-    const stats = {};
-    
-    // Combine results from both tables
-    [...(phenocamsResult.results || []), ...(mspectralResult.results || [])].forEach(row => {
+    const stats = {
+      note: 'Statistics include only phenocam instruments during database migration'
+    };
+
+    // Process results from instruments table (phenocams only)
+    (result.results || []).forEach(row => {
       const statusKey = row.status.toLowerCase();
-      stats[statusKey] = (stats[statusKey] || 0) + row.count;
+      stats[statusKey] = row.count;
     });
 
     return new Response(JSON.stringify(stats), {
@@ -510,23 +515,26 @@ async function handlePhenocams(method, pathSegments, request, env) {
         const user = await getUserFromRequest(request, env);
         
         let query = `
-          SELECT 
-            p.*,
+          SELECT
+            i.*,
             s.display_name as station_name,
-            s.acronym as station_acronym
-          FROM phenocams p
+            s.acronym as station_acronym,
+            p.display_name as platform_name
+          FROM instruments i
+          LEFT JOIN platforms p ON i.platform_id = p.id
           LEFT JOIN stations s ON p.station_id = s.id
+          WHERE i.instrument_type = 'phenocam'
         `;
         
         const queryParams = [];
         
         // Apply station filtering based on user role
         if (user && user.role === 'station') {
-          query += ' WHERE p.station_id = ?';
+          query += ' AND p.station_id = ?';
           queryParams.push(user.station_id);
         }
-        
-        query += ' ORDER BY p.priority, p.canonical_id';
+
+        query += ' ORDER BY i.normalized_name';
         
         const result = queryParams.length > 0 
           ? await env.DB.prepare(query).bind(...queryParams).all()
@@ -555,25 +563,25 @@ async function handlePhenocams(method, pathSegments, request, env) {
         }
         
         // Check if user has permission to modify this phenocam
-        const phenocamCheck = await env.DB.prepare(
-          'SELECT station_id FROM phenocams WHERE id = ?'
+        const instrumentCheck = await env.DB.prepare(
+          'SELECT p.station_id FROM instruments i LEFT JOIN platforms p ON i.platform_id = p.id WHERE i.id = ? AND i.instrument_type = "phenocam"'
         ).bind(id).first();
-        
-        if (!phenocamCheck) {
+
+        if (!instrumentCheck) {
           return new Response('Phenocam not found', { status: 404 });
         }
-        
-        if (!hasPermission(patchUser, 'write', 'instrument', phenocamCheck.station_id)) {
+
+        if (!hasPermission(patchUser, 'write', 'instrument', instrumentCheck.station_id)) {
           return new Response(JSON.stringify({ error: 'Permission denied' }), {
             status: 403,
             headers: { 'Content-Type': 'application/json' }
           });
         }
-        
+
         const body = await request.json();
         const updateFields = [];
         const updateValues = [];
-        
+
         // Validate and prepare update fields
         const allowedFields = ['canonical_id', 'legacy_acronym', 'ecosystem', 'location', 'status', 'thematic_program'];
         for (const [field, value] of Object.entries(body)) {
@@ -582,21 +590,21 @@ async function handlePhenocams(method, pathSegments, request, env) {
             updateValues.push(value);
           }
         }
-        
+
         if (updateFields.length === 0) {
           return new Response('No valid fields to update', { status: 400 });
         }
-        
+
         updateValues.push(id);
-        
+
         const updateQuery = `
-          UPDATE phenocams 
-          SET ${updateFields.join(', ')}, updated_at = datetime('now') 
-          WHERE id = ?
+          UPDATE instruments
+          SET ${updateFields.join(', ')}, updated_at = datetime('now')
+          WHERE id = ? AND instrument_type = 'phenocam'
         `;
-        
+
         await env.DB.prepare(updateQuery).bind(...updateValues).run();
-        
+
         return new Response(JSON.stringify({ success: true }), {
           headers: { 'Content-Type': 'application/json' }
         });
@@ -616,117 +624,21 @@ async function handlePhenocams(method, pathSegments, request, env) {
   }
 }
 
-// Multispectral sensors API handler
+// Multispectral sensors API handler - TEMPORARILY DISABLED
+// Will be re-enabled after database migration
 async function handleMspectralSensors(method, pathSegments, request, env) {
-  try {
-    switch (method) {
-      case 'GET':
-        // Public read access for sensor data
-        const user = await getUserFromRequest(request, env);
-        
-        let query = `
-          SELECT 
-            m.*,
-            s.display_name as station_name,
-            s.acronym as station_acronym
-          FROM mspectral_sensors m
-          LEFT JOIN stations s ON m.station_id = s.id
-        `;
-        
-        const queryParams = [];
-        
-        // Apply station filtering based on user role
-        if (user && user.role === 'station') {
-          query += ' WHERE m.station_id = ?';
-          queryParams.push(user.station_id);
-        }
-        
-        query += ' ORDER BY m.priority, m.canonical_id';
-        
-        const result = await env.DB.prepare(query).all();
-        
-        return new Response(JSON.stringify({
-          mspectral_sensors: result.results || []
-        }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-      case 'PATCH':
-        // Require authentication for modifications
-        const sensorPatchUser = await getUserFromRequest(request, env);
-        if (!sensorPatchUser) {
-          return new Response(JSON.stringify({ error: 'Authentication required' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        // Extract ID from pathSegments
-        const sensorId = pathSegments[1];
-        if (!sensorId) {
-          return new Response('ID required', { status: 400 });
-        }
-        
-        // Check if user has permission to modify this sensor
-        const sensorCheck = await env.DB.prepare(
-          'SELECT station_id FROM mspectral_sensors WHERE id = ?'
-        ).bind(sensorId).first();
-        
-        if (!sensorCheck) {
-          return new Response('Sensor not found', { status: 404 });
-        }
-        
-        if (!hasPermission(sensorPatchUser, 'write', 'instrument', sensorCheck.station_id)) {
-          return new Response(JSON.stringify({ error: 'Permission denied' }), {
-            status: 403,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        const sensorBody = await request.json();
-        const sensorUpdateFields = [];
-        const sensorUpdateValues = [];
-        
-        // Validate and prepare update fields
-        const allowedSensorFields = ['canonical_id', 'legacy_name', 'ecosystem', 'location', 'status', 'center_wavelength_nm', 'usage_type', 'brand_model', 'thematic_program'];
-        for (const [field, value] of Object.entries(sensorBody)) {
-          if (allowedSensorFields.includes(field)) {
-            sensorUpdateFields.push(`${field} = ?`);
-            sensorUpdateValues.push(value);
-          }
-        }
-        
-        if (sensorUpdateFields.length === 0) {
-          return new Response('No valid fields to update', { status: 400 });
-        }
-        
-        sensorUpdateValues.push(sensorId);
-        
-        const sensorUpdateQuery = `
-          UPDATE mspectral_sensors 
-          SET ${sensorUpdateFields.join(', ')}, updated_at = datetime('now') 
-          WHERE id = ?
-        `;
-        
-        await env.DB.prepare(sensorUpdateQuery).bind(...sensorUpdateValues).run();
-        
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-      default:
-        return new Response('Method not allowed', { status: 405 });
+  return new Response(JSON.stringify({
+    error: 'Multispectral sensors temporarily unavailable',
+    message: 'Multispectral sensor functionality is disabled during database migration',
+    details: 'Only phenocam instruments are currently supported. Multispectral sensors will be available after the database migration is complete.',
+    available_endpoints: {
+      phenocams: '/api/phenocams',
+      instruments: '/api/instruments (phenocams only)'
     }
-  } catch (error) {
-    console.error('Multispectral sensors API error:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Failed to fetch multispectral sensors',
-      message: error.message 
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
+  }), {
+    status: 503,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 // Authentication API handler
