@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2025-09-17
+
+### Fixed
+- **🗄️ Database Schema Migration** - Fixed API endpoints to work with new unified database schema
+  - Updated all API endpoints to use unified `instruments` table instead of separate `phenocams` and `mspectral_sensors` tables
+  - Enhanced instruments API with phenocam-only filtering during migration period
+  - Improved platforms API to properly join with instruments table using new schema
+  - Fixed GeoJSON endpoints to use new database relationships
+  - Added comprehensive error handling and validation for all CRUD operations
+  - Temporarily disabled multispectral sensor functionality during database migration
+
+### Changed
+- **🔧 API Architecture** - Streamlined API endpoints for better consistency and reliability
+  - All instrument queries now use unified schema with proper platform relationships
+  - Enhanced error messages with detailed validation feedback
+  - Added migration status indicators in API responses
+  - Improved network statistics calculations using new schema
+
+### Technical
+- **🛠️ Schema Migration** - Transitioned from legacy table structure to normalized schema
+- **🛡️ Error Handling** - Added comprehensive validation and error reporting
+- **📊 Data Integrity** - Enhanced data validation and relationship checks
+- **⚡ Performance** - Optimized queries for new database structure
+
 ## [2.0.1] - 2025-09-17
 
 ### Fixed
