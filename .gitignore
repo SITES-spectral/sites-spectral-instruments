@@ -5,11 +5,16 @@
 .env.local
 .env.production
 .env.development
+.env.*.local
 wrangler.toml
 secrets/
+private/
+config/secrets/
+config/private/
 *.key
 *.pem
 *.p12
+*.pfx
 
 # Credential files - NEVER COMMIT THESE
 *credentials*.json
@@ -25,6 +30,34 @@ api-credentials*.json
 *-SECRET.json
 *-CREDENTIALS.json
 
+# Sensitive data patterns
+*password*
+*secret*
+*SECRET*
+*Secret*
+*/secret/*
+*/SECRET/*
+*/Secret/*
+*token*
+*api_key*
+*private_key*
+credentials*
+auth*
+
+# Deprecated, secure patterns (all forms, all locations)
+*deprecated*
+*DEPRECATED*
+*Deprecated*
+*/deprecated/*
+*/DEPRECATED/*
+*/Deprecated/*
+*secure*
+*SECURE*
+*Secure*
+*/secure/*
+*/SECURE/*
+*/Secure/*
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -38,6 +71,9 @@ dist/
 build/
 .output/
 .wrangler/
+.parcel-cache/
+.next/
+.nuxt/
 
 # Database files (development)
 *.sqlite
@@ -47,6 +83,11 @@ build/
 *.db-wal
 database.sqlite*
 local.db
+*.duckdb
+*.duckdb.wal
+*.duckdb-journal
+duckdb_metadata/
+.duckdb/
 
 # Logs
 logs/
@@ -55,6 +96,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+*/logs/
+**/logs/
 
 # Runtime data
 pids/
@@ -65,12 +108,27 @@ pids/
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
+.nyc_output/
+*.cover
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.hypothesis/
+*.tsbuildinfo
 
 # Temporary files
 tmp/
 temp/
+*/temp/
+*/tmp/
+**/temp/
+**/tmp/
+temporary/
+cache/
 *.tmp
 *.temp
+.cache/
 
 # OS generated files
 .DS_Store
@@ -96,38 +154,66 @@ desktop.ini
 *.bak
 *.old
 *.orig
-
-# Cache directories
-.cache/
-.parcel-cache/
-.next/
-.nuxt/
-
-# CloudFlare Workers specific
-.dev.vars
-.wrangler/
-worker-configuration.d.ts
-
-# Testing
-.nyc_output/
-coverage/
-*.tsbuildinfo
-
-# Documentation build
-docs/_build/
-site/
+*~
 
 # Python cache (if any Python scripts)
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
+# Virtual environments
+.venv/
+venv/
+env/
 
-# Local development
+# Data directories - prevent committing any data files
+data/
+*/data/
+**/data/
 .local/
 .data/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+profile_default/
+ipython_config.py
+
+# Marimo
+.marimo/
+*.marimo
+marimo_cache/
+.marimo_cache/
+
+# AI Assistant files (Claude, Cursor, etc.)
+CLAUDE.md
+.claude/
+claude_*
+.cursor/
+cursor_*
+.cursor-*
+.anthropic/
+anthropic_*
 
 # Migration backups (keep original migrations)
 migrations/*.backup
@@ -140,6 +226,8 @@ public/css/generated/
 # User uploads (sensitive content)
 uploads/
 user-data/
+upload_logs/
+failed_uploads/
 
 # Analytics and monitoring
 analytics/
@@ -149,3 +237,19 @@ monitoring/
 local.config.js
 local.config.json
 override.config.*
+
+# Portal-specific sensitive files
+credentials/
+server_configs/
+connection_strings/
+
+# Output directories that might contain sensitive results
+output/
+outputs/
+results/
+uploads/
+downloads/
+exports/
+reports/
+site/
+docs/_build/
