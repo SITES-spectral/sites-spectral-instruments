@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.0.0",
-  "description": "SITES Spectral Stations & Instruments Management System - Web application for managing Swedish research station instruments including phenocams and multispectral sensors",
+  "version": "3.0.1",
+  "description": "SITES Spectral Stations & Instruments Management System v3.0.1 - Authentication-first web application for managing Swedish research station instruments with role-based access control",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
@@ -28,6 +28,10 @@
     "phenocams",
     "multispectral",
     "sensors",
+    "authentication",
+    "jwt",
+    "rbac",
+    "crud",
     "cloudflare",
     "workers",
     "d1",

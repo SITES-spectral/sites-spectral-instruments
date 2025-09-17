@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📋 Next Steps
+- Platform and instrument CRUD operations enhancement (currently placeholder functions)
+- Advanced search and filtering capabilities
+- Bulk operations for administrative efficiency
+- Data import/export functionality
+- Enhanced mobile responsive design
+
+## [3.0.1] - 2025-09-17
+
+### 📝 Updated
+- **Production URL**: Corrected production URL to https://sites.jobelab.com
+- **Documentation**: Updated CLAUDE.md and CHANGELOG.md with proper production URL
+- **Version Info**: Incremented version for documentation accuracy
+
+### 🌐 Deployment Information
+- **Primary URL**: https://sites.jobelab.com (Custom domain)
+- **Worker URL**: https://sites-spectral-instruments.jose-e5f.workers.dev (Cloudflare Workers URL)
+- **Status**: ✅ Operational with authentication-first architecture
+
 ## [3.0.0] - 2025-09-17
 
 ### 🚨 BREAKING CHANGES
@@ -164,6 +183,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance Optimized**: Fast loading and responsive interactions
 - **Maintenance Friendly**: Clear code structure for ongoing development
 - **Future-Proof**: Ready for evolving research data management needs
+
+### 🌐 Deployment Status
+- **Production URL**: https://sites.jobelab.com
+- **Worker URL**: https://sites-spectral-instruments.jose-e5f.workers.dev
+- **Deployment Date**: 2025-09-17
+- **Version**: 3.0.0
+- **Status**: ✅ Successfully deployed and tested
+- **Authentication**: ✅ Working correctly with role-based access
+- **CRUD Operations**: ✅ All tested and functional
+- **API Security**: ✅ All endpoints require authentication
 
 ## [2.0.2] - 2025-09-17
 
