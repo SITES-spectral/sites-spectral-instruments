@@ -21,10 +21,125 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=2.0.2">
+    <link rel="stylesheet" href="/css/styles.css?v=3.0.0">
+
+    <style>
+        .login-required {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .login-prompt {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .login-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 2rem;
+        }
+
+        .login-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .login-subtitle {
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .login-actions {
+            margin-bottom: 3rem;
+        }
+
+        .access-info {
+            margin-top: 3rem;
+        }
+
+        .access-info h3 {
+            font-size: 1.5rem;
+            color: #2d3748;
+            margin-bottom: 2rem;
+        }
+
+        .access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .access-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .access-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .access-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .access-icon.admin {
+            background: #667eea;
+        }
+
+        .access-icon.station {
+            background: #48bb78;
+        }
+
+        .access-card h4 {
+            font-size: 1.2rem;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .access-card p {
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .login-title {
+                font-size: 2rem;
+            }
+
+            .login-subtitle {
+                font-size: 1rem;
+            }
+
+            .access-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
     
     <!-- Version Meta -->
-    <meta name="app-version" content="2.0.2">
+    <meta name="app-version" content="3.0.0">
     <meta name="build-date" content="2025-09-17">
 </head>
 <body>
@@ -37,28 +152,10 @@
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="/" class="nav-link active">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/stations.html" class="nav-link">
-                        <i class="fas fa-map"></i> Interactive Map
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="/login.html" class="nav-link">
-                        <i class="fas fa-sign-in-alt"></i> Station Login
+                        <i class="fas fa-sign-in-alt"></i> Login
                     </a>
                 </li>
-                <!-- Documentation link hidden - broken links to GitHub docs -->
-                <!--
-                <li class="nav-item">
-                    <a href="/docs/" class="nav-link">
-                        <i class="fas fa-book"></i> Documentation
-                    </a>
-                </li>
-                -->
             </ul>
             <div class="nav-toggle" id="mobile-menu">
                 <span class="bar"></span>
@@ -70,118 +167,43 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Hero Section -->
-        <section class="hero">
+        <!-- Login Required Section -->
+        <section class="login-required">
             <div class="container">
-                <div class="hero-content">
-                    <h1 class="hero-title">SITES Spectral Monitoring Network</h1>
-                    <p class="hero-subtitle">
-                        Comprehensive management system for spectral monitoring stations and instruments across Sweden
+                <div class="login-prompt">
+                    <div class="login-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h1 class="login-title">Login Required</h1>
+                    <p class="login-subtitle">
+                        Please log in to access the SITES Spectral management system.
+                        This system requires authentication to view station data and manage instruments.
                     </p>
-                    <div class="hero-stats">
-                        <div class="stat-card">
-                            <div class="stat-number" id="total-stations">-</div>
-                            <div class="stat-label">Research Stations</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="total-instruments">-</div>
-                            <div class="stat-label">Instruments</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="active-instruments">-</div>
-                            <div class="stat-label">Active Instruments</div>
-                        </div>
+                    <div class="login-actions">
+                        <a href="/login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login to System
+                        </a>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Interactive Map Section -->
-        <section class="map-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Stations Interactive Map</h2>
-                    <p class="section-subtitle">Explore SITES Spectral stations and their platforms on the map</p>
-                </div>
-                <div class="map-container">
-                    <div id="stations-map" class="interactive-map">
-                        <div class="map-loading">
-                            <div class="spinner"></div>
-                            <p>Loading map...</p>
-                        </div>
-                    </div>
-                    <div class="map-controls">
-                        <div class="map-legend">
-                            <h4>Legend</h4>
-                            <div class="legend-item">
-                                <div class="legend-pin station-legend">
-                                    <div class="google-marker-pin station-pin">
-                                        <i class="fas fa-broadcast-tower"></i>
-                                    </div>
+                    <div class="access-info">
+                        <h3>Access Information</h3>
+                        <div class="access-grid">
+                            <div class="access-card">
+                                <div class="access-icon admin">
+                                    <i class="fas fa-user-shield"></i>
                                 </div>
-                                <span>SITES Spectral Stations</span>
+                                <h4>Administrators</h4>
+                                <p>Full system access including all stations, user management, and system configuration.</p>
                             </div>
-                            <div class="legend-item">
-                                <div class="legend-pin platform-legend">
-                                    <div class="google-marker-pin platform-pin">
-                                        <i class="fas fa-tower-broadcast"></i>
-                                    </div>
+                            <div class="access-card">
+                                <div class="access-icon station">
+                                    <i class="fas fa-broadcast-tower"></i>
                                 </div>
-                                <span>Platforms</span>
+                                <h4>Station Users</h4>
+                                <p>Access to manage instruments and data for their assigned research station.</p>
                             </div>
                         </div>
-                        <div class="map-layer-controls">
-                            <h4>Map Layers</h4>
-                            <label>
-                                <input type="radio" name="map-layer" value="satellite" checked>
-                                Satellite
-                            </label>
-                            <label>
-                                <input type="radio" name="map-layer" value="topographic">
-                                Topographic
-                            </label>
-                            <label>
-                                <input type="radio" name="map-layer" value="openstreetmap">
-                                Street Map
-                            </label>
-                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Stations Overview -->
-        <section class="stations-overview">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Research Stations</h2>
-                    <p class="section-subtitle">Click on a station to manage its instruments</p>
-                </div>
-                
-                <div class="stations-grid" id="stations-grid">
-                    <!-- Station cards will be loaded here dynamically -->
-                    <div class="loading-card">
-                        <div class="spinner"></div>
-                        <p>Loading stations...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- Recent Activity -->
-        <section class="recent-activity">
-            <div class="container">
-                <h2 class="section-title">Recent Activity</h2>
-                <div class="activity-feed" id="activity-feed">
-                    <!-- Activity items will be loaded here -->
-                    <div class="loading-item">
-                        <div class="spinner-sm"></div>
-                        <span>Loading recent activity...</span>
-                    </div>
-                </div>
-                <div class="activity-footer">
-                    <a href="/activity.html" class="btn btn-outline">View All Activity</a>
                 </div>
             </div>
         </section>
@@ -212,7 +234,7 @@
                     <p>&copy; 2025 SITES Spectral. All rights reserved.</p>
                 </div>
                 <div class="footer-right">
-                    <p>Version <span id="app-version">2.0.2</span> | Built on <span id="build-date">2025-09-17</span></p>
+                    <p>Version <span id="app-version">3.0.0</span> | Built on <span id="build-date">2025-09-17</span></p>
                 </div>
             </div>
         </div>
@@ -222,12 +244,25 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="/js/utils.js?v=2.0.2"></script>
-    <script src="/js/api.js?v=2.0.2"></script>
-    <script src="/js/components.js?v=2.0.2"></script>
-    <script src="/js/navigation.js?v=2.0.2"></script>
-    <script src="/js/interactive-map.js?v=2.0.2"></script>
-    <script src="/js/dashboard.js?v=2.0.2"></script>
+    <script src="/js/utils.js?v=3.0.0"></script>
+    <script>
+        // Check if user is already logged in and redirect accordingly
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('sites_spectral_token');
+            const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
+
+            if (token && user) {
+                // User is logged in, redirect to appropriate dashboard
+                if (user.role === 'admin') {
+                    window.location.href = '/admin/dashboard.html';
+                } else if (user.role === 'station') {
+                    window.location.href = `/station/dashboard.html?station=${user.station_id}`;
+                } else {
+                    // Readonly or other roles - redirect to login for now
+                    window.location.href = '/login.html';
+                }
+            }
+        });
+    </script>
 </body>
 </html>
