@@ -1,0 +1,39 @@
+name = "spectral-stations-instruments"
+main = "src/worker.js"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = true
+
+# GitHub integration
+# Enable auto-deployment from GitHub when commits are pushed to main branch
+
+# Project metadata
+# Version: 0.7.0
+# Release: 2025-09-17
+# Database Schema: v11 (11 migrations) - Complete normalized schema rewrite
+
+# Static Assets Configuration
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "spectral_stations_db"
+database_id = "3577571b-7a20-44a9-b089-37456877729d"
+
+[vars]
+ENVIRONMENT = "production"
+APP_NAME = "SITES Spectral Stations & Instruments"
+APP_VERSION = "0.7.0"
+USE_CLOUDFLARE_SECRETS = "true"
+
+# Custom domain routes  
+[[routes]]
+pattern = "sites.jobelab.com"
+zone_name = "jobelab.com"
+
+[[routes]]
+pattern = "sites.jobelab.com/*"
+zone_name = "jobelab.com"

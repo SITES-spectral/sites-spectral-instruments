@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-09-17
+
+### Added
+- **🗃️ Complete Database Schema Rewrite** - Fresh normalized schema from scratch
+  - **Normalized Naming**: Replaced "canonical_id" with "normalized_name" throughout system
+  - **Camera Specifications**: Full camera metadata with brand dropdown (Mobotix default, RedDot, Canon, Nikon)
+  - **Measurement Timeline**: Track first_measurement_year, last_measurement_year, and measurement_status
+  - **User-Editable Geolocations**: Station users can modify platform and instrument coordinates (decimal degrees)
+  - **Coordinate Inheritance**: Instruments inherit platform coordinates by default, but users can override
+  - **Enhanced YAML Structure**: Complete stations.yaml restructure with camera specs and timeline data
+
+### Enhanced
+- **🔐 Advanced Permission System** - Field-level editing controls
+  - **Station Users CAN Edit**: Camera specs, measurement timeline, coordinates, descriptions, ROI data
+  - **Station Users CANNOT Edit**: Normalized names, legacy acronyms, system identifiers (admin only)
+  - **Coordinate Editing**: Full decimal degree coordinate editing for both platforms and instruments
+  - **Camera Management**: Complete camera specification editing including brand, model, resolution, serial number
+
+### Technical
+- **📊 Fresh Database Architecture** - Clean start with no legacy dependencies
+  - **11 Migrations**: Complete schema from 0009_new_normalized_schema.sql onwards
+  - **Coordinate Inheritance Triggers**: Automatic coordinate inheritance from platform to instruments
+  - **Activity Logging**: Comprehensive audit trail for all coordinate and camera specification changes
+  - **Performance Optimized**: Strategic indexing for normalized names, coordinates, and camera specifications
+  - **Data Import Pipeline**: Automated import from enhanced stations.yaml structure
+
+### Database Schema
+- **stations**: Enhanced with status, coordinates, and description fields
+- **platforms**: User-editable coordinates, mounting details, and status tracking
+- **instruments**: Camera specifications, measurement timeline, coordinate overrides
+- **instrument_rois**: Complete ROI management with user editing capabilities
+- **user_field_permissions**: Granular field-level permission control system
+
+### User Experience
+- **🎯 Coordinate Management**: Easy decimal degree coordinate editing with validation
+- **📷 Camera Specification Tracking**: Complete camera metadata management
+- **📅 Timeline Tracking**: Measurement period tracking with status indicators
+- **🔄 Inheritance Logic**: Smart coordinate inheritance with override capabilities
+- **✅ Validation**: Coordinate range validation, camera resolution format validation, year range checks
+
+### Security
+- **🔒 Protected Identifiers**: Normalized names and system IDs restricted to admin users
+- **📍 Geographic Validation**: Coordinate range validation (Sweden: lat 55-70, lng 10-25)
+- **🎛️ Field-Level Permissions**: Granular control over what station users can modify
+- **📝 Audit Trail**: Complete activity logging for all user modifications
+
 ## [0.6.1] - 2025-09-15
 
 ### Fixed
