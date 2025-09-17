@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.0.1",
-  "description": "SITES Spectral Stations & Instruments Management System v3.0.1 - Authentication-first web application for managing Swedish research station instruments with role-based access control",
+  "version": "3.1.0",
+  "description": "SITES Spectral Stations & Instruments Management System v3.1.0 - Professional authentication-first web application with Google-style maps and comprehensive CRUD operations",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

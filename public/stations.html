@@ -673,6 +673,162 @@
             background: #9f7aea;
         }
 
+        /* Google-style Map Markers */
+        .google-style-marker {
+            position: relative !important;
+        }
+
+        .google-marker-pin {
+            position: relative;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .google-marker-pin:hover {
+            transform: rotate(-45deg) scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .google-marker-pin i {
+            transform: rotate(45deg);
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .google-marker-shadow {
+            position: absolute;
+            left: 50%;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        /* Station marker - Red/Orange like Google Maps */
+        .station-pin {
+            background: linear-gradient(135deg, #EA4335 0%, #FBBC04 100%);
+            width: 32px;
+            height: 32px;
+        }
+
+        .station-marker .google-marker-shadow {
+            width: 32px;
+            height: 14px;
+            bottom: -6px;
+        }
+
+        /* Platform marker - Blue */
+        .platform-pin {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+            width: 28px;
+            height: 28px;
+        }
+
+        .platform-marker .google-marker-shadow {
+            width: 28px;
+            height: 12px;
+            bottom: -5px;
+        }
+
+        /* Instrument marker - Green */
+        .instrument-pin {
+            background: linear-gradient(135deg, #34A853 0%, #0F9D58 100%);
+            width: 24px;
+            height: 24px;
+        }
+
+        .phenocam-marker .google-marker-shadow {
+            width: 24px;
+            height: 10px;
+            bottom: -4px;
+        }
+
+        /* Default marker - Gray */
+        .default-pin {
+            background: linear-gradient(135deg, #9AA0A6 0%, #5F6368 100%);
+            width: 24px;
+            height: 24px;
+        }
+
+        .default-marker .google-marker-shadow {
+            width: 24px;
+            height: 10px;
+            bottom: -4px;
+        }
+
+        /* Professional Map Popups */
+        .map-popup {
+            font-family: var(--font-family);
+            min-width: 250px;
+            padding: 0;
+        }
+
+        .map-popup h4 {
+            margin: 0 0 12px 0;
+            color: #1a73e8;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-popup p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.4;
+        }
+
+        .map-popup strong {
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .popup-actions {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .popup-actions .btn {
+            font-size: 13px;
+            padding: 6px 12px;
+            font-weight: 500;
+        }
+
+        /* Status badges in popups */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #e8f5e8;
+            color: #137333;
+        }
+
+        .status-inactive {
+            background: #fce8e6;
+            color: #d93025;
+        }
+
+        .status-unknown {
+            background: #f1f3f4;
+            color: #5f6368;
+        }
+
         /* Help tooltips */
         .help-tooltip {
             position: relative;
@@ -1646,36 +1802,95 @@
                     const [lng, lat] = feature.geometry.coordinates;
                     const props = feature.properties;
 
-                    let markerIcon, popupContent, markerClass;
+                    let markerHtml, popupContent, markerClass, iconSize, iconAnchor;
 
                     switch (props.type) {
                         case 'station':
-                            markerIcon = '<i class="fas fa-broadcast-tower"></i>';
-                            markerClass = 'station-marker';
-                            popupContent = `<strong>${props.name}</strong><br>Station ${props.acronym || ''}`;
+                            markerHtml = `
+                                <div class="google-marker-pin station-pin">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                </div>
+                                <div class="google-marker-shadow"></div>
+                            `;
+                            markerClass = 'station-marker google-style-marker';
+                            popupContent = `
+                                <div class="map-popup">
+                                    <h4><i class="fas fa-broadcast-tower"></i> ${props.name}</h4>
+                                    <p><strong>Station:</strong> ${props.acronym || ''}</p>
+                                    <p><strong>Location:</strong> ${props.latitude?.toFixed(4) || lat.toFixed(4)}, ${props.longitude?.toFixed(4) || lng.toFixed(4)}</p>
+                                    <div class="popup-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="window.location.href='/station.html?id=${props.id}'">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            iconSize = [32, 42];
+                            iconAnchor = [16, 42];
                             break;
                         case 'platform':
-                            markerIcon = '<i class="fas fa-tower-broadcast"></i>';
-                            markerClass = 'platform-marker';
-                            popupContent = `<strong>${props.name}</strong><br>Platform`;
+                            markerHtml = `
+                                <div class="google-marker-pin platform-pin">
+                                    <i class="fas fa-tower-broadcast"></i>
+                                </div>
+                                <div class="google-marker-shadow"></div>
+                            `;
+                            markerClass = 'platform-marker google-style-marker';
+                            popupContent = `
+                                <div class="map-popup">
+                                    <h4><i class="fas fa-tower-broadcast"></i> ${props.name}</h4>
+                                    <p><strong>Platform Height:</strong> ${props.platform_height_m || 'N/A'}m</p>
+                                    <p><strong>Mounting:</strong> ${props.mounting_structure || 'N/A'}</p>
+                                    <p><strong>Status:</strong> <span class="status-badge status-${(props.status || 'unknown').toLowerCase()}">${props.status || 'Unknown'}</span></p>
+                                </div>
+                            `;
+                            iconSize = [28, 38];
+                            iconAnchor = [14, 38];
                             break;
                         case 'phenocam':
-                            markerIcon = '<i class="fas fa-camera"></i>';
-                            markerClass = 'phenocam-marker';
-                            popupContent = `<strong>${props.instrument_id}</strong><br>Phenocam<br><small>Status: ${props.status || 'Unknown'}</small>`;
+                            markerHtml = `
+                                <div class="google-marker-pin instrument-pin">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="google-marker-shadow"></div>
+                            `;
+                            markerClass = 'phenocam-marker google-style-marker';
+                            popupContent = `
+                                <div class="map-popup">
+                                    <h4><i class="fas fa-camera"></i> ${props.instrument_id}</h4>
+                                    <p><strong>Type:</strong> Phenocam</p>
+                                    <p><strong>Camera:</strong> ${props.camera_brand || 'N/A'} ${props.camera_model || ''}</p>
+                                    <p><strong>Status:</strong> <span class="status-badge status-${(props.status || 'unknown').toLowerCase()}">${props.status || 'Unknown'}</span></p>
+                                    ${props.first_measurement_year ? `<p><strong>Active Since:</strong> ${props.first_measurement_year}</p>` : ''}
+                                </div>
+                            `;
+                            iconSize = [24, 34];
+                            iconAnchor = [12, 34];
                             break;
                         default:
-                            markerIcon = '<i class="fas fa-circle"></i>';
-                            markerClass = 'default-marker';
-                            popupContent = `<strong>${props.name || props.instrument_id}</strong>`;
+                            markerHtml = `
+                                <div class="google-marker-pin default-pin">
+                                    <i class="fas fa-map-marker"></i>
+                                </div>
+                                <div class="google-marker-shadow"></div>
+                            `;
+                            markerClass = 'default-marker google-style-marker';
+                            popupContent = `
+                                <div class="map-popup">
+                                    <h4>${props.name || props.instrument_id}</h4>
+                                    <p>Location marker</p>
+                                </div>
+                            `;
+                            iconSize = [24, 34];
+                            iconAnchor = [12, 34];
                     }
 
                     const marker = L.marker([lat, lng], {
                         icon: L.divIcon({
                             className: markerClass,
-                            html: `<div class="marker-icon ${markerClass}">${markerIcon}</div>`,
-                            iconSize: props.type === 'station' ? [35, 35] : [25, 25],
-                            iconAnchor: props.type === 'station' ? [17.5, 17.5] : [12.5, 12.5]
+                            html: markerHtml,
+                            iconSize: iconSize,
+                            iconAnchor: iconAnchor
                         })
                     });
 
