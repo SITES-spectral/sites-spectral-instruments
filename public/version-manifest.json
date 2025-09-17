@@ -1,7 +1,7 @@
 {
-  "version": "0.6.0",
-  "buildDate": "2025-09-12",
-  "timestamp": 1757655658814,
+  "version": "0.2.0",
+  "buildDate": "2025-09-17",
+  "timestamp": 1758120037201,
   "files": {
     "/css/styles.css?v=0.2.0": "0.2.0",
     "/js/utils.js?v=0.2.0": "0.2.0",

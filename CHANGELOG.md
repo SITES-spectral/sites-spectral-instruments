@@ -10,14 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - 2025-09-17
 
 ### Changed
-- **🚀 Production Deployment** - Migrated from deprecated v1 system to take over sites.jobelund.com domain
+- **🚀 Production Deployment** - Updated to take over sites.jobelab.com domain as production system
   - Updated deployment configuration to replace legacy application
-  - Migrated from sites.jobelab.com to sites.jobelund.com domain
+  - Configured for sites.jobelab.com domain deployment
   - Bumped version from 0.7.0 to 2.0.0 to reflect production deployment status
   - Updated all version references across the application
 
 ### Infrastructure
-- **🔧 Domain Migration** - Updated Cloudflare Workers routes to sites.jobelund.com
+- **🔧 Domain Configuration** - Updated Cloudflare Workers routes for sites.jobelab.com
 - **📦 Version Management** - Synchronized version across package.json, wrangler.toml, and application metadata
 - **🏗️ Production Ready** - Complete production deployment replacing deprecated legacy system
 
@@ -616,6 +616,6 @@ This is the initial tracked release. Previous development was exploratory and no
 - **Pre-release** (x.y.z-dev): Development versions, may be unstable
 
 ## Links
-- [Live Application](https://sites.jobelund.com)
-- [API Documentation](https://sites.jobelund.com/api/health)
+- [Live Application](https://sites.jobelab.com)
+- [API Documentation](https://sites.jobelab.com/api/health)
 - [SITES Network](https://www.fieldsites.se/)

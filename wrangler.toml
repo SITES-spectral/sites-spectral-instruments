@@ -31,9 +31,9 @@ USE_CLOUDFLARE_SECRETS = "true"
 
 # Custom domain routes  
 [[routes]]
-pattern = "sites.jobelund.com"
-zone_name = "jobelund.com"
+pattern = "sites.jobelab.com"
+zone_name = "jobelab.com"
 
 [[routes]]
-pattern = "sites.jobelund.com/*"
-zone_name = "jobelund.com"
+pattern = "sites.jobelab.com/*"
+zone_name = "jobelab.com"
