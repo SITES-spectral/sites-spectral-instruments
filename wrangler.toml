@@ -1,9 +1,10 @@
-name = "spectral-stations-instruments"
+name = "sites-spectral-instruments"
 main = "src/worker.js"
 compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 preview_urls = true
+account_id = "e5f93ed83288202d33cf9c7b18068f64"
 
 # GitHub integration
 # Enable auto-deployment from GitHub when commits are pushed to main branch
@@ -21,7 +22,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "spectral_stations_db"
-database_id = "8eb8e1e6-ea4b-4feb-a303-6bce22638acf"
+database_id = "2a6e433a-db6e-4b75-bba3-eb7e59363e1d"
 
 [vars]
 ENVIRONMENT = "production"
