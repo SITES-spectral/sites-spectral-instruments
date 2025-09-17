@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-09-17
+
+### Fixed
+- **🐛 API Error Handling** - Improved error handling and debugging for dashboard data issues
+  - Enhanced health check endpoint with database connectivity testing
+  - Added table listing and error reporting for debugging
+  - Improved network stats endpoint with graceful error handling for missing tables
+  - Added fallback responses when database queries fail
+  - Better error messages to help diagnose dashboard data retrieval issues
+
+### Technical
+- **🔧 Database Debugging** - Added comprehensive database connectivity testing
+- **🛡️ Error Resilience** - API endpoints now handle missing tables gracefully
+- **📊 Monitoring** - Enhanced health check with detailed database status information
+
 ## [2.0.0] - 2025-09-17
 
 ### Changed

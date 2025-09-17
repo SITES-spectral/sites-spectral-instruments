@@ -275,56 +275,136 @@ async function handleSearch(method, pathSegments, request, env) {
   });
 }
 
-function handleHealthCheck(env) {
-  return new Response(JSON.stringify({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    service: 'SITES Spectral Stations & Instruments',
-    version: env?.APP_VERSION || '0.1.0-dev',
-    environment: env?.ENVIRONMENT || 'development',
-    database: 'Cloudflare D1',
-    endpoints: {
-      stations: '/api/stations',
-      phenocams: '/api/phenocams', 
-      mspectral: '/api/mspectral',
-      stats: '/api/stats/network'
+async function handleHealthCheck(env) {
+  try {
+    // Test database connectivity
+    const dbTest = await env.DB.prepare('SELECT name FROM sqlite_master WHERE type="table" ORDER BY name').all();
+    const tables = dbTest.results?.map(row => row.name) || [];
+
+    // Test a simple query
+    let stationCount = 0;
+    try {
+      const countResult = await env.DB.prepare('SELECT COUNT(*) as count FROM stations').first();
+      stationCount = countResult?.count || 0;
+    } catch (e) {
+      console.warn('Station count query failed:', e);
     }
-  }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+
+    return new Response(JSON.stringify({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'SITES Spectral Stations & Instruments',
+      version: env?.APP_VERSION || '2.0.0',
+      environment: env?.ENVIRONMENT || 'development',
+      database: {
+        type: 'Cloudflare D1',
+        connected: true,
+        tables: tables.length,
+        table_list: tables,
+        stations: stationCount
+      },
+      endpoints: {
+        stations: '/api/stations',
+        phenocams: '/api/phenocams',
+        mspectral: '/api/mspectral',
+        stats: '/api/stats/network'
+      }
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      service: 'SITES Spectral Stations & Instruments',
+      version: env?.APP_VERSION || '2.0.0',
+      environment: env?.ENVIRONMENT || 'development',
+      database: {
+        type: 'Cloudflare D1',
+        connected: false,
+        error: error.message
+      },
+      message: 'Database connectivity issue'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
 
 // Helper functions for stats
 async function getNetworkStats(env) {
   try {
-    const [stationsResult, phenocamsResult, mspectralResult] = await Promise.all([
-      env.DB.prepare('SELECT COUNT(*) as count FROM stations').first(),
-      env.DB.prepare(`
-        SELECT 
+    // Try to get stats with fallback for missing tables
+    let stationsCount = 0;
+    let totalInstruments = 0;
+    let activeInstruments = 0;
+
+    try {
+      const stationsResult = await env.DB.prepare('SELECT COUNT(*) as count FROM stations').first();
+      stationsCount = stationsResult?.count || 0;
+    } catch (e) {
+      console.warn('Failed to get stations count:', e.message);
+    }
+
+    try {
+      const phenocamsResult = await env.DB.prepare(`
+        SELECT
           COUNT(*) as total,
           COUNT(CASE WHEN status = 'Active' THEN 1 END) as active
         FROM phenocams
-      `).first(),
-      env.DB.prepare(`
-        SELECT 
+      `).first();
+
+      totalInstruments += phenocamsResult?.total || 0;
+      activeInstruments += phenocamsResult?.active || 0;
+    } catch (e) {
+      console.warn('Failed to get phenocams count:', e.message);
+    }
+
+    try {
+      const mspectralResult = await env.DB.prepare(`
+        SELECT
           COUNT(*) as total,
           COUNT(CASE WHEN status = 'Active' THEN 1 END) as active
         FROM mspectral_sensors
-      `).first()
-    ]);
+      `).first();
 
-    const totalInstruments = phenocamsResult.total + mspectralResult.total;
-    const activeInstruments = phenocamsResult.active + mspectralResult.active;
+      totalInstruments += mspectralResult?.total || 0;
+      activeInstruments += mspectralResult?.active || 0;
+    } catch (e) {
+      console.warn('Failed to get multispectral sensors count:', e.message);
+    }
+
+    // If we have no data, provide some default values
+    if (stationsCount === 0 && totalInstruments === 0) {
+      return new Response(JSON.stringify({
+        total_stations: 0,
+        total_instruments: 0,
+        active_instruments: 0,
+        note: 'Database contains no data - migrations may be incomplete'
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     return new Response(JSON.stringify({
-      total_stations: stationsResult.count,
+      total_stations: stationsCount,
       total_instruments: totalInstruments,
       active_instruments: activeInstruments
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    throw new Error(`Failed to get network stats: ${error.message}`);
+    return new Response(JSON.stringify({
+      error: 'Failed to get network stats',
+      message: error.message,
+      total_stations: 0,
+      total_instruments: 0,
+      active_instruments: 0
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
 
