@@ -22,80 +22,68 @@ const STATION_CONFIGS = [
     {
         id: 1,
         name: 'Abisko',
-        acronym: 'AB',
+        acronym: 'ANS',
         username: 'abisko',
         role: 'station'
     },
     {
         id: 2,
         name: 'Asa',
-        acronym: 'AS',
+        acronym: 'ASA',
         username: 'asa',
         role: 'station'
     },
     {
         id: 3,
         name: 'Bolmen',
-        acronym: 'BM',
+        acronym: 'BOL',
         username: 'bolmen',
         role: 'station'
     },
     {
         id: 4,
         name: 'Erken',
-        acronym: 'ER',
+        acronym: 'ERK',
         username: 'erken',
         role: 'station'
     },
     {
         id: 5,
         name: 'Grimsö',
-        acronym: 'GR',
+        acronym: 'GRI',
         username: 'grimso',
         role: 'station'
     },
     {
         id: 6,
         name: 'Lönnstorp',
-        acronym: 'LO',
+        acronym: 'LON',
         username: 'lonnstorp',
         role: 'station'
     },
     {
         id: 7,
         name: 'Röbäcksdalen',
-        acronym: 'RO',
+        acronym: 'RBD',
         username: 'robacksdalen',
         role: 'station'
     },
     {
         id: 8,
         name: 'Skogaryd',
-        acronym: 'SK',
+        acronym: 'SKG',
         username: 'skogaryd',
         role: 'station'
     },
+
     {
         id: 9,
-        name: 'Stordalen',
-        acronym: 'ST',
-        username: 'stordalen',
-        role: 'station'
-    },
-    {
-        id: 10,
         name: 'Svartberget',
-        acronym: 'SV',
+        acronym: 'SVB',
         username: 'svartberget',
         role: 'station'
     },
-    {
-        id: 11,
-        name: 'Tarfala',
-        acronym: 'TA',
-        username: 'tarfala',
-        role: 'station'
-    }
+
 ];
 
 // Admin user configuration

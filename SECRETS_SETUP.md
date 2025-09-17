@@ -25,9 +25,8 @@ Each SITES station has a dedicated user account:
 | Lönnstorp | `lonnstorp` | station | 6 |
 | Röbäcksdalen | `robacksdalen` | station | 7 |
 | Skogaryd | `skogaryd` | station | 8 |
-| Stordalen | `stordalen` | station | 9 |
-| Svartberget | `svartberget` | station | 10 |
-| Tarfala | `tarfala` | station | 11 |
+| Svartberget | `svartberget` | station | 9 |
+
 
 Plus an admin account: `admin` with role `admin`.
 
