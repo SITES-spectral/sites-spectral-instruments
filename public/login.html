@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=3.2.0">
+    <link rel="stylesheet" href="/css/styles.css?v=3.2.1">
     
     <!-- Version Meta -->
-    <meta name="app-version" content="3.2.0">
+    <meta name="app-version" content="3.2.1">
     <meta name="build-date" content="2025-09-18">
     
     <style>
@@ -148,33 +148,6 @@
             display: block;
         }
 
-        .role-info {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 24px;
-            text-align: left;
-        }
-
-        .role-info h4 {
-            color: #0369a1;
-            margin: 0 0 8px 0;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .role-info ul {
-            margin: 0;
-            padding-left: 20px;
-            color: #0c4a6e;
-            font-size: 0.85rem;
-        }
-
-        .role-info ul li {
-            margin-bottom: 4px;
-        }
-
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -256,15 +229,6 @@
                 <i class="fas fa-arrow-left"></i>
                 Back to Public Dashboard
             </a>
-            
-            <div class="role-info">
-                <h4><i class="fas fa-info-circle"></i> Access Levels</h4>
-                <ul>
-                    <li><strong>Station Users:</strong> Manage instruments at your assigned station</li>
-                    <li><strong>Administrators:</strong> Full system access and user management</li>
-                    <li><strong>Public:</strong> View-only access without login</li>
-                </ul>
-            </div>
         </div>
     </div>
 
@@ -272,7 +236,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=3.2.0"></script>
+    <script src="/js/utils.js?v=3.2.1"></script>
     <script>
         class LoginManager {
             constructor() {

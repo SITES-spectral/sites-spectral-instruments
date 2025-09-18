@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.2.0",
-  "description": "SITES Spectral Stations & Instruments Management System v3.2.0 - YAML-based station dashboard with acronym routing and clean database rebuild",
+  "version": "3.2.1",
+  "description": "SITES Spectral Stations & Instruments Management System v3.2.1 - Improved login page UX with removed duplicate access information",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

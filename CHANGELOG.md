@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.2.1] - 2025-09-18
+
+### 🎨 User Experience Improvements
+
+#### 🔧 Login Page Cleanup
+- **Removed Duplicate Access Information**: Eliminated redundant "Access Levels" section from login page
+- **Cleaner Interface**: Access level information is now only shown on the main page where it's more appropriate
+- **Streamlined Login Flow**: Login page now focuses solely on authentication without informational clutter
+- **Improved UX**: Users get straight to login without duplicate information they've already seen
+
 ## [3.2.0] - 2025-09-18
 
 ### 🏗️ Major System Rebuild - YAML-Based Architecture
