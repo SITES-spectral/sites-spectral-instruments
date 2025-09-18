@@ -14,6 +14,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.1.3] - 2025-09-18
+
+### ✨ Platform & Instrument Management Enhancements
+
+#### 🔧 Auto-ID Generation System
+- **Fixed Platform ID Generation**: Corrected auto-ID template to `{station acronym}_{Ecosystem acronym}_{[PL, BL, GL] + zero padded number}`
+  - Examples: `ANS_FOR_PL01`, `LON_AGR_BL01`, `GRI_FOR_GL01`
+  - Added GL (Ground Level) option alongside PL (Platform) and BL (Building)
+  - Enhanced debugging with comprehensive console logging
+- **Fixed Instrument ID Generation**: Corrected phenocam ID template to `{platform ID}_PHE{zero padded number}`
+  - Examples: `ANS_FOR_PL01_PHE01`, `LON_AGR_BL01_PHE02`
+  - Removed incorrect underscore between PHE and number
+  - Proper sequential numbering within each platform
+
+#### 🎨 Visual Design Improvements
+- **Transparent Map Markers**: Updated all interactive map markers to use transparency (70% opacity)
+  - Station markers: `rgba(234, 67, 53, 0.7)` (red with transparency)
+  - Platform markers: `rgba(66, 133, 244, 0.7)` (blue with transparency)
+  - Instrument markers: `rgba(52, 168, 83, 0.7)` (green with transparency)
+- **SITES Green Branding**: Replaced blue-violet gradients with SITES spectral green branding
+  - Updated all linear gradients from `#667eea → #764ba2` to `#059669 → #064e3b`
+  - Applied to login page, redirect pages, station headers, and all gradient backgrounds
+  - Updated accent colors, buttons, and form focus states to match green theme
+
+#### 🛠️ Bug Fixes
+- **Modal Display Issues**: Fixed edit platform/instrument buttons failing to show modals
+- **Wrong Modal Opening**: Fixed "Add New Platform" button showing instrument modal instead
+- **Instrument Type Cleanup**: Removed "Weather Station (WEA)" and "Sensor (SEN)" from dropdown
+- **ID Generation Logic**: Corrected platform and instrument auto-ID generation algorithms
+
+### 🎯 User Experience Improvements
+- **Professional Green Theme**: Consistent SITES spectral green branding throughout interface
+- **Enhanced Transparency**: Map markers now blend better with background imagery
+- **Improved Debugging**: Added comprehensive console logging for ID generation troubleshooting
+- **Form Validation**: Enhanced auto-ID generation with proper error handling
+
+### 🔧 Technical Improvements
+- **ID Generation Patterns**: Robust regex patterns for platform and instrument ID validation
+- **Sequential Numbering**: Proper increment logic based on existing platform/instrument counts
+- **Color Consistency**: Unified green color palette using SITES success color (`#059669`)
+- **CSS Updates**: Comprehensive gradient and color updates across all HTML pages
+
+### 🌐 Deployment Status
+- **Production URL**: https://sites.jobelab.com
+- **Version**: 3.1.3
+- **Status**: ✅ Platform/instrument management with corrected auto-ID generation
+- **Branding**: ✅ SITES green theme applied throughout interface
+- **Map Markers**: ✅ Transparent markers for better visual integration
+
 ## [3.1.1] - 2025-09-17
 
 ### 🐛 Critical Fixes

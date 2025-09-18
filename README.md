@@ -2,7 +2,7 @@
 
 A comprehensive web-based management system for SITES Spectral monitoring stations and instruments across Sweden. This professional-grade application provides secure, role-based access to manage research infrastructure with an intuitive interface and powerful data management capabilities.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-3.1.3-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-orange.svg)
 ![Database](https://img.shields.io/badge/database-D1%20SQLite-green.svg)
 
@@ -18,7 +18,8 @@ A comprehensive web-based management system for SITES Spectral monitoring statio
 ### 🗺️ Interactive Mapping System
 - **Professional Leaflet.js Integration** with high-resolution satellite imagery
 - **Multi-layer Support**: Satellite (Esri ArcGIS), topographic, and OpenStreetMap
-- **Custom Markers**: Color-coded station and platform markers with type distinction
+- **Custom Markers**: Color-coded station and platform markers with type distinction and transparency
+- **Transparent Markers**: Enhanced visual integration with 70% opacity for better background visibility
 - **Rich Popups**: Detailed information panels with direct management links
 - **Responsive Design**: Adapts seamlessly to desktop, tablet, and mobile devices
 - **Layer Controls**: Easy switching between different map visualizations
@@ -27,13 +28,17 @@ A comprehensive web-based management system for SITES Spectral monitoring statio
 ### 📊 Data Management
 - **Dynamic Tables** with inline editing capabilities for real-time updates
 - **Hierarchical Structure**: Stations → Platforms → Instruments organization
+- **Auto-ID Generation**: Automatic unique ID creation for platforms and instruments
+- **Platform Management**: Complete CRUD operations with auto-generated IDs (`{STATION}_{ECOSYSTEM}_{LOCATION}##`)
+- **Instrument Management**: Comprehensive phenocam management with sequential IDs (`{PLATFORM}_PHE##`)
 - **Thematic Program Tracking**: SITES Spectral, ICOS, and Other classifications
 - **Priority-based Organization** with automatic sorting and visual indicators
 - **Advanced Filtering**: Search and filter by program, status, location, and more
 - **Bulk Operations**: Multi-select framework for efficient data management
 
 ### 🎨 Professional UI/UX
-- **SITES Spectral Branding** with official logos, colors, and visual identity
+- **SITES Spectral Branding** with official logos, colors, and green gradient themes
+- **Modern Green Theme**: Professional SITES green color palette throughout interface
 - **Responsive Design** optimized for all screen sizes and devices
 - **Loading States** and comprehensive error handling throughout
 - **Toast Notifications** for user feedback and status updates
