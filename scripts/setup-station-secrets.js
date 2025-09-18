@@ -1,89 +1,96 @@
 #!/usr/bin/env node
 /**
  * Setup Station Secrets for Cloudflare Workers
- * 
+ *
  * This script creates Cloudflare secrets for each station, allowing
  * station-based authentication using station names as user IDs.
- * 
+ *
+ * Updated to use station acronyms as station_id (text) instead of numeric IDs.
+ * Station acronyms match the authoritative .secure/stations.yaml file.
+ *
  * Usage:
  *   node scripts/setup-station-secrets.js
- * 
+ *
  * Requirements:
  *   - wrangler CLI installed and configured
  *   - Access to the D1 database
  *   - Cloudflare API permissions for secrets management
+ *
+ * Changes in v4.2.1:
+ *   - station_id now uses acronym text (ANS, ASA, etc.) instead of numeric IDs
+ *   - Corrected Skogaryd acronym from SKG to SKC (matches YAML)
+ *   - All acronyms verified against .secure/stations.yaml authoritative source
  */
 
 const { execSync } = require('child_process');
 const crypto = require('crypto');
 
 // Station configurations with their authentication details
+// Acronyms match .secure/stations.yaml authoritative source
 const STATION_CONFIGS = [
     {
-        id: 1,
+        station_id: 'ANS',
         name: 'Abisko',
         acronym: 'ANS',
         username: 'abisko',
         role: 'station'
     },
     {
-        id: 2,
+        station_id: 'ASA',
         name: 'Asa',
         acronym: 'ASA',
         username: 'asa',
         role: 'station'
     },
     {
-        id: 3,
+        station_id: 'BOL',
         name: 'Bolmen',
         acronym: 'BOL',
         username: 'bolmen',
         role: 'station'
     },
     {
-        id: 4,
+        station_id: 'ERK',
         name: 'Erken',
         acronym: 'ERK',
         username: 'erken',
         role: 'station'
     },
     {
-        id: 5,
+        station_id: 'GRI',
         name: 'Grimsö',
         acronym: 'GRI',
         username: 'grimso',
         role: 'station'
     },
     {
-        id: 6,
+        station_id: 'LON',
         name: 'Lönnstorp',
         acronym: 'LON',
         username: 'lonnstorp',
         role: 'station'
     },
     {
-        id: 7,
+        station_id: 'RBD',
         name: 'Röbäcksdalen',
         acronym: 'RBD',
         username: 'robacksdalen',
         role: 'station'
     },
     {
-        id: 8,
+        station_id: 'SKC',
         name: 'Skogaryd',
-        acronym: 'SKG',
+        acronym: 'SKC',
         username: 'skogaryd',
         role: 'station'
     },
-
     {
-        id: 9,
+        station_id: 'SVB',
         name: 'Svartberget',
         acronym: 'SVB',
         username: 'svartberget',
         role: 'station'
-    },
-
+    }
 ];
 
 // Admin user configuration
@@ -162,7 +169,7 @@ function createUserCredentials(config, password) {
         username: config.username,
         password: password,
         role: config.role,
-        station_id: config.id || null,
+        station_id: config.station_id || null,
         created_at: new Date().toISOString(),
         active: true
     };

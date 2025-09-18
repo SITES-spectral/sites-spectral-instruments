@@ -12,6 +12,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom feature implementation as requested
 - Streamlined user experience
 
+## [4.2.2] - 2025-09-18
+
+### 🔧 Station Credentials Script Updates
+
+#### ✨ Script Improvements
+- **Updated setup-station-secrets.js**: Modified credential generation script to use acronyms
+- **Text-Based Station IDs**: Script now generates station_id as acronym text (ANS, ASA, etc.)
+- **YAML Compliance**: All acronyms match authoritative `.secure/stations.yaml` file
+- **Corrected Acronyms**: Fixed Skogaryd from SKG to SKC to match YAML specification
+
+#### 🏗️ Generated Credentials Format
+- **station_id**: Now uses text acronyms instead of numeric IDs
+- **Consistent Mapping**: abisko→ANS, asa→ASA, grimso→GRI, lonnstorp→LON
+- **Verified Acronyms**: robacksdalen→RBD, skogaryd→SKC, svartberget→SVB
+- **Complete Coverage**: All 9 stations with proper acronym-based identification
+
+#### 📝 Documentation Updates
+- **Enhanced Comments**: Added detailed changelog within script file
+- **Usage Instructions**: Updated script documentation for v4.2.x compatibility
+- **YAML References**: Documented authoritative source for station acronyms
+
 ## [4.2.1] - 2025-09-18
 
 ### 🔧 Station Credential and Acronym Fixes
