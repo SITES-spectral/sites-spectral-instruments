@@ -358,8 +358,27 @@ async function getStations(db, user, searchParams) {
   });
 }
 
-async function getStation(db, acronym, user) {
-  if (!checkStationAccess(user, acronym)) {
+async function getStation(db, identifier, user) {
+  // Handle both numeric ID and acronym/normalized_name
+  const isNumericId = !isNaN(identifier) && !isNaN(parseFloat(identifier));
+
+  // For permission checking, we need to get the station first to check access
+  let station;
+  if (isNumericId) {
+    station = await db.prepare(`SELECT id, acronym, normalized_name FROM stations WHERE id = ?`).bind(parseInt(identifier)).first();
+  } else {
+    station = await db.prepare(`SELECT id, acronym, normalized_name FROM stations WHERE acronym = ? OR normalized_name = ?`).bind(identifier, identifier).first();
+  }
+
+  if (!station) {
+    return new Response(JSON.stringify({ error: 'Station not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Check station access using the station ID
+  if (!checkStationAccess(user, station.id)) {
     return new Response(JSON.stringify({ error: 'Access denied' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -381,8 +400,8 @@ async function getStation(db, acronym, user) {
       LEFT JOIN instruments i ON p.id = i.platform_id
       GROUP BY p.station_id
     ) i ON s.id = i.station_id
-    WHERE s.acronym = ? OR s.normalized_name = ?
-  `).bind(acronym, acronym).first();
+    WHERE s.id = ?
+  `).bind(station.id).first();
 
   if (!result) {
     return new Response(JSON.stringify({ error: 'Station not found' }), {
@@ -533,20 +552,28 @@ async function getInstruments(db, user, searchParams) {
 async function getGeoJSON(db, type, user) {
   const features = [];
 
-  // Add stations
+  // Add stations with platform and instrument counts
   if (type === 'all' || type === 'stations') {
     let stationsQuery = `
-      SELECT id, normalized_name, display_name, acronym, latitude, longitude, status
-      FROM stations
-      WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+      SELECT
+        s.id, s.normalized_name, s.display_name, s.acronym, s.latitude, s.longitude, s.status,
+        COUNT(DISTINCT p.id) as platform_count,
+        COUNT(DISTINCT i.id) as instrument_count,
+        COUNT(DISTINCT CASE WHEN i.status = 'Active' THEN i.id END) as active_instrument_count
+      FROM stations s
+      LEFT JOIN platforms p ON s.id = p.station_id
+      LEFT JOIN instruments i ON p.id = i.platform_id
+      WHERE s.latitude IS NOT NULL AND s.longitude IS NOT NULL
     `;
 
     const stationParams = [];
 
     if (user.role === 'station') {
-      stationsQuery += ` AND id = ?`;
+      stationsQuery += ` AND s.id = ?`;
       stationParams.push(user.station_id);
     }
+
+    stationsQuery += ` GROUP BY s.id, s.normalized_name, s.display_name, s.acronym, s.latitude, s.longitude, s.status`;
 
     const stations = await db.prepare(stationsQuery).bind(...stationParams).all();
 
@@ -562,7 +589,67 @@ async function getGeoJSON(db, type, user) {
           id: station.id,
           name: station.display_name,
           acronym: station.acronym,
-          status: station.status
+          status: station.status,
+          latitude: station.latitude,
+          longitude: station.longitude,
+          platform_count: station.platform_count || 0,
+          instrument_count: station.instrument_count || 0,
+          active_instrument_count: station.active_instrument_count || 0
+        }
+      });
+    }
+  }
+
+  // Add platforms with instrument details
+  if (type === 'all' || type === 'platforms') {
+    let platformsQuery = `
+      SELECT p.id, p.display_name, p.location_code, p.mounting_structure, p.platform_height_m,
+             p.latitude, p.longitude, p.status, s.display_name as station_name, s.id as station_id,
+             COUNT(DISTINCT i.id) as instrument_count,
+             COUNT(DISTINCT CASE WHEN i.status = 'Active' THEN i.id END) as active_instrument_count,
+             GROUP_CONCAT(DISTINCT i.camera_brand) as camera_brands,
+             GROUP_CONCAT(DISTINCT i.ecosystem_code) as ecosystem_codes,
+             GROUP_CONCAT(DISTINCT i.display_name) as instrument_names
+      FROM platforms p
+      JOIN stations s ON p.station_id = s.id
+      LEFT JOIN instruments i ON p.id = i.platform_id
+      WHERE p.latitude IS NOT NULL AND p.longitude IS NOT NULL
+    `;
+
+    const platformParams = [];
+
+    if (user.role === 'station') {
+      platformsQuery += ` AND s.id = ?`;
+      platformParams.push(user.station_id);
+    }
+
+    platformsQuery += ` GROUP BY p.id, p.display_name, p.location_code, p.mounting_structure, p.platform_height_m, p.latitude, p.longitude, p.status, s.display_name, s.id`;
+
+    const platforms = await db.prepare(platformsQuery).bind(...platformParams).all();
+
+    for (const platform of platforms.results || []) {
+      features.push({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [platform.longitude, platform.latitude]
+        },
+        properties: {
+          type: 'platform',
+          id: platform.id,
+          name: platform.display_name || platform.location_code || `Platform ${platform.id}`,
+          station_name: platform.station_name,
+          station_id: platform.station_id,
+          mounting_structure: platform.mounting_structure,
+          platform_height_m: platform.platform_height_m,
+          status: platform.status,
+          latitude: platform.latitude,
+          longitude: platform.longitude,
+          instrument_count: platform.instrument_count || 0,
+          active_instrument_count: platform.active_instrument_count || 0,
+          camera_brands: platform.camera_brands ? platform.camera_brands.split(',').filter(b => b) : [],
+          ecosystem_codes: platform.ecosystem_codes ? platform.ecosystem_codes.split(',').filter(e => e) : [],
+          instrument_names: platform.instrument_names ? platform.instrument_names.split(',').filter(n => n) : []
         }
       });
     }
@@ -577,27 +664,294 @@ async function getGeoJSON(db, type, user) {
   });
 }
 
-// Placeholder functions for platform and instrument operations
+// Platform CRUD operations
 async function getPlatform(db, id, user) {
-  return new Response(JSON.stringify({ error: 'Not implemented' }), { status: 501 });
+  const result = await db.prepare(`
+    SELECT p.*, s.display_name as station_name
+    FROM platforms p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `).bind(parseInt(id)).first();
+
+  if (!result) {
+    return new Response(JSON.stringify({ error: 'Platform not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Check station access
+  if (!checkStationAccess(user, result.station_id)) {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  return new Response(JSON.stringify(result), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function updatePlatform(db, id, data, user) {
-  return new Response(JSON.stringify({ error: 'Not implemented' }), { status: 501 });
+  // Check if platform exists and user has access
+  const existing = await db.prepare(`
+    SELECT p.*, s.id as station_id FROM platforms p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `).bind(parseInt(id)).first();
+
+  if (!existing) {
+    return new Response(JSON.stringify({ error: 'Platform not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (!checkStationAccess(user, existing.station_id)) {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Build update query dynamically
+  const updateFields = [];
+  const params = [];
+
+  const allowedFields = ['display_name', 'location_code', 'mounting_structure', 'platform_height_m', 'status', 'deployment_date', 'latitude', 'longitude', 'description'];
+
+  for (const field of allowedFields) {
+    if (data[field] !== undefined) {
+      updateFields.push(`${field} = ?`);
+      params.push(data[field]);
+    }
+  }
+
+  if (updateFields.length === 0) {
+    return new Response(JSON.stringify({ error: 'No valid fields to update' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  params.push(parseInt(id));
+
+  await db.prepare(`
+    UPDATE platforms
+    SET ${updateFields.join(', ')}
+    WHERE id = ?
+  `).bind(...params).run();
+
+  return new Response(JSON.stringify({ success: true, message: 'Platform updated successfully' }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function createPlatform(db, data, user) {
-  return new Response(JSON.stringify({ error: 'Not implemented' }), { status: 501 });
+  if (!data.station_id) {
+    return new Response(JSON.stringify({ error: 'Station ID required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (!checkStationAccess(user, parseInt(data.station_id))) {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const result = await db.prepare(`
+    INSERT INTO platforms (station_id, display_name, location_code, mounting_structure, platform_height_m, status, deployment_date, latitude, longitude, description)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    parseInt(data.station_id),
+    data.display_name || null,
+    data.location_code || null,
+    data.mounting_structure || null,
+    data.platform_height_m || null,
+    data.status || 'Active',
+    data.deployment_date || null,
+    data.latitude || null,
+    data.longitude || null,
+    data.description || null
+  ).run();
+
+  return new Response(JSON.stringify({
+    success: true,
+    message: 'Platform created successfully',
+    id: result.insertId
+  }), {
+    status: 201,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
+// Instrument CRUD operations
 async function getInstrument(db, id, user) {
-  return new Response(JSON.stringify({ error: 'Not implemented' }), { status: 501 });
+  const result = await db.prepare(`
+    SELECT i.*, p.display_name as platform_name, s.display_name as station_name, s.id as station_id
+    FROM instruments i
+    JOIN platforms p ON i.platform_id = p.id
+    JOIN stations s ON p.station_id = s.id
+    WHERE i.id = ?
+  `).bind(parseInt(id)).first();
+
+  if (!result) {
+    return new Response(JSON.stringify({ error: 'Instrument not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Check station access
+  if (!checkStationAccess(user, result.station_id)) {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  return new Response(JSON.stringify(result), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function updateInstrument(db, id, data, user) {
-  return new Response(JSON.stringify({ error: 'Not implemented' }), { status: 501 });
+  // Check if instrument exists and user has access
+  const existing = await db.prepare(`
+    SELECT i.*, p.station_id FROM instruments i
+    JOIN platforms p ON i.platform_id = p.id
+    WHERE i.id = ?
+  `).bind(parseInt(id)).first();
+
+  if (!existing) {
+    return new Response(JSON.stringify({ error: 'Instrument not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (!checkStationAccess(user, existing.station_id)) {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Build update query dynamically
+  const updateFields = [];
+  const params = [];
+
+  const allowedFields = [
+    'display_name', 'ecosystem_code', 'instrument_number', 'status', 'camera_brand', 'camera_model',
+    'camera_resolution', 'camera_serial_number', 'first_measurement_year', 'last_measurement_year',
+    'measurement_status', 'deployment_date', 'removal_date', 'latitude', 'longitude',
+    'instrument_height_m', 'viewing_direction', 'azimuth_degrees', 'degrees_from_nadir',
+    'description', 'installation_notes', 'maintenance_notes'
+  ];
+
+  for (const field of allowedFields) {
+    if (data[field] !== undefined) {
+      updateFields.push(`${field} = ?`);
+      params.push(data[field]);
+    }
+  }
+
+  if (updateFields.length === 0) {
+    return new Response(JSON.stringify({ error: 'No valid fields to update' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  params.push(parseInt(id));
+
+  await db.prepare(`
+    UPDATE instruments
+    SET ${updateFields.join(', ')}
+    WHERE id = ?
+  `).bind(...params).run();
+
+  return new Response(JSON.stringify({ success: true, message: 'Instrument updated successfully' }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function createInstrument(db, data, user) {
-  return new Response(JSON.stringify({ error: 'Not implemented' }), { status: 501 });
+  if (!data.platform_id) {
+    return new Response(JSON.stringify({ error: 'Platform ID required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Check if platform exists and user has access
+  const platform = await db.prepare(`
+    SELECT p.*, s.id as station_id FROM platforms p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `).bind(parseInt(data.platform_id)).first();
+
+  if (!platform) {
+    return new Response(JSON.stringify({ error: 'Platform not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (!checkStationAccess(user, platform.station_id)) {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const result = await db.prepare(`
+    INSERT INTO instruments (
+      platform_id, display_name, ecosystem_code, instrument_number, status, camera_brand, camera_model,
+      camera_resolution, camera_serial_number, first_measurement_year, last_measurement_year,
+      measurement_status, deployment_date, removal_date, latitude, longitude, instrument_height_m,
+      viewing_direction, azimuth_degrees, degrees_from_nadir, description, installation_notes, maintenance_notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    parseInt(data.platform_id),
+    data.display_name || null,
+    data.ecosystem_code || null,
+    data.instrument_number || null,
+    data.status || 'Active',
+    data.camera_brand || 'Mobotix',
+    data.camera_model || null,
+    data.camera_resolution || null,
+    data.camera_serial_number || null,
+    data.first_measurement_year || null,
+    data.last_measurement_year || null,
+    data.measurement_status || 'Active',
+    data.deployment_date || null,
+    data.removal_date || null,
+    data.latitude || null,
+    data.longitude || null,
+    data.instrument_height_m || null,
+    data.viewing_direction || null,
+    data.azimuth_degrees || null,
+    data.degrees_from_nadir || null,
+    data.description || null,
+    data.installation_notes || null,
+    data.maintenance_notes || null
+  ).run();
+
+  return new Response(JSON.stringify({
+    success: true,
+    message: 'Instrument created successfully',
+    id: result.insertId
+  }), {
+    status: 201,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }

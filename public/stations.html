@@ -868,6 +868,193 @@
             visibility: visible;
         }
 
+        /* Platform and Instrument Nested Layout */
+        .platform-summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .instruments-count {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            color: #4a5568;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .platform-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .instruments-section {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .instruments-title {
+            margin: 0 0 1rem 0;
+            color: #2d3748;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instruments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .instrument-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .instrument-card:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .instrument-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .instrument-title {
+            font-weight: 500;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .instrument-details {
+            margin-bottom: 0.75rem;
+        }
+
+        .instrument-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        .instrument-meta .meta-label {
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .instrument-meta .meta-value {
+            color: #2d3748;
+        }
+
+        .instrument-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .no-instruments {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            font-style: italic;
+        }
+
+        .no-instruments i {
+            margin-right: 0.5rem;
+        }
+
+        /* Map legend styling */
+        .legend-note {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .legend-note p {
+            margin: 0;
+            color: #718096;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .legend-note i {
+            color: #4299e1;
+            margin-right: 0.25rem;
+        }
+
+        /* Custom Map Tooltips */
+        .custom-tooltip {
+            background: rgba(0, 0, 0, 0.9) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            color: white !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+            padding: 0 !important;
+            max-width: 220px !important;
+        }
+
+        .custom-tooltip::before {
+            border-top-color: rgba(0, 0, 0, 0.9) !important;
+        }
+
+        .map-tooltip {
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .map-tooltip strong {
+            font-weight: 600;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 4px;
+            color: #ffffff;
+        }
+
+        .map-tooltip small {
+            display: block;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.3;
+            margin-bottom: 2px;
+        }
+
+        .map-tooltip small:last-child {
+            margin-bottom: 0;
+        }
+
+        .station-tooltip {
+            border-left: 3px solid #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
+        }
+
+        .platform-tooltip {
+            border-left: 3px solid #48bb78;
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
+        }
+
         @media (max-width: 768px) {
             .user-info {
                 flex-direction: column;
@@ -1002,8 +1189,8 @@
                     <button class="nav-tab active" onclick="showTab('stations')" title="View and manage research stations">
                         <i class="fas fa-broadcast-tower"></i> Stations & Map
                     </button>
-                    <button class="nav-tab" onclick="showTab('instruments')" title="View and manage all instruments">
-                        <i class="fas fa-camera"></i> All Instruments
+                    <button class="nav-tab" onclick="showTab('platforms')" title="View and manage all platforms">
+                        <i class="fas fa-tower-broadcast"></i> All Platforms
                     </button>
                 </div>
 
@@ -1042,20 +1229,11 @@
                                     <div class="legend-marker platform-marker">
                                         <i class="fas fa-tower-broadcast"></i>
                                     </div>
-                                    <span>Platforms</span>
+                                    <span>Platforms (with mounted instruments)</span>
                                 </div>
-                                <div class="legend-item">
-                                    <div class="legend-marker phenocam-marker">
-                                        <i class="fas fa-camera"></i>
-                                    </div>
-                                    <span>Phenocams</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-marker sensor-marker">
-                                        <i class="fas fa-microscope"></i>
-                                    </div>
-                                    <span>Sensors</span>
-                                </div>
+                            </div>
+                            <div class="legend-note">
+                                <p><i class="fas fa-info-circle"></i> <small>Instruments (phenocams/sensors) are mounted on platforms and share the same location.</small></p>
                             </div>
                         </div>
                     </div>
@@ -1070,23 +1248,23 @@
                 </div>
 
 
-                <!-- Instruments Tab -->
-                <div class="tab-content" id="instruments-tab">
+                <!-- Platforms Tab -->
+                <div class="tab-content" id="platforms-tab">
                     <div class="tab-header">
-                        <h2>All Instruments</h2>
+                        <h2>All Platforms</h2>
                         <div class="tab-instructions">
-                            <p><i class="fas fa-lightbulb"></i> View all instruments across your accessible stations. Each card shows key specifications and status information.</p>
+                            <p><i class="fas fa-lightbulb"></i> View all platforms across your accessible stations. Each platform represents a mounting structure that holds instruments.</p>
                         </div>
-                        <div class="tab-actions" id="instrument-tab-actions" style="display: none;">
-                            <button class="btn btn-primary" onclick="createNewInstrument()" title="Add a new instrument">
-                                <i class="fas fa-plus"></i> Add New Instrument
+                        <div class="tab-actions" id="platform-tab-actions" style="display: none;">
+                            <button class="btn btn-primary" onclick="createNewPlatform()" title="Add a new platform">
+                                <i class="fas fa-plus"></i> Add New Platform
                             </button>
                         </div>
                     </div>
-                    <div class="dashboard-grid" id="instruments-grid">
+                    <div class="dashboard-grid" id="platforms-grid">
                         <div class="loading-card">
                             <div class="spinner"></div>
-                            <span>Loading instruments...</span>
+                            <span>Loading platforms...</span>
                         </div>
                     </div>
                 </div>
@@ -1531,7 +1709,7 @@
             if (currentUser.role === 'admin') {
                 document.getElementById('admin-nav').style.display = 'block';
                 document.getElementById('station-tab-actions').style.display = 'flex';
-                document.getElementById('instrument-tab-actions').style.display = 'flex';
+                document.getElementById('platform-tab-actions').style.display = 'flex';
             }
 
             // Set role-specific instructions
@@ -1595,7 +1773,7 @@
         async function loadDashboardData() {
             await Promise.all([
                 loadStations(),
-                loadInstruments()
+                loadPlatforms()
             ]);
             // Initialize map after data is loaded
             setTimeout(initializeMap, 500);
@@ -1693,80 +1871,193 @@
             grid.innerHTML = stationsHTML;
         }
 
-        // Load instruments
-        async function loadInstruments() {
+        // Load platforms with their instruments
+        async function loadPlatforms() {
             try {
                 const token = localStorage.getItem('sites_spectral_token');
-                const response = await fetch('/api/instruments', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
 
-                if (!response.ok) {
+                // Load both platforms and instruments in parallel
+                const [platformsResponse, instrumentsResponse] = await Promise.all([
+                    fetch('/api/platforms', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('/api/instruments', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (!platformsResponse.ok) {
+                    throw new Error('Failed to fetch platforms');
+                }
+                if (!instrumentsResponse.ok) {
                     throw new Error('Failed to fetch instruments');
                 }
 
-                const data = await response.json();
-                const instruments = data.instruments || data;
+                const platformsData = await platformsResponse.json();
+                const instrumentsData = await instrumentsResponse.json();
 
-                renderInstruments(instruments);
+                const platforms = platformsData.platforms || platformsData;
+                const instruments = instrumentsData.instruments || instrumentsData;
+
+                // Group instruments by platform_id
+                const instrumentsByPlatform = {};
+                instruments.forEach(instrument => {
+                    if (!instrumentsByPlatform[instrument.platform_id]) {
+                        instrumentsByPlatform[instrument.platform_id] = [];
+                    }
+                    instrumentsByPlatform[instrument.platform_id].push(instrument);
+                });
+
+                // Add instruments to each platform
+                platforms.forEach(platform => {
+                    platform.instruments = instrumentsByPlatform[platform.id] || [];
+                });
+
+                renderPlatforms(platforms);
 
             } catch (error) {
-                console.error('Error loading instruments:', error);
-                document.getElementById('instruments-grid').innerHTML =
-                    '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load instruments</p></div>';
+                console.error('Error loading platforms:', error);
+                document.getElementById('platforms-grid').innerHTML =
+                    '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load platforms</p></div>';
             }
         }
 
-        // Render instruments in the grid
-        function renderInstruments(instruments) {
-            const grid = document.getElementById('instruments-grid');
+        // Render platforms in the grid with nested instruments
+        function renderPlatforms(platforms) {
+            const grid = document.getElementById('platforms-grid');
 
-            if (instruments.length === 0) {
+            if (platforms.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-camera"></i>
-                        <p>No instruments available</p>
+                        <i class="fas fa-tower-broadcast"></i>
+                        <p>No platforms available</p>
                     </div>
                 `;
                 return;
             }
 
-            const instrumentsHTML = instruments.map(instrument => `
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-camera"></i>
-                            ${instrument.display_name || instrument.normalized_name}
-                        </h3>
-                    </div>
-                    <div class="card-content">
-                        <div class="station-meta">
-                            <div class="meta-item">
-                                <span class="meta-label">Station</span>
-                                <span class="meta-value">${instrument.station_name || '-'}</span>
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Platform</span>
-                                <span class="meta-value">${instrument.platform_name || '-'}</span>
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Type</span>
-                                <span class="meta-value">${instrument.instrument_type || 'Phenocam'}</span>
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Status</span>
-                                <span class="meta-value status-badge ${instrument.status === 'Active' ? 'status-active' : 'status-inactive'}">
+            const platformsHTML = platforms.map(platform => {
+                // Render instruments for this platform
+                const instrumentsHTML = platform.instruments && platform.instruments.length > 0
+                    ? platform.instruments.map(instrument => `
+                        <div class="instrument-card" onclick="event.stopPropagation(); openInstrument(${instrument.id})">
+                            <div class="instrument-header">
+                                <span class="instrument-title">
+                                    <i class="fas fa-camera"></i>
+                                    ${instrument.display_name || instrument.instrument_number || 'Instrument ' + instrument.id}
+                                </span>
+                                <span class="status-badge ${instrument.status === 'Active' ? 'status-active' : 'status-inactive'}">
                                     ${instrument.status || 'Unknown'}
                                 </span>
                             </div>
+                            <div class="instrument-details">
+                                <div class="instrument-meta">
+                                    <span class="meta-label">Camera:</span>
+                                    <span class="meta-value">${instrument.camera_brand || 'N/A'} ${instrument.camera_model || ''}</span>
+                                </div>
+                                <div class="instrument-meta">
+                                    <span class="meta-label">Ecosystem:</span>
+                                    <span class="meta-value">${instrument.ecosystem_code || '-'}</span>
+                                </div>
+                                ${instrument.first_measurement_year ? `
+                                    <div class="instrument-meta">
+                                        <span class="meta-label">Active Since:</span>
+                                        <span class="meta-value">${instrument.first_measurement_year}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="instrument-actions">
+                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openInstrument(${instrument.id})">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                ${currentUser.role === 'admin' || currentUser.role === 'station' ? `
+                                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); editInstrument(${instrument.id}, ${platform.id})">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<div class="no-instruments"><i class="fas fa-info-circle"></i> No instruments on this platform</div>';
+
+                return `
+                    <div class="dashboard-card platform-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-tower-broadcast"></i>
+                                ${platform.display_name || platform.location_code || 'Platform ' + platform.id}
+                            </h3>
+                            <div class="platform-summary">
+                                <span class="instruments-count">
+                                    <i class="fas fa-camera"></i> ${platform.instruments ? platform.instruments.length : 0} instruments
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="station-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Station</span>
+                                    <span class="meta-value">${platform.station_name || '-'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Location Code</span>
+                                    <span class="meta-value">${platform.location_code || '-'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Mounting Structure</span>
+                                    <span class="meta-value">${platform.mounting_structure || '-'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Status</span>
+                                    <span class="meta-value status-badge ${platform.status === 'Active' ? 'status-active' : 'status-inactive'}">
+                                        ${platform.status || 'Unknown'}
+                                    </span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Platform Height</span>
+                                    <span class="meta-value">${platform.platform_height_m ? platform.platform_height_m + 'm' : '-'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Coordinates</span>
+                                    <span class="meta-value">
+                                        ${platform.latitude && platform.longitude
+                                            ? `${platform.latitude.toFixed(4)}, ${platform.longitude.toFixed(4)}`
+                                            : '-'
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Platform Actions -->
+                            <div class="platform-actions">
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openPlatform(${platform.id})">
+                                    <i class="fas fa-eye"></i> View Platform Details
+                                </button>
+                                ${currentUser.role === 'admin' || currentUser.role === 'station' ? `
+                                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); editPlatform(${platform.id}, ${platform.station_id || ''})">
+                                        <i class="fas fa-edit"></i> Edit Platform
+                                    </button>
+                                    <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); createNewInstrument(${platform.id})">
+                                        <i class="fas fa-plus"></i> Add Instrument
+                                    </button>
+                                ` : ''}
+                            </div>
+
+                            <!-- Instruments Section -->
+                            <div class="instruments-section">
+                                <h4 class="instruments-title">
+                                    <i class="fas fa-camera"></i> Instruments on this Platform
+                                </h4>
+                                <div class="instruments-grid">
+                                    ${instrumentsHTML}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
-            grid.innerHTML = instrumentsHTML;
+            grid.innerHTML = platformsHTML;
         }
 
         // Initialize map when map tab is shown
@@ -1817,11 +2108,12 @@
                             popupContent = `
                                 <div class="map-popup">
                                     <h4><i class="fas fa-broadcast-tower"></i> ${props.name}</h4>
-                                    <p><strong>Station:</strong> ${props.acronym || ''}</p>
+                                    <p><strong>Acronym:</strong> ${props.acronym || 'N/A'}</p>
+                                    <p><strong>Status:</strong> <span class="status-badge status-${(props.status || 'unknown').toLowerCase()}">${props.status || 'Unknown'}</span></p>
                                     <p><strong>Location:</strong> ${props.latitude?.toFixed(4) || lat.toFixed(4)}, ${props.longitude?.toFixed(4) || lng.toFixed(4)}</p>
                                     <div class="popup-actions">
                                         <button class="btn btn-sm btn-primary" onclick="window.location.href='/station.html?id=${props.id}'">
-                                            <i class="fas fa-eye"></i> View Details
+                                            <i class="fas fa-eye"></i> View Station Details
                                         </button>
                                     </div>
                                 </div>
@@ -1840,33 +2132,20 @@
                             popupContent = `
                                 <div class="map-popup">
                                     <h4><i class="fas fa-tower-broadcast"></i> ${props.name}</h4>
-                                    <p><strong>Platform Height:</strong> ${props.platform_height_m || 'N/A'}m</p>
+                                    <p><strong>Station:</strong> ${props.station_name}</p>
+                                    <p><strong>Height:</strong> ${props.platform_height_m ? props.platform_height_m + 'm' : 'N/A'}</p>
                                     <p><strong>Mounting:</strong> ${props.mounting_structure || 'N/A'}</p>
                                     <p><strong>Status:</strong> <span class="status-badge status-${(props.status || 'unknown').toLowerCase()}">${props.status || 'Unknown'}</span></p>
+                                    <p><strong>Location:</strong> ${props.latitude?.toFixed(4) || lat.toFixed(4)}, ${props.longitude?.toFixed(4) || lng.toFixed(4)}</p>
+                                    <div class="popup-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="window.location.href='/platform.html?id=${props.id}'">
+                                            <i class="fas fa-eye"></i> View Platform Details
+                                        </button>
+                                    </div>
                                 </div>
                             `;
                             iconSize = [28, 38];
                             iconAnchor = [14, 38];
-                            break;
-                        case 'phenocam':
-                            markerHtml = `
-                                <div class="google-marker-pin instrument-pin">
-                                    <i class="fas fa-camera"></i>
-                                </div>
-                                <div class="google-marker-shadow"></div>
-                            `;
-                            markerClass = 'phenocam-marker google-style-marker';
-                            popupContent = `
-                                <div class="map-popup">
-                                    <h4><i class="fas fa-camera"></i> ${props.instrument_id}</h4>
-                                    <p><strong>Type:</strong> Phenocam</p>
-                                    <p><strong>Camera:</strong> ${props.camera_brand || 'N/A'} ${props.camera_model || ''}</p>
-                                    <p><strong>Status:</strong> <span class="status-badge status-${(props.status || 'unknown').toLowerCase()}">${props.status || 'Unknown'}</span></p>
-                                    ${props.first_measurement_year ? `<p><strong>Active Since:</strong> ${props.first_measurement_year}</p>` : ''}
-                                </div>
-                            `;
-                            iconSize = [24, 34];
-                            iconAnchor = [12, 34];
                             break;
                         default:
                             markerHtml = `
@@ -1878,7 +2157,7 @@
                             markerClass = 'default-marker google-style-marker';
                             popupContent = `
                                 <div class="map-popup">
-                                    <h4>${props.name || props.instrument_id}</h4>
+                                    <h4>${props.name || 'Unknown Location'}</h4>
                                     <p>Location marker</p>
                                 </div>
                             `;
@@ -1895,6 +2174,35 @@
                         })
                     });
 
+                    // Create tooltip content based on marker type
+                    let tooltipContent = '';
+                    if (props.type === 'station') {
+                        tooltipContent = `
+                            <div class="map-tooltip station-tooltip">
+                                <strong>${props.name}</strong><br>
+                                <small>📡 ${props.platform_count || 0} platform${(props.platform_count || 0) !== 1 ? 's' : ''}</small><br>
+                                <small>📷 ${props.instrument_count || 0} instrument${(props.instrument_count || 0) !== 1 ? 's' : ''} (${props.active_instrument_count || 0} active)</small>
+                            </div>
+                        `;
+                    } else if (props.type === 'platform') {
+                        const cameraBrands = props.camera_brands && props.camera_brands.length > 0
+                            ? [...new Set(props.camera_brands)].join(', ')
+                            : 'N/A';
+                        const ecosystems = props.ecosystem_codes && props.ecosystem_codes.length > 0
+                            ? [...new Set(props.ecosystem_codes)].join(', ')
+                            : 'N/A';
+
+                        tooltipContent = `
+                            <div class="map-tooltip platform-tooltip">
+                                <strong>${props.name}</strong><br>
+                                <small>🏢 ${props.station_name}</small><br>
+                                <small>📷 ${props.instrument_count || 0} instrument${(props.instrument_count || 0) !== 1 ? 's' : ''} (${props.active_instrument_count || 0} active)</small><br>
+                                ${props.instrument_count > 0 ? `<small>📹 ${cameraBrands}</small><br>` : ''}
+                                ${props.instrument_count > 0 ? `<small>🌿 ${ecosystems}</small>` : ''}
+                            </div>
+                        `;
+                    }
+
                     // Add click handler for station markers to highlight corresponding card
                     if (props.type === 'station') {
                         marker.on('click', function() {
@@ -1904,6 +2212,16 @@
 
                     marker.addTo(stationsMap);
                     marker.bindPopup(popupContent);
+
+                    // Add tooltip on hover
+                    if (tooltipContent) {
+                        marker.bindTooltip(tooltipContent, {
+                            permanent: false,
+                            direction: 'top',
+                            offset: [0, -10],
+                            className: 'custom-tooltip'
+                        });
+                    }
                 });
 
                 // Remove loading indicator
@@ -2109,7 +2427,7 @@
 
                 Utils.showToast(platformId ? 'Platform updated successfully' : 'Platform created successfully', 'success');
                 closeModal('platform-modal');
-                loadStations(); // Reload to refresh data
+                loadPlatforms(); // Reload platforms to show changes
 
             } catch (error) {
                 console.error('Error saving platform:', error);
@@ -2220,7 +2538,7 @@
 
                 Utils.showToast(instrumentId ? 'Instrument updated successfully' : 'Instrument created successfully', 'success');
                 closeModal('instrument-modal');
-                loadInstruments(); // Reload instruments
+                loadPlatforms(); // Reload platforms to show updated instruments
 
             } catch (error) {
                 console.error('Error saving instrument:', error);
@@ -2252,10 +2570,30 @@
             showModal('station-modal');
         }
 
+        // Create new platform (admin only)
+        function createNewPlatform() {
+            populatePlatformForm({}); // Empty platform object for new creation
+            showModal('platform-modal');
+        }
+
         // Create new instrument (admin only)
-        function createNewInstrument() {
-            populateInstrumentForm({}); // Empty instrument object for new creation
+        function createNewInstrument(platformId = null) {
+            const instrumentData = {};
+            if (platformId) {
+                instrumentData.platform_id = platformId;
+            }
+            populateInstrumentForm(instrumentData, platformId);
             showModal('instrument-modal');
+        }
+
+        // Open platform details
+        function openPlatform(platformId) {
+            window.location.href = `/platform.html?id=${platformId}`;
+        }
+
+        // Open instrument details
+        function openInstrument(instrumentId) {
+            window.location.href = `/instrument.html?id=${instrumentId}`;
         }
 
         // Initialize instructions visibility on load

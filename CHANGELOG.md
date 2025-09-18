@@ -14,6 +14,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.2.3] - 2025-09-18
+
+### 🗺️ Interactive Map Hover Tooltips
+
+#### ✨ Enhanced Map Interaction
+- **Station Hover Tooltips**: Mouse hover on station markers shows comprehensive summary information
+  - Station name with platform count (e.g., "📡 3 platforms")
+  - Total instrument count across all platforms (e.g., "📷 8 instruments (6 active)")
+  - Professional styling with blue accent and gradient background
+- **Platform Hover Tooltips**: Mouse hover on platform markers shows detailed platform information
+  - Platform name and parent station
+  - Instrument count specific to that platform (e.g., "📷 2 instruments (2 active)")
+  - Camera brands mounted on platform (e.g., "📹 Mobotix, Canon")
+  - Ecosystem types being monitored (e.g., "🌿 FOR, AGR")
+  - Professional styling with green accent and gradient background
+
+#### 🔧 Backend Enhancements
+- **Enhanced GeoJSON API**: Updated `/api/geojson/all` endpoint to include aggregated statistics
+  - Station queries now include platform and instrument counts using SQL GROUP BY operations
+  - Platform queries include instrument details, camera brands, and ecosystem codes
+  - Maintained role-based security for station users
+- **Optimized Data Aggregation**: Efficient database queries to minimize API response time
+
+#### 🎨 User Experience Improvements
+- **Instant Information**: No need to click markers to see basic information
+- **Visual Hierarchy**: Different tooltip styles clearly distinguish stations from platforms
+- **Mobile Friendly**: Tooltips work seamlessly on touch devices
+- **Professional Design**: Custom CSS with proper typography, spacing, and visual indicators
+
+## [3.2.2] - 2025-09-18
+
+### 🗺️ Interactive Map Fixes and Platform-Centric Display
+
+#### 🔧 Map Functionality Fixes
+- **Fixed GeoJSON Data Loading**: Resolved map data loading issues that prevented markers from displaying
+- **Updated Map Legend**: Removed outdated phenocam/sensor markers, now shows only stations and platforms
+- **Platform Data Integration**: GeoJSON API now returns both stations and platforms with proper coordinates
+- **API Parameter Fix**: Resolved station endpoint parameter mismatch between frontend IDs and backend expectations
+
+#### 🏗️ Platform-Centric Architecture
+- **Replaced Instruments Tab**: Changed "All Instruments" tab to "All Platforms" tab for better data hierarchy
+- **Nested Instrument Display**: Instruments now display as cards nested within their parent platform cards
+- **Comprehensive Platform Cards**: Each platform card shows:
+  - Platform details (height, mounting structure, coordinates)
+  - All instruments mounted on that platform with specifications
+  - Camera brands, ecosystem codes, and measurement status
+  - Action buttons for viewing/editing platforms and adding instruments
+- **Enhanced Data Relationships**: Clear visual hierarchy showing Stations → Platforms → Instruments
+
+#### 🛠️ CRUD Operations Enhancement
+- **Complete Platform CRUD**: Implemented full create, read, update operations for platforms
+- **Complete Instrument CRUD**: Implemented full create, read, update operations for instruments
+- **Permission-Based Actions**: Users see appropriate action buttons based on their role permissions
+- **Integrated Workflows**: Platform creation/editing integrates seamlessly with instrument management
+
+#### 🎯 User Experience Improvements
+- **Hierarchical Navigation**: Users can now understand the logical structure of stations, platforms, and instruments
+- **Efficient Management**: Manage instruments directly within their platform context
+- **Visual Organization**: Platform cards show instrument count badges and status indicators
+- **Contextual Actions**: "Add Instrument" buttons appear on platforms where users have permissions
+
 ## [3.2.1] - 2025-09-18
 
 ### 🎨 User Experience Improvements
