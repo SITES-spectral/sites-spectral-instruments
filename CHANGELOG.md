@@ -12,6 +12,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom feature implementation as requested
 - Streamlined user experience
 
+## [4.0.2] - 2025-09-18
+
+### 🧹 JavaScript Schema Compliance Cleanup
+
+#### 🗑️ Removed Non-Compliant JavaScript
+- **Deleted `public/js/api.js`**: API client for deleted endpoints and non-existent pages
+- **Deleted `public/js/interactive-map.js`**: Map functionality referencing removed pages
+- **Deleted `public/js/navigation.js`**: Navigation component for deleted page structure
+
+#### ✅ Preserved Schema-Compliant JavaScript
+- **Core Infrastructure**: `src/worker.js`, `src/cors.js`, `src/version.js`
+- **Database Schema Tools**: `scripts/import_stations_yaml.js` (follows stations.yaml schema)
+- **Build Tools**: `scripts/build.js`, `scripts/setup-station-secrets.js`
+- **Generic Utilities**: `public/js/utils.js` (schema-agnostic helper functions)
+
+#### 🎯 Compliance Criteria
+- Files must follow database schema (stations → platforms → instruments)
+- Files must align with stations.yaml structure
+- Core infrastructure files preserved regardless of schema
+- Generic utilities without schema dependencies kept
+
+#### 📊 Result
+- **7 JavaScript files remain** (down from 10)
+- **100% schema compliance** for remaining files
+- **Clean foundation** ready for step-by-step rebuild
+
 ## [4.0.1] - 2025-09-18
 
 ### 🎯 Minimal System - Login Only
