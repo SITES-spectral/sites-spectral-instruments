@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom feature implementation as requested
 - Streamlined user experience
 
+## [4.0.1] - 2025-09-18
+
+### 🎯 Minimal System - Login Only
+
+#### 🗑️ Final Cleanup
+- **Replaced index.html**: Converted index page to be the login page directly
+- **Deleted login.html**: Removed separate login page (functionality moved to index)
+- **Removed Documentation**: Deleted old README.md and docs/ directory
+- **Template Cleanup**: Verified no custom template files exist
+
+#### 🔄 Current State
+- **Single Entry Point**: Index page is now the login interface
+- **Minimal Architecture**: Only essential files remain
+- **Ready for Rebuild**: Clean foundation for step-by-step custom implementation
+- **Login Functionality**: Basic login form ready for API integration
+
+#### 📄 Files Remaining
+- `index.html` - Login page (main entry point)
+- Core infrastructure files only
+- Database schema preserved
+- CSS and JavaScript utilities maintained
+
 ## [4.0.0] - 2025-09-18
 
 ### 🧹 Major Cleanup - Clean Slate Preparation
