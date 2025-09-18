@@ -12,6 +12,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.0] - 2025-09-19
+
+### 🗺️ Enhanced Map Experience & Database Reconstruction
+
+#### ✨ New Features
+- **Enhanced Map Marker Popups**: Station and platform markers now show detailed information including:
+  - Station ID and Platform ID (replacing generic "Location" labels)
+  - Database IDs for technical reference
+  - Instrument counts by type (e.g., "Phenocam: 2", "Sensor: 1") instead of total counts only
+  - Professional formatting with bullet points and clear categorization
+- **Improved Button Visibility**: Fixed layer control buttons with black text on white background for better contrast
+- **Dynamic Popup Updates**: Marker popups refresh automatically when instrument data loads from API
+
+#### 🗄️ Database Reconstruction
+- **Complete Database Rebuild**: Dropped all existing tables and rebuilt from authoritative YAML sources
+- **Real Data Integration**: Imported comprehensive data from:
+  - `.secure/stations.yaml` (7 stations, 19 platforms, 22 instruments)
+  - `yamls/ecosystems.yaml` (12 ecosystem types)
+  - `yamls/status.yaml` (12 status definitions)
+- **Corrected Coordinates**: Fixed dummy coordinates (62, 15) with real GPS positions:
+  - Röbäcksdalen (RBD): 63.806642, 20.229243
+  - All other stations now have accurate coordinates from YAML data
+- **Data Quality**: Cleaned problematic characters (`?`) from YAML files to ensure proper parsing
+
+#### 🔧 Technical Improvements
+- **Automated Migration Script**: Created `generate-migration-from-yaml.js` for systematic data import
+- **YAML Data Validation**: Proper parsing of nested coordinate structures (`geolocation.point.latitude_dd`)
+- **Foreign Key Optimization**: Removed problematic ecosystem constraints for better data flexibility
+- **Real-time Marker Updates**: Station markers update with accurate instrument type counts when data loads
+
+#### 🎨 User Interface Enhancements
+- **Better Text Contrast**: Layer control buttons now use dark text (#1f2937) with semi-transparent white backgrounds
+- **Professional Popup Design**: Clean, readable marker popups with hierarchical information display
+- **Improved Visual Hierarchy**: Clear distinction between station names, IDs, and instrument details
+- **Responsive Button States**: Enhanced hover and active states for layer controls with better visual feedback
+
+#### 📊 Data Accuracy Improvements
+- **Authoritative Source**: All data now sourced directly from official YAML configuration files
+- **Complete Ecosystem Coverage**: Added all 12 ecosystem types (HEA, AGR, MIR, LAK, WET, GRA, FOR, ALP, CON, DEC, MAR, PEA)
+- **Instrument Type Classification**: Proper categorization and counting of different instrument types per location
+- **Station Metadata**: Accurate display names, acronyms, and descriptions for all research stations
+
 ## [4.3.0] - 2025-09-18
 
 ### 🚀 Major Release: Real Data Integration & Interactive Dashboard

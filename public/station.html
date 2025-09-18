@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.2.2">
+    <link rel="stylesheet" href="/css/styles.css?v=4.3.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.2.2">
+    <meta name="app-version" content="4.3.0">
     <meta name="build-date" content="2025-09-18">
 
     <style>
@@ -251,25 +251,35 @@
         }
 
         .layer-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #1f2937;
             padding: 0.5rem 0.75rem;
             border-radius: 6px;
             font-size: 0.8rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 0.25rem;
+            text-shadow: none;
         }
 
         .layer-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.3);
+            color: #111827;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .layer-btn.active {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(0, 0, 0, 0.4);
+            color: #111827;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         }
 
         .station-map {
@@ -430,7 +440,7 @@
     </main>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.2.2"></script>
+    <script src="/js/utils.js?v=4.3.0"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -633,9 +643,40 @@
                 iconAnchor: [16, 16]
             });
 
-            L.marker([lat, lng], { icon: stationIcon })
+            // Create enhanced station popup with instrument details
+            const createStationPopup = () => {
+                const totalInstruments = window.stationInstruments || [];
+                const instrumentTypes = {};
+
+                // Count instruments by type
+                totalInstruments.forEach(instrument => {
+                    const type = instrument.instrument_type || 'phenocam';
+                    instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
+                });
+
+                let instrumentDetails = '';
+                if (Object.keys(instrumentTypes).length > 0) {
+                    instrumentDetails = '<br/><strong>Instruments:</strong><br/>';
+                    Object.entries(instrumentTypes).forEach(([type, count]) => {
+                        const displayType = type.charAt(0).toUpperCase() + type.slice(1);
+                        instrumentDetails += `• ${displayType}: ${count}<br/>`;
+                    });
+                } else {
+                    instrumentDetails = '<br/>Instruments: None';
+                }
+
+                return `<strong>${stationData.display_name}</strong><br/>` +
+                       `Station ID: ${stationData.acronym || stationAcronym}<br/>` +
+                       `Database ID: ${stationData.id || 'N/A'}` +
+                       instrumentDetails;
+            };
+
+            const stationMarker = L.marker([lat, lng], { icon: stationIcon })
                 .addTo(stationMap)
-                .bindPopup(`<strong>${stationData.display_name}</strong><br/>Station: ${stationData.acronym || stationAcronym}`);
+                .bindPopup(createStationPopup());
+
+            // Store station marker globally to update popup later
+            window.stationMarker = stationMarker;
 
             // Add real platform markers
             addPlatformMarkers(lat, lng);
@@ -645,6 +686,38 @@
         }
 
         function updateMapMarkers() {
+            // Update station marker popup with new instrument data
+            if (window.stationMarker) {
+                const createStationPopup = () => {
+                    const totalInstruments = window.stationInstruments || [];
+                    const instrumentTypes = {};
+
+                    // Count instruments by type
+                    totalInstruments.forEach(instrument => {
+                        const type = instrument.instrument_type || 'phenocam';
+                        instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
+                    });
+
+                    let instrumentDetails = '';
+                    if (Object.keys(instrumentTypes).length > 0) {
+                        instrumentDetails = '<br/><strong>Instruments:</strong><br/>';
+                        Object.entries(instrumentTypes).forEach(([type, count]) => {
+                            const displayType = type.charAt(0).toUpperCase() + type.slice(1);
+                            instrumentDetails += `• ${displayType}: ${count}<br/>`;
+                        });
+                    } else {
+                        instrumentDetails = '<br/>Instruments: None';
+                    }
+
+                    return `<strong>${stationData.display_name}</strong><br/>` +
+                           `Station ID: ${stationData.acronym || stationAcronym}<br/>` +
+                           `Database ID: ${stationData.id || 'N/A'}` +
+                           instrumentDetails;
+                };
+
+                window.stationMarker.setPopupContent(createStationPopup());
+            }
+
             // Clear existing platform markers
             if (window.platformMarkers) {
                 window.platformMarkers.forEach(marker => {
@@ -690,13 +763,31 @@
                     iconAnchor: [12, 12]
                 });
 
-                // Count instruments for this platform
+                // Count instruments for this platform and group by type
                 const platformInstruments = window.stationInstruments ?
                     window.stationInstruments.filter(inst => inst.platform_id === platform.id) : [];
 
+                const instrumentTypes = {};
+                platformInstruments.forEach(instrument => {
+                    const type = instrument.instrument_type || 'phenocam';
+                    instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
+                });
+
+                let instrumentDetails = '';
+                if (Object.keys(instrumentTypes).length > 0) {
+                    instrumentDetails = '<br/><strong>Instruments:</strong><br/>';
+                    Object.entries(instrumentTypes).forEach(([type, count]) => {
+                        const displayType = type.charAt(0).toUpperCase() + type.slice(1);
+                        instrumentDetails += `• ${displayType}: ${count}<br/>`;
+                    });
+                } else {
+                    instrumentDetails = '<br/>Instruments: None';
+                }
+
                 const popupContent = `<strong>${platform.display_name}</strong><br/>` +
-                    `Location: ${platform.location_code || 'N/A'}<br/>` +
-                    `Instruments: ${platformInstruments.length}`;
+                    `Platform ID: ${platform.location_code || 'N/A'}<br/>` +
+                    `Database ID: ${platform.id || 'N/A'}` +
+                    instrumentDetails;
 
                 const marker = L.marker([lat, lng], { icon: platformIcon })
                     .addTo(stationMap)
