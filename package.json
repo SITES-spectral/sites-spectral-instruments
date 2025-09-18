@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.2.7",
-  "description": "SITES Spectral Stations & Instruments Management System v3.2.7 - Fixed station ID parameter authentication",
+  "version": "4.0.0",
+  "description": "SITES Spectral Stations & Instruments Management System v4.0.0 - Clean slate rebuild preparation",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
