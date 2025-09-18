@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.0.2">
+    <link rel="stylesheet" href="/css/styles.css?v=4.2.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.0.2">
+    <meta name="app-version" content="4.2.0">
     <meta name="build-date" content="2025-09-18">
 
     <style>
@@ -213,7 +213,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.0.2"></script>
+    <script src="/js/utils.js?v=4.2.0"></script>
     <script>
         class LoginManager {
             constructor() {
@@ -246,11 +246,21 @@
 
             async verifyTokenAndRedirect(token) {
                 try {
-                    // For now, just check if user data exists
-                    const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
-                    if (user) {
-                        this.redirectUser(user);
-                        return;
+                    // Verify token with API
+                    const response = await fetch('/api/auth/verify', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.valid && data.user) {
+                            localStorage.setItem('sites_spectral_user', JSON.stringify(data.user));
+                            this.redirectUser(data.user);
+                            return;
+                        }
                     }
                 } catch (error) {
                     console.error('Token verification failed:', error);
@@ -276,25 +286,28 @@
                 this.clearError();
 
                 try {
-                    // Mock authentication for now - will be replaced with real API
-                    if (username === 'admin' && password === 'admin') {
-                        const mockUser = {
-                            username: 'admin',
-                            role: 'admin',
-                            station_acronym: 'ANS'
-                        };
-                        const mockToken = 'mock-token-' + Date.now();
+                    // Real API authentication
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
 
-                        localStorage.setItem('sites_spectral_token', mockToken);
-                        localStorage.setItem('sites_spectral_user', JSON.stringify(mockUser));
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        localStorage.setItem('sites_spectral_token', data.token);
+                        localStorage.setItem('sites_spectral_user', JSON.stringify(data.user));
 
                         Utils.showToast('Login successful!', 'success');
 
                         setTimeout(() => {
-                            this.redirectUser(mockUser);
+                            this.redirectUser(data.user);
                         }, 1000);
                     } else {
-                        this.showError('Invalid credentials. Use admin/admin for testing.');
+                        this.showError(data.error || 'Login failed');
                     }
 
                 } catch (error) {

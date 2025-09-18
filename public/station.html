@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.0.2">
+    <link rel="stylesheet" href="/css/styles.css?v=4.2.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.0.2">
+    <meta name="app-version" content="4.2.0">
     <meta name="build-date" content="2025-09-18">
 
     <style>
@@ -216,7 +216,7 @@
     </main>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.0.2"></script>
+    <script src="/js/utils.js?v=4.2.0"></script>
     <script>
         let currentUser = null;
         let stationData = null;
@@ -250,27 +250,37 @@
 
         async function loadStationData() {
             try {
-                // For now, we'll create mock station data based on the acronym
-                // This will be replaced with actual API call later
-                const mockStations = {
-                    'ANS': { display_name: 'Abisko', acronym: 'ANS' },
-                    'ASA': { display_name: 'Asa', acronym: 'ASA' },
-                    'SVB': { display_name: 'Svartberget', acronym: 'SVB' },
-                    'LON': { display_name: 'Lonnstorp', acronym: 'LON' },
-                    'ROB': { display_name: 'Robacksdalen', acronym: 'ROB' },
-                    'GRI': { display_name: 'Grimsö', acronym: 'GRI' },
-                    'ERK': { display_name: 'Erken', acronym: 'ERK' }
-                };
-
-                const station = mockStations[stationAcronym.toUpperCase()];
-
-                if (!station) {
-                    showError('Station not found');
+                // Get auth token
+                const token = localStorage.getItem('sites_spectral_token');
+                if (!token) {
+                    window.location.href = '/';
                     return;
                 }
 
-                stationData = station;
-                showStationData();
+                // Load station data from API
+                const response = await fetch(`/api/stations/${stationAcronym}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const station = await response.json();
+                    stationData = station;
+                    showStationData();
+                } else if (response.status === 401) {
+                    // Token expired, redirect to login
+                    localStorage.removeItem('sites_spectral_token');
+                    localStorage.removeItem('sites_spectral_user');
+                    window.location.href = '/';
+                } else if (response.status === 404) {
+                    showError('Station not found');
+                } else if (response.status === 403) {
+                    showError('Access denied to this station');
+                } else {
+                    showError('Failed to load station data');
+                }
 
             } catch (error) {
                 console.error('Error loading station data:', error);
