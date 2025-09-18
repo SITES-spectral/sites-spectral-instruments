@@ -354,6 +354,18 @@ async function loadCredentials(env) {
           "role": "station",
           "station_id": "ASA"
         },
+        "bolmen": {
+          "username": "bolmen",
+          "password": "GhcjvVWRb2jH9RHuwDyxNtuy",
+          "role": "station",
+          "station_id": "BOL"
+        },
+        "erken": {
+          "username": "erken",
+          "password": "DRx6Hy2FnYrptilw6EyTu3rE",
+          "role": "station",
+          "station_id": "ERK"
+        },
         "grimso": {
           "username": "grimso",
           "password": "HTZkIOIh7rAWLowwXRnxAvKA",

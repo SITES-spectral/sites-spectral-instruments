@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "SITES Spectral Stations & Instruments Management System v4.1.0 - Minimal station data page with login flow",
   "main": "src/worker.js",
   "scripts": {

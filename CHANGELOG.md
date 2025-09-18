@@ -12,6 +12,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom feature implementation as requested
 - Streamlined user experience
 
+## [4.2.1] - 2025-09-18
+
+### 🔧 Station Credential and Acronym Fixes
+
+#### ✅ Station ID Corrections
+- **YAML Compliance**: Updated station acronyms to match `.secure/stations.yaml`
+- **Correct Acronyms**: ANS, ASA, GRI, LON, RBD, SKC, SVB from authoritative YAML file
+- **Complete Station Set**: Added back bolmen and erken with placeholder acronyms (BOL, ERK)
+- **Data Consistency**: Station IDs now use text acronyms instead of numeric values
+
+#### 🗃️ Station Mapping Updates
+- **abisko**: ANS (verified from YAML)
+- **asa**: ASA (verified from YAML)
+- **bolmen**: BOL (placeholder, not in YAML)
+- **erken**: ERK (placeholder, not in YAML)
+- **grimso**: GRI (verified from YAML)
+- **lonnstorp**: LON (verified from YAML)
+- **robacksdalen**: RBD (verified from YAML, corrected from ROB)
+- **skogaryd**: SKC (verified from YAML, corrected from SKO)
+- **svartberget**: SVB (verified from YAML)
+
+#### 🔐 Authentication System
+- **Real Credentials**: All station credentials maintained from secure file
+- **Proper Validation**: Database queries updated for new acronym format
+- **Role-Based Access**: Station users correctly mapped to their acronyms
+- **Token Integration**: JWT tokens include correct station_id as acronym
+
 ## [4.2.0] - 2025-09-18
 
 ### 🔐 Real Authentication System Implementation
