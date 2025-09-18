@@ -1,0 +1,30 @@
+L1_product_quality_filtered_image: {
+  'description': 'Quality-filtered phenocamera photos',
+  'legacy_datatype_acronym': 'P01-RGB',
+  'product_acronym': 'L1_QFI'     
+  }
+
+L2_product_RGB_CIMV_daily: {
+  'description': 'Phenocam - RGB Composite Image of Mean Values, daily',
+  'legacy_datatype_acronym': 'P01-RGB',
+  'product_acronym': 'L2_RGB_CIMV'     
+  }
+L2_product_GCC_CIMV_daily: {
+  'description': 'Phenocam - Green Chromatic Index Composite Image of Mean Values, daily',
+  'legacy_datatype_acronym': 'P01-GCC',
+  'product_acronym': 'L2_GCC_CIMV'  
+  }
+
+L2_product_RCC_CIMV_daily: {
+  'description': 'Phenocam - Red Chromatic Index Composite Image of Mean Values, daily',
+  'legacy_datatype_acronym': 'P01-RCC', 
+  'product_acronym': 'L2_RCC_CIMV' 
+  }
+
+L3_product_ROI_time_series_daily: {
+  'description': 'Phenocam - Green and Red Chromatic Coordinates time series of the RGB Composite Image of Mean Values - Region of Interest Mean and Standard Deviation, daily values with QFLAG and presence of individual flags.',
+  'legacy_datatype_acronym': 'P01-GCC-RCC',
+  'product_acronym': L3_ROI_TS,
+  }
+
+

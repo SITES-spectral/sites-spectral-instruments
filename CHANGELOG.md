@@ -14,6 +14,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.2.0] - 2025-09-18
+
+### 🏗️ Major System Rebuild - YAML-Based Architecture
+
+#### 🗄️ Database Restructure
+- **Complete Database Rebuild**: Cleared all data and implemented new YAML-based schema
+- **Stations.yaml Integration**: Single source of truth for all station, platform, and instrument data
+- **Normalized Schema**: Clean hierarchical relationships between stations → platforms → instruments
+- **Data Import**: Successfully imported all station data from stations.yaml structure
+
+#### 🎯 Station Dashboard
+- **New Station Dashboard**: `/station-dashboard.html` with role-based access
+- **Interactive Platform Map**: Shows platform locations with professional markers
+- **Platform Cards Grid**: Comprehensive platform information display
+- **Instrument Details**: Camera specifications, ecosystem codes, and status information
+- **Modal Editing**: Professional forms for editing platform details
+
+#### 🔗 API Improvements
+- **Acronym-Based Routing**: `/api/stations/ANS` instead of `/api/stations/1`
+- **Station Acronym Authentication**: Updated auth system to use station acronyms
+- **Flexible Station Lookup**: Support for both acronym and normalized name lookup
+- **Enhanced Permissions**: Station users can only access their assigned station
+
+#### 🎨 User Experience
+- **Authentication-First Design**: All functionality requires proper login
+- **Role-Based Interface**: Different views for admin vs station users
+- **Professional Map Markers**: Clean, Google-style markers for stations and platforms
+- **Responsive Design**: Optimized for desktop and mobile devices
+
+#### 🔧 Technical Enhancements
+- **YAML Data Structure**: Follows stations.yaml hierarchical organization
+- **Platform Type Classification**: Mast (PL), Building (BL), Ground-level (GL)
+- **Instrument Hierarchy**: Clear platform → instrument relationships
+- **Status Management**: Comprehensive status tracking for all entities
+
+#### 🚀 Deployment
+- **Production Ready**: Deployed and tested at https://sites-spectral-instruments.jose-e5f.workers.dev
+- **Authentication Verified**: All login credentials working correctly
+- **API Endpoints Tested**: Station lookup by acronym functioning properly
+- **Dashboard Operational**: Station-specific dashboards loading correctly
+
 ## [3.1.3] - 2025-09-18
 
 ### ✨ Platform & Instrument Management Enhancements

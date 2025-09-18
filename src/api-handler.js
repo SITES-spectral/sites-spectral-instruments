@@ -344,8 +344,8 @@ async function getStations(db, user, searchParams) {
 
   // Station users can only see their assigned station
   if (user.role === 'station') {
-    query += ` WHERE s.id = ?`;
-    params.push(user.station_id);
+    query += ` WHERE s.acronym = ?`;
+    params.push(user.station_acronym);
   }
 
   query += ` ORDER BY s.display_name`;
@@ -358,8 +358,8 @@ async function getStations(db, user, searchParams) {
   });
 }
 
-async function getStation(db, id, user) {
-  if (!checkStationAccess(user, id)) {
+async function getStation(db, acronym, user) {
+  if (!checkStationAccess(user, acronym)) {
     return new Response(JSON.stringify({ error: 'Access denied' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -381,8 +381,8 @@ async function getStation(db, id, user) {
       LEFT JOIN instruments i ON p.id = i.platform_id
       GROUP BY p.station_id
     ) i ON s.id = i.station_id
-    WHERE s.id = ?
-  `).bind(id).first();
+    WHERE s.acronym = ? OR s.normalized_name = ?
+  `).bind(acronym, acronym).first();
 
   if (!result) {
     return new Response(JSON.stringify({ error: 'Station not found' }), {

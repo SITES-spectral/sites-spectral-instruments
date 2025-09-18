@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.1.3",
-  "description": "SITES Spectral Stations & Instruments Management System v3.1.3 - Platform/instrument management with auto-ID generation, transparent map markers, and SITES green branding",
+  "version": "3.2.0",
+  "description": "SITES Spectral Stations & Instruments Management System v3.2.0 - YAML-based station dashboard with acronym routing and clean database rebuild",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

@@ -19,43 +19,43 @@ const CREDENTIALS = {
     "username": "abisko",
     "password": "HRdz99RNihpa0K99wtAkT4XR",
     "role": "station",
-    "station_id": 1
+    "station_acronym": "ANS"
   },
   "asa": {
     "username": "asa",
     "password": "RFglByrYfkN37s9fIssBQIjx",
     "role": "station",
-    "station_id": 2
+    "station_acronym": "ASA"
   },
   "grimso": {
     "username": "grimso",
     "password": "HTZkIOIh7rAWLowwXRnxAvKA",
     "role": "station",
-    "station_id": 5
+    "station_acronym": "GRI"
   },
   "lonnstorp": {
     "username": "lonnstorp",
     "password": "Y1VnG71Ho6zwPpCOFiALszaP",
     "role": "station",
-    "station_id": 6
+    "station_acronym": "LON"
   },
   "robacksdalen": {
     "username": "robacksdalen",
     "password": "jMeu6AIt9Ep1AaBwHfmxhGqB",
     "role": "station",
-    "station_id": 7
+    "station_acronym": "RBD"
   },
   "skogaryd": {
     "username": "skogaryd",
     "password": "4k5tk8EaxifV5qjrx3cKjEpA",
     "role": "station",
-    "station_id": 8
+    "station_acronym": "SKC"
   },
   "svartberget": {
     "username": "svartberget",
     "password": "BvmF1ioEIw7AYXs2t1SoEI8Y",
     "role": "station",
-    "station_id": 9
+    "station_acronym": "SVB"
   }
 };
 
@@ -72,7 +72,7 @@ export async function authenticateUser(username, password) {
     id: username,
     username: user.username,
     role: user.role,
-    station_id: user.station_id || null,
+    station_acronym: user.station_acronym || null,
     full_name: user.username,
     auth_method: 'secrets'
   };
@@ -86,7 +86,7 @@ export async function generateToken(user) {
     sub: user.id,
     username: user.username,
     role: user.role,
-    station_id: user.station_id,
+    station_acronym: user.station_acronym,
     iss: JWT_ISSUER,
     aud: JWT_AUDIENCE,
     exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
@@ -134,7 +134,7 @@ export async function getUserFromRequest(request) {
     id: payload.sub,
     username: payload.username,
     role: payload.role,
-    station_id: payload.station_id
+    station_acronym: payload.station_acronym
   };
 }
 
@@ -155,7 +155,7 @@ export async function requireAuth(request) {
 /**
  * Check if user has permission for an operation
  */
-export function hasPermission(user, operation, resource, resourceId = null) {
+export function hasPermission(user, operation, resource, resourceAcronym = null) {
   // Admin users have all permissions
   if (user.role === 'admin') {
     return true;
@@ -165,12 +165,12 @@ export function hasPermission(user, operation, resource, resourceId = null) {
   if (user.role === 'station') {
     // For read operations, station users can see their station
     if (operation === 'read') {
-      return resourceId === null || resourceId === user.station_id;
+      return resourceAcronym === null || resourceAcronym === user.station_acronym;
     }
 
     // For write operations, station users can edit their station's resources
     if (operation === 'write') {
-      return resourceId === user.station_id;
+      return resourceAcronym === user.station_acronym;
     }
   }
 
@@ -185,13 +185,13 @@ export function hasPermission(user, operation, resource, resourceId = null) {
 /**
  * Check station access for station users
  */
-export function checkStationAccess(user, stationId) {
+export function checkStationAccess(user, stationAcronym) {
   if (user.role === 'admin') {
     return true;
   }
 
   if (user.role === 'station') {
-    return user.station_id === parseInt(stationId);
+    return user.station_acronym === stationAcronym;
   }
 
   return false;
