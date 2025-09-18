@@ -14,6 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.1.1] - 2025-09-17
+
+### 🐛 Critical Fixes
+
+#### 🔄 Fixed Endless Loading Issue
+- **Redirect URLs Fixed**: Corrected authentication redirects from non-existent `/station/dashboard.html` and `/admin/dashboard.html` to unified `/stations.html`
+- **Backward Compatibility**: Created redirect pages for old dashboard URLs to prevent 404 errors
+- **Authentication Flow**: Updated login and index page redirects to use correct URLs
+- **Map Interactions**: Fixed interactive map buttons to point to correct station detail pages
+
+#### 🛠️ Technical Improvements
+- **Graceful Redirects**: Added professional loading screens for old dashboard URLs
+- **URL Parameter Handling**: Preserve station parameters when redirecting from old URLs
+- **Error Prevention**: Eliminated endless loading loops caused by missing pages
+- **User Experience**: Smooth transition with loading indicators during redirects
+
+### 🌐 Deployment Status
+- **Production URL**: https://sites.jobelab.com
+- **Status**: ✅ Critical loading issue resolved
+- **Authentication**: ✅ All redirects now working correctly
+- **Backward Compatibility**: ✅ Old URLs gracefully redirect to new structure
+
 ## [3.1.0] - 2025-09-17
 
 ### ✨ Enhanced User Experience
