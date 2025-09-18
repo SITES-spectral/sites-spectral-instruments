@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Station Details - SITES Spectral</title>
+    <meta name="description" content="Detailed view of SITES spectral monitoring station platforms and instruments">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet.js for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css?v=3.1.1">
+    
+    <style>
+        .station-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .station-info {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: start;
+        }
+        
+        .station-details h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+        }
+        
+        .station-meta {
+            display: flex;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.25rem;
+        }
+        
+        .meta-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .map-container {
+            position: relative;
+        }
+
+        .station-map {
+            width: 300px;
+            height: 200px;
+            border-radius: 8px;
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .map-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            min-width: 80px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .legend-marker {
+            flex-shrink: 0;
+        }
+
+        .legend-marker .marker-icon {
+            width: 16px;
+            height: 16px;
+            font-size: 8px;
+        }
+
+        /* Map marker styles */
+        .marker-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+
+        .station-marker .marker-icon {
+            background: #667eea;
+            font-size: 14px;
+        }
+
+        .platform-marker .marker-icon {
+            background: #48bb78;
+            font-size: 12px;
+        }
+
+        .phenocam-marker .marker-icon {
+            background: #4299e1;
+            font-size: 10px;
+        }
+
+        .fixed_sensor-marker .marker-icon,
+        .sensor-marker .marker-icon {
+            background: #9f7aea;
+            font-size: 10px;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-title {
+            margin: 0;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .section-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .platform-item, .instrument-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s;
+        }
+        
+        .platform-item:hover, .instrument-item:hover {
+            background-color: #f7fafc;
+        }
+        
+        .platform-item:last-child, .instrument-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .item-id {
+            font-family: monospace;
+            background: #e2e8f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #4a5568;
+        }
+        
+        .item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            font-size: 0.9rem;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            justify-content: flex-end;
+        }
+
+        .item-actions .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-inactive {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .loading-state {
+            padding: 2rem;
+            text-align: center;
+            color: #718096;
+        }
+        
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            color: #718096;
+        }
+        
+        .breadcrumb {
+            background: #f7fafc;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+        }
+        
+        .breadcrumb-link {
+            color: #3182ce;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .station-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .station-map {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .station-meta {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="brand-logo">
+                <span>SITES Spectral</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/stations.html" class="nav-link">
+                        <i class="fas fa-map"></i> Interactive Map
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/login.html" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Station Login
+                    </a>
+                </li>
+                <!-- Documentation link hidden - broken links to GitHub docs -->
+                <!--
+                <li class="nav-item">
+                    <a href="/docs/" class="nav-link">
+                        <i class="fas fa-book"></i> Documentation
+                    </a>
+                </li>
+                -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Breadcrumb -->
+        <section class="breadcrumb">
+            <div class="container">
+                <nav class="breadcrumb-nav">
+                    <a href="/" class="breadcrumb-link">Home</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span id="station-breadcrumb">Station</span>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Station Header -->
+        <section class="station-header">
+            <div class="container">
+                <div class="station-info">
+                    <div class="station-details">
+                        <h1 id="station-name">Loading Station...</h1>
+                        <div class="station-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Acronym</span>
+                                <span class="meta-value" id="station-acronym">-</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Location</span>
+                                <span class="meta-value" id="station-location">-</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Coordinates</span>
+                                <span class="meta-value" id="station-coordinates">-</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Status</span>
+                                <span class="meta-value status-badge" id="station-status">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <div id="station-map" class="station-map"></div>
+                        <div class="map-legend">
+                            <div class="legend-title">Map Legend</div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon station-pin"><i class="fas fa-broadcast-tower"></i></div>
+                                </div>
+                                <span>Station</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon platform-pin"><i class="fas fa-tower-broadcast"></i></div>
+                                </div>
+                                <span>Platform</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon phenocam-marker"><i class="fas fa-camera"></i></div>
+                                </div>
+                                <span>Phenocam</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-marker">
+                                    <div class="marker-icon fixed_sensor-marker"><i class="fas fa-microscope"></i></div>
+                                </div>
+                                <span>Sensor</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <div class="container">
+            <div class="content-grid">
+                <!-- Platforms Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-building"></i>
+                            Platforms
+                            <span id="platform-count" class="meta-value"></span>
+                        </h2>
+                    </div>
+                    <div class="section-content" id="platforms-content">
+                        <div class="loading-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading platforms...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instruments Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-camera"></i>
+                            Instruments
+                            <span id="instrument-count" class="meta-value"></span>
+                        </h2>
+                    </div>
+                    <div class="section-content" id="instruments-content">
+                        <div class="loading-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading instruments...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>&copy; 2025 SITES Spectral. All rights reserved.</p>
+                </div>
+                <div class="footer-right">
+                    <p>Version <span id="app-version">3.1.1</span> | Built on <span id="build-date">2025-09-18</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/utils.js?v=3.1.1"></script>
+    <script src="/js/api.js?v=3.1.1"></script>
+    <script src="/js/components.js?v=3.1.1"></script>
+    <script src="/js/navigation.js?v=3.1.1"></script>
+    <script>
+        // Get station ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const stationId = urlParams.get('id');
+        
+        if (!stationId) {
+            showToast('Station ID is required', 'error');
+            window.location.href = '/';
+        }
+
+        let stationMap;
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await loadStationDetails(stationId);
+            } catch (error) {
+                console.error('Failed to load station details:', error);
+                showToast('Failed to load station details', 'error');
+            }
+        });
+
+        // Load station details
+        async function loadStationDetails(stationId) {
+            try {
+                // Load station data
+                const stationResponse = await fetch(`/api/stations/${stationId}`);
+                if (!stationResponse.ok) {
+                    throw new Error('Station not found');
+                }
+                const station = await stationResponse.json();
+                
+                // Update page title and breadcrumb
+                document.getElementById('page-title').textContent = `${station.name} - SITES Spectral`;
+                document.getElementById('station-breadcrumb').textContent = station.name;
+                
+                // Update station details
+                document.getElementById('station-name').textContent = station.name;
+                document.getElementById('station-acronym').textContent = station.acronym || '-';
+                document.getElementById('station-location').textContent = station.location || '-';
+                document.getElementById('station-coordinates').textContent = 
+                    station.latitude && station.longitude 
+                        ? `${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}`
+                        : '-';
+                
+                const statusBadge = document.getElementById('station-status');
+                statusBadge.textContent = station.status || 'Unknown';
+                statusBadge.className = `meta-value status-badge ${
+                    station.status === 'Active' ? 'status-active' : 'status-inactive'
+                }`;
+
+                // Initialize station map
+                if (station.latitude && station.longitude) {
+                    await initializeStationMap(station);
+                }
+
+                // Load platforms and instruments in parallel
+                await Promise.all([
+                    loadPlatforms(stationId),
+                    loadInstruments(stationId)
+                ]);
+
+            } catch (error) {
+                console.error('Error loading station details:', error);
+                showToast('Failed to load station details', 'error');
+                
+                // Update UI to show error state
+                document.getElementById('station-name').textContent = 'Station Not Found';
+                document.getElementById('platforms-content').innerHTML = 
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load station data</p></div>';
+                document.getElementById('instruments-content').innerHTML = 
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load station data</p></div>';
+            }
+        }
+
+        // Initialize station map
+        async function initializeStationMap(station) {
+            const mapContainer = document.getElementById('station-map');
+            
+            stationMap = L.map(mapContainer, {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([station.latitude, station.longitude], 12);
+
+            // Add tile layer
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri'
+            }).addTo(stationMap);
+
+            try {
+                // Load GeoJSON data for all stations and platforms with instruments
+                const geoJsonResponse = await fetch('/api/geojson/all?include_instruments=true');
+                if (!geoJsonResponse.ok) throw new Error('Failed to fetch GeoJSON data');
+                
+                const geoJsonData = await geoJsonResponse.json();
+                
+                // Filter features for this station only
+                const stationFeatures = geoJsonData.features.filter(feature => {
+                    return feature.properties.station_id === station.id;
+                });
+
+                // Add markers for each feature
+                stationFeatures.forEach(feature => {
+                    const [lng, lat] = feature.geometry.coordinates;
+                    const props = feature.properties;
+                    
+                    let markerIcon, popupContent, markerClass;
+                    
+                    // Determine marker type and styling
+                    switch (props.type) {
+                        case 'station':
+                            markerIcon = '<i class="fas fa-broadcast-tower"></i>';
+                            markerClass = 'station-marker';
+                            popupContent = `<strong>${props.name}</strong><br>Station ${props.acronym || ''}`;
+                            break;
+                        case 'platform':
+                            markerIcon = '<i class="fas fa-tower-broadcast"></i>';
+                            markerClass = 'platform-marker';
+                            popupContent = `<strong>${props.name}</strong><br>Platform ${props.platform_id}<br><small>Type: ${props.platform_type || 'Unknown'}</small>`;
+                            break;
+                        case 'phenocam':
+                            markerIcon = '<i class="fas fa-camera"></i>';
+                            markerClass = 'phenocam-marker';
+                            popupContent = `<strong>${props.instrument_id}</strong><br>Phenocam<br><small>Status: ${props.status || 'Unknown'}</small>`;
+                            break;
+                        case 'sensor':
+                        case 'multispectral_sensor':
+                        case 'fixed_sensor':
+                            markerIcon = '<i class="fas fa-microscope"></i>';
+                            markerClass = 'fixed_sensor-marker';
+                            popupContent = `<strong>${props.instrument_id}</strong><br>Sensor<br><small>Status: ${props.status || 'Unknown'}</small>`;
+                            break;
+                        default:
+                            markerIcon = '<i class="fas fa-circle"></i>';
+                            markerClass = 'default-marker';
+                            popupContent = `<strong>${props.name || props.instrument_id}</strong><br>${props.type}`;
+                    }
+                    
+                    // Create marker with appropriate icon
+                    const marker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: markerClass,
+                            html: `<div class="marker-icon ${markerClass}">${markerIcon}</div>`,
+                            iconSize: props.type === 'station' ? [35, 35] : 
+                                     props.type === 'platform' ? [28, 28] : [22, 22],
+                            iconAnchor: props.type === 'station' ? [17.5, 17.5] : 
+                                       props.type === 'platform' ? [14, 14] : [11, 11]
+                        })
+                    });
+                    
+                    marker.addTo(stationMap);
+                    marker.bindPopup(popupContent);
+                });
+
+                // Fit map bounds to include all markers if there are multiple points
+                if (stationFeatures.length > 1) {
+                    const group = new L.featureGroup(Object.values(stationMap._layers).filter(layer => layer instanceof L.Marker));
+                    if (group.getLayers().length > 0) {
+                        stationMap.fitBounds(group.getBounds().pad(0.1));
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error loading map data:', error);
+                
+                // Fallback: show just the station marker
+                const stationMarker = L.marker([station.latitude, station.longitude], {
+                    icon: L.divIcon({
+                        className: 'station-marker',
+                        html: '<div class="marker-icon station-marker"><i class="fas fa-broadcast-tower"></i></div>',
+                        iconSize: [35, 35],
+                        iconAnchor: [17.5, 17.5]
+                    })
+                });
+                
+                stationMarker.addTo(stationMap);
+                stationMarker.bindPopup(`<strong>${station.display_name || station.name}</strong><br>Station ${station.acronym || ''}`);
+            }
+        }
+
+        // Load platforms
+        async function loadPlatforms(stationId) {
+            try {
+                const response = await fetch(`/api/platforms?station_id=${stationId}`);
+                if (!response.ok) throw new Error('Failed to fetch platforms');
+                
+                const platforms = await response.json();
+                const contentEl = document.getElementById('platforms-content');
+                const countEl = document.getElementById('platform-count');
+                
+                countEl.textContent = `(${platforms.length})`;
+                
+                if (platforms.length === 0) {
+                    contentEl.innerHTML = '<div class="empty-state"><i class="fas fa-building"></i><p>No platforms registered for this station</p></div>';
+                    return;
+                }
+
+                const platformsHTML = platforms.map(platform => `
+                    <div class="platform-item">
+                        <div class="item-header">
+                            <h4 class="item-name">${platform.name}</h4>
+                            <span class="item-id">${platform.platform_id}</span>
+                        </div>
+                        <div class="item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Type</span>
+                                <span class="detail-value">${platform.type || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Program</span>
+                                <span class="detail-value">${platform.thematic_program || 'SITES_Spectral'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value status-badge ${platform.status === 'Active' ? 'status-active' : 'status-inactive'}">
+                                    ${platform.status || 'Unknown'}
+                                </span>
+                            </div>
+                            ${platform.latitude && platform.longitude ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Coordinates</span>
+                                <span class="detail-value">${platform.latitude.toFixed(4)}, ${platform.longitude.toFixed(4)}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                contentEl.innerHTML = platformsHTML;
+
+            } catch (error) {
+                console.error('Error loading platforms:', error);
+                document.getElementById('platforms-content').innerHTML = 
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load platforms</p></div>';
+            }
+        }
+
+        // Load instruments
+        async function loadInstruments(stationId) {
+            try {
+                const response = await fetch(`/api/instruments?station_id=${stationId}`);
+                if (!response.ok) throw new Error('Failed to fetch instruments');
+                
+                const instrumentsData = await response.json();
+                const instruments = instrumentsData.instruments || instrumentsData; // Handle both formats
+                const contentEl = document.getElementById('instruments-content');
+                const countEl = document.getElementById('instrument-count');
+                
+                countEl.textContent = `(${instruments.length})`;
+                
+                if (instruments.length === 0) {
+                    contentEl.innerHTML = '<div class="empty-state"><i class="fas fa-camera"></i><p>No instruments registered for this station</p></div>';
+                    return;
+                }
+
+                const instrumentsHTML = instruments.map(instrument => `
+                    <div class="instrument-item">
+                        <div class="item-header">
+                            <h4 class="item-name">${instrument.name}</h4>
+                            <span class="item-id">${instrument.serial_number || instrument.id}</span>
+                        </div>
+                        <div class="item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Model</span>
+                                <span class="detail-value">${instrument.model || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Type</span>
+                                <span class="detail-value">${instrument.type || 'Camera'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Platform</span>
+                                <span class="detail-value">${instrument.platform_name || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value status-badge ${instrument.status === 'Active' ? 'status-active' : 'status-inactive'}">
+                                    ${instrument.status || 'Unknown'}
+                                </span>
+                            </div>
+                            ${instrument.installed_date ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Installed</span>
+                                <span class="detail-value">${new Date(instrument.installed_date).toLocaleDateString()}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                contentEl.innerHTML = instrumentsHTML;
+
+            } catch (error) {
+                console.error('Error loading instruments:', error);
+                document.getElementById('instruments-content').innerHTML = 
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load instruments</p></div>';
+            }
+        }
+
+    </script>
+</body>
+</html>

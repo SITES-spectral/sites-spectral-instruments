@@ -185,6 +185,12 @@
             border-color: #667eea;
         }
 
+        .station-card.highlighted {
+            border-color: #f39c12 !important;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.3);
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.05) 0%, rgba(243, 156, 18, 0.1) 100%);
+        }
+
         .station-meta {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -676,6 +682,7 @@
         /* Google-style Map Markers */
         .google-style-marker {
             position: relative !important;
+            background: transparent !important;
         }
 
         .google-marker-pin {
@@ -993,10 +1000,7 @@
                 <!-- Navigation Tabs -->
                 <div class="nav-tabs">
                     <button class="nav-tab active" onclick="showTab('stations')" title="View and manage research stations">
-                        <i class="fas fa-broadcast-tower"></i> My Stations
-                    </button>
-                    <button class="nav-tab" onclick="showTab('map')" title="Interactive map view of all stations and instruments">
-                        <i class="fas fa-map"></i> Interactive Map
+                        <i class="fas fa-broadcast-tower"></i> Stations & Map
                     </button>
                     <button class="nav-tab" onclick="showTab('instruments')" title="View and manage all instruments">
                         <i class="fas fa-camera"></i> All Instruments
@@ -1006,9 +1010,9 @@
                 <!-- Stations Tab -->
                 <div class="tab-content active" id="stations-tab">
                     <div class="tab-header">
-                        <h2>Research Stations</h2>
+                        <h2>Research Stations & Interactive Map</h2>
                         <div class="tab-instructions">
-                            <p><i class="fas fa-lightbulb"></i> Click on any station card to view detailed information, platforms, and instruments. Use the Edit button to modify station details.</p>
+                            <p><i class="fas fa-lightbulb"></i> Explore stations on the interactive map below or browse the station cards. Click map markers to highlight corresponding stations in the list.</p>
                         </div>
                         <div class="tab-actions" id="station-tab-actions" style="display: none;">
                             <button class="btn btn-primary" onclick="createNewStation()" title="Create a new research station">
@@ -1016,22 +1020,8 @@
                             </button>
                         </div>
                     </div>
-                    <div class="dashboard-grid" id="stations-grid">
-                        <div class="loading-card">
-                            <div class="spinner"></div>
-                            <span>Loading stations...</span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Map Tab -->
-                <div class="tab-content" id="map-tab">
-                    <div class="tab-header">
-                        <h2>Interactive Station Map</h2>
-                        <div class="tab-instructions">
-                            <p><i class="fas fa-lightbulb"></i> Explore the locations of all stations, platforms, and instruments. Click on markers for detailed information. Use mouse wheel to zoom and drag to pan.</p>
-                        </div>
-                    </div>
+                    <!-- Integrated Map Section -->
                     <div class="map-container">
                         <div id="stations-map" class="interactive-map">
                             <div class="map-loading">
@@ -1069,7 +1059,16 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Stations Grid -->
+                    <div class="dashboard-grid" id="stations-grid" style="margin-top: 2rem;">
+                        <div class="loading-card">
+                            <div class="spinner"></div>
+                            <span>Loading stations...</span>
+                        </div>
+                    </div>
                 </div>
+
 
                 <!-- Instruments Tab -->
                 <div class="tab-content" id="instruments-tab">
@@ -1598,6 +1597,8 @@
                 loadStations(),
                 loadInstruments()
             ]);
+            // Initialize map after data is loaded
+            setTimeout(initializeMap, 500);
         }
 
         // Load stations based on user role
@@ -1696,7 +1697,7 @@
         async function loadInstruments() {
             try {
                 const token = localStorage.getItem('sites_spectral_token');
-                const response = await fetch('/api/phenocams', {
+                const response = await fetch('/api/instruments', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -1707,7 +1708,7 @@
                 }
 
                 const data = await response.json();
-                const instruments = data.phenocams || data;
+                const instruments = data.instruments || data;
 
                 renderInstruments(instruments);
 
@@ -1894,6 +1895,13 @@
                         })
                     });
 
+                    // Add click handler for station markers to highlight corresponding card
+                    if (props.type === 'station') {
+                        marker.on('click', function() {
+                            highlightStationCard(props.id);
+                        });
+                    }
+
                     marker.addTo(stationsMap);
                     marker.bindPopup(popupContent);
                 });
@@ -1922,8 +1930,8 @@
             });
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
-            // Initialize map if map tab is shown
-            if (tabName === 'map') {
+            // Initialize map if stations tab is shown (since map is integrated)
+            if (tabName === 'stations') {
                 setTimeout(initializeMap, 100);
             }
         }
@@ -2254,6 +2262,25 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkInstructionsVisibility();
         });
+
+        // Highlight station card when map marker is clicked
+        function highlightStationCard(stationId) {
+            // Remove existing highlights
+            document.querySelectorAll('.station-card.highlighted').forEach(card => {
+                card.classList.remove('highlighted');
+            });
+
+            // Find and highlight the station card
+            const stationCards = document.querySelectorAll('.station-card');
+            stationCards.forEach(card => {
+                const cardOnClick = card.getAttribute('onclick');
+                if (cardOnClick && cardOnClick.includes(`openStation(${stationId})`)) {
+                    card.classList.add('highlighted');
+                    // Scroll to the highlighted card
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
 
         // Logout function
         function logout() {
