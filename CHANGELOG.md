@@ -14,6 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.2.4] - 2025-09-18
+
+### 🔧 Database Compatibility Fix
+
+#### 🛠️ Critical Bug Fix
+- **Fixed GROUP_CONCAT Issue**: Resolved D1 database compatibility issue that was preventing stations and map data from loading
+- **Replaced GROUP_CONCAT with Separate Queries**: Changed from single complex query with GROUP_CONCAT to multiple queries for instrument details
+- **Improved Performance**: More efficient data aggregation for platform tooltips and instrument metadata
+- **Enhanced Error Handling**: Better error recovery for database operations
+
+#### 📊 Technical Details
+- **Database Query Optimization**: Split complex aggregation query into simpler, more reliable queries
+- **Array Processing**: Proper handling of camera brands, ecosystem codes, and instrument names arrays
+- **Cloudflare D1 Compatibility**: Ensured all SQL queries work correctly with D1's SQLite implementation
+
 ## [3.2.3] - 2025-09-18
 
 ### 🗺️ Interactive Map Hover Tooltips

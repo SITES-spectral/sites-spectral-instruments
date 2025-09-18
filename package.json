@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.2.3",
-  "description": "SITES Spectral Stations & Instruments Management System v3.2.3 - Added interactive map hover tooltips with platform/instrument counts and details",
+  "version": "3.2.4",
+  "description": "SITES Spectral Stations & Instruments Management System v3.2.4 - Fixed GROUP_CONCAT compatibility issue with D1 database",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

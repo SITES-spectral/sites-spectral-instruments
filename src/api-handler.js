@@ -606,10 +606,7 @@ async function getGeoJSON(db, type, user) {
       SELECT p.id, p.display_name, p.location_code, p.mounting_structure, p.platform_height_m,
              p.latitude, p.longitude, p.status, s.display_name as station_name, s.id as station_id,
              COUNT(DISTINCT i.id) as instrument_count,
-             COUNT(DISTINCT CASE WHEN i.status = 'Active' THEN i.id END) as active_instrument_count,
-             GROUP_CONCAT(DISTINCT i.camera_brand) as camera_brands,
-             GROUP_CONCAT(DISTINCT i.ecosystem_code) as ecosystem_codes,
-             GROUP_CONCAT(DISTINCT i.display_name) as instrument_names
+             COUNT(DISTINCT CASE WHEN i.status = 'Active' THEN i.id END) as active_instrument_count
       FROM platforms p
       JOIN stations s ON p.station_id = s.id
       LEFT JOIN instruments i ON p.id = i.platform_id
@@ -627,7 +624,20 @@ async function getGeoJSON(db, type, user) {
 
     const platforms = await db.prepare(platformsQuery).bind(...platformParams).all();
 
+    // Get instrument details for each platform separately
     for (const platform of platforms.results || []) {
+      // Get instruments for this platform
+      const instrumentsQuery = `
+        SELECT DISTINCT camera_brand, ecosystem_code, display_name
+        FROM instruments
+        WHERE platform_id = ? AND camera_brand IS NOT NULL
+      `;
+      const instruments = await db.prepare(instrumentsQuery).bind(platform.id).all();
+
+      const camera_brands = [...new Set((instruments.results || []).map(i => i.camera_brand).filter(b => b))];
+      const ecosystem_codes = [...new Set((instruments.results || []).map(i => i.ecosystem_code).filter(e => e))];
+      const instrument_names = (instruments.results || []).map(i => i.display_name).filter(n => n);
+
       features.push({
         type: 'Feature',
         geometry: {
@@ -647,9 +657,9 @@ async function getGeoJSON(db, type, user) {
           longitude: platform.longitude,
           instrument_count: platform.instrument_count || 0,
           active_instrument_count: platform.active_instrument_count || 0,
-          camera_brands: platform.camera_brands ? platform.camera_brands.split(',').filter(b => b) : [],
-          ecosystem_codes: platform.ecosystem_codes ? platform.ecosystem_codes.split(',').filter(e => e) : [],
-          instrument_names: platform.instrument_names ? platform.instrument_names.split(',').filter(n => n) : []
+          camera_brands: camera_brands,
+          ecosystem_codes: ecosystem_codes,
+          instrument_names: instrument_names
         }
       });
     }
