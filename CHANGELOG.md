@@ -12,6 +12,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom feature implementation as requested
 - Streamlined user experience
 
+## [4.1.0] - 2025-09-18
+
+### 🏗️ Minimal Station Data Page Implementation
+
+#### ✨ New Features
+- **Station Data Page**: Created `/station.html` as the main station interface
+- **Complete Login Flow**: Login → Station Page with proper authentication
+- **Station Identification**: Uses station acronyms (ANS, ASA, SVB, etc.) as URL parameters
+- **Mock Authentication**: Testing credentials `admin/admin` for development
+
+#### 🎯 Station Page Features
+- **Welcome Section**: Dynamic station name display based on acronym
+- **Minimal Navigation**: SITES Spectral logo and text only
+- **Logout Functionality**: Proper token cleanup and redirect to login
+- **Responsive Design**: Mobile and desktop compatibility
+- **Error Handling**: Loading states and error messages
+
+#### 🔄 Authentication Flow
+1. **Login Page** (`/`): User enters credentials
+2. **Token Storage**: localStorage management for session persistence
+3. **Station Redirect**: Automatic redirect to `/station.html?station={acronym}`
+4. **Station Loading**: Dynamic station data based on acronym parameter
+5. **Logout**: Clean session termination and redirect
+
+#### 🎨 Design Elements
+- **Professional Navigation**: Green gradient navbar with SITES branding
+- **Clean Interface**: Minimal, focused design ready for expansion
+- **Icon Integration**: FontAwesome icons for visual clarity
+- **Consistent Styling**: Unified color scheme and typography
+
+#### 📊 Mock Data Integration
+- **Station Mapping**: ANS→Abisko, ASA→Asa, SVB→Svartberget, etc.
+- **Database Ready**: Structure prepared for real database integration
+- **Schema Compliant**: Follows stations.yaml and database schema
+
+#### 🔧 Technical Implementation
+- **URL Parameters**: Station identification via `?station=ANS`
+- **Local Storage**: Session management with token and user data
+- **Error States**: Comprehensive error handling and user feedback
+- **Loading States**: Smooth user experience during data loading
+
 ## [4.0.2] - 2025-09-18
 
 ### 🧹 JavaScript Schema Compliance Cleanup

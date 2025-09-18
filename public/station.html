@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Data - SITES Spectral</title>
+    <meta name="description" content="SITES Spectral Station Data">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css?v=4.0.2">
+
+    <!-- Version Meta -->
+    <meta name="app-version" content="4.0.2">
+    <meta name="build-date" content="2025-09-18">
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .welcome-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .welcome-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #059669;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-state {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 0.5rem;
+            }
+
+            .brand-text {
+                font-size: 1.1rem;
+            }
+
+            .main-content {
+                padding: 1rem 0.5rem;
+            }
+
+            .welcome-section {
+                padding: 1.5rem;
+            }
+
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="brand-logo">
+                <span class="brand-text">SITES Spectral</span>
+            </div>
+            <div class="nav-actions">
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="welcome-section">
+            <div class="loading-state" id="loading-state">
+                <div class="spinner"></div>
+                <p>Loading station data...</p>
+            </div>
+            <div id="welcome-content" style="display: none;">
+                <h1 class="welcome-title">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span id="station-name">Station</span>
+                </h1>
+                <p class="welcome-subtitle">Welcome to your SITES Spectral station data</p>
+            </div>
+            <div id="error-state" class="error-state" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="error-message">Failed to load station data</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/js/utils.js?v=4.0.2"></script>
+    <script>
+        let currentUser = null;
+        let stationData = null;
+
+        // Get station acronym from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const stationAcronym = urlParams.get('station');
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            const token = localStorage.getItem('sites_spectral_token');
+            const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
+
+            if (!token || !user) {
+                // Not authenticated, redirect to login
+                window.location.href = '/';
+                return;
+            }
+
+            currentUser = user;
+
+            // If no station parameter, redirect to login
+            if (!stationAcronym) {
+                window.location.href = '/';
+                return;
+            }
+
+            // Load station data
+            await loadStationData();
+        });
+
+        async function loadStationData() {
+            try {
+                // For now, we'll create mock station data based on the acronym
+                // This will be replaced with actual API call later
+                const mockStations = {
+                    'ANS': { display_name: 'Abisko', acronym: 'ANS' },
+                    'ASA': { display_name: 'Asa', acronym: 'ASA' },
+                    'SVB': { display_name: 'Svartberget', acronym: 'SVB' },
+                    'LON': { display_name: 'Lonnstorp', acronym: 'LON' },
+                    'ROB': { display_name: 'Robacksdalen', acronym: 'ROB' },
+                    'GRI': { display_name: 'Grimsö', acronym: 'GRI' },
+                    'ERK': { display_name: 'Erken', acronym: 'ERK' }
+                };
+
+                const station = mockStations[stationAcronym.toUpperCase()];
+
+                if (!station) {
+                    showError('Station not found');
+                    return;
+                }
+
+                stationData = station;
+                showStationData();
+
+            } catch (error) {
+                console.error('Error loading station data:', error);
+                showError('Failed to load station data');
+            }
+        }
+
+        function showStationData() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('welcome-content').style.display = 'block';
+
+            document.getElementById('station-name').textContent = stationData.display_name;
+            document.title = `${stationData.display_name} - SITES Spectral`;
+        }
+
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('welcome-content').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function logout() {
+            localStorage.removeItem('sites_spectral_token');
+            localStorage.removeItem('sites_spectral_user');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

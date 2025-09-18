@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.0.2",
-  "description": "SITES Spectral Stations & Instruments Management System v4.0.2 - Schema-compliant JavaScript only",
+  "version": "4.1.0",
+  "description": "SITES Spectral Stations & Instruments Management System v4.1.0 - Minimal station data page with login flow",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

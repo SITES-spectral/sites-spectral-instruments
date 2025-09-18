@@ -3,265 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITES Spectral Stations & Instruments</title>
-    <meta name="description" content="Management system for SITES spectral monitoring stations and instruments">
-    
+    <title>Login - SITES Spectral</title>
+    <meta name="description" content="Login to SITES Spectral Stations & Instruments Management System">
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Leaflet.js for interactive maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=3.2.7">
+    <link rel="stylesheet" href="/css/styles.css?v=4.0.2">
+
+    <!-- Version Meta -->
+    <meta name="app-version" content="4.0.2">
+    <meta name="build-date" content="2025-09-18">
 
     <style>
-        .login-required {
-            min-height: 70vh;
+        .login-container {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem 0;
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            padding: 20px;
         }
 
-        .login-prompt {
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
         }
 
-        .login-icon {
-            font-size: 4rem;
-            color: #667eea;
-            margin-bottom: 2rem;
+        .login-logo {
+            font-size: 3rem;
+            color: #059669;
+            margin-bottom: 10px;
         }
 
         .login-title {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 8px;
         }
 
         .login-subtitle {
-            font-size: 1.2rem;
-            color: #4a5568;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 0.95rem;
         }
 
-        .login-actions {
-            margin-bottom: 3rem;
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
         }
 
-        .access-info {
-            margin-top: 3rem;
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
         }
 
-        .access-info h3 {
-            font-size: 1.5rem;
-            color: #2d3748;
-            margin-bottom: 2rem;
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
         }
 
-        .access-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+        .form-input:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
         }
 
-        .access-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.2s;
+        .form-input.error {
+            border-color: #ef4444;
         }
 
-        .access-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .access-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 1.5rem;
+        .login-btn {
+            width: 100%;
+            background: #059669;
             color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 20px;
         }
 
-        .access-icon.admin {
-            background: #667eea;
+        .login-btn:hover:not(:disabled) {
+            background: #064e3b;
         }
 
-        .access-icon.station {
-            background: #48bb78;
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
         }
 
-        .access-card h4 {
-            font-size: 1.2rem;
-            color: #2d3748;
-            margin-bottom: 1rem;
+        .login-btn .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
         }
 
-        .access-card p {
-            color: #4a5568;
-            line-height: 1.5;
+        .login-btn.loading .spinner {
+            display: inline-block;
         }
 
-        @media (max-width: 768px) {
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+
             .login-title {
-                font-size: 2rem;
-            }
-
-            .login-subtitle {
-                font-size: 1rem;
-            }
-
-            .access-grid {
-                grid-template-columns: 1fr;
+                font-size: 1.5rem;
             }
         }
     </style>
-    
-    <!-- Version Meta -->
-    <meta name="app-version" content="3.2.7">
-    <meta name="build-date" content="2025-09-18">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="brand-logo">
-                <span>SITES Spectral</span>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="height: 80px; width: auto;">
             </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="/login.html" class="nav-link">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </a>
-                </li>
-            </ul>
-            <div class="nav-toggle" id="mobile-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </div>
-    </nav>
+            <h1 class="login-title">Welcome</h1>
+            <p class="login-subtitle">Sign in to access SITES Spectral</p>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Login Required Section -->
-        <section class="login-required">
-            <div class="container">
-                <div class="login-prompt">
-                    <div class="login-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <h1 class="login-title">Login Required</h1>
-                    <p class="login-subtitle">
-                        Please log in to access the SITES Spectral management system.
-                        This system requires authentication to view station data and manage instruments.
-                    </p>
-                    <div class="login-actions">
-                        <a href="/login.html" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login to System
-                        </a>
-                    </div>
-                    <div class="access-info">
-                        <h3>Access Information</h3>
-                        <div class="access-grid">
-                            <div class="access-card">
-                                <div class="access-icon admin">
-                                    <i class="fas fa-user-shield"></i>
-                                </div>
-                                <h4>Administrators</h4>
-                                <p>Full system access including all stations, user management, and system configuration.</p>
-                            </div>
-                            <div class="access-card">
-                                <div class="access-icon station">
-                                    <i class="fas fa-broadcast-tower"></i>
-                                </div>
-                                <h4>Station Users</h4>
-                                <p>Access to manage instruments and data for their assigned research station.</p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="error-message" id="error-message"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username or Email</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="form-input"
+                        placeholder="Enter your username or email"
+                        required
+                        autocomplete="username"
+                    >
                 </div>
-            </div>
-        </section>
-    </main>
 
-    <!-- Status Modal -->
-    <div class="modal" id="status-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Network Status Overview</h3>
-                <button class="modal-close" onclick="closeStatusModal()">
-                    <i class="fas fa-times"></i>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="login-btn" id="login-btn">
+                    <div class="spinner"></div>
+                    <span>Sign In</span>
                 </button>
-            </div>
-            <div class="modal-body">
-                <div class="status-grid" id="status-grid">
-                    <!-- Status information will be loaded here -->
-                </div>
-            </div>
+            </form>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-left">
-                    <p>&copy; 2025 SITES Spectral. All rights reserved.</p>
-                </div>
-                <div class="footer-right">
-                    <p>Version <span id="app-version">3.2.7</span> | Built on <span id="build-date">2025-09-18</span></p>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Toast Notifications -->
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=3.2.7"></script>
+    <script src="/js/utils.js?v=4.0.2"></script>
     <script>
-        // Check if user is already logged in and redirect accordingly
-        document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem('sites_spectral_token');
-            const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
+        class LoginManager {
+            constructor() {
+                this.form = document.getElementById('login-form');
+                this.usernameInput = document.getElementById('username');
+                this.passwordInput = document.getElementById('password');
+                this.submitBtn = document.getElementById('login-btn');
+                this.errorMessage = document.getElementById('error-message');
 
-            if (token && user) {
-                // User is logged in, redirect to appropriate dashboard
-                if (user.role === 'admin') {
-                    window.location.href = '/stations.html';
-                } else if (user.role === 'station') {
-                    window.location.href = '/stations.html';
-                } else {
-                    // Readonly or other roles - can access stations view
-                    window.location.href = '/stations.html';
+                this.init();
+            }
+
+            init() {
+                // Check if already logged in
+                const token = localStorage.getItem('sites_spectral_token');
+                if (token) {
+                    this.verifyTokenAndRedirect(token);
+                }
+
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+                // Clear error message when user starts typing
+                [this.usernameInput, this.passwordInput].forEach(input => {
+                    input.addEventListener('input', () => {
+                        this.clearError();
+                        input.classList.remove('error');
+                    });
+                });
+            }
+
+            async verifyTokenAndRedirect(token) {
+                try {
+                    // For now, just check if user data exists
+                    const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
+                    if (user) {
+                        this.redirectUser(user);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Token verification failed:', error);
+                }
+
+                // Remove invalid token
+                localStorage.removeItem('sites_spectral_token');
+                localStorage.removeItem('sites_spectral_user');
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+
+                const username = this.usernameInput.value.trim();
+                const password = this.passwordInput.value;
+
+                if (!username || !password) {
+                    this.showError('Please enter both username and password');
+                    return;
+                }
+
+                this.setLoading(true);
+                this.clearError();
+
+                try {
+                    // Mock authentication for now - will be replaced with real API
+                    if (username === 'admin' && password === 'admin') {
+                        const mockUser = {
+                            username: 'admin',
+                            role: 'admin',
+                            station_acronym: 'ANS'
+                        };
+                        const mockToken = 'mock-token-' + Date.now();
+
+                        localStorage.setItem('sites_spectral_token', mockToken);
+                        localStorage.setItem('sites_spectral_user', JSON.stringify(mockUser));
+
+                        Utils.showToast('Login successful!', 'success');
+
+                        setTimeout(() => {
+                            this.redirectUser(mockUser);
+                        }, 1000);
+                    } else {
+                        this.showError('Invalid credentials. Use admin/admin for testing.');
+                    }
+
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError('Login failed. Please check your connection and try again.');
+                } finally {
+                    this.setLoading(false);
                 }
             }
+
+            redirectUser(user) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect');
+
+                // Redirect to station page with station acronym
+                if (user.station_acronym) {
+                    window.location.href = redirect || `/station.html?station=${user.station_acronym}`;
+                } else {
+                    // For users without station, use a default station
+                    window.location.href = redirect || `/station.html?station=ANS`;
+                }
+            }
+
+            setLoading(loading) {
+                this.submitBtn.disabled = loading;
+                if (loading) {
+                    this.submitBtn.classList.add('loading');
+                } else {
+                    this.submitBtn.classList.remove('loading');
+                }
+            }
+
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+                this.usernameInput.classList.add('error');
+                this.passwordInput.classList.add('error');
+            }
+
+            clearError() {
+                this.errorMessage.classList.remove('show');
+                this.errorMessage.textContent = '';
+            }
+        }
+
+        // Initialize login manager when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
         });
     </script>
 </body>
