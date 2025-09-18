@@ -1,6 +1,21 @@
 // New API Handler for Authentication-First Architecture
 import { getUserFromRequest, authenticateUser, generateToken, hasPermission, checkStationAccess } from './auth-secrets.js';
 
+// Helper function to enhance user object with station_id
+async function enhanceUserWithStationId(user, db) {
+  if (user && user.role === 'station' && user.station_acronym && !user.station_id) {
+    try {
+      const station = await db.prepare(`SELECT id FROM stations WHERE acronym = ?`).bind(user.station_acronym).first();
+      if (station) {
+        user.station_id = station.id;
+      }
+    } catch (error) {
+      console.error('Error looking up station_id:', error);
+    }
+  }
+  return user;
+}
+
 export async function handleApiRequest(request, env, ctx) {
   const url = new URL(request.url);
   const pathSegments = url.pathname.split('/').filter(segment => segment);
@@ -377,8 +392,8 @@ async function getStation(db, identifier, user) {
     });
   }
 
-  // Check station access using the station ID
-  if (!checkStationAccess(user, station.id)) {
+  // Check station access using the station acronym
+  if (!checkStationAccess(user, station.acronym)) {
     return new Response(JSON.stringify({ error: 'Access denied' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }

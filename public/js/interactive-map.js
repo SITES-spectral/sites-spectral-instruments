@@ -264,7 +264,7 @@ class InteractiveMap {
                 <p><strong>Ecosystem:</strong> ${station.ecosystem || 'N/A'}</p>
                 <p><strong>Elevation:</strong> ${station.elevation_m ? station.elevation_m + 'm' : 'N/A'}</p>
                 <div class="popup-actions">
-                    <button onclick="window.location.href='/station.html?id=${station.id}'" class="btn btn-primary btn-sm">
+                    <button onclick="window.location.href='/station.html?id=${station.acronym}'" class="btn btn-primary btn-sm">
                         <i class="fas fa-cog"></i> Manage Station
                     </button>
                 </div>
@@ -329,7 +329,7 @@ class InteractiveMap {
                     </span>
                 </p>
                 <div class="popup-actions">
-                    <button onclick="window.location.href='/station.html?id=${platform.station_id}'" class="btn btn-secondary btn-sm">
+                    <button onclick="window.location.href='/station.html?id=${station?.acronym || platform.station_id}'" class="btn btn-secondary btn-sm">
                         <i class="fas fa-eye"></i> View Details
                     </button>
                 </div>

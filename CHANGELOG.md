@@ -14,6 +14,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.2.7] - 2025-09-18
+
+### 🔧 Station ID Parameter Authentication Fix
+
+#### 🛠️ Critical Authentication Fix
+- **Fixed Station Page Access**: Resolved issue where station pages with numeric IDs (e.g., `/station?id=1`) were failing authentication
+- **Enhanced API Handler**: Updated `getStation` function to handle both numeric IDs and station acronyms seamlessly
+- **Fixed Interactive Map Links**: Updated map popup buttons to use station acronyms instead of numeric IDs for consistent authentication
+- **Improved Access Control**: `checkStationAccess` function now properly validates station access using acronyms
+
+#### 📊 Technical Improvements
+- **Dual ID Support**: API endpoints now accept both numeric station IDs and station acronyms
+- **Authentication Consistency**: All station links now use acronyms for proper permission checking
+- **Error Prevention**: Eliminated authentication mismatches between frontend links and backend validation
+- **Map Integration**: Interactive map markers now link correctly to station management pages
+
+#### 🔄 Files Modified
+- `src/api-handler.js`: Enhanced station lookup and authentication logic
+- `public/js/interactive-map.js`: Fixed station links in map popups to use acronyms
+
+## [3.2.6] - 2025-09-18
+
+### 🔧 Previous Fixes
+- Platform-centric UI architecture
+- GROUP_CONCAT database compatibility
+- Version display caching issues
+
 ## [3.2.5] - 2025-09-18
 
 ### 🔧 Version Display Fix

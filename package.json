@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.2.5",
-  "description": "SITES Spectral Stations & Instruments Management System v3.2.5 - Fixed version display caching issue",
+  "version": "3.2.7",
+  "description": "SITES Spectral Stations & Instruments Management System v3.2.7 - Fixed station ID parameter authentication",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
