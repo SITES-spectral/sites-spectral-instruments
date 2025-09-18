@@ -23,6 +23,12 @@ export async function handleApiRequest(request, env, ctx) {
       case 'stations':
         return await handleStations(method, id, request, env);
 
+      case 'platforms':
+        return await handlePlatforms(method, id, request, env);
+
+      case 'instruments':
+        return await handleInstruments(method, id, request, env);
+
       case 'health':
         return await handleHealth(env);
 
@@ -202,6 +208,136 @@ async function handleStations(method, id, request, env) {
   }
 }
 
+// Platform endpoints
+async function handlePlatforms(method, id, request, env) {
+  if (method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Authentication required
+  const user = await getUserFromRequest(request, env);
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'Authentication required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    const url = new URL(request.url);
+    const stationParam = url.searchParams.get('station');
+
+    let query = `
+      SELECT p.id, p.display_name, p.location_code, p.station_id,
+             p.latitude, p.longitude, p.platform_height_m, p.status,
+             s.acronym as station_acronym, s.display_name as station_name
+      FROM platforms p
+      JOIN stations s ON p.station_id = s.id
+    `;
+
+    let params = [];
+
+    if (stationParam) {
+      query += ' WHERE s.acronym = ? OR s.normalized_name = ?';
+      params = [stationParam, stationParam];
+    }
+
+    // Add permission filtering
+    if (user.role === 'station' && user.station_normalized_name) {
+      query += stationParam ? ' AND' : ' WHERE';
+      query += ' s.normalized_name = ?';
+      params.push(user.station_normalized_name);
+    }
+
+    query += ' ORDER BY p.display_name';
+
+    const result = await env.DB.prepare(query).bind(...params).all();
+
+    return new Response(JSON.stringify({
+      platforms: result?.results || []
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Platforms error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch platform data' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Instrument endpoints
+async function handleInstruments(method, id, request, env) {
+  if (method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Authentication required
+  const user = await getUserFromRequest(request, env);
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'Authentication required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    const url = new URL(request.url);
+    const stationParam = url.searchParams.get('station');
+
+    let query = `
+      SELECT i.id, i.display_name, i.platform_id, i.ecosystem_code,
+             i.camera_brand, i.camera_model, i.status, i.latitude, i.longitude,
+             p.display_name as platform_name, p.location_code,
+             s.acronym as station_acronym, s.display_name as station_name
+      FROM instruments i
+      JOIN platforms p ON i.platform_id = p.id
+      JOIN stations s ON p.station_id = s.id
+    `;
+
+    let params = [];
+
+    if (stationParam) {
+      query += ' WHERE s.acronym = ? OR s.normalized_name = ?';
+      params = [stationParam, stationParam];
+    }
+
+    // Add permission filtering
+    if (user.role === 'station' && user.station_normalized_name) {
+      query += stationParam ? ' AND' : ' WHERE';
+      query += ' s.normalized_name = ?';
+      params.push(user.station_normalized_name);
+    }
+
+    query += ' ORDER BY i.display_name';
+
+    const result = await env.DB.prepare(query).bind(...params).all();
+
+    return new Response(JSON.stringify({
+      instruments: result?.results || []
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Instruments error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch instrument data' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
 // Health check endpoint
 async function handleHealth(env) {
   return new Response(JSON.stringify({
@@ -332,72 +468,35 @@ async function getUserFromRequest(request, env) {
 // Data access functions
 async function loadCredentials(env) {
   try {
-    // For security, credentials are embedded at build time
-    return {
-      "generated_at": "2025-09-17T16:18:08.540Z",
-      "jwt_secret": "d13570ae6cb3e670a8aba30acc062bd92ba5a552e2f27b6a1e9a85449e0244cb842466279e3c05531d63e9f4fb2a37d96e1d2aef33649fbc0035cc0bc3d87f84",
-      "admin": {
-        "username": "admin",
-        "password": "IvKlLUk1JzBz6CrudDVxxSec",
-        "role": "admin"
-      },
-      "stations": {
-        "abisko": {
-          "username": "abisko",
-          "password": "HRdz99RNihpa0K99wtAkT4XR",
-          "role": "station",
-          "station_id": "ANS"
-        },
-        "asa": {
-          "username": "asa",
-          "password": "RFglByrYfkN37s9fIssBQIjx",
-          "role": "station",
-          "station_id": "ASA"
-        },
-        "bolmen": {
-          "username": "bolmen",
-          "password": "GhcjvVWRb2jH9RHuwDyxNtuy",
-          "role": "station",
-          "station_id": "BOL"
-        },
-        "erken": {
-          "username": "erken",
-          "password": "DRx6Hy2FnYrptilw6EyTu3rE",
-          "role": "station",
-          "station_id": "ERK"
-        },
-        "grimso": {
-          "username": "grimso",
-          "password": "HTZkIOIh7rAWLowwXRnxAvKA",
-          "role": "station",
-          "station_id": "GRI"
-        },
-        "lonnstorp": {
-          "username": "lonnstorp",
-          "password": "Y1VnG71Ho6zwPpCOFiALszaP",
-          "role": "station",
-          "station_id": "LON"
-        },
-        "robacksdalen": {
-          "username": "robacksdalen",
-          "password": "jMeu6AIt9Ep1AaBwHfmxhGqB",
-          "role": "station",
-          "station_id": "RBD"
-        },
-        "skogaryd": {
-          "username": "skogaryd",
-          "password": "4k5tk8EaxifV5qjrx3cKjEpA",
-          "role": "station",
-          "station_id": "SKC"
-        },
-        "svartberget": {
-          "username": "svartberget",
-          "password": "BvmF1ioEIw7AYXs2t1SoEI8Y",
-          "role": "station",
-          "station_id": "SVB"
+    // Load credentials from Cloudflare secrets
+    if (env.USE_CLOUDFLARE_SECRETS === 'true') {
+      const credentials = {
+        admin: JSON.parse(env.ADMIN_CREDENTIALS || '{}'),
+        stations: {},
+        jwt_secret: env.JWT_SECRET
+      };
+
+      // Load station credentials from individual secrets
+      const stationNames = ['abisko', 'asa', 'bolmen', 'erken', 'grimso', 'lonnstorp', 'robacksdalen', 'skogaryd', 'svartberget'];
+
+      for (const stationName of stationNames) {
+        const secretName = `STATION_${stationName.toUpperCase()}_CREDENTIALS`;
+        const stationSecret = env[secretName];
+        if (stationSecret) {
+          try {
+            credentials.stations[stationName] = JSON.parse(stationSecret);
+          } catch (parseError) {
+            console.warn(`Failed to parse credentials for ${stationName}:`, parseError);
+          }
         }
       }
-    };
+
+      return credentials;
+    } else {
+      // Fallback: try to load from database or return error
+      console.error('No credential loading method configured');
+      return null;
+    }
   } catch (error) {
     console.error('Failed to load credentials:', error);
     return null;

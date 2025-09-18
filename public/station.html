@@ -17,11 +17,15 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.2.0">
+    <link rel="stylesheet" href="/css/styles.css?v=4.2.2">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.2.0">
+    <meta name="app-version" content="4.2.2">
     <meta name="build-date" content="2025-09-18">
 
     <style>
@@ -154,6 +158,128 @@
             margin: 1rem 0;
         }
 
+        /* Dashboard Styles */
+        .dashboard-section {
+            margin-top: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card, .map-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Summary Card Styles */
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Map Card Styles */
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .layer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .layer-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .layer-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .station-map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             .nav-container {
                 padding: 0 0.5rem;
@@ -173,6 +299,35 @@
 
             .welcome-title {
                 font-size: 1.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .card-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+
+            .map-controls {
+                align-self: stretch;
+                justify-content: center;
+            }
+
+            .stat-item {
+                padding: 0.75rem 0;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .station-map {
+                height: 300px;
             }
         }
     </style>
@@ -213,13 +368,78 @@
                 <span id="error-message">Failed to load station data</span>
             </div>
         </div>
+
+        <!-- Dashboard Section -->
+        <div class="dashboard-section" id="dashboard-section" style="display: none;">
+            <div class="dashboard-grid">
+                <!-- Summary Card -->
+                <div class="summary-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-bar"></i> Station Overview</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="platforms-count">0</span>
+                                <span class="stat-label">Platforms</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="instruments-count">0</span>
+                                <span class="stat-label">Instruments</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="coordinates">-</span>
+                                <span class="stat-label">Coordinates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Card -->
+                <div class="map-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-map"></i> Station Location</h3>
+                        <div class="map-controls">
+                            <button class="layer-btn active" data-layer="satellite">
+                                <i class="fas fa-satellite"></i> Satellite
+                            </button>
+                            <button class="layer-btn" data-layer="osm">
+                                <i class="fas fa-map"></i> Street
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div id="station-map" class="station-map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.2.0"></script>
+    <script src="/js/utils.js?v=4.2.2"></script>
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         let currentUser = null;
         let stationData = null;
+        let stationMap = null;
+        let satelliteLayer = null;
+        let osmLayer = null;
 
         // Get station acronym from URL parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -288,13 +508,225 @@
             }
         }
 
-        function showStationData() {
+        async function showStationData() {
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('error-state').style.display = 'none';
             document.getElementById('welcome-content').style.display = 'block';
+            document.getElementById('dashboard-section').style.display = 'block';
 
             document.getElementById('station-name').textContent = stationData.display_name;
             document.title = `${stationData.display_name} - SITES Spectral`;
+
+            // Update dashboard and then initialize map with real data
+            await updateDashboard();
+            initializeMap();
+        }
+
+        async function updateDashboard() {
+            try {
+                // Fetch real platform and instrument counts from API
+                await fetchDashboardData();
+
+                // Update coordinates if available
+                if (stationData.latitude && stationData.longitude) {
+                    const coords = `${stationData.latitude.toFixed(4)}, ${stationData.longitude.toFixed(4)}`;
+                    document.getElementById('coordinates').textContent = coords;
+                }
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+                // Fallback to default values if API fails
+                document.getElementById('platforms-count').textContent = '0';
+                document.getElementById('instruments-count').textContent = '0';
+            }
+        }
+
+        async function fetchDashboardData() {
+            const token = localStorage.getItem('sites_spectral_token');
+            if (!token) {
+                console.warn('No authentication token available');
+                return;
+            }
+
+            try {
+                // Fetch platforms for this station
+                const platformsResponse = await fetch(`/api/platforms?station=${stationData.acronym}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Fetch instruments for this station
+                const instrumentsResponse = await fetch(`/api/instruments?station=${stationData.acronym}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                let platformCount = 0;
+                let instrumentCount = 0;
+
+                let platformsData = null;
+                let instrumentsData = null;
+
+                if (platformsResponse.ok) {
+                    platformsData = await platformsResponse.json();
+                    platformCount = platformsData.platforms ? platformsData.platforms.length : 0;
+                }
+
+                if (instrumentsResponse.ok) {
+                    instrumentsData = await instrumentsResponse.json();
+                    instrumentCount = instrumentsData.instruments ? instrumentsData.instruments.length : 0;
+                }
+
+                // Update the display
+                document.getElementById('platforms-count').textContent = platformCount;
+                document.getElementById('instruments-count').textContent = instrumentCount;
+
+                // Store for map use
+                window.stationPlatforms = platformsData ? (platformsData.platforms || []) : [];
+                window.stationInstruments = instrumentsData ? (instrumentsData.instruments || []) : [];
+
+                // Update map markers if map is already initialized
+                if (window.stationMap) {
+                    updateMapMarkers();
+                }
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                throw error;
+            }
+        }
+
+        function initializeMap() {
+            // Default coordinates (Abisko) if station coordinates not available
+            const defaultLat = 68.353729;
+            const defaultLng = 18.816522;
+
+            const lat = stationData.latitude || defaultLat;
+            const lng = stationData.longitude || defaultLng;
+
+            // Initialize map
+            stationMap = L.map('station-map').setView([lat, lng], 13);
+
+            // Satellite layer (default)
+            satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; <a href="https://www.arcgis.com/">ArcGIS</a>',
+                maxZoom: 18
+            });
+
+            // OpenStreetMap layer
+            osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            });
+
+            // Add default layer
+            satelliteLayer.addTo(stationMap);
+
+            // Add station marker with custom icon
+            const stationIcon = L.divIcon({
+                html: '<div style="background: rgba(5, 150, 105, 0.9); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"><i class="fas fa-broadcast-tower" style="font-size: 14px;"></i></div>',
+                className: 'custom-div-icon',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            L.marker([lat, lng], { icon: stationIcon })
+                .addTo(stationMap)
+                .bindPopup(`<strong>${stationData.display_name}</strong><br/>Station: ${stationData.acronym || stationAcronym}`);
+
+            // Add real platform markers
+            addPlatformMarkers(lat, lng);
+
+            // Setup layer controls
+            setupLayerControls();
+        }
+
+        function updateMapMarkers() {
+            // Clear existing platform markers
+            if (window.platformMarkers) {
+                window.platformMarkers.forEach(marker => {
+                    window.stationMap.removeLayer(marker);
+                });
+            }
+            window.platformMarkers = [];
+
+            // Re-add platform markers with current data
+            const lat = stationData.latitude || 68.353729;
+            const lng = stationData.longitude || 18.816522;
+            addPlatformMarkers(lat, lng);
+        }
+
+        function addPlatformMarkers(stationLat, stationLng) {
+            // Initialize platform markers array if not exists
+            if (!window.platformMarkers) {
+                window.platformMarkers = [];
+            }
+
+            // Use real platform data if available, otherwise show mock data for demo
+            const platforms = window.stationPlatforms || [];
+
+            if (platforms.length === 0) {
+                // Fallback to demo platforms if no real data
+                const demoPlatforms = [
+                    { display_name: 'Demo Platform 01', latitude: stationLat + 0.001, longitude: stationLng + 0.001 },
+                    { display_name: 'Demo Platform 02', latitude: stationLat - 0.001, longitude: stationLng + 0.0015 },
+                    { display_name: 'Demo Platform 03', latitude: stationLat + 0.0005, longitude: stationLng - 0.001 }
+                ];
+                platforms.push(...demoPlatforms);
+            }
+
+            platforms.forEach(platform => {
+                // Use platform coordinates if available, otherwise offset from station
+                const lat = platform.latitude || (stationLat + (Math.random() - 0.5) * 0.002);
+                const lng = platform.longitude || (stationLng + (Math.random() - 0.5) * 0.002);
+
+                const platformIcon = L.divIcon({
+                    html: '<div style="background: rgba(59, 130, 246, 0.9); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"><i class="fas fa-building" style="font-size: 10px;"></i></div>',
+                    className: 'custom-div-icon',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                // Count instruments for this platform
+                const platformInstruments = window.stationInstruments ?
+                    window.stationInstruments.filter(inst => inst.platform_id === platform.id) : [];
+
+                const popupContent = `<strong>${platform.display_name}</strong><br/>` +
+                    `Location: ${platform.location_code || 'N/A'}<br/>` +
+                    `Instruments: ${platformInstruments.length}`;
+
+                const marker = L.marker([lat, lng], { icon: platformIcon })
+                    .addTo(stationMap)
+                    .bindPopup(popupContent);
+
+                // Store marker for later removal
+                window.platformMarkers.push(marker);
+            });
+        }
+
+        function setupLayerControls() {
+            // Layer control buttons
+            document.querySelectorAll('.layer-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const layer = this.dataset.layer;
+
+                    // Update active state
+                    document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Switch layers
+                    if (layer === 'satellite') {
+                        stationMap.removeLayer(osmLayer);
+                        stationMap.addLayer(satelliteLayer);
+                    } else {
+                        stationMap.removeLayer(satelliteLayer);
+                        stationMap.addLayer(osmLayer);
+                    }
+                });
+            });
         }
 
         function showError(message) {
