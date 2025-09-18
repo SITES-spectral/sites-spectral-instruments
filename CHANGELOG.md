@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mobile responsive design
 - Real-time data synchronization
 
+## [3.2.5] - 2025-09-18
+
+### 🔧 Version Display Fix
+
+#### 🛠️ Cache Issue Resolution
+- **Fixed Hardcoded Version Numbers**: Replaced hardcoded version display in stations.html footer with dynamic version variables
+- **Added Proper ID Attributes**: Added `id="app-version"` and `id="build-date"` attributes for dynamic version updates
+- **Cache Invalidation**: Deployed new version to force cache refresh and ensure correct version display
+- **Consistent Version Display**: All pages now show current version and build date correctly
+
 ## [3.2.4] - 2025-09-18
 
 ### 🔧 Database Compatibility Fix

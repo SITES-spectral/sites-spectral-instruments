@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "3.2.4",
-  "description": "SITES Spectral Stations & Instruments Management System v3.2.4 - Fixed GROUP_CONCAT compatibility issue with D1 database",
+  "version": "3.2.5",
+  "description": "SITES Spectral Stations & Instruments Management System v3.2.5 - Fixed version display caching issue",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
