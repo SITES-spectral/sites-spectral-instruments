@@ -8,9 +8,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
+- ROI data population from stations.yaml
 - Enhanced user management interface
 - Bulk data operations
 - Advanced analytics dashboard
+
+## [4.5.1] - 2025-09-19
+
+### 🏗️ Database Schema Enhancement & Data Completeness Review
+
+#### 📊 Comprehensive Data Analysis
+- **Measurement Timeline Verification**: Confirmed that instrument measurement timeline data is fully implemented
+  - `first_measurement_year`, `last_measurement_year`, and `measurement_status` fields are populated and displayed
+  - Data ranges from 2010-2025 across different instruments with proper status tracking
+  - Timeline information prominently displayed in instrument detail modals
+- **ROI Infrastructure Created**: Established database foundation for Regions of Interest (ROI) data
+  - Created `instrument_rois` table with comprehensive schema for phenocam ROI polygons
+  - Support for ROI properties: name, description, alpha, auto_generated flag, RGB colors, thickness
+  - Coordinate storage as JSON arrays for polygon points
+  - Foreign key relationships and performance indexes
+
+#### 🗄️ Database Schema Updates
+- **ROI Table Structure**: Added `instrument_rois` table with fields:
+  - `roi_name` (e.g., 'ROI_00', 'ROI_01') for ROI identification
+  - `points_json` for storing polygon coordinate arrays from stations.yaml
+  - `color_r`, `color_g`, `color_b` for RGB color specifications
+  - `auto_generated`, `alpha`, `thickness` for ROI rendering properties
+  - `source_image`, `generated_date` for ROI metadata tracking
+- **Performance Optimization**: Added indexes for instrument_id and roi_name lookups
+- **Data Integrity**: Foreign key constraints with CASCADE deletion for data consistency
+
+#### 🔍 Missing Data Identification
+- **ROI Data Gap**: Identified that ROI polygon data from stations.yaml is not yet populated in database
+- **ROI Modal Section**: Added ROI section to instrument details modal (placeholder for future ROI data display)
+- **Data Pipeline Ready**: Infrastructure prepared for importing ROI coordinates and metadata from YAML sources
+
+#### 📋 Data Completeness Status
+- ✅ **Operation Programs**: Fully implemented with color-coded badges in platform modals
+- ✅ **Measurement Timeline**: Complete implementation with first/last years and status tracking
+- ✅ **Camera Specifications**: Comprehensive camera metadata (brand, model, resolution, serial numbers)
+- ✅ **Position Data**: Full coordinate, height, viewing direction, and azimuth information
+- 🔄 **ROI Data**: Database schema ready, YAML import pending
+- ✅ **Station Hierarchy**: Complete stations → platforms → instruments relationships
+
+#### 🎯 Enhanced User Experience
+- **Complete Instrument Information**: Instrument modals now display comprehensive metadata including timeline
+- **Research Context**: Platform modals show which research programs (SITES, ICOS, Polar) operate each platform
+- **Professional Presentation**: Consistent styling and organization across all detail modals
+- **Data Transparency**: All available metadata from stations.yaml properly surfaced in the interface
+
+This release establishes a solid foundation for complete data representation while identifying remaining gaps for future enhancement. The measurement timeline implementation was verified as already complete, while ROI infrastructure has been prepared for future data population.
 
 ## [4.5.0] - 2025-09-19
 
