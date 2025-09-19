@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.4.6">
+    <link rel="stylesheet" href="/css/styles.css?v=4.4.8">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.4.6">
+    <meta name="app-version" content="4.4.8">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -437,10 +437,54 @@
                 </div>
             </div>
         </div>
+
+        <!-- Platforms Section -->
+        <div class="container platforms-section">
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-tower-observation"></i> Platforms & Instruments
+            </h2>
+            <div id="platforms-grid" class="platforms-grid">
+                <!-- Platform cards will be dynamically generated here -->
+                <div class="loading-card">
+                    <div class="spinner"></div>
+                    <span>Loading platforms...</span>
+                </div>
+            </div>
+        </div>
     </main>
 
+    <!-- Platform Details Modal -->
+    <div id="platform-modal" class="platform-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
+                <button class="modal-close-large" onclick="closePlatformModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="platform-details" class="detail-grid">
+                    <!-- Platform details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrument Details Modal -->
+    <div id="instrument-modal" class="instrument-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-camera"></i> Instrument Details</h3>
+                <button class="modal-close-large" onclick="closeInstrumentModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="instrument-details" class="detail-grid">
+                    <!-- Instrument details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.4.6"></script>
+    <script src="/js/utils.js?v=4.4.8"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -530,6 +574,9 @@
             // Update dashboard and then initialize map with real data
             await updateDashboard();
             initializeMap();
+
+            // Load platforms and instruments
+            await loadPlatformsAndInstruments();
         }
 
         async function updateDashboard() {
@@ -873,6 +920,394 @@
             localStorage.removeItem('sites_spectral_user');
             window.location.href = '/';
         }
+
+        // Platform and Instrument Management Functions
+        async function loadPlatformsAndInstruments() {
+            const token = localStorage.getItem('sites_spectral_token');
+            if (!token) return;
+
+            const platformsGrid = document.getElementById('platforms-grid');
+
+            try {
+                // Fetch platforms for this station
+                const platformsResponse = await fetch(`/api/platforms?station=${stationData.acronym}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Fetch instruments for this station
+                const instrumentsResponse = await fetch(`/api/instruments?station=${stationData.acronym}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (platformsResponse.ok && instrumentsResponse.ok) {
+                    const platformsData = await platformsResponse.json();
+                    const instrumentsData = await instrumentsResponse.json();
+
+                    const platforms = platformsData.platforms || [];
+                    const instruments = instrumentsData.instruments || [];
+
+                    // Group instruments by platform
+                    const instrumentsByPlatform = {};
+                    instruments.forEach(instrument => {
+                        if (!instrumentsByPlatform[instrument.platform_id]) {
+                            instrumentsByPlatform[instrument.platform_id] = [];
+                        }
+                        instrumentsByPlatform[instrument.platform_id].push(instrument);
+                    });
+
+                    // Generate platform cards
+                    platformsGrid.innerHTML = platforms.map(platform =>
+                        createPlatformCard(platform, instrumentsByPlatform[platform.id] || [])
+                    ).join('');
+
+                } else {
+                    platformsGrid.innerHTML = '<div class="error-card">Failed to load platforms and instruments</div>';
+                }
+            } catch (error) {
+                console.error('Error loading platforms and instruments:', error);
+                platformsGrid.innerHTML = '<div class="error-card">Error loading platforms and instruments</div>';
+            }
+        }
+
+        function createPlatformCard(platform, instruments) {
+            const statusClass = `status-${platform.status?.toLowerCase() || 'unknown'}`;
+            const coordinates = platform.latitude && platform.longitude
+                ? `${platform.latitude.toFixed(4)}°N, ${platform.longitude.toFixed(4)}°E`
+                : 'No coordinates';
+
+            const instrumentCards = instruments.map(instrument =>
+                createInstrumentCard(instrument)
+            ).join('');
+
+            return `
+                <div class="platform-card" data-platform-id="${platform.id}">
+                    <div class="platform-header" onclick="showPlatformDetails(${platform.id})">
+                        <div class="platform-title">
+                            <i class="fas fa-tower-observation"></i>
+                            ${platform.display_name}
+                        </div>
+                        <div class="platform-meta">
+                            <div class="platform-structure">
+                                <i class="fas fa-cog"></i>
+                                ${platform.mounting_structure || 'Unknown'} • ${platform.platform_height_m || 'N/A'}m
+                            </div>
+                            <div class="platform-status ${statusClass}">
+                                ${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}
+                            </div>
+                            <div class="platform-coordinates">
+                                ${coordinates}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="instruments-section">
+                        <h4><i class="fas fa-camera"></i> Instruments (${instruments.length})</h4>
+                        <div class="instruments-grid">
+                            ${instrumentCards || '<div class="no-instruments">No instruments</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createInstrumentCard(instrument) {
+            const statusClass = `status-${instrument.status?.toLowerCase() || 'unknown'}`;
+            const legacyName = instrument.legacy_acronym || 'No Legacy';
+            const legacyClass = instrument.legacy_acronym ? '' : 'no-legacy';
+            const direction = instrument.viewing_direction || 'N/A';
+
+            return `
+                <div class="instrument-card" onclick="showInstrumentDetails(${instrument.id})" data-instrument-id="${instrument.id}">
+                    <div class="instrument-legacy ${legacyClass}">
+                        ${legacyName}
+                    </div>
+                    <div class="instrument-direction">
+                        ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
+                    </div>
+                    <div class="instrument-status ${statusClass}">
+                        ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getStatusIcon(status) {
+            switch(status?.toLowerCase()) {
+                case 'active': return '🟢';
+                case 'inactive': return '🔴';
+                case 'decommissioned': return '⚫';
+                case 'testing': return '🟡';
+                case 'maintenance': return '🟠';
+                default: return '⚪';
+            }
+        }
+
+        async function showPlatformDetails(platformId) {
+            const token = localStorage.getItem('sites_spectral_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/api/platforms/${platformId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const platform = await response.json();
+                    populatePlatformModal(platform);
+                    document.getElementById('platform-modal').classList.add('show');
+                } else {
+                    console.error('Failed to fetch platform details');
+                }
+            } catch (error) {
+                console.error('Error fetching platform details:', error);
+            }
+        }
+
+        function populatePlatformModal(platform) {
+            const detailsContainer = document.getElementById('platform-details');
+
+            detailsContainer.innerHTML = `
+                <div class="detail-section">
+                    <h4><i class="fas fa-info-circle"></i> General Information</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Platform Name</span>
+                        <span class="detail-value">${platform.display_name || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Normalized ID</span>
+                        <span class="detail-value monospace">${platform.normalized_name || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Location Code</span>
+                        <span class="detail-value">${platform.location_code || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value status-${platform.status?.toLowerCase() || 'unknown'}">${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Location & Positioning</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Latitude</span>
+                        <span class="detail-value monospace">${platform.latitude ? platform.latitude.toFixed(6) : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Longitude</span>
+                        <span class="detail-value monospace">${platform.longitude ? platform.longitude.toFixed(6) : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Platform Height</span>
+                        <span class="detail-value">${platform.platform_height_m ? platform.platform_height_m + 'm' : 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-cogs"></i> Technical Specifications</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Mounting Structure</span>
+                        <span class="detail-value">${platform.mounting_structure || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Deployment Date</span>
+                        <span class="detail-value">${platform.deployment_date || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Station</span>
+                        <span class="detail-value">${platform.station_name || 'N/A'} (${platform.station_acronym || 'N/A'})</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-sticky-note"></i> Additional Information</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Description</span>
+                        <span class="detail-value">${platform.description || 'No description available'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function showInstrumentDetails(instrumentId) {
+            const token = localStorage.getItem('sites_spectral_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const instrument = await response.json();
+                    populateInstrumentModal(instrument);
+                    document.getElementById('instrument-modal').classList.add('show');
+                } else {
+                    console.error('Failed to fetch instrument details');
+                }
+            } catch (error) {
+                console.error('Error fetching instrument details:', error);
+            }
+        }
+
+        function populateInstrumentModal(instrument) {
+            const detailsContainer = document.getElementById('instrument-details');
+
+            detailsContainer.innerHTML = `
+                <div class="detail-section">
+                    <h4><i class="fas fa-info-circle"></i> General Information</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Instrument Name</span>
+                        <span class="detail-value">${instrument.display_name || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Legacy Acronym</span>
+                        <span class="detail-value monospace">${instrument.legacy_acronym || 'No Legacy'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Normalized ID</span>
+                        <span class="detail-value monospace">${instrument.normalized_name || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value status-${instrument.status?.toLowerCase() || 'unknown'}">${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-camera"></i> Camera Specifications</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Camera Brand</span>
+                        <span class="detail-value">${instrument.camera_brand || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Camera Model</span>
+                        <span class="detail-value">${instrument.camera_model || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Resolution</span>
+                        <span class="detail-value monospace">${instrument.camera_resolution || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Serial Number</span>
+                        <span class="detail-value monospace">${instrument.camera_serial_number || 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Latitude</span>
+                        <span class="detail-value monospace">${instrument.latitude ? instrument.latitude.toFixed(6) : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Longitude</span>
+                        <span class="detail-value monospace">${instrument.longitude ? instrument.longitude.toFixed(6) : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Height</span>
+                        <span class="detail-value">${instrument.instrument_height_m ? instrument.instrument_height_m + 'm' : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Viewing Direction</span>
+                        <span class="detail-value">${instrument.viewing_direction || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Azimuth</span>
+                        <span class="detail-value">${instrument.azimuth_degrees ? instrument.azimuth_degrees + '°' : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Degrees from Nadir</span>
+                        <span class="detail-value">${instrument.degrees_from_nadir ? instrument.degrees_from_nadir + '°' : 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-calendar-alt"></i> Timeline & Classification</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Instrument Type</span>
+                        <span class="detail-value">${instrument.instrument_type || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Ecosystem Code</span>
+                        <span class="detail-value">${instrument.ecosystem_code || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Deployment Date</span>
+                        <span class="detail-value">${instrument.deployment_date || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">First Measurement</span>
+                        <span class="detail-value">${instrument.first_measurement_year || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Last Measurement</span>
+                        <span class="detail-value">${instrument.last_measurement_year || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Measurement Status</span>
+                        <span class="detail-value">${instrument.measurement_status || 'N/A'}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-sticky-note"></i> Notes & Context</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Platform</span>
+                        <span class="detail-value">${instrument.platform_name || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Station</span>
+                        <span class="detail-value">${instrument.station_name || 'N/A'} (${instrument.station_acronym || 'N/A'})</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Description</span>
+                        <span class="detail-value">${instrument.description || 'No description available'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Installation Notes</span>
+                        <span class="detail-value">${instrument.installation_notes || 'No installation notes'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Maintenance Notes</span>
+                        <span class="detail-value">${instrument.maintenance_notes || 'No maintenance notes'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closePlatformModal() {
+            document.getElementById('platform-modal').classList.remove('show');
+        }
+
+        function closeInstrumentModal() {
+            document.getElementById('instrument-modal').classList.remove('show');
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const platformModal = document.getElementById('platform-modal');
+            const instrumentModal = document.getElementById('instrument-modal');
+
+            if (event.target === platformModal) {
+                closePlatformModal();
+            }
+            if (event.target === instrumentModal) {
+                closeInstrumentModal();
+            }
+        });
+
+        // Close modals with ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePlatformModal();
+                closeInstrumentModal();
+            }
+        });
     </script>
 </body>
 </html>

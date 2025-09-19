@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.4.7",
-  "description": "SITES Spectral Stations & Instruments Management System v4.4.7 - Improved Leaflet map popup spacing and visual layout",
+  "version": "4.4.8",
+  "description": "SITES Spectral Stations & Instruments Management System v4.4.8 - Enhanced platform cards with instrument details and comprehensive modal views",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

@@ -12,6 +12,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.8] - 2025-09-19
+
+### 🏗️ Enhanced Platform & Instrument Data Presentation
+
+#### ✨ Platform Cards Grid System
+- **Comprehensive Platform Cards**: Added visual grid layout below station overview and map
+- **Platform Information Display**: Shows platform name, mounting structure, height, status, and coordinates
+- **Status Color Coding**: Visual status indicators with emoji icons (🟢 Active, ⚫ Decommissioned, 🔴 Inactive, 🟡 Testing, 🟠 Maintenance)
+- **Responsive Grid Layout**: Auto-fitting cards that adapt to different screen sizes
+- **Professional Styling**: Gradient headers, hover effects, and consistent visual hierarchy
+
+#### 🔧 Nested Instrument Cards
+- **Legacy Acronym Display**: Shows familiar legacy names (e.g., "SFA-AGR-P01", "SVB-FOR-P02")
+- **Viewing Direction Information**: Displays instrument orientation with azimuth degrees
+- **Individual Status Tracking**: Each instrument shows its own operational status
+- **Compact Design**: Efficient space usage within platform cards
+- **Missing Data Handling**: Graceful display of "No Legacy" for instruments without legacy acronyms
+
+#### 🪟 Comprehensive Modal System
+- **Platform Details Modal**: Complete platform specifications in organized sections:
+  - General Information (name, ID, location code, status)
+  - Location & Positioning (lat/lon coordinates, platform height)
+  - Technical Specifications (mounting structure, deployment date)
+  - Additional Information (descriptions and notes)
+- **Instrument Details Modal**: Extensive instrument specifications:
+  - General Information (name, legacy acronym, normalized ID, status)
+  - Camera Specifications (brand, model, resolution, serial number)
+  - Position & Orientation (coordinates, height, viewing direction, azimuth)
+  - Timeline & Classification (instrument type, ecosystem, measurement periods)
+  - Notes & Context (platform, station, descriptions, maintenance notes)
+
+#### 🎯 User Experience Enhancements
+- **Coordinated Display**: Both latitude and longitude shown in platform cards and modals
+- **Click-to-Explore**: Platform header opens platform details, instrument cards open instrument details
+- **Keyboard Navigation**: ESC key and click-outside-to-close modal functionality
+- **Loading States**: Professional loading indicators during data fetch
+- **Error Handling**: Graceful fallback displays for API failures
+
+#### 📋 Data Integration
+- **API Integration**: Seamless connection to existing `/api/platforms` and `/api/instruments` endpoints
+- **Hierarchical Data Structure**: Proper grouping of instruments by platform
+- **Station Filtering**: Only displays platforms and instruments for the current station
+- **Real-time Status**: Live status information with color-coded indicators
+
+#### 🎨 Technical Implementation
+- **CSS Grid Layout**: Modern responsive design with proper spacing and alignment
+- **Modal System Architecture**: Reusable modal components with consistent styling
+- **Status Icon Mapping**: Comprehensive status-to-emoji mapping function
+- **Form-Style Data Display**: Professional field-value presentation in modals
+- **Mobile Responsive**: Optimized layouts for all device sizes
+
+#### 🔍 Information Architecture
+- **Progressive Disclosure**: Overview in cards → Details in modals → Complete specifications
+- **Contextual Relationships**: Clear station → platform → instrument hierarchy
+- **Legacy Name Priority**: Familiar acronyms prominently displayed for researcher recognition
+- **Comprehensive Metadata**: All available fields from stations.yaml properly displayed
+
+This implementation provides researchers with immediate visual access to platform and instrument information while maintaining the existing map functionality and adding comprehensive detail views through an intuitive modal system.
+
 ## [4.4.7] - 2025-09-19
 
 ### 🎨 Enhanced Map Popup Spacing
