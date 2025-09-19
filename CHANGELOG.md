@@ -12,6 +12,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.9] - 2025-09-19
+
+### 🔧 Fixed Individual Record API Endpoints
+
+#### ✨ Modal Data Population Fix
+- **Fixed Platform Modals**: Platform detail modals now properly display real data when clicking platform cards
+- **Fixed Instrument Modals**: Instrument detail modals now correctly show comprehensive specifications
+- **API Endpoint Enhancement**: Updated `/api/platforms/{id}` and `/api/instruments/{id}` to return individual records instead of arrays
+- **Complete Data Fields**: Individual record endpoints now include all relevant fields for modal display
+
+#### 🔍 API Implementation Details
+- **Platform Individual Records**: `/api/platforms/1` now returns single platform object with:
+  - Platform metadata (name, location code, status, mounting structure)
+  - Geographic data (latitude, longitude, height)
+  - Station relationship data
+  - Deployment and description information
+- **Instrument Individual Records**: `/api/instruments/1` now returns single instrument object with:
+  - Complete camera specifications (brand, model, resolution, serial number)
+  - Measurement timeline (first year, last year, measurement status)
+  - Position data (coordinates, height, viewing direction, azimuth)
+  - Classification data (ecosystem code, instrument type, legacy acronym)
+  - Platform and station relationship information
+
+#### 🛠️ Technical Improvements
+- **Enhanced SQL Queries**: Individual record queries include comprehensive field selection for modal display
+- **Permission-Based Filtering**: Individual record access respects user permissions (station users see only their assigned station's data)
+- **Error Handling**: Proper 404 responses for non-existent or inaccessible records
+- **Response Format**: Consistent single-object responses for individual records vs. array responses for lists
+
+#### 🎯 User Experience Enhancement
+- **Working Modals**: Platform and instrument cards now properly open modals with real database data
+- **Complete Information**: Modals display all available metadata from the stations.yaml-based database
+- **Interactive Interface**: Users can now click any platform or instrument card to view detailed specifications
+- **Consistent Data Flow**: Fixed the complete data pipeline from database → API → frontend → modal display
+
+This fix resolves the issue where clicking platform and instrument cards resulted in empty or non-functional modals, ensuring the enhanced data presentation system works as intended.
+
 ## [4.4.8] - 2025-09-19
 
 ### 🏗️ Enhanced Platform & Instrument Data Presentation

@@ -227,41 +227,79 @@ async function handlePlatforms(method, id, request, env) {
   }
 
   try {
-    const url = new URL(request.url);
-    const stationParam = url.searchParams.get('station');
+    if (id) {
+      // Get specific platform by ID
+      let query = `
+        SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+               p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+               p.deployment_date, p.description,
+               s.acronym as station_acronym, s.display_name as station_name
+        FROM platforms p
+        JOIN stations s ON p.station_id = s.id
+        WHERE p.id = ?
+      `;
 
-    let query = `
-      SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
-             p.latitude, p.longitude, p.platform_height_m, p.status,
-             s.acronym as station_acronym, s.display_name as station_name
-      FROM platforms p
-      JOIN stations s ON p.station_id = s.id
-    `;
+      // Add permission filtering
+      if (user.role === 'station' && user.station_normalized_name) {
+        query += ' AND s.normalized_name = ?';
+      }
 
-    let params = [];
+      const params = user.role === 'station' && user.station_normalized_name
+        ? [id, user.station_normalized_name]
+        : [id];
 
-    if (stationParam) {
-      query += ' WHERE s.acronym = ? OR s.normalized_name = ?';
-      params = [stationParam, stationParam];
+      const result = await env.DB.prepare(query).bind(...params).first();
+
+      if (!result) {
+        return new Response(JSON.stringify({ error: 'Platform not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else {
+      // List platforms (existing logic)
+      const url = new URL(request.url);
+      const stationParam = url.searchParams.get('station');
+
+      let query = `
+        SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+               p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+               s.acronym as station_acronym, s.display_name as station_name
+        FROM platforms p
+        JOIN stations s ON p.station_id = s.id
+      `;
+
+      let params = [];
+
+      if (stationParam) {
+        query += ' WHERE s.acronym = ? OR s.normalized_name = ?';
+        params = [stationParam, stationParam];
+      }
+
+      // Add permission filtering
+      if (user.role === 'station' && user.station_normalized_name) {
+        query += stationParam ? ' AND' : ' WHERE';
+        query += ' s.normalized_name = ?';
+        params.push(user.station_normalized_name);
+      }
+
+      query += ' ORDER BY p.display_name';
+
+      const result = await env.DB.prepare(query).bind(...params).all();
+
+      return new Response(JSON.stringify({
+        platforms: result?.results || []
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-
-    // Add permission filtering
-    if (user.role === 'station' && user.station_normalized_name) {
-      query += stationParam ? ' AND' : ' WHERE';
-      query += ' s.normalized_name = ?';
-      params.push(user.station_normalized_name);
-    }
-
-    query += ' ORDER BY p.display_name';
-
-    const result = await env.DB.prepare(query).bind(...params).all();
-
-    return new Response(JSON.stringify({
-      platforms: result?.results || []
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
 
   } catch (error) {
     console.error('Platforms error:', error);
@@ -291,45 +329,88 @@ async function handleInstruments(method, id, request, env) {
   }
 
   try {
-    const url = new URL(request.url);
-    const stationParam = url.searchParams.get('station');
+    if (id) {
+      // Get specific instrument by ID
+      let query = `
+        SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
+               i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
+               i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
+               i.camera_brand, i.camera_model, i.camera_resolution, i.camera_serial_number,
+               i.first_measurement_year, i.last_measurement_year, i.measurement_status,
+               i.instrument_height_m, i.description, i.installation_notes, i.maintenance_notes,
+               p.display_name as platform_name, p.location_code, p.mounting_structure,
+               s.acronym as station_acronym, s.display_name as station_name
+        FROM instruments i
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+        WHERE i.id = ?
+      `;
 
-    let query = `
-      SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
-             i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
-             i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
-             i.camera_brand, i.camera_model, i.camera_resolution,
-             p.display_name as platform_name, p.location_code,
-             s.acronym as station_acronym, s.display_name as station_name
-      FROM instruments i
-      JOIN platforms p ON i.platform_id = p.id
-      JOIN stations s ON p.station_id = s.id
-    `;
+      // Add permission filtering
+      if (user.role === 'station' && user.station_normalized_name) {
+        query += ' AND s.normalized_name = ?';
+      }
 
-    let params = [];
+      const params = user.role === 'station' && user.station_normalized_name
+        ? [id, user.station_normalized_name]
+        : [id];
 
-    if (stationParam) {
-      query += ' WHERE s.acronym = ? OR s.normalized_name = ?';
-      params = [stationParam, stationParam];
+      const result = await env.DB.prepare(query).bind(...params).first();
+
+      if (!result) {
+        return new Response(JSON.stringify({ error: 'Instrument not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else {
+      // List instruments (existing logic)
+      const url = new URL(request.url);
+      const stationParam = url.searchParams.get('station');
+
+      let query = `
+        SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
+               i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
+               i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
+               i.camera_brand, i.camera_model, i.camera_resolution,
+               p.display_name as platform_name, p.location_code,
+               s.acronym as station_acronym, s.display_name as station_name
+        FROM instruments i
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+      `;
+
+      let params = [];
+
+      if (stationParam) {
+        query += ' WHERE s.acronym = ? OR s.normalized_name = ?';
+        params = [stationParam, stationParam];
+      }
+
+      // Add permission filtering
+      if (user.role === 'station' && user.station_normalized_name) {
+        query += stationParam ? ' AND' : ' WHERE';
+        query += ' s.normalized_name = ?';
+        params.push(user.station_normalized_name);
+      }
+
+      query += ' ORDER BY i.display_name';
+
+      const result = await env.DB.prepare(query).bind(...params).all();
+
+      return new Response(JSON.stringify({
+        instruments: result?.results || []
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-
-    // Add permission filtering
-    if (user.role === 'station' && user.station_normalized_name) {
-      query += stationParam ? ' AND' : ' WHERE';
-      query += ' s.normalized_name = ?';
-      params.push(user.station_normalized_name);
-    }
-
-    query += ' ORDER BY i.display_name';
-
-    const result = await env.DB.prepare(query).bind(...params).all();
-
-    return new Response(JSON.stringify({
-      instruments: result?.results || []
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
 
   } catch (error) {
     console.error('Instruments error:', error);

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.4.8",
-  "description": "SITES Spectral Stations & Instruments Management System v4.4.8 - Enhanced platform cards with instrument details and comprehensive modal views",
+  "version": "4.4.9",
+  "description": "SITES Spectral Stations & Instruments Management System v4.4.9 - Fixed individual record API endpoints for working platform and instrument modals",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
