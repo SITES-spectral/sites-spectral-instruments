@@ -210,8 +210,8 @@ CREATE TABLE IF NOT EXISTS activity_log (
                         const instrumentName = instrument.display_name || instrumentKey;
                         const instrumentNormalized = instrument.normalized_name || instrumentKey;
                         const legacyAcronym = instrument.legacy_acronym || '';
-                        const instrumentType = instrument.instrument_type || 'phenocam';
-                        const ecosystemCode = instrument.ecosystem_code || '';
+                        const instrumentType = instrument.instrument_type || instrument.type || 'phenocam';
+                        const ecosystemCode = instrument.ecosystem_code || instrument.ecosystem || '';
                         const instrumentNumber = instrument.instrument_number || '';
                         const instrumentStatus = instrument.status || 'Active';
                         const instrumentDeploymentDate = instrument.deployment_date ? `'${instrument.deployment_date}'` : 'NULL';

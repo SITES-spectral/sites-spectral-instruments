@@ -295,8 +295,10 @@ async function handleInstruments(method, id, request, env) {
     const stationParam = url.searchParams.get('station');
 
     let query = `
-      SELECT i.id, i.display_name, i.platform_id, i.ecosystem_code,
-             i.camera_brand, i.camera_model, i.status, i.latitude, i.longitude,
+      SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
+             i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
+             i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
+             i.camera_brand, i.camera_model, i.camera_resolution,
              p.display_name as platform_name, p.location_code,
              s.acronym as station_acronym, s.display_name as station_name
       FROM instruments i

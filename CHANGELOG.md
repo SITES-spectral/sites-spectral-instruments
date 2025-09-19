@@ -12,6 +12,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.2] - 2025-09-19
+
+### 🔧 Comprehensive API & Database Fixes
+
+#### ✨ Enhanced Instrument API
+- **Fixed Missing Fields**: Updated `/api/instruments` endpoint to include all database fields:
+  - `normalized_name`, `instrument_type`, `legacy_acronym`, `instrument_number`
+  - `viewing_direction`, `azimuth_degrees`, `camera_resolution`
+  - All fields now properly accessible to frontend components
+- **Consistent Field Mapping**: Ensured API responses match database schema completely
+
+#### 🗄️ Database Schema Corrections
+- **Fixed YAML Field Inconsistencies**: Updated migration script to handle multiple YAML field name variants:
+  - `instrument_type` vs `type` - both now properly imported
+  - `ecosystem_code` vs `ecosystem` - both field names handled correctly
+- **Complete Database Rebuild**: Applied corrected migration with proper field mapping
+- **Ecosystem Diversity**: Database now contains accurate ecosystem distribution:
+  - AGR (Agriculture): 5 instruments
+  - FOR (Forest): 10 instruments
+  - LAK (Lake): 1 instrument
+  - MIR (Mire): 3 instruments
+  - WET (Wetland): 3 instruments
+
+#### 🗺️ Map Marker Improvements
+- **Ecosystem-Based Grouping**: Map popups now show instrument counts by ecosystem type instead of generic "Phenocam" counts
+- **Accurate Platform Data**: Platform markers display correct ecosystem distribution per location
+- **Enhanced Station Overview**: Station markers show comprehensive ecosystem breakdown
+
+#### 🔍 Proactive Issue Prevention
+- **Systematic API Audit**: Checked all endpoints for missing database fields
+- **Field Mapping Validation**: Ensured frontend code has access to all required data
+- **Migration Script Robustness**: Improved YAML parsing to handle field name variations
+- **Data Integrity**: Verified complete data flow from YAML → Database → API → Frontend
+
+#### 📊 Data Quality Improvements
+- **Authoritative YAML Sources**: All data consistently imported from official configuration files
+- **Complete Field Population**: No missing or null data due to field name mismatches
+- **Ecosystem Classification**: Proper categorization of instruments by research focus area
+- **Legacy Compatibility**: Maintained legacy acronyms and identifiers for continuity
+
 ## [4.4.1] - 2025-09-19
 
 ### 🐛 Bug Fixes
