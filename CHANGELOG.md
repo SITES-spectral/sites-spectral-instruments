@@ -12,6 +12,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.7] - 2025-09-19
+
+### 🎨 Enhanced Map Popup Spacing
+
+#### ✨ Visual Improvements
+- **Increased Popup Padding**: Changed from 1rem to 1.5rem for better breathing room around popup content
+- **Enhanced Text Spacing**: Improved margins between headings (1rem) and paragraphs (0.75rem)
+- **Better Line Height**: Added 1.5 line-height to popup paragraphs for improved readability
+- **Refined Action Buttons**: Added visual separator with border-top and increased spacing (1.5rem margin, 1rem padding)
+- **Professional Layout**: Better gap between action buttons (0.75rem) for improved touch targets
+
+#### 🔧 Technical Changes
+- Updated `.map-popup` padding from 1rem to 1.5rem
+- Enhanced heading margins from 0.75rem to 1rem
+- Improved paragraph spacing from 0.5rem to 0.75rem with line-height 1.5
+- Added border separator above action buttons with increased spacing
+- Maintained responsive design compatibility
+
+#### 📱 User Experience
+- **Better Readability**: Text no longer appears cramped against popup edges
+- **Professional Appearance**: Consistent spacing throughout popup content
+- **Improved Touch Interface**: Better button spacing for mobile interaction
+- **Visual Hierarchy**: Clear separation between content sections
+
 ## [4.4.6] - 2025-09-19
 
 ### 🔄 Database Update with Latest Stations Data
