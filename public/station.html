@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.4.3">
+    <link rel="stylesheet" href="/css/styles.css?v=4.4.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.4.3">
+    <meta name="app-version" content="4.4.4">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -440,7 +440,7 @@
     </main>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.4.3"></script>
+    <script src="/js/utils.js?v=4.4.4"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -658,7 +658,9 @@
                         instrumentsWithLegacy.push({
                             type: type,
                             legacy: instrument.legacy_acronym,
-                            name: instrument.display_name
+                            name: instrument.display_name,
+                            normalized_name: instrument.normalized_name,
+                            status: instrument.status || instrument.measurement_status
                         });
                     }
                 });
@@ -673,10 +675,16 @@
 
                     // Add legacy acronyms if available
                     if (instrumentsWithLegacy.length > 0) {
-                        instrumentDetails += '<br/><strong>Legacy Names:</strong><br/>';
+                        instrumentDetails += '<br/><strong>Instruments Table:</strong><br/>';
+                        instrumentDetails += '<table style="width:100%; font-size:12px; border-collapse:collapse; margin-top:5px;">';
+                        instrumentDetails += '<tr style="background:#f5f5f5;"><th style="padding:3px; text-align:left; border:1px solid #ddd;">Legacy</th><th style="padding:3px; text-align:left; border:1px solid #ddd;">Normalized</th><th style="padding:3px; text-align:left; border:1px solid #ddd;">Status</th></tr>';
                         instrumentsWithLegacy.forEach(inst => {
-                            instrumentDetails += `• ${inst.legacy}<br/>`;
+                            const status = inst.status || 'Unknown';
+                            const statusColor = status.toLowerCase() === 'active' ? '#22c55e' :
+                                              status.toLowerCase() === 'inactive' ? '#ef4444' : '#6b7280';
+                            instrumentDetails += `<tr><td style="padding:3px; border:1px solid #ddd;">${inst.legacy}</td><td style="padding:3px; border:1px solid #ddd; font-size:10px;">${inst.normalized_name || 'N/A'}</td><td style="padding:3px; border:1px solid #ddd; color:${statusColor}; font-weight:bold;">${status}</td></tr>`;
                         });
+                        instrumentDetails += '</table>';
                     }
                 } else {
                     instrumentDetails = '<br/>Instruments: None';
@@ -810,7 +818,9 @@
                         instrumentsWithLegacy.push({
                             type: type,
                             legacy: instrument.legacy_acronym,
-                            name: instrument.display_name
+                            name: instrument.display_name,
+                            normalized_name: instrument.normalized_name,
+                            status: instrument.status || instrument.measurement_status
                         });
                     }
                 });
@@ -825,10 +835,16 @@
 
                     // Add legacy acronyms if available
                     if (instrumentsWithLegacy.length > 0) {
-                        instrumentDetails += '<br/><strong>Legacy Names:</strong><br/>';
+                        instrumentDetails += '<br/><strong>Instruments Table:</strong><br/>';
+                        instrumentDetails += '<table style="width:100%; font-size:12px; border-collapse:collapse; margin-top:5px;">';
+                        instrumentDetails += '<tr style="background:#f5f5f5;"><th style="padding:3px; text-align:left; border:1px solid #ddd;">Legacy</th><th style="padding:3px; text-align:left; border:1px solid #ddd;">Normalized</th><th style="padding:3px; text-align:left; border:1px solid #ddd;">Status</th></tr>';
                         instrumentsWithLegacy.forEach(inst => {
-                            instrumentDetails += `• ${inst.legacy}<br/>`;
+                            const status = inst.status || 'Unknown';
+                            const statusColor = status.toLowerCase() === 'active' ? '#22c55e' :
+                                              status.toLowerCase() === 'inactive' ? '#ef4444' : '#6b7280';
+                            instrumentDetails += `<tr><td style="padding:3px; border:1px solid #ddd;">${inst.legacy}</td><td style="padding:3px; border:1px solid #ddd; font-size:10px;">${inst.normalized_name || 'N/A'}</td><td style="padding:3px; border:1px solid #ddd; color:${statusColor}; font-weight:bold;">${status}</td></tr>`;
                         });
+                        instrumentDetails += '</table>';
                     }
                 } else {
                     instrumentDetails = '<br/>Instruments: None';

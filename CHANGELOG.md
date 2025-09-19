@@ -12,6 +12,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.4] - 2025-09-19
+
+### 📊 Enhanced Popup Tables with Comprehensive Instrument Information
+
+#### ✨ Improved Table Display
+- **Instruments Table**: Renamed from "Legacy Names" to "Instruments Table" for clarity
+- **Shortened Column Headers**: Optimized for better readability
+  - "Legacy" (instead of "Legacy Name")
+  - "Normalized" (instead of "Normalized Name")
+  - "Status" (unchanged)
+
+#### 📋 Enhanced Data Presentation
+- **Comprehensive Instrument Data**: Each popup table now shows:
+  - **Legacy Acronym**: Historical instrument identifier (e.g., "ANS-FOR-P01")
+  - **Normalized Name**: Current system identifier (e.g., "ANS_FOR_BL01_PHE01")
+  - **Active Status**: Real-time instrument status with color coding
+    - Green: Active instruments
+    - Red: Inactive instruments
+    - Gray: Unknown status
+
+#### 🎨 Visual Improvements
+- **Professional Table Styling**: Clean borders and alternating row colors
+- **Status Color Coding**: Immediate visual feedback on instrument status
+- **Responsive Design**: Optimized table layout for popup display
+- **Compact Format**: Efficient use of space while maintaining readability
+
+#### 🔧 Technical Implementation
+- Enhanced data collection to include normalized names and status
+- Color-coded status indicators with CSS styling
+- Improved table structure for better popup integration
+- Maintained compatibility with existing map functionality
+
 ## [4.4.3] - 2025-09-19
 
 ### 🗺️ Enhanced Map Experience with Google-Style Markers
