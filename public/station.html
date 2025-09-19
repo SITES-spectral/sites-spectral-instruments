@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.4.0">
+    <link rel="stylesheet" href="/css/styles.css?v=4.4.3">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.4.0">
+    <meta name="app-version" content="4.4.3">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -440,7 +440,7 @@
     </main>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.4.0"></script>
+    <script src="/js/utils.js?v=4.4.3"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -635,23 +635,32 @@
             // Add default layer
             satelliteLayer.addTo(stationMap);
 
-            // Add station marker with custom icon
+            // Add station marker with Google-style red marker
             const stationIcon = L.divIcon({
-                html: '<div style="background: rgba(5, 150, 105, 0.9); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"><i class="fas fa-broadcast-tower" style="font-size: 14px;"></i></div>',
-                className: 'custom-div-icon',
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
+                html: '<div style="position: relative;"><svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg"><path d="M16 0C7.2 0 0 7.2 0 16c0 8.8 16 24 16 24s16-15.2 16-24C32 7.2 24.8 0 16 0z" fill="#EA4335"/><circle cx="16" cy="16" r="8" fill="white"/><i class="fas fa-broadcast-tower" style="font-size: 10px; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); color: #EA4335;"></i></svg></div>',
+                className: 'google-marker-icon',
+                iconSize: [32, 40],
+                iconAnchor: [16, 40]
             });
 
             // Create enhanced station popup with instrument details
             const createStationPopup = () => {
                 const totalInstruments = window.stationInstruments || [];
                 const instrumentTypes = {};
+                const instrumentsWithLegacy = [];
 
-                // Count instruments by type
+                // Count instruments by type and collect legacy names
                 totalInstruments.forEach(instrument => {
                     const type = instrument.instrument_type || 'phenocam';
                     instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
+
+                    if (instrument.legacy_acronym) {
+                        instrumentsWithLegacy.push({
+                            type: type,
+                            legacy: instrument.legacy_acronym,
+                            name: instrument.display_name
+                        });
+                    }
                 });
 
                 let instrumentDetails = '';
@@ -661,6 +670,14 @@
                         const displayType = type.charAt(0).toUpperCase() + type.slice(1);
                         instrumentDetails += `• ${displayType}: ${count}<br/>`;
                     });
+
+                    // Add legacy acronyms if available
+                    if (instrumentsWithLegacy.length > 0) {
+                        instrumentDetails += '<br/><strong>Legacy Names:</strong><br/>';
+                        instrumentsWithLegacy.forEach(inst => {
+                            instrumentDetails += `• ${inst.legacy}<br/>`;
+                        });
+                    }
                 } else {
                     instrumentDetails = '<br/>Instruments: None';
                 }
@@ -690,11 +707,20 @@
                 const createStationPopup = () => {
                     const totalInstruments = window.stationInstruments || [];
                     const instrumentTypes = {};
+                    const instrumentsWithLegacy = [];
 
-                    // Count instruments by type
+                    // Count instruments by type and collect legacy names
                     totalInstruments.forEach(instrument => {
                         const type = instrument.instrument_type || 'phenocam';
                         instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
+
+                        if (instrument.legacy_acronym) {
+                            instrumentsWithLegacy.push({
+                                type: type,
+                                legacy: instrument.legacy_acronym,
+                                name: instrument.display_name
+                            });
+                        }
                     });
 
                     let instrumentDetails = '';
@@ -704,6 +730,14 @@
                             const displayType = type.charAt(0).toUpperCase() + type.slice(1);
                             instrumentDetails += `• ${displayType}: ${count}<br/>`;
                         });
+
+                        // Add legacy acronyms if available
+                        if (instrumentsWithLegacy.length > 0) {
+                            instrumentDetails += '<br/><strong>Legacy Names:</strong><br/>';
+                            instrumentsWithLegacy.forEach(inst => {
+                                instrumentDetails += `• ${inst.legacy}<br/>`;
+                            });
+                        }
                     } else {
                         instrumentDetails = '<br/>Instruments: None';
                     }
@@ -755,10 +789,10 @@
                 const lng = platform.longitude || (stationLng + (Math.random() - 0.5) * 0.002);
 
                 const platformIcon = L.divIcon({
-                    html: '<div style="background: rgba(59, 130, 246, 0.9); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"><i class="fas fa-building" style="font-size: 10px;"></i></div>',
-                    className: 'custom-div-icon',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
+                    html: '<div style="position: relative;"><svg width="24" height="30" viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12c0 6.6 12 18 12 18s12-11.4 12-18C24 5.4 18.6 0 12 0z" fill="#4285F4"/><circle cx="12" cy="12" r="6" fill="white"/><i class="fas fa-building" style="font-size: 8px; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); color: #4285F4;"></i></svg></div>',
+                    className: 'google-marker-icon',
+                    iconSize: [24, 30],
+                    iconAnchor: [12, 30]
                 });
 
                 // Count instruments for this platform and group by type
@@ -766,9 +800,19 @@
                     window.stationInstruments.filter(inst => inst.platform_id === platform.id) : [];
 
                 const instrumentTypes = {};
+                const instrumentsWithLegacy = [];
+
                 platformInstruments.forEach(instrument => {
                     const type = instrument.instrument_type || 'phenocam';
                     instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
+
+                    if (instrument.legacy_acronym) {
+                        instrumentsWithLegacy.push({
+                            type: type,
+                            legacy: instrument.legacy_acronym,
+                            name: instrument.display_name
+                        });
+                    }
                 });
 
                 let instrumentDetails = '';
@@ -778,13 +822,35 @@
                         const displayType = type.charAt(0).toUpperCase() + type.slice(1);
                         instrumentDetails += `• ${displayType}: ${count}<br/>`;
                     });
+
+                    // Add legacy acronyms if available
+                    if (instrumentsWithLegacy.length > 0) {
+                        instrumentDetails += '<br/><strong>Legacy Names:</strong><br/>';
+                        instrumentsWithLegacy.forEach(inst => {
+                            instrumentDetails += `• ${inst.legacy}<br/>`;
+                        });
+                    }
                 } else {
                     instrumentDetails = '<br/>Instruments: None';
                 }
 
-                const popupContent = `<strong>${platform.display_name}</strong><br/>` +
-                    `Platform ID: ${platform.normalized_name || 'N/A'}` +
-                    instrumentDetails;
+                // Build platform details
+                let platformDetails = `<strong>${platform.display_name}</strong><br/>` +
+                    `Platform ID: ${platform.normalized_name || 'N/A'}<br/>`;
+
+                if (platform.mounting_structure) {
+                    platformDetails += `Mounting: ${platform.mounting_structure}<br/>`;
+                }
+
+                if (platform.platform_height_m) {
+                    platformDetails += `Height: ${platform.platform_height_m}m<br/>`;
+                }
+
+                if (platform.description) {
+                    platformDetails += `Description: ${platform.description}<br/>`;
+                }
+
+                const popupContent = platformDetails + instrumentDetails;
 
                 const marker = L.marker([lat, lng], { icon: platformIcon })
                     .addTo(stationMap)

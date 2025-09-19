@@ -12,6 +12,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.3] - 2025-09-19
+
+### 🗺️ Enhanced Map Experience with Google-Style Markers
+
+#### ✨ New Map Features
+- **Google-Style Markers**: Replaced custom circular icons with authentic Google Maps-style markers
+  - **Station Markers**: Red Google marker (#EA4335) with broadcast tower icon
+  - **Platform Markers**: Blue Google marker (#4285F4) with building icon
+  - Proper marker anchoring and sizing for optimal visual experience
+
+#### 📍 Enhanced Popup Information
+- **Platform Popups**: Now include comprehensive context information:
+  - Platform ID (normalized name)
+  - Mounting structure (Building RoofTop, Tower, Building Wall, etc.)
+  - Platform height in meters above ground
+  - Detailed description
+  - Instrument counts by type
+  - **Legacy Names**: Display instrument legacy acronyms (e.g., "ANS-FOR-P01", "SFA-AGR-P01")
+
+- **Station Popups**: Enhanced with complete station overview:
+  - Station name and ID
+  - Total instrument counts by type
+  - Complete list of all instrument legacy acronyms at the station
+
+#### 🎯 User Experience Improvements
+- **Better Visual Hierarchy**: Clear distinction between stations and platforms
+- **Rich Context Information**: Users get comprehensive information without leaving the map
+- **Historical Context**: Legacy acronyms provide connection to historical naming conventions
+- **Professional Appearance**: Google-style markers provide familiar, polished interface
+
+#### 🔧 Technical Implementation
+- Updated Leaflet marker system with SVG-based Google-style icons
+- Enhanced popup content generation with dynamic data loading
+- Maintained backward compatibility with existing map functionality
+- Optimized marker rendering for better performance
+
 ## [4.4.2] - 2025-09-19
 
 ### 🔧 Comprehensive API & Database Fixes

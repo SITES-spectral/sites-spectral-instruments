@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.4.2",
-  "description": "SITES Spectral Stations & Instruments Management System v4.4.2 - Comprehensive API fixes and ecosystem diversity with corrected database schema",
+  "version": "4.4.3",
+  "description": "SITES Spectral Stations & Instruments Management System v4.4.3 - Enhanced map popups with Google-style markers and comprehensive context information",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
