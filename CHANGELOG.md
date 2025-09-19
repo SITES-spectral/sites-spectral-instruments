@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.1] - 2025-09-19
+
+### 🐛 Bug Fixes
+- **Fixed Platform ID Display**: Resolved issue where platform markers showed "N/A" instead of actual platform IDs
+  - Updated `/api/platforms` endpoint to include `normalized_name` field in SQL query
+  - Platform popups now correctly display identifiers like "LON_AGR_PL01", "RBD_AGR_PL01", etc.
+  - Fixed database schema mismatch between YAML structure and API response
+- **Removed Database IDs**: Cleaned up marker popups by removing internal database ID numbers as requested
+- **Improved Data Consistency**: Ensured API responses match database schema and frontend expectations
+
 ## [4.4.0] - 2025-09-19
 
 ### 🗺️ Enhanced Map Experience & Database Reconstruction

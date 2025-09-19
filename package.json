@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.4.0",
-  "description": "SITES Spectral Stations & Instruments Management System v4.4.0 - Enhanced map markers with detailed station/platform information and real YAML data integration",
+  "version": "4.4.1",
+  "description": "SITES Spectral Stations & Instruments Management System v4.4.1 - Fixed platform ID display in map markers with proper API data retrieval",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

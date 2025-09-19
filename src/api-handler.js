@@ -231,7 +231,7 @@ async function handlePlatforms(method, id, request, env) {
     const stationParam = url.searchParams.get('station');
 
     let query = `
-      SELECT p.id, p.display_name, p.location_code, p.station_id,
+      SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
              p.latitude, p.longitude, p.platform_height_m, p.status,
              s.acronym as station_acronym, s.display_name as station_name
       FROM platforms p
