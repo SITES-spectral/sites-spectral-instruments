@@ -420,3 +420,4 @@ const response = await fetch('/api/geojson/all', {
 
 This system prioritizes security, usability, and comprehensive audit trails suitable for research institution requirements.
 - update the version number, changelog, documentation, when successfully tested, troubleshooted fixed  and done. Then commit, push and deploy
+- The authentication system uses Cloudflare secrets, not database credentials

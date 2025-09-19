@@ -232,7 +232,7 @@ async function handlePlatforms(method, id, request, env) {
       let query = `
         SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
                p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
-               p.deployment_date, p.description,
+               p.deployment_date, p.description, p.operation_programs,
                s.acronym as station_acronym, s.display_name as station_name
         FROM platforms p
         JOIN stations s ON p.station_id = s.id
@@ -270,7 +270,7 @@ async function handlePlatforms(method, id, request, env) {
       let query = `
         SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
                p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
-               s.acronym as station_acronym, s.display_name as station_name
+               p.operation_programs, s.acronym as station_acronym, s.display_name as station_name
         FROM platforms p
         JOIN stations s ON p.station_id = s.id
       `;

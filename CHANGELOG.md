@@ -12,6 +12,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.5.0] - 2025-09-19
+
+### ✨ Added Operation Programs Display in Platform Details
+
+#### 🏛️ Research Programs Integration
+- **Database Enhancement**: Added `operation_programs` field to platforms table to track which research programs operate each platform
+- **YAML Data Source**: Populated operation programs data from stations.yaml structure where available
+- **Program Variety**: Support for multiple research programs including:
+  - SITES (Swedish Infrastructure for Ecosystem Science)
+  - ICOS (Integrated Carbon Observation System)
+  - Swedish Polar Research Secretariat
+  - Other research programs as defined in stations.yaml
+
+#### 🎨 Visual Program Badges
+- **Styled Program Badges**: Created color-coded badges for different research programs
+  - 🌱 SITES programs: Green badges (#ecfdf5 background, #065f46 text)
+  - 🌍 ICOS programs: Blue badges (#eff6ff background, #1e40af text)
+  - ❄️ Polar Research: Light blue badges (#f0f9ff background, #0c4a6e text)
+  - 🔬 Other programs: Gray badges (#f8fafc background, #475569 text)
+- **Icon Integration**: Each program type displays with relevant emoji icons
+- **Responsive Design**: Badges wrap properly on smaller screens
+
+#### 🔍 Platform Modal Enhancement
+- **New Research Programs Section**: Added dedicated section in platform details modal
+- **Operation Programs Field**: Displays all research programs operating the platform
+- **Professional Formatting**: Multiple programs displayed as separate styled badges
+- **Graceful Fallback**: Shows "Not specified" for platforms without program information
+
+#### 🔧 API Improvements
+- **Enhanced Platform Endpoints**: Both individual platform and platform list APIs now include operation_programs field
+- **Complete Data Integration**: All platform API responses include comprehensive program information
+- **Backward Compatibility**: Existing API functionality maintained while adding new program data
+
+#### 📊 Data Population
+- **Station-Specific Programs**: Different research programs assigned based on station requirements:
+  - Abisko (ANS): Swedish Polar Research Secretariat, SITES, ICOS
+  - Most stations (GRI, LON, RBD, SKC, SVB): SITES, ICOS
+  - ASA: SITES only
+- **Accurate Mapping**: Program assignments based on actual operations from stations.yaml data
+- **Complete Coverage**: All existing platforms now have appropriate program assignments
+
+This enhancement provides researchers and station managers with clear visibility into which research programs are responsible for operating each platform, improving coordination and understanding of institutional responsibilities.
+
 ## [4.4.9] - 2025-09-19
 
 ### 🔧 Fixed Individual Record API Endpoints
