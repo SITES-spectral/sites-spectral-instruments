@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.6.1] - 2025-09-19
+
+### 🔧 Enhanced Image Update System
+
+#### 🎯 Database-Driven Image Processing
+- **Full Database Integration**: Updated image update script to process all 23 instruments from database instead of limited stations.yaml data
+- **Comprehensive Coverage**: Successfully updated 13 out of 23 instruments with latest L1 phenocam images
+- **Improved Accuracy**: Real-time data availability checking shows actual instrument coverage vs theoretical estimates
+
+#### 📊 Actual Data Status
+- **Successfully Updated (13 instruments)**:
+  - ANS: ANS_FOR_BL01_PHE01 ✅
+  - GRI: GRI_FOR_BL01_PHE01 ✅
+  - LON: LON_AGR_PL01_PHE01, LON_AGR_PL01_PHE02, LON_AGR_PL01_PHE03 ✅
+  - RBD: RBD_AGR_PL01_PHE01, RBD_AGR_PL02_PHE01 ✅
+  - SKC: SKC_CEM_FOR_PL01_PHE01, SKC_CEM_FOR_PL02_PHE01, SKC_CEM_FOR_PL03_PHE01, SKC_LAK_PL01_PHE01, SKC_MAD_FOR_PL02_PHE01, SKC_MAD_WET_PL01_PHE01 ✅
+
+- **No Data Available (10 instruments)**:
+  - ASA: No data directory yet (confirmed expected)
+  - SKC: 3 instruments with empty L1 directories
+  - SVB: 4 instruments only have L3 data, no L1 processing
+
+#### 🛠️ Technical Improvements
+- **Database-First Approach**: Script now reads all instruments from database rather than limited YAML file
+- **Enhanced Error Reporting**: Detailed logging showing specific reasons for missing images
+- **Manifest Generation**: Complete tracking of successful vs failed image updates
+- **Graceful Degradation**: UI properly handles missing images with professional placeholders
+
 ## [4.6.0] - 2025-09-19
 
 ### 📸 Phenocam Representative Images Integration

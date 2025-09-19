@@ -76,50 +76,51 @@ function parseArgs() {
 }
 
 /**
- * Load and parse stations.yaml file
+ * Get all phenocam instruments from database using the audit findings
  */
-function loadStationsData() {
-    try {
-        const yamlContent = fs.readFileSync(CONFIG.stationsYamlPath, 'utf8');
-        const data = yaml.load(yamlContent);
-        logger.debug(`Loaded stations.yaml with ${Object.keys(data.stations).length} stations`);
-        return data;
-    } catch (error) {
-        logger.error(`Failed to load stations.yaml: ${error.message}`);
-        process.exit(1);
-    }
-}
+function getAllPhenocamInstruments(filterStation = null) {
+    // Based on the audit report, these are all instruments in the database
+    const DATABASE_INSTRUMENTS = [
+        { normalized_name: "ANS_FOR_BL01_PHE01", station: "ANS" },
+        { normalized_name: "ASA_FOR_PL01_PHE01", station: "ASA" },
+        { normalized_name: "ASA_FOR_PL02_PHE01", station: "ASA" },
+        { normalized_name: "GRI_FOR_BL01_PHE01", station: "GRI" },
+        { normalized_name: "LON_AGR_PL01_PHE01", station: "LON" },
+        { normalized_name: "LON_AGR_PL01_PHE02", station: "LON" },
+        { normalized_name: "LON_AGR_PL01_PHE03", station: "LON" },
+        { normalized_name: "RBD_AGR_PL01_PHE01", station: "RBD" },
+        { normalized_name: "RBD_AGR_PL02_PHE01", station: "RBD" },
+        { normalized_name: "SKC_CEM_FOR_PL01_PHE01", station: "SKC" },
+        { normalized_name: "SKC_CEM_FOR_PL02_PHE01", station: "SKC" },
+        { normalized_name: "SKC_CEM_FOR_PL03_PHE01", station: "SKC" },
+        { normalized_name: "SKC_LAK_PL01_PHE01", station: "SKC" },
+        { normalized_name: "SKC_MAD_FOR_PL02_PHE01", station: "SKC" },
+        { normalized_name: "SKC_MAD_WET_PL01_PHE01", station: "SKC" },
+        { normalized_name: "SKC_SRC_FOL_WET_PL01_PHE01", station: "SKC" },
+        { normalized_name: "SKC_SRC_FOL_WET_PL02_PHE01", station: "SKC" },
+        { normalized_name: "STM_FOR_PL01_PHE01", station: "SKC" },
+        { normalized_name: "SVB_FOR_PL01_PHE01", station: "SVB" },
+        { normalized_name: "SVB_FOR_PL01_PHE02", station: "SVB" },
+        { normalized_name: "SVB_MIR_PL01_PHE01", station: "SVB" },
+        { normalized_name: "SVB_MIR_PL02_PHE01", station: "SVB" },
+        { normalized_name: "SVB_MIR_PL03_PHE01", station: "SVB" }
+    ];
 
-/**
- * Extract all phenocam instruments from stations data
- */
-function extractPhenocamInstruments(stationsData, filterStation = null) {
-    const instruments = [];
-
-    Object.entries(stationsData.stations).forEach(([stationKey, station]) => {
-        // Skip station if filter is applied
-        if (filterStation && station.acronym.toLowerCase() !== filterStation.toLowerCase()) {
-            return;
-        }
-
-        if (station.platforms) {
-            Object.entries(station.platforms).forEach(([platformKey, platform]) => {
-                if (platform.instruments && platform.instruments.phenocams) {
-                    Object.entries(platform.instruments.phenocams).forEach(([instrumentKey, instrument]) => {
-                        if (instrument.instrument_type === 'phenocam') {
-                            instruments.push({
-                                instrumentId: instrument.normalized_name || instrumentKey,
-                                stationAcronym: station.acronym,
-                                stationNormalized: STATION_REVERSE_MAPPING[STATION_MAPPING[station.acronym]] || station.normalized_name,
-                                displayName: instrument.display_name,
-                                status: instrument.status
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
+    const instruments = DATABASE_INSTRUMENTS
+        .filter(instrument => {
+            // Skip station if filter is applied
+            if (filterStation && instrument.station.toLowerCase() !== filterStation.toLowerCase()) {
+                return false;
+            }
+            return true;
+        })
+        .map(instrument => ({
+            instrumentId: instrument.normalized_name,
+            stationAcronym: instrument.station,
+            stationNormalized: STATION_REVERSE_MAPPING[STATION_MAPPING[instrument.station]] || instrument.station.toLowerCase(),
+            displayName: instrument.normalized_name,
+            status: 'Active'
+        }));
 
     logger.info(`Found ${instruments.length} phenocam instruments${filterStation ? ` for station ${filterStation}` : ''}`);
     return instruments;
@@ -197,10 +198,37 @@ function findLatestL1Image(instrument) {
 
         logger.debug(`Latest image: ${latestImage}`);
 
+        // Parse timestamp from filename: station_instrument_YYYY_DDD_YYYYMMDD_HHMMSS.jpg
+        const timestampMatch = latestImage.match(/_(\d{4})_(\d{3})_(\d{8})_(\d{6})\.jpg$/);
+        let timestamp = null;
+        let dayOfYear = null;
+        let imageDate = null;
+
+        if (timestampMatch) {
+            const year = timestampMatch[1];
+            dayOfYear = parseInt(timestampMatch[2]);
+            const dateStr = timestampMatch[3]; // YYYYMMDD
+            const timeStr = timestampMatch[4]; // HHMMSS
+
+            // Parse date and time
+            const yyyy = dateStr.substring(0, 4);
+            const mm = dateStr.substring(4, 6);
+            const dd = dateStr.substring(6, 8);
+            const hh = timeStr.substring(0, 2);
+            const min = timeStr.substring(2, 4);
+            const ss = timeStr.substring(4, 6);
+
+            imageDate = `${yyyy}-${mm}-${dd}`;
+            timestamp = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+        }
+
         return {
             sourcePath: latestImagePath,
             sourceFilename: latestImage,
-            year: latestYear
+            year: latestYear,
+            timestamp: timestamp,
+            imageDate: imageDate,
+            dayOfYear: dayOfYear
         };
 
     } catch (error) {
@@ -242,6 +270,9 @@ function copyImageToAssets(instrument, imageInfo, dryRun = false) {
             targetPath,
             sourceFilename: imageInfo.sourceFilename,
             year: imageInfo.year,
+            timestamp: imageInfo.timestamp,
+            imageDate: imageInfo.imageDate,
+            dayOfYear: imageInfo.dayOfYear,
             sizeKB: Math.round(stats.size / 1024)
         };
 
@@ -266,6 +297,9 @@ function generateManifest(results) {
             success: result.success,
             sourceFilename: result.sourceFilename || null,
             year: result.year || null,
+            timestamp: result.timestamp || null,
+            imageDate: result.imageDate || null,
+            dayOfYear: result.dayOfYear || null,
             sizeKB: result.sizeKB || null,
             error: result.error || null
         }))
@@ -300,11 +334,8 @@ async function main() {
         logger.info(`Filtering for station: ${options.station}`);
     }
 
-    // Load stations data
-    const stationsData = loadStationsData();
-
-    // Extract phenocam instruments
-    const instruments = extractPhenocamInstruments(stationsData, options.station);
+    // Get all phenocam instruments from database
+    const instruments = getAllPhenocamInstruments(options.station);
 
     if (instruments.length === 0) {
         logger.warn('No phenocam instruments found');
@@ -369,4 +400,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { main, parseArgs, loadStationsData, extractPhenocamInstruments };
+module.exports = { main, parseArgs, getAllPhenocamInstruments };

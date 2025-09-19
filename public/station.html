@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.5.1">
+    <link rel="stylesheet" href="/css/styles.css?v=4.6.1">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.5.1">
+    <meta name="app-version" content="4.6.1">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -484,7 +484,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.5.1"></script>
+    <script src="/js/utils.js?v=4.6.1"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -928,6 +928,9 @@
 
             const platformsGrid = document.getElementById('platforms-grid');
 
+            // Load image manifest for metadata display
+            await loadImageManifest();
+
             try {
                 // Fetch platforms for this station
                 const platformsResponse = await fetch(`/api/platforms?station=${stationData.acronym}`, {
@@ -1145,6 +1148,87 @@
                     </div>
                 </div>
             `;
+        }
+
+        function createImageMetadataSection(instrument) {
+            const imageMetadata = getImageMetadata(instrument.normalized_name);
+
+            if (!imageMetadata || !imageMetadata.success) {
+                return `
+                    <div class="detail-section">
+                        <h4><i class="fas fa-image"></i> Image Information</h4>
+                        <div class="detail-field">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value status-missing">
+                                <i class="fas fa-exclamation-triangle"></i> No image available
+                            </span>
+                        </div>
+                        ${imageMetadata?.error ? `
+                        <div class="detail-field">
+                            <span class="detail-label">Reason</span>
+                            <span class="detail-value">${imageMetadata.error}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="detail-section">
+                    <h4><i class="fas fa-image"></i> Image Information</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Image Captured</span>
+                        <span class="detail-value">
+                            <i class="fas fa-calendar-alt"></i> ${imageMetadata.imageDate || 'Unknown date'}
+                            ${imageMetadata.timestamp ? `<br><i class="fas fa-clock"></i> ${imageMetadata.timestamp.split(' ')[1]} (UTC)` : ''}
+                        </span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Day of Year</span>
+                        <span class="detail-value">${imageMetadata.dayOfYear ? `Day ${imageMetadata.dayOfYear} of ${imageMetadata.year}` : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Image Size</span>
+                        <span class="detail-value">${imageMetadata.sizeKB ? `${imageMetadata.sizeKB} KB` : 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Original Filename</span>
+                        <span class="detail-value monospace">${imageMetadata.sourceFilename || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Update Status</span>
+                        <span class="detail-value status-active">
+                            <i class="fas fa-check-circle"></i> Representative image available
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Global variable to store image manifest
+        let imageManifest = null;
+
+        async function loadImageManifest() {
+            if (imageManifest) return imageManifest;
+
+            try {
+                const response = await fetch('/images/stations/instrument-images-manifest.json');
+                if (response.ok) {
+                    imageManifest = await response.json();
+                    return imageManifest;
+                }
+            } catch (error) {
+                console.warn('Could not load image manifest:', error);
+            }
+            return null;
+        }
+
+        function getImageMetadata(instrumentId) {
+            if (!imageManifest || !imageManifest.instruments) {
+                return null;
+            }
+
+            return imageManifest.instruments.find(item => item.instrumentId === instrumentId);
         }
 
         async function showPlatformDetails(platformId) {
@@ -1401,6 +1485,7 @@
                         <span class="detail-value">${instrument.maintenance_notes || 'No maintenance notes'}</span>
                     </div>
                 </div>
+                ${createImageMetadataSection(instrument)}
             `;
         }
 

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.6.0",
-  "description": "SITES Spectral Stations & Instruments Management System v4.6.0 - Phenocam representative images integration with thumbnails and modal views",
+  "version": "4.6.1",
+  "description": "SITES Spectral Stations & Instruments Management System v4.6.1 - Enhanced image update system with full database integration",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
