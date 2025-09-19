@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.4.5",
-  "description": "SITES Spectral Stations & Instruments Management System v4.4.5 - Simplified station popups with summary counts and improved platform popup labels",
+  "version": "4.4.6",
+  "description": "SITES Spectral Stations & Instruments Management System v4.4.6 - Updated database with latest stations.yaml data including comprehensive station and instrument information",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

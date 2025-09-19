@@ -12,6 +12,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.6] - 2025-09-19
+
+### 🔄 Database Update with Latest Stations Data
+
+#### ✨ Comprehensive Data Refresh
+- **Updated Stations YAML Import**: Successfully imported latest stations.yaml data (updated 2025-09-19)
+  - 7 stations with accurate coordinates and metadata
+  - 19 platforms with detailed mounting specifications
+  - 23 instruments with complete camera specifications
+- **Data Integrity**: All station coordinates verified and corrected where needed
+- **Enhanced Instrument Data**: Added comprehensive camera specifications including:
+  - Camera brands (Nikon, Mobotix)
+  - Camera models (D300S DSLR, M15 IP, M16 IP, M25 IP)
+  - Resolutions (4288x2848, 3072x2048, 1024x768)
+  - Viewing directions and azimuth angles
+
+#### 🔧 Technical Improvements
+- **Migration System**: Created migration 0021_import_updated_stations_yaml.sql for complete data refresh
+- **Database Normalization**: Ensured proper foreign key relationships between stations, platforms, and instruments
+- **API Consistency**: Verified all API endpoints return updated data correctly
+- **Data Quality**: Fixed inconsistent field structures in YAML and normalized to database schema
+
+#### 📊 Data Statistics
+- **Stations**: 7 research stations across Sweden
+- **Platforms**: 19 measurement platforms with varied mounting structures
+- **Instruments**: 23 phenocams with comprehensive technical specifications
+- **Ecosystems**: 12 ecosystem types properly categorized
+
+#### ✅ Quality Assurance
+- **API Testing**: All endpoints verified working with new data
+- **Authentication**: Login system confirmed operational
+- **Data Validation**: Coordinates and specifications validated
+- **System Health**: All services confirmed healthy and operational
+
 ## [4.4.5] - 2025-09-19
 
 ### 🎯 Simplified Popup Interface & Improved Labeling
