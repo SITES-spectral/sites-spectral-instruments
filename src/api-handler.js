@@ -29,6 +29,9 @@ export async function handleApiRequest(request, env, ctx) {
       case 'instruments':
         return await handleInstruments(method, id, request, env);
 
+      case 'rois':
+        return await handleROIs(method, id, request, env);
+
       case 'health':
         return await handleHealth(env);
 
@@ -647,6 +650,127 @@ async function getStationsData(user, env) {
   } catch (error) {
     console.error('Database error in getStationsData:', error);
     return [];
+  }
+}
+
+// Handle ROI requests
+async function handleROIs(method, id, request, env) {
+  if (method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const user = await getUserFromRequest(request, env);
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'Authentication required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const url = new URL(request.url);
+  const instrumentParam = url.searchParams.get('instrument');
+
+  try {
+    if (id) {
+      // Get specific ROI by ID
+      let query = `
+        SELECT r.id, r.roi_name, r.description, r.alpha, r.auto_generated,
+               r.color_r, r.color_g, r.color_b, r.thickness, r.generated_date,
+               r.source_image, r.points_json, r.created_at,
+               i.normalized_name as instrument_name, i.display_name as instrument_display_name,
+               s.acronym as station_acronym
+        FROM instrument_rois r
+        JOIN instruments i ON r.instrument_id = i.id
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+        WHERE r.id = ?
+      `;
+
+      const roi = await env.DB.prepare(query).bind(id).first();
+
+      if (!roi) {
+        return new Response(JSON.stringify({ error: 'ROI not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Parse points JSON
+      if (roi.points_json) {
+        roi.points = JSON.parse(roi.points_json);
+      }
+
+      return new Response(JSON.stringify(roi), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else {
+      // Get ROIs for a specific instrument
+      if (instrumentParam) {
+        let query = `
+          SELECT r.id, r.roi_name, r.description, r.alpha, r.auto_generated,
+                 r.color_r, r.color_g, r.color_b, r.thickness, r.generated_date,
+                 r.source_image, r.points_json, r.created_at,
+                 i.normalized_name as instrument_name, i.display_name as instrument_display_name
+          FROM instrument_rois r
+          JOIN instruments i ON r.instrument_id = i.id
+          WHERE i.normalized_name = ?
+          ORDER BY r.roi_name
+        `;
+
+        const results = await env.DB.prepare(query).bind(instrumentParam).all();
+        const rois = results.results.map(roi => {
+          if (roi.points_json) {
+            roi.points = JSON.parse(roi.points_json);
+          }
+          return roi;
+        });
+
+        return new Response(JSON.stringify({ rois }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+      } else {
+        // Get all ROIs
+        let query = `
+          SELECT r.id, r.roi_name, r.description, r.alpha, r.auto_generated,
+                 r.color_r, r.color_g, r.color_b, r.thickness, r.generated_date,
+                 r.source_image, r.points_json, r.created_at,
+                 i.normalized_name as instrument_name, i.display_name as instrument_display_name,
+                 s.acronym as station_acronym
+          FROM instrument_rois r
+          JOIN instruments i ON r.instrument_id = i.id
+          JOIN platforms p ON i.platform_id = p.id
+          JOIN stations s ON p.station_id = s.id
+          ORDER BY s.acronym, i.normalized_name, r.roi_name
+        `;
+
+        const results = await env.DB.prepare(query).all();
+        const rois = results.results.map(roi => {
+          if (roi.points_json) {
+            roi.points = JSON.parse(roi.points_json);
+          }
+          return roi;
+        });
+
+        return new Response(JSON.stringify({ rois }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+  } catch (error) {
+    console.error('ROI endpoint error:', error);
+    return new Response(JSON.stringify({
+      error: 'Failed to fetch ROI data',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
 

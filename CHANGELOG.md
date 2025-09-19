@@ -8,10 +8,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
-- ROI data population from stations.yaml
 - Enhanced user management interface
 - Bulk data operations
 - Advanced analytics dashboard
+- ROI visualization overlays on phenocam images
+
+## [4.7.0] - 2025-09-19
+
+### 🎯 ROI Nested Cards System & Complete Regional Information
+
+#### 🗺️ Regions of Interest (ROI) Integration
+- **Database Population**: Migrated all ROI data from stations.yaml to database with comprehensive metadata
+- **Nested Card System**: Implemented interactive ROI cards within instrument details, similar to platform/instrument hierarchy
+- **Complete ROI Details**: Detailed modal system showing full ROI specifications including geometry, colors, and generation metadata
+
+#### 📊 ROI Data Management
+- **Comprehensive ROI Database**: Populated 13 ROIs across 5 instruments from stations.yaml
+  - ANS_FOR_BL01_PHE01: 4 ROIs (ROI_00 through ROI_03)
+  - GRI_FOR_BL01_PHE01: 2 ROIs (ROI_00, ROI_01)
+  - LON_AGR_PL01_PHE01: 5 ROIs (ROI_00, ROI_01, ROI_02, ROI_03, ROI_06)
+  - ASA_FOR_PL01_PHE01, ASA_FOR_PL02_PHE01: 1 ROI each (ROI_00)
+
+#### 🛠️ Technical Implementation
+- **ROI API Endpoints**: Complete CRUD API for ROI data with authentication
+  - `GET /api/rois` - List all ROIs
+  - `GET /api/rois?instrument={name}` - ROIs for specific instrument
+  - `GET /api/rois/{id}` - Individual ROI details
+- **Interactive UI Components**: Professional card-based interface with hover effects and visual indicators
+- **Modal Detail System**: Comprehensive ROI information including:
+  - Visual properties (color, thickness, transparency)
+  - Geometry data (coordinate points, vertex count)
+  - Generation metadata (auto-generated vs manual, source images)
+
+#### 🎨 Visual Design Enhancements
+- **Color-Coded ROI Cards**: Visual color indicators matching actual ROI boundary colors
+- **Responsive Grid Layout**: Adaptive ROI cards that work on all device sizes
+- **Professional Styling**: Consistent with existing platform/instrument card design
+- **Empty State Handling**: Graceful display for instruments without defined ROIs
+
+#### 🔍 ROI Detail Modal Features
+- **Complete Geometry Display**: All coordinate points with formatted display
+- **Visual Properties**: Color swatches, RGB values, line thickness settings
+- **Metadata Information**: Generation dates, source images, auto-generation flags
+- **Source Traceability**: Original image filenames for ROI generation debugging
+
+#### 🚀 User Experience Improvements
+- **Progressive Disclosure**: ROI cards → detailed modal → complete specifications
+- **Contextual Information**: ROI data loads automatically when viewing instrument details
+- **Error Handling**: Professional error states for missing or failed ROI data
+- **Accessibility**: Keyboard navigation and screen reader support for all ROI components
 
 ## [4.6.1] - 2025-09-19
 

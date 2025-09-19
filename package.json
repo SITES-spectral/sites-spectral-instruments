@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.6.1",
-  "description": "SITES Spectral Stations & Instruments Management System v4.6.1 - Enhanced image update system with full database integration",
+  "version": "4.7.0",
+  "description": "SITES Spectral Stations & Instruments Management System v4.7.0 - ROI Nested Cards System with Complete Regional Information",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

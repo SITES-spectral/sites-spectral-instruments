@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.6.1">
+    <link rel="stylesheet" href="/css/styles.css?v=4.7.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.6.1">
+    <meta name="app-version" content="4.7.0">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -340,6 +340,169 @@
                 height: 300px;
             }
         }
+
+        /* ROI Cards and Modal Styles */
+        .roi-cards-container {
+            margin-top: 10px;
+        }
+
+        .roi-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .roi-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .roi-card:hover {
+            border-color: #059669;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .roi-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .roi-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.9rem;
+        }
+
+        .roi-color-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid #d1d5db;
+            flex-shrink: 0;
+        }
+
+        .roi-description {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .roi-metadata {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .roi-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .roi-meta-item.roi-auto {
+            color: #059669;
+        }
+
+        .roi-meta-item i {
+            font-size: 0.7rem;
+        }
+
+        .roi-empty-state,
+        .roi-error-state {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .roi-empty-state i,
+        .roi-error-state i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .roi-error-state {
+            color: #ef4444;
+        }
+
+        /* ROI Modal Styles */
+        .roi-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .roi-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .roi-color-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .roi-color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            flex-shrink: 0;
+        }
+
+        .roi-color-values {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .roi-points-display {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .roi-point {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #374151;
+            padding: 2px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .roi-point:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .roi-cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -483,8 +646,23 @@
         </div>
     </div>
 
+    <!-- ROI Detail Modal -->
+    <div id="roi-modal" class="roi-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-crop-alt"></i> ROI Details</h3>
+                <button class="modal-close-large" onclick="closeROIModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="roi-details" class="detail-grid">
+                    <!-- ROI details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.6.1"></script>
+    <script src="/js/utils.js?v=4.7.0"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1231,6 +1409,209 @@
             return imageManifest.instruments.find(item => item.instrumentId === instrumentId);
         }
 
+        // ROI Management Functions
+        async function loadROICards(instrumentId, instrumentNormalizedName) {
+            const token = localStorage.getItem('sites_spectral_token');
+            if (!token) return;
+
+            const roiContainer = document.getElementById(`roi-cards-${instrumentId}`);
+            if (!roiContainer) return;
+
+            try {
+                const response = await fetch(`/api/rois?instrument=${instrumentNormalizedName}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const rois = data.rois || [];
+
+                    if (rois.length === 0) {
+                        roiContainer.innerHTML = `
+                            <div class="roi-empty-state">
+                                <i class="fas fa-crop-alt"></i>
+                                <span>No ROIs defined for this instrument</span>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // Create ROI cards
+                    const roiCardsHTML = rois.map(roi => createROICard(roi)).join('');
+                    roiContainer.innerHTML = `
+                        <div class="roi-cards-grid">
+                            ${roiCardsHTML}
+                        </div>
+                    `;
+
+                } else {
+                    console.error('Failed to fetch ROI data');
+                    roiContainer.innerHTML = `
+                        <div class="roi-error-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Failed to load ROI data</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading ROI data:', error);
+                roiContainer.innerHTML = `
+                    <div class="roi-error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Error loading ROI data</span>
+                    </div>
+                `;
+            }
+        }
+
+        function createROICard(roi) {
+            const colorDisplay = `rgb(${roi.color_r}, ${roi.color_g}, ${roi.color_b})`;
+            const isAutoGenerated = roi.auto_generated;
+            const pointsCount = roi.points ? roi.points.length : 0;
+
+            return `
+                <div class="roi-card" onclick="showROIDetails(${roi.id})" data-roi-id="${roi.id}">
+                    <div class="roi-card-header">
+                        <div class="roi-name">${roi.roi_name}</div>
+                        <div class="roi-color-indicator" style="background-color: ${colorDisplay}"></div>
+                    </div>
+                    <div class="roi-card-content">
+                        ${roi.description ? `
+                            <div class="roi-description">${roi.description}</div>
+                        ` : ''}
+                        <div class="roi-metadata">
+                            <div class="roi-meta-item">
+                                <i class="fas fa-vector-square"></i>
+                                <span>${pointsCount} points</span>
+                            </div>
+                            ${isAutoGenerated ? `
+                                <div class="roi-meta-item roi-auto">
+                                    <i class="fas fa-magic"></i>
+                                    <span>Auto-generated</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function showROIDetails(roiId) {
+            const token = localStorage.getItem('sites_spectral_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/api/rois/${roiId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const roi = await response.json();
+                    populateROIModal(roi);
+                    document.getElementById('roi-modal').classList.add('show');
+                } else {
+                    console.error('Failed to fetch ROI details');
+                }
+            } catch (error) {
+                console.error('Error loading ROI details:', error);
+            }
+        }
+
+        function populateROIModal(roi) {
+            const detailsContainer = document.getElementById('roi-details');
+            const colorDisplay = `rgb(${roi.color_r}, ${roi.color_g}, ${roi.color_b})`;
+            const pointsCount = roi.points ? roi.points.length : 0;
+
+            detailsContainer.innerHTML = `
+                <div class="detail-section">
+                    <h4><i class="fas fa-info-circle"></i> ROI Information</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">ROI Name</span>
+                        <span class="detail-value">${roi.roi_name}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Description</span>
+                        <span class="detail-value">${roi.description || 'No description provided'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Instrument</span>
+                        <span class="detail-value">${roi.instrument_display_name || roi.instrument_name}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-palette"></i> Visual Properties</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Color</span>
+                        <span class="detail-value">
+                            <div class="roi-color-display">
+                                <div class="roi-color-swatch" style="background-color: ${colorDisplay}"></div>
+                                <span class="roi-color-values">RGB(${roi.color_r}, ${roi.color_g}, ${roi.color_b})</span>
+                            </div>
+                        </span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Line Thickness</span>
+                        <span class="detail-value">${roi.thickness}px</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Transparency</span>
+                        <span class="detail-value">${roi.alpha || 0}</span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-vector-square"></i> Geometry</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Points Count</span>
+                        <span class="detail-value">${pointsCount} vertices</span>
+                    </div>
+                    ${roi.points ? `
+                        <div class="detail-field detail-field-full">
+                            <span class="detail-label">Coordinates</span>
+                            <div class="roi-points-display">
+                                ${roi.points.map((point, index) =>
+                                    `<div class="roi-point">Point ${index + 1}: (${point[0]}, ${point[1]})</div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="detail-section">
+                    <h4><i class="fas fa-cog"></i> Generation Info</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Type</span>
+                        <span class="detail-value">
+                            ${roi.auto_generated ?
+                                '<i class="fas fa-magic"></i> Auto-generated' :
+                                '<i class="fas fa-user"></i> Manual'
+                            }
+                        </span>
+                    </div>
+                    ${roi.generated_date ? `
+                        <div class="detail-field">
+                            <span class="detail-label">Generated Date</span>
+                            <span class="detail-value">${roi.generated_date}</span>
+                        </div>
+                    ` : ''}
+                    ${roi.source_image ? `
+                        <div class="detail-field">
+                            <span class="detail-label">Source Image</span>
+                            <span class="detail-value monospace">${roi.source_image}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function closeROIModal() {
+            document.getElementById('roi-modal').classList.remove('show');
+        }
+
         async function showPlatformDetails(platformId) {
             const token = localStorage.getItem('sites_spectral_token');
             if (!token) return;
@@ -1453,13 +1834,10 @@
                 </div>
                 <div class="detail-section">
                     <h4><i class="fas fa-crop-alt"></i> Regions of Interest (ROIs)</h4>
-                    <div class="detail-field">
-                        <span class="detail-label">ROI Information</span>
-                        <span class="detail-value">
-                            <div id="roi-info-${instrument.id}" class="roi-container">
-                                Loading ROI data...
-                            </div>
-                        </span>
+                    <div class="detail-field detail-field-full">
+                        <div id="roi-cards-${instrument.id}" class="roi-cards-container">
+                            Loading ROI data...
+                        </div>
                     </div>
                 </div>
                 <div class="detail-section">
@@ -1487,6 +1865,9 @@
                 </div>
                 ${createImageMetadataSection(instrument)}
             `;
+
+            // Load ROI data for this instrument
+            loadROICards(instrument.id, instrument.normalized_name);
         }
 
         function closePlatformModal() {
@@ -1501,12 +1882,16 @@
         document.addEventListener('click', function(event) {
             const platformModal = document.getElementById('platform-modal');
             const instrumentModal = document.getElementById('instrument-modal');
+            const roiModal = document.getElementById('roi-modal');
 
             if (event.target === platformModal) {
                 closePlatformModal();
             }
             if (event.target === instrumentModal) {
                 closeInstrumentModal();
+            }
+            if (event.target === roiModal) {
+                closeROIModal();
             }
         });
 
@@ -1515,6 +1900,7 @@
             if (event.key === 'Escape') {
                 closePlatformModal();
                 closeInstrumentModal();
+                closeROIModal();
             }
         });
     </script>
