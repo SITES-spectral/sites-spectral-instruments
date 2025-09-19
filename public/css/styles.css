@@ -1438,3 +1438,163 @@ body {
     color: #475569;
     border-color: #94a3b8;
 }
+
+/* Instrument Thumbnail Styling */
+.instrument-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.instrument-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.instrument-thumbnail-container {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.instrument-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease-in-out;
+}
+
+.instrument-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+.instrument-thumbnail-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    width: 100%;
+    height: 100%;
+    gap: 0.5rem;
+}
+
+.instrument-thumbnail-placeholder i {
+    font-size: 2rem;
+}
+
+/* Instrument Modal Image Styling */
+.detail-field-full {
+    display: block !important;
+    border-bottom: none !important;
+    padding-bottom: 1rem !important;
+}
+
+.instrument-modal-image-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.instrument-modal-image {
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    object-fit: cover;
+    display: block;
+}
+
+.instrument-modal-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    color: #94a3b8;
+    background-color: #f8fafc;
+    min-height: 200px;
+    gap: 1rem;
+}
+
+.instrument-modal-image-placeholder i {
+    font-size: 3rem;
+}
+
+.instrument-modal-image-placeholder span {
+    font-size: 1rem;
+    text-align: center;
+}
+
+.image-caption {
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-direction: column;
+    text-align: center;
+}
+
+.image-caption i {
+    color: #059669;
+}
+
+.image-note {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
+/* Responsive Design for Images */
+@media (max-width: 768px) {
+    .instrument-thumbnail-container {
+        height: 100px;
+    }
+
+    .instrument-modal-image {
+        max-height: 250px;
+    }
+
+    .instrument-modal-image-container {
+        max-width: 100%;
+    }
+
+    .image-caption {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .instrument-thumbnail-container {
+        height: 80px;
+    }
+
+    .instrument-modal-image {
+        max-height: 200px;
+    }
+
+    .instrument-modal-image-placeholder {
+        padding: 2rem 1rem;
+        min-height: 150px;
+    }
+
+    .instrument-modal-image-placeholder i {
+        font-size: 2rem;
+    }
+}

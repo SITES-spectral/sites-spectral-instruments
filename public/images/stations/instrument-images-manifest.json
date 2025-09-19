@@ -1,0 +1,17 @@
+{
+  "generated": "2025-09-19T15:48:28.772Z",
+  "totalInstruments": 1,
+  "successCount": 1,
+  "failedCount": 0,
+  "instruments": [
+    {
+      "instrumentId": "LON_AGR_PL01_PHE01",
+      "stationAcronym": "LON",
+      "success": true,
+      "sourceFilename": "lonnstorp_LON_AGR_PL01_PHE01_2025_120_20250430_130002.jpg",
+      "year": "2025",
+      "sizeKB": 2040,
+      "error": null
+    }
+  ]
+}

@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.5.0">
+    <link rel="stylesheet" href="/css/styles.css?v=4.5.1">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.5.0">
+    <meta name="app-version" content="4.5.1">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -484,7 +484,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.5.0"></script>
+    <script src="/js/utils.js?v=4.5.1"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1023,14 +1023,17 @@
 
             return `
                 <div class="instrument-card" onclick="showInstrumentDetails(${instrument.id})" data-instrument-id="${instrument.id}">
-                    <div class="instrument-legacy ${legacyClass}">
-                        ${legacyName}
-                    </div>
-                    <div class="instrument-direction">
-                        ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
-                    </div>
-                    <div class="instrument-status ${statusClass}">
-                        ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
+                    ${createInstrumentThumbnail(instrument)}
+                    <div class="instrument-content">
+                        <div class="instrument-legacy ${legacyClass}">
+                            ${legacyName}
+                        </div>
+                        <div class="instrument-direction">
+                            ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
+                        </div>
+                        <div class="instrument-status ${statusClass}">
+                            ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
+                        </div>
                     </div>
                 </div>
             `;
@@ -1073,6 +1076,75 @@
 
                 return `<span class="${badgeClass}">${icon} ${program}</span>`;
             }).join(' ');
+        }
+
+        function getInstrumentImageUrl(instrument) {
+            // Map station acronyms to normalized directory names
+            const stationMapping = {
+                'ANS': 'abisko',
+                'ASA': 'asa',
+                'GRI': 'grimso',
+                'LON': 'lonnstorp',
+                'RBD': 'robacksdalen',
+                'SKC': 'skogaryd',
+                'SVB': 'svartberget'
+            };
+
+            const stationDir = stationMapping[instrument.station_acronym];
+            if (!stationDir || !instrument.normalized_name) {
+                return null;
+            }
+
+            return `/images/stations/${stationDir}/instruments/${instrument.normalized_name}.jpg`;
+        }
+
+        function createInstrumentThumbnail(instrument) {
+            const imageUrl = getInstrumentImageUrl(instrument);
+
+            if (!imageUrl) {
+                return '<div class="instrument-thumbnail-placeholder"><i class="fas fa-camera"></i></div>';
+            }
+
+            return `
+                <div class="instrument-thumbnail-container">
+                    <img
+                        src="${imageUrl}"
+                        alt="Phenocam view for ${instrument.display_name || instrument.normalized_name}"
+                        class="instrument-thumbnail"
+                        onerror="this.parentElement.innerHTML='<div class=\\'instrument-thumbnail-placeholder\\'><i class=\\'fas fa-camera\\'></i></div>'"
+                        loading="lazy"
+                    />
+                </div>
+            `;
+        }
+
+        function createInstrumentModalImage(instrument) {
+            const imageUrl = getInstrumentImageUrl(instrument);
+
+            if (!imageUrl) {
+                return `
+                    <div class="instrument-modal-image-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <span>No representative image available</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="instrument-modal-image-container">
+                    <img
+                        src="${imageUrl}"
+                        alt="Current phenocam view for ${instrument.display_name || instrument.normalized_name}"
+                        class="instrument-modal-image"
+                        onerror="this.parentElement.innerHTML='<div class=\\'instrument-modal-image-placeholder\\'><i class=\\'fas fa-camera\\'></i><span>Image not available</span></div>'"
+                    />
+                    <div class="image-caption">
+                        <i class="fas fa-camera"></i>
+                        Representative phenocam view
+                        <span class="image-note">Updated weekly/monthly to show vegetation status</span>
+                    </div>
+                </div>
+            `;
         }
 
         async function showPlatformDetails(platformId) {
@@ -1197,6 +1269,12 @@
             const detailsContainer = document.getElementById('instrument-details');
 
             detailsContainer.innerHTML = `
+                <div class="detail-section">
+                    <h4><i class="fas fa-eye"></i> Visual Overview</h4>
+                    <div class="detail-field detail-field-full">
+                        ${createInstrumentModalImage(instrument)}
+                    </div>
+                </div>
                 <div class="detail-section">
                     <h4><i class="fas fa-info-circle"></i> General Information</h4>
                     <div class="detail-field">

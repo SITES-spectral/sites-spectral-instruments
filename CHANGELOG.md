@@ -13,6 +13,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.6.0] - 2025-09-19
+
+### 📸 Phenocam Representative Images Integration
+
+#### 🎯 Visual Enhancement for Instrument Monitoring
+- **Representative Images**: Each instrument now displays actual phenocam imagery showing current vegetation status
+- **Dual Display Modes**: Thumbnails in instrument cards and large images in detail modals
+- **Weekly/Monthly Updates**: Infrastructure for manual updates to show seasonal vegetation changes
+- **Source Integration**: Uses latest L1 processed images from phenocam data pipeline
+
+#### 🏗️ Asset Structure & Automation
+- **Organized Asset Structure**: Created hierarchical image storage:
+  ```
+  public/images/stations/{station}/instruments/{instrument}.jpg
+  ```
+- **Automation Script**: `scripts/update-instrument-images.js` for finding and copying latest L1 images
+  - Intelligent image discovery from data directories
+  - Station filtering capability
+  - Dry-run mode for testing
+  - Comprehensive manifest generation
+  - Error handling for missing data
+- **NPM Scripts**: Easy execution with `npm run update-images` and `npm run update-images:dry-run`
+
+#### 🎨 User Interface Enhancements
+- **Instrument Card Thumbnails**:
+  - 120px height responsive thumbnails in instrument cards
+  - Hover zoom effects for better visual feedback
+  - Graceful fallback for missing images with camera placeholder
+  - Lazy loading for performance optimization
+- **Modal Visual Overview**:
+  - Large 500px max-width images in instrument detail modals
+  - Professional styling with captions and metadata
+  - "Visual Overview" section prominently placed at modal top
+  - Context information about update frequency
+
+#### 🔧 Technical Implementation
+- **Smart Image URLs**: Dynamic URL generation based on station and instrument mapping
+- **Error Handling**: Comprehensive fallback system for missing or failed images
+  - Placeholder icons for missing images
+  - Graceful degradation when images fail to load
+  - Alternative content with clear messaging
+- **Responsive Design**: Optimized display across all device sizes
+  - Mobile: 80px thumbnails, 200px modal images
+  - Tablet: 100px thumbnails, 250px modal images
+  - Desktop: 120px thumbnails, 350px modal images
+- **Performance Optimization**: Lazy loading, efficient image formats, proper caching
+
+#### 📊 Image Management System
+- **Source Data Integration**:
+  - Reads from `/home/jobelund/lu2024-12-46/SITES/Spectral/data/{station}/phenocams/products/{instrument}/L1/{year}/`
+  - Finds latest image by day of year and timestamp
+  - Handles multiple years of data automatically
+- **File Naming Convention**:
+  - Source: `{station}_{instrument}_{year}_{day_of_year}_{timestamp}.jpg`
+  - Target: `{instrument}.jpg` (e.g., `ANS_FOR_BL01_PHE01.jpg`)
+- **Manifest Generation**: JSON manifest tracking all processed images with metadata
+
+#### 🎨 CSS Styling System
+- **Component-Based Styling**: Dedicated CSS classes for all image components
+- **Consistent Visual Language**: Professional styling matching SITES Spectral theme
+- **Interactive Elements**: Hover effects, transitions, and visual feedback
+- **Accessibility**: Proper alt text, focus states, and semantic markup
+
+#### 📋 Comprehensive Error Handling
+- **Missing Images**: Professional placeholder with camera icon and clear messaging
+- **Failed Loads**: JavaScript error handling with automatic fallback to placeholders
+- **Network Issues**: Graceful degradation when image requests fail
+- **Data Gaps**: Clear indication when no representative image is available
+
+This major enhancement transforms the instrument interface from data-only to visually rich, providing researchers and station managers with immediate visual context for each phenocam's current view and vegetation monitoring status.
+
 ## [4.5.1] - 2025-09-19
 
 ### 🏗️ Database Schema Enhancement & Data Completeness Review

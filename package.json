@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.5.1",
-  "description": "SITES Spectral Stations & Instruments Management System v4.5.1 - Enhanced data completeness with operation programs, measurement timeline, and ROI infrastructure",
+  "version": "4.6.0",
+  "description": "SITES Spectral Stations & Instruments Management System v4.6.0 - Phenocam representative images integration with thumbnails and modal views",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
@@ -17,7 +17,9 @@
     "db:console": "wrangler d1 execute spectral_stations_db --command",
     "populate:phenocams": "node populate_phenocams.js",
     "populate:mspectral": "node populate_mspectral.js",
-    "populate:all": "npm run populate:phenocams && npm run populate:mspectral"
+    "populate:all": "npm run populate:phenocams && npm run populate:mspectral",
+    "update-images": "node scripts/update-instrument-images.js",
+    "update-images:dry-run": "node scripts/update-instrument-images.js --dry-run"
   },
   "keywords": [
     "sites",
