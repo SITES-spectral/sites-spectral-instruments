@@ -12,6 +12,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bulk data operations
 - Advanced analytics dashboard
 
+## [4.4.5] - 2025-09-19
+
+### 🎯 Simplified Popup Interface & Improved Labeling
+
+#### ✨ Station Popup Simplification
+- **Streamlined Display**: Station popups now show only essential information:
+  - Station name and acronym
+  - Summary count of platforms
+  - Summary count of instruments
+- **Removed Detailed Tables**: Eliminated complex instrument tables from station view for cleaner interface
+- **Focus on Overview**: Station markers provide high-level summary, detailed info available in platform popups
+
+#### 🏷️ Improved Platform Labeling
+- **Consistent Terminology**: Changed "Platform ID" to "Acronym" in platform popups
+- **Unified Labeling**: Both station and platform popups now use "Acronym" for consistency
+- **Clear Hierarchy**: Station shows overview, platforms show detailed instrument information
+
+#### 🎨 User Experience Improvements
+- **Reduced Complexity**: Station popups are now clean and fast to read
+- **Better Information Architecture**: Logical separation between overview (station) and details (platform)
+- **Consistent Interface**: Unified labeling across all popup types
+- **Improved Readability**: Less cluttered station popups focus user attention appropriately
+
+#### 🔧 Technical Changes
+- Simplified station popup creation functions
+- Updated platform popup labeling
+- Maintained all detailed instrument information in platform popups
+- Preserved comprehensive table functionality where most valuable
+
 ## [4.4.4] - 2025-09-19
 
 ### 📊 Enhanced Popup Tables with Comprehensive Instrument Information

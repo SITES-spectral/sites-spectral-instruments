@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.4.4">
+    <link rel="stylesheet" href="/css/styles.css?v=4.4.5">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.4.4">
+    <meta name="app-version" content="4.4.5">
     <meta name="build-date" content="2025-09-19">
 
     <style>
@@ -440,7 +440,7 @@
     </main>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.4.4"></script>
+    <script src="/js/utils.js?v=4.4.5"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -643,56 +643,18 @@
                 iconAnchor: [16, 40]
             });
 
-            // Create enhanced station popup with instrument details
+            // Create simplified station popup with summary counts
             const createStationPopup = () => {
+                const totalPlatforms = window.stationPlatforms || [];
                 const totalInstruments = window.stationInstruments || [];
-                const instrumentTypes = {};
-                const instrumentsWithLegacy = [];
 
-                // Count instruments by type and collect legacy names
-                totalInstruments.forEach(instrument => {
-                    const type = instrument.instrument_type || 'phenocam';
-                    instrumentTypes[type] = (instrumentTypes[type] || 0) + 1;
-
-                    if (instrument.legacy_acronym) {
-                        instrumentsWithLegacy.push({
-                            type: type,
-                            legacy: instrument.legacy_acronym,
-                            name: instrument.display_name,
-                            normalized_name: instrument.normalized_name,
-                            status: instrument.status || instrument.measurement_status
-                        });
-                    }
-                });
-
-                let instrumentDetails = '';
-                if (Object.keys(instrumentTypes).length > 0) {
-                    instrumentDetails = '<br/><strong>Instruments:</strong><br/>';
-                    Object.entries(instrumentTypes).forEach(([type, count]) => {
-                        const displayType = type.charAt(0).toUpperCase() + type.slice(1);
-                        instrumentDetails += `• ${displayType}: ${count}<br/>`;
-                    });
-
-                    // Add legacy acronyms if available
-                    if (instrumentsWithLegacy.length > 0) {
-                        instrumentDetails += '<br/><strong>Instruments Table:</strong><br/>';
-                        instrumentDetails += '<table style="width:100%; font-size:12px; border-collapse:collapse; margin-top:5px;">';
-                        instrumentDetails += '<tr style="background:#f5f5f5;"><th style="padding:3px; text-align:left; border:1px solid #ddd;">Legacy</th><th style="padding:3px; text-align:left; border:1px solid #ddd;">Normalized</th><th style="padding:3px; text-align:left; border:1px solid #ddd;">Status</th></tr>';
-                        instrumentsWithLegacy.forEach(inst => {
-                            const status = inst.status || 'Unknown';
-                            const statusColor = status.toLowerCase() === 'active' ? '#22c55e' :
-                                              status.toLowerCase() === 'inactive' ? '#ef4444' : '#6b7280';
-                            instrumentDetails += `<tr><td style="padding:3px; border:1px solid #ddd;">${inst.legacy}</td><td style="padding:3px; border:1px solid #ddd; font-size:10px;">${inst.normalized_name || 'N/A'}</td><td style="padding:3px; border:1px solid #ddd; color:${statusColor}; font-weight:bold;">${status}</td></tr>`;
-                        });
-                        instrumentDetails += '</table>';
-                    }
-                } else {
-                    instrumentDetails = '<br/>Instruments: None';
-                }
+                const platformCount = totalPlatforms.length;
+                const instrumentCount = totalInstruments.length;
 
                 return `<strong>${stationData.display_name}</strong><br/>` +
-                       `Station ID: ${stationData.acronym || stationAcronym}` +
-                       instrumentDetails;
+                       `Acronym: ${stationData.acronym || stationAcronym}<br/>` +
+                       `Platforms: ${platformCount}<br/>` +
+                       `Instruments: ${instrumentCount}`;
             };
 
             const stationMarker = L.marker([lat, lng], { icon: stationIcon })
@@ -852,7 +814,7 @@
 
                 // Build platform details
                 let platformDetails = `<strong>${platform.display_name}</strong><br/>` +
-                    `Platform ID: ${platform.normalized_name || 'N/A'}<br/>`;
+                    `Acronym: ${platform.normalized_name || 'N/A'}<br/>`;
 
                 if (platform.mounting_structure) {
                     platformDetails += `Mounting: ${platform.mounting_structure}<br/>`;
