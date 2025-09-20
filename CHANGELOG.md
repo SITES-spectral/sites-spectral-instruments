@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.7] - 2025-09-20
+
+### 🔧 Platform Tooltip Fix
+
+#### 🐛 Bug Fixes
+- **Platform Tooltip IDs**: Fixed platform tooltips to show correct platform identifiers
+  - **Before**: Showed database ID numbers (e.g., "Platform: 1")
+  - **After**: Shows actual platform identifiers (e.g., "Platform: ANS_FOR_BL01")
+  - **Implementation**: Changed tooltip to use `platform.normalized_name` instead of `platform.id`
+
+#### 🎯 Improved User Experience
+- **Accurate Identification**: Platform tooltips now show meaningful platform codes
+- **Consistent with Data**: Tooltips match the platform acronyms shown in detail popups
+
 ## [4.7.6] - 2025-09-20
 
 ### 🗺️ Interactive Map Tooltips and Enhanced User Experience
