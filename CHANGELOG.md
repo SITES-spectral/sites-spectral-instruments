@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.2] - 2025-09-20
+
+### 🚀 Production Database Migration & API Endpoint Updates
+
+#### 📊 Database Migration with Standardized Structure
+- **Production Database Updated**: Successfully migrated all standardized stations.yaml data to production database
+- **Nested Geolocation Support**: Updated import scripts to handle new nested geolocation structure with EPSG preservation
+- **Platform-Instrument Corrections**: Applied all platform-instrument relationship fixes including ASA_FOR_PL02 creation
+- **Data Integrity Verified**: Confirmed 7 stations, 20 platforms, and 23 instruments correctly imported
+
+#### 🔧 API Endpoint Compatibility
+- **Import Script Enhancement**: Created new import-stations-yaml-updated.js that properly handles nested geolocation structure
+- **Ecosystem Data Preservation**: Used existing ecosystem definitions from database instead of creating duplicates
+- **Status Code Accuracy**: Preserved actual status values from YAML (Active, Decommissioned, Testing, Inactive)
+- **Field Mapping Corrections**: Fixed instrument_number field formatting and SQL escaping issues
+
+#### 🛠️ Technical Implementation
+- **Migration 0024**: Created comprehensive migration file that clears and repopulates all station data
+- **Coordinate Extraction**: Smart coordinate extraction function handles both nested and legacy coordinate formats
+- **Reference Data Integrity**: Maintained existing ecosystem and status reference data without duplicating
+- **Production Database Health**: Verified successful import with 113 changes, 127 rows written
+
+#### 🔍 Data Validation Results
+- **Stations**: 7 stations imported including fixed Abisko coordinates and metadata
+- **Platforms**: 20 platforms with proper ASA_FOR_PL02 platform creation and operation_programs
+- **Instruments**: 23 instruments with corrected ASA_FOR_PL02_PHE01 assignment and ecosystem codes
+- **Geolocation**: All coordinates properly extracted from nested structure and stored as decimal degrees
+
 ## [4.7.1] - 2025-09-20
 
 ### 📊 Data Schema Standardization & Naming Convention Implementation

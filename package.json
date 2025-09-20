@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.7.1",
-  "description": "SITES Spectral Stations & Instruments Management System v4.7.1 - Data Schema Standardization & Naming Convention Implementation",
+  "version": "4.7.2",
+  "description": "SITES Spectral Stations & Instruments Management System v4.7.2 - Production Database Migration with Standardized YAML Structure",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

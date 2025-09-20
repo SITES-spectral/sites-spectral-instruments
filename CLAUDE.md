@@ -2,19 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.7.1 - Data Schema Standardization (2025-09-20)
+## Version 4.7.2 - Production Database Migration (2025-09-20)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Deployment Date:** 2025-09-20
-**🔧 Data Integrity Verified:** YAML Schema Standardized, Platform-Instrument Relationships Fixed, Naming Conventions Documented
+**🔧 Production Database Synchronized:** All standardized YAML data migrated to production with verified data integrity
 
-### 📊 Latest Update: YAML Configuration Standardization
-- **Parameter Consistency**: Comprehensive audit and standardization of stations.yaml
-- **Coordinate System**: Standardized all coordinates to decimal degrees with nested geolocation structure
-- **Platform Fixes**: Corrected ASA station platform-instrument relationships
-- **Documentation**: Created comprehensive naming convention guidelines
-- **Version Update**: Updated to stations.yaml version 2025.9.20.1
+### 🚀 Latest Update: Production Database Migration Complete
+- **Database Migration**: Successfully applied migration 0024 with all standardized stations.yaml data
+- **Data Verification**: Confirmed 7 stations, 20 platforms, 23 instruments correctly imported to production
+- **API Compatibility**: Updated import scripts to handle nested geolocation structure
+- **Platform Fixes Applied**: ASA_FOR_PL02 platform creation and instrument corrections live in production
+- **Ecosystem Integrity**: Preserved existing ecosystem definitions while importing new station data
 
 ### 🚨 BREAKING CHANGES - IMPORTANT ARCHITECTURE CHANGES
 
@@ -428,3 +428,4 @@ const response = await fetch('/api/geojson/all', {
 This system prioritizes security, usability, and comprehensive audit trails suitable for research institution requirements.
 - update the version number, changelog, documentation, when successfully tested, troubleshooted fixed  and done. Then commit, push and deploy
 - The authentication system uses Cloudflare secrets, not database credentials
+- use station-credentials-SECURE.json to login using the cloudflare credentials
