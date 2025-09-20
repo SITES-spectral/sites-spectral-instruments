@@ -13,6 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.6] - 2025-09-20
+
+### 🗺️ Interactive Map Tooltips and Enhanced User Experience
+
+#### ✨ New Features
+- **Map Hover Tooltips**: Added interactive tooltips to Leaflet map markers
+  - **Station Tooltips**: Show station acronym on hover over station markers
+  - **Platform Tooltips**: Show platform ID on hover over platform markers
+  - **Non-intrusive Design**: Tooltips appear above markers without interfering with click functionality
+  - **Dynamic Updates**: Tooltips update automatically when station data changes
+
+#### 🎨 User Experience Improvements
+- **Quick Identification**: Users can now quickly identify stations and platforms without clicking
+- **Preserved Functionality**: All existing click-to-show-details functionality remains intact
+- **Clean Interface**: Tooltips positioned with proper offset and direction for optimal visibility
+
+#### 🔧 Technical Implementation
+- **Leaflet Integration**: Added `.bindTooltip()` to both station and platform markers
+- **Consistent Styling**: Tooltips use consistent positioning and styling across all markers
+- **Performance Optimized**: Lightweight implementation that doesn't impact map performance
+
 ## [4.7.5] - 2025-09-20
 
 ### 🎯 Complete ROI Data Restoration and Full System Functionality

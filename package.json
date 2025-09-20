@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.7.5",
-  "description": "SITES Spectral Stations & Instruments Management System v4.7.5 - Complete ROI Data Restoration and Full System Functionality",
+  "version": "4.7.6",
+  "description": "SITES Spectral Stations & Instruments Management System v4.7.6 - Interactive Map Tooltips and Enhanced User Experience",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

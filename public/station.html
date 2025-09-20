@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.7.4">
+    <link rel="stylesheet" href="/css/styles.css?v=4.7.6">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.7.4">
+    <meta name="app-version" content="4.7.6">
     <meta name="build-date" content="2025-09-20">
 
     <style>
@@ -884,7 +884,12 @@
 
             const stationMarker = L.marker([lat, lng], { icon: stationIcon })
                 .addTo(stationMap)
-                .bindPopup(createStationPopup());
+                .bindPopup(createStationPopup())
+                .bindTooltip(`Station: ${stationData.acronym || stationAcronym}`, {
+                    permanent: false,
+                    direction: 'top',
+                    offset: [0, -10]
+                });
 
             // Store station marker globally to update popup later
             window.stationMarker = stationMarker;
@@ -943,6 +948,8 @@
                 };
 
                 window.stationMarker.setPopupContent(createStationPopup());
+                // Update tooltip as well
+                window.stationMarker.setTooltipContent(`Station: ${stationData.acronym || stationAcronym}`);
             }
 
             // Clear existing platform markers
@@ -1057,7 +1064,12 @@
 
                 const marker = L.marker([lat, lng], { icon: platformIcon })
                     .addTo(stationMap)
-                    .bindPopup(popupContent);
+                    .bindPopup(popupContent)
+                    .bindTooltip(`Platform: ${platform.id || platform.normalized_name}`, {
+                        permanent: false,
+                        direction: 'top',
+                        offset: [0, -10]
+                    });
 
                 // Store marker for later removal
                 window.platformMarkers.push(marker);
