@@ -1,5 +1,5 @@
 -- Import standardized station data from stations.yaml vundefined
--- Generated: 2025-09-20T08:52:39.675Z
+-- Generated: 2025-09-20T09:15:21.452Z
 -- Schema: Standardized with nested geolocation structure
 
 -- Clear existing data first
@@ -17,7 +17,9 @@ INSERT INTO stations (id, normalized_name, display_name, acronym, status, countr
 (4, 'lonnstorp', 'Lönnstorp', 'LON', 'Active', 'Sweden', 55.66915120680076, 13.102841729711757, NULL, 'Lönnstorp Agricultural Research Station'),
 (5, 'robacksdalen', 'Röbäcksdalen', 'RBD', 'Active', 'Sweden', 63.81101813533398, 20.23857775473176, NULL, 'Röbäcksdalen Research Station'),
 (6, 'skogaryd', 'Skogaryd', 'SKC', 'Active', 'Sweden', 58.36489314691996, 12.144947284525392, NULL, 'Skogaryd Research Catchment'),
-(7, 'svartberget', 'Svartberget', 'SVB', 'Active', 'Sweden', 64.24433725317064, 19.76638029816108, NULL, 'Svartberget Research Station');
+(7, 'svartberget', 'Svartberget', 'SVB', 'Active', 'Sweden', 64.24433725317064, 19.76638029816108, NULL, 'Svartberget Research Station'),
+(8, 'bolmen', 'Bolmen Research Station', 'BOL', 'Active', 'Sweden', 56.996567, 13.783417, NULL, 'Bolmen Research Station'),
+(9, 'erken', 'Erken Laboratory', 'ERK', 'Active', 'Sweden', 59.88374339980456, 18.655476188993664, NULL, 'Erken Laboratory');
 
 -- Insert platforms
 INSERT INTO platforms (id, station_id, normalized_name, display_name, location_code, mounting_structure, platform_height_m, status, latitude, longitude, deployment_date, description, operation_programs) VALUES
@@ -40,7 +42,9 @@ INSERT INTO platforms (id, station_id, normalized_name, display_name, location_c
 (17, 7, 'SVB_MIR_PL01', 'SVB MIR Platform 01', 'PL01', '', 17.5, 'Active', 64.18258503808431, 19.558028904903516, NULL, '', '["SITES","ICOS"]'),
 (18, 7, 'SVB_MIR_PL02', 'SVB MIR Platform 02', 'PL02', 'Mast', 3.3, 'Active', 64.18201, 19.556576, NULL, '', '["SITES","ICOS"]'),
 (19, 7, 'SVB_MIR_PL03', 'SVB MIR Platform 03', 'PL03', 'Mast', 17.5, 'Active', 64.182536, 19.558045, NULL, '', '["SITES","ICOS"]'),
-(20, 7, 'SVB_FOR_PL01', 'SVB FOR Platform 01', 'PL01', 'Flagpole and Tower', 70, 'Active', 64.256342, 19.771621, NULL, '', '["SITES","ICOS"]');
+(20, 7, 'SVB_FOR_PL01', 'SVB FOR Platform 01', 'PL01', 'Flagpole and Tower', 70, 'Active', 64.256342, 19.771621, NULL, '', '["SITES","ICOS"]'),
+(21, 8, 'BOL_FOR_PL01', 'Bolmen Forest Platform 01', 'PL01', '', NULL, 'Planned', 56.996567, 13.783417, NULL, 'Planned forest phenocam platform', NULL),
+(22, 9, 'ERK_LAK_PL01', 'Erken Lake Platform 01', 'PL01', '', NULL, 'Planned', 59.88374339980456, 18.655476188993664, NULL, 'Planned lake phenocam platform', NULL);
 
 -- Insert instruments
 INSERT INTO instruments (id, platform_id, normalized_name, display_name, instrument_type, ecosystem_code, instrument_number, camera_brand, camera_model, camera_resolution, camera_serial_number, first_measurement_year, last_measurement_year, measurement_status, status, latitude, longitude, instrument_height_m, viewing_direction, azimuth_degrees, description, installation_notes, maintenance_notes) VALUES
@@ -66,9 +70,11 @@ INSERT INTO instruments (id, platform_id, normalized_name, display_name, instrum
 (20, 18, 'SVB_MIR_PL02_PHE01', 'SVB MIR PL02 PHE01', 'phenocam', 'MIR', 'PHE01', '', '', '', '', NULL, NULL, 'Active', 'Active', 64.18201, 19.556576, 3.3, '', NULL, 'Mire ecosystem monitoring phenocam', 'Mast-mounted phenocam viewing North', ''),
 (21, 19, 'SVB_MIR_PL03_PHE01', 'SVB MIR PL03 PHE01', 'phenocam', 'MIR', 'PHE01', '', '', '', '', NULL, NULL, 'Active', 'Active', 64.182536, 19.558045, 17.5, '', NULL, 'Mire ecosystem monitoring phenocam', 'Mast-mounted phenocam viewing North-NorthEast', ''),
 (22, 20, 'SVB_FOR_PL01_PHE01', 'SVB FOR PL01 PHE01', 'phenocam', 'FOR', 'PHE01', '', '', '', '', NULL, NULL, 'Active', 'Inactive', 64.256342, 19.771621, 70, '', NULL, 'Forest ecosystem monitoring phenocam', 'Tower-mounted phenocam viewing North-West', ''),
-(23, 20, 'SVB_FOR_PL01_PHE02', 'SVB FOR PL01 PHE02', 'phenocam', 'FOR', 'PHE02', '', '', '', '', NULL, NULL, 'Active', 'Active', 64.256342, 19.771621, 70, '', NULL, 'Forest ecosystem monitoring phenocam', 'Tower-mounted phenocam viewing North-West', '');
+(23, 20, 'SVB_FOR_PL01_PHE02', 'SVB FOR PL01 PHE02', 'phenocam', 'FOR', 'PHE02', '', '', '', '', NULL, NULL, 'Active', 'Active', 64.256342, 19.771621, 70, '', NULL, 'Forest ecosystem monitoring phenocam', 'Tower-mounted phenocam viewing North-West', ''),
+(24, 21, 'BOL_FOR_PL01_PHE01', 'Bolmen Forest Platform 01 Phenocam 01', 'phenocam', 'FOR', 'PHE01', '', '', '', '', NULL, NULL, 'Planned', 'Planned', 56.996567, 13.783417, NULL, '', NULL, 'Planned forest ecosystem monitoring phenocam', '', ''),
+(25, 22, 'ERK_LAK_PL01_PHE01', 'Erken Lake Platform 01 Phenocam 01', 'phenocam', 'LAK', 'PHE01', '', '', '', '', NULL, NULL, 'Planned', 'Planned', 59.88374339980456, 18.655476188993664, NULL, '', NULL, 'Planned lake ecosystem monitoring phenocam', '', '');
 
 -- Summary:
--- Stations: 7
--- Platforms: 20
--- Instruments: 23
+-- Stations: 9
+-- Platforms: 22
+-- Instruments: 25

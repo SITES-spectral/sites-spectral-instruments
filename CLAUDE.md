@@ -2,19 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.7.2 - Production Database Migration (2025-09-20)
+## Version 4.7.3 - New Research Stations Added (2025-09-20)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Deployment Date:** 2025-09-20
-**🔧 Production Database Synchronized:** All standardized YAML data migrated to production with verified data integrity
+**🔧 Research Network Expanded:** Added Bolmen and Erken stations with planned platforms and instruments
 
-### 🚀 Latest Update: Production Database Migration Complete
-- **Database Migration**: Successfully applied migration 0024 with all standardized stations.yaml data
-- **Data Verification**: Confirmed 7 stations, 20 platforms, 23 instruments correctly imported to production
-- **API Compatibility**: Updated import scripts to handle nested geolocation structure
-- **Platform Fixes Applied**: ASA_FOR_PL02 platform creation and instrument corrections live in production
-- **Ecosystem Integrity**: Preserved existing ecosystem definitions while importing new station data
+### 🏗️ Latest Update: New Research Stations Integration
+- **Network Expansion**: Added Bolmen Research Station (BOL) and Erken Laboratory (ERK) to SITES network
+- **Station Count**: Increased from 7 to 9 research stations with comprehensive geographic coverage
+- **Platform Planning**: Added 2 planned platforms (BOL_FOR_PL01, ERK_LAK_PL01) for future deployments
+- **Instrument Capacity**: Enhanced network to 25 phenocam instruments including planned installations
+- **Database Integrity**: Successfully migrated all station data with proper coordinate and ecosystem classification
 
 ### 🚨 BREAKING CHANGES - IMPORTANT ARCHITECTURE CHANGES
 

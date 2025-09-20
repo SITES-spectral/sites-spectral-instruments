@@ -13,6 +13,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.3] - 2025-09-20
+
+### 🏗️ New Research Stations: Bolmen and Erken
+
+#### 🆕 Station Additions
+- **Bolmen Research Station (BOL)**: Added new research station with planned forest platform
+  - **Location**: 56.996567°N, 13.783417°E (Forest ecosystem)
+  - **Platform**: BOL_FOR_PL01 with planned status for future phenocam deployment
+  - **Instrument**: BOL_FOR_PL01_PHE01 with planned forest ecosystem monitoring capabilities
+
+- **Erken Laboratory (ERK)**: Added new laboratory facility with planned lake platform
+  - **Location**: 59.88374°N, 18.65547°E (Lake ecosystem)
+  - **Platform**: ERK_LAK_PL01 with planned status for future phenocam deployment
+  - **Instrument**: ERK_LAK_PL01_PHE01 with planned lake ecosystem monitoring capabilities
+
+#### 📊 Database Expansion
+- **Station Count**: Increased from 7 to 9 research stations in SITES network
+- **Platform Coverage**: Expanded from 20 to 22 platforms including planned installations
+- **Instrument Capacity**: Enhanced from 23 to 25 phenocam instruments for comprehensive monitoring
+- **Geographic Distribution**: Extended monitoring network coverage across Sweden
+
+#### 🛠️ Technical Implementation
+- **YAML Schema**: Updated stations.yaml to version 2025.9.20.2 with new station definitions
+- **Database Migration**: Applied comprehensive migration with all existing and new station data
+- **Nested Geolocation**: Proper coordinate structure maintained for all new stations
+- **Status Management**: Implemented "Planned" status for future deployment tracking
+
+#### 🔍 Data Verification
+- **Coordinate Accuracy**: Verified precise decimal degree coordinates for both stations
+- **Ecosystem Classification**: Proper ecosystem codes (FOR for Bolmen, LAK for Erken)
+- **Naming Conventions**: Followed established naming patterns for consistency
+- **Database Integrity**: Confirmed successful import with 107 changes, 127 rows written
+
 ## [4.7.2] - 2025-09-20
 
 ### 🚀 Production Database Migration & API Endpoint Updates
