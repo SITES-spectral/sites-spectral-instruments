@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.7.0",
-  "description": "SITES Spectral Stations & Instruments Management System v4.7.0 - ROI Nested Cards System with Complete Regional Information",
+  "version": "4.7.1",
+  "description": "SITES Spectral Stations & Instruments Management System v4.7.1 - Data Schema Standardization & Naming Convention Implementation",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

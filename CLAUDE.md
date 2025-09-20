@@ -2,12 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 3.1.1 - Fixed Authentication Redirects (2025-09-17)
+## Version 4.7.1 - Data Schema Standardization (2025-09-20)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-17
-**🔧 All Tests Passed:** Authentication, CRUD Operations, API Security
+**📅 Deployment Date:** 2025-09-20
+**🔧 Data Integrity Verified:** YAML Schema Standardized, Platform-Instrument Relationships Fixed, Naming Conventions Documented
+
+### 📊 Latest Update: YAML Configuration Standardization
+- **Parameter Consistency**: Comprehensive audit and standardization of stations.yaml
+- **Coordinate System**: Standardized all coordinates to decimal degrees with nested geolocation structure
+- **Platform Fixes**: Corrected ASA station platform-instrument relationships
+- **Documentation**: Created comprehensive naming convention guidelines
+- **Version Update**: Updated to stations.yaml version 2025.9.20.1
 
 ### 🚨 BREAKING CHANGES - IMPORTANT ARCHITECTURE CHANGES
 

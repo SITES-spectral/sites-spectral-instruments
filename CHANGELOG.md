@@ -13,6 +13,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.1] - 2025-09-20
+
+### 📊 Data Schema Standardization & Naming Convention Implementation
+
+#### 🔧 YAML Configuration Audit & Standardization
+- **Parameter Consistency**: Comprehensive audit of stations.yaml identified and fixed parameter naming inconsistencies across all stations, platforms, and instruments
+- **Coordinate Standardization**: Standardized all latitude/longitude parameters to use `_dd` suffix (decimal degrees) with proper nested geolocation structure
+- **Schema Unification**: Resolved schema bifurcation by implementing single standardized pattern across all entities
+- **Prefix Standardization**: Added `instrument_` and `platform_` prefixes for better parameter organization
+
+#### 🗺️ Geolocation Structure Enhancement
+- **Nested Organization**: Maintained nested geolocation structure for better semantic organization and EPSG preservation
+- **Future Extensibility**: Enhanced structure allows for additional geospatial metadata and coordinate reference systems
+- **Data Integrity**: All coordinates now properly structured with EPSG:4326 reference system
+
+#### 🏗️ Platform-Instrument Relationship Fixes
+- **ASA Station Correction**: Fixed incorrect platform-instrument relationships where ASA_FOR_PL02_PHE01 was incorrectly assigned to ASA_FOR_PL01
+- **Platform Creation**: Created missing ASA_FOR_PL02 platform to properly house its associated instrument
+- **ID Pattern Validation**: Implemented validation ensuring instrument ID prefixes match their parent platform IDs
+
+#### 📋 Naming Convention Documentation
+- **Comprehensive Guidelines**: Created detailed naming convention documentation (`NAMING_CONVENTIONS.md`)
+- **Multi-Ecosystem Patterns**: Documented complex naming patterns for stations with multiple ecosystems (e.g., SKC_CEM_FOR_PL01, SKC_MAD_WET_PL01)
+- **Validation Rules**: Defined critical rules including `_PHE{number}` suffix requirement for all phenocam instruments
+- **Legacy Support**: Documented approach for handling legacy acronyms while maintaining backward compatibility
+
+#### 🛠️ Technical Implementation
+- **Automated Scripts**: Created Python scripts for standardization, geolocation fixing, and platform-instrument relationship validation
+- **Backup Safety**: Comprehensive backup system before any modifications
+- **Data Integrity Checks**: Multi-level validation ensuring no data loss during standardization process
+- **Version Tracking**: Updated to version 2025.9.20.1 with complete audit trail
+
+#### 📊 Station Coverage
+- **Complete Audit**: Analyzed all 7 stations (ANS, ASA, GRI, LON, RBD, SKC, SVB) for consistency
+- **Ecosystem Mapping**: Standardized ecosystem codes (FOR, AGR, MIR, LAK, WET) across all platforms
+- **Platform Types**: Documented and standardized platform location types (BL: Building, PL: Platform)
+
 ## [4.7.0] - 2025-09-19
 
 ### 🎯 ROI Nested Cards System & Complete Regional Information
