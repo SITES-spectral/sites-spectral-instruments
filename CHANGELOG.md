@@ -13,6 +13,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.5] - 2025-09-20
+
+### 🎯 Complete ROI Data Restoration and Full System Functionality
+
+#### ✅ ROI System Fully Operational
+- **ROI Database Population**: Successfully populated `instrument_rois` table with 42 ROIs extracted from stations.yaml
+  - **Multi-ROI Support**: ROI_00 (full image), ROI_01, ROI_02, ROI_03, etc. for comprehensive ecosystem monitoring
+  - **Rich Metadata**: Complete ROI data including polygon points, RGB colors, descriptions, and auto-generation flags
+  - **Cross-Station Coverage**: ROIs restored for all active instruments across SITES network
+
+#### 🔧 ROI Data Extraction and Migration
+- **New ROI Script**: Created `scripts/populate-rois-from-yaml.js` for proper ROI data extraction
+  - **Nested Structure Handling**: Properly extracts ROI data from stations.yaml nested structure
+  - **Color Management**: Preserves RGB color arrays and converts to individual R, G, B database fields
+  - **Points Serialization**: Handles polygon coordinate arrays with proper JSON serialization
+  - **Metadata Preservation**: Maintains auto-generation flags, descriptions, and source image references
+
+#### 📊 ROI Coverage Statistics
+- **Total ROIs**: 42 regions of interest across the SITES network
+- **Instrument Coverage**: ROI data for 20+ phenocam instruments
+- **ROI Types**: Full image exclusions, forest sections, agricultural plots, lake surfaces
+- **Color Coding**: Green (vegetation), Blue (water/sky), Red (soil/structures), White (full image)
+
+#### 🎨 ROI Display Features
+- **Interactive ROI Cards**: Visual cards showing ROI name, color indicator, and metadata
+- **Detailed ROI Modal**: Click-through to view complete ROI specifications
+- **Polygon Visualization**: Display of coordinate points and geometric properties
+- **Auto-Generation Indicators**: Clear marking of automatically vs manually created ROIs
+
+#### 🌐 Network Examples
+- **Abisko (ANS)**: 4 ROIs for forest ecosystem monitoring with mountain views
+- **Lönnstorp (LON)**: 5 ROIs per phenocam for agricultural field monitoring
+- **Skogaryd (SKC)**: Multiple ROIs across forest, lake, and wetland ecosystems
+- **Svartberget (SVB)**: Forest and mire ecosystem ROI coverage
+
+#### 🛠️ Technical Implementation
+- **API Integration**: Existing `/api/rois` endpoint now returns populated data
+- **Database Schema**: Proper utilization of `instrument_rois` table with all fields
+- **Frontend Integration**: ROI cards load dynamically in instrument detail modals
+- **Error Handling**: Graceful handling of instruments without ROI definitions
+
+#### 🔍 Quality Verification
+- **Database Confirmation**: Verified 42 ROIs successfully inserted with proper instrument relationships
+- **API Testing**: Confirmed ROI endpoints return correct data with authentication
+- **Frontend Validation**: ROI cards display properly with color indicators and metadata
+- **User Experience**: Smooth interaction with ROI details modal and comprehensive information display
+
 ## [4.7.4] - 2025-09-20
 
 ### 🔧 Fixed Nested Data Migration for Camera Specifications and Instrument Details
