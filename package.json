@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.7.7",
-  "description": "SITES Spectral Stations & Instruments Management System v4.7.7 - Fixed Platform Tooltip IDs",
+  "version": "4.7.8",
+  "description": "SITES Spectral Stations & Instruments Management System v4.7.8 - Enhanced Station and Platform Tooltips",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

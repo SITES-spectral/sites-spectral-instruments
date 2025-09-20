@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.8] - 2025-09-20
+
+### 🎯 Enhanced Station Tooltips
+
+#### ✨ User Experience Improvements
+- **Station Name Tooltips**: Station markers now show full station names instead of just acronyms
+  - **Before**: "Station: ANS"
+  - **After**: "Abisko" (full display name)
+  - **Fallback**: Uses acronym if display name not available
+- **Platform Identification**: Maintained correct platform ID tooltips (e.g., "Platform: ANS_FOR_BL01")
+
+#### 🔧 Technical Implementation
+- **Smart Fallback**: Uses `display_name` first, then `acronym` as fallback
+- **Dynamic Updates**: Tooltips update correctly when station data changes
+- **Consistent Experience**: Both hover tooltips and detail popups show appropriate information
+
 ## [4.7.7] - 2025-09-20
 
 ### 🔧 Platform Tooltip Fix
