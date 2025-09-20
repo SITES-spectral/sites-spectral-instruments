@@ -13,6 +13,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.7.4] - 2025-09-20
+
+### 🔧 Fixed Nested Data Migration for Camera Specifications and Instrument Details
+
+#### 🐛 Critical Bug Fix
+- **Nested Parameter Extraction**: Fixed migration script to properly handle nested data structures in stations.yaml
+  - **Camera Specifications**: Correctly extract `camera_specifications.brand` and `camera_specifications.model` instead of flat properties
+  - **Measurement Timeline**: Proper extraction of `measurement_timeline.first_measurement_year` and status data
+  - **Viewing Directions**: Fixed extraction of instrument viewing directions with proper prefix handling
+  - **ROI Data**: Restored rich ROI information that was previously lost during migration
+
+#### 📊 Data Recovery
+- **Camera Details**: Restored camera brands (Nikon, Mobotix, etc.) and models that were showing as empty
+- **Instrument Timeline**: Fixed first measurement years, measurement status, and operational timeline data
+- **Geographic Data**: Preserved all viewing directions, azimuth degrees, and instrument positioning
+- **Technical Specifications**: Recovered camera resolutions, serial numbers, and mounting details
+
+#### 🛠️ Technical Implementation
+- **Migration Script Update**: Enhanced `scripts/import-stations-yaml-updated.js` with proper nested object traversal
+- **Database Re-migration**: Applied corrected data extraction with 113 changes, 127 rows written
+- **Data Validation**: Verified all previously working instrument details are now properly displayed
+- **API Consistency**: Ensured all instrument modal details show complete camera and timeline information
+
+#### 🔍 Quality Assurance
+- **Before Fix**: Camera specifications, ROIs, and timeline data showing as empty strings
+- **After Fix**: Rich instrument data properly displayed with complete camera specifications
+- **User Verification**: Confirmed restoration of previously working functionality from original backup
+- **Database Integrity**: All nested data structures now properly extracted and stored
+
 ## [4.7.3] - 2025-09-20
 
 ### 🏗️ New Research Stations: Bolmen and Erken

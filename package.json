@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.7.3",
-  "description": "SITES Spectral Stations & Instruments Management System v4.7.3 - Added Bolmen and Erken Research Stations with Planned Platforms",
+  "version": "4.7.4",
+  "description": "SITES Spectral Stations & Instruments Management System v4.7.4 - Fixed Nested Data Migration for Camera Specifications and Instrument Details",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

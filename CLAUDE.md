@@ -2,19 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.7.3 - New Research Stations Added (2025-09-20)
+## Version 4.7.4 - Fixed Nested Data Migration (2025-09-20)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Deployment Date:** 2025-09-20
-**🔧 Research Network Expanded:** Added Bolmen and Erken stations with planned platforms and instruments
+**🔧 Critical Fix:** Restored nested data migration for camera specifications and instrument details
 
-### 🏗️ Latest Update: New Research Stations Integration
-- **Network Expansion**: Added Bolmen Research Station (BOL) and Erken Laboratory (ERK) to SITES network
-- **Station Count**: Increased from 7 to 9 research stations with comprehensive geographic coverage
-- **Platform Planning**: Added 2 planned platforms (BOL_FOR_PL01, ERK_LAK_PL01) for future deployments
-- **Instrument Capacity**: Enhanced network to 25 phenocam instruments including planned installations
-- **Database Integrity**: Successfully migrated all station data with proper coordinate and ecosystem classification
+### 🏗️ Latest Update: Nested Data Migration Fix
+- **Data Recovery**: Fixed migration script to properly extract nested camera specifications and timeline data
+- **Camera Details**: Restored camera brands, models, resolutions that were showing as empty
+- **Instrument Timeline**: Fixed first measurement years, measurement status, and operational data
+- **ROI Information**: Recovered rich ROI data that was previously lost during migration
+- **Database Integrity**: Re-migrated all instrument data with proper nested structure handling
 
 ### 🚨 BREAKING CHANGES - IMPORTANT ARCHITECTURE CHANGES
 

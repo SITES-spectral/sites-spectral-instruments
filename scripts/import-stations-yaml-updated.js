@@ -92,22 +92,28 @@ for (const [stationKey, station] of Object.entries(stationsData.stations)) {
           let instLng = instrumentCoords.lng ? instrumentCoords.lng : 'NULL';
 
           const instrumentHeight = instrument.instrument_height_m || 'NULL';
-          const viewingDirection = escapeSql(instrument.viewing_direction || '');
-          let azimuth = instrument.azimuth_degrees || 'NULL';
+          const viewingDirection = escapeSql(instrument.instrument_viewing_direction || instrument.viewing_direction || '');
+          let azimuth = instrument.instrument_azimuth_degrees || instrument.azimuth_degrees || 'NULL';
           if (azimuth !== 'NULL' && azimuth.toString().includes('?')) {
             azimuth = 'NULL';
           }
 
-          const cameraBrand = escapeSql(instrument.camera_brand || '');
-          const cameraModel = escapeSql(instrument.camera_model || '');
-          const cameraResolution = escapeSql(instrument.camera_resolution || '');
-          const cameraSerial = escapeSql(instrument.camera_serial_number || '');
+          // Extract camera specifications from nested structure
+          const cameraSpecs = instrument.camera_specifications || {};
+          const cameraBrand = escapeSql(cameraSpecs.brand || '');
+          const cameraModel = escapeSql(cameraSpecs.model || '');
+          const cameraResolution = escapeSql(cameraSpecs.resolution || '');
+          const cameraSerial = escapeSql(cameraSpecs.serial_number || '');
+
+          // Extract measurement timeline from nested structure
+          const timeline = instrument.measurement_timeline || {};
+          const firstYear = timeline.first_measurement_year || 'NULL';
+          const lastYear = timeline.last_measurement_year || 'NULL';
+          const measurementStatus = escapeSql(timeline.measurement_status || instrument.measurement_status || 'Active');
+
           const ecosystemCode = escapeSql(instrument.ecosystem_code || '');
           const instrumentType = escapeSql(instrument.instrument_type || 'phenocam');
           const instrumentNumber = instrument.instrument_number ? `'${instrument.instrument_number}'` : 'NULL';
-          const firstYear = instrument.first_measurement_year || 'NULL';
-          const lastYear = instrument.last_measurement_year || 'NULL';
-          const measurementStatus = escapeSql(instrument.measurement_status || 'Active');
           const instrumentStatus = escapeSql(instrument.status || 'Active');
           const displayName = escapeSql(instrument.display_name || instrumentKey);
           const description = escapeSql(instrument.description || '');
