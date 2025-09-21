@@ -309,15 +309,7 @@ async function handlePlatforms(method, id, request, env) {
       // Update platform
       const platformData = await request.json();
 
-      // Check permissions
-      if (!hasPermission(user, 'write', 'platforms', user.station_normalized_name)) {
-        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      // First verify platform exists and user has access
+      // First verify platform exists and get its station
       let checkQuery = `
         SELECT p.id, s.normalized_name as station_normalized_name
         FROM platforms p
@@ -325,19 +317,19 @@ async function handlePlatforms(method, id, request, env) {
         WHERE p.id = ?
       `;
 
-      if (user.role === 'station' && user.station_normalized_name) {
-        checkQuery += ' AND s.normalized_name = ?';
-      }
-
-      const checkParams = user.role === 'station' && user.station_normalized_name
-        ? [id, user.station_normalized_name]
-        : [id];
-
-      const existingPlatform = await env.DB.prepare(checkQuery).bind(...checkParams).first();
+      const existingPlatform = await env.DB.prepare(checkQuery).bind(id).first();
 
       if (!existingPlatform) {
-        return new Response(JSON.stringify({ error: 'Platform not found or access denied' }), {
+        return new Response(JSON.stringify({ error: 'Platform not found' }), {
           status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check permissions based on the platform's actual station
+      if (!hasPermission(user, 'write', 'platforms', existingPlatform.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
           headers: { 'Content-Type': 'application/json' }
         });
       }
@@ -519,15 +511,7 @@ async function handleInstruments(method, id, request, env) {
       // Update instrument
       const instrumentData = await request.json();
 
-      // Check permissions
-      if (!hasPermission(user, 'write', 'instruments', user.station_normalized_name)) {
-        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      // First verify instrument exists and user has access
+      // First verify instrument exists and get its station
       let checkQuery = `
         SELECT i.id, s.normalized_name as station_normalized_name
         FROM instruments i
@@ -536,19 +520,19 @@ async function handleInstruments(method, id, request, env) {
         WHERE i.id = ?
       `;
 
-      if (user.role === 'station' && user.station_normalized_name) {
-        checkQuery += ' AND s.normalized_name = ?';
-      }
-
-      const checkParams = user.role === 'station' && user.station_normalized_name
-        ? [id, user.station_normalized_name]
-        : [id];
-
-      const existingInstrument = await env.DB.prepare(checkQuery).bind(...checkParams).first();
+      const existingInstrument = await env.DB.prepare(checkQuery).bind(id).first();
 
       if (!existingInstrument) {
-        return new Response(JSON.stringify({ error: 'Instrument not found or access denied' }), {
+        return new Response(JSON.stringify({ error: 'Instrument not found' }), {
           status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check permissions based on the instrument's actual station
+      if (!hasPermission(user, 'write', 'instruments', existingInstrument.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
           headers: { 'Content-Type': 'application/json' }
         });
       }
@@ -1238,4 +1222,31 @@ function canAccessStation(user, station) {
 
   // readonly users can access all stations
   return user.role === 'readonly';
+}
+
+// Permission checking function for CRUD operations
+function hasPermission(user, operation, resource, stationNormalizedName) {
+  // Admin users have all permissions
+  if (user.role === 'admin') {
+    return true;
+  }
+
+  // Read-only users only have read permissions
+  if (user.role === 'readonly') {
+    return operation === 'read';
+  }
+
+  // Station users have write permissions for their own station's resources
+  if (user.role === 'station') {
+    if (operation === 'read') {
+      return true; // Station users can read data
+    }
+
+    if (operation === 'write') {
+      // Check if resource belongs to user's station
+      return user.station_normalized_name === stationNormalizedName;
+    }
+  }
+
+  return false;
 }
