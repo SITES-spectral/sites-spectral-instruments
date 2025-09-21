@@ -2,6 +2,87 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Version 4.7.9 - Complete CRUD Operations with Edit Functionality (2025-09-21)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
+**🌐 Production URL:** https://sites.jobelab.com
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Deployment Date:** 2025-09-21
+**🎯 Major Achievement:** Full CRUD operations with role-based editing for platforms and instruments
+
+### 🏗️ Latest Update: Complete CRUD System Implementation
+- **Edit Buttons**: Added edit buttons to all platform and instrument cards with role-based visibility
+- **Modal Edit Forms**: Professional edit modals with tabbed organization and field validation
+- **Role-Based Permissions**: Admin users can edit all fields, station users have controlled field access
+- **Recently Updated Badges**: Visual indicators showing recently modified items with configurable time windows
+- **Real-time Updates**: Immediate UI refresh after successful edits with success notifications
+- **API Endpoints**: Complete PUT endpoints for platforms and instruments with proper authentication
+- **Permission System**: Field-level permissions enforcing station isolation and admin privileges
+- **Auto-hide Settings**: User-configurable display settings for recent update badges (1 week to 2 months)
+
+### 🔧 Technical Implementation
+- **Frontend**: Edit modals with form validation and real-time notifications
+- **Backend**: PUT API endpoints with proper authentication and permission checking
+- **Database**: Utilizes existing `updated_at` timestamps for tracking modifications
+- **Security**: All operations properly authenticated and authorized based on user roles
+- **UX**: Success notifications, loading states, and error handling throughout
+
+### ✨ New CRUD Features Detail
+
+#### 🎛️ Edit Button System
+- **Platform Cards**: Edit buttons appear in top-right corner for authorized users
+- **Instrument Cards**: Compact edit buttons on each instrument card
+- **Role Visibility**: Only admin and station users see edit buttons for their permitted items
+- **Visual Design**: Professional green buttons with hover effects and proper spacing
+
+#### 📝 Modal Edit Forms
+- **Professional Layout**: Clean, organized forms with proper field grouping
+- **Input Validation**: Client-side validation with required field indicators
+- **Permission Notices**: Clear indicators showing which fields are read-only for station users
+- **Form Controls**: Save/Cancel buttons with loading states and error handling
+
+#### 🔒 Permission Matrix
+**Admin Users:**
+- Can edit all stations, platforms, and instruments
+- Full access to normalized names, IDs, and legacy acronyms
+- No restrictions on any field modifications
+
+**Station Users:**
+- Can only edit platforms and instruments at their assigned station
+- Cannot modify normalized names, IDs, or legacy acronyms (read-only)
+- Can update display names, status, coordinates, descriptions, and technical specifications
+
+**Read-Only Users:**
+- No edit buttons displayed
+- View-only access to all information
+- Cannot make any modifications
+
+#### 🏷️ Recently Updated Badge System
+- **Visual Indicators**: Bright orange badges with sparkle icons for recently updated items
+- **Time Display**: Shows relative time since last update (e.g., "2h ago", "3 days ago")
+- **Auto-Hide Feature**: Configurable display duration (1 week, 2 weeks, 1 month, 2 months)
+- **User Control**: Toggle to completely hide/show recent update badges
+- **Platform Badges**: Shows "Updated" with timestamp for platform cards
+- **Instrument Badges**: Shows "New" for recently modified instrument cards
+
+#### 🔔 Notification System
+- **Success Notifications**: Slide-in notifications for successful edits
+- **Error Handling**: Clear error messages for failed operations
+- **Auto-Dismiss**: Notifications automatically disappear after 3 seconds
+- **Animation**: Smooth slide-in/slide-out animations for professional feel
+
+#### 🛡️ API Security
+- **Authentication Required**: All PUT endpoints require valid JWT tokens
+- **Permission Checking**: Server-side verification of user permissions for each field
+- **Data Validation**: Input sanitization and validation on both client and server
+- **Station Isolation**: Station users cannot access data from other stations
+- **Audit Trail**: All changes tracked with timestamps in database
+
+#### 📊 Database Integration
+- **Updated Timestamps**: Automatic `updated_at` field updates on all modifications
+- **Atomic Operations**: Single database transactions for consistency
+- **Foreign Key Integrity**: Proper relationships maintained during updates
+- **Rollback Support**: Transaction rollback on validation failures
+
 ## Version 4.7.5 - Complete ROI Data Restoration and Full System Functionality (2025-09-20)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -9,7 +90,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **📅 Deployment Date:** 2025-09-20
 **🎯 Major Achievement:** Complete restoration of ROI system with full functionality across SITES network
 
-### 🏗️ Latest Update: Complete ROI System Restoration
+### 🏗️ Previous Update: Complete ROI System Restoration
 - **ROI Database Population**: Successfully populated 42 ROIs across all active phenocam instruments
 - **Interactive ROI Cards**: Fully functional ROI display system with color-coded visual indicators
 - **Detailed ROI Modals**: Complete ROI information including polygon coordinates and metadata

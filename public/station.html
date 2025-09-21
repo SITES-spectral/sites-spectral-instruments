@@ -22,11 +22,11 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.7.8">
+    <link rel="stylesheet" href="/css/styles.css?v=4.7.9">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.7.8">
-    <meta name="build-date" content="2025-09-20">
+    <meta name="app-version" content="4.7.9">
+    <meta name="build-date" content="2025-09-21">
 
     <style>
         body {
@@ -503,6 +503,281 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Export Button Styles */
+        .export-btn {
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            background: linear-gradient(135deg, #047857 0%, #052e16 100%);
+        }
+
+        .export-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .export-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+        }
+
+        .export-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Loading state for export button */
+        .export-btn.loading {
+            opacity: 0.8;
+            cursor: wait;
+        }
+
+        .export-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .export-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Platform and Instrument Edit Buttons */
+        .platform-header {
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .edit-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-btn:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .instrument-edit-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .instrument-edit-btn:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Success Notification */
+        .success-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .success-notification.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        .success-notification i {
+            font-size: 1.2rem;
+        }
+
+        /* Edit Modal Form Styles */
+        .form-readonly-notice {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-readonly-notice i {
+            color: #f59e0b;
+        }
+
+        .field-readonly {
+            background: #f3f4f6 !important;
+            cursor: not-allowed !important;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .save-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            background: linear-gradient(135deg, #047857 0%, #052e16 100%);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Recently Updated Badge */
+        .recently-updated {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+            z-index: 5;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .recently-updated i {
+            font-size: 0.6rem;
+        }
+
+        .update-timestamp {
+            font-size: 0.55rem;
+            opacity: 0.9;
+        }
+
+        /* Settings for hiding recent updates */
+        .hide-recent-updates-setting {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            z-index: 100;
+        }
+
+        .hide-recent-updates-setting label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .hide-recent-updates-setting input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .hide-recent-updates-setting select {
+            padding: 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -603,9 +878,15 @@
 
         <!-- Platforms Section -->
         <div class="container platforms-section">
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-tower-observation"></i> Platforms & Instruments
-            </h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-tower-observation"></i> Platforms & Instruments
+                </h2>
+                <button id="export-csv-btn" class="export-btn" onclick="exportStationData()" style="display: none;">
+                    <i class="fas fa-download"></i>
+                    Export CSV
+                </button>
+            </div>
             <div id="platforms-grid" class="platforms-grid">
                 <!-- Platform cards will be dynamically generated here -->
                 <div class="loading-card">
@@ -661,8 +942,52 @@
         </div>
     </div>
 
+    <!-- Platform Edit Modal -->
+    <div id="platform-edit-modal" class="platform-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-edit"></i> Edit Platform</h3>
+                <button class="modal-close-large" onclick="closePlatformEditModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="platform-edit-form" class="edit-form">
+                    <!-- Edit form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrument Edit Modal -->
+    <div id="instrument-edit-modal" class="instrument-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-edit"></i> Edit Instrument</h3>
+                <button class="modal-close-large" onclick="closeInstrumentEditModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="instrument-edit-form" class="edit-form">
+                    <!-- Edit form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Updates Settings -->
+    <div class="hide-recent-updates-setting">
+        <label>
+            <input type="checkbox" id="show-recent-updates" checked onchange="toggleRecentUpdates()">
+            Show recent updates
+        </label>
+        <select id="recent-updates-duration" onchange="updateRecentUpdatesDuration()">
+            <option value="7">1 week</option>
+            <option value="14" selected>2 weeks</option>
+            <option value="30">1 month</option>
+            <option value="60">2 months</option>
+        </select>
+    </div>
+
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.7.7"></script>
+    <script src="/js/utils.js?v=4.7.9"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -748,6 +1073,9 @@
 
             document.getElementById('station-name').textContent = stationData.display_name;
             document.title = `${stationData.display_name} - SITES Spectral`;
+
+            // Show export button
+            document.getElementById('export-csv-btn').style.display = 'flex';
 
             // Update dashboard and then initialize map with real data
             await updateDashboard();
@@ -1178,25 +1506,45 @@
                 createInstrumentCard(instrument)
             ).join('');
 
+            // Check if user can edit (admin or station user for their station)
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
+            // Check if recently updated
+            const recentlyUpdatedBadge = shouldShowRecentUpdate(platform.updated_at) ?
+                `<div class="recently-updated">
+                    <i class="fas fa-sparkles"></i>
+                    <span>Updated</span>
+                    <span class="update-timestamp">${getTimeSinceUpdate(platform.updated_at)}</span>
+                </div>` : '';
+
             return `
-                <div class="platform-card" data-platform-id="${platform.id}">
-                    <div class="platform-header" onclick="showPlatformDetails(${platform.id})">
-                        <div class="platform-title">
-                            <i class="fas fa-tower-observation"></i>
-                            ${platform.display_name}
+                <div class="platform-card" data-platform-id="${platform.id}" style="position: relative;">
+                    ${recentlyUpdatedBadge}
+                    <div class="platform-header">
+                        <div onclick="showPlatformDetails(${platform.id})" style="flex: 1; cursor: pointer;">
+                            <div class="platform-title">
+                                <i class="fas fa-tower-observation"></i>
+                                ${platform.display_name}
+                            </div>
+                            <div class="platform-meta">
+                                <div class="platform-structure">
+                                    <i class="fas fa-cog"></i>
+                                    ${platform.mounting_structure || 'Unknown'} • ${platform.platform_height_m || 'N/A'}m
+                                </div>
+                                <div class="platform-status ${statusClass}">
+                                    ${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}
+                                </div>
+                                <div class="platform-coordinates">
+                                    ${coordinates}
+                                </div>
+                            </div>
                         </div>
-                        <div class="platform-meta">
-                            <div class="platform-structure">
-                                <i class="fas fa-cog"></i>
-                                ${platform.mounting_structure || 'Unknown'} • ${platform.platform_height_m || 'N/A'}m
-                            </div>
-                            <div class="platform-status ${statusClass}">
-                                ${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}
-                            </div>
-                            <div class="platform-coordinates">
-                                ${coordinates}
-                            </div>
-                        </div>
+                        ${canEdit ? `
+                            <button class="edit-btn" onclick="editPlatform(${platform.id})" title="Edit Platform">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        ` : ''}
                     </div>
                     <div class="instruments-section">
                         <h4><i class="fas fa-camera"></i> Instruments (${instruments.length})</h4>
@@ -1214,20 +1562,39 @@
             const legacyClass = instrument.legacy_acronym ? '' : 'no-legacy';
             const direction = instrument.viewing_direction || 'N/A';
 
+            // Check if user can edit (admin or station user for their station)
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
+            // Check if recently updated
+            const recentlyUpdatedBadge = shouldShowRecentUpdate(instrument.updated_at) ?
+                `<div class="recently-updated">
+                    <i class="fas fa-sparkles"></i>
+                    <span>New</span>
+                </div>` : '';
+
             return `
-                <div class="instrument-card" onclick="showInstrumentDetails(${instrument.id})" data-instrument-id="${instrument.id}">
-                    ${createInstrumentThumbnail(instrument)}
-                    <div class="instrument-content">
-                        <div class="instrument-legacy ${legacyClass}">
-                            ${legacyName}
-                        </div>
-                        <div class="instrument-direction">
-                            ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
-                        </div>
-                        <div class="instrument-status ${statusClass}">
-                            ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
+                <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;">
+                    ${recentlyUpdatedBadge}
+                    <div onclick="showInstrumentDetails(${instrument.id})" style="cursor: pointer;">
+                        ${createInstrumentThumbnail(instrument)}
+                        <div class="instrument-content">
+                            <div class="instrument-legacy ${legacyClass}">
+                                ${legacyName}
+                            </div>
+                            <div class="instrument-direction">
+                                ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
+                            </div>
+                            <div class="instrument-status ${statusClass}">
+                                ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
+                            </div>
                         </div>
                     </div>
+                    ${canEdit ? `
+                        <button class="instrument-edit-btn" onclick="event.stopPropagation(); editInstrument(${instrument.id})" title="Edit Instrument">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    ` : ''}
                 </div>
             `;
         }
@@ -1915,6 +2282,485 @@
                 closeROIModal();
             }
         });
+
+        // Export functionality
+        async function exportStationData() {
+            const exportBtn = document.getElementById('export-csv-btn');
+            const originalContent = exportBtn.innerHTML;
+
+            try {
+                // Show loading state
+                exportBtn.disabled = true;
+                exportBtn.classList.add('loading');
+                exportBtn.innerHTML = '<i class="fas fa-spinner"></i> Exporting...';
+
+                // Get auth token
+                const token = localStorage.getItem('sites_spectral_token');
+                if (!token) {
+                    showExportError('Authentication required');
+                    return;
+                }
+
+                // Make API call to export endpoint
+                const response = await fetch(`/api/export/station/${stationAcronym}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Get the filename from the Content-Disposition header
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'station_data_export.csv';
+
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+
+                    // Create blob and download
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    // Show success message briefly
+                    exportBtn.innerHTML = '<i class="fas fa-check"></i> Downloaded!';
+                    exportBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #047857 100%)';
+
+                    setTimeout(() => {
+                        exportBtn.innerHTML = originalContent;
+                        exportBtn.style.background = '';
+                    }, 2000);
+
+                } else if (response.status === 401) {
+                    // Token expired, redirect to login
+                    localStorage.removeItem('sites_spectral_token');
+                    localStorage.removeItem('sites_spectral_user');
+                    window.location.href = '/';
+                } else if (response.status === 403) {
+                    showExportError('Access denied to export this station data');
+                } else if (response.status === 404) {
+                    showExportError('Station data not found');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    showExportError(errorData.message || 'Failed to export station data');
+                }
+
+            } catch (error) {
+                console.error('Export error:', error);
+                showExportError('Network error occurred during export');
+            } finally {
+                // Reset button state
+                exportBtn.disabled = false;
+                exportBtn.classList.remove('loading');
+
+                // Reset button if it's not showing success state
+                if (!exportBtn.innerHTML.includes('Downloaded!')) {
+                    exportBtn.innerHTML = originalContent;
+                }
+            }
+        }
+
+        function showExportError(message) {
+            const exportBtn = document.getElementById('export-csv-btn');
+            const originalContent = exportBtn.innerHTML;
+
+            // Show error state
+            exportBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+            exportBtn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+
+            // Show error message (you could also use a toast notification here)
+            alert(`Export Error: ${message}`);
+
+            // Reset button after delay
+            setTimeout(() => {
+                exportBtn.innerHTML = originalContent;
+                exportBtn.style.background = '';
+            }, 3000);
+        }
+
+        // Edit Functions
+        async function editPlatform(platformId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/platforms/${platformId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch platform');
+                const platform = await response.json();
+
+                showPlatformEditModal(platform);
+            } catch (error) {
+                console.error('Error loading platform for edit:', error);
+                showNotification('Failed to load platform data', 'error');
+            }
+        }
+
+        async function editInstrument(instrumentId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch instrument');
+                const instrument = await response.json();
+
+                showInstrumentEditModal(instrument);
+            } catch (error) {
+                console.error('Error loading instrument for edit:', error);
+                showNotification('Failed to load instrument data', 'error');
+            }
+        }
+
+        function showPlatformEditModal(platform) {
+            const editForm = document.getElementById('platform-edit-form');
+            const isAdmin = currentUser.role === 'admin';
+
+            // Build edit form based on user permissions
+            editForm.innerHTML = `
+                ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
+
+                <form id="platform-update-form">
+                    <input type="hidden" id="edit-platform-id" value="${platform.id}">
+
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="edit-platform-name" value="${platform.display_name || ''}"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location Code</label>
+                        <input type="text" id="edit-platform-location-code" value="${platform.location_code || ''}"
+                               class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="edit-platform-status" class="form-control">
+                            <option value="Active" ${platform.status === 'Active' ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${platform.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <option value="Maintenance" ${platform.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                            <option value="Decommissioned" ${platform.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                            <option value="Planned" ${platform.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mounting Structure</label>
+                        <input type="text" id="edit-platform-mounting" value="${platform.mounting_structure || ''}"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Platform Height (m)</label>
+                        <input type="number" id="edit-platform-height" value="${platform.platform_height_m || ''}"
+                               class="form-control" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="number" id="edit-platform-latitude" value="${platform.latitude || ''}"
+                               class="form-control" step="0.000001">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="number" id="edit-platform-longitude" value="${platform.longitude || ''}"
+                               class="form-control" step="0.000001">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit-platform-description" class="form-control" rows="3">${platform.description || ''}</textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePlatformEditModal()">Cancel</button>
+                        <button type="submit" class="save-btn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            // Add form submission handler
+            document.getElementById('platform-update-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await savePlatformChanges(platform.id);
+            });
+
+            document.getElementById('platform-edit-modal').classList.add('show');
+        }
+
+        function showInstrumentEditModal(instrument) {
+            const editForm = document.getElementById('instrument-edit-form');
+            const isAdmin = currentUser.role === 'admin';
+
+            // Build edit form based on user permissions
+            editForm.innerHTML = `
+                ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
+
+                <form id="instrument-update-form">
+                    <input type="hidden" id="edit-instrument-id" value="${instrument.id}">
+
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="edit-instrument-name" value="${instrument.display_name || ''}"
+                               class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Legacy Acronym</label>
+                        <input type="text" id="edit-instrument-legacy" value="${instrument.legacy_acronym || ''}"
+                               class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="edit-instrument-status" class="form-control">
+                            <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <option value="Testing" ${instrument.status === 'Testing' ? 'selected' : ''}>Testing</option>
+                            <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                            <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Camera Brand</label>
+                        <input type="text" id="edit-instrument-camera-brand" value="${instrument.camera_brand || ''}"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Camera Model</label>
+                        <input type="text" id="edit-instrument-camera-model" value="${instrument.camera_model || ''}"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Camera Resolution</label>
+                        <input type="text" id="edit-instrument-camera-resolution" value="${instrument.camera_resolution || ''}"
+                               class="form-control" placeholder="e.g., 4096x3072">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Viewing Direction</label>
+                        <input type="text" id="edit-instrument-viewing-direction" value="${instrument.viewing_direction || ''}"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Azimuth (degrees)</label>
+                        <input type="number" id="edit-instrument-azimuth" value="${instrument.azimuth_degrees || ''}"
+                               class="form-control" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="number" id="edit-instrument-latitude" value="${instrument.latitude || ''}"
+                               class="form-control" step="0.000001">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="number" id="edit-instrument-longitude" value="${instrument.longitude || ''}"
+                               class="form-control" step="0.000001">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit-instrument-description" class="form-control" rows="3">${instrument.description || ''}</textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">Cancel</button>
+                        <button type="submit" class="save-btn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            // Add form submission handler
+            document.getElementById('instrument-update-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveInstrumentChanges(instrument.id);
+            });
+
+            document.getElementById('instrument-edit-modal').classList.add('show');
+        }
+
+        async function savePlatformChanges(platformId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const platformData = {
+                    display_name: document.getElementById('edit-platform-name').value,
+                    location_code: document.getElementById('edit-platform-location-code').value,
+                    status: document.getElementById('edit-platform-status').value,
+                    mounting_structure: document.getElementById('edit-platform-mounting').value,
+                    platform_height_m: parseFloat(document.getElementById('edit-platform-height').value) || null,
+                    latitude: parseFloat(document.getElementById('edit-platform-latitude').value) || null,
+                    longitude: parseFloat(document.getElementById('edit-platform-longitude').value) || null,
+                    description: document.getElementById('edit-platform-description').value,
+                    updated_at: new Date().toISOString()
+                };
+
+                const response = await fetch(`/api/platforms/${platformId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(platformData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to update platform');
+                }
+
+                closePlatformEditModal();
+                showNotification('Platform updated successfully', 'success');
+
+                // Refresh the platforms display
+                await loadPlatformsAndInstruments();
+            } catch (error) {
+                console.error('Error saving platform:', error);
+                showNotification(error.message || 'Failed to save platform changes', 'error');
+            }
+        }
+
+        async function saveInstrumentChanges(instrumentId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const instrumentData = {
+                    display_name: document.getElementById('edit-instrument-name').value,
+                    legacy_acronym: document.getElementById('edit-instrument-legacy').value,
+                    status: document.getElementById('edit-instrument-status').value,
+                    camera_brand: document.getElementById('edit-instrument-camera-brand').value,
+                    camera_model: document.getElementById('edit-instrument-camera-model').value,
+                    camera_resolution: document.getElementById('edit-instrument-camera-resolution').value,
+                    viewing_direction: document.getElementById('edit-instrument-viewing-direction').value,
+                    azimuth_degrees: parseFloat(document.getElementById('edit-instrument-azimuth').value) || null,
+                    latitude: parseFloat(document.getElementById('edit-instrument-latitude').value) || null,
+                    longitude: parseFloat(document.getElementById('edit-instrument-longitude').value) || null,
+                    description: document.getElementById('edit-instrument-description').value,
+                    updated_at: new Date().toISOString()
+                };
+
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(instrumentData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to update instrument');
+                }
+
+                closeInstrumentEditModal();
+                showNotification('Instrument updated successfully', 'success');
+
+                // Refresh the platforms display
+                await loadPlatformsAndInstruments();
+            } catch (error) {
+                console.error('Error saving instrument:', error);
+                showNotification(error.message || 'Failed to save instrument changes', 'error');
+            }
+        }
+
+        function closePlatformEditModal() {
+            document.getElementById('platform-edit-modal').classList.remove('show');
+        }
+
+        function closeInstrumentEditModal() {
+            document.getElementById('instrument-edit-modal').classList.remove('show');
+        }
+
+        // Success/Error Notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%)';
+            }
+
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('hiding');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Recently Updated Helper Functions
+        function shouldShowRecentUpdate(updatedAt) {
+            if (!updatedAt) return false;
+
+            const showUpdates = document.getElementById('show-recent-updates')?.checked ?? true;
+            if (!showUpdates) return false;
+
+            const durationDays = parseInt(document.getElementById('recent-updates-duration')?.value || '14');
+            const updateDate = new Date(updatedAt);
+            const now = new Date();
+            const daysSinceUpdate = (now - updateDate) / (1000 * 60 * 60 * 24);
+
+            return daysSinceUpdate <= durationDays;
+        }
+
+        function getTimeSinceUpdate(updatedAt) {
+            if (!updatedAt) return '';
+
+            const updateDate = new Date(updatedAt);
+            const now = new Date();
+            const hoursSince = (now - updateDate) / (1000 * 60 * 60);
+
+            if (hoursSince < 1) return 'just now';
+            if (hoursSince < 24) return `${Math.floor(hoursSince)}h ago`;
+            const daysSince = Math.floor(hoursSince / 24);
+            if (daysSince === 1) return '1 day ago';
+            return `${daysSince} days ago`;
+        }
+
+        function toggleRecentUpdates() {
+            loadPlatformsAndInstruments(); // Refresh display
+        }
+
+        function updateRecentUpdatesDuration() {
+            loadPlatformsAndInstruments(); // Refresh display
+        }
     </script>
 </body>
 </html>

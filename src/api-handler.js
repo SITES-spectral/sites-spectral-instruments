@@ -32,6 +32,9 @@ export async function handleApiRequest(request, env, ctx) {
       case 'rois':
         return await handleROIs(method, id, request, env);
 
+      case 'export':
+        return await handleExport(method, pathSegments, request, env);
+
       case 'health':
         return await handleHealth(env);
 
@@ -213,7 +216,7 @@ async function handleStations(method, id, request, env) {
 
 // Platform endpoints
 async function handlePlatforms(method, id, request, env) {
-  if (method !== 'GET') {
+  if (!['GET', 'PUT'].includes(method)) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -230,7 +233,7 @@ async function handlePlatforms(method, id, request, env) {
   }
 
   try {
-    if (id) {
+    if (method === 'GET' && id) {
       // Get specific platform by ID
       let query = `
         SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
@@ -265,7 +268,7 @@ async function handlePlatforms(method, id, request, env) {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    } else {
+    } else if (method === 'GET') {
       // List platforms (existing logic)
       const url = new URL(request.url);
       const stationParam = url.searchParams.get('station');
@@ -302,6 +305,105 @@ async function handlePlatforms(method, id, request, env) {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
+    } else if (method === 'PUT' && id) {
+      // Update platform
+      const platformData = await request.json();
+
+      // Check permissions
+      if (!hasPermission(user, 'write', 'platforms', user.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // First verify platform exists and user has access
+      let checkQuery = `
+        SELECT p.id, s.normalized_name as station_normalized_name
+        FROM platforms p
+        JOIN stations s ON p.station_id = s.id
+        WHERE p.id = ?
+      `;
+
+      if (user.role === 'station' && user.station_normalized_name) {
+        checkQuery += ' AND s.normalized_name = ?';
+      }
+
+      const checkParams = user.role === 'station' && user.station_normalized_name
+        ? [id, user.station_normalized_name]
+        : [id];
+
+      const existingPlatform = await env.DB.prepare(checkQuery).bind(...checkParams).first();
+
+      if (!existingPlatform) {
+        return new Response(JSON.stringify({ error: 'Platform not found or access denied' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Build update query with allowed fields
+      const allowedFields = [];
+      const values = [];
+
+      // Fields that station users can edit
+      const stationEditableFields = [
+        'display_name', 'status', 'mounting_structure', 'platform_height_m',
+        'latitude', 'longitude', 'description', 'updated_at'
+      ];
+
+      // Fields that only admin can edit
+      const adminOnlyFields = ['location_code'];
+
+      // Add station editable fields
+      stationEditableFields.forEach(field => {
+        if (platformData[field] !== undefined) {
+          allowedFields.push(`${field} = ?`);
+          values.push(platformData[field]);
+        }
+      });
+
+      // Add admin-only fields if user is admin
+      if (user.role === 'admin') {
+        adminOnlyFields.forEach(field => {
+          if (platformData[field] !== undefined) {
+            allowedFields.push(`${field} = ?`);
+            values.push(platformData[field]);
+          }
+        });
+      }
+
+      if (allowedFields.length === 0) {
+        return new Response(JSON.stringify({ error: 'No valid fields to update' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Always update updated_at if not explicitly provided
+      if (!platformData.updated_at) {
+        allowedFields.push('updated_at = ?');
+        values.push(new Date().toISOString());
+      }
+
+      const updateQuery = `
+        UPDATE platforms
+        SET ${allowedFields.join(', ')}
+        WHERE id = ?
+      `;
+
+      values.push(id);
+
+      await env.DB.prepare(updateQuery).bind(...values).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Platform updated successfully',
+        id: parseInt(id)
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
   } catch (error) {
@@ -315,7 +417,7 @@ async function handlePlatforms(method, id, request, env) {
 
 // Instrument endpoints
 async function handleInstruments(method, id, request, env) {
-  if (method !== 'GET') {
+  if (!['GET', 'PUT'].includes(method)) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -332,7 +434,7 @@ async function handleInstruments(method, id, request, env) {
   }
 
   try {
-    if (id) {
+    if (method === 'GET' && id) {
       // Get specific instrument by ID
       let query = `
         SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
@@ -372,7 +474,7 @@ async function handleInstruments(method, id, request, env) {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    } else {
+    } else if (method === 'GET') {
       // List instruments (existing logic)
       const url = new URL(request.url);
       const stationParam = url.searchParams.get('station');
@@ -413,6 +515,107 @@ async function handleInstruments(method, id, request, env) {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
+    } else if (method === 'PUT' && id) {
+      // Update instrument
+      const instrumentData = await request.json();
+
+      // Check permissions
+      if (!hasPermission(user, 'write', 'instruments', user.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // First verify instrument exists and user has access
+      let checkQuery = `
+        SELECT i.id, s.normalized_name as station_normalized_name
+        FROM instruments i
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+        WHERE i.id = ?
+      `;
+
+      if (user.role === 'station' && user.station_normalized_name) {
+        checkQuery += ' AND s.normalized_name = ?';
+      }
+
+      const checkParams = user.role === 'station' && user.station_normalized_name
+        ? [id, user.station_normalized_name]
+        : [id];
+
+      const existingInstrument = await env.DB.prepare(checkQuery).bind(...checkParams).first();
+
+      if (!existingInstrument) {
+        return new Response(JSON.stringify({ error: 'Instrument not found or access denied' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Build update query with allowed fields
+      const allowedFields = [];
+      const values = [];
+
+      // Fields that station users can edit
+      const stationEditableFields = [
+        'display_name', 'status', 'camera_brand', 'camera_model', 'camera_resolution',
+        'viewing_direction', 'azimuth_degrees', 'latitude', 'longitude',
+        'description', 'updated_at'
+      ];
+
+      // Fields that only admin can edit
+      const adminOnlyFields = ['legacy_acronym', 'normalized_name'];
+
+      // Add station editable fields
+      stationEditableFields.forEach(field => {
+        if (instrumentData[field] !== undefined) {
+          allowedFields.push(`${field} = ?`);
+          values.push(instrumentData[field]);
+        }
+      });
+
+      // Add admin-only fields if user is admin
+      if (user.role === 'admin') {
+        adminOnlyFields.forEach(field => {
+          if (instrumentData[field] !== undefined) {
+            allowedFields.push(`${field} = ?`);
+            values.push(instrumentData[field]);
+          }
+        });
+      }
+
+      if (allowedFields.length === 0) {
+        return new Response(JSON.stringify({ error: 'No valid fields to update' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Always update updated_at if not explicitly provided
+      if (!instrumentData.updated_at) {
+        allowedFields.push('updated_at = ?');
+        values.push(new Date().toISOString());
+      }
+
+      const updateQuery = `
+        UPDATE instruments
+        SET ${allowedFields.join(', ')}
+        WHERE id = ?
+      `;
+
+      values.push(id);
+
+      await env.DB.prepare(updateQuery).bind(...values).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Instrument updated successfully',
+        id: parseInt(id)
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
   } catch (error) {
@@ -422,6 +625,256 @@ async function handleInstruments(method, id, request, env) {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+}
+
+// Export endpoints
+async function handleExport(method, pathSegments, request, env) {
+  if (method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Authentication required
+  const user = await getUserFromRequest(request, env);
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'Authentication required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const action = pathSegments[1];
+  const stationId = pathSegments[2];
+
+  try {
+    switch (action) {
+      case 'station':
+        if (!stationId) {
+          return new Response(JSON.stringify({ error: 'Station ID required' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        return await handleStationExport(stationId, user, env);
+
+      default:
+        return new Response(JSON.stringify({ error: 'Export type not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+    }
+  } catch (error) {
+    console.error('Export error:', error);
+    return new Response(JSON.stringify({
+      error: 'Failed to export data',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function handleStationExport(stationId, user, env) {
+  try {
+    // Get station data first to check permissions and get station name
+    const station = await getStationData(stationId, env);
+    if (!station) {
+      return new Response(JSON.stringify({ error: 'Station not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check access permission
+    if (!canAccessStation(user, station)) {
+      return new Response(JSON.stringify({ error: 'Access denied' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Query for complete station data with all platforms and instruments
+    let query = `
+      SELECT
+        s.display_name as station_name,
+        s.acronym as station_acronym,
+        s.normalized_name as station_normalized_name,
+        s.status as station_status,
+        s.country as station_country,
+        s.latitude as station_latitude,
+        s.longitude as station_longitude,
+        s.elevation_m as station_elevation,
+        s.description as station_description,
+
+        p.id as platform_id,
+        p.normalized_name as platform_normalized_name,
+        p.display_name as platform_name,
+        p.location_code as platform_location_code,
+        p.mounting_structure as platform_mounting_structure,
+        p.platform_height_m as platform_height,
+        p.status as platform_status,
+        p.latitude as platform_latitude,
+        p.longitude as platform_longitude,
+        p.deployment_date as platform_deployment_date,
+        p.description as platform_description,
+        p.operation_programs as platform_operation_programs,
+
+        i.id as instrument_id,
+        i.normalized_name as instrument_normalized_name,
+        i.display_name as instrument_name,
+        i.legacy_acronym as instrument_legacy_acronym,
+        i.instrument_type as instrument_type,
+        i.ecosystem_code as instrument_ecosystem_code,
+        i.instrument_number as instrument_number,
+        i.camera_brand as instrument_camera_brand,
+        i.camera_model as instrument_camera_model,
+        i.camera_resolution as instrument_camera_resolution,
+        i.camera_serial_number as instrument_camera_serial,
+        i.first_measurement_year as instrument_first_measurement_year,
+        i.last_measurement_year as instrument_last_measurement_year,
+        i.measurement_status as instrument_measurement_status,
+        i.status as instrument_status,
+        i.latitude as instrument_latitude,
+        i.longitude as instrument_longitude,
+        i.instrument_height_m as instrument_height,
+        i.viewing_direction as instrument_viewing_direction,
+        i.azimuth_degrees as instrument_azimuth,
+        i.description as instrument_description,
+        i.installation_notes as instrument_installation_notes,
+        i.maintenance_notes as instrument_maintenance_notes
+      FROM stations s
+      LEFT JOIN platforms p ON s.id = p.station_id
+      LEFT JOIN instruments i ON p.id = i.platform_id
+      WHERE s.normalized_name = ? OR s.acronym = ?
+      ORDER BY p.display_name, i.display_name
+    `;
+
+    const result = await env.DB.prepare(query).bind(stationId, stationId).all();
+    const rows = result?.results || [];
+
+    if (rows.length === 0) {
+      return new Response(JSON.stringify({ error: 'No data found for station' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Generate CSV content
+    const csvContent = generateStationCSV(rows);
+
+    // Generate filename
+    const stationName = station.display_name || station.acronym || stationId;
+    const filename = `${sanitizeFilename(stationName)}_SITES_SPECTRAL_INSTRUMENTS.csv`;
+
+    return new Response(csvContent, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Cache-Control': 'no-cache'
+      }
+    });
+
+  } catch (error) {
+    console.error('Station export error:', error);
+    throw error;
+  }
+}
+
+function generateStationCSV(rows) {
+  // CSV headers
+  const headers = [
+    'Station Name', 'Station Acronym', 'Station Status', 'Station Country',
+    'Station Latitude', 'Station Longitude', 'Station Elevation (m)', 'Station Description',
+    'Platform ID', 'Platform Name', 'Platform Location Code', 'Platform Mounting Structure',
+    'Platform Height (m)', 'Platform Status', 'Platform Latitude', 'Platform Longitude',
+    'Platform Deployment Date', 'Platform Description', 'Platform Operation Programs',
+    'Instrument ID', 'Instrument Name', 'Instrument Legacy Acronym', 'Instrument Type',
+    'Instrument Ecosystem Code', 'Instrument Number', 'Camera Brand', 'Camera Model',
+    'Camera Resolution', 'Camera Serial Number', 'First Measurement Year', 'Last Measurement Year',
+    'Measurement Status', 'Instrument Status', 'Instrument Latitude', 'Instrument Longitude',
+    'Instrument Height (m)', 'Viewing Direction', 'Azimuth (degrees)', 'Instrument Description',
+    'Installation Notes', 'Maintenance Notes'
+  ];
+
+  // Convert rows to CSV format
+  let csvContent = headers.join(',') + '\n';
+
+  for (const row of rows) {
+    const csvRow = [
+      escapeCsvValue(row.station_name),
+      escapeCsvValue(row.station_acronym),
+      escapeCsvValue(row.station_status),
+      escapeCsvValue(row.station_country),
+      row.station_latitude || '',
+      row.station_longitude || '',
+      row.station_elevation || '',
+      escapeCsvValue(row.station_description),
+      row.platform_id || '',
+      escapeCsvValue(row.platform_name),
+      escapeCsvValue(row.platform_location_code),
+      escapeCsvValue(row.platform_mounting_structure),
+      row.platform_height || '',
+      escapeCsvValue(row.platform_status),
+      row.platform_latitude || '',
+      row.platform_longitude || '',
+      escapeCsvValue(row.platform_deployment_date),
+      escapeCsvValue(row.platform_description),
+      escapeCsvValue(row.platform_operation_programs),
+      row.instrument_id || '',
+      escapeCsvValue(row.instrument_name),
+      escapeCsvValue(row.instrument_legacy_acronym),
+      escapeCsvValue(row.instrument_type),
+      escapeCsvValue(row.instrument_ecosystem_code),
+      escapeCsvValue(row.instrument_number),
+      escapeCsvValue(row.instrument_camera_brand),
+      escapeCsvValue(row.instrument_camera_model),
+      escapeCsvValue(row.instrument_camera_resolution),
+      escapeCsvValue(row.instrument_camera_serial),
+      row.instrument_first_measurement_year || '',
+      row.instrument_last_measurement_year || '',
+      escapeCsvValue(row.instrument_measurement_status),
+      escapeCsvValue(row.instrument_status),
+      row.instrument_latitude || '',
+      row.instrument_longitude || '',
+      row.instrument_height || '',
+      escapeCsvValue(row.instrument_viewing_direction),
+      row.instrument_azimuth || '',
+      escapeCsvValue(row.instrument_description),
+      escapeCsvValue(row.instrument_installation_notes),
+      escapeCsvValue(row.instrument_maintenance_notes)
+    ];
+
+    csvContent += csvRow.join(',') + '\n';
+  }
+
+  return csvContent;
+}
+
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  const stringValue = String(value);
+
+  // If value contains comma, quote, or newline, wrap in quotes and escape quotes
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes('\r')) {
+    return '"' + stringValue.replace(/"/g, '""') + '"';
+  }
+
+  return stringValue;
+}
+
+function sanitizeFilename(filename) {
+  // Replace spaces with underscores and remove invalid characters
+  return filename
+    .replace(/\s+/g, '_')
+    .replace(/[<>:"/\\|?*]/g, '')
+    .replace(/[^\w\-_.]/g, '');
 }
 
 // Health check endpoint
