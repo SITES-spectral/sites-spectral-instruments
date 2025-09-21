@@ -560,54 +560,13 @@
             }
         }
 
-        /* Platform and Instrument Edit Buttons */
+        /* Platform and Instrument Cards - Clean Interface */
         .platform-header {
-            display: flex;
-            align-items: flex-start;
-            position: relative;
+            display: block;
         }
 
-        .edit-btn {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 0.4rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
+        .instrument-card {
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .edit-btn:hover {
-            background: #047857;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .instrument-edit-btn {
-            position: absolute;
-            right: 5px;
-            top: 5px;
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 0.25rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-        }
-
-        .instrument-edit-btn:hover {
-            background: #047857;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
         /* Success Notification */
@@ -705,6 +664,39 @@
         .save-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        /* Modal Header Actions */
+        .modal-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-edit-btn {
+            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .modal-edit-btn:hover {
+            background: linear-gradient(135deg, #047857 0%, #052e16 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .modal-edit-btn i {
+            font-size: 0.8rem;
         }
 
         /* Recently Updated Badge */
@@ -1521,30 +1513,23 @@
             return `
                 <div class="platform-card" data-platform-id="${platform.id}" style="position: relative;">
                     ${recentlyUpdatedBadge}
-                    <div class="platform-header">
-                        <div onclick="showPlatformDetails(${platform.id})" style="flex: 1; cursor: pointer;">
-                            <div class="platform-title">
-                                <i class="fas fa-tower-observation"></i>
-                                ${platform.display_name}
+                    <div class="platform-header" onclick="showPlatformDetails(${platform.id})" style="cursor: pointer;">
+                        <div class="platform-title">
+                            <i class="fas fa-tower-observation"></i>
+                            ${platform.display_name}
+                        </div>
+                        <div class="platform-meta">
+                            <div class="platform-structure">
+                                <i class="fas fa-cog"></i>
+                                ${platform.mounting_structure || 'Unknown'} • ${platform.platform_height_m || 'N/A'}m
                             </div>
-                            <div class="platform-meta">
-                                <div class="platform-structure">
-                                    <i class="fas fa-cog"></i>
-                                    ${platform.mounting_structure || 'Unknown'} • ${platform.platform_height_m || 'N/A'}m
-                                </div>
-                                <div class="platform-status ${statusClass}">
-                                    ${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}
-                                </div>
-                                <div class="platform-coordinates">
-                                    ${coordinates}
-                                </div>
+                            <div class="platform-status ${statusClass}">
+                                ${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}
+                            </div>
+                            <div class="platform-coordinates">
+                                ${coordinates}
                             </div>
                         </div>
-                        ${canEdit ? `
-                            <button class="edit-btn" onclick="editPlatform(${platform.id})" title="Edit Platform">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        ` : ''}
                     </div>
                     <div class="instruments-section">
                         <h4><i class="fas fa-camera"></i> Instruments (${instruments.length})</h4>
@@ -1562,10 +1547,6 @@
             const legacyClass = instrument.legacy_acronym ? '' : 'no-legacy';
             const direction = instrument.viewing_direction || 'N/A';
 
-            // Check if user can edit (admin or station user for their station)
-            const canEdit = currentUser && (currentUser.role === 'admin' ||
-                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
-
             // Check if recently updated
             const recentlyUpdatedBadge = shouldShowRecentUpdate(instrument.updated_at) ?
                 `<div class="recently-updated">
@@ -1574,27 +1555,20 @@
                 </div>` : '';
 
             return `
-                <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;">
+                <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;" onclick="showInstrumentDetails(${instrument.id})">
                     ${recentlyUpdatedBadge}
-                    <div onclick="showInstrumentDetails(${instrument.id})" style="cursor: pointer;">
-                        ${createInstrumentThumbnail(instrument)}
-                        <div class="instrument-content">
-                            <div class="instrument-legacy ${legacyClass}">
-                                ${legacyName}
-                            </div>
-                            <div class="instrument-direction">
-                                ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
-                            </div>
-                            <div class="instrument-status ${statusClass}">
-                                ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
-                            </div>
+                    ${createInstrumentThumbnail(instrument)}
+                    <div class="instrument-content">
+                        <div class="instrument-legacy ${legacyClass}">
+                            ${legacyName}
+                        </div>
+                        <div class="instrument-direction">
+                            ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
+                        </div>
+                        <div class="instrument-status ${statusClass}">
+                            ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
                         </div>
                     </div>
-                    ${canEdit ? `
-                        <button class="instrument-edit-btn" onclick="event.stopPropagation(); editInstrument(${instrument.id})" title="Edit Instrument">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    ` : ''}
                 </div>
             `;
         }
@@ -2018,6 +1992,23 @@
         function populatePlatformModal(platform) {
             const detailsContainer = document.getElementById('platform-details');
 
+            // Update modal header with edit button if user has permissions
+            const modalHeader = document.querySelector('#platform-modal .modal-header-large');
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
+            modalHeader.innerHTML = `
+                <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
+                <div class="modal-header-actions">
+                    ${canEdit ? `
+                        <button class="modal-edit-btn" onclick="editPlatform(${platform.id})" title="Edit Platform">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    ` : ''}
+                    <button class="modal-close-large" onclick="closePlatformModal()">&times;</button>
+                </div>
+            `;
+
             detailsContainer.innerHTML = `
                 <div class="detail-section">
                     <h4><i class="fas fa-info-circle"></i> General Information</h4>
@@ -2111,6 +2102,23 @@
 
         function populateInstrumentModal(instrument) {
             const detailsContainer = document.getElementById('instrument-details');
+
+            // Update modal header with edit button if user has permissions
+            const modalHeader = document.querySelector('#instrument-modal .modal-header-large');
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
+            modalHeader.innerHTML = `
+                <h3><i class="fas fa-camera"></i> Instrument Details</h3>
+                <div class="modal-header-actions">
+                    ${canEdit ? `
+                        <button class="modal-edit-btn" onclick="editInstrument(${instrument.id})" title="Edit Instrument">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    ` : ''}
+                    <button class="modal-close-large" onclick="closeInstrumentModal()">&times;</button>
+                </div>
+            `;
 
             detailsContainer.innerHTML = `
                 <div class="detail-section">
