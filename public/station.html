@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.7.9">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.7.9">
+    <meta name="app-version" content="4.8.0">
     <meta name="build-date" content="2025-09-21">
 
     <style>
@@ -979,7 +979,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.7.9"></script>
+    <script src="/js/utils.js?v=4.8.0"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -2876,6 +2876,11 @@
 
                 // Refresh the platforms display
                 await loadPlatformsAndInstruments();
+
+                // If platform detail modal is open, refresh it with updated data
+                if (document.getElementById('platform-modal').classList.contains('show')) {
+                    await refreshPlatformDetailModal(platformId);
+                }
             } catch (error) {
                 console.error('Error saving platform:', error);
                 showNotification(error.message || 'Failed to save platform changes', 'error');
@@ -2949,6 +2954,11 @@
 
                 // Refresh the platforms display
                 await loadPlatformsAndInstruments();
+
+                // If instrument detail modal is open, refresh it with updated data
+                if (document.getElementById('instrument-modal').classList.contains('show')) {
+                    await refreshInstrumentDetailModal(instrumentId);
+                }
             } catch (error) {
                 console.error('Error saving instrument:', error);
                 showNotification(error.message || 'Failed to save instrument changes', 'error');
@@ -2961,6 +2971,41 @@
 
         function closeInstrumentEditModal() {
             document.getElementById('instrument-edit-modal').classList.remove('show');
+        }
+
+        // Helper functions to refresh detail modals after successful edits
+        async function refreshPlatformDetailModal(platformId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/platforms/${platformId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const updatedPlatform = await response.json();
+                    populatePlatformModal(updatedPlatform);
+                }
+            } catch (error) {
+                console.error('Error refreshing platform modal:', error);
+            }
+        }
+
+        async function refreshInstrumentDetailModal(instrumentId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const updatedInstrument = await response.json();
+                    populateInstrumentModal(updatedInstrument);
+                }
+            } catch (error) {
+                console.error('Error refreshing instrument modal:', error);
+            }
         }
 
         // Success/Error Notification
