@@ -341,7 +341,7 @@ async function handlePlatforms(method, id, request, env) {
       // Fields that station users can edit
       const stationEditableFields = [
         'display_name', 'status', 'mounting_structure', 'platform_height_m',
-        'latitude', 'longitude', 'description', 'updated_at'
+        'latitude', 'longitude', 'deployment_date', 'description', 'updated_at'
       ];
 
       // Fields that only admin can edit
@@ -430,8 +430,8 @@ async function handleInstruments(method, id, request, env) {
       // Get specific instrument by ID
       let query = `
         SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
-               i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
-               i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
+               i.instrument_type, i.ecosystem_code, i.instrument_number, i.status, i.deployment_date,
+               i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees, i.degrees_from_nadir,
                i.camera_brand, i.camera_model, i.camera_resolution, i.camera_serial_number,
                i.first_measurement_year, i.last_measurement_year, i.measurement_status,
                i.instrument_height_m, i.description, i.installation_notes, i.maintenance_notes,
@@ -543,9 +543,16 @@ async function handleInstruments(method, id, request, env) {
 
       // Fields that station users can edit
       const stationEditableFields = [
-        'display_name', 'status', 'camera_brand', 'camera_model', 'camera_resolution',
-        'viewing_direction', 'azimuth_degrees', 'latitude', 'longitude',
-        'description', 'updated_at'
+        'display_name', 'status',
+        // Camera specifications
+        'camera_brand', 'camera_model', 'camera_resolution', 'camera_serial_number',
+        // Position & orientation
+        'latitude', 'longitude', 'instrument_height_m', 'viewing_direction', 'azimuth_degrees', 'degrees_from_nadir',
+        // Timeline & classification
+        'instrument_type', 'ecosystem_code', 'deployment_date', 'first_measurement_year', 'last_measurement_year', 'measurement_status',
+        // Notes & context
+        'description', 'installation_notes', 'maintenance_notes',
+        'updated_at'
       ];
 
       // Fields that only admin can edit
