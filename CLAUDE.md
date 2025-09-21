@@ -2,12 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.0 - Comprehensive Edit Forms with All Detail Modal Fields (2025-09-21)
+## Version 4.8.1 - Complete API Fix for All Edit Form Fields (2025-09-21)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Deployment Date:** 2025-09-21
-**🎯 Major Achievement:** Comprehensive edit forms with all fields from detail modals and smart dropdown options
+**🎯 Major Achievement:** Complete API fix ensuring all comprehensive edit form fields save and retrieve properly
+
+### 🐛 Critical Bug Fixes in v4.8.1
+- **API Field Support**: Fixed API endpoints missing support for comprehensive edit form fields
+- **Database Operations**: Added all missing fields to both GET and PUT operations
+- **User-Reported Issue**: Fixed "degrees_from_nadir" not saving or displaying (now works correctly)
+- **Modal Refresh**: Fixed detail modals not showing updated content after edits
+- **Data Persistence**: All 25 instrument fields and 12 platform fields now save properly
+
+### 🔧 Technical Fixes Applied
+- **Instrument GET**: Added `degrees_from_nadir` and `deployment_date` to SELECT query
+- **Instrument PUT**: Extended `stationEditableFields` to include 13 missing fields
+- **Platform PUT**: Added `deployment_date` to `stationEditableFields` array
+- **Modal Refresh**: Added automatic detail modal refresh after successful edits
+- **Field Validation**: All form fields now properly processed and stored
 
 ### 🏗️ Latest Update: Comprehensive Edit Forms Implementation
 - **Complete Field Coverage**: Edit forms now include ALL fields shown in detail modals for both platforms and instruments
