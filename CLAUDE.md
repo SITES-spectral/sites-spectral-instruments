@@ -2,22 +2,37 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.7.9 - Complete CRUD Operations with Edit Functionality (2025-09-21)
+## Version 4.8.0 - Comprehensive Edit Forms with All Detail Modal Fields (2025-09-21)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Deployment Date:** 2025-09-21
-**🎯 Major Achievement:** Full CRUD operations with role-based editing for platforms and instruments
+**🎯 Major Achievement:** Comprehensive edit forms with all fields from detail modals and smart dropdown options
 
-### 🏗️ Latest Update: Complete CRUD System Implementation
-- **Edit Buttons**: Added edit buttons to all platform and instrument cards with role-based visibility
-- **Modal Edit Forms**: Professional edit modals with tabbed organization and field validation
-- **Role-Based Permissions**: Admin users can edit all fields, station users have controlled field access
-- **Recently Updated Badges**: Visual indicators showing recently modified items with configurable time windows
-- **Real-time Updates**: Immediate UI refresh after successful edits with success notifications
-- **API Endpoints**: Complete PUT endpoints for platforms and instruments with proper authentication
-- **Permission System**: Field-level permissions enforcing station isolation and admin privileges
-- **Auto-hide Settings**: User-configurable display settings for recent update badges (1 week to 2 months)
+### 🏗️ Latest Update: Comprehensive Edit Forms Implementation
+- **Complete Field Coverage**: Edit forms now include ALL fields shown in detail modals for both platforms and instruments
+- **Unified Experience**: Edit forms follow the exact same order and section structure as detail modals
+- **Smart Dropdowns**: Common values provided for camera brands, resolutions, viewing directions, instrument types, and ecosystem codes
+- **"Other" Options**: Custom input fields that appear dynamically when "Other" is selected from dropdowns
+- **Enhanced Data Handling**: Updated save functions to process all new fields with proper data type conversions
+- **Professional Organization**: Forms organized in clear sections with icons matching the detail modal layout
+- **Improved UX**: Better user experience with helpful placeholders, validation, and intuitive field grouping
+- **Role-Based Control**: Maintains admin/station user permission structure across all new fields
+
+### 📋 Comprehensive Form Fields Added
+**Platform Edit Form:**
+- General Information: Name, Normalized ID, Location Code, Status
+- Location & Positioning: Latitude, Longitude, Platform Height
+- Technical Specifications: Mounting Structure (dropdown), Deployment Date
+- Research Programs: Station assignment, Operation Programs
+- Additional Information: Description and notes
+
+**Instrument Edit Form:**
+- General Information: Name, Legacy Acronym, Normalized ID, Status (6 options)
+- Camera Specifications: Brand (dropdown), Model, Resolution (dropdown), Serial Number
+- Position & Orientation: Coordinates, Height, Viewing Direction (dropdown), Azimuth, Degrees from Nadir
+- Timeline & Classification: Type (dropdown), Ecosystem Code (dropdown), Deployment Date, Measurement Years, Status
+- Notes & Context: Platform, Station, Description, Installation Notes, Maintenance Notes
 
 ### 🔧 Technical Implementation
 - **Frontend**: Edit modals with form validation and real-time notifications

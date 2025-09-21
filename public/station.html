@@ -2441,63 +2441,126 @@
             const editForm = document.getElementById('platform-edit-form');
             const isAdmin = currentUser.role === 'admin';
 
-            // Build edit form based on user permissions
+            // Build comprehensive edit form based on user permissions
             editForm.innerHTML = `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
 
                 <form id="platform-update-form">
                     <input type="hidden" id="edit-platform-id" value="${platform.id}">
 
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="edit-platform-name" value="${platform.display_name || ''}"
-                               class="form-control" required>
+                    <!-- General Information Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> General Information</h4>
+
+                        <div class="form-group">
+                            <label>Platform Name *</label>
+                            <input type="text" id="edit-platform-name" value="${platform.display_name || ''}"
+                                   class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Normalized ID</label>
+                            <input type="text" id="edit-platform-normalized-name" value="${platform.normalized_name || ''}"
+                                   class="form-control field-readonly" readonly
+                                   title="System-generated identifier - cannot be edited">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Location Code</label>
+                            <input type="text" id="edit-platform-location-code" value="${platform.location_code || ''}"
+                                   class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}
+                                   placeholder="e.g., BL01, PL01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="edit-platform-status" class="form-control">
+                                <option value="Active" ${platform.status === 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Inactive" ${platform.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                <option value="Maintenance" ${platform.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                <option value="Decommissioned" ${platform.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                                <option value="Planned" ${platform.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                                <option value="Removed" ${platform.status === 'Removed' ? 'selected' : ''}>Removed</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Location Code</label>
-                        <input type="text" id="edit-platform-location-code" value="${platform.location_code || ''}"
-                               class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}>
+                    <!-- Location & Positioning Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-map-marker-alt"></i> Location & Positioning</h4>
+
+                        <div class="form-group">
+                            <label>Latitude (decimal degrees)</label>
+                            <input type="number" id="edit-platform-latitude" value="${platform.latitude || ''}"
+                                   class="form-control" step="0.000001" placeholder="e.g., 68.353729">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Longitude (decimal degrees)</label>
+                            <input type="number" id="edit-platform-longitude" value="${platform.longitude || ''}"
+                                   class="form-control" step="0.000001" placeholder="e.g., 18.816522">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Platform Height (meters)</label>
+                            <input type="number" id="edit-platform-height" value="${platform.platform_height_m || ''}"
+                                   class="form-control" step="0.1" placeholder="Height above ground level">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="edit-platform-status" class="form-control">
-                            <option value="Active" ${platform.status === 'Active' ? 'selected' : ''}>Active</option>
-                            <option value="Inactive" ${platform.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-                            <option value="Maintenance" ${platform.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
-                            <option value="Decommissioned" ${platform.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
-                            <option value="Planned" ${platform.status === 'Planned' ? 'selected' : ''}>Planned</option>
-                        </select>
+                    <!-- Technical Specifications Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-cogs"></i> Technical Specifications</h4>
+
+                        <div class="form-group">
+                            <label>Mounting Structure</label>
+                            <select id="edit-platform-mounting" class="form-control">
+                                <option value="">Select mounting structure...</option>
+                                <option value="Building RoofTop" ${platform.mounting_structure === 'Building RoofTop' ? 'selected' : ''}>Building RoofTop</option>
+                                <option value="Tower" ${platform.mounting_structure === 'Tower' ? 'selected' : ''}>Tower</option>
+                                <option value="Mast" ${platform.mounting_structure === 'Mast' ? 'selected' : ''}>Mast</option>
+                                <option value="Pole" ${platform.mounting_structure === 'Pole' ? 'selected' : ''}>Pole</option>
+                                <option value="Tripod" ${platform.mounting_structure === 'Tripod' ? 'selected' : ''}>Tripod</option>
+                                <option value="Ground Mount" ${platform.mounting_structure === 'Ground Mount' ? 'selected' : ''}>Ground Mount</option>
+                                <option value="Tree Mount" ${platform.mounting_structure === 'Tree Mount' ? 'selected' : ''}>Tree Mount</option>
+                                <option value="Other" ${platform.mounting_structure && !['Building RoofTop', 'Tower', 'Mast', 'Pole', 'Tripod', 'Ground Mount', 'Tree Mount'].includes(platform.mounting_structure) ? 'selected' : ''}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Custom Mounting Structure</label>
+                            <input type="text" id="edit-platform-mounting-custom" value="${platform.mounting_structure && !['Building RoofTop', 'Tower', 'Mast', 'Pole', 'Tripod', 'Ground Mount', 'Tree Mount'].includes(platform.mounting_structure) ? platform.mounting_structure : ''}"
+                                   class="form-control" placeholder="Enter custom mounting structure type">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Deployment Date</label>
+                            <input type="date" id="edit-platform-deployment-date" value="${platform.deployment_date || ''}"
+                                   class="form-control">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Mounting Structure</label>
-                        <input type="text" id="edit-platform-mounting" value="${platform.mounting_structure || ''}"
-                               class="form-control">
+                    <!-- Research Programs Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-users"></i> Research Programs</h4>
+
+                        <div class="form-group">
+                            <label>Operation Programs</label>
+                            <textarea id="edit-platform-operation-programs" class="form-control" rows="3"
+                                      placeholder="Enter operation programs, separated by commas">${platform.operation_programs || ''}</textarea>
+                            <small class="form-text">Enter multiple programs separated by commas</small>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Platform Height (m)</label>
-                        <input type="number" id="edit-platform-height" value="${platform.platform_height_m || ''}"
-                               class="form-control" step="0.1">
-                    </div>
+                    <!-- Additional Information Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-sticky-note"></i> Additional Information</h4>
 
-                    <div class="form-group">
-                        <label>Latitude</label>
-                        <input type="number" id="edit-platform-latitude" value="${platform.latitude || ''}"
-                               class="form-control" step="0.000001">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Longitude</label>
-                        <input type="number" id="edit-platform-longitude" value="${platform.longitude || ''}"
-                               class="form-control" step="0.000001">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="edit-platform-description" class="form-control" rows="3">${platform.description || ''}</textarea>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="edit-platform-description" class="form-control" rows="4"
+                                      placeholder="Enter platform description, purpose, or additional details">${platform.description || ''}</textarea>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -2522,81 +2585,216 @@
             const editForm = document.getElementById('instrument-edit-form');
             const isAdmin = currentUser.role === 'admin';
 
-            // Build edit form based on user permissions
+            // Build comprehensive edit form matching detail modal structure and order
             editForm.innerHTML = `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
-
                 <form id="instrument-update-form">
                     <input type="hidden" id="edit-instrument-id" value="${instrument.id}">
 
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="edit-instrument-name" value="${instrument.display_name || ''}"
-                               class="form-control" required>
+                    <!-- General Information Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> General Information</h4>
+                        <div class="form-group">
+                            <label>Instrument Name</label>
+                            <input type="text" id="edit-instrument-name" value="${instrument.display_name || ''}"
+                                   class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Legacy Acronym</label>
+                            <input type="text" id="edit-instrument-legacy" value="${instrument.legacy_acronym || ''}"
+                                   class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}>
+                        </div>
+                        <div class="form-group">
+                            <label>Normalized ID</label>
+                            <input type="text" id="edit-instrument-normalized" value="${instrument.normalized_name || ''}"
+                                   class="form-control field-readonly" readonly title="System-generated identifier">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="edit-instrument-status" class="form-control">
+                                <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                <option value="Testing" ${instrument.status === 'Testing' ? 'selected' : ''}>Testing</option>
+                                <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                                <option value="Planned" ${instrument.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Legacy Acronym</label>
-                        <input type="text" id="edit-instrument-legacy" value="${instrument.legacy_acronym || ''}"
-                               class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}>
+                    <!-- Camera Specifications Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-camera"></i> Camera Specifications</h4>
+                        <div class="form-group">
+                            <label>Camera Brand</label>
+                            <select id="edit-instrument-camera-brand" class="form-control">
+                                <option value="">Select brand...</option>
+                                <option value="Mobotix" ${instrument.camera_brand === 'Mobotix' ? 'selected' : ''}>Mobotix</option>
+                                <option value="Axis" ${instrument.camera_brand === 'Axis' ? 'selected' : ''}>Axis</option>
+                                <option value="Canon" ${instrument.camera_brand === 'Canon' ? 'selected' : ''}>Canon</option>
+                                <option value="Nikon" ${instrument.camera_brand === 'Nikon' ? 'selected' : ''}>Nikon</option>
+                                <option value="Sony" ${instrument.camera_brand === 'Sony' ? 'selected' : ''}>Sony</option>
+                                <option value="Other" ${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? 'selected' : ''}>Other</option>
+                            </select>
+                            <input type="text" id="edit-instrument-camera-brand-other" value="${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? instrument.camera_brand : ''}"
+                                   class="form-control mt-2" placeholder="Enter other brand..." style="display: ${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? 'block' : 'none'};">
+                        </div>
+                        <div class="form-group">
+                            <label>Camera Model</label>
+                            <input type="text" id="edit-instrument-camera-model" value="${instrument.camera_model || ''}"
+                                   class="form-control" placeholder="e.g., M16B, P1437-E">
+                        </div>
+                        <div class="form-group">
+                            <label>Resolution</label>
+                            <select id="edit-instrument-camera-resolution" class="form-control">
+                                <option value="">Select resolution...</option>
+                                <option value="4096x3072" ${instrument.camera_resolution === '4096x3072' ? 'selected' : ''}>4096x3072 (12MP)</option>
+                                <option value="3264x2448" ${instrument.camera_resolution === '3264x2448' ? 'selected' : ''}>3264x2448 (8MP)</option>
+                                <option value="2592x1944" ${instrument.camera_resolution === '2592x1944' ? 'selected' : ''}>2592x1944 (5MP)</option>
+                                <option value="2048x1536" ${instrument.camera_resolution === '2048x1536' ? 'selected' : ''}>2048x1536 (3MP)</option>
+                                <option value="1920x1080" ${instrument.camera_resolution === '1920x1080' ? 'selected' : ''}>1920x1080 (2MP/FHD)</option>
+                                <option value="Other" ${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? 'selected' : ''}>Other</option>
+                            </select>
+                            <input type="text" id="edit-instrument-camera-resolution-other" value="${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? instrument.camera_resolution : ''}"
+                                   class="form-control mt-2" placeholder="e.g., 5472x3648" style="display: ${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? 'block' : 'none'};">
+                        </div>
+                        <div class="form-group">
+                            <label>Serial Number</label>
+                            <input type="text" id="edit-instrument-camera-serial" value="${instrument.camera_serial_number || ''}"
+                                   class="form-control" placeholder="Camera serial number">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="edit-instrument-status" class="form-control">
-                            <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
-                            <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-                            <option value="Testing" ${instrument.status === 'Testing' ? 'selected' : ''}>Testing</option>
-                            <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
-                            <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
-                        </select>
+                    <!-- Position & Orientation Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
+                        <div class="form-group">
+                            <label>Latitude</label>
+                            <input type="number" id="edit-instrument-latitude" value="${instrument.latitude || ''}"
+                                   class="form-control" step="0.000001" placeholder="Decimal degrees">
+                        </div>
+                        <div class="form-group">
+                            <label>Longitude</label>
+                            <input type="number" id="edit-instrument-longitude" value="${instrument.longitude || ''}"
+                                   class="form-control" step="0.000001" placeholder="Decimal degrees">
+                        </div>
+                        <div class="form-group">
+                            <label>Height (meters)</label>
+                            <input type="number" id="edit-instrument-height" value="${instrument.instrument_height_m || ''}"
+                                   class="form-control" step="0.1" placeholder="Height above ground">
+                        </div>
+                        <div class="form-group">
+                            <label>Viewing Direction</label>
+                            <select id="edit-instrument-viewing-direction" class="form-control">
+                                <option value="">Select direction...</option>
+                                <option value="North" ${instrument.viewing_direction === 'North' ? 'selected' : ''}>North</option>
+                                <option value="Northeast" ${instrument.viewing_direction === 'Northeast' ? 'selected' : ''}>Northeast</option>
+                                <option value="East" ${instrument.viewing_direction === 'East' ? 'selected' : ''}>East</option>
+                                <option value="Southeast" ${instrument.viewing_direction === 'Southeast' ? 'selected' : ''}>Southeast</option>
+                                <option value="South" ${instrument.viewing_direction === 'South' ? 'selected' : ''}>South</option>
+                                <option value="Southwest" ${instrument.viewing_direction === 'Southwest' ? 'selected' : ''}>Southwest</option>
+                                <option value="West" ${instrument.viewing_direction === 'West' ? 'selected' : ''}>West</option>
+                                <option value="Northwest" ${instrument.viewing_direction === 'Northwest' ? 'selected' : ''}>Northwest</option>
+                                <option value="Other" ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'selected' : ''}>Other</option>
+                            </select>
+                            <input type="text" id="edit-instrument-viewing-direction-other" value="${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? instrument.viewing_direction : ''}"
+                                   class="form-control mt-2" placeholder="Specify direction..." style="display: ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'block' : 'none'};">
+                        </div>
+                        <div class="form-group">
+                            <label>Azimuth (degrees)</label>
+                            <input type="number" id="edit-instrument-azimuth" value="${instrument.azimuth_degrees || ''}"
+                                   class="form-control" step="0.1" min="0" max="360" placeholder="0-360 degrees">
+                        </div>
+                        <div class="form-group">
+                            <label>Degrees from Nadir</label>
+                            <input type="number" id="edit-instrument-nadir" value="${instrument.degrees_from_nadir || ''}"
+                                   class="form-control" step="0.1" min="0" max="90" placeholder="0-90 degrees">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Camera Brand</label>
-                        <input type="text" id="edit-instrument-camera-brand" value="${instrument.camera_brand || ''}"
-                               class="form-control">
+                    <!-- Timeline & Classification Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-calendar-alt"></i> Timeline & Classification</h4>
+                        <div class="form-group">
+                            <label>Instrument Type</label>
+                            <select id="edit-instrument-type" class="form-control">
+                                <option value="">Select type...</option>
+                                <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
+                                <option value="Weather Station" ${instrument.instrument_type === 'Weather Station' ? 'selected' : ''}>Weather Station</option>
+                                <option value="Sensor" ${instrument.instrument_type === 'Sensor' ? 'selected' : ''}>Sensor</option>
+                                <option value="Other" ${instrument.instrument_type && !['Phenocam', 'Weather Station', 'Sensor'].includes(instrument.instrument_type) ? 'selected' : ''}>Other</option>
+                            </select>
+                            <input type="text" id="edit-instrument-type-other" value="${instrument.instrument_type && !['Phenocam', 'Weather Station', 'Sensor'].includes(instrument.instrument_type) ? instrument.instrument_type : ''}"
+                                   class="form-control mt-2" placeholder="Specify type..." style="display: ${instrument.instrument_type && !['Phenocam', 'Weather Station', 'Sensor'].includes(instrument.instrument_type) ? 'block' : 'none'};">
+                        </div>
+                        <div class="form-group">
+                            <label>Ecosystem Code</label>
+                            <select id="edit-instrument-ecosystem" class="form-control">
+                                <option value="">Select ecosystem...</option>
+                                <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
+                                <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                <option value="WET" ${instrument.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
+                                <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Agricultural</option>
+                                <option value="TUN" ${instrument.ecosystem_code === 'TUN' ? 'selected' : ''}>TUN - Tundra</option>
+                                <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine</option>
+                                <option value="Other" ${instrument.ecosystem_code && !['FOR', 'GRA', 'WET', 'AGR', 'TUN', 'ALP'].includes(instrument.ecosystem_code) ? 'selected' : ''}>Other</option>
+                            </select>
+                            <input type="text" id="edit-instrument-ecosystem-other" value="${instrument.ecosystem_code && !['FOR', 'GRA', 'WET', 'AGR', 'TUN', 'ALP'].includes(instrument.ecosystem_code) ? instrument.ecosystem_code : ''}"
+                                   class="form-control mt-2" placeholder="Enter ecosystem code..." style="display: ${instrument.ecosystem_code && !['FOR', 'GRA', 'WET', 'AGR', 'TUN', 'ALP'].includes(instrument.ecosystem_code) ? 'block' : 'none'};">
+                        </div>
+                        <div class="form-group">
+                            <label>Deployment Date</label>
+                            <input type="date" id="edit-instrument-deployment" value="${instrument.deployment_date || ''}"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>First Measurement Year</label>
+                            <input type="number" id="edit-instrument-first-year" value="${instrument.first_measurement_year || ''}"
+                                   class="form-control" min="2000" max="2030" placeholder="e.g., 2010">
+                        </div>
+                        <div class="form-group">
+                            <label>Last Measurement Year</label>
+                            <input type="number" id="edit-instrument-last-year" value="${instrument.last_measurement_year || ''}"
+                                   class="form-control" min="2000" max="2030" placeholder="e.g., 2024">
+                        </div>
+                        <div class="form-group">
+                            <label>Measurement Status</label>
+                            <select id="edit-instrument-measurement-status" class="form-control">
+                                <option value="">Select status...</option>
+                                <option value="Active" ${instrument.measurement_status === 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Inactive" ${instrument.measurement_status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                <option value="Intermittent" ${instrument.measurement_status === 'Intermittent' ? 'selected' : ''}>Intermittent</option>
+                                <option value="Seasonal" ${instrument.measurement_status === 'Seasonal' ? 'selected' : ''}>Seasonal</option>
+                                <option value="Completed" ${instrument.measurement_status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Camera Model</label>
-                        <input type="text" id="edit-instrument-camera-model" value="${instrument.camera_model || ''}"
-                               class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Camera Resolution</label>
-                        <input type="text" id="edit-instrument-camera-resolution" value="${instrument.camera_resolution || ''}"
-                               class="form-control" placeholder="e.g., 4096x3072">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Viewing Direction</label>
-                        <input type="text" id="edit-instrument-viewing-direction" value="${instrument.viewing_direction || ''}"
-                               class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Azimuth (degrees)</label>
-                        <input type="number" id="edit-instrument-azimuth" value="${instrument.azimuth_degrees || ''}"
-                               class="form-control" step="0.1">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Latitude</label>
-                        <input type="number" id="edit-instrument-latitude" value="${instrument.latitude || ''}"
-                               class="form-control" step="0.000001">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Longitude</label>
-                        <input type="number" id="edit-instrument-longitude" value="${instrument.longitude || ''}"
-                               class="form-control" step="0.000001">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="edit-instrument-description" class="form-control" rows="3">${instrument.description || ''}</textarea>
+                    <!-- Notes & Context Section -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-sticky-note"></i> Notes & Context</h4>
+                        <div class="form-group">
+                            <label>Platform</label>
+                            <input type="text" id="edit-instrument-platform" value="${instrument.platform_name || ''}"
+                                   class="form-control field-readonly" readonly title="Platform is managed separately">
+                        </div>
+                        <div class="form-group">
+                            <label>Station</label>
+                            <input type="text" id="edit-instrument-station" value="${(instrument.station_name || '') + (instrument.station_acronym ? ' (' + instrument.station_acronym + ')' : '')}"
+                                   class="form-control field-readonly" readonly title="Station is managed separately">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="edit-instrument-description" class="form-control" rows="3" placeholder="General description of the instrument...">${instrument.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Installation Notes</label>
+                            <textarea id="edit-instrument-installation-notes" class="form-control" rows="3" placeholder="Notes about installation and setup...">${instrument.installation_notes || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Maintenance Notes</label>
+                            <textarea id="edit-instrument-maintenance-notes" class="form-control" rows="3" placeholder="Maintenance history and notes...">${instrument.maintenance_notes || ''}</textarea>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -2608,6 +2806,9 @@
                 </form>
             `;
 
+            // Add dynamic dropdown handlers for "Other" options
+            setupDropdownHandlers();
+
             // Add form submission handler
             document.getElementById('instrument-update-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -2615,6 +2816,29 @@
             });
 
             document.getElementById('instrument-edit-modal').classList.add('show');
+        }
+
+        // Helper function to set up dropdown handlers for "Other" options
+        function setupDropdownHandlers() {
+            const dropdownPairs = [
+                ['edit-instrument-camera-brand', 'edit-instrument-camera-brand-other'],
+                ['edit-instrument-camera-resolution', 'edit-instrument-camera-resolution-other'],
+                ['edit-instrument-viewing-direction', 'edit-instrument-viewing-direction-other'],
+                ['edit-instrument-type', 'edit-instrument-type-other'],
+                ['edit-instrument-ecosystem', 'edit-instrument-ecosystem-other']
+            ];
+
+            dropdownPairs.forEach(([selectId, otherId]) => {
+                const selectElement = document.getElementById(selectId);
+                const otherElement = document.getElementById(otherId);
+
+                if (selectElement && otherElement) {
+                    selectElement.addEventListener('change', function() {
+                        otherElement.style.display = this.value === 'Other' ? 'block' : 'none';
+                        if (this.value !== 'Other') otherElement.value = '';
+                    });
+                }
+            });
         }
 
         async function savePlatformChanges(platformId) {
@@ -2662,18 +2886,47 @@
             try {
                 const token = localStorage.getItem('sites_spectral_token');
 
+                // Helper function to get value from select or "other" input
+                function getSelectOrOtherValue(selectId, otherId) {
+                    const selectValue = document.getElementById(selectId)?.value;
+                    if (selectValue === 'Other') {
+                        return document.getElementById(otherId)?.value || '';
+                    }
+                    return selectValue || '';
+                }
+
                 const instrumentData = {
                     display_name: document.getElementById('edit-instrument-name').value,
                     legacy_acronym: document.getElementById('edit-instrument-legacy').value,
                     status: document.getElementById('edit-instrument-status').value,
-                    camera_brand: document.getElementById('edit-instrument-camera-brand').value,
+
+                    // Camera specifications
+                    camera_brand: getSelectOrOtherValue('edit-instrument-camera-brand', 'edit-instrument-camera-brand-other'),
                     camera_model: document.getElementById('edit-instrument-camera-model').value,
-                    camera_resolution: document.getElementById('edit-instrument-camera-resolution').value,
-                    viewing_direction: document.getElementById('edit-instrument-viewing-direction').value,
-                    azimuth_degrees: parseFloat(document.getElementById('edit-instrument-azimuth').value) || null,
+                    camera_resolution: getSelectOrOtherValue('edit-instrument-camera-resolution', 'edit-instrument-camera-resolution-other'),
+                    camera_serial_number: document.getElementById('edit-instrument-camera-serial')?.value || '',
+
+                    // Position & orientation
                     latitude: parseFloat(document.getElementById('edit-instrument-latitude').value) || null,
                     longitude: parseFloat(document.getElementById('edit-instrument-longitude').value) || null,
+                    instrument_height_m: parseFloat(document.getElementById('edit-instrument-height')?.value) || null,
+                    viewing_direction: getSelectOrOtherValue('edit-instrument-viewing-direction', 'edit-instrument-viewing-direction-other'),
+                    azimuth_degrees: parseFloat(document.getElementById('edit-instrument-azimuth').value) || null,
+                    degrees_from_nadir: parseFloat(document.getElementById('edit-instrument-nadir')?.value) || null,
+
+                    // Timeline & classification
+                    instrument_type: getSelectOrOtherValue('edit-instrument-type', 'edit-instrument-type-other'),
+                    ecosystem_code: getSelectOrOtherValue('edit-instrument-ecosystem', 'edit-instrument-ecosystem-other'),
+                    deployment_date: document.getElementById('edit-instrument-deployment')?.value || null,
+                    first_measurement_year: parseInt(document.getElementById('edit-instrument-first-year')?.value) || null,
+                    last_measurement_year: parseInt(document.getElementById('edit-instrument-last-year')?.value) || null,
+                    measurement_status: document.getElementById('edit-instrument-measurement-status')?.value || '',
+
+                    // Notes & context
                     description: document.getElementById('edit-instrument-description').value,
+                    installation_notes: document.getElementById('edit-instrument-installation-notes')?.value || '',
+                    maintenance_notes: document.getElementById('edit-instrument-maintenance-notes')?.value || '',
+
                     updated_at: new Date().toISOString()
                 };
 

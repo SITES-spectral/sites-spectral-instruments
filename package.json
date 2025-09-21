@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.7.9",
-  "description": "SITES Spectral Stations & Instruments Management System v4.7.9 - Complete CRUD Operations with Edit Functionality",
+  "version": "4.8.0",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.0 - Comprehensive Edit Forms with All Detail Modal Fields",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
