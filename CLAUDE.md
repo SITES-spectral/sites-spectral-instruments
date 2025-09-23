@@ -2,11 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.5 - Updated Meteorological Station Phenocam and Added Viewing Direction Label (2025-09-23)
+## Version 4.8.6 - Fixed Missing Help Button in Instrument Cards (2025-09-23)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.5
+**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.6
+**🎯 Major Achievement:** Restored missing help button functionality in instrument cards
+
+### 🔧 Quick Fix in v4.8.6
+- **Missing Help Button**: Restored help button that was inadvertently removed from instrument cards
+- **Improved Positioning**: Moved help button to instrument title section for better visibility
+- **Enhanced UX**: Help button now positioned in top-right corner of normalized name title area
+- **Clean Design**: Removed duplicate help button and optimized placement
+
+## Version 4.8.5 - Updated Meteorological Station Phenocam and Added Viewing Direction Label (2025-09-23)
+**📅 Previous Version**
 **🎯 Major Achievement:** Standardized meteorological station phenocam naming and enhanced UI clarity
 
 ### 🏷️ Database and UI Updates in v4.8.5

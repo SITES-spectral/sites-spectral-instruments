@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.8.6] - 2025-09-23
+
+### 🔧 Quick Fix: Restored Help Button in Instrument Cards
+
+#### 🐛 Bug Fix
+- **Missing Help Button**: Restored help button that was inadvertently removed from instrument cards
+- **Improved Positioning**: Moved help button to instrument title section for better visibility
+- **Enhanced UX**: Help button now positioned in top-right corner of normalized name title area
+- **Tooltip Guidance**: Maintains "Click this card to view instrument details and specifications" tooltip
+
+#### 🔧 Technical Implementation
+- **Strategic Placement**: Help button positioned in instrument title with absolute positioning
+- **Clean Design**: Removed duplicate help button from legacy name section
+- **Consistent Styling**: Maintains same styling and functionality as before
+- **Event Handling**: Proper event stopPropagation to prevent card click conflicts
+
 ## [4.8.5] - 2025-09-23
 
 ### 🏷️ Meteorological Station Phenocam Update and UI Enhancement
