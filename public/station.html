@@ -802,6 +802,7 @@
                     <span id="station-name">Station</span>
                 </h1>
                 <p class="welcome-subtitle">Welcome to your SITES Spectral station data</p>
+                <p class="station-description" id="station-description" style="margin-top: 10px; color: #666; font-style: italic;"></p>
             </div>
             <div id="error-state" class="error-state" style="display: none;">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -1065,6 +1066,15 @@
 
             document.getElementById('station-name').textContent = stationData.display_name;
             document.title = `${stationData.display_name} - SITES Spectral`;
+
+            // Set station description if available
+            const descriptionElement = document.getElementById('station-description');
+            if (stationData.description) {
+                descriptionElement.textContent = stationData.description;
+                descriptionElement.style.display = 'block';
+            } else {
+                descriptionElement.style.display = 'none';
+            }
 
             // Show export button
             document.getElementById('export-csv-btn').style.display = 'flex';

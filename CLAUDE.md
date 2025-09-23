@@ -18,6 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Smart Bounds Calculation**: Uses Leaflet's fitBounds with appropriate padding and maximum zoom limits
 - **Full Station Names**: Station marker tooltips now display complete research station names (e.g., "Abisko Scientific Research Station" instead of just "Abisko")
 - **Enhanced Information Display**: Improved user experience with more descriptive station identification on map hover
+- **Welcome Card Description**: Added station description to the welcome card for better context and institutional information
+- **Professional Presentation**: Station descriptions now visible in both map tooltips and welcome section
 - **User-Responsive Design**: Direct implementation of user feedback for improved usability
 
 ## Version 4.8.6 - Fixed Missing Help Button in Instrument Cards (2025-09-23)
