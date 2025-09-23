@@ -1517,6 +1517,8 @@
                         <div class="platform-title">
                             <i class="fas fa-tower-observation"></i>
                             ${platform.display_name}
+                            <br><small style="opacity: 0.7; font-weight: normal;">${platform.normalized_name || 'N/A'}</small>
+                            <i class="fas fa-question-circle help-icon" title="Click this card to view platform details and technical specifications" style="margin-left: 8px; font-size: 0.8em; opacity: 0.6; cursor: help;" onclick="event.stopPropagation()"></i>
                         </div>
                         <div class="platform-meta">
                             <div class="platform-structure">
@@ -1543,7 +1545,7 @@
 
         function createInstrumentCard(instrument) {
             const statusClass = `status-${instrument.status?.toLowerCase() || 'unknown'}`;
-            const legacyName = instrument.legacy_acronym || 'No Legacy';
+            const legacyName = instrument.legacy_acronym ? `legacy name: ${instrument.legacy_acronym}` : 'No Legacy';
             const legacyClass = instrument.legacy_acronym ? '' : 'no-legacy';
             const direction = instrument.viewing_direction || 'N/A';
 
@@ -1561,6 +1563,7 @@
                     <div class="instrument-content">
                         <div class="instrument-legacy ${legacyClass}">
                             ${legacyName}
+                            <i class="fas fa-question-circle help-icon" title="Click this card to view instrument details and specifications" style="margin-left: 8px; font-size: 0.7em; opacity: 0.6; cursor: help;" onclick="event.stopPropagation()"></i>
                         </div>
                         <div class="instrument-direction">
                             ${direction}${instrument.azimuth_degrees ? ` (${instrument.azimuth_degrees}°)` : ''}
@@ -2004,6 +2007,7 @@
                         <button class="modal-edit-btn" onclick="editPlatform(${platform.id})" title="Edit Platform">
                             <i class="fas fa-edit"></i> Edit
                         </button>
+                        <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Click to modify platform details</small>
                     ` : ''}
                     <button class="modal-close-large" onclick="closePlatformModal()">&times;</button>
                 </div>
@@ -2115,6 +2119,7 @@
                         <button class="modal-edit-btn" onclick="editInstrument(${instrument.id})" title="Edit Instrument">
                             <i class="fas fa-edit"></i> Edit
                         </button>
+                        <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Click to modify instrument specifications</small>
                     ` : ''}
                     <button class="modal-close-large" onclick="closeInstrumentModal()">&times;</button>
                 </div>

@@ -2,11 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.1 - Complete API Fix for All Edit Form Fields (2025-09-21)
+## Version 4.8.2 - Enhanced UX with Legacy Name Prefix, Help Buttons, and New Abisko Platforms (2025-09-23)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-21
+**📅 Deployment Date:** 2025-09-23
+**🎯 Major Achievement:** Enhanced user experience with improved guidance and expanded Abisko platform infrastructure
+
+### ✨ User Experience Enhancements in v4.8.2
+- **Legacy Name Display**: Added "legacy name:" prefix before legacy acronyms in instrument cards for better clarity
+- **Help System**: Added helpful question mark icons to platform and instrument cards with tooltips explaining functionality
+- **Modal Instructions**: Added small instructional text next to edit buttons in detail modals for better user guidance
+- **Platform Expansion**: Added 2 new platforms and 3 new instruments at Abisko station for future ecosystem monitoring
+
+### 🗺️ New Abisko Infrastructure
+- **Stordalen Birch Forest Platform**: New platform (BF01) with Mobotix phenocam for forest monitoring
+- **Miellejokka Heath Platform**: New platform (HE01) with Mobotix phenocam for heath ecosystem monitoring
+- **Met Station Enhancement**: Added second Nikon phenocam to existing meteorological station platform
+- **Status Management**: All new equipment properly marked as "Planned" for future deployment workflow
+
+## Version 4.8.1 - Complete API Fix for All Edit Form Fields (2025-09-21)
+**📅 Previous Version**
 **🎯 Major Achievement:** Complete API fix ensuring all comprehensive edit form fields save and retrieve properly
 
 ### 🐛 Critical Bug Fixes in v4.8.1

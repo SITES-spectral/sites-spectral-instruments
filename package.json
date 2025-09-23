@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.1",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.1 - Complete API Fix for All Edit Form Fields",
+  "version": "4.8.2",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.2 - Enhanced UX with Legacy Name Prefix, Help Buttons, and New Abisko Platforms",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

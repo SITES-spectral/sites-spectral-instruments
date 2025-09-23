@@ -13,6 +13,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.8.2] - 2025-09-23
+
+### 🎯 Enhanced UX with Legacy Name Prefix, Help Buttons, and New Abisko Platforms
+
+#### ✨ User Experience Improvements
+- **Legacy Name Display**: Added "legacy name:" prefix before legacy acronyms in instrument cards for better clarity
+- **Help System**: Added helpful question mark icons to platform and instrument cards with tooltips explaining card functionality
+- **Modal Instructions**: Added small instructional text next to edit buttons in detail modals
+- **Improved Guidance**: Enhanced user guidance with contextual help throughout the interface
+
+#### 🗺️ Platform Expansion at Abisko Station
+- **Stordalen Birch Forest Platform**: New platform for forest ecosystem monitoring
+  - Platform Code: BF01 (Birch Forest 01)
+  - Mobotix phenocam planned for installation
+  - Status: Planned for future deployment
+- **Miellejokka Heath Platform**: New platform for heath ecosystem monitoring
+  - Platform Code: HE01 (Heath 01)
+  - Mobotix phenocam planned for installation
+  - Status: Planned for future deployment
+- **Meteorological Station Enhancement**: Added second Nikon phenocam to existing met station platform
+  - Additional camera for expanded monitoring capabilities
+  - Status: Planned for future deployment
+
+#### 🔧 Technical Implementation
+- **Database Expansion**: Added 2 new platforms and 3 new instruments to Abisko station
+- **Status Management**: All new equipment marked as "Planned" status for proper workflow tracking
+- **Normalized Naming**: Consistent naming convention for new platforms and instruments
+- **Ecosystem Codes**: Proper ecosystem classification (FOR for forest, HEA for heath, TUN for tundra)
+
+#### 📋 Data Management
+- **Platform IDs**: Stordalen (ID: 23), Miellejokka (ID: 24), Met Station (ID: 1)
+- **Instrument IDs**: Stordalen Phenocam (ID: 26), Miellejokka Phenocam (ID: 27), Met Station Nikon (ID: 28)
+- **Future Planning**: Null coordinates and specifications allow for future completion during actual deployment
+
 ## [4.7.8] - 2025-09-20
 
 ### 🎯 Enhanced Station Tooltips
