@@ -2,11 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.4 - Updated Abisko Platform Coordinates and Normalized Names (2025-09-23)
+## Version 4.8.5 - Updated Meteorological Station Phenocam and Added Viewing Direction Label (2025-09-23)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.4
+**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.5
+**🎯 Major Achievement:** Standardized meteorological station phenocam naming and enhanced UI clarity
+
+### 🏷️ Database and UI Updates in v4.8.5
+- **ANS_FOR_BL01_PHE02**: Updated meteorological station second phenocam normalized name and coordinates
+- **Viewing Direction Labels**: Added "viewing direction:" prefix to instrument cards for better clarity
+- **Coordinate Alignment**: Applied same coordinates as ANS_FOR_BL01_PHE01 for platform consistency
+- **Enhanced User Experience**: Consistent labeling pattern across all instrument card fields
+
+## Version 4.8.4 - Updated Abisko Platform Coordinates and Normalized Names (2025-09-23)
+**📅 Previous Version**
 **🎯 Major Achievement:** Updated Abisko platform data with precise coordinates and standardized naming
 
 ### 🗺️ Platform Data Updates in v4.8.4

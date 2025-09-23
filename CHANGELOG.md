@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.8.5] - 2025-09-23
+
+### 🏷️ Meteorological Station Phenocam Update and UI Enhancement
+
+#### 📝 Normalized Name Standardization
+- **ANS_FOR_BL01_PHE02**: Updated meteorological station second phenocam from `ans_metstation_phe02` to standardized format
+- **Coordinate Matching**: Applied same coordinates as ANS_FOR_BL01_PHE01 (68.35368325999725, 18.816555032266894)
+- **Naming Consistency**: Both meteorological station phenocams now follow consistent ANS_FOR_BL01_PHE## pattern
+
+#### ✨ User Interface Improvements
+- **Viewing Direction Label**: Added "viewing direction:" prefix before direction values in instrument cards
+- **Enhanced Clarity**: Instrument cards now clearly label the viewing direction (e.g., "viewing direction: West")
+- **Consistent Labeling**: Matches the pattern used for legacy names with descriptive prefixes
+
+#### 🔧 Technical Implementation
+- **Database Update**: Single instrument record updated with new normalized name and coordinates
+- **Platform Alignment**: Second phenocam now properly aligned with first phenocam on same platform
+- **Standard Nomenclature**: Follows established SITES naming conventions
+- **UI Enhancement**: Added descriptive text to viewing direction display in instrument cards
+
 ## [4.8.4] - 2025-09-23
 
 ### 🗺️ Abisko Platform Data Updates

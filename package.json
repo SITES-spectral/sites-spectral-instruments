@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.4",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.4 - Updated Abisko Platform Coordinates and Normalized Names",
+  "version": "4.8.5",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.5 - Updated Meteorological Station Phenocam and Added Viewing Direction Label",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
