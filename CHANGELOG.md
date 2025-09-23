@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.8.4] - 2025-09-23
+
+### 🗺️ Abisko Platform Data Updates
+
+#### 📍 Coordinate Updates
+- **Miellejokka Heath Platform**: Updated coordinates to 68.311722, 18.91527
+- **Stordalen Birch Forest Platform**: Updated coordinates to 68.34980602492992, 19.04258100806418
+- **Instrument Coordinates**: Updated corresponding instrument coordinates to match platform locations
+
+#### 🏷️ Normalized Name Updates
+- **Miellejokka Platform**: Updated normalized name to `ANS_MJH_PL01` (MJH = Miellejokka Heath)
+- **Miellejokka Instrument**: Updated normalized name to `ANS_MJH_PL01_PHE01`
+- **Stordalen Platform**: Updated normalized name to `ANS_SBF_FOR_PL01` (SBF = Stordalen Birch Forest)
+- **Stordalen Instrument**: Updated normalized name to `ANS_SBF_FOR_PL01_PHE01`
+
+#### 🔧 Technical Implementation
+- **Database Updates**: Applied coordinate and naming updates to platforms and instruments tables
+- **Consistent Naming**: Follows standard SITES nomenclature with station acronyms
+- **Geographic Accuracy**: Precise coordinates for accurate mapping and field deployment
+
 ## [4.8.3] - 2025-09-23
 
 ### 🏷️ Instrument Card Title Enhancement

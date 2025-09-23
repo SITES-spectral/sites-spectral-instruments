@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.3",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.3 - Added Normalized Names as Titles in Instrument Cards",
+  "version": "4.8.4",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.4 - Updated Abisko Platform Coordinates and Normalized Names",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

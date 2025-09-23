@@ -2,11 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.3 - Added Normalized Names as Titles in Instrument Cards (2025-09-23)
+## Version 4.8.4 - Updated Abisko Platform Coordinates and Normalized Names (2025-09-23)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED
+**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.4
+**🎯 Major Achievement:** Updated Abisko platform data with precise coordinates and standardized naming
+
+### 🗺️ Platform Data Updates in v4.8.4
+- **Miellejokka Heath Platform**: Updated coordinates (68.311722, 18.91527) and normalized name (ANS_MJH_PL01)
+- **Stordalen Birch Forest Platform**: Updated coordinates (68.34980602492992, 19.04258100806418) and normalized name (ANS_SBF_FOR_PL01)
+- **Instrument Updates**: Applied matching coordinates and standardized normalized names for both phenocams
+- **Station Acronyms**: MJH for Miellejokka Heath, SBF for Stordalen Birch Forest
+
+## Version 4.8.3 - Added Normalized Names as Titles in Instrument Cards (2025-09-23)
+**📅 Previous Version**
 **🎯 Major Achievement:** Enhanced instrument card layout with prominent normalized name titles
 
 ### 🏷️ Instrument Card Enhancement in v4.8.3
