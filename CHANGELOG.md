@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.8.3] - 2025-09-23
+
+### 🏷️ Instrument Card Title Enhancement
+
+#### ✨ User Experience Improvements
+- **Normalized Name Titles**: Added instrument normalized names as prominent titles above thumbnail images in instrument cards
+- **Visual Hierarchy**: Enhanced card layout with clear instrument identification at the top
+- **Consistent Display**: All instrument cards now show normalized names (e.g., "ANS_FOR_BL01_PHE01") before legacy names
+- **Professional Styling**: Title section with subtle background and border for better visual separation
+
+#### 🔧 Technical Implementation
+- **Card Structure**: Added dedicated title section above thumbnail in instrument cards
+- **Fallback Display**: Shows "No ID" when normalized name is not available
+- **Responsive Design**: Title styling works across different screen sizes
+- **Consistent Formatting**: Centered, styled titles with professional appearance
+
 ## [4.8.2] - 2025-09-23
 
 ### 🎯 Enhanced UX with Legacy Name Prefix, Help Buttons, and New Abisko Platforms

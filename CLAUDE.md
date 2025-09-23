@@ -2,11 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.2 - Enhanced UX with Legacy Name Prefix, Help Buttons, and New Abisko Platforms (2025-09-23)
+## Version 4.8.3 - Added Normalized Names as Titles in Instrument Cards (2025-09-23)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-23
+**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED
+**🎯 Major Achievement:** Enhanced instrument card layout with prominent normalized name titles
+
+### 🏷️ Instrument Card Enhancement in v4.8.3
+- **Normalized Name Titles**: Added instrument normalized names as prominent titles above thumbnail images
+- **Visual Hierarchy**: Enhanced card layout with clear instrument identification at the top
+- **Professional Styling**: Title section with subtle background and border for better visual separation
+- **Consistent Display**: All instrument cards now show normalized names (e.g., "ANS_FOR_BL01_PHE01") before legacy names
+
+## Version 4.8.2 - Enhanced UX with Legacy Name Prefix, Help Buttons, and New Abisko Platforms (2025-09-23)
+**📅 Previous Version**
 **🎯 Major Achievement:** Enhanced user experience with improved guidance and expanded Abisko platform infrastructure
 
 ### ✨ User Experience Enhancements in v4.8.2

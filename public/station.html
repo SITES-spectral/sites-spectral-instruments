@@ -22,11 +22,11 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.1">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.2">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.1">
-    <meta name="build-date" content="2025-09-21">
+    <meta name="app-version" content="4.8.2">
+    <meta name="build-date" content="2025-09-23">
 
     <style>
         body {
@@ -979,7 +979,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.1"></script>
+    <script src="/js/utils.js?v=4.8.2"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1559,6 +1559,9 @@
             return `
                 <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;" onclick="showInstrumentDetails(${instrument.id})">
                     ${recentlyUpdatedBadge}
+                    <div class="instrument-title" style="padding: 8px 12px; background: rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85em; color: #333; text-align: center;">
+                        ${instrument.normalized_name || 'No ID'}
+                    </div>
                     ${createInstrumentThumbnail(instrument)}
                     <div class="instrument-content">
                         <div class="instrument-legacy ${legacyClass}">
