@@ -1205,7 +1205,7 @@
             const stationMarker = L.marker([lat, lng], { icon: stationIcon })
                 .addTo(stationMap)
                 .bindPopup(createStationPopup())
-                .bindTooltip(`${stationData.display_name || stationData.acronym || stationAcronym}`, {
+                .bindTooltip(`${stationData.description || stationData.display_name || stationData.acronym || stationAcronym}`, {
                     permanent: false,
                     direction: 'top',
                     offset: [0, -10]
@@ -1269,7 +1269,7 @@
 
                 window.stationMarker.setPopupContent(createStationPopup());
                 // Update tooltip as well
-                window.stationMarker.setTooltipContent(`${stationData.display_name || stationData.acronym || stationAcronym}`);
+                window.stationMarker.setTooltipContent(`${stationData.description || stationData.display_name || stationData.acronym || stationAcronym}`);
             }
 
             // Clear existing platform markers

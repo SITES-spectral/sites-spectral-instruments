@@ -16,6 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Auto-Fitting Map Zoom**: Map now automatically adjusts zoom level to show all platforms and station markers
 - **Optimized Platform Visibility**: Particularly beneficial for Abisko station with distributed platforms
 - **Smart Bounds Calculation**: Uses Leaflet's fitBounds with appropriate padding and maximum zoom limits
+- **Full Station Names**: Station marker tooltips now display complete research station names (e.g., "Abisko Scientific Research Station" instead of just "Abisko")
+- **Enhanced Information Display**: Improved user experience with more descriptive station identification on map hover
 - **User-Responsive Design**: Direct implementation of user feedback for improved usability
 
 ## Version 4.8.6 - Fixed Missing Help Button in Instrument Cards (2025-09-23)
