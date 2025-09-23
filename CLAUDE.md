@@ -2,11 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.6 - Fixed Missing Help Button in Instrument Cards (2025-09-23)
+## Version 4.8.7 - Enhanced Help Button Size and Visibility (2025-09-23)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.6
+**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.7
+**🎯 Major Achievement:** Enhanced help button usability with improved size and visibility
+
+### ✨ User Experience Enhancement in v4.8.7
+- **Increased Button Size**: Enlarged help button from 0.7em to 1.1em (57% size increase)
+- **Better Visibility**: Increased opacity from 0.6 to 0.75 for improved contrast
+- **Enhanced Accessibility**: Larger click target area for better interaction across devices
+- **User-Responsive Design**: Direct implementation of user feedback for improved usability
+
+## Version 4.8.6 - Fixed Missing Help Button in Instrument Cards (2025-09-23)
+**📅 Previous Version**
 **🎯 Major Achievement:** Restored missing help button functionality in instrument cards
 
 ### 🔧 Quick Fix in v4.8.6

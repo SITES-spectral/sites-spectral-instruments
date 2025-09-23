@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.6",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.6 - Fixed Missing Help Button in Instrument Cards",
+  "version": "4.8.7",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.7 - Enhanced Help Button Size and Visibility",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

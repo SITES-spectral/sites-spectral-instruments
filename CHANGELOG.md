@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.8.7] - 2025-09-23
+
+### ✨ Enhanced Help Button Size and Visibility
+
+#### 🎯 User Experience Improvements
+- **Increased Button Size**: Enlarged help button from 0.7em to 1.1em (57% size increase)
+- **Better Visibility**: Increased opacity from 0.6 to 0.75 for improved contrast
+- **Enhanced Accessibility**: Larger click target area for better mobile and desktop interaction
+- **Professional Appearance**: Maintains clean design while improving usability
+
+#### 🔧 Technical Implementation
+- **Font Size Update**: Changed from small (0.7em) to medium-large (1.1em)
+- **Opacity Enhancement**: Improved visibility with increased opacity
+- **Responsive Design**: Better button size works across all device sizes
+- **User Feedback**: Direct response to user request for improved button visibility
+
 ## [4.8.6] - 2025-09-23
 
 ### 🔧 Quick Fix: Restored Help Button in Instrument Cards
