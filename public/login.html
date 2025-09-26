@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.9.0">
+    <link rel="stylesheet" href="/css/styles.css?v=4.9.1">
     
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.0">
+    <meta name="app-version" content="4.9.1">
     <meta name="build-date" content="2025-09-26">
     
     <style>
@@ -236,7 +236,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.9.0"></script>
+    <script src="/js/utils.js?v=4.9.1"></script>
     <script>
         class LoginManager {
             constructor() {
@@ -350,8 +350,8 @@
                 
                 if (user.role === 'admin') {
                     targetUrl = redirect || '/dashboard.html';
-                } else if (user.role === 'station') {
-                    targetUrl = redirect || '/dashboard.html';
+                } else if (user.role === 'station' && user.station_acronym) {
+                    targetUrl = redirect || `/station.html?station=${user.station_acronym}`;
                 } else {
                     targetUrl = redirect || '/dashboard.html';
                 }

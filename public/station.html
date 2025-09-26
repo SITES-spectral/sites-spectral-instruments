@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.9.0">
+    <link rel="stylesheet" href="/css/styles.css?v=4.9.1">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.0">
+    <meta name="app-version" content="4.9.1">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -1397,7 +1397,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.9.0"></script>
+    <script src="/js/utils.js?v=4.9.1"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1881,8 +1881,10 @@
 
             const platformsGrid = document.getElementById('platforms-grid');
 
-            // Load image manifest for metadata display
-            await loadImageManifest();
+            // Load image manifest for metadata display (async, don't wait)
+            loadImageManifest().catch(error => {
+                console.warn('Failed to load image manifest:', error);
+            });
 
             try {
                 // Fetch platforms for this station

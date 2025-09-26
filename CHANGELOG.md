@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.9.2] - 2025-09-26
+
+### 🐛 Critical Bug Fixes: Station Page Loading and User Redirection
+
+#### 🚨 Fixed Infinite Loading Issue
+- **Station Page Loading**: Resolved infinite loading problem on station pages caused by blocking `await loadImageManifest()`
+- **Async Loading**: Changed image manifest loading to non-blocking asynchronous operation
+- **Performance**: Station data now loads immediately without waiting for manifest file
+- **Error Handling**: Added proper error handling for manifest loading failures
+
+#### 🔧 Fixed User Redirection Logic
+- **Station User Redirects**: Fixed incorrect redirection where station users were sent to `/dashboard.html` instead of their station pages
+- **Proper Routing**: Station users now correctly redirected to `/station.html?station=${user.station_acronym}`
+- **Admin Access**: Admin users continue to be redirected to `/dashboard.html` as intended
+- **Login Flow**: Updated both `login.html` and maintained correct logic in `index.html`
+
+#### 🎯 User Experience Improvements
+- **Immediate Loading**: Station pages now load instantly instead of hanging indefinitely
+- **Correct Navigation**: Users land on the appropriate page based on their role and permissions
+- **Better Error Handling**: Improved error messaging and fallback behavior
+- **Seamless Access**: Eliminates confusion caused by incorrect page redirections
+
+#### 🔧 Technical Implementation
+- **Non-blocking Manifest**: `loadImageManifest()` runs asynchronously without blocking main loading sequence
+- **Conditional Redirects**: Proper role-based redirect logic in `redirectUser()` function
+- **Error Resilience**: Graceful handling of manifest loading failures
+- **Performance Optimization**: Reduced initial page load time by removing blocking operations
+
 ## [4.8.7] - 2025-09-23
 
 ### ✨ Enhanced Help Button Size and Visibility
