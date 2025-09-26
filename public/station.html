@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.12">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.13">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.12">
+    <meta name="app-version" content="4.8.13">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -984,6 +984,11 @@
             transform: translateY(-1px);
         }
 
+        /* Explicit Delete Button Styles */
+        .explicit-delete-btn:hover {
+            background: #dc2626 !important;
+        }
+
         /* Prevent delete button clicks from triggering card clicks */
         .instrument-delete-btn, .roi-delete-btn {
             z-index: 20;
@@ -1312,7 +1317,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.12"></script>
+    <script src="/js/utils.js?v=4.8.13"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1888,15 +1893,17 @@
                     <div class="instruments-section">
                         <h4>
                             <i class="fas fa-camera"></i> Instruments (${instruments.length})
-                            ${canEdit ? `
-                                <button class="add-instrument-btn" onclick="addInstrument(${platform.id})" title="➕ Add new phenocam instrument to this platform. The system will automatically generate a normalized name like ${platform.normalized_name}_PHE03."
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            ` : ''}
                         </h4>
                         <div class="instruments-grid">
-                            ${instrumentCards || `<div class="no-instruments">No instruments configured yet${canEdit ? ' - <button class="inline-add-btn" onclick="addInstrument(' + platform.id + ')" title="🎯 Click to add the first phenocam instrument to this platform. The system will guide you through the setup process.">Add your first instrument</button>' : ''}</div>`}
+                            ${instrumentCards || `<div class="no-instruments">No instruments configured yet</div>`}
                         </div>
+                        ${canEdit ? `
+                            <div style="padding: 12px; border-top: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); margin-top: 8px;">
+                                <button onclick="addInstrument(${platform.id})" style="width: 100%; padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                                    + Add New Instrument
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1922,11 +1929,6 @@
             return `
                 <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;" onclick="showInstrumentDetails(${instrument.id})">
                     ${recentlyUpdatedBadge}
-                    ${canEdit ? `
-                        <button class="instrument-delete-btn" onclick="deleteInstrument(${instrument.id})" title="🗑️ Delete this instrument permanently. All associated ROI data will be deleted. A backup can be created before deletion."
-                            <i class="fas fa-times"></i>
-                        </button>
-                    ` : ''}
                     <div class="instrument-title" style="padding: 8px 12px; background: rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85em; color: #333; text-align: center; position: relative;">
                         ${instrument.normalized_name || 'No ID'}
                         <i class="fas fa-question-circle help-icon" title="🔍 Click this card to view instrument details, specifications, ROIs, and image metadata. Admin and station users can also edit or delete this instrument." style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 1.1em; opacity: 0.75; cursor: help;" onclick="event.stopPropagation()"></i>
@@ -1943,6 +1945,13 @@
                             ${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
                         </div>
                     </div>
+                    ${canEdit ? `
+                        <div style="padding: 8px; border-top: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02);">
+                            <button class="explicit-delete-btn" onclick="event.stopPropagation(); deleteInstrument(${instrument.id})" style="width: 100%; padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 0.85em; cursor: pointer; transition: background 0.2s;">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 6px;"></i> Delete Instrument
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -2407,11 +2416,6 @@
 
             return `
                 <div class="roi-card" onclick="showROIDetails(${roi.id})" data-roi-id="${roi.id}" style="position: relative;">
-                    ${canEdit ? `
-                        <button class="roi-delete-btn" onclick="deleteROI(${roi.id})" title="🗑️ Delete this ROI permanently. All polygon data and analysis configurations will be removed. A backup can be created before deletion."
-                            <i class="fas fa-times"></i>
-                        </button>
-                    ` : ''}
                     <div class="roi-card-header">
                         <div class="roi-name">${roi.roi_name}</div>
                         <div class="roi-color-indicator" style="background-color: ${colorDisplay}"></div>
@@ -2543,6 +2547,14 @@
                         </div>
                     ` : ''}
                 </div>
+                ${currentUser && ((currentUser.role === 'admin') ||
+                    (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name)) ? `
+                    <div style="padding: 16px; border-top: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); margin-top: 16px;">
+                        <button onclick="deleteROI(${roi.id})" style="width: 100%; padding: 10px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> Delete ROI
+                        </button>
+                    </div>
+                ` : ''}
             `;
         }
 

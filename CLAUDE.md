@@ -2,11 +2,46 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.12 - Fixed CRUD Button Placement for Better UX (2025-09-26)
+## Version 4.8.13 - Explicit CRUD Buttons with Warning Icons (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.12 🎯
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.13 ⚠️
+**🎯 Major Achievement:** Complete redesign of CRUD buttons with explicit text labels and warning icons for maximum user safety
+
+### ⚠️ Explicit CRUD Button Redesign in v4.8.13
+- **Removed Problematic Small Buttons**: Eliminated small icon-only delete buttons that were prone to accidental clicks
+- **Explicit Delete Buttons**: Added full-width "Delete Instrument" buttons at bottom of instrument cards with warning triangle icons
+- **ROI Modal Delete Buttons**: Added prominent "Delete ROI" buttons in ROI detail modals with warning icons
+- **Clear Add Buttons**: Replaced small plus icons with full-width "+ Add New Instrument" buttons in platform cards
+- **Text-Based Interface**: All CRUD operations now use explicit text labels instead of icon-only buttons
+- **Warning Icons**: Delete buttons feature `fas fa-exclamation-triangle` icons to clearly indicate destructive actions
+
+### ✨ Technical Implementation
+- **Button Positioning**: Delete buttons positioned at card bottoms with clear visual separation
+- **Warning Iconography**: FontAwesome warning triangle icons (`fas fa-exclamation-triangle`) on all delete buttons
+- **Hover Effects**: Red delete buttons darken on hover (`#ef4444` to `#dc2626`)
+- **Green Add Buttons**: Full-width green buttons (`#10b981`) with hover effects for positive actions
+- **Modal Integration**: Delete buttons properly integrated in ROI detail modals with permission checking
+- **Event Handling**: Proper `event.stopPropagation()` to prevent unwanted card clicks
+
+### 🎯 User Safety Benefits
+- **Zero Accidental Deletions**: No more small buttons near help icons that cause accidental clicks
+- **Crystal Clear Intent**: Text labels make it impossible to misunderstand button functions
+- **Visual Warning System**: Warning triangles immediately communicate destructive actions
+- **Comfortable Sizing**: Large, easy-to-click buttons reduce user interface stress
+- **Professional Standards**: Follows modern UI/UX patterns for destructive actions
+- **Accessibility**: Better for users with motor difficulties or small screens
+
+### 🔧 Button Specifications
+- **Delete Buttons**: Full-width, red background (#ef4444), white text with warning triangle icon
+- **Add Buttons**: Full-width, green background (#10b981), white text with plus symbol
+- **Button Text**: Clear, descriptive labels ("Delete Instrument", "Delete ROI", "+ Add New Instrument")
+- **Positioning**: Bottom of cards with subtle border separation and background tinting
+- **Responsive**: Works across all device sizes with consistent styling
+
+## Version 4.8.12 - Fixed CRUD Button Placement for Better UX (2025-09-26)
+**📅 Previous Version**
 **🎯 Major Achievement:** Fixed CRUD button placement to prevent accidental deletions and improve user safety
 
 ### 🎯 UX Safety Enhancement in v4.8.12
