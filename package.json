@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.16",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.15 - Fixed Ecosystem Codes to Match YAML Source",
+  "version": "4.9.0",
+  "description": "SITES Spectral Stations & Instruments Management System v4.9.0 - Complete Admin-Only CRUD Operations for Stations and Platforms",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
