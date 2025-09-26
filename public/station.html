@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.9.3">
+    <link rel="stylesheet" href="/css/styles.css?v=4.9.5">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.3">
+    <meta name="app-version" content="4.9.5">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -1397,9 +1397,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.9.3"></script>
+    <script src="/js/utils.js?v=4.9.5"></script>
     <!-- Leaflet JavaScript -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         let currentUser = null;
@@ -1427,10 +1427,10 @@
                 currentUser = user;
                 console.log('Current user:', currentUser);
 
-                // If no station parameter, redirect to dashboard/login
+                // If no station parameter, redirect based on role
                 if (!stationAcronym) {
                     console.log('No station parameter, redirecting');
-                    if (user.role === 'admin' || user.role === 'readonly') {
+                    if (user.role === 'admin') {
                         window.location.href = '/dashboard.html';
                     } else {
                         window.location.href = '/';
@@ -1757,18 +1757,8 @@
                 window.platformMarkers = [];
             }
 
-            // Use real platform data if available, otherwise show mock data for demo
+            // Use real platform data from database
             const platforms = window.stationPlatforms || [];
-
-            if (platforms.length === 0) {
-                // Fallback to demo platforms if no real data
-                const demoPlatforms = [
-                    { display_name: 'Demo Platform 01', latitude: stationLat + 0.001, longitude: stationLng + 0.001 },
-                    { display_name: 'Demo Platform 02', latitude: stationLat - 0.001, longitude: stationLng + 0.0015 },
-                    { display_name: 'Demo Platform 03', latitude: stationLat + 0.0005, longitude: stationLng - 0.001 }
-                ];
-                platforms.push(...demoPlatforms);
-            }
 
             platforms.forEach(platform => {
                 // Use platform coordinates if available, otherwise offset from station

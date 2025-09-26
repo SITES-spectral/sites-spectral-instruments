@@ -576,6 +576,16 @@
                 const userData = await userResponse.json();
                 currentUser = userData.user;
 
+                // Only admin users can access dashboard
+                if (currentUser.role !== 'admin') {
+                    if (currentUser.role === 'station' && currentUser.station_acronym) {
+                        window.location.href = `/station.html?station=${currentUser.station_acronym}`;
+                    } else {
+                        window.location.href = '/';
+                    }
+                    return;
+                }
+
                 // Update user display
                 document.getElementById('user-name').textContent = currentUser.username;
                 document.getElementById('user-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);

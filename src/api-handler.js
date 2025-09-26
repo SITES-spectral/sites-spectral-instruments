@@ -2087,7 +2087,10 @@ function canAccessStation(user, station) {
   }
 
   if (user.role === 'station') {
-    return user.station_normalized_name === station.normalized_name;
+    // Check both normalized name and acronym for station access
+    return user.station_normalized_name === station.normalized_name ||
+           user.station_acronym === station.acronym ||
+           user.station_acronym === station.normalized_name;
   }
 
   // readonly users can access all stations

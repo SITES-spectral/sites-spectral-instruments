@@ -2,7 +2,33 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.9.1 - Complete Admin Dashboard with Station Management Interface (2025-09-26)
+## Version 4.9.5 - Enhanced Security: Role-Based Access Control and JavaScript Fixes (2025-09-26)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
+**🌐 Production URL:** https://sites.jobelab.com
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.9.5 🔒
+**🎯 Major Achievement:** Implemented strict role-based access control and fixed critical JavaScript syntax errors
+
+### 🔒 Enhanced Role-Based Access Control in v4.9.5
+- **Dashboard Access Restriction**: Only admin users can access `/dashboard.html` - all other users are redirected appropriately
+- **Station User Isolation**: Station users can only access their assigned station page, cannot reach dashboard
+- **Readonly User Restriction**: Readonly users no longer have dashboard access, redirected to login
+- **Login Redirect Logic**: Updated to properly route users based on role (admin → dashboard, station → station page, others → login)
+- **Station Page Security**: Fixed redirect logic to prevent non-admin users from accessing dashboard
+
+### 🐛 Critical JavaScript Fixes in v4.9.5
+- **Leaflet Script Tag**: Fixed malformed script tag missing closing `>` that caused "unexpected token: '{'" syntax error
+- **Demo Data Removal**: Removed all hardcoded demo platform data since application now works with database
+- **Syntax Validation**: Verified all HTML pages have balanced braces and parentheses
+- **Script Validation**: Ensured proper HTML structure and JavaScript parsing across all pages
+
+### 🚀 Security Improvements in v4.9.5
+- **Multi-Layer Protection**: Added both client-side and server-side role validation
+- **Access Prevention**: Dashboard prevents unauthorized access with immediate redirect
+- **Role Enforcement**: Consistent role checking across login, dashboard, and station pages
+- **User Experience**: Seamless redirects maintain user flow while enforcing security
+
+## Previous Version: 4.9.1 - Complete Admin Dashboard with Station Management Interface (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev

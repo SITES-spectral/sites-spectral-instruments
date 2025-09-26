@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.9.4",
+  "version": "4.9.5",
   "description": "SITES Spectral Stations & Instruments Management System v4.9.4 - Role-Based Login Redirects and Platform/Instrument Counts",
   "main": "src/worker.js",
   "scripts": {
