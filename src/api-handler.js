@@ -1742,9 +1742,13 @@ async function getStationData(identifier, env) {
 async function getStationsData(user, env) {
   try {
     let query = `
-      SELECT id, display_name, acronym, normalized_name, latitude, longitude,
-             elevation_m, status, country, description
-      FROM stations
+      SELECT s.id, s.display_name, s.acronym, s.normalized_name, s.latitude, s.longitude,
+             s.elevation_m, s.status, s.country, s.description,
+             COUNT(DISTINCT p.id) as platform_count,
+             COUNT(DISTINCT i.id) as instrument_count
+      FROM stations s
+      LEFT JOIN platforms p ON s.id = p.station_id
+      LEFT JOIN instruments i ON p.id = i.platform_id
     `;
 
     let result;
@@ -1752,14 +1756,16 @@ async function getStationsData(user, env) {
     // Filter based on user role
     if (user.role === 'admin') {
       // Admin can see all stations
-      result = await env.DB.prepare(query + ' ORDER BY display_name').all();
+      query += ' GROUP BY s.id ORDER BY s.display_name';
+      result = await env.DB.prepare(query).all();
     } else if (user.role === 'station' && user.station_normalized_name) {
       // Station users can only see their own station
-      query += ' WHERE normalized_name = ? ORDER BY display_name';
+      query += ' WHERE s.normalized_name = ? GROUP BY s.id ORDER BY s.display_name';
       result = await env.DB.prepare(query).bind(user.station_normalized_name).all();
     } else {
       // Readonly users can see all stations
-      result = await env.DB.prepare(query + ' ORDER BY display_name').all();
+      query += ' GROUP BY s.id ORDER BY s.display_name';
+      result = await env.DB.prepare(query).all();
     }
 
     return result?.results || [];

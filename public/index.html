@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="/css/styles.css?v=4.9.3">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.2">
+    <meta name="app-version" content="4.9.3">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -322,13 +322,23 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect');
 
-                // Redirect to station page with station acronym
-                if (user.station_acronym) {
-                    window.location.href = redirect || `/station.html?station=${user.station_acronym}`;
+                // Determine redirect URL based on user role
+                let targetUrl = '/';
+
+                if (user.role === 'admin') {
+                    targetUrl = redirect || '/dashboard.html';
+                } else if (user.role === 'station' && user.station_acronym) {
+                    // Always use station.html for station users with their station
+                    targetUrl = redirect || `/station.html?station=${user.station_acronym}`;
+                } else if (user.role === 'readonly') {
+                    // Readonly users go to dashboard to see all stations
+                    targetUrl = redirect || '/dashboard.html';
                 } else {
-                    // For users without station, use a default station
-                    window.location.href = redirect || `/station.html?station=ANS`;
+                    // Fallback to dashboard for any other case
+                    targetUrl = redirect || '/dashboard.html';
                 }
+
+                window.location.href = targetUrl;
             }
 
             setLoading(loading) {

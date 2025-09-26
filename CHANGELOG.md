@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [4.9.4] - 2025-09-26
+
+### 🔐 Role-Based Login Redirects and Dashboard Platform/Instrument Counts
+
+#### 🎯 Fixed Login Redirect Logic
+- **Admin Users**: Now properly redirected to `/dashboard.html` after login
+- **Station Users**: Correctly redirected to `/station.html?station={acronym}` for their specific station
+- **Readonly Users**: Appropriately directed to `/dashboard.html` to view all stations
+- **Index.html Fix**: Corrected inconsistent redirect logic that was sending all users to station pages
+
+#### 📊 Dashboard Platform/Instrument Counts
+- **Real-Time Counts**: Dashboard now displays actual platform and instrument counts for each station
+- **Database Integration**: Enhanced `getStationsData()` API function to include aggregate counts using LEFT JOIN queries
+- **Dynamic Display**: Replaced hardcoded "-" placeholders with `${station.platform_count || 0}` and `${station.instrument_count || 0}`
+- **SQL Optimization**: Added GROUP BY clauses to properly aggregate platform and instrument counts per station
+
+#### 🛠️ Technical Implementation
+- **API Enhancement**: Modified `src/api-handler.js` to include platform_count and instrument_count in station queries
+- **Frontend Integration**: Updated `public/dashboard.html` to utilize the new count fields from API responses
+- **Login Consistency**: Standardized redirect logic across `index.html` and `login.html` for consistent user experience
+- **Database Efficiency**: Single query now provides station data with associated counts, reducing API calls
+
+#### 🎨 User Experience Improvements
+- **Role-Appropriate Access**: Users now land on pages appropriate for their permission level
+- **Dashboard Functionality**: Admin and readonly users see comprehensive station overview with live counts
+- **Station Focus**: Station users immediately access their specific station management interface
+- **Visual Feedback**: Dashboard cards now show meaningful statistics instead of placeholder values
+
 ## [4.9.3] - 2025-09-26
 
 ### 🐛 Critical JavaScript Syntax Fixes: Resolved Page Loading and Function Definition Issues
