@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.7",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.7 - Enhanced Help Button Size and Visibility",
+  "version": "4.8.9",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.9 - Research Programs Multiselect Component",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

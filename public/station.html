@@ -22,11 +22,11 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.7">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.9">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.7">
-    <meta name="build-date" content="2025-09-23">
+    <meta name="app-version" content="4.8.9">
+    <meta name="build-date" content="2025-09-26">
 
     <style>
         body {
@@ -770,6 +770,142 @@
             border-radius: 4px;
             font-size: 0.75rem;
         }
+
+        /* Multiselect Component Styles */
+        .multiselect-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .multiselect-display {
+            min-height: 2.5rem;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .multiselect-display:hover {
+            border-color: #9ca3af;
+        }
+
+        .multiselect-display.open {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .multiselect-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .multiselect-tag.sites { background: #10b981; }
+        .multiselect-tag.icos { background: #8b5cf6; }
+        .multiselect-tag.slu { background: #f59e0b; }
+        .multiselect-tag.polar { background: #06b6d4; }
+        .multiselect-tag.goteborg { background: #ef4444; }
+
+        .multiselect-tag-remove {
+            margin-left: 0.25rem;
+            cursor: pointer;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        .multiselect-tag-remove:hover {
+            opacity: 1;
+        }
+
+        .multiselect-placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .multiselect-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .multiselect-dropdown.open {
+            display: block;
+        }
+
+        .multiselect-option {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .multiselect-option:hover {
+            background: #f3f4f6;
+        }
+
+        .multiselect-option.selected {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .multiselect-option-text {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .multiselect-option-icon {
+            font-size: 0.875rem;
+        }
+
+        .multiselect-custom-input {
+            padding: 0.5rem 0.75rem;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .multiselect-custom-input input {
+            width: 100%;
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .multiselect-custom-input button {
+            margin-top: 0.5rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .multiselect-custom-input button:hover {
+            background: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -980,7 +1116,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.7"></script>
+    <script src="/js/utils.js?v=4.8.9"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1613,8 +1749,20 @@
         function formatOperationPrograms(programsString) {
             if (!programsString) return 'Not specified';
 
-            // Split the comma-separated programs and create badges
-            const programs = programsString.split(',').map(p => p.trim());
+            let programs = [];
+
+            // Check if it's a JSON array string format (contains brackets)
+            if (programsString.startsWith('[') && programsString.endsWith(']')) {
+                try {
+                    programs = JSON.parse(programsString);
+                } catch (e) {
+                    // Fallback to treating as comma-separated if JSON parse fails
+                    programs = programsString.split(',').map(p => p.trim());
+                }
+            } else {
+                // Split the comma-separated programs
+                programs = programsString.split(',').map(p => p.trim());
+            }
 
             return programs.map(program => {
                 let badgeClass = 'program-badge';
@@ -1637,6 +1785,196 @@
                 return `<span class="${badgeClass}">${icon} ${program}</span>`;
             }).join(' ');
         }
+
+        function convertOperationProgramsForEdit(programsString) {
+            if (!programsString) return '';
+
+            // Check if it's a JSON array string format (contains brackets)
+            if (programsString.startsWith('[') && programsString.endsWith(']')) {
+                try {
+                    const programs = JSON.parse(programsString);
+                    return programs.join(', ');
+                } catch (e) {
+                    // Return as-is if JSON parse fails
+                    return programsString;
+                }
+            } else {
+                // Return as-is if it's already comma-separated
+                return programsString;
+            }
+        }
+
+        function convertOperationProgramsToArray(programsString) {
+            if (!programsString) return [];
+
+            // Check if it's a JSON array string format (contains brackets)
+            if (programsString.startsWith('[') && programsString.endsWith(']')) {
+                try {
+                    return JSON.parse(programsString);
+                } catch (e) {
+                    // Fallback to treating as comma-separated if JSON parse fails
+                    return programsString.split(',').map(p => p.trim()).filter(p => p);
+                }
+            } else {
+                // Split the comma-separated programs
+                return programsString.split(',').map(p => p.trim()).filter(p => p);
+            }
+        }
+
+        // Multiselect Component for Research Programs
+        class ResearchProgramsMultiselect {
+            constructor(containerId, initialValues = []) {
+                this.container = document.getElementById(containerId);
+                this.selectedValues = new Set(initialValues);
+
+                // Predefined options based on existing data
+                this.predefinedOptions = [
+                    { value: 'SITES', label: 'SITES', icon: '🌱', cssClass: 'sites' },
+                    { value: 'ICOS', label: 'ICOS', icon: '🌍', cssClass: 'icos' },
+                    { value: 'SLU', label: 'SLU', icon: '🏛️', cssClass: 'slu' },
+                    { value: 'Swedish Polar Research Secretariat', label: 'Swedish Polar Research Secretariat', icon: '❄️', cssClass: 'polar' },
+                    { value: 'Goteborg University', label: 'Göteborg University', icon: '🏫', cssClass: 'goteborg' }
+                ];
+
+                this.customInput = '';
+                this.isOpen = false;
+
+                this.render();
+                this.bindEvents();
+            }
+
+            render() {
+                this.container.innerHTML = `
+                    <div class="multiselect-display" id="${this.container.id}-display">
+                        ${this.renderSelectedTags()}
+                        ${this.selectedValues.size === 0 ? '<span class="multiselect-placeholder">Select research programs...</span>' : ''}
+                    </div>
+                    <div class="multiselect-dropdown" id="${this.container.id}-dropdown">
+                        ${this.renderOptions()}
+                        <div class="multiselect-custom-input">
+                            <input type="text" placeholder="Add custom program..." id="${this.container.id}-custom">
+                            <button type="button" onclick="researchProgramsMultiselect.addCustom()">Add</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSelectedTags() {
+                return Array.from(this.selectedValues).map(value => {
+                    const option = this.predefinedOptions.find(opt => opt.value === value);
+                    const cssClass = option ? option.cssClass : 'default';
+                    const icon = option ? option.icon : '🔬';
+
+                    return `
+                        <span class="multiselect-tag ${cssClass}">
+                            ${icon} ${value}
+                            <span class="multiselect-tag-remove" onclick="researchProgramsMultiselect.removeValue('${value.replace(/'/g, "\\'")}')">&times;</span>
+                        </span>
+                    `;
+                }).join('');
+            }
+
+            renderOptions() {
+                return this.predefinedOptions.map(option => {
+                    const isSelected = this.selectedValues.has(option.value);
+                    return `
+                        <div class="multiselect-option ${isSelected ? 'selected' : ''}" onclick="researchProgramsMultiselect.toggleValue('${option.value.replace(/'/g, "\\'")}')">
+                            <div class="multiselect-option-text">
+                                <span class="multiselect-option-icon">${option.icon}</span>
+                                <span>${option.label}</span>
+                            </div>
+                            ${isSelected ? '<i class="fas fa-check"></i>' : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            bindEvents() {
+                const display = document.getElementById(`${this.container.id}-display`);
+                const dropdown = document.getElementById(`${this.container.id}-dropdown`);
+
+                display.addEventListener('click', () => this.toggle());
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!this.container.contains(e.target)) {
+                        this.close();
+                    }
+                });
+
+                // Handle custom input
+                const customInput = document.getElementById(`${this.container.id}-custom`);
+                customInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.addCustom();
+                    }
+                });
+            }
+
+            toggle() {
+                this.isOpen ? this.close() : this.open();
+            }
+
+            open() {
+                this.isOpen = true;
+                const display = document.getElementById(`${this.container.id}-display`);
+                const dropdown = document.getElementById(`${this.container.id}-dropdown`);
+
+                display.classList.add('open');
+                dropdown.classList.add('open');
+            }
+
+            close() {
+                this.isOpen = false;
+                const display = document.getElementById(`${this.container.id}-display`);
+                const dropdown = document.getElementById(`${this.container.id}-dropdown`);
+
+                display.classList.remove('open');
+                dropdown.classList.remove('open');
+            }
+
+            toggleValue(value) {
+                if (this.selectedValues.has(value)) {
+                    this.selectedValues.delete(value);
+                } else {
+                    this.selectedValues.add(value);
+                }
+                this.render();
+                this.bindEvents();
+            }
+
+            removeValue(value) {
+                this.selectedValues.delete(value);
+                this.render();
+                this.bindEvents();
+            }
+
+            addCustom() {
+                const input = document.getElementById(`${this.container.id}-custom`);
+                const value = input.value.trim();
+
+                if (value && !this.selectedValues.has(value)) {
+                    this.selectedValues.add(value);
+                    input.value = '';
+                    this.render();
+                    this.bindEvents();
+                }
+            }
+
+            getValues() {
+                return Array.from(this.selectedValues);
+            }
+
+            setValues(values) {
+                this.selectedValues = new Set(values);
+                this.render();
+                this.bindEvents();
+            }
+        }
+
+        // Global instance for platform edit form
+        let researchProgramsMultiselect;
 
         function getInstrumentImageUrl(instrument) {
             // Map station acronyms to normalized directory names
@@ -2574,9 +2912,10 @@
 
                         <div class="form-group">
                             <label>Operation Programs</label>
-                            <textarea id="edit-platform-operation-programs" class="form-control" rows="3"
-                                      placeholder="Enter operation programs, separated by commas">${platform.operation_programs || ''}</textarea>
-                            <small class="form-text">Enter multiple programs separated by commas</small>
+                            <div id="edit-platform-operation-programs" class="multiselect-container">
+                                <!-- Multiselect component will be populated here -->
+                            </div>
+                            <small class="form-text">Select from existing programs or add new ones</small>
                         </div>
                     </div>
 
@@ -2605,6 +2944,10 @@
                 e.preventDefault();
                 await savePlatformChanges(platform.id);
             });
+
+            // Initialize multiselect component for research programs
+            const currentPrograms = convertOperationProgramsToArray(platform.operation_programs);
+            researchProgramsMultiselect = new ResearchProgramsMultiselect('edit-platform-operation-programs', currentPrograms);
 
             document.getElementById('platform-edit-modal').classList.add('show');
         }
@@ -2881,6 +3224,8 @@
                     platform_height_m: parseFloat(document.getElementById('edit-platform-height').value) || null,
                     latitude: parseFloat(document.getElementById('edit-platform-latitude').value) || null,
                     longitude: parseFloat(document.getElementById('edit-platform-longitude').value) || null,
+                    deployment_date: document.getElementById('edit-platform-deployment-date').value,
+                    operation_programs: researchProgramsMultiselect ? researchProgramsMultiselect.getValues().join(', ') : '',
                     description: document.getElementById('edit-platform-description').value,
                     updated_at: new Date().toISOString()
                 };

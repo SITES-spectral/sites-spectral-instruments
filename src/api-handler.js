@@ -341,7 +341,7 @@ async function handlePlatforms(method, id, request, env) {
       // Fields that station users can edit
       const stationEditableFields = [
         'display_name', 'status', 'mounting_structure', 'platform_height_m',
-        'latitude', 'longitude', 'deployment_date', 'description', 'updated_at'
+        'latitude', 'longitude', 'deployment_date', 'description', 'operation_programs', 'updated_at'
       ];
 
       // Fields that only admin can edit

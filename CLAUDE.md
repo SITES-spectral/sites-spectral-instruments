@@ -2,11 +2,41 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.7 - Enhanced Help Button Size and Auto-Fitting Map Zoom (2025-09-23)
+## Version 4.8.9 - Research Programs Multiselect Component (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-23 ✅ DEPLOYED v4.8.7 ✨
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.9 ✨
+**🎯 Major Achievement:** Professional multiselect component for research programs with predefined options and custom input
+
+### ✨ Research Programs Multiselect Enhancement in v4.8.9
+- **Streamlit-Style Component**: Professional multiselect widget inspired by Streamlit's st.multiselect
+- **Predefined Options**: Harmonized list of existing research programs (SITES, ICOS, SLU, Swedish Polar Research Secretariat, Göteborg University)
+- **Custom Program Input**: Ability to add new research programs while preventing data inconsistencies
+- **Visual Program Tags**: Color-coded tags with icons for different research programs
+- **Data Consistency**: Prevents human errors and maintains data integrity across the network
+- **Click-to-Remove**: Easy removal of selected programs with × buttons
+- **Professional Styling**: Modern UI with hover effects and proper accessibility
+- **Error Prevention**: No more typos or inconsistent program names
+- **Backwards Compatible**: Properly handles existing JSON array and comma-separated data formats
+
+### 🎯 User Experience Benefits
+- **Harmonized Data**: All stations now use consistent research program names
+- **Error-Free Input**: No more manual typing errors for program names
+- **Visual Clarity**: Instant visual feedback with colored tags and icons
+- **Flexible Input**: Choose from existing programs or add custom ones
+- **One-Click Operations**: Easy selection/deselection with mouse clicks
+- **Professional Interface**: Clean, modern design matching the overall application aesthetic
+
+### 🔧 Technical Implementation
+- **CSS-Based Styling**: Custom multiselect component with professional appearance
+- **JavaScript Class**: Reusable ResearchProgramsMultiselect component
+- **Data Format Handling**: Seamless conversion between JSON arrays and comma-separated values
+- **API Integration**: Updated save functionality to properly handle multiselect data
+- **Responsive Design**: Works across all device sizes and screen resolutions
+
+## Version 4.8.7 - Enhanced Help Button Size and Auto-Fitting Map Zoom (2025-09-23)
+**📅 Previous Version**
 **🎯 Major Achievement:** Enhanced help button usability and improved map auto-fitting functionality
 
 ### ✨ User Experience Enhancement in v4.8.7

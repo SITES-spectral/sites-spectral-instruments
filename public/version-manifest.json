@@ -1,16 +1,16 @@
 {
-  "version": "4.8.7",
-  "buildDate": "2025-09-23",
-  "timestamp": 1758594165914,
+  "version": "4.8.9",
+  "buildDate": "2025-09-26",
+  "timestamp": 1758877649009,
   "files": {
-    "/css/styles.css?v=4.8.7": "4.8.7",
-    "/js/utils.js?v=4.8.7": "4.8.7",
-    "/js/api.js?v=4.8.7": "4.8.7",
-    "/js/components.js?v=4.8.7": "4.8.7",
-    "/js/interactive-map.js?v=4.8.7": "4.8.7",
-    "/js/dashboard.js?v=4.8.7": "4.8.7",
-    "/js/station-dashboard.js?v=4.8.7": "4.8.7",
-    "/js/navigation.js?v=4.8.7": "4.8.7",
-    "/js/export.js?v=4.8.7": "4.8.7"
+    "/css/styles.css?v=4.8.9": "4.8.9",
+    "/js/utils.js?v=4.8.9": "4.8.9",
+    "/js/api.js?v=4.8.9": "4.8.9",
+    "/js/components.js?v=4.8.9": "4.8.9",
+    "/js/interactive-map.js?v=4.8.9": "4.8.9",
+    "/js/dashboard.js?v=4.8.9": "4.8.9",
+    "/js/station-dashboard.js?v=4.8.9": "4.8.9",
+    "/js/navigation.js?v=4.8.9": "4.8.9",
+    "/js/export.js?v=4.8.9": "4.8.9"
   }
 }
