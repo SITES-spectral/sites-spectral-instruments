@@ -1303,7 +1303,7 @@ async function handleROIs(method, id, request, env) {
   const instrumentParam = url.searchParams.get('instrument');
 
   try {
-    if (id) {
+    if (method === 'GET' && id) {
       // Get specific ROI by ID
       let query = `
         SELECT r.id, r.roi_name, r.description, r.alpha, r.auto_generated,
@@ -1336,7 +1336,7 @@ async function handleROIs(method, id, request, env) {
         headers: { 'Content-Type': 'application/json' }
       });
 
-    } else {
+    } else if (method === 'GET') {
       // Get ROIs for a specific instrument
       if (instrumentParam) {
         let query = `
@@ -1389,6 +1389,7 @@ async function handleROIs(method, id, request, env) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
+
     } else if (method === 'POST') {
       // Create new ROI
       const roiData = await request.json();
