@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.9",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.9 - Research Programs Multiselect Component",
+  "version": "4.8.10",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.10 - Complete CRUD Operations for Instruments and ROIs",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

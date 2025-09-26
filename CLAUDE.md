@@ -2,6 +2,69 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Version 4.8.10 - Complete CRUD Operations for Instruments and ROIs (2025-09-26)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
+**🌐 Production URL:** https://sites.jobelab.com
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.10 🚀
+**🎯 Major Achievement:** Full CRUD (Create, Read, Update, Delete) functionality for instruments and ROIs with automatic naming, backup system, and comprehensive user guidance
+
+### 🔧 Complete CRUD System Implementation in v4.8.10
+- **Instrument Management**: Full create, read, update, delete operations for phenocam instruments
+- **ROI Management**: Complete CRUD functionality for Regions of Interest (ROIs)
+- **Automatic Naming**: Smart auto-generation of normalized names (e.g., ANS_FOR_BL01_PHE03, ROI_00)
+- **Backup System**: Optional JSON backups before deletion with complete data preservation
+- **Permission-Based Access**: Station users can only manage instruments/ROIs for their assigned stations
+- **Real-time UI Updates**: Immediate refresh of all displays after create/delete operations
+
+### ✨ User Experience Enhancements
+- **Intuitive Interface**: Plus buttons for adding new instruments and ROIs throughout the UI
+- **Smart Deletion**: Delete buttons with confirmation dialogs and backup options
+- **Visual Feedback**: Professional loading states, success notifications, and error handling
+- **Comprehensive Help**: Enhanced tooltips with emojis and detailed guidance throughout
+- **Professional Forms**: Clean modal forms with validation and contextual instructions
+- **Empty State Guidance**: Helpful prompts when no instruments or ROIs exist
+
+### 🎯 Instrument CRUD Features
+- **Auto-Generated Names**: Platform-based naming (e.g., ANS_FOR_BL01_PHE01, ANS_FOR_BL01_PHE02)
+- **Sequential Numbering**: Automatic PHE number assignment based on existing instruments
+- **Default Values**: New instruments start as "Planned" status with basic phenocam settings
+- **Complete Backup**: Full instrument data plus all associated ROIs before deletion
+- **Platform Integration**: Add buttons in platform cards and modals for easy access
+
+### 🎯 ROI CRUD Features
+- **Auto-Generated Names**: Sequential ROI naming (ROI_00, ROI_01, ROI_02, etc.)
+- **Color Management**: RGB color picker with live preview for visualization
+- **Technical Settings**: Thickness, alpha transparency, and description fields
+- **Backup Preservation**: Complete ROI data with polygon coordinates before deletion
+- **Instrument Integration**: Add/delete ROI buttons in instrument detail modals
+
+### 🔒 Security and Permissions
+- **Role-Based Access**: Admin users can manage all; station users limited to their station
+- **Permission Validation**: Server-side checks for all create/delete operations
+- **Audit Trails**: Complete logging of all CRUD operations with user attribution
+- **Backup Security**: Automatic backup generation before any destructive operations
+
+### 💾 Backup System Architecture
+- **Comprehensive Data**: Includes all related data (instruments with ROIs, ROI with context)
+- **Metadata Tracking**: Timestamps, deletion type, user attribution, station context
+- **Automatic Downloads**: JSON files auto-download with descriptive filenames
+- **Restore Capability**: Backup format designed for potential data restoration
+
+### 🚀 Technical Implementation
+- **Backend APIs**: RESTful endpoints for POST (create) and DELETE operations
+- **Frontend Modals**: Professional forms with validation and user guidance
+- **Auto-Naming Logic**: Smart algorithms to find next available sequential numbers
+- **Error Handling**: Comprehensive error management with user-friendly messages
+- **Real-time Updates**: Automatic UI refresh after all CRUD operations
+
+### 🎨 UI/UX Design Elements
+- **Professional Buttons**: Green plus buttons for creation, red delete buttons for removal
+- **Modal System**: Consistent modal design for all create/delete confirmations
+- **Loading States**: Spinner animations during API operations
+- **Success Feedback**: Slide-in notifications with operation confirmations
+- **Help Integration**: Contextual help text and tooltips throughout interface
+
 ## Version 4.8.9 - Research Programs Multiselect Component (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com

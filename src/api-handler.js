@@ -409,7 +409,7 @@ async function handlePlatforms(method, id, request, env) {
 
 // Instrument endpoints
 async function handleInstruments(method, id, request, env) {
-  if (!['GET', 'PUT'].includes(method)) {
+  if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -607,11 +607,196 @@ async function handleInstruments(method, id, request, env) {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
+
+    } else if (method === 'POST') {
+      // Create new instrument
+      const instrumentData = await request.json();
+
+      if (!instrumentData.platform_id) {
+        return new Response(JSON.stringify({ error: 'Platform ID is required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Verify platform exists and get its station for permission check
+      const platformQuery = `
+        SELECT p.id, p.normalized_name as platform_normalized_name, s.normalized_name as station_normalized_name
+        FROM platforms p
+        JOIN stations s ON p.station_id = s.id
+        WHERE p.id = ?
+      `;
+
+      const platform = await env.DB.prepare(platformQuery).bind(instrumentData.platform_id).first();
+
+      if (!platform) {
+        return new Response(JSON.stringify({ error: 'Platform not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check permissions for the platform's station
+      if (!hasPermission(user, 'write', 'instruments', platform.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Generate next normalized name for this platform
+      const existingInstrumentsQuery = `
+        SELECT normalized_name FROM instruments
+        WHERE platform_id = ? AND normalized_name LIKE ?
+        ORDER BY normalized_name DESC
+      `;
+
+      const namePattern = `${platform.platform_normalized_name}_PHE%`;
+      const existingInstruments = await env.DB.prepare(existingInstrumentsQuery)
+        .bind(instrumentData.platform_id, namePattern).all();
+
+      // Find next PHE number
+      let nextPheNumber = 1;
+      if (existingInstruments.results && existingInstruments.results.length > 0) {
+        const existingNumbers = existingInstruments.results
+          .map(r => {
+            const match = r.normalized_name.match(/_PHE(\d+)$/);
+            return match ? parseInt(match[1]) : 0;
+          })
+          .filter(n => n > 0);
+
+        if (existingNumbers.length > 0) {
+          nextPheNumber = Math.max(...existingNumbers) + 1;
+        }
+      }
+
+      const normalizedName = `${platform.platform_normalized_name}_PHE${nextPheNumber.toString().padStart(2, '0')}`;
+      const displayName = instrumentData.display_name || `${platform.platform_normalized_name} Phenocam ${nextPheNumber.toString().padStart(2, '0')}`;
+
+      // Insert new instrument with auto-generated normalized name
+      const insertQuery = `
+        INSERT INTO instruments (
+          platform_id, normalized_name, display_name, instrument_type, ecosystem_code,
+          instrument_number, status, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const now = new Date().toISOString();
+      const instrumentNumber = `PHE${nextPheNumber.toString().padStart(2, '0')}`;
+
+      const result = await env.DB.prepare(insertQuery).bind(
+        instrumentData.platform_id,
+        normalizedName,
+        displayName,
+        'phenocam',
+        instrumentData.ecosystem_code || '',
+        instrumentNumber,
+        'Planned',
+        now,
+        now
+      ).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Instrument created successfully',
+        id: result.meta.last_row_id,
+        normalized_name: normalizedName
+      }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'DELETE' && id) {
+      // Delete instrument
+      const url = new URL(request.url);
+      const backup = url.searchParams.get('backup') === 'true';
+
+      // First verify instrument exists and get its station for permission check
+      const checkQuery = `
+        SELECT i.id, i.normalized_name, s.normalized_name as station_normalized_name
+        FROM instruments i
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+        WHERE i.id = ?
+      `;
+
+      const existingInstrument = await env.DB.prepare(checkQuery).bind(id).first();
+
+      if (!existingInstrument) {
+        return new Response(JSON.stringify({ error: 'Instrument not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check permissions
+      if (!hasPermission(user, 'write', 'instruments', existingInstrument.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      let backupData = null;
+
+      // Generate backup if requested
+      if (backup) {
+        // Get complete instrument data
+        const instrumentQuery = `
+          SELECT i.*, p.display_name as platform_name, p.normalized_name as platform_normalized_name,
+                 s.acronym as station_acronym, s.display_name as station_name
+          FROM instruments i
+          JOIN platforms p ON i.platform_id = p.id
+          JOIN stations s ON p.station_id = s.id
+          WHERE i.id = ?
+        `;
+
+        const instrumentData = await env.DB.prepare(instrumentQuery).bind(id).first();
+
+        // Get associated ROIs
+        const roisQuery = `
+          SELECT * FROM instrument_rois WHERE instrument_id = ?
+        `;
+        const roisResult = await env.DB.prepare(roisQuery).bind(id).all();
+
+        backupData = {
+          instrument: instrumentData,
+          rois: roisResult?.results || [],
+          backup_metadata: {
+            timestamp: new Date().toISOString(),
+            backup_type: 'instrument_deletion',
+            platform_name: instrumentData.platform_normalized_name,
+            station: instrumentData.station_acronym,
+            deleted_by: user.username
+          }
+        };
+      }
+
+      // Delete instrument (ROIs will be deleted by CASCADE)
+      await env.DB.prepare('DELETE FROM instruments WHERE id = ?').bind(id).run();
+
+      const response = {
+        success: true,
+        message: 'Instrument deleted successfully',
+        id: parseInt(id)
+      };
+
+      if (backupData) {
+        response.backup_data = backupData;
+      }
+
+      return new Response(JSON.stringify(response), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
   } catch (error) {
     console.error('Instruments error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch instrument data' }), {
+    return new Response(JSON.stringify({
+      error: 'Failed to process instrument request',
+      message: error.message
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -1099,7 +1284,7 @@ async function getStationsData(user, env) {
 
 // Handle ROI requests
 async function handleROIs(method, id, request, env) {
-  if (method !== 'GET') {
+  if (!['GET', 'POST', 'DELETE'].includes(method)) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -1204,12 +1389,196 @@ async function handleROIs(method, id, request, env) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
+    } else if (method === 'POST') {
+      // Create new ROI
+      const roiData = await request.json();
+
+      if (!roiData.instrument_id) {
+        return new Response(JSON.stringify({ error: 'Instrument ID is required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Verify instrument exists and get its station for permission check
+      const instrumentQuery = `
+        SELECT i.id, i.normalized_name as instrument_normalized_name,
+               s.normalized_name as station_normalized_name
+        FROM instruments i
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+        WHERE i.id = ?
+      `;
+
+      const instrument = await env.DB.prepare(instrumentQuery).bind(roiData.instrument_id).first();
+
+      if (!instrument) {
+        return new Response(JSON.stringify({ error: 'Instrument not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check permissions for the instrument's station
+      if (!hasPermission(user, 'write', 'rois', instrument.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Generate next ROI name for this instrument
+      const existingROIsQuery = `
+        SELECT roi_name FROM instrument_rois
+        WHERE instrument_id = ? AND roi_name LIKE 'ROI_%'
+        ORDER BY roi_name DESC
+      `;
+
+      const existingROIs = await env.DB.prepare(existingROIsQuery)
+        .bind(roiData.instrument_id).all();
+
+      // Find next ROI number
+      let nextRoiNumber = 0;
+      if (existingROIs.results && existingROIs.results.length > 0) {
+        const existingNumbers = existingROIs.results
+          .map(r => {
+            const match = r.roi_name.match(/^ROI_(\d+)$/);
+            return match ? parseInt(match[1]) : -1;
+          })
+          .filter(n => n >= 0);
+
+        if (existingNumbers.length > 0) {
+          nextRoiNumber = Math.max(...existingNumbers) + 1;
+        }
+      }
+
+      const roiName = `ROI_${nextRoiNumber.toString().padStart(2, '0')}`;
+
+      // Insert new ROI with auto-generated name and default values
+      const insertQuery = `
+        INSERT INTO instrument_rois (
+          instrument_id, roi_name, description, alpha, auto_generated,
+          color_r, color_g, color_b, thickness, points_json,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const now = new Date().toISOString();
+
+      const result = await env.DB.prepare(insertQuery).bind(
+        roiData.instrument_id,
+        roiName,
+        roiData.description || '',
+        roiData.alpha || 0.0,
+        false, // auto_generated
+        roiData.color_r || 255,
+        roiData.color_g || 255,
+        roiData.color_b || 255,
+        roiData.thickness || 7,
+        roiData.points_json || '[]',
+        now,
+        now
+      ).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'ROI created successfully',
+        id: result.meta.last_row_id,
+        roi_name: roiName
+      }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'DELETE' && id) {
+      // Delete ROI
+      const url = new URL(request.url);
+      const backup = url.searchParams.get('backup') === 'true';
+
+      // First verify ROI exists and get its station for permission check
+      const checkQuery = `
+        SELECT r.id, r.roi_name, s.normalized_name as station_normalized_name,
+               i.normalized_name as instrument_normalized_name
+        FROM instrument_rois r
+        JOIN instruments i ON r.instrument_id = i.id
+        JOIN platforms p ON i.platform_id = p.id
+        JOIN stations s ON p.station_id = s.id
+        WHERE r.id = ?
+      `;
+
+      const existingROI = await env.DB.prepare(checkQuery).bind(id).first();
+
+      if (!existingROI) {
+        return new Response(JSON.stringify({ error: 'ROI not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check permissions
+      if (!hasPermission(user, 'write', 'rois', existingROI.station_normalized_name)) {
+        return new Response(JSON.stringify({ error: 'Insufficient permissions' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      let backupData = null;
+
+      // Generate backup if requested
+      if (backup) {
+        // Get complete ROI data
+        const roiQuery = `
+          SELECT r.*, i.normalized_name as instrument_normalized_name,
+                 p.normalized_name as platform_normalized_name,
+                 s.acronym as station_acronym, s.display_name as station_name
+          FROM instrument_rois r
+          JOIN instruments i ON r.instrument_id = i.id
+          JOIN platforms p ON i.platform_id = p.id
+          JOIN stations s ON p.station_id = s.id
+          WHERE r.id = ?
+        `;
+
+        const roiData = await env.DB.prepare(roiQuery).bind(id).first();
+
+        backupData = {
+          roi: roiData,
+          instrument_context: {
+            normalized_name: roiData.instrument_normalized_name,
+            platform_name: roiData.platform_normalized_name,
+            station: roiData.station_acronym
+          },
+          backup_metadata: {
+            timestamp: new Date().toISOString(),
+            backup_type: 'roi_deletion',
+            deleted_by: user.username
+          }
+        };
+      }
+
+      // Delete ROI
+      await env.DB.prepare('DELETE FROM instrument_rois WHERE id = ?').bind(id).run();
+
+      const response = {
+        success: true,
+        message: 'ROI deleted successfully',
+        id: parseInt(id)
+      };
+
+      if (backupData) {
+        response.backup_data = backupData;
+      }
+
+      return new Response(JSON.stringify(response), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
   } catch (error) {
     console.error('ROI endpoint error:', error);
     return new Response(JSON.stringify({
-      error: 'Failed to fetch ROI data',
+      error: 'Failed to process ROI request',
       message: error.message
     }), {
       status: 500,

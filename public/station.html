@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.9">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.10">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.9">
+    <meta name="app-version" content="4.8.10">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -906,6 +906,157 @@
         .multiselect-custom-input button:hover {
             background: #2563eb;
         }
+        /* CRUD Button Styles */
+        .add-instrument-btn, .add-roi-btn {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+
+        .add-instrument-btn:hover, .add-roi-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .instrument-delete-btn, .roi-delete-btn, .modal-delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+        }
+
+        .instrument-delete-btn:hover, .roi-delete-btn:hover, .modal-delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .modal-delete-btn {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin-left: 0.5rem;
+        }
+
+        .modal-delete-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .inline-add-btn {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .inline-add-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #065f46 100%);
+            transform: translateY(-1px);
+        }
+
+        /* Prevent delete button clicks from triggering card clicks */
+        .instrument-delete-btn, .roi-delete-btn {
+            z-index: 20;
+        }
+
+        /* Delete Confirmation Styles */
+        .delete-warning {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .warning-icon {
+            color: #dc2626;
+            font-size: 2rem;
+        }
+
+        .warning-content h4 {
+            margin: 0 0 0.5rem 0;
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .warning-content p {
+            margin: 0 0 1rem 0;
+            color: #374151;
+        }
+
+        .backup-option {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .backup-option label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .delete-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
     </style>
 </head>
 <body>
@@ -1101,6 +1252,51 @@
         </div>
     </div>
 
+    <!-- Create Instrument Modal -->
+    <div id="create-instrument-modal" class="instrument-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-plus"></i> Add New Instrument</h3>
+                <button class="modal-close-large" onclick="closeCreateInstrumentModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="create-instrument-form" class="edit-form">
+                    <!-- Create form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create ROI Modal -->
+    <div id="create-roi-modal" class="roi-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-plus"></i> Add New ROI</h3>
+                <button class="modal-close-large" onclick="closeCreateROIModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="create-roi-form" class="edit-form">
+                    <!-- Create form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirmation-modal" class="instrument-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+                <button class="modal-close-large" onclick="closeDeleteConfirmationModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="delete-confirmation-content" class="edit-form">
+                    <!-- Delete confirmation content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Recent Updates Settings -->
     <div class="hide-recent-updates-setting">
         <label>
@@ -1116,7 +1312,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.9"></script>
+    <script src="/js/utils.js?v=4.8.10"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1674,7 +1870,7 @@
                             <i class="fas fa-tower-observation"></i>
                             ${platform.display_name}
                             <br><small style="opacity: 0.7; font-weight: normal;">${platform.normalized_name || 'N/A'}</small>
-                            <i class="fas fa-question-circle help-icon" title="Click this card to view platform details and technical specifications" style="margin-left: 8px; font-size: 0.8em; opacity: 0.6; cursor: help;" onclick="event.stopPropagation()"></i>
+                            <i class="fas fa-question-circle help-icon" title="🔍 Click this card to view platform details, instruments, and technical specifications. Admin and station users can also edit platform information." style="margin-left: 8px; font-size: 0.8em; opacity: 0.6; cursor: help;" onclick="event.stopPropagation()"></i>
                         </div>
                         <div class="platform-meta">
                             <div class="platform-structure">
@@ -1690,9 +1886,16 @@
                         </div>
                     </div>
                     <div class="instruments-section">
-                        <h4><i class="fas fa-camera"></i> Instruments (${instruments.length})</h4>
+                        <h4>
+                            <i class="fas fa-camera"></i> Instruments (${instruments.length})
+                            ${canEdit ? `
+                                <button class="add-instrument-btn" onclick="addInstrument(${platform.id})" title="➕ Add new phenocam instrument to this platform. The system will automatically generate a normalized name like ${platform.normalized_name}_PHE03."
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            ` : ''}
+                        </h4>
                         <div class="instruments-grid">
-                            ${instrumentCards || '<div class="no-instruments">No instruments</div>'}
+                            ${instrumentCards || `<div class="no-instruments">No instruments configured yet${canEdit ? ' - <button class="inline-add-btn" onclick="addInstrument(' + platform.id + ')" title="🎯 Click to add the first phenocam instrument to this platform. The system will guide you through the setup process.">Add your first instrument</button>' : ''}</div>`}
                         </div>
                     </div>
                 </div>
@@ -1705,6 +1908,10 @@
             const legacyClass = instrument.legacy_acronym ? '' : 'no-legacy';
             const direction = instrument.viewing_direction ? `viewing direction: ${instrument.viewing_direction}` : 'viewing direction: N/A';
 
+            // Check if user can edit (admin or station user for their station)
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
             // Check if recently updated
             const recentlyUpdatedBadge = shouldShowRecentUpdate(instrument.updated_at) ?
                 `<div class="recently-updated">
@@ -1715,9 +1922,14 @@
             return `
                 <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;" onclick="showInstrumentDetails(${instrument.id})">
                     ${recentlyUpdatedBadge}
+                    ${canEdit ? `
+                        <button class="instrument-delete-btn" onclick="deleteInstrument(${instrument.id})" title="🗑️ Delete this instrument permanently. All associated ROI data will be deleted. A backup can be created before deletion."
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
                     <div class="instrument-title" style="padding: 8px 12px; background: rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85em; color: #333; text-align: center; position: relative;">
                         ${instrument.normalized_name || 'No ID'}
-                        <i class="fas fa-question-circle help-icon" title="Click this card to view instrument details and specifications" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 1.1em; opacity: 0.75; cursor: help;" onclick="event.stopPropagation()"></i>
+                        <i class="fas fa-question-circle help-icon" title="🔍 Click this card to view instrument details, specifications, ROIs, and image metadata. Admin and station users can also edit or delete this instrument." style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 1.1em; opacity: 0.75; cursor: help;" onclick="event.stopPropagation()"></i>
                     </div>
                     ${createInstrumentThumbnail(instrument)}
                     <div class="instrument-content">
@@ -2189,8 +2401,17 @@
             const isAutoGenerated = roi.auto_generated;
             const pointsCount = roi.points ? roi.points.length : 0;
 
+            // Check if user can edit (admin or station user for their station)
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
             return `
-                <div class="roi-card" onclick="showROIDetails(${roi.id})" data-roi-id="${roi.id}">
+                <div class="roi-card" onclick="showROIDetails(${roi.id})" data-roi-id="${roi.id}" style="position: relative;">
+                    ${canEdit ? `
+                        <button class="roi-delete-btn" onclick="deleteROI(${roi.id})" title="🗑️ Delete this ROI permanently. All polygon data and analysis configurations will be removed. A backup can be created before deletion."
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
                     <div class="roi-card-header">
                         <div class="roi-name">${roi.roi_name}</div>
                         <div class="roi-color-indicator" style="background-color: ${colorDisplay}"></div>
@@ -2480,7 +2701,10 @@
                         <button class="modal-edit-btn" onclick="editInstrument(${instrument.id})" title="Edit Instrument">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Click to modify instrument specifications</small>
+                        <button class="modal-delete-btn" onclick="deleteInstrument(${instrument.id})" title="Delete Instrument">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Edit or delete this instrument</small>
                     ` : ''}
                     <button class="modal-close-large" onclick="closeInstrumentModal()">&times;</button>
                 </div>
@@ -2586,7 +2810,14 @@
                     </div>
                 </div>
                 <div class="detail-section">
-                    <h4><i class="fas fa-crop-alt"></i> Regions of Interest (ROIs)</h4>
+                    <h4>
+                        <i class="fas fa-crop-alt"></i> Regions of Interest (ROIs)
+                        ${canEdit ? `
+                            <button class="add-roi-btn" onclick="addROI(${instrument.id})" title="➕ Add new Region of Interest (ROI) to this instrument. ROIs are used to define specific areas for vegetation analysis in phenocam images."
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        ` : ''}
+                    </h4>
                     <div class="detail-field detail-field-full">
                         <div id="roi-cards-${instrument.id}" class="roi-cards-container">
                             Loading ROI data...
@@ -2636,6 +2867,9 @@
             const platformModal = document.getElementById('platform-modal');
             const instrumentModal = document.getElementById('instrument-modal');
             const roiModal = document.getElementById('roi-modal');
+            const createInstrumentModal = document.getElementById('create-instrument-modal');
+            const createRoiModal = document.getElementById('create-roi-modal');
+            const deleteModal = document.getElementById('delete-confirmation-modal');
 
             if (event.target === platformModal) {
                 closePlatformModal();
@@ -2646,6 +2880,15 @@
             if (event.target === roiModal) {
                 closeROIModal();
             }
+            if (event.target === createInstrumentModal) {
+                closeCreateInstrumentModal();
+            }
+            if (event.target === createRoiModal) {
+                closeCreateROIModal();
+            }
+            if (event.target === deleteModal) {
+                closeDeleteConfirmationModal();
+            }
         });
 
         // Close modals with ESC key
@@ -2654,6 +2897,9 @@
                 closePlatformModal();
                 closeInstrumentModal();
                 closeROIModal();
+                closeCreateInstrumentModal();
+                closeCreateROIModal();
+                closeDeleteConfirmationModal();
             }
         });
 
@@ -3379,6 +3625,467 @@
             } catch (error) {
                 console.error('Error refreshing instrument modal:', error);
             }
+        }
+
+        // CRUD Functions for Instruments and ROIs
+        async function addInstrument(platformId) {
+            try {
+                const createModal = document.getElementById('create-instrument-modal');
+                const createForm = document.getElementById('create-instrument-form');
+
+                createForm.innerHTML = `
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                            <strong>Auto-naming:</strong> The normalized name will be automatically generated based on the platform (e.g., ANS_FOR_BL01_PHE03).<br>
+                            <strong>Purpose:</strong> This ensures consistent naming across the SITES Spectral network and prevents duplicates.
+                        </p>
+
+                        <div class="form-group">
+                            <label for="create-display-name">Display Name</label>
+                            <input type="text" id="create-display-name" placeholder="e.g., Platform Phenocam 01">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="create-ecosystem-code">Ecosystem Code</label>
+                            <select id="create-ecosystem-code">
+                                <option value="">Select ecosystem...</option>
+                                <option value="FOR">Forest (FOR)</option>
+                                <option value="AGR">Agriculture (AGR)</option>
+                                <option value="MIR">Mire (MIR)</option>
+                                <option value="LAK">Lake (LAK)</option>
+                                <option value="WET">Wetland (WET)</option>
+                                <option value="HEA">Heath (HEA)</option>
+                                <option value="TUN">Tundra (TUN)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="create-description">Description</label>
+                            <textarea id="create-description" rows="3" placeholder="Optional description for this instrument..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="closeCreateInstrumentModal()">Cancel</button>
+                        <button type="button" class="save-btn" onclick="saveNewInstrument(${platformId})">
+                            <i class="fas fa-plus"></i> Create Instrument
+                        </button>
+                    </div>
+                `;
+
+                createModal.classList.add('show');
+            } catch (error) {
+                console.error('Error showing create instrument modal:', error);
+                showNotification('Failed to open create instrument form', 'error');
+            }
+        }
+
+        async function saveNewInstrument(platformId) {
+            const saveBtn = document.querySelector('#create-instrument-modal .save-btn');
+            const originalText = saveBtn.innerHTML;
+
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+
+                const displayName = document.getElementById('create-display-name').value.trim();
+                const ecosystemCode = document.getElementById('create-ecosystem-code').value;
+                const description = document.getElementById('create-description').value.trim();
+
+                const instrumentData = {
+                    platform_id: platformId,
+                    display_name: displayName,
+                    ecosystem_code: ecosystemCode,
+                    description: description
+                };
+
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch('/api/instruments', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(instrumentData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification(`Instrument ${result.normalized_name} created successfully!`);
+                    closeCreateInstrumentModal();
+
+                    // Refresh the platforms display
+                    await loadPlatformsAndInstruments();
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.message || 'Failed to create instrument');
+                }
+            } catch (error) {
+                console.error('Error creating instrument:', error);
+                showNotification(error.message || 'Failed to create instrument', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
+
+        async function deleteInstrument(instrumentId) {
+            try {
+                // Prevent event bubbling
+                event.stopPropagation();
+
+                const deleteModal = document.getElementById('delete-confirmation-modal');
+                const deleteContent = document.getElementById('delete-confirmation-content');
+
+                deleteContent.innerHTML = `
+                    <div class="delete-warning">
+                        <div class="warning-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="warning-content">
+                            <h4>Delete Instrument</h4>
+                            <p>This action will permanently delete this instrument and all associated ROI data. This cannot be undone.</p>
+
+                            <div class="backup-option">
+                                <label>
+                                    <input type="checkbox" id="backup-instrument" checked>
+                                    Create backup before deletion (recommended)
+                                </label>
+                                <small style="display: block; color: #6b7280; margin-top: 0.5rem;">
+                                    Backup will include all instrument data and ROIs as a JSON file
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 2rem;">
+                        <button type="button" class="cancel-btn" onclick="closeDeleteConfirmationModal()">Cancel</button>
+                        <button type="button" class="delete-btn" onclick="confirmDeleteInstrument(${instrumentId})">
+                            <i class="fas fa-trash"></i> Delete Permanently
+                        </button>
+                    </div>
+                `;
+
+                deleteModal.classList.add('show');
+            } catch (error) {
+                console.error('Error showing delete confirmation:', error);
+                showNotification('Failed to open delete confirmation', 'error');
+            }
+        }
+
+        async function confirmDeleteInstrument(instrumentId) {
+            const deleteBtn = document.querySelector('#delete-confirmation-modal .delete-btn');
+            const originalText = deleteBtn.innerHTML;
+
+            try {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+                const backup = document.getElementById('backup-instrument').checked;
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const response = await fetch(`/api/instruments/${instrumentId}?backup=${backup}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    // Download backup if requested and provided
+                    if (backup && result.backup_data) {
+                        const blob = new Blob([JSON.stringify(result.backup_data, null, 2)],
+                            { type: 'application/json' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        a.download = `${result.backup_data.instrument.normalized_name}_backup_${timestamp}.json`;
+                        a.href = url;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    }
+
+                    showNotification('Instrument deleted successfully');
+                    closeDeleteConfirmationModal();
+
+                    // Refresh the platforms display
+                    await loadPlatformsAndInstruments();
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.message || 'Failed to delete instrument');
+                }
+            } catch (error) {
+                console.error('Error deleting instrument:', error);
+                showNotification(error.message || 'Failed to delete instrument', 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
+            }
+        }
+
+        async function addROI(instrumentId) {
+            try {
+                const createModal = document.getElementById('create-roi-modal');
+                const createForm = document.getElementById('create-roi-form');
+
+                createForm.innerHTML = `
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> ROI Information</h4>
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                            <strong>Auto-naming:</strong> The ROI name will be automatically generated (e.g., ROI_00, ROI_01, etc.).<br>
+                            <strong>Usage:</strong> ROIs define regions in phenocam images for vegetation analysis and monitoring.<br>
+                            <strong>Note:</strong> Polygon coordinates can be added later using external tools.
+                        </p>
+
+                        <div class="form-group">
+                            <label for="create-roi-description">Description</label>
+                            <textarea id="create-roi-description" rows="3" placeholder="Describe what this ROI represents..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="create-roi-color-r">Red (0-255)</label>
+                                <input type="number" id="create-roi-color-r" min="0" max="255" value="255">
+                            </div>
+                            <div class="form-group">
+                                <label for="create-roi-color-g">Green (0-255)</label>
+                                <input type="number" id="create-roi-color-g" min="0" max="255" value="255">
+                            </div>
+                            <div class="form-group">
+                                <label for="create-roi-color-b">Blue (0-255)</label>
+                                <input type="number" id="create-roi-color-b" min="0" max="255" value="255">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="create-roi-thickness">Line Thickness (1-10)</label>
+                                <input type="number" id="create-roi-thickness" min="1" max="10" value="7">
+                            </div>
+                            <div class="form-group">
+                                <label for="create-roi-alpha">Transparency (0.0-1.0)</label>
+                                <input type="number" id="create-roi-alpha" min="0" max="1" step="0.1" value="0.0">
+                            </div>
+                        </div>
+
+                        <div class="color-preview" style="margin-top: 1rem;">
+                            <label>Color Preview:</label>
+                            <div id="roi-color-preview" style="width: 40px; height: 20px; border: 1px solid #ccc; background: rgb(255, 255, 255); display: inline-block; margin-left: 10px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="closeCreateROIModal()">Cancel</button>
+                        <button type="button" class="save-btn" onclick="saveNewROI(${instrumentId})">
+                            <i class="fas fa-plus"></i> Create ROI
+                        </button>
+                    </div>
+                `;
+
+                // Add color preview updates
+                ['create-roi-color-r', 'create-roi-color-g', 'create-roi-color-b'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', updateROIColorPreview);
+                });
+
+                createModal.classList.add('show');
+            } catch (error) {
+                console.error('Error showing create ROI modal:', error);
+                showNotification('Failed to open create ROI form', 'error');
+            }
+        }
+
+        function updateROIColorPreview() {
+            const r = document.getElementById('create-roi-color-r').value || 255;
+            const g = document.getElementById('create-roi-color-g').value || 255;
+            const b = document.getElementById('create-roi-color-b').value || 255;
+            const preview = document.getElementById('roi-color-preview');
+            if (preview) {
+                preview.style.background = `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+
+        async function saveNewROI(instrumentId) {
+            const saveBtn = document.querySelector('#create-roi-modal .save-btn');
+            const originalText = saveBtn.innerHTML;
+
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+
+                const description = document.getElementById('create-roi-description').value.trim();
+                const colorR = parseInt(document.getElementById('create-roi-color-r').value) || 255;
+                const colorG = parseInt(document.getElementById('create-roi-color-g').value) || 255;
+                const colorB = parseInt(document.getElementById('create-roi-color-b').value) || 255;
+                const thickness = parseInt(document.getElementById('create-roi-thickness').value) || 7;
+                const alpha = parseFloat(document.getElementById('create-roi-alpha').value) || 0.0;
+
+                const roiData = {
+                    instrument_id: instrumentId,
+                    description: description,
+                    color_r: colorR,
+                    color_g: colorG,
+                    color_b: colorB,
+                    thickness: thickness,
+                    alpha: alpha
+                };
+
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch('/api/rois', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(roiData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification(`ROI ${result.roi_name} created successfully!`);
+                    closeCreateROIModal();
+
+                    // Refresh ROI data for this instrument
+                    const roiContainer = document.getElementById(`roi-cards-${instrumentId}`);
+                    if (roiContainer) {
+                        await loadROICards(instrumentId, null); // Will need to get instrument name
+                    }
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.message || 'Failed to create ROI');
+                }
+            } catch (error) {
+                console.error('Error creating ROI:', error);
+                showNotification(error.message || 'Failed to create ROI', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
+
+        async function deleteROI(roiId) {
+            try {
+                // Prevent event bubbling
+                event.stopPropagation();
+
+                const deleteModal = document.getElementById('delete-confirmation-modal');
+                const deleteContent = document.getElementById('delete-confirmation-content');
+
+                deleteContent.innerHTML = `
+                    <div class="delete-warning">
+                        <div class="warning-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="warning-content">
+                            <h4>Delete ROI</h4>
+                            <p>This action will permanently delete this ROI and all its data. This cannot be undone.</p>
+
+                            <div class="backup-option">
+                                <label>
+                                    <input type="checkbox" id="backup-roi" checked>
+                                    Create backup before deletion (recommended)
+                                </label>
+                                <small style="display: block; color: #6b7280; margin-top: 0.5rem;">
+                                    Backup will include all ROI data as a JSON file
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 2rem;">
+                        <button type="button" class="cancel-btn" onclick="closeDeleteConfirmationModal()">Cancel</button>
+                        <button type="button" class="delete-btn" onclick="confirmDeleteROI(${roiId})">
+                            <i class="fas fa-trash"></i> Delete Permanently
+                        </button>
+                    </div>
+                `;
+
+                deleteModal.classList.add('show');
+            } catch (error) {
+                console.error('Error showing delete confirmation:', error);
+                showNotification('Failed to open delete confirmation', 'error');
+            }
+        }
+
+        async function confirmDeleteROI(roiId) {
+            const deleteBtn = document.querySelector('#delete-confirmation-modal .delete-btn');
+            const originalText = deleteBtn.innerHTML;
+
+            try {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+                const backup = document.getElementById('backup-roi').checked;
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const response = await fetch(`/api/rois/${roiId}?backup=${backup}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    // Download backup if requested and provided
+                    if (backup && result.backup_data) {
+                        const blob = new Blob([JSON.stringify(result.backup_data, null, 2)],
+                            { type: 'application/json' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const filename = `${result.backup_data.instrument_context.normalized_name}_${result.backup_data.roi.roi_name}_backup_${timestamp}.json`;
+                        a.download = filename;
+                        a.href = url;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    }
+
+                    showNotification('ROI deleted successfully');
+                    closeDeleteConfirmationModal();
+
+                    // Find and refresh the ROI container
+                    const roiCard = document.querySelector(`[data-roi-id="${roiId}"]`);
+                    if (roiCard) {
+                        const instrumentContainer = roiCard.closest('[id^="roi-cards-"]');
+                        if (instrumentContainer) {
+                            const instrumentId = instrumentContainer.id.replace('roi-cards-', '');
+                            await loadROICards(instrumentId, null); // Will need to get instrument name
+                        }
+                    }
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.message || 'Failed to delete ROI');
+                }
+            } catch (error) {
+                console.error('Error deleting ROI:', error);
+                showNotification(error.message || 'Failed to delete ROI', 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
+            }
+        }
+
+        // Modal close functions
+        function closeCreateInstrumentModal() {
+            document.getElementById('create-instrument-modal').classList.remove('show');
+        }
+
+        function closeCreateROIModal() {
+            document.getElementById('create-roi-modal').classList.remove('show');
+        }
+
+        function closeDeleteConfirmationModal() {
+            document.getElementById('delete-confirmation-modal').classList.remove('show');
         }
 
         // Success/Error Notification
