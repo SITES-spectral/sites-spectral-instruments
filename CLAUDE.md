@@ -2,11 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.11 - Enhanced Modal Synchronization for CRUD Operations (2025-09-26)
+## Version 4.8.12 - Fixed CRUD Button Placement for Better UX (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.11 🔄
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.12 🎯
+**🎯 Major Achievement:** Fixed CRUD button placement to prevent accidental deletions and improve user safety
+
+### 🎯 UX Safety Enhancement in v4.8.12
+- **Safe Button Placement**: Moved delete/add buttons from right to left side of cards to prevent accidental clicks
+- **Clear Visual Separation**: Delete buttons now positioned away from help buttons to avoid confusion
+- **Enhanced Button Icons**: White X (×) symbols for delete and white plus (+) symbols for add operations
+- **Improved User Safety**: Reduced risk of accidental instrument/ROI deletions during normal browsing
+- **Better Visual Hierarchy**: Clear separation between action buttons and information buttons
+
+### ✨ Technical Implementation
+- **Left-Side Positioning**: Changed delete/add buttons from `right: 5px` to `left: 5px` positioning
+- **Enhanced Icon Visibility**: Maintained white FontAwesome icons (`fas fa-times`, `fas fa-plus`) for clarity
+- **Consistent Styling**: Preserved button colors (red for delete, green for add) with improved placement
+- **Z-Index Management**: Proper layering to ensure buttons remain clickable and visible
+- **Responsive Design**: Button placement works across all device sizes
+
+### 🎯 User Benefits
+- **Accident Prevention**: No more accidental deletions when trying to click help buttons
+- **Intuitive Interface**: Left-side placement follows common UI patterns for destructive actions
+- **Clear Visual Cues**: White symbols on colored backgrounds provide excellent contrast
+- **Professional Experience**: Consistent button placement across instrument and ROI cards
+- **Enhanced Safety**: Users can safely explore help information without deletion risk
+
+## Version 4.8.11 - Enhanced Modal Synchronization for CRUD Operations (2025-09-26)
+**📅 Previous Version**
 **🎯 Major Achievement:** Enhanced modal synchronization ensuring all open modals refresh automatically after CRUD operations
 
 ### 🔄 Modal Synchronization Enhancement in v4.8.11

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.11",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.11 - Enhanced Modal Synchronization for CRUD Operations",
+  "version": "4.8.12",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.12 - Fixed CRUD Button Placement for Better UX",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
