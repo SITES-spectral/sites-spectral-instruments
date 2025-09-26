@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.9.0",
-  "description": "SITES Spectral Stations & Instruments Management System v4.9.0 - Complete Admin-Only CRUD Operations for Stations and Platforms",
+  "version": "4.9.1",
+  "description": "SITES Spectral Stations & Instruments Management System v4.9.1 - Complete Admin Dashboard with Station Management Interface",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
