@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.10">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.11">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.10">
+    <meta name="app-version" content="4.8.11">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -1312,7 +1312,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.10"></script>
+    <script src="/js/utils.js?v=4.8.11"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -2565,6 +2565,7 @@
                 if (response.ok) {
                     const platform = await response.json();
                     populatePlatformModal(platform);
+                    trackPlatformModal(platformId); // Track this modal
                     document.getElementById('platform-modal').classList.add('show');
                 } else {
                     console.error('Failed to fetch platform details');
@@ -2677,6 +2678,7 @@
                 if (response.ok) {
                     const instrument = await response.json();
                     populateInstrumentModal(instrument);
+                    trackInstrumentModal(instrumentId); // Track this modal
                     document.getElementById('instrument-modal').classList.add('show');
                 } else {
                     console.error('Failed to fetch instrument details');
@@ -3715,8 +3717,9 @@
                     showNotification(`Instrument ${result.normalized_name} created successfully!`);
                     closeCreateInstrumentModal();
 
-                    // Refresh the platforms display
+                    // Refresh the platforms display and any open modals
                     await loadPlatformsAndInstruments();
+                    await refreshOpenModals();
                 } else {
                     const error = await response.json().catch(() => ({}));
                     throw new Error(error.message || 'Failed to create instrument');
@@ -3814,8 +3817,9 @@
                     showNotification('Instrument deleted successfully');
                     closeDeleteConfirmationModal();
 
-                    // Refresh the platforms display
+                    // Refresh the platforms display and any open modals
                     await loadPlatformsAndInstruments();
+                    await refreshOpenModals();
                 } else {
                     const error = await response.json().catch(() => ({}));
                     throw new Error(error.message || 'Failed to delete instrument');
@@ -3950,11 +3954,12 @@
                     showNotification(`ROI ${result.roi_name} created successfully!`);
                     closeCreateROIModal();
 
-                    // Refresh ROI data for this instrument
+                    // Refresh ROI data for this instrument and any open modals
                     const roiContainer = document.getElementById(`roi-cards-${instrumentId}`);
                     if (roiContainer) {
-                        await loadROICards(instrumentId, null); // Will need to get instrument name
+                        await loadROICards(instrumentId, null);
                     }
+                    await refreshOpenModals(); // Refresh modals in case platform modal is open
                 } else {
                     const error = await response.json().catch(() => ({}));
                     throw new Error(error.message || 'Failed to create ROI');
@@ -4062,6 +4067,9 @@
                             await loadROICards(instrumentId, null); // Will need to get instrument name
                         }
                     }
+
+                    // Refresh any open modals to show updated data
+                    await refreshOpenModals();
                 } else {
                     const error = await response.json().catch(() => ({}));
                     throw new Error(error.message || 'Failed to delete ROI');
@@ -4075,7 +4083,20 @@
             }
         }
 
-        // Modal close functions
+        // Modal state tracking and refresh functionality
+        let currentOpenPlatformId = null;
+        let currentOpenInstrumentId = null;
+
+        // Track modal states when opening
+        function trackPlatformModal(platformId) {
+            currentOpenPlatformId = platformId;
+        }
+
+        function trackInstrumentModal(instrumentId) {
+            currentOpenInstrumentId = instrumentId;
+        }
+
+        // Enhanced modal close functions with state tracking
         function closeCreateInstrumentModal() {
             document.getElementById('create-instrument-modal').classList.remove('show');
         }
@@ -4086,6 +4107,90 @@
 
         function closeDeleteConfirmationModal() {
             document.getElementById('delete-confirmation-modal').classList.remove('show');
+        }
+
+        // Update existing modal close functions to include state tracking
+        function closePlatformModal() {
+            document.getElementById('platform-modal').classList.remove('show');
+            currentOpenPlatformId = null;
+        }
+
+        function closeInstrumentModal() {
+            document.getElementById('instrument-modal').classList.remove('show');
+            currentOpenInstrumentId = null;
+        }
+
+        // Comprehensive modal refresh after CRUD operations
+        async function refreshOpenModals() {
+            try {
+                // Refresh platform modal if open
+                if (currentOpenPlatformId && document.getElementById('platform-modal').classList.contains('show')) {
+                    await refreshPlatformModal(currentOpenPlatformId);
+                }
+
+                // Refresh instrument modal if open (but not if it was deleted)
+                if (currentOpenInstrumentId && document.getElementById('instrument-modal').classList.contains('show')) {
+                    await refreshInstrumentModal(currentOpenInstrumentId);
+                }
+            } catch (error) {
+                console.error('Error refreshing open modals:', error);
+            }
+        }
+
+        // Refresh platform modal content
+        async function refreshPlatformModal(platformId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/platforms/${platformId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const platform = await response.json();
+
+                    // Get updated instruments for this platform
+                    const instrumentsResponse = await fetch(`/api/instruments?station=${stationAcronym}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (instrumentsResponse.ok) {
+                        const instrumentsData = await instrumentsResponse.json();
+                        const platformInstruments = instrumentsData.instruments.filter(inst => inst.platform_id === platformId);
+
+                        // Update platform modal content
+                        populatePlatformModal(platform, platformInstruments);
+                    }
+                }
+            } catch (error) {
+                console.error('Error refreshing platform modal:', error);
+            }
+        }
+
+        // Enhanced refresh for instrument modal
+        async function refreshInstrumentModal(instrumentId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const updatedInstrument = await response.json();
+                    populateInstrumentModal(updatedInstrument);
+                } else if (response.status === 404) {
+                    // Instrument was deleted, close the modal
+                    closeInstrumentModal();
+                    showNotification('Instrument no longer exists', 'info');
+                }
+            } catch (error) {
+                console.error('Error refreshing instrument modal:', error);
+            }
         }
 
         // Success/Error Notification
