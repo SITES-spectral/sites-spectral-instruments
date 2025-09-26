@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.14",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.14 - Improved Add Button Placement",
+  "version": "4.8.15",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.15 - Fixed Ecosystem Codes to Match YAML Source",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

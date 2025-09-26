@@ -2,11 +2,50 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.14 - Improved Add Button Placement (2025-09-26)
+## Version 4.8.15 - Fixed Ecosystem Codes to Match YAML Source (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.14 🎯
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.15 📚
+**🎯 Major Achievement:** Synchronized ecosystem codes with official YAML source of truth for data consistency
+
+### 📚 Ecosystem Code Standardization in v4.8.15
+- **Source of Truth Integration**: Updated dropdown options to match `yamls/ecosystems.yaml` exactly
+- **Complete Ecosystem Coverage**: Added all 12 official ecosystem codes vs previous limited selection
+- **Consistent Naming**: Standardized format "CODE - Description" matching YAML specifications
+- **Data Integrity**: Ensures all new instruments use officially recognized ecosystem classifications
+- **Backward Compatibility**: Maintains "Other" option for custom codes with proper validation
+
+### ✅ Official Ecosystem Codes Added
+- **HEA - Heathland**: Added from YAML source
+- **AGR - Arable Land**: Updated description from generic "Agricultural"
+- **MIR - Mires**: Maintained existing option
+- **LAK - Lake**: Maintained existing option
+- **WET - Wetland**: Maintained existing option
+- **GRA - Grassland**: Maintained existing option
+- **FOR - Forest**: Maintained existing option
+- **ALP - Alpine Forest**: Updated description from generic "Alpine"
+- **CON - Coniferous Forest**: Added new forest subtype from YAML
+- **DEC - Deciduous Forest**: Added new forest subtype from YAML
+- **MAR - Marshland**: Added new wetland subtype from YAML
+- **PEA - Peatland**: Added new wetland subtype from YAML
+
+### ✨ Technical Implementation
+- **Edit Form Updates**: Updated instrument edit dropdown with all 12 ecosystem codes
+- **Create Form Updates**: Updated new instrument creation dropdown with all 12 codes
+- **Validation Updates**: Updated "Other" field detection to recognize all official codes
+- **Description Consistency**: Standardized all descriptions to match YAML specifications
+- **Form Synchronization**: Both create and edit forms now have identical ecosystem options
+
+### 🎯 Data Quality Benefits
+- **Standardized Classification**: All instruments now use consistent ecosystem terminology
+- **Research Accuracy**: Ecosystem codes match scientific classification standards
+- **Database Integrity**: Prevents inconsistent ecosystem code entries
+- **Report Consistency**: Standardized codes improve data analysis and reporting
+- **Future-Proof**: New ecosystem types can be added to YAML without code changes
+
+## Version 4.8.14 - Improved Add Button Placement (2025-09-26)
+**📅 Previous Version**
 **🎯 Major Achievement:** Optimized add button placement to eliminate proximity confusion with delete buttons
 
 ### 🎯 Smart Button Positioning in v4.8.14

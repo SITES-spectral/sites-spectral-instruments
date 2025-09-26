@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.14">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.15">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.14">
+    <meta name="app-version" content="4.8.15">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -1317,7 +1317,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.14"></script>
+    <script src="/js/utils.js?v=4.8.15"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -3360,16 +3360,22 @@
                             <label>Ecosystem Code</label>
                             <select id="edit-instrument-ecosystem" class="form-control">
                                 <option value="">Select ecosystem...</option>
-                                <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
-                                <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                <option value="HEA" ${instrument.ecosystem_code === 'HEA' ? 'selected' : ''}>HEA - Heathland</option>
+                                <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Arable Land</option>
+                                <option value="MIR" ${instrument.ecosystem_code === 'MIR' ? 'selected' : ''}>MIR - Mires</option>
+                                <option value="LAK" ${instrument.ecosystem_code === 'LAK' ? 'selected' : ''}>LAK - Lake</option>
                                 <option value="WET" ${instrument.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
-                                <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Agricultural</option>
-                                <option value="TUN" ${instrument.ecosystem_code === 'TUN' ? 'selected' : ''}>TUN - Tundra</option>
-                                <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine</option>
-                                <option value="Other" ${instrument.ecosystem_code && !['FOR', 'GRA', 'WET', 'AGR', 'TUN', 'ALP'].includes(instrument.ecosystem_code) ? 'selected' : ''}>Other</option>
+                                <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
+                                <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine Forest</option>
+                                <option value="CON" ${instrument.ecosystem_code === 'CON' ? 'selected' : ''}>CON - Coniferous Forest</option>
+                                <option value="DEC" ${instrument.ecosystem_code === 'DEC' ? 'selected' : ''}>DEC - Deciduous Forest</option>
+                                <option value="MAR" ${instrument.ecosystem_code === 'MAR' ? 'selected' : ''}>MAR - Marshland</option>
+                                <option value="PEA" ${instrument.ecosystem_code === 'PEA' ? 'selected' : ''}>PEA - Peatland</option>
+                                <option value="Other" ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'selected' : ''}>Other</option>
                             </select>
-                            <input type="text" id="edit-instrument-ecosystem-other" value="${instrument.ecosystem_code && !['FOR', 'GRA', 'WET', 'AGR', 'TUN', 'ALP'].includes(instrument.ecosystem_code) ? instrument.ecosystem_code : ''}"
-                                   class="form-control mt-2" placeholder="Enter ecosystem code..." style="display: ${instrument.ecosystem_code && !['FOR', 'GRA', 'WET', 'AGR', 'TUN', 'ALP'].includes(instrument.ecosystem_code) ? 'block' : 'none'};">
+                            <input type="text" id="edit-instrument-ecosystem-other" value="${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? instrument.ecosystem_code : ''}"
+                                   class="form-control mt-2" placeholder="Enter ecosystem code..." style="display: ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'block' : 'none'};">
                         </div>
                         <div class="form-group">
                             <label>Deployment Date</label>
@@ -3662,13 +3668,18 @@
                             <label for="create-ecosystem-code">Ecosystem Code</label>
                             <select id="create-ecosystem-code">
                                 <option value="">Select ecosystem...</option>
-                                <option value="FOR">Forest (FOR)</option>
-                                <option value="AGR">Agriculture (AGR)</option>
-                                <option value="MIR">Mire (MIR)</option>
-                                <option value="LAK">Lake (LAK)</option>
-                                <option value="WET">Wetland (WET)</option>
-                                <option value="HEA">Heath (HEA)</option>
-                                <option value="TUN">Tundra (TUN)</option>
+                                <option value="HEA">HEA - Heathland</option>
+                                <option value="AGR">AGR - Arable Land</option>
+                                <option value="MIR">MIR - Mires</option>
+                                <option value="LAK">LAK - Lake</option>
+                                <option value="WET">WET - Wetland</option>
+                                <option value="GRA">GRA - Grassland</option>
+                                <option value="FOR">FOR - Forest</option>
+                                <option value="ALP">ALP - Alpine Forest</option>
+                                <option value="CON">CON - Coniferous Forest</option>
+                                <option value="DEC">DEC - Deciduous Forest</option>
+                                <option value="MAR">MAR - Marshland</option>
+                                <option value="PEA">PEA - Peatland</option>
                             </select>
                         </div>
 
