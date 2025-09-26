@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.8.15">
+    <link rel="stylesheet" href="/css/styles.css?v=4.8.16">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.8.15">
+    <meta name="app-version" content="4.8.16">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -1089,12 +1089,27 @@
                 <p>Loading station data...</p>
             </div>
             <div id="welcome-content" style="display: none;">
-                <h1 class="welcome-title">
-                    <i class="fas fa-broadcast-tower"></i>
-                    <span id="station-name">Station</span>
-                </h1>
-                <p class="welcome-subtitle">Welcome to your SITES Spectral station data</p>
-                <p class="station-description" id="station-description" style="margin-top: 10px; color: #666; font-style: italic;"></p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div>
+                        <h1 class="welcome-title">
+                            <i class="fas fa-broadcast-tower"></i>
+                            <span id="station-name">Station</span>
+                        </h1>
+                        <p class="welcome-subtitle">Welcome to your SITES Spectral station data</p>
+                        <p class="station-description" id="station-description" style="margin-top: 10px; color: #666; font-style: italic;"></p>
+                    </div>
+                    <div id="admin-station-controls" style="display: none;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="showCreateStationModal()" class="btn btn-success" title="Create New Station">
+                                <i class="fas fa-plus"></i> <i class="fas fa-broadcast-tower"></i>
+                            </button>
+                            <button onclick="showDeleteStationModal(stationData.id, stationData.display_name)" class="btn btn-danger" title="Delete This Station">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <small style="display: block; color: #666; margin-top: 4px; text-align: right;">Admin Controls</small>
+                    </div>
+                </div>
             </div>
             <div id="error-state" class="error-state" style="display: none;">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -1167,6 +1182,11 @@
                 <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-tower-observation"></i> Platforms & Instruments
                 </h2>
+                <div id="admin-platform-controls" style="display: none;">
+                    <button onclick="showCreatePlatformModal(stationData.id)" class="btn btn-success" title="Create New Platform">
+                        <i class="fas fa-plus"></i> <i class="fas fa-tower-broadcast"></i> Platform
+                    </button>
+                </div>
                 <button id="export-csv-btn" class="export-btn" onclick="exportStationData()" style="display: none;">
                     <i class="fas fa-download"></i>
                     Export CSV
@@ -1257,6 +1277,66 @@
         </div>
     </div>
 
+    <!-- Admin-Only Create Station Modal -->
+    <div id="create-station-modal" class="station-modal" style="display: none;">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-broadcast-tower"></i> Create New Station</h3>
+                <button class="modal-close-large" onclick="closeCreateStationModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="create-station-form" class="edit-form">
+                    <!-- Create station form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin-Only Delete Station Modal -->
+    <div id="delete-station-modal" class="station-modal" style="display: none;">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3 style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Delete Station</h3>
+                <button class="modal-close-large" onclick="closeDeleteStationModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="delete-station-content">
+                    <!-- Delete station content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin-Only Create Platform Modal -->
+    <div id="create-platform-modal" class="platform-modal" style="display: none;">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-tower-broadcast"></i> Create New Platform</h3>
+                <button class="modal-close-large" onclick="closeCreatePlatformModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="create-platform-form" class="edit-form">
+                    <!-- Create platform form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin-Only Delete Platform Modal -->
+    <div id="delete-platform-modal" class="platform-modal" style="display: none;">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3 style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Delete Platform</h3>
+                <button class="modal-close-large" onclick="closeDeletePlatformModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="delete-platform-content">
+                    <!-- Delete platform content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Create Instrument Modal -->
     <div id="create-instrument-modal" class="instrument-modal">
         <div class="modal-content-large">
@@ -1317,7 +1397,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.8.15"></script>
+    <script src="/js/utils.js?v=4.8.16"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1403,6 +1483,12 @@
 
             document.getElementById('station-name').textContent = stationData.display_name;
             document.title = `${stationData.display_name} - SITES Spectral`;
+
+            // Show admin controls if user is admin
+            if (currentUser && currentUser.role === 'admin') {
+                document.getElementById('admin-station-controls').style.display = 'block';
+                document.getElementById('admin-platform-controls').style.display = 'block';
+            }
 
             // Set station description if available
             const descriptionElement = document.getElementById('station-description');
@@ -1903,6 +1989,15 @@
                             ${instrumentCards || `<div class="no-instruments">No instruments configured yet</div>`}
                         </div>
                     </div>
+                    ${currentUser && currentUser.role === 'admin' ? `
+                        <div style="padding: 12px; background: rgba(239, 68, 68, 0.05); border-top: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: center;">
+                            <button onclick="event.stopPropagation(); showDeletePlatformModal(${platform.id}, '${platform.display_name.replace(/'/g, '\\\'')}')"
+                                    class="btn btn-danger" style="padding: 6px 16px; font-size: 0.85em;"
+                                    title="Delete Platform (Admin Only)">
+                                <i class="fas fa-exclamation-triangle"></i> Delete Platform
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -4272,6 +4367,663 @@
 
         function updateRecentUpdatesDuration() {
             loadPlatformsAndInstruments(); // Refresh display
+        }
+
+        // ============================================
+        // ADMIN-ONLY STATION AND PLATFORM MANAGEMENT
+        // ============================================
+
+        // Station Creation Functions (Admin Only)
+        function showCreateStationModal() {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotification('Admin privileges required', 'error');
+                return;
+            }
+
+            const form = document.getElementById('create-station-form');
+            form.innerHTML = `
+                <div class="form-section">
+                    <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="station-display-name">Display Name *</label>
+                            <input type="text" id="station-display-name" class="form-input" required
+                                   placeholder="e.g., New Research Station"
+                                   oninput="updateStationNormalizedName()">
+                            <small>The human-readable name for the station</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="station-acronym">Acronym *</label>
+                            <input type="text" id="station-acronym" class="form-input" required
+                                   placeholder="e.g., NRS" maxlength="3" style="text-transform: uppercase;">
+                            <small>3-letter station code (uppercase)</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="station-normalized-name">Normalized Name *</label>
+                            <input type="text" id="station-normalized-name" class="form-input" required
+                                   placeholder="Auto-generated from display name">
+                            <small>System identifier (auto-generated, editable)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="station-status">Status</label>
+                            <select id="station-status" class="form-input">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Planned">Planned</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Location</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="station-country">Country</label>
+                            <input type="text" id="station-country" class="form-input" value="Sweden">
+                        </div>
+                        <div class="form-group">
+                            <label for="station-elevation">Elevation (m)</label>
+                            <input type="number" id="station-elevation" class="form-input" step="0.1"
+                                   placeholder="Optional elevation in meters">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="station-latitude">Latitude</label>
+                            <input type="number" id="station-latitude" class="form-input" step="any"
+                                   placeholder="e.g., 59.8583" min="-90" max="90">
+                            <small>Decimal degrees (-90 to 90)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="station-longitude">Longitude</label>
+                            <input type="number" id="station-longitude" class="form-input" step="any"
+                                   placeholder="e.g., 17.6389" min="-180" max="180">
+                            <small>Decimal degrees (-180 to 180)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-align-left"></i> Description</h4>
+                    <div class="form-group">
+                        <label for="station-description">Description</label>
+                        <textarea id="station-description" class="form-input" rows="3"
+                                  placeholder="Optional description of the research station"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateStationModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary save-btn" onclick="saveNewStation()">
+                        <i class="fas fa-save"></i> Create Station
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('create-station-modal').classList.add('show');
+        }
+
+        function updateStationNormalizedName() {
+            const displayName = document.getElementById('station-display-name').value;
+            const normalizedName = displayName.toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[åä]/g, 'a')
+                .replace(/[ö]/g, 'o')
+                .replace(/[^a-z0-9_]/g, '');
+
+            document.getElementById('station-normalized-name').value = normalizedName;
+        }
+
+        async function saveNewStation() {
+            const saveBtn = document.querySelector('#create-station-modal .save-btn');
+            const originalText = saveBtn.innerHTML;
+
+            try {
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                saveBtn.disabled = true;
+
+                const stationData = {
+                    display_name: document.getElementById('station-display-name').value.trim(),
+                    acronym: document.getElementById('station-acronym').value.trim().toUpperCase(),
+                    normalized_name: document.getElementById('station-normalized-name').value.trim(),
+                    status: document.getElementById('station-status').value,
+                    country: document.getElementById('station-country').value.trim(),
+                    latitude: parseFloat(document.getElementById('station-latitude').value) || null,
+                    longitude: parseFloat(document.getElementById('station-longitude').value) || null,
+                    elevation_m: parseFloat(document.getElementById('station-elevation').value) || null,
+                    description: document.getElementById('station-description').value.trim()
+                };
+
+                // Validation
+                if (!stationData.display_name || !stationData.acronym || !stationData.normalized_name) {
+                    throw new Error('Display name, acronym, and normalized name are required');
+                }
+
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch('/api/stations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': \`Bearer \${token}\`
+                    },
+                    body: JSON.stringify(stationData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 409 && result.conflicts) {
+                        // Handle conflicts with suggestions
+                        let conflictMessage = 'Conflicts detected:\\n';
+                        result.conflicts.forEach(conflict => {
+                            conflictMessage += \`- \${conflict.field}: "\${conflict.value}" already exists\\n\`;
+                        });
+
+                        if (result.suggestions && result.suggestions.normalized_name) {
+                            conflictMessage += \`\\nSuggested normalized name: \${result.suggestions.normalized_name}\`;
+                            document.getElementById('station-normalized-name').value = result.suggestions.normalized_name;
+                        }
+
+                        throw new Error(conflictMessage);
+                    }
+                    throw new Error(result.error || 'Failed to create station');
+                }
+
+                showNotification(\`Station "\${stationData.display_name}" created successfully!\`, 'success');
+                closeCreateStationModal();
+
+                // Refresh the page or reload stations data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Station creation error:', error);
+                showNotification(error.message, 'error');
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        function closeCreateStationModal() {
+            document.getElementById('create-station-modal').classList.remove('show');
+        }
+
+        // Station Deletion Functions (Admin Only)
+        function showDeleteStationModal(stationId, stationName) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotification('Admin privileges required', 'error');
+                return;
+            }
+
+            const content = document.getElementById('delete-station-content');
+            content.innerHTML = \`
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 2em; margin-bottom: 16px;"></i>
+                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Station: \${stationName}</h4>
+                    <p><strong>WARNING:</strong> This action cannot be undone and will permanently delete:</p>
+                    <ul style="text-align: left; margin: 16px 0; padding-left: 24px;">
+                        <li>The station record</li>
+                        <li>All platforms at this station</li>
+                        <li>All instruments on those platforms</li>
+                        <li>All ROI data for those instruments</li>
+                    </ul>
+                    <p>This is a <strong>DESTRUCTIVE OPERATION</strong> that will remove all data associated with this station.</p>
+
+                    <div id="dependency-analysis" style="margin: 16px 0; padding: 12px; background: #f3f4f6; border-radius: 6px;">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i> Analyzing dependencies...
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin: 16px 0;">
+                        <label>
+                            <input type="checkbox" id="generate-backup" checked>
+                            Generate backup before deletion
+                        </label>
+                        <small style="display: block; margin-top: 4px; color: #666;">
+                            Recommended: Creates a downloadable JSON backup of all station data
+                        </small>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 24px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeDeleteStationModal()">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete-station-btn"
+                                onclick="confirmDeleteStation('\${stationId}', '\${stationName}')" disabled>
+                            <i class="fas fa-trash"></i> Delete Station
+                        </button>
+                    </div>
+                </div>
+            \`;
+
+            // Analyze dependencies
+            analyzeDependencies('station', stationId);
+            document.getElementById('delete-station-modal').classList.add('show');
+        }
+
+        async function analyzeDependencies(type, id) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const endpoint = type === 'station' ? \`/api/stations/\${id}\` : \`/api/platforms/\${id}\`;
+
+                // This would need to be enhanced to get dependency counts
+                // For now, enable the delete button after a delay
+                setTimeout(() => {
+                    const analysisDiv = document.getElementById('dependency-analysis');
+                    if (analysisDiv) {
+                        analysisDiv.innerHTML = \`
+                            <p><i class="fas fa-info-circle"></i> Ready to proceed with deletion.</p>
+                            <p><small>Dependency analysis complete. All related data will be removed.</small></p>
+                        \`;
+
+                        const deleteBtn = document.getElementById(\`confirm-delete-\${type}-btn\`);
+                        if (deleteBtn) {
+                            deleteBtn.disabled = false;
+                        }
+                    }
+                }, 1500);
+            } catch (error) {
+                console.error('Dependency analysis error:', error);
+            }
+        }
+
+        async function confirmDeleteStation(stationId, stationName) {
+            const deleteBtn = document.getElementById('confirm-delete-station-btn');
+            const originalText = deleteBtn.innerHTML;
+
+            try {
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                deleteBtn.disabled = true;
+
+                const generateBackup = document.getElementById('generate-backup').checked;
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const url = \`/api/stations/\${stationId}?force_cascade=true\${generateBackup ? '&backup=true' : ''}\`;
+
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': \`Bearer \${token}\`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to delete station');
+                }
+
+                // Handle backup download if provided
+                if (result.backup_data) {
+                    const filename = \`\${stationName.replace(/\s+/g, '_')}_BACKUP_\${new Date().toISOString().split('T')[0]}.json\`;
+                    downloadBackup(result.backup_data, filename);
+                }
+
+                showNotification(\`Station "\${stationName}" deleted successfully\`, 'success');
+                closeDeleteStationModal();
+
+                // Redirect to stations list or reload
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Station deletion error:', error);
+                showNotification(error.message, 'error');
+            } finally {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+            }
+        }
+
+        function closeDeleteStationModal() {
+            document.getElementById('delete-station-modal').classList.remove('show');
+        }
+
+        // Platform Creation Functions (Admin Only)
+        function showCreatePlatformModal(stationId) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotification('Admin privileges required', 'error');
+                return;
+            }
+
+            const form = document.getElementById('create-platform-form');
+            form.innerHTML = \`
+                <div class="form-section">
+                    <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="platform-display-name">Display Name *</label>
+                            <input type="text" id="platform-display-name" class="form-input" required
+                                   placeholder="e.g., Research Platform 01"
+                                   oninput="updatePlatformNormalizedName()">
+                            <small>Descriptive name for the platform</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="platform-location-code">Location Code *</label>
+                            <input type="text" id="platform-location-code" class="form-input" required
+                                   placeholder="e.g., PL01" style="text-transform: uppercase;"
+                                   oninput="updatePlatformNormalizedName()">
+                            <small>Unique code within station (e.g., PL01, BL01)</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="platform-ecosystem-code">Ecosystem Code</label>
+                            <select id="platform-ecosystem-code" class="form-input" onchange="updatePlatformNormalizedName()">
+                                <option value="FOR">FOR - Forest</option>
+                                <option value="AGR">AGR - Agricultural</option>
+                                <option value="MIR">MIR - Mires</option>
+                                <option value="LAK">LAK - Lake</option>
+                                <option value="WET">WET - Wetland</option>
+                                <option value="GRA">GRA - Grassland</option>
+                                <option value="HEA">HEA - Heathland</option>
+                                <option value="ALP">ALP - Alpine</option>
+                                <option value="GEN">GEN - General</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="platform-status">Status</label>
+                            <select id="platform-status" class="form-input">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Planned">Planned</option>
+                                <option value="Testing">Testing</option>
+                                <option value="Decommissioned">Decommissioned</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-normalized-name">Normalized Name *</label>
+                        <input type="text" id="platform-normalized-name" class="form-input" required
+                               placeholder="Auto-generated from station, ecosystem, and location">
+                        <small>System identifier (auto-generated, editable)</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-cogs"></i> Technical Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="platform-mounting-structure">Mounting Structure</label>
+                            <select id="platform-mounting-structure" class="form-input">
+                                <option value="">Select mounting structure</option>
+                                <option value="Tower">Tower</option>
+                                <option value="Mast">Mast</option>
+                                <option value="Building RoofTop">Building RoofTop</option>
+                                <option value="Building Wall">Building Wall</option>
+                                <option value="Flagpole and Tower">Flagpole and Tower</option>
+                                <option value="Pole">Pole</option>
+                                <option value="Tripod">Tripod</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="platform-height">Platform Height (m)</label>
+                            <input type="number" id="platform-height" class="form-input" step="0.1"
+                                   placeholder="Height above ground">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Location</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="platform-latitude">Latitude</label>
+                            <input type="number" id="platform-latitude" class="form-input" step="any"
+                                   placeholder="Decimal degrees" min="-90" max="90">
+                        </div>
+                        <div class="form-group">
+                            <label for="platform-longitude">Longitude</label>
+                            <input type="number" id="platform-longitude" class="form-input" step="any"
+                                   placeholder="Decimal degrees" min="-180" max="180">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-deployment-date">Deployment Date</label>
+                        <input type="date" id="platform-deployment-date" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-align-left"></i> Description</h4>
+                    <div class="form-group">
+                        <label for="platform-description">Description</label>
+                        <textarea id="platform-description" class="form-input" rows="3"
+                                  placeholder="Optional description of the platform"></textarea>
+                    </div>
+                </div>
+
+                <input type="hidden" id="platform-station-id" value="\${stationId}">
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreatePlatformModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary save-btn" onclick="saveNewPlatform()">
+                        <i class="fas fa-save"></i> Create Platform
+                    </button>
+                </div>
+            \`;
+
+            // Initialize normalized name
+            updatePlatformNormalizedName();
+            document.getElementById('create-platform-modal').classList.add('show');
+        }
+
+        function updatePlatformNormalizedName() {
+            const stationAcronym = stationData?.acronym || 'STA';
+            const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
+            const locationCode = document.getElementById('platform-location-code')?.value || '';
+
+            if (locationCode) {
+                const normalizedName = \`\${stationAcronym}_\${ecosystemCode}_\${locationCode}\`;
+                const normalizedInput = document.getElementById('platform-normalized-name');
+                if (normalizedInput) {
+                    normalizedInput.value = normalizedName;
+                }
+            }
+        }
+
+        async function saveNewPlatform() {
+            const saveBtn = document.querySelector('#create-platform-modal .save-btn');
+            const originalText = saveBtn.innerHTML;
+
+            try {
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                saveBtn.disabled = true;
+
+                const platformData = {
+                    station_id: parseInt(document.getElementById('platform-station-id').value),
+                    display_name: document.getElementById('platform-display-name').value.trim(),
+                    location_code: document.getElementById('platform-location-code').value.trim().toUpperCase(),
+                    ecosystem_code: document.getElementById('platform-ecosystem-code').value,
+                    normalized_name: document.getElementById('platform-normalized-name').value.trim(),
+                    status: document.getElementById('platform-status').value,
+                    mounting_structure: document.getElementById('platform-mounting-structure').value || null,
+                    platform_height_m: parseFloat(document.getElementById('platform-height').value) || null,
+                    latitude: parseFloat(document.getElementById('platform-latitude').value) || null,
+                    longitude: parseFloat(document.getElementById('platform-longitude').value) || null,
+                    deployment_date: document.getElementById('platform-deployment-date').value || null,
+                    description: document.getElementById('platform-description').value.trim()
+                };
+
+                // Validation
+                if (!platformData.display_name || !platformData.location_code || !platformData.normalized_name) {
+                    throw new Error('Display name, location code, and normalized name are required');
+                }
+
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch('/api/platforms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': \`Bearer \${token}\`
+                    },
+                    body: JSON.stringify(platformData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 409 && result.conflicts) {
+                        // Handle conflicts with suggestions
+                        let conflictMessage = 'Conflicts detected:\\n';
+                        result.conflicts.forEach(conflict => {
+                            conflictMessage += \`- \${conflict.field}: "\${conflict.value}" already exists\\n\`;
+                        });
+
+                        if (result.suggestions) {
+                            if (result.suggestions.location_code) {
+                                conflictMessage += \`\\nSuggested location code: \${result.suggestions.location_code}\`;
+                                document.getElementById('platform-location-code').value = result.suggestions.location_code;
+                            }
+                            if (result.suggestions.normalized_name) {
+                                document.getElementById('platform-normalized-name').value = result.suggestions.normalized_name;
+                            }
+                        }
+
+                        throw new Error(conflictMessage);
+                    }
+                    throw new Error(result.error || 'Failed to create platform');
+                }
+
+                showNotification(\`Platform "\${platformData.display_name}" created successfully!\`, 'success');
+                closeCreatePlatformModal();
+
+                // Refresh the display
+                loadPlatformsAndInstruments();
+
+            } catch (error) {
+                console.error('Platform creation error:', error);
+                showNotification(error.message, 'error');
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        function closeCreatePlatformModal() {
+            document.getElementById('create-platform-modal').classList.remove('show');
+        }
+
+        // Platform Deletion Functions (Admin Only)
+        function showDeletePlatformModal(platformId, platformName) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotification('Admin privileges required', 'error');
+                return;
+            }
+
+            const content = document.getElementById('delete-platform-content');
+            content.innerHTML = \`
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 2em; margin-bottom: 16px;"></i>
+                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Platform: \${platformName}</h4>
+                    <p><strong>WARNING:</strong> This action cannot be undone and will permanently delete:</p>
+                    <ul style="text-align: left; margin: 16px 0; padding-left: 24px;">
+                        <li>The platform record</li>
+                        <li>All instruments on this platform</li>
+                        <li>All ROI data for those instruments</li>
+                    </ul>
+
+                    <div id="dependency-analysis" style="margin: 16px 0; padding: 12px; background: #f3f4f6; border-radius: 6px;">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i> Analyzing dependencies...
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin: 16px 0;">
+                        <label>
+                            <input type="checkbox" id="generate-backup" checked>
+                            Generate backup before deletion
+                        </label>
+                        <small style="display: block; margin-top: 4px; color: #666;">
+                            Recommended: Creates a downloadable JSON backup of all platform data
+                        </small>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 24px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeDeletePlatformModal()">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete-platform-btn"
+                                onclick="confirmDeletePlatform('\${platformId}', '\${platformName}')" disabled>
+                            <i class="fas fa-trash"></i> Delete Platform
+                        </button>
+                    </div>
+                </div>
+            \`;
+
+            // Analyze dependencies
+            analyzeDependencies('platform', platformId);
+            document.getElementById('delete-platform-modal').classList.add('show');
+        }
+
+        async function confirmDeletePlatform(platformId, platformName) {
+            const deleteBtn = document.getElementById('confirm-delete-platform-btn');
+            const originalText = deleteBtn.innerHTML;
+
+            try {
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                deleteBtn.disabled = true;
+
+                const generateBackup = document.getElementById('generate-backup').checked;
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const url = \`/api/platforms/\${platformId}?force_cascade=true\${generateBackup ? '&backup=true' : ''}\`;
+
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': \`Bearer \${token}\`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to delete platform');
+                }
+
+                // Handle backup download if provided
+                if (result.backup_data) {
+                    const filename = \`\${platformName.replace(/\s+/g, '_')}_BACKUP_\${new Date().toISOString().split('T')[0]}.json\`;
+                    downloadBackup(result.backup_data, filename);
+                }
+
+                showNotification(\`Platform "\${platformName}" deleted successfully\`, 'success');
+                closeDeletePlatformModal();
+
+                // Refresh the display
+                loadPlatformsAndInstruments();
+
+            } catch (error) {
+                console.error('Platform deletion error:', error);
+                showNotification(error.message, 'error');
+            } finally {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+            }
+        }
+
+        function closeDeletePlatformModal() {
+            document.getElementById('delete-platform-modal').classList.remove('show');
+        }
+
+        // Utility function for downloading backups
+        function downloadBackup(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>

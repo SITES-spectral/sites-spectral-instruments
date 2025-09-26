@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.15",
+  "version": "4.8.16",
   "description": "SITES Spectral Stations & Instruments Management System v4.8.15 - Fixed Ecosystem Codes to Match YAML Source",
   "main": "src/worker.js",
   "scripts": {

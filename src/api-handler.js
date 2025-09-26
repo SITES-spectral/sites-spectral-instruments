@@ -158,7 +158,7 @@ async function handleAuth(method, pathSegments, request, env) {
 
 // Station endpoints
 async function handleStations(method, id, request, env) {
-  if (method !== 'GET') {
+  if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -175,7 +175,7 @@ async function handleStations(method, id, request, env) {
   }
 
   try {
-    if (id) {
+    if (method === 'GET' && id) {
       // Get specific station by normalized name or acronym
       const station = await getStationData(id, env);
       if (!station) {
@@ -197,10 +197,291 @@ async function handleStations(method, id, request, env) {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
-    } else {
+
+    } else if (method === 'GET') {
       // List stations (filtered by user permissions)
       const stations = await getStationsData(user, env);
       return new Response(JSON.stringify({ stations }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'POST') {
+      // Create new station (admin only)
+      if (user.role !== 'admin') {
+        return new Response(JSON.stringify({ error: 'Admin privileges required' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      const stationData = await request.json();
+
+      // Required fields validation
+      if (!stationData.display_name || !stationData.acronym) {
+        return new Response(JSON.stringify({ error: 'Display name and acronym are required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Generate normalized name from display name
+      const normalizedName = stationData.normalized_name ||
+        stationData.display_name.toLowerCase().replace(/\s+/g, '_').replace(/[åä]/g, 'a').replace(/[ö]/g, 'o');
+
+      // Check for duplicate normalized names and acronyms
+      const duplicateCheck = await env.DB.prepare(`
+        SELECT normalized_name, acronym FROM stations
+        WHERE normalized_name = ? OR acronym = ?
+      `).bind(normalizedName, stationData.acronym).all();
+
+      if (duplicateCheck.results && duplicateCheck.results.length > 0) {
+        const conflicts = duplicateCheck.results.map(r => ({
+          field: r.normalized_name === normalizedName ? 'normalized_name' : 'acronym',
+          value: r.normalized_name === normalizedName ? r.normalized_name : r.acronym
+        }));
+
+        return new Response(JSON.stringify({
+          error: 'Duplicate values detected',
+          conflicts: conflicts,
+          suggestions: {
+            normalized_name: generateAlternativeNormalizedName(normalizedName, duplicateCheck.results.map(r => r.normalized_name))
+          }
+        }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Insert new station
+      const insertQuery = `
+        INSERT INTO stations (
+          normalized_name, display_name, acronym, status, country,
+          latitude, longitude, elevation_m, description, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const now = new Date().toISOString();
+
+      const result = await env.DB.prepare(insertQuery).bind(
+        normalizedName,
+        stationData.display_name,
+        stationData.acronym.toUpperCase(),
+        stationData.status || 'Active',
+        stationData.country || 'Sweden',
+        stationData.latitude || null,
+        stationData.longitude || null,
+        stationData.elevation_m || null,
+        stationData.description || '',
+        now,
+        now
+      ).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Station created successfully',
+        id: result.meta.last_row_id,
+        normalized_name: normalizedName
+      }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'PUT' && id) {
+      // Update station (admin only)
+      if (user.role !== 'admin') {
+        return new Response(JSON.stringify({ error: 'Admin privileges required' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      const stationData = await request.json();
+
+      // First verify station exists
+      const existingStation = await getStationData(id, env);
+      if (!existingStation) {
+        return new Response(JSON.stringify({ error: 'Station not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check for duplicate normalized names and acronyms if they're being changed
+      if ((stationData.normalized_name && stationData.normalized_name !== existingStation.normalized_name) ||
+          (stationData.acronym && stationData.acronym !== existingStation.acronym)) {
+
+        const duplicateCheck = await env.DB.prepare(`
+          SELECT normalized_name, acronym FROM stations
+          WHERE (normalized_name = ? OR acronym = ?) AND id != ?
+        `).bind(
+          stationData.normalized_name || existingStation.normalized_name,
+          stationData.acronym || existingStation.acronym,
+          existingStation.id
+        ).all();
+
+        if (duplicateCheck.results && duplicateCheck.results.length > 0) {
+          const conflicts = duplicateCheck.results.map(r => ({
+            field: r.normalized_name === (stationData.normalized_name || existingStation.normalized_name) ? 'normalized_name' : 'acronym',
+            value: r.normalized_name === (stationData.normalized_name || existingStation.normalized_name) ? r.normalized_name : r.acronym
+          }));
+
+          return new Response(JSON.stringify({
+            error: 'Duplicate values detected',
+            conflicts: conflicts
+          }), {
+            status: 409,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      }
+
+      // Build update query with provided fields
+      const allowedFields = [];
+      const values = [];
+      const editableFields = [
+        'normalized_name', 'display_name', 'acronym', 'status', 'country',
+        'latitude', 'longitude', 'elevation_m', 'description'
+      ];
+
+      editableFields.forEach(field => {
+        if (stationData[field] !== undefined) {
+          allowedFields.push(`${field} = ?`);
+          values.push(field === 'acronym' ? stationData[field].toUpperCase() : stationData[field]);
+        }
+      });
+
+      if (allowedFields.length === 0) {
+        return new Response(JSON.stringify({ error: 'No valid fields to update' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Always update updated_at
+      allowedFields.push('updated_at = ?');
+      values.push(new Date().toISOString());
+
+      const updateQuery = `
+        UPDATE stations
+        SET ${allowedFields.join(', ')}
+        WHERE id = ?
+      `;
+
+      values.push(existingStation.id);
+
+      await env.DB.prepare(updateQuery).bind(...values).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Station updated successfully',
+        id: existingStation.id
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'DELETE' && id) {
+      // Delete station (admin only)
+      if (user.role !== 'admin') {
+        return new Response(JSON.stringify({ error: 'Admin privileges required' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      const url = new URL(request.url);
+      const backup = url.searchParams.get('backup') === 'true';
+
+      // First verify station exists
+      const existingStation = await getStationData(id, env);
+      if (!existingStation) {
+        return new Response(JSON.stringify({ error: 'Station not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check for dependent data
+      const dependencyCheck = await env.DB.prepare(`
+        SELECT
+          (SELECT COUNT(*) FROM platforms WHERE station_id = ?) as platform_count,
+          (SELECT COUNT(*) FROM instruments i JOIN platforms p ON i.platform_id = p.id WHERE p.station_id = ?) as instrument_count,
+          (SELECT COUNT(*) FROM instrument_rois r JOIN instruments i ON r.instrument_id = i.id JOIN platforms p ON i.platform_id = p.id WHERE p.station_id = ?) as roi_count
+      `).bind(existingStation.id, existingStation.id, existingStation.id).first();
+
+      const hasDependendencies = dependencyCheck.platform_count > 0 || dependencyCheck.instrument_count > 0 || dependencyCheck.roi_count > 0;
+
+      if (hasDependendencies && !url.searchParams.get('force_cascade')) {
+        return new Response(JSON.stringify({
+          error: 'Station has dependent data',
+          dependencies: {
+            platforms: dependencyCheck.platform_count,
+            instruments: dependencyCheck.instrument_count,
+            rois: dependencyCheck.roi_count
+          },
+          message: 'Use force_cascade=true to delete station and all dependent data'
+        }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      let backupData = null;
+
+      // Generate backup if requested
+      if (backup) {
+        // Get complete station data with all dependents
+        const stationQuery = `SELECT * FROM stations WHERE id = ?`;
+        const platformsQuery = `SELECT * FROM platforms WHERE station_id = ?`;
+        const instrumentsQuery = `
+          SELECT i.* FROM instruments i
+          JOIN platforms p ON i.platform_id = p.id
+          WHERE p.station_id = ?
+        `;
+        const roisQuery = `
+          SELECT r.* FROM instrument_rois r
+          JOIN instruments i ON r.instrument_id = i.id
+          JOIN platforms p ON i.platform_id = p.id
+          WHERE p.station_id = ?
+        `;
+
+        const [station, platforms, instruments, rois] = await Promise.all([
+          env.DB.prepare(stationQuery).bind(existingStation.id).first(),
+          env.DB.prepare(platformsQuery).bind(existingStation.id).all(),
+          env.DB.prepare(instrumentsQuery).bind(existingStation.id).all(),
+          env.DB.prepare(roisQuery).bind(existingStation.id).all()
+        ]);
+
+        backupData = {
+          station: station,
+          platforms: platforms?.results || [],
+          instruments: instruments?.results || [],
+          rois: rois?.results || [],
+          backup_metadata: {
+            timestamp: new Date().toISOString(),
+            backup_type: 'station_deletion',
+            deleted_by: user.username,
+            dependency_counts: dependencyCheck
+          }
+        };
+      }
+
+      // Delete station (will cascade to platforms, instruments, and ROIs due to foreign key constraints)
+      await env.DB.prepare('DELETE FROM stations WHERE id = ?').bind(existingStation.id).run();
+
+      const response = {
+        success: true,
+        message: 'Station deleted successfully',
+        id: existingStation.id,
+        dependencies_deleted: dependencyCheck
+      };
+
+      if (backupData) {
+        response.backup_data = backupData;
+      }
+
+      return new Response(JSON.stringify(response), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -216,7 +497,7 @@ async function handleStations(method, id, request, env) {
 
 // Platform endpoints
 async function handlePlatforms(method, id, request, env) {
-  if (!['GET', 'PUT'].includes(method)) {
+  if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json' }
@@ -393,6 +674,212 @@ async function handlePlatforms(method, id, request, env) {
         message: 'Platform updated successfully',
         id: parseInt(id)
       }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'POST') {
+      // Create new platform (admin only)
+      if (user.role !== 'admin') {
+        return new Response(JSON.stringify({ error: 'Admin privileges required' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      const platformData = await request.json();
+
+      // Required fields validation
+      if (!platformData.station_id || !platformData.display_name || !platformData.location_code) {
+        return new Response(JSON.stringify({ error: 'Station ID, display name, and location code are required' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Verify station exists
+      const station = await env.DB.prepare('SELECT id, acronym, normalized_name FROM stations WHERE id = ?')
+        .bind(platformData.station_id).first();
+
+      if (!station) {
+        return new Response(JSON.stringify({ error: 'Station not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Generate normalized name based on station acronym, ecosystem, and location code
+      const ecosystemCode = platformData.ecosystem_code || 'GEN'; // Default to GEN for general
+      const normalizedName = platformData.normalized_name ||
+        `${station.acronym}_${ecosystemCode}_${platformData.location_code}`;
+
+      // Check for duplicate normalized names within the same station
+      const duplicateCheck = await env.DB.prepare(`
+        SELECT normalized_name, location_code FROM platforms
+        WHERE station_id = ? AND (normalized_name = ? OR location_code = ?)
+      `).bind(platformData.station_id, normalizedName, platformData.location_code).all();
+
+      if (duplicateCheck.results && duplicateCheck.results.length > 0) {
+        const conflicts = duplicateCheck.results.map(r => ({
+          field: r.normalized_name === normalizedName ? 'normalized_name' : 'location_code',
+          value: r.normalized_name === normalizedName ? r.normalized_name : r.location_code
+        }));
+
+        return new Response(JSON.stringify({
+          error: 'Duplicate values detected',
+          conflicts: conflicts,
+          suggestions: {
+            location_code: generateNextLocationCode(platformData.location_code, duplicateCheck.results.map(r => r.location_code)),
+            normalized_name: generateAlternativeNormalizedName(normalizedName, duplicateCheck.results.map(r => r.normalized_name))
+          }
+        }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Insert new platform
+      const insertQuery = `
+        INSERT INTO platforms (
+          station_id, normalized_name, display_name, location_code,
+          mounting_structure, platform_height_m, status, latitude, longitude,
+          deployment_date, description, operation_programs, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const now = new Date().toISOString();
+
+      const result = await env.DB.prepare(insertQuery).bind(
+        platformData.station_id,
+        normalizedName,
+        platformData.display_name,
+        platformData.location_code,
+        platformData.mounting_structure || null,
+        platformData.platform_height_m || null,
+        platformData.status || 'Active',
+        platformData.latitude || null,
+        platformData.longitude || null,
+        platformData.deployment_date || null,
+        platformData.description || '',
+        platformData.operation_programs || null,
+        now,
+        now
+      ).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Platform created successfully',
+        id: result.meta.last_row_id,
+        normalized_name: normalizedName
+      }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+    } else if (method === 'DELETE' && id) {
+      // Delete platform (admin only)
+      if (user.role !== 'admin') {
+        return new Response(JSON.stringify({ error: 'Admin privileges required' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      const url = new URL(request.url);
+      const backup = url.searchParams.get('backup') === 'true';
+
+      // First verify platform exists and get its station info
+      const existingPlatform = await env.DB.prepare(`
+        SELECT p.id, p.normalized_name, p.display_name,
+               s.acronym as station_acronym, s.display_name as station_name
+        FROM platforms p
+        JOIN stations s ON p.station_id = s.id
+        WHERE p.id = ?
+      `).bind(id).first();
+
+      if (!existingPlatform) {
+        return new Response(JSON.stringify({ error: 'Platform not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check for dependent data
+      const dependencyCheck = await env.DB.prepare(`
+        SELECT
+          (SELECT COUNT(*) FROM instruments WHERE platform_id = ?) as instrument_count,
+          (SELECT COUNT(*) FROM instrument_rois r JOIN instruments i ON r.instrument_id = i.id WHERE i.platform_id = ?) as roi_count
+      `).bind(id, id).first();
+
+      const hasDependendencies = dependencyCheck.instrument_count > 0 || dependencyCheck.roi_count > 0;
+
+      if (hasDependendencies && !url.searchParams.get('force_cascade')) {
+        return new Response(JSON.stringify({
+          error: 'Platform has dependent data',
+          dependencies: {
+            instruments: dependencyCheck.instrument_count,
+            rois: dependencyCheck.roi_count
+          },
+          message: 'Use force_cascade=true to delete platform and all dependent data'
+        }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      let backupData = null;
+
+      // Generate backup if requested
+      if (backup) {
+        // Get complete platform data with all dependents
+        const platformQuery = `
+          SELECT p.*, s.acronym as station_acronym, s.display_name as station_name
+          FROM platforms p
+          JOIN stations s ON p.station_id = s.id
+          WHERE p.id = ?
+        `;
+        const instrumentsQuery = `SELECT * FROM instruments WHERE platform_id = ?`;
+        const roisQuery = `
+          SELECT r.* FROM instrument_rois r
+          JOIN instruments i ON r.instrument_id = i.id
+          WHERE i.platform_id = ?
+        `;
+
+        const [platform, instruments, rois] = await Promise.all([
+          env.DB.prepare(platformQuery).bind(id).first(),
+          env.DB.prepare(instrumentsQuery).bind(id).all(),
+          env.DB.prepare(roisQuery).bind(id).all()
+        ]);
+
+        backupData = {
+          platform: platform,
+          instruments: instruments?.results || [],
+          rois: rois?.results || [],
+          backup_metadata: {
+            timestamp: new Date().toISOString(),
+            backup_type: 'platform_deletion',
+            station: existingPlatform.station_acronym,
+            deleted_by: user.username,
+            dependency_counts: dependencyCheck
+          }
+        };
+      }
+
+      // Delete platform (will cascade to instruments and ROIs due to foreign key constraints)
+      await env.DB.prepare('DELETE FROM platforms WHERE id = ?').bind(id).run();
+
+      const response = {
+        success: true,
+        message: 'Platform deleted successfully',
+        id: parseInt(id),
+        dependencies_deleted: dependencyCheck
+      };
+
+      if (backupData) {
+        response.backup_data = backupData;
+      }
+
+      return new Response(JSON.stringify(response), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -1626,4 +2113,38 @@ function hasPermission(user, operation, resource, stationNormalizedName) {
   }
 
   return false;
+}
+
+// Helper function to generate alternative normalized names when conflicts occur
+function generateAlternativeNormalizedName(baseName, existingNames) {
+  let counter = 1;
+  let candidateName = baseName;
+
+  while (existingNames.includes(candidateName)) {
+    candidateName = `${baseName}_${counter}`;
+    counter++;
+  }
+
+  return candidateName;
+}
+
+// Helper function to generate next available location code
+function generateNextLocationCode(baseCode, existingCodes) {
+  // Extract base pattern (letters) and number
+  const match = baseCode.match(/^([A-Z]+)(\d+)$/);
+  if (!match) {
+    return `${baseCode}02`; // Default to adding 02 if pattern not recognized
+  }
+
+  const [, prefix, number] = match;
+  let counter = parseInt(number) + 1;
+
+  let candidateCode = `${prefix}${counter.toString().padStart(2, '0')}`;
+
+  while (existingCodes.includes(candidateCode)) {
+    counter++;
+    candidateCode = `${prefix}${counter.toString().padStart(2, '0')}`;
+  }
+
+  return candidateCode;
 }
