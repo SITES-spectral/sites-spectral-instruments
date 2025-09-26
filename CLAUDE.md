@@ -2,11 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 4.8.13 - Explicit CRUD Buttons with Warning Icons (2025-09-26)
+## Version 4.8.14 - Improved Add Button Placement (2025-09-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.13 ⚠️
+**📅 Deployment Date:** 2025-09-26 ✅ DEPLOYED v4.8.14 🎯
+**🎯 Major Achievement:** Optimized add button placement to eliminate proximity confusion with delete buttons
+
+### 🎯 Smart Button Positioning in v4.8.14
+- **Moved Add Button to Title**: Relocated "+ Add Instrument" button from card bottom to inline with "Instruments" title
+- **Clear Visual Separation**: Add button now positioned far from delete buttons to prevent confusion
+- **Logical Grouping**: Add button grouped with title where it semantically belongs
+- **Reduced Interface Clutter**: Cleaner card layout with better visual hierarchy
+- **Professional Styling**: Compact button styling that fits naturally in title area
+
+### ✨ Technical Implementation
+- **Flexbox Layout**: Used `display: flex; justify-content: space-between` for title area
+- **Compact Sizing**: Smaller, appropriately-sized button (`padding: 6px 12px`) for title integration
+- **Consistent Styling**: Maintained green color scheme (#10b981) with hover effects
+- **Responsive Design**: Button scales properly with title text across all screen sizes
+- **Clean Typography**: Button size and font weight balanced with title text
+
+### 🎯 User Benefits
+- **No More Confusion**: Clear separation between add (top) and delete (bottom) functions
+- **Intuitive Placement**: Add button where users expect it - with the section title
+- **Reduced Cognitive Load**: Visual hierarchy makes intent immediately clear
+- **Safer Interaction**: Impossible to accidentally click delete when trying to add
+- **Professional UX**: Follows standard UI patterns for section-level actions
+
+## Version 4.8.13 - Explicit CRUD Buttons with Warning Icons (2025-09-26)
+**📅 Previous Version**
 **🎯 Major Achievement:** Complete redesign of CRUD buttons with explicit text labels and warning icons for maximum user safety
 
 ### ⚠️ Explicit CRUD Button Redesign in v4.8.13

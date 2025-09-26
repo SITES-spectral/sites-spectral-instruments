@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.8.13",
-  "description": "SITES Spectral Stations & Instruments Management System v4.8.13 - Explicit CRUD Buttons with Warning Icons",
+  "version": "4.8.14",
+  "description": "SITES Spectral Stations & Instruments Management System v4.8.14 - Improved Add Button Placement",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
