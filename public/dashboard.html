@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.9.0">
+    <link rel="stylesheet" href="/css/styles.css?v=4.9.3">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.0">
+    <meta name="app-version" content="4.9.3">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -546,7 +546,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.9.0"></script>
+    <script src="/js/utils.js?v=4.9.3"></script>
     <script>
         let currentUser = null;
         let stations = [];
@@ -909,7 +909,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': \`Bearer \${token}\`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(stationData)
                 });
@@ -919,13 +919,13 @@
                 if (!response.ok) {
                     if (response.status === 409 && result.conflicts) {
                         // Handle conflicts with suggestions
-                        let conflictMessage = 'Conflicts detected:\\n';
+                        let conflictMessage = 'Conflicts detected:\n';
                         result.conflicts.forEach(conflict => {
-                            conflictMessage += \`- \${conflict.field}: "\${conflict.value}" already exists\\n\`;
+                            conflictMessage += `- ${conflict.field}: "${conflict.value}" already exists\n`;
                         });
 
                         if (result.suggestions && result.suggestions.normalized_name) {
-                            conflictMessage += \`\\nSuggested normalized name: \${result.suggestions.normalized_name}\`;
+                            conflictMessage += `\nSuggested normalized name: ${result.suggestions.normalized_name}`;
                             document.getElementById('station-normalized-name').value = result.suggestions.normalized_name;
                         }
 
@@ -934,7 +934,7 @@
                     throw new Error(result.error || 'Failed to create station');
                 }
 
-                showNotification(\`Station "\${stationData.display_name}" created successfully!\`, 'success');
+                showNotification(`Station "${stationData.display_name}" created successfully!`, 'success');
                 closeCreateStationModal();
 
                 // Refresh the dashboard
@@ -963,10 +963,10 @@
             }
 
             const content = document.getElementById('delete-station-content');
-            content.innerHTML = \`
+            content.innerHTML = `
                 <div class="warning-message">
                     <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 2em; margin-bottom: 16px;"></i>
-                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Station: \${stationName}</h4>
+                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Station: ${stationName}</h4>
                     <p><strong>WARNING:</strong> This action cannot be undone and will permanently delete:</p>
                     <ul style="text-align: left; margin: 16px 0; padding-left: 24px;">
                         <li>The station record</li>
@@ -995,12 +995,12 @@
                     <div class="form-actions" style="margin-top: 24px;">
                         <button type="button" class="btn btn-secondary" onclick="closeDeleteStationModal()">Cancel</button>
                         <button type="button" class="btn btn-danger" id="confirm-delete-station-btn"
-                                onclick="confirmDeleteStation('\${stationId}', '\${stationName}')" disabled>
+                                onclick="confirmDeleteStation('${stationId}', '${stationName}')" disabled>
                             <i class="fas fa-trash"></i> Delete Station
                         </button>
                     </div>
                 </div>
-            \`;
+            `;
 
             // Analyze dependencies
             analyzeDependencies('station', stationId);
@@ -1013,12 +1013,12 @@
                 setTimeout(() => {
                     const analysisDiv = document.getElementById('dependency-analysis');
                     if (analysisDiv) {
-                        analysisDiv.innerHTML = \`
+                        analysisDiv.innerHTML = `
                             <p><i class="fas fa-info-circle"></i> Ready to proceed with deletion.</p>
                             <p><small>Dependency analysis complete. All related data will be removed.</small></p>
-                        \`;
+                        `;
 
-                        const deleteBtn = document.getElementById(\`confirm-delete-\${type}-btn\`);
+                        const deleteBtn = document.getElementById(`confirm-delete-${type}-btn`);
                         if (deleteBtn) {
                             deleteBtn.disabled = false;
                         }
@@ -1040,12 +1040,12 @@
                 const generateBackup = document.getElementById('generate-backup').checked;
                 const token = localStorage.getItem('sites_spectral_token');
 
-                const url = \`/api/stations/\${stationId}?force_cascade=true\${generateBackup ? '&backup=true' : ''}\`;
+                const url = `/api/stations/${stationId}?force_cascade=true${generateBackup ? '&backup=true' : ''}`;
 
                 const response = await fetch(url, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': \`Bearer \${token}\`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -1057,11 +1057,11 @@
 
                 // Handle backup download if provided
                 if (result.backup_data) {
-                    const filename = \`\${stationName.replace(/\s+/g, '_')}_BACKUP_\${new Date().toISOString().split('T')[0]}.json\`;
+                    const filename = `${stationName.replace(/\s+/g, '_')}_BACKUP_${new Date().toISOString().split('T')[0]}.json`;
                     downloadBackup(result.backup_data, filename);
                 }
 
-                showNotification(\`Station "\${stationName}" deleted successfully\`, 'success');
+                showNotification(`Station "${stationName}" deleted successfully`, 'success');
                 closeDeleteStationModal();
 
                 // Refresh the dashboard

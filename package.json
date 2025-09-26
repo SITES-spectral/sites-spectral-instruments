@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.9.2",
-  "description": "SITES Spectral Stations & Instruments Management System v4.9.2 - Fixed Station Page Loading and User Redirection",
+  "version": "4.9.3",
+  "description": "SITES Spectral Stations & Instruments Management System v4.9.3 - Critical JavaScript Syntax Fixes for Page Loading",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

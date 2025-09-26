@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.9.1">
+    <link rel="stylesheet" href="/css/styles.css?v=4.9.3">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.1">
+    <meta name="app-version" content="4.9.3">
     <meta name="build-date" content="2025-09-26">
 
     <style>
@@ -1397,7 +1397,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.9.1"></script>
+    <script src="/js/utils.js?v=4.9.3"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1413,37 +1413,52 @@
         const stationAcronym = urlParams.get('station');
 
         document.addEventListener('DOMContentLoaded', async function() {
-            // Check authentication
-            const token = localStorage.getItem('sites_spectral_token');
-            const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
-
-            if (!token || !user) {
-                // Not authenticated, redirect to login
-                window.location.href = '/';
-                return;
-            }
-
-            currentUser = user;
-
-            // If no station parameter, redirect to login
-            if (!stationAcronym) {
-                window.location.href = '/';
-                return;
-            }
-
-            // Load station data
-            await loadStationData();
-        });
-
-        async function loadStationData() {
             try {
-                // Get auth token
+                // Check authentication
                 const token = localStorage.getItem('sites_spectral_token');
-                if (!token) {
+                const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
+
+                if (!token || !user) {
+                    console.log('No authentication, redirecting to login');
                     window.location.href = '/';
                     return;
                 }
 
+                currentUser = user;
+                console.log('Current user:', currentUser);
+
+                // If no station parameter, redirect to dashboard/login
+                if (!stationAcronym) {
+                    console.log('No station parameter, redirecting');
+                    if (user.role === 'admin' || user.role === 'readonly') {
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        window.location.href = '/';
+                    }
+                    return;
+                }
+
+                console.log('Loading station data for:', stationAcronym);
+                // Load station data
+                await loadStationData();
+            } catch (error) {
+                console.error('Error in DOMContentLoaded:', error);
+                showError('Error initializing page: ' + error.message);
+            }
+        });
+
+        async function loadStationData() {
+            console.log('Loading station data for:', stationAcronym);
+            try {
+                // Get auth token
+                const token = localStorage.getItem('sites_spectral_token');
+                if (!token) {
+                    console.error('No auth token found');
+                    window.location.href = '/';
+                    return;
+                }
+
+                console.log('Making API call to /api/stations/' + stationAcronym);
                 // Load station data from API
                 const response = await fetch(`/api/stations/${stationAcronym}`, {
                     method: 'GET',
@@ -1452,62 +1467,79 @@
                     }
                 });
 
+                console.log('API response status:', response.status);
+
                 if (response.ok) {
                     const station = await response.json();
+                    console.log('Station data received:', station);
                     stationData = station;
-                    showStationData();
+                    await showStationData();
                 } else if (response.status === 401) {
+                    console.error('Token expired or invalid');
                     // Token expired, redirect to login
                     localStorage.removeItem('sites_spectral_token');
                     localStorage.removeItem('sites_spectral_user');
                     window.location.href = '/';
                 } else if (response.status === 404) {
+                    console.error('Station not found');
                     showError('Station not found');
                 } else if (response.status === 403) {
+                    console.error('Access denied to station');
                     showError('Access denied to this station');
                 } else {
+                    console.error('Failed to load station data, status:', response.status);
                     showError('Failed to load station data');
                 }
 
             } catch (error) {
                 console.error('Error loading station data:', error);
-                showError('Failed to load station data');
+                showError('Failed to load station data: ' + error.message);
             }
         }
 
         async function showStationData() {
-            document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('error-state').style.display = 'none';
-            document.getElementById('welcome-content').style.display = 'block';
-            document.getElementById('dashboard-section').style.display = 'block';
+            console.log('Showing station data for:', stationData);
+            try {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'none';
+                document.getElementById('welcome-content').style.display = 'block';
+                document.getElementById('dashboard-section').style.display = 'block';
 
-            document.getElementById('station-name').textContent = stationData.display_name;
-            document.title = `${stationData.display_name} - SITES Spectral`;
+                document.getElementById('station-name').textContent = stationData.display_name;
+                document.title = `${stationData.display_name} - SITES Spectral`;
 
-            // Show admin controls if user is admin
-            if (currentUser && currentUser.role === 'admin') {
-                document.getElementById('admin-station-controls').style.display = 'block';
-                document.getElementById('admin-platform-controls').style.display = 'block';
+                // Show admin controls if user is admin
+                if (currentUser && currentUser.role === 'admin') {
+                    document.getElementById('admin-station-controls').style.display = 'block';
+                    document.getElementById('admin-platform-controls').style.display = 'block';
+                }
+
+                // Set station description if available
+                const descriptionElement = document.getElementById('station-description');
+                if (stationData.description) {
+                    descriptionElement.textContent = stationData.description;
+                    descriptionElement.style.display = 'block';
+                } else {
+                    descriptionElement.style.display = 'none';
+                }
+
+                // Show export button
+                document.getElementById('export-csv-btn').style.display = 'flex';
+
+                // Update dashboard and then initialize map with real data
+                console.log('Updating dashboard...');
+                await updateDashboard();
+                console.log('Initializing map...');
+                initializeMap();
+
+                // Load platforms and instruments
+                console.log('Loading platforms and instruments...');
+                await loadPlatformsAndInstruments();
+                console.log('Station data display complete');
+            } catch (error) {
+                console.error('Error in showStationData:', error);
+                showError('Error displaying station data: ' + error.message);
             }
-
-            // Set station description if available
-            const descriptionElement = document.getElementById('station-description');
-            if (stationData.description) {
-                descriptionElement.textContent = stationData.description;
-                descriptionElement.style.display = 'block';
-            } else {
-                descriptionElement.style.display = 'none';
-            }
-
-            // Show export button
-            document.getElementById('export-csv-btn').style.display = 'flex';
-
-            // Update dashboard and then initialize map with real data
-            await updateDashboard();
-            initializeMap();
-
-            // Load platforms and instruments
-            await loadPlatformsAndInstruments();
         }
 
         async function updateDashboard() {
@@ -1869,24 +1901,38 @@
         }
 
         function logout() {
-            localStorage.removeItem('sites_spectral_token');
-            localStorage.removeItem('sites_spectral_user');
-            window.location.href = '/';
+            console.log('Logout button clicked');
+            try {
+                localStorage.removeItem('sites_spectral_token');
+                localStorage.removeItem('sites_spectral_user');
+                console.log('Cleared localStorage, redirecting to login');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error during logout:', error);
+                // Force redirect even if localStorage fails
+                window.location.href = '/';
+            }
         }
 
         // Platform and Instrument Management Functions
         async function loadPlatformsAndInstruments() {
+            console.log('Loading platforms and instruments...');
             const token = localStorage.getItem('sites_spectral_token');
-            if (!token) return;
+            if (!token) {
+                console.error('No token for loading platforms and instruments');
+                return;
+            }
 
             const platformsGrid = document.getElementById('platforms-grid');
 
             // Load image manifest for metadata display (async, don't wait)
+            console.log('Loading image manifest...');
             loadImageManifest().catch(error => {
                 console.warn('Failed to load image manifest:', error);
             });
 
             try {
+                console.log('Fetching platforms for station:', stationData.acronym);
                 // Fetch platforms for this station
                 const platformsResponse = await fetch(`/api/platforms?station=${stationData.acronym}`, {
                     headers: {
@@ -1895,6 +1941,9 @@
                     }
                 });
 
+                console.log('Platforms response status:', platformsResponse.status);
+
+                console.log('Fetching instruments for station:', stationData.acronym);
                 // Fetch instruments for this station
                 const instrumentsResponse = await fetch(`/api/instruments?station=${stationData.acronym}`, {
                     headers: {
@@ -1903,12 +1952,19 @@
                     }
                 });
 
+                console.log('Instruments response status:', instrumentsResponse.status);
+
                 if (platformsResponse.ok && instrumentsResponse.ok) {
                     const platformsData = await platformsResponse.json();
                     const instrumentsData = await instrumentsResponse.json();
 
+                    console.log('Platforms data:', platformsData);
+                    console.log('Instruments data:', instrumentsData);
+
                     const platforms = platformsData.platforms || [];
                     const instruments = instrumentsData.instruments || [];
+
+                    console.log('Found', platforms.length, 'platforms and', instruments.length, 'instruments');
 
                     // Group instruments by platform
                     const instrumentsByPlatform = {};
@@ -1919,17 +1975,21 @@
                         instrumentsByPlatform[instrument.platform_id].push(instrument);
                     });
 
+                    console.log('Generating platform cards...');
                     // Generate platform cards
                     platformsGrid.innerHTML = platforms.map(platform =>
                         createPlatformCard(platform, instrumentsByPlatform[platform.id] || [])
                     ).join('');
 
+                    console.log('Platform cards generated successfully');
+
                 } else {
+                    console.error('Failed API calls - platforms:', platformsResponse.status, 'instruments:', instrumentsResponse.status);
                     platformsGrid.innerHTML = '<div class="error-card">Failed to load platforms and instruments</div>';
                 }
             } catch (error) {
                 console.error('Error loading platforms and instruments:', error);
-                platformsGrid.innerHTML = '<div class="error-card">Error loading platforms and instruments</div>';
+                platformsGrid.innerHTML = '<div class="error-card">Error loading platforms and instruments: ' + error.message + '</div>';
             }
         }
 
@@ -4510,7 +4570,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': \`Bearer \${token}\`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(stationData)
                 });
@@ -4520,13 +4580,13 @@
                 if (!response.ok) {
                     if (response.status === 409 && result.conflicts) {
                         // Handle conflicts with suggestions
-                        let conflictMessage = 'Conflicts detected:\\n';
+                        let conflictMessage = 'Conflicts detected:\n';
                         result.conflicts.forEach(conflict => {
-                            conflictMessage += \`- \${conflict.field}: "\${conflict.value}" already exists\\n\`;
+                            conflictMessage += `- ${conflict.field}: "${conflict.value}" already exists\n`;
                         });
 
                         if (result.suggestions && result.suggestions.normalized_name) {
-                            conflictMessage += \`\\nSuggested normalized name: \${result.suggestions.normalized_name}\`;
+                            conflictMessage += `\nSuggested normalized name: ${result.suggestions.normalized_name}`;
                             document.getElementById('station-normalized-name').value = result.suggestions.normalized_name;
                         }
 
@@ -4535,7 +4595,7 @@
                     throw new Error(result.error || 'Failed to create station');
                 }
 
-                showNotification(\`Station "\${stationData.display_name}" created successfully!\`, 'success');
+                showNotification(`Station "${stationData.display_name}" created successfully!`, 'success');
                 closeCreateStationModal();
 
                 // Refresh the page or reload stations data
@@ -4564,10 +4624,10 @@
             }
 
             const content = document.getElementById('delete-station-content');
-            content.innerHTML = \`
+            content.innerHTML = `
                 <div class="warning-message">
                     <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 2em; margin-bottom: 16px;"></i>
-                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Station: \${stationName}</h4>
+                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Station: ${stationName}</h4>
                     <p><strong>WARNING:</strong> This action cannot be undone and will permanently delete:</p>
                     <ul style="text-align: left; margin: 16px 0; padding-left: 24px;">
                         <li>The station record</li>
@@ -4611,7 +4671,7 @@
         async function analyzeDependencies(type, id) {
             try {
                 const token = localStorage.getItem('sites_spectral_token');
-                const endpoint = type === 'station' ? \`/api/stations/\${id}\` : \`/api/platforms/\${id}\`;
+                const endpoint = type === 'station' ? `/api/stations/${id}` : `/api/platforms/${id}`;
 
                 // This would need to be enhanced to get dependency counts
                 // For now, enable the delete button after a delay
@@ -4645,12 +4705,12 @@
                 const generateBackup = document.getElementById('generate-backup').checked;
                 const token = localStorage.getItem('sites_spectral_token');
 
-                const url = \`/api/stations/\${stationId}?force_cascade=true\${generateBackup ? '&backup=true' : ''}\`;
+                const url = `/api/stations/${stationId}?force_cascade=true${generateBackup ? '&backup=true' : ''}`;
 
                 const response = await fetch(url, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': \`Bearer \${token}\`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -4865,7 +4925,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': \`Bearer \${token}\`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(platformData)
                 });
@@ -4875,9 +4935,9 @@
                 if (!response.ok) {
                     if (response.status === 409 && result.conflicts) {
                         // Handle conflicts with suggestions
-                        let conflictMessage = 'Conflicts detected:\\n';
+                        let conflictMessage = 'Conflicts detected:\n';
                         result.conflicts.forEach(conflict => {
-                            conflictMessage += \`- \${conflict.field}: "\${conflict.value}" already exists\\n\`;
+                            conflictMessage += `- ${conflict.field}: "${conflict.value}" already exists\n`;
                         });
 
                         if (result.suggestions) {
@@ -4922,10 +4982,10 @@
             }
 
             const content = document.getElementById('delete-platform-content');
-            content.innerHTML = \`
+            content.innerHTML = `
                 <div class="warning-message">
                     <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 2em; margin-bottom: 16px;"></i>
-                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Platform: \${platformName}</h4>
+                    <h4 style="color: #ef4444; margin-bottom: 16px;">Delete Platform: ${platformName}</h4>
                     <p><strong>WARNING:</strong> This action cannot be undone and will permanently delete:</p>
                     <ul style="text-align: left; margin: 16px 0; padding-left: 24px;">
                         <li>The platform record</li>
@@ -4980,7 +5040,7 @@
                 const response = await fetch(url, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': \`Bearer \${token}\`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
