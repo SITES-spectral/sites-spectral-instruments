@@ -28,6 +28,9 @@ class SitesStationDashboard {
 
     async setupStationDashboard() {
         try {
+            // Show loading state initially
+            this.showLoadingState();
+
             // Verify authentication
             await this.verifyAccess();
 
@@ -36,13 +39,16 @@ class SitesStationDashboard {
                 await this.loadStationData();
                 this.setupMap();
                 this.setupEventListeners();
+
+                // Show successful state
+                this.showSuccessState();
             } else {
                 this.redirectToAppropriateLocation();
             }
 
         } catch (error) {
             console.error('Station dashboard setup error:', error);
-            this.showError('Failed to initialize station: ' + error.message);
+            this.showErrorState('Failed to initialize station: ' + error.message);
         }
     }
 
@@ -84,6 +90,9 @@ class SitesStationDashboard {
             userRoleEl.textContent = this.currentUser.role.charAt(0).toUpperCase() + this.currentUser.role.slice(1);
         }
 
+        // Expose currentUser globally for backward compatibility with embedded functions
+        window.currentUser = this.currentUser;
+
         // Show/hide admin controls
         this.toggleAdminControls();
     }
@@ -100,7 +109,8 @@ class SitesStationDashboard {
     async loadStationData() {
         try {
             // Load station details by acronym
-            const stations = await window.sitesAPI.getStations();
+            const response = await window.sitesAPI.getStations();
+            const stations = Array.isArray(response) ? response : (response.stations || []);
             this.stationData = stations.find(s => s.acronym === this.stationAcronym);
 
             if (!this.stationData) {
@@ -167,6 +177,9 @@ class SitesStationDashboard {
 
         // Update counts
         this.updateCounts();
+
+        // Expose stationData globally for backward compatibility with embedded functions
+        window.stationData = this.stationData;
     }
 
     formatCoordinates() {
@@ -442,6 +455,48 @@ class SitesStationDashboard {
         return div.innerHTML;
     }
 
+    // Page state management
+    showLoadingState() {
+        const loadingEl = document.getElementById('loading-state');
+        const errorEl = document.getElementById('error-state');
+        const welcomeEl = document.getElementById('welcome-content');
+        const dashboardEl = document.getElementById('dashboard-section');
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (errorEl) errorEl.style.display = 'none';
+        if (welcomeEl) welcomeEl.style.display = 'none';
+        if (dashboardEl) dashboardEl.style.display = 'none';
+    }
+
+    showSuccessState() {
+        const loadingEl = document.getElementById('loading-state');
+        const errorEl = document.getElementById('error-state');
+        const welcomeEl = document.getElementById('welcome-content');
+        const dashboardEl = document.getElementById('dashboard-section');
+
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (errorEl) errorEl.style.display = 'none';
+        if (welcomeEl) welcomeEl.style.display = 'block';
+        if (dashboardEl) dashboardEl.style.display = 'block';
+    }
+
+    showErrorState(message) {
+        const loadingEl = document.getElementById('loading-state');
+        const errorEl = document.getElementById('error-state');
+        const welcomeEl = document.getElementById('welcome-content');
+        const dashboardEl = document.getElementById('dashboard-section');
+        const errorMessageEl = document.getElementById('error-message');
+
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (errorEl) errorEl.style.display = 'block';
+        if (welcomeEl) welcomeEl.style.display = 'none';
+        if (dashboardEl) dashboardEl.style.display = 'none';
+        if (errorMessageEl) errorMessageEl.textContent = message;
+
+        // Also show notification
+        showNotification(message, 'error');
+    }
+
     showError(message) {
         showNotification(message, 'error');
     }
@@ -476,4 +531,15 @@ function saveNewPlatform() {
 function refreshOpenModals() {
     // Placeholder for modal refresh functionality
     return Promise.resolve();
+}
+
+// Global logout function for onclick handlers
+function logout() {
+    if (window.sitesStationDashboard) {
+        return window.sitesStationDashboard.logout();
+    } else {
+        // Fallback if module not loaded
+        window.sitesAPI?.clearAuth();
+        window.location.href = '/';
+    }
 }

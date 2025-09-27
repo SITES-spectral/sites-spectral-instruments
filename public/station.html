@@ -22,10 +22,10 @@
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=4.9.5">
+    <link rel="stylesheet" href="/css/styles.css?v=4.9.6">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="4.9.5">
+    <meta name="app-version" content="4.9.6">
     <meta name="build-date" content="2025-09-27">
 
     <style>
@@ -1397,13 +1397,13 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=4.9.5"></script>
-    <script src="/js/api.js?v=4.9.5"></script>
-    <script src="/js/components.js?v=4.9.5"></script>
-    <script src="/js/interactive-map.js?v=4.9.5"></script>
-    <script src="/js/station-dashboard.js?v=4.9.5"></script>
-    <script src="/js/navigation.js?v=4.9.5"></script>
-    <script src="/js/export.js?v=4.9.5"></script>
+    <script src="/js/utils.js?v=4.9.6"></script>
+    <script src="/js/api.js?v=4.9.6"></script>
+    <script src="/js/components.js?v=4.9.6"></script>
+    <script src="/js/interactive-map.js?v=4.9.6"></script>
+    <script src="/js/station-dashboard.js?v=4.9.6"></script>
+    <script src="/js/navigation.js?v=4.9.6"></script>
+    <script src="/js/export.js?v=4.9.6"></script>
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1418,40 +1418,42 @@
         const urlParams = new URLSearchParams(window.location.search);
         const stationAcronym = urlParams.get('station');
 
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                // Check authentication
-                const token = localStorage.getItem('sites_spectral_token');
-                const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
+        // DISABLED: Conflicted with modular station-dashboard.js initialization
+        // The new SitesStationDashboard class handles all initialization
+        // document.addEventListener('DOMContentLoaded', async function() {
+        //     try {
+        //         // Check authentication
+        //         const token = localStorage.getItem('sites_spectral_token');
+        //         const user = JSON.parse(localStorage.getItem('sites_spectral_user') || 'null');
 
-                if (!token || !user) {
-                    console.log('No authentication, redirecting to login');
-                    window.location.href = '/';
-                    return;
-                }
+        //         if (!token || !user) {
+        //             console.log('No authentication, redirecting to login');
+        //             window.location.href = '/';
+        //             return;
+        //         }
 
-                currentUser = user;
-                console.log('Current user:', currentUser);
+        //         currentUser = user;
+        //         console.log('Current user:', currentUser);
 
-                // If no station parameter, redirect based on role
-                if (!stationAcronym) {
-                    console.log('No station parameter, redirecting');
-                    if (user.role === 'admin') {
-                        window.location.href = '/dashboard.html';
-                    } else {
-                        window.location.href = '/';
-                    }
-                    return;
-                }
+        //         // If no station parameter, redirect based on role
+        //         if (!stationAcronym) {
+        //             console.log('No station parameter, redirecting');
+        //             if (user.role === 'admin') {
+        //                 window.location.href = '/dashboard.html';
+        //             } else {
+        //                 window.location.href = '/';
+        //             }
+        //             return;
+        //         }
 
-                console.log('Loading station data for:', stationAcronym);
-                // Load station data
-                await loadStationData();
-            } catch (error) {
-                console.error('Error in DOMContentLoaded:', error);
-                showError('Error initializing page: ' + error.message);
-            }
-        });
+        //         console.log('Loading station data for:', stationAcronym);
+        //         // Load station data
+        //         await loadStationData();
+        //     } catch (error) {
+        //         console.error('Error in DOMContentLoaded:', error);
+        //         showError('Error initializing page: ' + error.message);
+        //     }
+        // });
 
         async function loadStationData() {
             console.log('Loading station data for:', stationAcronym);
