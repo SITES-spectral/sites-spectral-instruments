@@ -1400,13 +1400,14 @@
     <script src="/js/utils.js?v=4.9.6"></script>
     <script src="/js/api.js?v=4.9.6"></script>
     <script src="/js/components.js?v=4.9.6"></script>
+    <!-- Leaflet JavaScript - MUST LOAD FIRST -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Application scripts that depend on Leaflet -->
     <script src="/js/interactive-map.js?v=4.9.6"></script>
     <script src="/js/station-dashboard.js?v=4.9.6"></script>
     <script src="/js/navigation.js?v=4.9.6"></script>
     <script src="/js/export.js?v=4.9.6"></script>
-    <!-- Leaflet JavaScript -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         let currentUser = null;
         let stationData = null;
