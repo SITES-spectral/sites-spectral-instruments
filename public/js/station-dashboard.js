@@ -396,8 +396,7 @@ class SitesStationDashboard {
                     </div>
                     <div class="platform-meta">
                         ${platform.ecosystem_code ? `<span class="ecosystem-badge">${platform.ecosystem_code}</span>` : ''}
-                        ${platform.location_code ? `<span class="location-code">${platform.location_code}</span>` : ''}
-                        ${platform.legacy_name ? `<div class="legacy-name" style="font-size: 0.8em; color: #6b7280; margin-top: 4px;">Legacy: ${platform.legacy_name}</div>` : ''}
+                        ${platform.legacy_name ? `<div class="legacy-name" style="font-size: 0.8em; color: #6b7280; margin-top: 4px;">legacy name: ${platform.legacy_name}</div>` : ''}
                     </div>
                 </div>
 
@@ -605,10 +604,12 @@ class SitesStationDashboard {
                     <span class="detail-label">Normalized ID</span>
                     <span class="detail-value monospace">${platform.normalized_name || 'N/A'}</span>
                 </div>
+                ${platform.legacy_name ? `
                 <div class="detail-field">
-                    <span class="detail-label">Location Code</span>
-                    <span class="detail-value">${platform.location_code || 'N/A'}</span>
+                    <span class="detail-label">Legacy Name</span>
+                    <span class="detail-value">${platform.legacy_name}</span>
                 </div>
+                ` : ''}
                 <div class="detail-field">
                     <span class="detail-label">Status</span>
                     <span class="detail-value status-${platform.status?.toLowerCase() || 'unknown'}">${this.getStatusIcon(platform.status)} ${platform.status || 'Unknown'}</span>
