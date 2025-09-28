@@ -1109,6 +1109,22 @@
             URL.revokeObjectURL(url);
         }
 
+        // Platform modal management
+        function closePlatformModal() {
+            document.getElementById('platform-modal').classList.remove('show');
+            if (window.sitesStationDashboard) {
+                window.sitesStationDashboard.currentOpenPlatformId = null;
+            }
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const platformModal = document.getElementById('platform-modal');
+            if (event.target === platformModal) {
+                closePlatformModal();
+            }
+        });
+
         // Notification system
         function showNotification(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -1128,5 +1144,21 @@
             }, 4000);
         }
     </script>
+
+    <!-- Platform Details Modal -->
+    <div id="platform-modal" class="platform-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
+                <button class="modal-close-large" onclick="closePlatformModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="platform-details" class="detail-grid">
+                    <!-- Platform details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

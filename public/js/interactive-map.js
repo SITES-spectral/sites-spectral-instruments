@@ -211,14 +211,13 @@ class SitesInteractiveMap {
         const instrumentCount = platformData.instrument_count || 0;
         return `
             <div class="map-popup platform-popup">
-                <h5>${platformData.normalized_name || platformData.display_name || 'Platform'}</h5>
-                ${platformData.display_name && platformData.normalized_name !== platformData.display_name ?
-                    `<p><small style="opacity: 0.7;">${platformData.display_name}</small></p>` : ''}
+                <h5>${platformData.display_name || platformData.normalized_name || 'Platform'}</h5>
+                ${platformData.normalized_name && platformData.normalized_name !== platformData.display_name ?
+                    `<p><small style="opacity: 0.7; color: #059669; font-family: 'Courier New', monospace; font-weight: 600;">${platformData.normalized_name}</small></p>` : ''}
                 ${platformData.ecosystem_code ? `<p><strong>Ecosystem:</strong> ${platformData.ecosystem_code}</p>` : ''}
                 ${platformData.location_code ? `<p><strong>Location:</strong> ${platformData.location_code}</p>` : ''}
                 <p><strong>Instruments:</strong> ${instrumentCount}</p>
-                ${platformData.latitude && platformData.longitude ?
-                    `<p><strong>Coordinates:</strong> ${platformData.latitude.toFixed(4)}, ${platformData.longitude.toFixed(4)}</p>` : ''}
+                ${platformData.description ? `<p><strong>Description:</strong> ${platformData.description}</p>` : ''}
             </div>
         `;
     }

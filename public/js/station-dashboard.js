@@ -12,6 +12,7 @@ class SitesStationDashboard {
         this.selectedInstrument = null;
         this.stationAcronym = null;
         this.isLoadingPlatforms = false;
+        this.currentOpenPlatformId = null;
         this.init();
     }
 
@@ -383,17 +384,20 @@ class SitesStationDashboard {
         const instruments = this.instruments.filter(inst => inst.platform_id === platform.id);
         const instrumentCount = instruments.length;
 
-        const coordinates = platform.latitude && platform.longitude
-            ? `${platform.latitude.toFixed(4)}, ${platform.longitude.toFixed(4)}`
-            : 'No coordinates';
+        const locationDisplay = platform.normalized_name ||
+            (platform.latitude && platform.longitude ? `${platform.latitude.toFixed(4)}, ${platform.longitude.toFixed(4)}` : 'No location');
 
         return `
             <div class="platform-card" data-platform-id="${platform.id}">
                 <div class="platform-header">
                     <h4>${this.escapeHtml(platform.display_name)}</h4>
+                    <div class="platform-normalized-name">
+                        <span style="color: #059669; font-family: 'Courier New', monospace; font-weight: 600;">${platform.normalized_name || 'N/A'}</span>
+                    </div>
                     <div class="platform-meta">
                         ${platform.ecosystem_code ? `<span class="ecosystem-badge">${platform.ecosystem_code}</span>` : ''}
                         ${platform.location_code ? `<span class="location-code">${platform.location_code}</span>` : ''}
+                        ${platform.legacy_name ? `<div class="legacy-name" style="font-size: 0.8em; color: #6b7280; margin-top: 4px;">Legacy: ${platform.legacy_name}</div>` : ''}
                     </div>
                 </div>
 
@@ -401,7 +405,7 @@ class SitesStationDashboard {
                     <div class="platform-info">
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>${coordinates}</span>
+                            <span>${locationDisplay}</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-camera"></i>
@@ -411,15 +415,16 @@ class SitesStationDashboard {
 
                     ${instrumentCount > 0 ? `
                         <div class="instruments-preview">
-                            ${instruments.slice(0, 3).map(inst => `
-                                <div class="instrument-chip">
-                                    <i class="fas fa-camera"></i>
-                                    ${this.escapeHtml(inst.name)}
-                                </div>
-                            `).join('')}
+                            <h5 style="margin: 8px 0 4px 0; font-size: 0.9em; color: #374151;"><i class="fas fa-camera"></i> Instruments</h5>
+                            ${instruments.slice(0, 3).map(inst => this.createInstrumentCard(inst)).join('')}
                             ${instrumentCount > 3 ? `<div class="instrument-chip more">+${instrumentCount - 3} more</div>` : ''}
                         </div>
-                    ` : ''}
+                    ` : `
+                        <div class="no-instruments">
+                            <i class="fas fa-camera" style="opacity: 0.3;"></i>
+                            <span style="opacity: 0.6;">No instruments configured</span>
+                        </div>
+                    `}
                 </div>
 
                 <div class="platform-actions">
@@ -542,12 +547,185 @@ class SitesStationDashboard {
         }
     }
 
-    viewPlatformDetails(platformId) {
-        const platform = this.platforms.find(p => p.id === platformId);
-        if (platform) {
-            // Show platform details modal or navigate to dedicated page
-            showNotification(`Platform details for "${platform.display_name}" coming soon`, 'info');
+    async viewPlatformDetails(platformId) {
+        const token = localStorage.getItem('sites_spectral_token');
+        if (!token) return;
+
+        try {
+            const response = await fetch(`/api/platforms/${platformId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                const platform = await response.json();
+                this.populatePlatformModal(platform);
+                this.trackPlatformModal(platformId);
+                document.getElementById('platform-modal').classList.add('show');
+            } else {
+                console.error('Failed to fetch platform details');
+                showNotification('Failed to load platform details', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching platform details:', error);
+            showNotification('Error loading platform details', 'error');
         }
+    }
+
+    populatePlatformModal(platform) {
+        const detailsContainer = document.getElementById('platform-details');
+
+        // Update modal header with edit button if user has permissions
+        const modalHeader = document.querySelector('#platform-modal .modal-header-large');
+        const canEdit = this.currentUser && (this.currentUser.role === 'admin' ||
+            (this.currentUser.role === 'station' && this.currentUser.station_normalized_name === this.stationData?.normalized_name));
+
+        modalHeader.innerHTML = `
+            <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
+            <div class="modal-header-actions">
+                ${canEdit ? `
+                    <button class="modal-edit-btn" onclick="sitesStationDashboard.editPlatform(${platform.id})" title="Edit Platform">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Click to modify platform details</small>
+                ` : ''}
+                <button class="modal-close-large" onclick="closePlatformModal()">&times;</button>
+            </div>
+        `;
+
+        detailsContainer.innerHTML = `
+            <div class="detail-section">
+                <h4><i class="fas fa-info-circle"></i> General Information</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Platform Name</span>
+                    <span class="detail-value">${platform.display_name || 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Normalized ID</span>
+                    <span class="detail-value monospace">${platform.normalized_name || 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Location Code</span>
+                    <span class="detail-value">${platform.location_code || 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value status-${platform.status?.toLowerCase() || 'unknown'}">${this.getStatusIcon(platform.status)} ${platform.status || 'Unknown'}</span>
+                </div>
+            </div>
+            <div class="detail-section">
+                <h4><i class="fas fa-map-marker-alt"></i> Location & Positioning</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Latitude</span>
+                    <span class="detail-value monospace">${platform.latitude ? platform.latitude.toFixed(6) : 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Longitude</span>
+                    <span class="detail-value monospace">${platform.longitude ? platform.longitude.toFixed(6) : 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Platform Height</span>
+                    <span class="detail-value">${platform.platform_height_m ? platform.platform_height_m + 'm' : 'N/A'}</span>
+                </div>
+            </div>
+            <div class="detail-section">
+                <h4><i class="fas fa-cogs"></i> Technical Specifications</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Mounting Structure</span>
+                    <span class="detail-value">${platform.mounting_structure || 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Deployment Date</span>
+                    <span class="detail-value">${platform.deployment_date || 'N/A'}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Station</span>
+                    <span class="detail-value">${platform.station_name || 'N/A'} (${platform.station_acronym || 'N/A'})</span>
+                </div>
+            </div>
+            <div class="detail-section">
+                <h4><i class="fas fa-users"></i> Research Programs</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Operation Programs</span>
+                    <span class="detail-value">${platform.operation_programs ? this.formatOperationPrograms(platform.operation_programs) : 'Not specified'}</span>
+                </div>
+            </div>
+            <div class="detail-section">
+                <h4><i class="fas fa-sticky-note"></i> Additional Information</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">${platform.description || 'No description provided'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    trackPlatformModal(platformId) {
+        this.currentOpenPlatformId = platformId;
+    }
+
+    formatOperationPrograms(programs) {
+        if (!programs) return 'Not specified';
+        if (typeof programs === 'string') {
+            try {
+                programs = JSON.parse(programs);
+            } catch {
+                return programs;
+            }
+        }
+        if (Array.isArray(programs)) {
+            return programs.join(', ');
+        }
+        return programs.toString();
+    }
+
+    getStatusIcon(status) {
+        const statusIcons = {
+            'Active': '<i class="fas fa-check-circle" style="color: #10b981;"></i>',
+            'Inactive': '<i class="fas fa-times-circle" style="color: #ef4444;"></i>',
+            'Maintenance': '<i class="fas fa-tools" style="color: #f59e0b;"></i>',
+            'Planned': '<i class="fas fa-clock" style="color: #6b7280;"></i>',
+            'Decommissioned': '<i class="fas fa-archive" style="color: #9ca3af;"></i>'
+        };
+        return statusIcons[status] || '<i class="fas fa-question-circle" style="color: #6b7280;"></i>';
+    }
+
+    createInstrumentCard(instrument) {
+        // Get the latest image URL - this will be implemented to fetch actual phenocam images
+        const imageUrl = this.getLatestPhenocamImage(instrument.id);
+
+        return `
+            <div class="instrument-card-compact" onclick="sitesStationDashboard.viewInstrumentDetails('${instrument.id}')" style="cursor: pointer; margin: 4px 0; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; transition: background 0.2s;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${imageUrl ? `
+                        <div style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+                            <img src="${imageUrl}" alt="Latest image" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    ` : `
+                        <div style="width: 40px; height: 40px; border-radius: 4px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-camera" style="color: #9ca3af;"></i>
+                        </div>
+                    `}
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 600; font-size: 0.85em; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.escapeHtml(instrument.display_name || instrument.name || 'Unnamed')}</div>
+                        <div style="font-size: 0.75em; color: #6b7280; font-family: 'Courier New', monospace;">${instrument.normalized_name || 'No ID'}</div>
+                        ${instrument.status ? `<div style="font-size: 0.7em; margin-top: 2px;">${this.getStatusIcon(instrument.status)} ${instrument.status}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getLatestPhenocamImage(instrumentId) {
+        // Placeholder for now - this would fetch the actual latest image URL
+        // TODO: Implement actual phenocam image fetching
+        return null;
+    }
+
+    viewInstrumentDetails(instrumentId) {
+        // Placeholder for instrument details view
+        showNotification(`Instrument details for ${instrumentId} - coming soon`, 'info');
     }
 
     editPlatform(platformId) {
