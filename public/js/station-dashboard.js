@@ -724,19 +724,388 @@ class SitesStationDashboard {
     }
 
     viewInstrumentDetails(instrumentId) {
-        // Placeholder for instrument details view
-        showNotification(`Instrument details for ${instrumentId} - coming soon`, 'info');
+        const instrument = this.instruments.find(i => i.id == instrumentId);
+        if (instrument) {
+            this.showInstrumentDetailsModal(instrument);
+        }
+    }
+
+    showInstrumentDetailsModal(instrument) {
+        // Create and show a modal with instrument details and edit/delete options
+        const modal = document.createElement('div');
+        modal.className = 'instrument-modal show';
+        modal.id = 'instrument-details-modal';
+
+        // Check permissions for edit/delete buttons
+        const canEdit = this.currentUser?.role === 'admin' || this.currentUser?.role === 'station';
+
+        modal.innerHTML = `
+            <div class="modal-content-large">
+                <div class="modal-header-large">
+                    <h3><i class="fas fa-camera"></i> ${this.escapeHtml(instrument.display_name || 'Instrument Details')}</h3>
+                    <button class="modal-close-large" onclick="closeInstrumentDetailsModal()">&times;</button>
+                </div>
+                <div class="modal-body-large">
+                    <div class="detail-section">
+                        <h4>Basic Information</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Display Name:</strong> ${this.escapeHtml(instrument.display_name || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Normalized Name:</strong> <code>${instrument.normalized_name || 'N/A'}</code>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Type:</strong> ${this.escapeHtml(instrument.instrument_type || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Status:</strong> ${this.getStatusIcon(instrument.status)} ${instrument.status || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>Camera Specifications</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Brand:</strong> ${this.escapeHtml(instrument.camera_brand || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Model:</strong> ${this.escapeHtml(instrument.camera_model || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Resolution:</strong> ${this.escapeHtml(instrument.camera_resolution || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Serial Number:</strong> ${this.escapeHtml(instrument.camera_serial_number || 'N/A')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>Location & Orientation</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Coordinates:</strong> ${instrument.latitude && instrument.longitude ?
+                                    `${instrument.latitude.toFixed(6)}, ${instrument.longitude.toFixed(6)}` : 'N/A'}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Height:</strong> ${instrument.instrument_height_m ? `${instrument.instrument_height_m}m` : 'N/A'}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Viewing Direction:</strong> ${this.escapeHtml(instrument.viewing_direction || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Azimuth:</strong> ${instrument.azimuth_degrees ? `${instrument.azimuth_degrees}°` : 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                    ${instrument.description ? `
+                        <div class="detail-section">
+                            <h4>Description</h4>
+                            <p>${this.escapeHtml(instrument.description)}</p>
+                        </div>
+                    ` : ''}
+
+                    ${canEdit ? `
+                        <div class="modal-actions">
+                            <button class="btn btn-primary" onclick="sitesStationDashboard.editInstrument('${instrument.id}')">
+                                <i class="fas fa-edit"></i> Edit Instrument
+                            </button>
+                            <button class="btn btn-danger" onclick="sitesStationDashboard.deleteInstrument('${instrument.id}', '${this.escapeHtml(instrument.display_name)}')">
+                                <i class="fas fa-trash"></i> Delete Instrument
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    editInstrument(instrumentId) {
+        // Station users can edit their own instruments, admin can edit all
+        if (this.currentUser?.role !== 'admin' && this.currentUser?.role !== 'station') {
+            showNotification('Edit privileges required', 'error');
+            return;
+        }
+
+        const instrument = this.instruments.find(i => i.id == instrumentId);
+        if (instrument) {
+            this.showEditInstrumentModal(instrument);
+        }
+    }
+
+    deleteInstrument(instrumentId, instrumentName) {
+        // Station users can delete their own instruments, admin can delete all
+        if (this.currentUser?.role !== 'admin' && this.currentUser?.role !== 'station') {
+            showNotification('Delete privileges required', 'error');
+            return;
+        }
+
+        const message = `Are you sure you want to delete the instrument "${instrumentName}"? This action cannot be undone.`;
+
+        if (!confirm(message)) {
+            return;
+        }
+
+        this.performInstrumentDeletion(instrumentId);
+    }
+
+    async performInstrumentDeletion(instrumentId) {
+        try {
+            const response = await window.sitesAPI.deleteInstrument(instrumentId);
+
+            if (response.success) {
+                showNotification('Instrument deleted successfully', 'success');
+
+                // Close any open modals
+                const modal = document.getElementById('instrument-details-modal');
+                if (modal) {
+                    modal.remove();
+                }
+
+                // Reload data
+                await this.loadPlatformsAndInstruments();
+            } else {
+                throw new Error(response.error || 'Failed to delete instrument');
+            }
+
+        } catch (error) {
+            console.error('Error deleting instrument:', error);
+            showNotification(`Failed to delete instrument: ${error.message}`, 'error');
+        }
+    }
+
+    showEditInstrumentModal(instrument) {
+        const modal = document.getElementById('instrument-edit-modal');
+        const formContainer = document.getElementById('instrument-edit-form');
+
+        if (!modal || !formContainer) {
+            console.error('Instrument edit modal elements not found');
+            return;
+        }
+
+        // Populate the edit form with instrument data
+        formContainer.innerHTML = `
+            <form id="edit-instrument-form" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-display-name">Instrument Name</label>
+                        <input type="text" id="edit-instrument-display-name" class="form-input"
+                               value="${this.escapeHtml(instrument.display_name || '')}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-type">Instrument Type</label>
+                        <select id="edit-instrument-type" class="form-select" required>
+                            <option value="">Select Type</option>
+                            <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
+                            <option value="Weather Station" ${instrument.instrument_type === 'Weather Station' ? 'selected' : ''}>Weather Station</option>
+                            <option value="Soil Sensor" ${instrument.instrument_type === 'Soil Sensor' ? 'selected' : ''}>Soil Sensor</option>
+                            <option value="Eddy Covariance" ${instrument.instrument_type === 'Eddy Covariance' ? 'selected' : ''}>Eddy Covariance</option>
+                            <option value="Other" ${instrument.instrument_type === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-status">Status</label>
+                        <select id="edit-instrument-status" class="form-select">
+                            <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-deployment">Deployment Date</label>
+                        <input type="date" id="edit-instrument-deployment" class="form-input"
+                               value="${instrument.deployment_date || ''}">
+                    </div>
+                </div>
+
+                <h4>Camera Specifications</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-camera-brand">Camera Brand</label>
+                        <input type="text" id="edit-instrument-camera-brand" class="form-input"
+                               value="${this.escapeHtml(instrument.camera_brand || '')}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-camera-model">Camera Model</label>
+                        <input type="text" id="edit-instrument-camera-model" class="form-input"
+                               value="${this.escapeHtml(instrument.camera_model || '')}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-camera-resolution">Camera Resolution</label>
+                        <input type="text" id="edit-instrument-camera-resolution" class="form-input"
+                               value="${this.escapeHtml(instrument.camera_resolution || '')}"
+                               placeholder="e.g., 2048x1536">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-camera-serial">Serial Number</label>
+                        <input type="text" id="edit-instrument-camera-serial" class="form-input"
+                               value="${this.escapeHtml(instrument.camera_serial_number || '')}">
+                    </div>
+                </div>
+
+                <h4>Location & Orientation</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-latitude">Latitude</label>
+                        <input type="number" id="edit-instrument-latitude" class="form-input"
+                               value="${instrument.latitude || ''}" step="0.000001" min="-90" max="90">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-longitude">Longitude</label>
+                        <input type="number" id="edit-instrument-longitude" class="form-input"
+                               value="${instrument.longitude || ''}" step="0.000001" min="-180" max="180">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-height">Instrument Height (m)</label>
+                        <input type="number" id="edit-instrument-height" class="form-input"
+                               value="${instrument.instrument_height_m || ''}" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-viewing">Viewing Direction</label>
+                        <select id="edit-instrument-viewing" class="form-select">
+                            <option value="">Select Direction</option>
+                            <option value="North" ${instrument.viewing_direction === 'North' ? 'selected' : ''}>North</option>
+                            <option value="South" ${instrument.viewing_direction === 'South' ? 'selected' : ''}>South</option>
+                            <option value="East" ${instrument.viewing_direction === 'East' ? 'selected' : ''}>East</option>
+                            <option value="West" ${instrument.viewing_direction === 'West' ? 'selected' : ''}>West</option>
+                            <option value="Northeast" ${instrument.viewing_direction === 'Northeast' ? 'selected' : ''}>Northeast</option>
+                            <option value="Northwest" ${instrument.viewing_direction === 'Northwest' ? 'selected' : ''}>Northwest</option>
+                            <option value="Southeast" ${instrument.viewing_direction === 'Southeast' ? 'selected' : ''}>Southeast</option>
+                            <option value="Southwest" ${instrument.viewing_direction === 'Southwest' ? 'selected' : ''}>Southwest</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-azimuth">Azimuth (degrees)</label>
+                        <input type="number" id="edit-instrument-azimuth" class="form-input"
+                               value="${instrument.azimuth_degrees || ''}" step="0.1" min="0" max="360">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-nadir">Degrees from Nadir</label>
+                        <input type="number" id="edit-instrument-nadir" class="form-input"
+                               value="${instrument.degrees_from_nadir || ''}" step="0.1" min="0" max="90">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-instrument-description">Description</label>
+                    <textarea id="edit-instrument-description" class="form-textarea" rows="3">${this.escapeHtml(instrument.description || '')}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-instrument-installation">Installation Notes</label>
+                    <textarea id="edit-instrument-installation" class="form-textarea" rows="2">${this.escapeHtml(instrument.installation_notes || '')}</textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        `;
+
+        // Add form submit handler
+        const form = document.getElementById('edit-instrument-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.saveInstrumentEdit(instrument.id);
+        });
+
+        // Show the modal
+        modal.classList.add('show');
+    }
+
+    async saveInstrumentEdit(instrumentId) {
+        try {
+            const formData = {
+                display_name: document.getElementById('edit-instrument-display-name').value.trim(),
+                instrument_type: document.getElementById('edit-instrument-type').value,
+                status: document.getElementById('edit-instrument-status').value,
+                deployment_date: document.getElementById('edit-instrument-deployment').value || null,
+                camera_brand: document.getElementById('edit-instrument-camera-brand').value.trim() || null,
+                camera_model: document.getElementById('edit-instrument-camera-model').value.trim() || null,
+                camera_resolution: document.getElementById('edit-instrument-camera-resolution').value.trim() || null,
+                camera_serial_number: document.getElementById('edit-instrument-camera-serial').value.trim() || null,
+                latitude: parseFloat(document.getElementById('edit-instrument-latitude').value) || null,
+                longitude: parseFloat(document.getElementById('edit-instrument-longitude').value) || null,
+                instrument_height_m: parseFloat(document.getElementById('edit-instrument-height').value) || null,
+                viewing_direction: document.getElementById('edit-instrument-viewing').value || null,
+                azimuth_degrees: parseFloat(document.getElementById('edit-instrument-azimuth').value) || null,
+                degrees_from_nadir: parseFloat(document.getElementById('edit-instrument-nadir').value) || null,
+                description: document.getElementById('edit-instrument-description').value.trim() || null,
+                installation_notes: document.getElementById('edit-instrument-installation').value.trim() || null
+            };
+
+            // Validation
+            if (!formData.display_name) {
+                showNotification('Instrument name is required', 'error');
+                return;
+            }
+
+            if (!formData.instrument_type) {
+                showNotification('Instrument type is required', 'error');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('#edit-instrument-form button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            // Make API call
+            const response = await window.sitesAPI.updateInstrument(instrumentId, formData);
+
+            if (response.success) {
+                showNotification('Instrument updated successfully', 'success');
+                closeInstrumentEditModal();
+
+                // Reload data to show changes
+                await this.loadPlatformsAndInstruments();
+            } else {
+                throw new Error(response.error || 'Failed to update instrument');
+            }
+
+        } catch (error) {
+            console.error('Error saving instrument edit:', error);
+            showNotification(`Failed to update instrument: ${error.message}`, 'error');
+
+            // Restore button state
+            const submitBtn = document.querySelector('#edit-instrument-form button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            }
+        }
     }
 
     editPlatform(platformId) {
-        if (this.currentUser?.role !== 'admin') {
-            showNotification('Admin privileges required', 'error');
+        // Station users can edit their own platforms, admin can edit all
+        if (this.currentUser?.role !== 'admin' && this.currentUser?.role !== 'station') {
+            showNotification('Edit privileges required', 'error');
             return;
         }
 
         const platform = this.platforms.find(p => p.id === platformId);
         if (platform) {
-            showNotification(`Edit functionality for "${platform.display_name}" coming soon`, 'info');
+            this.showEditPlatformModal(platform);
         }
     }
 
@@ -764,6 +1133,148 @@ class SitesStationDashboard {
                 showNotification(`Failed to delete platform: ${error.message}`, 'error');
             }
         });
+    }
+
+    showEditPlatformModal(platform) {
+        const modal = document.getElementById('platform-edit-modal');
+        const formContainer = document.getElementById('platform-edit-form');
+
+        if (!modal || !formContainer) {
+            console.error('Platform edit modal elements not found');
+            return;
+        }
+
+        // Populate the edit form with platform data
+        formContainer.innerHTML = `
+            <form id="edit-platform-form" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-platform-display-name">Platform Name</label>
+                        <input type="text" id="edit-platform-display-name" class="form-input"
+                               value="${this.escapeHtml(platform.display_name || '')}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-platform-status">Status</label>
+                        <select id="edit-platform-status" class="form-select">
+                            <option value="Active" ${platform.status === 'Active' ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${platform.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            <option value="Maintenance" ${platform.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-platform-latitude">Latitude</label>
+                        <input type="number" id="edit-platform-latitude" class="form-input"
+                               value="${platform.latitude || ''}" step="0.000001" min="-90" max="90">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-platform-longitude">Longitude</label>
+                        <input type="number" id="edit-platform-longitude" class="form-input"
+                               value="${platform.longitude || ''}" step="0.000001" min="-180" max="180">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-platform-height">Platform Height (m)</label>
+                        <input type="number" id="edit-platform-height" class="form-input"
+                               value="${platform.platform_height_m || ''}" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-platform-mounting">Mounting Structure</label>
+                        <input type="text" id="edit-platform-mounting" class="form-input"
+                               value="${this.escapeHtml(platform.mounting_structure || '')}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-platform-deployment">Deployment Date</label>
+                    <input type="date" id="edit-platform-deployment" class="form-input"
+                           value="${platform.deployment_date || ''}">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-platform-description">Description</label>
+                    <textarea id="edit-platform-description" class="form-textarea" rows="3">${this.escapeHtml(platform.description || '')}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-platform-programs">Operation Programs</label>
+                    <textarea id="edit-platform-programs" class="form-textarea" rows="2">${this.escapeHtml(platform.operation_programs || '')}</textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePlatformEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        `;
+
+        // Add form submit handler
+        const form = document.getElementById('edit-platform-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.savePlatformEdit(platform.id);
+        });
+
+        // Show the modal
+        modal.classList.add('show');
+    }
+
+    async savePlatformEdit(platformId) {
+        try {
+            const formData = {
+                display_name: document.getElementById('edit-platform-display-name').value.trim(),
+                status: document.getElementById('edit-platform-status').value,
+                latitude: parseFloat(document.getElementById('edit-platform-latitude').value) || null,
+                longitude: parseFloat(document.getElementById('edit-platform-longitude').value) || null,
+                platform_height_m: parseFloat(document.getElementById('edit-platform-height').value) || null,
+                mounting_structure: document.getElementById('edit-platform-mounting').value.trim() || null,
+                deployment_date: document.getElementById('edit-platform-deployment').value || null,
+                description: document.getElementById('edit-platform-description').value.trim() || null,
+                operation_programs: document.getElementById('edit-platform-programs').value.trim() || null
+            };
+
+            // Validation
+            if (!formData.display_name) {
+                showNotification('Platform name is required', 'error');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('#edit-platform-form button[type="submit"]');
+            const originalContent = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            // Make API call
+            const response = await window.sitesAPI.updatePlatform(platformId, formData);
+
+            if (response.success) {
+                showNotification('Platform updated successfully', 'success');
+                closePlatformEditModal();
+
+                // Reload data to show changes
+                await this.loadPlatformsAndInstruments();
+            } else {
+                throw new Error(response.error || 'Failed to update platform');
+            }
+
+        } catch (error) {
+            console.error('Error saving platform edit:', error);
+            showNotification(`Failed to update platform: ${error.message}`, 'error');
+
+            // Restore button state
+            const submitBtn = document.querySelector('#edit-platform-form button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            }
+        }
     }
 
     // Utility functions
@@ -890,6 +1401,21 @@ function saveNewPlatform() {
 function refreshOpenModals() {
     // Placeholder for modal refresh functionality
     return Promise.resolve();
+}
+
+// Global modal helper functions
+function closeInstrumentDetailsModal() {
+    const modal = document.getElementById('instrument-details-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function closeInstrumentEditModal() {
+    const modal = document.getElementById('instrument-edit-modal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
 }
 
 // Global logout function for onclick handlers

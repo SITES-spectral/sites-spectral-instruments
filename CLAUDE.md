@@ -2,12 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.1.0 - COMPLETE PLATFORM FUNCTIONALITY RESTORATION (2025-09-28)
+## Version 5.2.0 - ENHANCED CRUD OPERATIONS WITH ECOSYSTEM CODES & STATUS MANAGEMENT (2025-09-28)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-28 ✅ DEPLOYED v5.1.0 🚀
-**🎯 Major Achievement:** Comprehensive restoration of all platform functionality including working modals, nested instrument display, phenocam image support, and enhanced platform identification through collaborative specialist agent analysis
+**📅 Deployment Date:** 2025-09-28 ✅ DEPLOYED v5.2.0 🚀
+**🎯 Major Achievement:** Comprehensive CRUD system enhancement with ecosystem classification, dynamic status management, complete YAML-to-database field mapping, and enhanced API endpoints for scientific research workflows
+
+### 🚀 Enhanced CRUD Operations in v5.2.0
+- **Ecosystem Codes API**: Complete 12-ecosystem classification system with categorized dropdowns (Forest, Agricultural, Wetland, Aquatic, Other)
+- **Status Management System**: 12 color-coded status options grouped by operational categories with real-time descriptions
+- **Professional Form Components**: Smart dropdown components with category grouping, validation, and user feedback
+- **Complete YAML-to-Database Mapping**: Comprehensive documentation mapping all YAML fields to database columns with API endpoints
+- **Enhanced API Architecture**: New handlers for ecosystems, status codes, and enhanced component library integration
 
 ### 🚀 Platform Functionality Restoration in v5.1.0
 - **Platform Modal System**: Complete restoration of "View Details" functionality with working modals displaying comprehensive platform metadata
@@ -274,3 +281,4 @@ All 12 official ecosystem codes are supported:
 - **Platform Management**: Create platforms via section header button, delete via platform card buttons
 - **Data Safety**: All deletions include dependency analysis and optional backup generation
 - **Validation**: Real-time conflict checking with intelligent name suggestions
+- do not use emails and passowrds for login in user tables in the database we use cloudflare usernames credentials

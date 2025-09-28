@@ -13,7 +13,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 - Full phenocam image API integration
-- Advanced instrument detail modals
+- Missing camera specification fields implementation
+
+## [5.2.0] - 2025-09-28
+
+### 🚀 MAJOR: Enhanced CRUD Operations with Ecosystem Codes, Status Management, and API Enhancements
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Comprehensive CRUD system enhancement with ecosystem classification, dynamic status management, and complete YAML-to-database field mapping
+
+#### ✨ **New Features**
+- **Ecosystem Codes API**: Complete ecosystem classification system with 12 ecosystem types
+  - Categorized dropdowns (Forest, Agricultural, Wetland, Aquatic, Other)
+  - Dynamic ecosystem selection with descriptions
+  - API endpoints: `/api/ecosystems`, `/api/values/ecosystems`
+- **Status Codes Management**: Comprehensive operational status system
+  - 12 status options with color coding and categories
+  - Grouped by Operational, Development, Temporary, Retired
+  - API endpoints: `/api/status-codes`, `/api/values/status-codes`
+- **Enhanced CRUD Components**: Professional dropdown components for forms
+  - Smart ecosystem dropdown with category grouping
+  - Color-coded status dropdown with descriptions
+  - Real-time validation and user feedback
+
+#### 🔧 **API Enhancements**
+- **New Handlers Created**:
+  - `src/handlers/ecosystems.js` - Complete ecosystem codes management
+  - `src/handlers/status-codes.js` - Comprehensive status handling
+- **Enhanced API Routing**: New endpoints integrated into main API handler
+- **Component Library**: Added ecosystem and status dropdown components to `/js/components.js`
+
+#### 📋 **Documentation & Analysis**
+- **Complete YAML-to-Database Mapping**: Comprehensive field relationship documentation
+  - All YAML fields mapped to database columns with API endpoints
+  - Missing fields identified with implementation recommendations
+  - Terminology clarification (location_code → named_location)
+- **API Endpoint Documentation**: Each field mapped to corresponding API endpoints
+
+#### 🛠️ **Technical Improvements**
+- **Enhanced Form Components**: Professional dropdown components with:
+  - Category-based organization
+  - Real-time description updates
+  - Color-coded status indicators
+  - Error handling and loading states
+- **Research Programs Integration**: Multiselect research programs already functional
+- **ROI Management**: Enhanced nested ROI cards for phenocam instruments
+
+#### 🎯 **Ready for Implementation**
+- **Missing Camera Specifications**: Identified fields ready for database schema enhancement
+- **Deployment Date Fields**: Instrument and platform deployment tracking prepared
+- **Legacy Acronym Support**: Backward compatibility planning completed
+
+#### 🚀 **Production Ready**
+- All new API endpoints tested and functional
+- Enhanced CRUD operations support full scientific workflow
+- Professional UI components ready for station manager use
+- Complete ecosystem and status classification system operational
 
 ## [5.1.0] - 2025-09-28
 

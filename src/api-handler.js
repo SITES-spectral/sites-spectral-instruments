@@ -8,6 +8,10 @@ import { handleInstruments } from './handlers/instruments.js';
 import { handleROIs } from './handlers/rois.js';
 import { handleExport } from './handlers/export.js';
 import { handleAdmin } from './admin/admin-router.js';
+import { handleResearchPrograms, getResearchProgramsValues } from './handlers/research-programs.js';
+import { handlePhenocamROIs } from './handlers/phenocam-rois.js';
+import { handleEcosystems, getEcosystemDropdownValues } from './handlers/ecosystems.js';
+import { handleStatusCodes, getStatusDropdownValues } from './handlers/status-codes.js';
 import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
@@ -58,8 +62,33 @@ export async function handleApiRequest(request, env, ctx) {
       case 'rois':
         return await handleROIs(method, id, request, env);
 
+      case 'phenocam-rois':
+        return await handlePhenocamROIs(method, pathSegments, request, env);
+
       case 'export':
         return await handleExport(method, pathSegments, request, env);
+
+      case 'research-programs':
+        return await handleResearchPrograms(method, id, request, env);
+
+      case 'ecosystems':
+        return await handleEcosystems(method, id, request, env);
+
+      case 'status-codes':
+        return await handleStatusCodes(method, id, request, env);
+
+      case 'values':
+        // Special endpoint for dropdown/multiselect values
+        if (pathSegments[1] === 'research-programs') {
+          return await getResearchProgramsValues(request, env);
+        }
+        if (pathSegments[1] === 'ecosystems') {
+          return await getEcosystemDropdownValues(request, env);
+        }
+        if (pathSegments[1] === 'status-codes') {
+          return await getStatusDropdownValues(request, env);
+        }
+        return createNotFoundResponse();
 
       case 'health':
         return await handleHealth(env);

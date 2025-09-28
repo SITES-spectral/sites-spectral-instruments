@@ -40,8 +40,7 @@ export async function handlePlatforms(method, id, request, env) {
         }
 
       case 'POST':
-        // Platform creation is admin-only, redirect to admin handler
-        return createForbiddenResponse();
+        return await createPlatform(user, request, env);
 
       case 'PUT':
         if (!id) {
@@ -255,4 +254,141 @@ async function updatePlatform(id, user, request, env) {
     message: 'Platform updated successfully',
     id: parseInt(id, 10)
   });
+}
+
+/**
+ * Create new platform
+ * @param {Object} user - Authenticated user
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Response} Create response
+ */
+async function createPlatform(user, request, env) {
+  // Check if user has write permissions for platforms
+  const permission = checkUserPermissions(user, 'platforms', 'write');
+  if (!permission.allowed) {
+    return createForbiddenResponse();
+  }
+
+  const platformData = await request.json();
+
+  // Required fields validation
+  const requiredFields = ['display_name', 'station_id', 'ecosystem_code'];
+  for (const field of requiredFields) {
+    if (!platformData[field]) {
+      return createErrorResponse(`Missing required field: ${field}`, 400);
+    }
+  }
+
+  // For station users, ensure they can only create platforms for their own station
+  if (user.role === 'station') {
+    // Get user's station info
+    const stationQuery = `SELECT id, normalized_name FROM stations WHERE normalized_name = ?`;
+    const userStation = await executeQueryFirst(env, stationQuery, [user.station_normalized_name], 'createPlatform-station-check');
+
+    if (!userStation || userStation.id !== parseInt(platformData.station_id, 10)) {
+      return createForbiddenResponse();
+    }
+  }
+
+  // Verify station exists
+  const stationQuery = `SELECT id, normalized_name, acronym FROM stations WHERE id = ?`;
+  const station = await executeQueryFirst(env, stationQuery, [platformData.station_id], 'createPlatform-station-verify');
+
+  if (!station) {
+    return createErrorResponse('Station not found', 404);
+  }
+
+  // Generate normalized name and location code if not provided (admin can override)
+  let normalizedName = platformData.normalized_name;
+  let locationCode = platformData.location_code;
+
+  if (!normalizedName || user.role !== 'admin') {
+    // Auto-generate normalized name: {STATION}_{ECOSYSTEM}_{LOCATION}
+    const nextLocationCode = await getNextLocationCode(station.id, platformData.ecosystem_code, env);
+    normalizedName = `${station.normalized_name}_${platformData.ecosystem_code}_${nextLocationCode}`;
+    locationCode = nextLocationCode;
+  }
+
+  // Check for duplicate normalized names
+  const duplicateCheck = `SELECT id FROM platforms WHERE normalized_name = ?`;
+  const duplicate = await executeQueryFirst(env, duplicateCheck, [normalizedName], 'createPlatform-duplicate-check');
+
+  if (duplicate) {
+    return createErrorResponse(`Platform with normalized name '${normalizedName}' already exists`, 409);
+  }
+
+  // Prepare insert data
+  const now = new Date().toISOString();
+  const insertQuery = `
+    INSERT INTO platforms (
+      normalized_name, display_name, location_code, station_id, ecosystem_code,
+      latitude, longitude, platform_height_m, status, mounting_structure,
+      deployment_date, description, operation_programs, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    normalizedName,
+    platformData.display_name,
+    locationCode,
+    platformData.station_id,
+    platformData.ecosystem_code,
+    platformData.latitude || null,
+    platformData.longitude || null,
+    platformData.platform_height_m || null,
+    platformData.status || 'Active',
+    platformData.mounting_structure || null,
+    platformData.deployment_date || null,
+    platformData.description || null,
+    platformData.operation_programs || null,
+    now,
+    now
+  ];
+
+  const result = await executeQueryRun(env, insertQuery, values, 'createPlatform');
+
+  if (!result || !result.meta?.last_row_id) {
+    return createErrorResponse('Failed to create platform', 500);
+  }
+
+  return createSuccessResponse({
+    success: true,
+    message: 'Platform created successfully',
+    id: result.meta.last_row_id,
+    normalized_name: normalizedName,
+    location_code: locationCode
+  });
+}
+
+/**
+ * Get next available location code for platform
+ * @param {number} stationId - Station ID
+ * @param {string} ecosystemCode - Ecosystem code
+ * @param {Object} env - Environment variables and bindings
+ * @returns {string} Next location code (P01, P02, etc.)
+ */
+async function getNextLocationCode(stationId, ecosystemCode, env) {
+  const query = `
+    SELECT location_code
+    FROM platforms
+    WHERE station_id = ? AND ecosystem_code = ?
+    ORDER BY location_code DESC
+    LIMIT 1
+  `;
+
+  const result = await executeQueryFirst(env, query, [stationId, ecosystemCode], 'getNextLocationCode');
+
+  if (!result || !result.location_code) {
+    return 'P01';
+  }
+
+  // Extract number and increment
+  const match = result.location_code.match(/P(\d+)/);
+  if (match) {
+    const number = parseInt(match[1], 10) + 1;
+    return `P${number.toString().padStart(2, '0')}`;
+  }
+
+  return 'P01';
 }

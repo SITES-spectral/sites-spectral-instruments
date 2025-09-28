@@ -32,6 +32,191 @@ class SitesComponents {
         return container;
     }
 
+    /**
+     * Create ecosystem codes dropdown component
+     * @param {string} containerId - Container element ID
+     * @param {string} selectedValue - Currently selected ecosystem code
+     * @param {Object} options - Configuration options
+     * @returns {Promise<void>}
+     */
+    async createEcosystemDropdown(containerId, selectedValue = '', options = {}) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container with ID '${containerId}' not found`);
+            return;
+        }
+
+        try {
+            // Fetch ecosystem codes from API
+            const response = await fetch('/api/values/ecosystems');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ecosystem codes: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const ecosystems = result.data || [];
+
+            // Group ecosystems by category
+            const categories = {};
+            ecosystems.forEach(eco => {
+                if (!categories[eco.category]) {
+                    categories[eco.category] = [];
+                }
+                categories[eco.category].push(eco);
+            });
+
+            // Build dropdown HTML
+            let optionsHtml = '<option value="">Select ecosystem...</option>';
+
+            Object.keys(categories).forEach(category => {
+                optionsHtml += `<optgroup label="${category}">`;
+                categories[category].forEach(eco => {
+                    const isSelected = eco.value === selectedValue ? 'selected' : '';
+                    optionsHtml += `
+                        <option value="${eco.value}" ${isSelected} title="${eco.description}">
+                            ${eco.label}
+                        </option>
+                    `;
+                });
+                optionsHtml += '</optgroup>';
+            });
+
+            // Create dropdown HTML
+            const dropdownHtml = `
+                <select class="form-control ecosystem-dropdown" id="${containerId}-select"
+                        ${options.required ? 'required' : ''}>
+                    ${optionsHtml}
+                </select>
+                ${options.showDescription ? `<div class="field-description" id="${containerId}-description">Select the ecosystem type for this instrument</div>` : ''}
+            `;
+
+            container.innerHTML = dropdownHtml;
+
+            // Add change event listener to show description
+            if (options.showDescription) {
+                const select = container.querySelector('select');
+                const descDiv = container.querySelector('.field-description');
+
+                select.addEventListener('change', (e) => {
+                    const selectedEco = ecosystems.find(eco => eco.value === e.target.value);
+                    if (selectedEco) {
+                        descDiv.textContent = selectedEco.description;
+                        descDiv.style.color = '#10B981';
+                    } else {
+                        descDiv.textContent = 'Select the ecosystem type for this instrument';
+                        descDiv.style.color = '#6B7280';
+                    }
+                });
+            }
+
+        } catch (error) {
+            console.error('Error creating ecosystem dropdown:', error);
+            container.innerHTML = `
+                <select class="form-control" disabled>
+                    <option>Error loading ecosystem codes</option>
+                </select>
+            `;
+        }
+    }
+
+    /**
+     * Create status codes dropdown component
+     * @param {string} containerId - Container element ID
+     * @param {string} selectedValue - Currently selected status code
+     * @param {Object} options - Configuration options
+     * @returns {Promise<void>}
+     */
+    async createStatusDropdown(containerId, selectedValue = '', options = {}) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container with ID '${containerId}' not found`);
+            return;
+        }
+
+        try {
+            // Fetch status codes from API
+            const response = await fetch('/api/values/status-codes');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch status codes: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const statusCodes = result.data || [];
+
+            // Group status codes by category
+            const categories = {};
+            statusCodes.forEach(status => {
+                if (!categories[status.category]) {
+                    categories[status.category] = [];
+                }
+                categories[status.category].push(status);
+            });
+
+            // Build dropdown HTML
+            let optionsHtml = '<option value="">Select status...</option>';
+
+            Object.keys(categories).forEach(category => {
+                optionsHtml += `<optgroup label="${category}">`;
+                categories[category].forEach(status => {
+                    const isSelected = status.value === selectedValue ? 'selected' : '';
+                    optionsHtml += `
+                        <option value="${status.value}" ${isSelected}
+                                title="${status.description}"
+                                data-color="${status.color}">
+                            ${status.label}
+                        </option>
+                    `;
+                });
+                optionsHtml += '</optgroup>';
+            });
+
+            // Create dropdown HTML
+            const dropdownHtml = `
+                <select class="form-control status-dropdown" id="${containerId}-select"
+                        ${options.required ? 'required' : ''}>
+                    ${optionsHtml}
+                </select>
+                ${options.showDescription ? `<div class="field-description" id="${containerId}-description">Select the operational status</div>` : ''}
+            `;
+
+            container.innerHTML = dropdownHtml;
+
+            // Add change event listener to show description and color
+            if (options.showDescription) {
+                const select = container.querySelector('select');
+                const descDiv = container.querySelector('.field-description');
+
+                select.addEventListener('change', (e) => {
+                    const selectedStatus = statusCodes.find(status => status.value === e.target.value);
+                    if (selectedStatus) {
+                        descDiv.textContent = selectedStatus.description;
+                        descDiv.style.color = selectedStatus.color;
+                    } else {
+                        descDiv.textContent = 'Select the operational status';
+                        descDiv.style.color = '#6B7280';
+                    }
+                });
+
+                // Set initial description if there's a selected value
+                if (selectedValue) {
+                    const selectedStatus = statusCodes.find(status => status.value === selectedValue);
+                    if (selectedStatus) {
+                        descDiv.textContent = selectedStatus.description;
+                        descDiv.style.color = selectedStatus.color;
+                    }
+                }
+            }
+
+        } catch (error) {
+            console.error('Error creating status dropdown:', error);
+            container.innerHTML = `
+                <select class="form-control" disabled>
+                    <option>Error loading status codes</option>
+                </select>
+            `;
+        }
+    }
+
     setupGlobalEventListeners() {
         // Close modals on escape key
         document.addEventListener('keydown', (e) => {

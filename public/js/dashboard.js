@@ -146,6 +146,7 @@ class SitesDashboard {
             const response = await window.sitesAPI.getStations();
             this.stations = Array.isArray(response) ? response : (response.stations || []);
 
+            this.updateDashboardStats();
             this.filterAndRenderStations();
 
         } catch (error) {
@@ -342,6 +343,33 @@ class SitesDashboard {
 
         if (emptyState) {
             emptyState.style.display = 'block';
+        }
+    }
+
+    updateDashboardStats() {
+        if (!this.stations || !Array.isArray(this.stations)) {
+            return;
+        }
+
+        const totalStations = this.stations.length;
+        const totalPlatforms = this.stations.reduce((sum, station) => sum + (station.platform_count || 0), 0);
+        const totalInstruments = this.stations.reduce((sum, station) => sum + (station.instrument_count || 0), 0);
+
+        // Update dashboard stat counters
+        const stationsCountEl = document.getElementById('stations-count');
+        const platformsCountEl = document.getElementById('platforms-count');
+        const instrumentsCountEl = document.getElementById('instruments-count');
+
+        if (stationsCountEl) {
+            stationsCountEl.textContent = totalStations;
+        }
+
+        if (platformsCountEl) {
+            platformsCountEl.textContent = totalPlatforms;
+        }
+
+        if (instrumentsCountEl) {
+            instrumentsCountEl.textContent = totalInstruments;
         }
     }
 
