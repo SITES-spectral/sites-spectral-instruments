@@ -13,6 +13,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - ROI visualization overlays on phenocam images
 
+## [5.0.12] - 2025-09-28
+
+### 🎨 UI Enhancement & Modal Functionality Restoration
+
+#### 🔧 Platform Display Improvements
+- **Normalized Names Display**: Platform cards now prominently show normalized names (e.g., `SVB_FOR_P02`) in green monospace font
+- **Location Code Integration**: Replaced coordinate display with meaningful location codes (e.g., "Location: P02")
+- **Card Layout Enhancement**: Improved visual hierarchy with clear separation of display names and technical identifiers
+- **User Experience**: More readable and professional platform card presentation
+
+#### 🗺️ Interactive Map Enhancements
+- **Map Marker Labels**: Platform popup titles now use normalized names instead of display names
+- **Information Hierarchy**: Primary display shows technical identifiers with display names as secondary information
+- **Popup Content**: Enhanced platform markers to prioritize normalized names for technical users
+- **Consistency**: Aligned map display with platform card styling and information priority
+
+#### 🎯 Complete Modal & Form CSS Framework
+- **Bootstrap-Style Buttons**: Added comprehensive `.btn`, `.btn-primary`, `.btn-success`, `.btn-danger`, `.btn-warning`, `.btn-secondary` classes
+- **Form Controls**: Complete `.form-control`, `.form-select`, `.form-group`, `.form-label` styling
+- **Interactive States**: Hover effects, focus states, disabled states, and error handling for all form elements
+- **CRUD Operations**: "View Details" buttons and modal functionality now fully operational
+- **Professional Styling**: Gradient backgrounds, smooth transitions, and modern design patterns
+
+#### 🛠️ Technical Infrastructure
+- **CSS Architecture**: Added 200+ lines of missing Bootstrap-compatible styles
+- **Component Library**: Complete form and button component system with consistent theming
+- **Accessibility**: Proper focus indicators, disabled states, and keyboard navigation support
+- **Responsive Design**: Mobile-friendly button and form layouts with appropriate sizing classes
+
+#### ✅ Functionality Restored
+- **Modal System**: All platform, instrument, and station modals now display correctly
+- **Button Interactions**: "View Details", "Create", "Edit", and "Delete" buttons fully functional
+- **Form Submission**: Complete form styling for creating and editing entities
+- **User Interface**: Professional, consistent styling across all interactive elements
+
+## [5.0.11] - 2025-09-28
+
+### 🎯 Platform Loading Fixed - SQL Query Error Resolved
+
+#### 🐛 Critical Database Schema Issue Fixed
+- **Root Cause Identified**: SQL error `no such column: p.ecosystem_code` preventing platform loading
+- **Database Schema Alignment**: Removed references to non-existent `ecosystem_code` column from platform queries
+- **Platform Display Restored**: SVB station now correctly displays all 5 platforms (SVB_FOR_P02, SVB_FOR_PL01, SVB_MIR_PL01, SVB_MIR_PL02, SVB_MIR_PL03)
+- **Error Resolution**: Fixed both `getPlatformsList()` and `getPlatformById()` queries in `/src/handlers/platforms.js`
+
+#### 🔍 Enhanced Debugging Infrastructure
+- **Server-Side Logging**: Added comprehensive platform API debugging with query parameters and results
+- **Client-Side Enhancement**: Dual parameter support for platform loading (station acronym + normalized_name)
+- **Error Tracking**: Detailed console logging for platform loading process and failure points
+- **Query Visibility**: SQL query and parameter logging for database troubleshooting
+
+#### 🏗️ Platform Loading Architecture Improvements
+- **Fallback Mechanism**: Platform API now tries both station acronym ("SVB") and normalized_name ("svartberget")
+- **Permission Integration**: Proper role-based filtering with user station access validation
+- **Error Resilience**: Graceful handling of platform loading failures with user-friendly messages
+- **Data Synchronization**: Improved sync between modular SitesStationDashboard and legacy UI functions
+
+#### 📊 Database Compatibility & Performance
+- **Schema Validation**: Aligned all SQL queries with actual database table structure
+- **Query Optimization**: Removed invalid column references preventing successful data retrieval
+- **Error Prevention**: Fixed potential SQL errors in platform detail and listing queries
+- **Data Integrity**: Maintained proper JOIN operations and GROUP BY clauses for accurate counts
+
+#### ✅ Verification & Results
+- **Platform Cards**: Successfully rendering 5 platform cards for SVB station
+- **API Responses**: Platform API returning HTTP 200 with valid platform data arrays
+- **Database Connectivity**: All platform queries executing successfully without SQL errors
+- **UI Updates**: Station overview displays correct platform counts and renders platform grid
+
+#### 🔄 Migration Path from v4.9.x to v5.0.11
+- **Modular Architecture**: Completed transition from monolithic HTML to modular JavaScript system
+- **API Consistency**: Standardized platform loading parameters across client and server
+- **Error Handling**: Enhanced error reporting and debugging capabilities
+- **Backward Compatibility**: Maintained legacy UI function support during transition
+
+#### 🚧 Known Issues (In Progress)
+- **View Details Modals**: Platform and instrument detail modals not opening (under investigation)
+- **Modal System**: Investigating modal function definitions and event binding
+
 ## [4.9.4] - 2025-09-26
 
 ### 🔐 Role-Based Login Redirects and Dashboard Platform/Instrument Counts

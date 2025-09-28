@@ -211,7 +211,9 @@ class SitesInteractiveMap {
         const instrumentCount = platformData.instrument_count || 0;
         return `
             <div class="map-popup platform-popup">
-                <h5>${platformData.display_name || 'Platform'}</h5>
+                <h5>${platformData.normalized_name || platformData.display_name || 'Platform'}</h5>
+                ${platformData.display_name && platformData.normalized_name !== platformData.display_name ?
+                    `<p><small style="opacity: 0.7;">${platformData.display_name}</small></p>` : ''}
                 ${platformData.ecosystem_code ? `<p><strong>Ecosystem:</strong> ${platformData.ecosystem_code}</p>` : ''}
                 ${platformData.location_code ? `<p><strong>Location:</strong> ${platformData.location_code}</p>` : ''}
                 <p><strong>Instruments:</strong> ${instrumentCount}</p>

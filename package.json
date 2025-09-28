@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.0.11",
+  "version": "5.0.12",
   "description": "SITES Spectral Stations & Instruments Management System v5.0.1 - CRITICAL FIX: Integrity Hash and CORS Issues",
   "main": "src/worker.js",
   "scripts": {
