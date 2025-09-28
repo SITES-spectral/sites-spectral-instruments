@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.3",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.3 - HOTFIX: Reverted Card Label Changes to Restore Functionality",
+  "version": "5.2.4",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.4 - CRITICAL FIX: Duplicate Variable Declaration Syntax Error",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

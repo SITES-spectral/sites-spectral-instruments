@@ -1185,8 +1185,7 @@ class SitesStationDashboard {
                 return;
             }
 
-            // Show loading state
-            const submitBtn = document.querySelector('#edit-instrument-form button[type="submit"]');
+            // Update loading state
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 

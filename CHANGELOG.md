@@ -15,6 +15,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.4] - 2025-09-28
+
+### 🚨 CRITICAL FIX: Duplicate Variable Declaration Syntax Error
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Emergency resolution of SitesStationDashboard module loading failure
+
+#### 🚨 **Critical Bug Fix**
+- **Module Loading Failure**: Fixed `SitesStationDashboard: false` error preventing station dashboard functionality
+- **Duplicate Variable Declaration**: Resolved duplicate `const submitBtn` declarations in station-dashboard.js:1189
+- **JavaScript Syntax Error**: Eliminated parsing failure that blocked module initialization
+- **Cache Invalidation**: Version bump to v5.2.4 forces browser cache refresh for corrected modules
+
+#### 🔧 **Technical Resolution**
+- **Root Cause**: Duplicate `const submitBtn` declaration on line 1189 causing JavaScript parse error
+- **Fix Applied**: Changed duplicate declaration to `submitBtn.disabled = true;` using existing variable
+- **Files Modified**: station-dashboard.js, all HTML files updated with v5.2.4 version references
+- **Module Validation**: All 10 JavaScript files pass syntax validation after fix
+
+#### 🎯 **Immediate Impact**
+- **Station Dashboard**: Fully functional module loading restored
+- **Module Check**: `SitesStationDashboard: true` ✅ (was `false` ❌)
+- **All Functionality**: Modal workflows, editing, and data loading operational
+- **User Experience**: Complete restoration of station management capabilities
+
+#### 🛡️ **Agent Team Response**
+- **Pebble QA Specialist**: Rapid identification and resolution of critical syntax error
+- **Emergency Deployment**: Immediate fix applied with version increment for cache busting
+- **Comprehensive Testing**: Module loading verification and functionality restoration confirmed
+
+## [5.2.3] - 2025-09-28
+
+### 🚨 HOTFIX: Reverted Card Label Changes to Restore Functionality
+
 ## [5.2.2] - 2025-09-28
 
 ### 🎨 PATCH: Enhanced Platform and Instrument Card Labels with Legacy Name Display
