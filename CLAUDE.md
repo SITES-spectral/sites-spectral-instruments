@@ -2,12 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.1 - EDIT INSTRUMENT MODAL DATA LOADING AND TRANSITION FIXES (2025-09-28)
+## Version 5.2.2 - ENHANCED PLATFORM AND INSTRUMENT CARD LABELS WITH LEGACY NAME DISPLAY (2025-09-28)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-28 ✅ DEPLOYED v5.2.1 🚀
-**🎯 Major Achievement:** Complete resolution of edit instrument modal data population issues and smooth modal transitions through specialist agent team collaboration
+**📅 Deployment Date:** 2025-09-28 ✅ DEPLOYED v5.2.2 🚀
+**🎯 Major Achievement:** Improved card layout clarity with descriptive labels and legacy name information display
+
+### 🎨 Card Layout Enhancements in v5.2.2
+- **Platform Card Labels**: Added "platform:" label before normalized name for clear identification
+- **Platform Legacy Names**: Replaced location code display with "legacy name:" label and value
+- **Instrument Card Labels**: Added "instrument:" label before normalized name for consistency
+- **Instrument Legacy Names**: Added "legacy name:" label creating 4-line instrument card layout
+- **Visual Hierarchy**: Enhanced card readability with proper label styling and spacing
 
 ### 🔧 Edit Instrument Modal Fixes in v5.2.1
 - **Data Loading Resolution**: Fixed field ID mismatches preventing database data from populating in edit instrument forms

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.1",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.1 - PATCH: Fixed Edit Instrument Modal Data Loading and Modal Transition Issues",
+  "version": "5.2.2",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.2 - PATCH: Enhanced Platform and Instrument Card Labels with Legacy Name Display",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

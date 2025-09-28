@@ -392,12 +392,12 @@ class SitesStationDashboard {
                 <div class="platform-header">
                     <h4>${this.escapeHtml(platform.display_name)}</h4>
                     <div class="platform-normalized-name">
+                        <div style="font-size: 0.8em; color: #6b7280; margin-bottom: 2px;">platform:</div>
                         <span style="color: #059669; font-family: 'Courier New', monospace; font-weight: 600;">${platform.normalized_name || 'N/A'}</span>
                     </div>
                     <div class="platform-meta">
                         ${platform.ecosystem_code ? `<span class="ecosystem-badge">${platform.ecosystem_code}</span>` : ''}
-                        ${platform.location_code ? `<span class="location-code">${platform.location_code}</span>` : ''}
-                        ${platform.legacy_name ? `<div class="legacy-name" style="font-size: 0.8em; color: #6b7280; margin-top: 4px;">Legacy: ${platform.legacy_name}</div>` : ''}
+                        ${platform.legacy_name ? `<div class="legacy-name" style="font-size: 0.8em; color: #6b7280; margin-top: 4px;">legacy name: ${platform.legacy_name}</div>` : ''}
                     </div>
                 </div>
 
@@ -709,7 +709,9 @@ class SitesStationDashboard {
                     `}
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-weight: 600; font-size: 0.85em; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.escapeHtml(instrument.display_name || instrument.name || 'Unnamed')}</div>
+                        <div style="font-size: 0.7em; color: #6b7280; margin-top: 1px;">instrument:</div>
                         <div style="font-size: 0.75em; color: #6b7280; font-family: 'Courier New', monospace;">${instrument.normalized_name || 'No ID'}</div>
+                        ${instrument.legacy_name ? `<div style="font-size: 0.7em; color: #6b7280; margin-top: 1px;">legacy name: ${instrument.legacy_name}</div>` : ''}
                         ${instrument.status ? `<div style="font-size: 0.7em; margin-top: 2px;">${this.getStatusIcon(instrument.status)} ${instrument.status}</div>` : ''}
                     </div>
                 </div>

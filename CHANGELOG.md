@@ -15,6 +15,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.2] - 2025-09-28
+
+### 🎨 PATCH: Enhanced Platform and Instrument Card Labels with Legacy Name Display
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Improved card layout clarity with descriptive labels and legacy name information display
+
+#### ✨ **UI Enhancements**
+- **Platform Card Labels**: Added "platform:" label before normalized name for clear identification
+- **Platform Legacy Names**: Replaced location code display with "legacy name:" label and value
+- **Instrument Card Labels**: Added "instrument:" label before normalized name for consistency
+- **Instrument Legacy Names**: Added "legacy name:" label with value creating 4-line instrument card layout
+- **Visual Hierarchy**: Enhanced card readability with proper label styling and spacing
+
+#### 🔧 **Technical Improvements**
+- **Card Structure**: Updated `createPlatformCard()` function in station-dashboard.js:712
+- **Instrument Layout**: Enhanced `createInstrumentCard()` function in station-dashboard.js:711-715
+- **Label Consistency**: Applied consistent labeling patterns across both platform and instrument cards
+- **Legacy Data Display**: Proper handling and display of legacy name information
+
+#### 🎯 **User Experience**
+- **Clear Identification**: Users can now easily distinguish between current and legacy identifiers
+- **Consistent Layout**: Standardized label format across all card types
+- **Information Hierarchy**: Improved visual organization of card metadata
+- **4-Line Instrument Cards**: Complete information display as requested with proper spacing
+
 ## [5.2.1] - 2025-09-28
 
 ### 🔧 PATCH: Fixed Edit Instrument Modal Data Loading and Modal Transition Issues
