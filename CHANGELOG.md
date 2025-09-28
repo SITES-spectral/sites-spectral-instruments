@@ -15,6 +15,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.10] - 2025-09-28
+
+### 🔧 PATCH: Intelligent Image Availability System with Manifest Integration
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Enhanced phenocam image system with intelligent availability checking to prevent "image not found" errors
+
+#### 🚨 **Issues Resolved**
+- **Image Not Found Errors**: Fixed display of images that don't exist in production by implementing manifest-based checking
+- **Graceful Fallbacks**: Instruments without phenocam images now show professional camera icon placeholders
+- **Production Deployment**: Verified that all 57 station image files are properly deployed and accessible
+
+#### ✨ **Manifest-Based Image Intelligence**
+- **Smart Availability Checking**: Added `loadImageManifest()` method to check image availability before display
+- **Manifest Integration**: System now consults `/images/stations/instrument-images-manifest.json` for image status
+- **Success Filtering**: Only instruments with `success: true` in manifest display actual phenocam images
+- **Fallback Logic**: Instruments without images gracefully show camera icon instead of broken image links
+
+#### 📊 **Image Availability Statistics**
+- **Total Instruments Tracked**: 23 instruments across all stations
+- **Available Images**: 13 instruments with successful phenocam captures
+- **Unavailable Images**: 10 instruments with "No L1 images found" status
+- **Stations with Images**: SKC (6 images), LON (3 images), RBD (2 images), GRI (1 image), ANS (1 image)
+- **Stations without Images**: ASA, SVB (display fallback icons)
+
+#### 🔧 **Technical Implementation**
+- **Enhanced Methods**: Updated `getLatestPhenocamImage()` and `getInstrumentImageUrl()` with manifest checking
+- **Manifest Loading**: Added async manifest loading during dashboard initialization
+- **Error Prevention**: Proactive checking prevents 404 errors and broken image displays
+- **Console Logging**: Enhanced debugging with manifest load status and availability checking
+
+#### 🌟 **User Experience Improvements**
+- **Professional Appearance**: No more broken image placeholders in production
+- **Consistent Interface**: Uniform display whether images are available or not
+- **Performance Optimization**: Reduced network requests by pre-checking image availability
+- **Visual Feedback**: Clear distinction between available images and placeholder icons
+
+#### 🏗️ **Production Deployment Verification**
+- **Asset Upload**: All 57 station image files successfully deployed to Cloudflare Workers
+- **Manifest Accessibility**: Image manifest file accessible at production URL
+- **Image Paths**: Verified correct path structure `/images/stations/{station}/instruments/{normalized_name}.jpg`
+- **Fallback Testing**: Confirmed graceful degradation for missing images
+
 ## [5.2.8] - 2025-09-28
 
 ### 🖼️ PATCH: Complete Phenocam Image Integration with Zoomable Functionality

@@ -13,6 +13,7 @@ class SitesStationDashboard {
         this.stationAcronym = null;
         this.isLoadingPlatforms = false;
         this.currentOpenPlatformId = null;
+        this.imageManifest = null;
         this.init();
     }
 
@@ -39,6 +40,7 @@ class SitesStationDashboard {
             // Load station data
             if (this.stationAcronym) {
                 await this.loadStationData();
+                await this.loadImageManifest();
                 this.setupMap();
                 this.setupEventListeners();
 
@@ -159,6 +161,23 @@ class SitesStationDashboard {
         } catch (error) {
             console.error('Error loading station data:', error);
             throw new Error(`Failed to load station data: ${error.message}`);
+        }
+    }
+
+    async loadImageManifest() {
+        try {
+            console.debug('Loading image manifest...');
+            const response = await fetch('/images/stations/instrument-images-manifest.json');
+            if (response.ok) {
+                this.imageManifest = await response.json();
+                console.debug('Image manifest loaded:', this.imageManifest);
+            } else {
+                console.warn('Image manifest not found, using fallback image detection');
+                this.imageManifest = null;
+            }
+        } catch (error) {
+            console.warn('Failed to load image manifest:', error);
+            this.imageManifest = null;
         }
     }
 
@@ -729,6 +748,16 @@ class SitesStationDashboard {
             return null;
         }
 
+        // Check manifest for image availability
+        if (this.imageManifest && this.imageManifest.instruments) {
+            const manifestEntry = this.imageManifest.instruments.find(
+                img => img.instrumentId === instrument.normalized_name && img.success === true
+            );
+            if (!manifestEntry) {
+                return null; // Image not available according to manifest
+            }
+        }
+
         // Construct image path based on station and instrument normalized name
         const stationAcronym = this.stationData?.acronym?.toLowerCase();
         if (!stationAcronym) {
@@ -745,6 +774,16 @@ class SitesStationDashboard {
         // Helper function to get image URL for an instrument object
         if (!instrument || !instrument.normalized_name) {
             return null;
+        }
+
+        // Check manifest for image availability
+        if (this.imageManifest && this.imageManifest.instruments) {
+            const manifestEntry = this.imageManifest.instruments.find(
+                img => img.instrumentId === instrument.normalized_name && img.success === true
+            );
+            if (!manifestEntry) {
+                return null; // Image not available according to manifest
+            }
         }
 
         const stationAcronym = this.stationData?.acronym?.toLowerCase();
