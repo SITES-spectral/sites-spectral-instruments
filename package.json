@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.5",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.5 - PATCH: Platform Display Improvements - Removed Location Code, Added Legacy Names",
+  "version": "5.2.6",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.6 - PATCH: Final Platform Display Polish and Legacy Name Enhancement",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

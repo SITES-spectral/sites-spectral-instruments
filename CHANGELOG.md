@@ -15,6 +15,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.6] - 2025-09-28
+
+### 🎨 PATCH: Final Platform Display Polish and Legacy Name Enhancement
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Completed platform interface cleanup with optimized information display and enhanced legacy name presentation
+
+#### ✨ **Platform Interface Enhancements**
+- **Location Code Removal**: Eliminated redundant location_code display from platform cards and details modal
+- **Legacy Name Enhancement**: Added proper "legacy name:" labeling in both platform cards and details modal
+- **Information Hierarchy**: Streamlined platform identification focusing on meaningful identifiers
+- **Visual Polish**: Cleaner card layouts with reduced information clutter
+
+#### 🔧 **Technical Improvements**
+- **Platform Cards**: Updated `createPlatformCard()` function to remove location_code and enhance legacy name display
+- **Platform Details Modal**: Modified `populatePlatformModal()` function to replace "Location Code" field with "Legacy Name" field
+- **Consistent Labeling**: Applied uniform "legacy name:" prefix across all platform displays
+- **Conditional Display**: Legacy name field only appears when legacy name data exists
+
+#### 🎯 **User Experience Benefits**
+- **Cleaner Interface**: Removed confusing location codes that were cluttering platform information
+- **Clear Identification**: Users can easily distinguish between normalized names and legacy names
+- **Focused Display**: Platform cards now emphasize essential identification information
+- **Consistent Presentation**: Uniform legacy name labeling across cards and modal views
+
+## [5.2.5] - 2025-09-28
+
+### 🎨 PATCH: Platform Display Improvements - Removed Location Code, Added Legacy Names
+
 ## [5.2.4] - 2025-09-28
 
 ### 🚨 CRITICAL FIX: Duplicate Variable Declaration Syntax Error
