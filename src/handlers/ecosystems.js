@@ -1,7 +1,7 @@
 // SITES Spectral Ecosystem Codes Handler
 // Serves ecosystem codes from ecosystems.yaml for form components
 
-import { createJsonResponse, createErrorResponse } from '../utils/responses.js';
+import { createSuccessResponse, createErrorResponse } from '../utils/responses.js';
 
 /**
  * Ecosystem codes based on ecosystems.yaml configuration
@@ -80,7 +80,7 @@ async function handleGetEcosystems(request, env) {
         break;
     }
 
-    return createJsonResponse({
+    return createSuccessResponse({
       success: true,
       data: response,
       count: response.length,
@@ -108,7 +108,7 @@ export async function getEcosystemDropdownValues(request, env) {
       category: getCategoryForEcosystem(eco.code)
     }));
 
-    return createJsonResponse({
+    return createSuccessResponse({
       success: true,
       data: dropdownValues,
       count: dropdownValues.length

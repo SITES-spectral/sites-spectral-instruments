@@ -1,7 +1,7 @@
 // SITES Spectral Status Codes Handler
 // Serves status options from status.yaml for form components
 
-import { createJsonResponse, createErrorResponse } from '../utils/responses.js';
+import { createSuccessResponse, createErrorResponse } from '../utils/responses.js';
 
 /**
  * Status codes based on status.yaml configuration
@@ -168,7 +168,7 @@ async function handleGetStatusCodes(request, env) {
         break;
     }
 
-    return createJsonResponse({
+    return createSuccessResponse({
       success: true,
       data: response,
       count: Array.isArray(response) ? response.length : Object.keys(response).length,
@@ -198,7 +198,7 @@ export async function getStatusDropdownValues(request, env) {
       color: status.color
     }));
 
-    return createJsonResponse({
+    return createSuccessResponse({
       success: true,
       data: dropdownValues,
       count: dropdownValues.length

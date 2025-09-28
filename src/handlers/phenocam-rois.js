@@ -159,7 +159,7 @@ async function getPhenocamROIsOverview(user, request, env) {
  */
 async function getPhenocamROIsByInstrument(instrumentId, user, request, env) {
   // First verify instrument exists and user has access
-  const instrumentQuery = `
+  let instrumentQuery = `
     SELECT i.*, p.display_name as platform_name, p.research_programs,
            s.acronym as station_acronym, s.normalized_name as station_normalized_name
     FROM instruments i
@@ -445,7 +445,7 @@ async function deletePhenocamROI(instrumentId, roiId, user, env) {
  * Helper function to verify instrument access
  */
 async function verifyInstrumentAccess(instrumentId, user, env) {
-  const query = `
+  let query = `
     SELECT i.id, s.normalized_name as station_normalized_name
     FROM instruments i
     JOIN platforms p ON i.platform_id = p.id
@@ -471,7 +471,7 @@ async function verifyInstrumentAccess(instrumentId, user, env) {
  * Helper function to verify ROI access
  */
 async function verifyROIAccess(instrumentId, roiId, user, env) {
-  const query = `
+  let query = `
     SELECT r.id, s.normalized_name as station_normalized_name
     FROM instrument_rois r
     JOIN instruments i ON r.instrument_id = i.id
