@@ -67,29 +67,72 @@ class SitesSpectralAPI {
         return headers;
     }
 
-    // Handle API errors
-    handleApiError(response, error = null) {
+    // Handle API errors with enhanced error messages
+    async handleApiError(response, error = null) {
         if (response && response.status === 401) {
+            console.warn('Authentication expired, redirecting to login');
             this.clearAuth();
             window.location.href = '/';
             return;
         }
 
         if (error) {
-            console.error('API Error:', error);
-            throw new Error(error.message || 'Network error occurred');
+            console.error('API Network Error:', error);
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Network connection failed. Please check your internet connection and try again.');
+            }
+            if (error.name === 'AbortError') {
+                throw new Error('Request timed out. Please try again.');
+            }
+            throw new Error(error.message || 'Network error occurred. Please try again.');
         }
 
         if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch (parseError) {
+                // If we can't parse the error response, use the status text
+                console.warn('Could not parse error response:', parseError);
+            }
+
+            // Provide user-friendly error messages for common status codes
+            switch (response.status) {
+                case 403:
+                    errorMessage = 'Access denied. You do not have permission to perform this action.';
+                    break;
+                case 404:
+                    errorMessage = 'Resource not found. The requested data may have been deleted.';
+                    break;
+                case 422:
+                    errorMessage = errorMessage || 'Invalid data provided. Please check your input and try again.';
+                    break;
+                case 500:
+                    errorMessage = 'Server error occurred. Please try again in a few moments.';
+                    break;
+                case 503:
+                    errorMessage = 'Service temporarily unavailable. Please try again later.';
+                    break;
+            }
+
+            throw new Error(errorMessage);
         }
     }
 
-    // Make authenticated API request
+    // Make authenticated API request with timeout and retry logic
     async fetchWithAuth(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
+        const timeout = options.timeout || 10000; // 10 second default timeout
+
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
         const config = {
             ...options,
+            signal: controller.signal,
             headers: {
                 ...this.getAuthHeaders(),
                 ...(options.headers || {})
@@ -97,15 +140,20 @@ class SitesSpectralAPI {
         };
 
         try {
+            console.debug(`API Request: ${config.method || 'GET'} ${url}`);
             const response = await fetch(url, config);
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
-                this.handleApiError(response);
+                await this.handleApiError(response);
             }
 
+            console.debug(`API Response: ${response.status} ${response.statusText}`);
             return response;
         } catch (error) {
-            this.handleApiError(null, error);
+            clearTimeout(timeoutId);
+            console.error(`API Request failed for ${url}:`, error);
+            await this.handleApiError(null, error);
         }
     }
 
@@ -149,10 +197,17 @@ class SitesSpectralAPI {
         window.location.href = '/';
     }
 
-    // Station methods
+    // Station methods with enhanced error handling
     async getStations() {
-        const response = await this.fetchWithAuth('/api/stations');
-        return response.json();
+        try {
+            const response = await this.fetchWithAuth('/api/stations');
+            const data = await response.json();
+            console.debug('Loaded stations:', data);
+            return data;
+        } catch (error) {
+            console.error('Failed to load stations:', error);
+            throw new Error(`Failed to load stations: ${error.message}`);
+        }
     }
 
     async getStation(id) {
@@ -183,11 +238,19 @@ class SitesSpectralAPI {
         return response.json();
     }
 
-    // Platform methods
-    async getPlatforms(stationId = null) {
-        const url = stationId ? `/api/platforms?station_id=${stationId}` : '/api/platforms';
-        const response = await this.fetchWithAuth(url);
-        return response.json();
+    // Platform methods with enhanced error handling
+    async getPlatforms(stationAcronym = null) {
+        try {
+            const url = stationAcronym ? `/api/platforms?station=${stationAcronym}` : '/api/platforms';
+            console.debug(`Loading platforms${stationAcronym ? ` for station ${stationAcronym}` : ''}`);
+            const response = await this.fetchWithAuth(url);
+            const data = await response.json();
+            console.debug(`Loaded ${Array.isArray(data.platforms) ? data.platforms.length : Array.isArray(data) ? data.length : 0} platforms`);
+            return data;
+        } catch (error) {
+            console.error(`Failed to load platforms${stationAcronym ? ` for station ${stationAcronym}` : ''}:`, error);
+            throw new Error(`Failed to load platforms: ${error.message}`);
+        }
     }
 
     async getPlatform(id) {
@@ -196,11 +259,19 @@ class SitesSpectralAPI {
     }
 
     async createPlatform(platformData) {
-        const response = await this.fetchWithAuth('/api/platforms', {
-            method: 'POST',
-            body: JSON.stringify(platformData)
-        });
-        return response.json();
+        try {
+            console.debug('Creating platform:', platformData);
+            const response = await this.fetchWithAuth('/api/platforms', {
+                method: 'POST',
+                body: JSON.stringify(platformData)
+            });
+            const data = await response.json();
+            console.debug('Platform created successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Failed to create platform:', error);
+            throw new Error(`Failed to create platform: ${error.message}`);
+        }
     }
 
     async updatePlatform(id, platformData) {
@@ -212,17 +283,33 @@ class SitesSpectralAPI {
     }
 
     async deletePlatform(id) {
-        const response = await this.fetchWithAuth(`/api/platforms/${id}`, {
-            method: 'DELETE'
-        });
-        return response.json();
+        try {
+            console.debug(`Deleting platform ${id}`);
+            const response = await this.fetchWithAuth(`/api/platforms/${id}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            console.debug('Platform deleted successfully');
+            return data;
+        } catch (error) {
+            console.error(`Failed to delete platform ${id}:`, error);
+            throw new Error(`Failed to delete platform: ${error.message}`);
+        }
     }
 
-    // Instrument methods
-    async getInstruments(platformId = null) {
-        const url = platformId ? `/api/instruments?platform_id=${platformId}` : '/api/instruments';
-        const response = await this.fetchWithAuth(url);
-        return response.json();
+    // Instrument methods with enhanced error handling
+    async getInstruments(stationAcronym = null) {
+        try {
+            const url = stationAcronym ? `/api/instruments?station=${stationAcronym}` : '/api/instruments';
+            console.debug(`Loading instruments${stationAcronym ? ` for station ${stationAcronym}` : ''}`);
+            const response = await this.fetchWithAuth(url);
+            const data = await response.json();
+            console.debug(`Loaded ${Array.isArray(data.instruments) ? data.instruments.length : Array.isArray(data) ? data.length : 0} instruments`);
+            return data;
+        } catch (error) {
+            console.error(`Failed to load instruments${stationAcronym ? ` for station ${stationAcronym}` : ''}:`, error);
+            throw new Error(`Failed to load instruments: ${error.message}`);
+        }
     }
 
     async getInstrument(id) {

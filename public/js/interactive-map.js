@@ -10,16 +10,26 @@ class SitesInteractiveMap {
         this.defaultCenter = [59.8586, 17.6389]; // Uppsala, Sweden
         this.defaultZoom = 8;
 
-        // Swedish coordinate systems
-        this.swerefProjection = {
-            name: 'SWEREF99 TM',
-            crs: L.CRS.EPSG3857, // Web Mercator for Leaflet compatibility
-            bounds: [10.03, 55.36, 24.17, 69.07] // Sweden bounds [west, south, east, north]
-        };
+        // Swedish coordinate systems (will be initialized when Leaflet is available)
+        this.swerefProjection = null;
+    }
+
+    // Initialize Swedish coordinate system (call when Leaflet is loaded)
+    initializeSwedishProjection() {
+        if (typeof L !== 'undefined' && !this.swerefProjection) {
+            this.swerefProjection = {
+                name: 'SWEREF99 TM',
+                crs: L.CRS.EPSG3857, // Web Mercator for Leaflet compatibility
+                bounds: [10.03, 55.36, 24.17, 69.07] // Sweden bounds [west, south, east, north]
+            };
+        }
     }
 
     // Initialize map in a container
     initializeMap(containerId, options = {}) {
+        // Initialize Swedish projection system if not done yet
+        this.initializeSwedishProjection();
+
         const container = document.getElementById(containerId);
         if (!container) {
             console.error(`Map container ${containerId} not found`);

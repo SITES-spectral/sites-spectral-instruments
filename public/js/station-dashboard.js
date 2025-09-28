@@ -11,6 +11,7 @@ class SitesStationDashboard {
         this.selectedPlatform = null;
         this.selectedInstrument = null;
         this.stationAcronym = null;
+        this.isLoadingPlatforms = false;
         this.init();
     }
 
@@ -53,20 +54,27 @@ class SitesStationDashboard {
     }
 
     async verifyAccess() {
+        console.debug('Verifying access...');
+
         if (!window.sitesAPI?.isAuthenticated()) {
+            console.warn('User not authenticated, redirecting to home');
             window.location.href = '/';
             return;
         }
 
         this.currentUser = window.sitesAPI.getUser();
+        console.debug('Current user:', this.currentUser);
+        console.debug('Requesting station:', this.stationAcronym);
 
         // Check if station user has access to this station
         if (this.currentUser.role === 'station' &&
             this.currentUser.station_acronym !== this.stationAcronym) {
+            console.warn(`Station user can only access their own station. User station: ${this.currentUser.station_acronym}, Requested: ${this.stationAcronym}`);
             window.location.href = `/station.html?station=${this.currentUser.station_acronym}`;
             return;
         }
 
+        console.debug('Access verification passed');
         this.updateUserDisplay();
     }
 
@@ -108,16 +116,40 @@ class SitesStationDashboard {
 
     async loadStationData() {
         try {
-            // Load station details by acronym
-            const response = await window.sitesAPI.getStations();
+            console.debug(`Loading station data for: ${this.stationAcronym}`);
+
+            // Load station details by acronym with detailed error handling
+            let response;
+            try {
+                response = await window.sitesAPI.getStations();
+            } catch (error) {
+                throw new Error(`Failed to fetch stations list: ${error.message}`);
+            }
+
             const stations = Array.isArray(response) ? response : (response.stations || []);
+            console.debug(`Found ${stations.length} stations in system:`, stations);
+            console.debug(`Looking for station with acronym: '${this.stationAcronym}'`);
+
+            // Enhanced debugging: log each station's acronym and comparison
+            stations.forEach((station, index) => {
+                console.debug(`Station ${index}: acronym='${station.acronym}' (matches: ${station.acronym === this.stationAcronym})`);
+            });
+
             this.stationData = stations.find(s => s.acronym === this.stationAcronym);
 
             if (!this.stationData) {
-                throw new Error(`Station ${this.stationAcronym} not found`);
+                const availableStations = stations.map(s => s.acronym).join(', ');
+                console.error('Station not found details:', {
+                    searchingFor: this.stationAcronym,
+                    availableStations: stations.map(s => ({ acronym: s.acronym, id: s.id, normalized_name: s.normalized_name })),
+                    currentUser: this.currentUser
+                });
+                throw new Error(`Station '${this.stationAcronym}' not found. Available stations: ${availableStations || 'none'}`);
             }
 
-            // Load platforms and instruments
+            console.debug(`Loaded station data:`, this.stationData);
+
+            // Load platforms and instruments with proper error handling
             await Promise.all([
                 this.loadPlatformsAndInstruments(),
                 this.updateStationDisplay()
@@ -125,31 +157,90 @@ class SitesStationDashboard {
 
         } catch (error) {
             console.error('Error loading station data:', error);
-            throw error;
+            throw new Error(`Failed to load station data: ${error.message}`);
         }
     }
 
     async loadPlatformsAndInstruments() {
         try {
-            // Load platforms for this station
-            const platformsResponse = await window.sitesAPI.getPlatforms(this.stationData.id);
-            this.platforms = Array.isArray(platformsResponse) ? platformsResponse : [];
+            // Prevent multiple simultaneous loads
+            if (this.isLoadingPlatforms) {
+                console.debug('Platform loading already in progress, skipping...');
+                return;
+            }
+            this.isLoadingPlatforms = true;
 
-            // Load all instruments for this station's platforms
-            const instrumentPromises = this.platforms.map(platform =>
-                window.sitesAPI.getInstruments(platform.id)
-            );
+            console.debug(`Loading platforms and instruments for station: ${this.stationData.acronym}`);
 
-            const instrumentResponses = await Promise.all(instrumentPromises);
-            this.instruments = instrumentResponses.flat();
+            // Load platforms for this station - try acronym first, then normalized_name if needed
+            let platformsResponse;
+            try {
+                console.debug(`Station data available:`, {
+                    acronym: this.stationData.acronym,
+                    normalized_name: this.stationData.normalized_name,
+                    id: this.stationData.id
+                });
 
-            // Update displays
-            this.renderPlatforms();
-            this.updateMapMarkers();
+                console.debug(`Making API call to get platforms for station: ${this.stationData.acronym}`);
+                platformsResponse = await window.sitesAPI.getPlatforms(this.stationData.acronym);
+                console.debug(`Raw platforms response:`, platformsResponse);
+
+                this.platforms = Array.isArray(platformsResponse) ?
+                    platformsResponse :
+                    (platformsResponse.platforms || []);
+                console.debug(`Processed platforms array (${this.platforms.length} items):`, this.platforms);
+
+                // If no platforms found with acronym, try normalized_name
+                if (this.platforms.length === 0 && this.stationData.normalized_name && this.stationData.normalized_name !== this.stationData.acronym) {
+                    console.debug(`No platforms found with acronym '${this.stationData.acronym}', trying normalized_name '${this.stationData.normalized_name}'`);
+                    platformsResponse = await window.sitesAPI.getPlatforms(this.stationData.normalized_name);
+                    console.debug(`Raw platforms response with normalized_name:`, platformsResponse);
+
+                    this.platforms = Array.isArray(platformsResponse) ?
+                        platformsResponse :
+                        (platformsResponse.platforms || []);
+                    console.debug(`Processed platforms array with normalized_name (${this.platforms.length} items):`, this.platforms);
+                }
+
+                if (this.platforms.length === 0) {
+                    console.warn(`No platforms found for station ${this.stationData.acronym}/${this.stationData.normalized_name}. Final response was:`, platformsResponse);
+                }
+            } catch (error) {
+                console.error(`Failed to load platforms for station ${this.stationData.acronym}:`, error);
+                this.platforms = [];
+                this.showError(`Failed to load platforms: ${error.message}`);
+                // Don't throw here, continue to try loading instruments
+            }
+
+            // Load all instruments for this station using station acronym
+            try {
+                const instrumentsResponse = await window.sitesAPI.getInstruments(this.stationData.acronym);
+                this.instruments = Array.isArray(instrumentsResponse) ?
+                    instrumentsResponse :
+                    (instrumentsResponse.instruments || []);
+                console.debug(`Loaded ${this.instruments.length} instruments`);
+            } catch (error) {
+                console.error(`Failed to load instruments for station ${this.stationData.acronym}:`, error);
+                this.instruments = [];
+                this.showError(`Failed to load instruments: ${error.message}`);
+                // Don't throw here, platforms might still be loaded
+            }
+
+            // Update displays even if some data failed to load
+            try {
+                this.renderPlatforms();
+                this.updateMapMarkers();
+                console.debug('Successfully updated platform and instrument displays');
+            } catch (error) {
+                console.error('Error updating displays:', error);
+                this.showError(`Failed to update display: ${error.message}`);
+            }
 
         } catch (error) {
-            console.error('Error loading platforms and instruments:', error);
-            this.showError('Failed to load station data');
+            console.error('Critical error loading platforms and instruments:', error);
+            this.showError(`Critical error loading station data: ${error.message}`);
+        } finally {
+            this.isLoadingPlatforms = false;
         }
     }
 
@@ -159,21 +250,39 @@ class SitesStationDashboard {
         // Update page title
         document.title = `${this.stationData.display_name} - SITES Spectral`;
 
-        // Update station header
-        const elements = {
-            'station-name': this.stationData.display_name,
-            'station-acronym': this.stationData.acronym,
-            'station-description': this.stationData.description,
-            'station-organization': this.stationData.organization,
-            'station-coordinates': this.formatCoordinates()
-        };
+        // Update station header - main elements
+        const stationNameEl = document.getElementById('station-name');
+        if (stationNameEl) {
+            stationNameEl.textContent = this.stationData.display_name;
+        }
 
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element && value) {
-                element.textContent = value;
+        const stationAcronymEl = document.getElementById('station-acronym');
+        if (stationAcronymEl && this.stationData.acronym) {
+            stationAcronymEl.textContent = `(${this.stationData.acronym})`;
+            stationAcronymEl.style.display = 'inline';
+        }
+
+        const stationDescEl = document.getElementById('station-description');
+        if (stationDescEl && this.stationData.description) {
+            stationDescEl.textContent = this.stationData.description;
+            stationDescEl.style.display = 'block';
+        }
+
+        // Update optional metadata
+        const organizationEl = document.getElementById('station-organization');
+        if (organizationEl && this.stationData.organization) {
+            organizationEl.innerHTML = `<strong>Organization:</strong> ${this.stationData.organization}`;
+            organizationEl.style.display = 'block';
+        }
+
+        const coordinatesEl = document.getElementById('station-coordinates');
+        if (coordinatesEl) {
+            const coords = this.formatCoordinates();
+            if (coords !== 'No coordinates') {
+                coordinatesEl.innerHTML = `<strong>Coordinates:</strong> ${coords}`;
+                coordinatesEl.style.display = 'block';
             }
-        });
+        }
 
         // Update counts
         this.updateCounts();
@@ -193,8 +302,8 @@ class SitesStationDashboard {
         const platformCount = this.platforms.length;
         const instrumentCount = this.instruments.length;
 
-        const platformCountEl = document.getElementById('platform-count');
-        const instrumentCountEl = document.getElementById('instrument-count');
+        const platformCountEl = document.getElementById('platforms-count');
+        const instrumentCountEl = document.getElementById('instruments-count');
 
         if (platformCountEl) {
             platformCountEl.textContent = platformCount;
@@ -238,10 +347,17 @@ class SitesStationDashboard {
     }
 
     renderPlatforms() {
-        const platformsContainer = document.getElementById('platforms-list');
-        if (!platformsContainer) return;
+        console.debug(`renderPlatforms() called with ${this.platforms.length} platforms:`, this.platforms);
+
+        const platformsContainer = document.getElementById('platforms-grid');
+        if (!platformsContainer) {
+            console.error('platforms-grid container not found!');
+            return;
+        }
+        console.debug('Found platforms-grid container:', platformsContainer);
 
         if (this.platforms.length === 0) {
+            console.debug('No platforms to render, showing empty state');
             platformsContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-building fa-3x"></i>
@@ -256,6 +372,8 @@ class SitesStationDashboard {
             `;
             return;
         }
+
+        console.debug(`Rendering ${this.platforms.length} platform cards...`);
 
         const platformCards = this.platforms.map(platform => this.createPlatformCard(platform)).join('');
         platformsContainer.innerHTML = platformCards;
@@ -372,7 +490,10 @@ class SitesStationDashboard {
 
     async saveNewPlatform() {
         const form = document.getElementById('create-platform-form');
-        if (!form) return;
+        if (!form) {
+            this.showError('Create platform form not found');
+            return;
+        }
 
         const formData = new FormData(form);
         const platformData = {
@@ -384,20 +505,40 @@ class SitesStationDashboard {
             longitude: formData.get('longitude') ? parseFloat(formData.get('longitude')) : null
         };
 
+        // Validate required fields
+        if (!platformData.display_name?.trim()) {
+            this.showError('Platform name is required');
+            return;
+        }
+
         try {
-            showNotification('Creating platform...', 'info');
+            console.debug('Creating platform with data:', platformData);
+
+            if (typeof showNotification === 'function') {
+                showNotification('Creating platform...', 'info');
+            }
 
             await window.sitesAPI.createPlatform(platformData);
 
-            showNotification('Platform created successfully', 'success');
-            closeModal('create-platform-modal');
+            if (typeof showNotification === 'function') {
+                showNotification('Platform created successfully', 'success');
+            }
 
-            // Reload platforms
-            await this.loadPlatformsAndInstruments();
+            if (typeof closeModal === 'function') {
+                closeModal('create-platform-modal');
+            }
+
+            // Reload platforms with error handling
+            try {
+                await this.loadPlatformsAndInstruments();
+            } catch (reloadError) {
+                console.warn('Failed to reload platforms after creation:', reloadError);
+                this.showError('Platform created but failed to refresh data. Please refresh the page.');
+            }
 
         } catch (error) {
             console.error('Error creating platform:', error);
-            showNotification(`Failed to create platform: ${error.message}`, 'error');
+            this.showError(`Failed to create platform: ${error.message}`);
         }
     }
 
@@ -487,18 +628,55 @@ class SitesStationDashboard {
         const dashboardEl = document.getElementById('dashboard-section');
         const errorMessageEl = document.getElementById('error-message');
 
+        console.error('Showing error state:', message);
+
         if (loadingEl) loadingEl.style.display = 'none';
         if (errorEl) errorEl.style.display = 'block';
         if (welcomeEl) welcomeEl.style.display = 'none';
         if (dashboardEl) dashboardEl.style.display = 'none';
-        if (errorMessageEl) errorMessageEl.textContent = message;
+        if (errorMessageEl) {
+            errorMessageEl.textContent = message;
 
-        // Also show notification
-        showNotification(message, 'error');
+            // Add retry button if not already present
+            const retryBtn = errorMessageEl.querySelector('.retry-btn');
+            if (!retryBtn) {
+                const retryButton = document.createElement('button');
+                retryButton.className = 'btn btn-primary retry-btn';
+                retryButton.innerHTML = '<i class="fas fa-redo"></i> Retry';
+                retryButton.style.marginTop = '1rem';
+                retryButton.onclick = () => this.retryLoadingData();
+                errorMessageEl.appendChild(retryButton);
+            }
+        }
+
+        // Also show notification with more context
+        const notification = typeof showNotification === 'function' ?
+            showNotification(message, 'error') :
+            console.error('showNotification not available:', message);
     }
 
     showError(message) {
-        showNotification(message, 'error');
+        console.error('Station dashboard error:', message);
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'error');
+        } else {
+            // Fallback if notification system not available
+            console.error('Notification system not available, error was:', message);
+            alert(`Error: ${message}`);
+        }
+    }
+
+    // Retry loading data after an error
+    async retryLoadingData() {
+        console.debug('Retrying to load station data...');
+        try {
+            this.showLoadingState();
+            await this.loadStationData();
+            this.showSuccessState();
+        } catch (error) {
+            console.error('Retry failed:', error);
+            this.showErrorState(`Retry failed: ${error.message}`);
+        }
     }
 
     async logout() {
@@ -511,6 +689,9 @@ class SitesStationDashboard {
         }
     }
 }
+
+// Export class to global scope
+window.SitesStationDashboard = SitesStationDashboard;
 
 // Global instance
 window.sitesStationDashboard = new SitesStationDashboard();

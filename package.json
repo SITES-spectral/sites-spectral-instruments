@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "4.9.6",
-  "description": "SITES Spectral Stations & Instruments Management System v4.9.4 - Role-Based Login Redirects and Platform/Instrument Counts",
+  "version": "5.0.11",
+  "description": "SITES Spectral Stations & Instruments Management System v5.0.1 - CRITICAL FIX: Integrity Hash and CORS Issues",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
