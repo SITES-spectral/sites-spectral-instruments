@@ -723,9 +723,64 @@ class SitesStationDashboard {
     }
 
     getLatestPhenocamImage(instrumentId) {
-        // Placeholder for now - this would fetch the actual latest image URL
-        // TODO: Implement actual phenocam image fetching
-        return null;
+        // Find the instrument by ID to get its normalized name
+        const instrument = this.instruments.find(i => i.id == instrumentId);
+        if (!instrument || !instrument.normalized_name) {
+            return null;
+        }
+
+        // Construct image path based on station and instrument normalized name
+        const stationAcronym = this.stationData?.acronym?.toLowerCase();
+        if (!stationAcronym) {
+            return null;
+        }
+
+        // Image path: /images/stations/{station}/instruments/{normalized_name}.jpg
+        const imagePath = `/images/stations/${stationAcronym}/instruments/${instrument.normalized_name}.jpg`;
+
+        return imagePath;
+    }
+
+    getInstrumentImageUrl(instrument) {
+        // Helper function to get image URL for an instrument object
+        if (!instrument || !instrument.normalized_name) {
+            return null;
+        }
+
+        const stationAcronym = this.stationData?.acronym?.toLowerCase();
+        if (!stationAcronym) {
+            return null;
+        }
+
+        return `/images/stations/${stationAcronym}/instruments/${instrument.normalized_name}.jpg`;
+    }
+
+    getPhenocamImageHtml(instrument) {
+        const imageUrl = this.getInstrumentImageUrl(instrument);
+        if (!imageUrl) {
+            return `
+                <div class="phenocam-placeholder">
+                    <i class="fas fa-camera-retro"></i>
+                    <p>No phenocam image available</p>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="phenocam-image-wrapper">
+                <img
+                    src="${imageUrl}"
+                    alt="Phenocam view for ${this.escapeHtml(instrument.display_name || instrument.normalized_name)}"
+                    class="phenocam-image"
+                    onclick="this.classList.toggle('zoomed')"
+                    onerror="this.parentElement.innerHTML = '<div class=\\'phenocam-error\\'><i class=\\'fas fa-exclamation-triangle\\'></i><p>Image not found</p></div>'"
+                    onload="this.style.opacity = '1'"
+                />
+                <div class="phenocam-image-info">
+                    <small><i class="fas fa-info-circle"></i> Click image to zoom</small>
+                </div>
+            </div>
+        `;
     }
 
     viewInstrumentDetails(instrumentId) {
@@ -771,6 +826,13 @@ class SitesStationDashboard {
                             <div class="detail-item">
                                 <strong>Status:</strong> ${this.getStatusIcon(instrument.status)} ${instrument.status || 'N/A'}
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>Phenocam Image</h4>
+                        <div class="phenocam-image-container">
+                            ${this.getPhenocamImageHtml(instrument)}
                         </div>
                     </div>
 
