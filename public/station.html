@@ -21,10 +21,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.0">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.1">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.0">
+    <meta name="app-version" content="5.2.1">
     <meta name="build-date" content="2025-09-28">
 
     <style>
@@ -1714,16 +1714,16 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.0"></script>
-    <script src="/js/api.js?v=5.2.0"></script>
-    <script src="/js/components.js?v=5.2.0"></script>
+    <script src="/js/utils.js?v=5.2.1"></script>
+    <script src="/js/api.js?v=5.2.1"></script>
+    <script src="/js/components.js?v=5.2.1"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.0"></script>
-    <script src="/js/station-dashboard.js?v=5.2.0"></script>
-    <script src="/js/navigation.js?v=5.2.0"></script>
-    <script src="/js/export.js?v=5.2.0"></script>
+    <script src="/js/interactive-map.js?v=5.2.1"></script>
+    <script src="/js/station-dashboard.js?v=5.2.1"></script>
+    <script src="/js/navigation.js?v=5.2.1"></script>
+    <script src="/js/export.js?v=5.2.1"></script>
     <script>
         let currentUser = null;
         let stationData = null;
@@ -3306,7 +3306,18 @@
                 if (!response.ok) throw new Error('Failed to fetch instrument');
                 const instrument = await response.json();
 
-                showInstrumentEditModal(instrument);
+                // FIX #2: Close parent instrument details modal before opening edit modal
+                closeInstrumentModal();
+
+                // FIX #2: Also use SitesComponents modal management for better state tracking
+                if (window.sitesComponents) {
+                    window.sitesComponents.closeModal('instrument-modal');
+                }
+
+                // Small delay to ensure modal transition completes
+                setTimeout(() => {
+                    showInstrumentEditModal(instrument);
+                }, 100);
             } catch (error) {
                 console.error('Error loading instrument for edit:', error);
                 showNotification('Failed to load instrument data', 'error');
@@ -3465,6 +3476,21 @@
         function showInstrumentEditModal(instrument) {
             const editForm = document.getElementById('instrument-edit-form');
             const isAdmin = currentUser.role === 'admin';
+
+            // FIX #1: Add debugging and data validation
+            console.log('showInstrumentEditModal called with instrument:', instrument);
+
+            if (!instrument || !instrument.id) {
+                console.error('Invalid instrument data provided to showInstrumentEditModal');
+                showNotification('Invalid instrument data received', 'error');
+                return;
+            }
+
+            if (!editForm) {
+                console.error('instrument-edit-form element not found');
+                showNotification('Edit form container not found', 'error');
+                return;
+            }
 
             // Build comprehensive edit form matching detail modal structure and order
             editForm.innerHTML = `
@@ -3702,7 +3728,45 @@
                 await saveInstrumentChanges(instrument.id);
             });
 
+            // FIX #1: Show modal and validate form population
             document.getElementById('instrument-edit-modal').classList.add('show');
+
+            // Validate form population after DOM update
+            setTimeout(() => {
+                validateFormPopulation(instrument);
+            }, 50);
+        }
+
+        // FIX #1: Helper function to validate form field population
+        function validateFormPopulation(instrument) {
+            const testFields = [
+                { id: 'edit-instrument-name', value: instrument.display_name, label: 'Instrument Name' },
+                { id: 'edit-instrument-normalized', value: instrument.normalized_name, label: 'Normalized ID' },
+                { id: 'edit-instrument-status', value: instrument.status, label: 'Status' }
+            ];
+
+            let populationErrors = [];
+
+            testFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element) {
+                    populationErrors.push(`${field.label} field not found in DOM`);
+                } else if (field.value && !element.value) {
+                    populationErrors.push(`${field.label} not populated (expected: ${field.value})`);
+                    console.warn(`Form field validation failed for ${field.id}:`, {
+                        expected: field.value,
+                        actual: element.value,
+                        element: element
+                    });
+                }
+            });
+
+            if (populationErrors.length > 0) {
+                console.error('Form population validation failed:', populationErrors);
+                showNotification(`Form population issue detected: ${populationErrors[0]}`, 'warning');
+            } else {
+                console.log('Form population validation passed');
+            }
         }
 
         // Helper function to set up dropdown handlers for "Other" options

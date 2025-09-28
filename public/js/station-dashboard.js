@@ -834,8 +834,40 @@ class SitesStationDashboard {
 
         const instrument = this.instruments.find(i => i.id == instrumentId);
         if (instrument) {
-            this.showEditInstrumentModal(instrument);
+            // UX Enhancement: Smooth modal transition from view to edit
+            this.transitionToEditMode(instrument);
         }
+    }
+
+    /**
+     * UX-optimized transition from view modal to edit modal
+     * Provides smooth user flow with proper modal management
+     */
+    transitionToEditMode(instrument) {
+        // 1. Close details modal with smooth transition
+        const detailsModal = document.getElementById('instrument-details-modal');
+        if (detailsModal) {
+            detailsModal.style.transition = 'opacity 0.2s ease-out';
+            detailsModal.style.opacity = '0';
+
+            setTimeout(() => {
+                detailsModal.remove();
+            }, 200);
+        }
+
+        // 2. Brief pause for smooth transition
+        setTimeout(() => {
+            this.showEditInstrumentModal(instrument);
+
+            // 3. Focus on first form field for immediate editing
+            setTimeout(() => {
+                const firstInput = document.getElementById('edit-instrument-display-name');
+                if (firstInput) {
+                    firstInput.focus();
+                    firstInput.select(); // Pre-select text for easy editing
+                }
+            }, 100);
+        }, 150);
     }
 
     deleteInstrument(instrumentId, instrumentName) {
@@ -1014,8 +1046,10 @@ class SitesStationDashboard {
                 </div>
 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="save-instrument-btn">
                         <i class="fas fa-save"></i> Save Changes
                     </button>
                 </div>
@@ -1029,12 +1063,98 @@ class SitesStationDashboard {
             await this.saveInstrumentEdit(instrument.id);
         });
 
-        // Show the modal
+        // Add cancel button handler
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        cancelBtn.addEventListener('click', () => {
+            this.cancelInstrumentEdit(instrument);
+        });
+
+        // Show the modal with enhanced UX
         modal.classList.add('show');
+
+        // Add visual indicator that we're in edit mode
+        modal.setAttribute('data-mode', 'edit');
+
+        // Improve accessibility
+        modal.setAttribute('aria-label', `Edit instrument: ${instrument.display_name}`);
+
+        // Add escape key handler for this specific modal
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                this.cancelInstrumentEdit(instrument);
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
+    /**
+     * UX-optimized cancel behavior for instrument editing
+     * Provides clear path back to view mode with data preservation options
+     */
+    cancelInstrumentEdit(instrument) {
+        const modal = document.getElementById('instrument-edit-modal');
+        if (!modal) return;
+
+        // Check if form has been modified
+        const form = document.getElementById('edit-instrument-form');
+        const hasChanges = this.formHasChanges(form, instrument);
+
+        if (hasChanges) {
+            // Show confirmation dialog for unsaved changes
+            const message = 'You have unsaved changes. Would you like to return to the instrument details or discard changes?';
+
+            if (confirm(message)) {
+                // User wants to keep working
+                return;
+            }
+        }
+
+        // Close edit modal
+        modal.classList.remove('show');
+
+        // Option to return to details view
+        setTimeout(() => {
+            if (confirm('Would you like to return to the instrument details view?')) {
+                this.showInstrumentDetailsModal(instrument);
+            }
+        }, 300);
+    }
+
+    /**
+     * Check if form has been modified from original values
+     */
+    formHasChanges(form, originalData) {
+        if (!form || !originalData) return false;
+
+        const currentValues = {
+            display_name: document.getElementById('edit-instrument-display-name')?.value || '',
+            instrument_type: document.getElementById('edit-instrument-type')?.value || '',
+            status: document.getElementById('edit-instrument-status')?.value || '',
+            camera_brand: document.getElementById('edit-instrument-camera-brand')?.value || '',
+            camera_model: document.getElementById('edit-instrument-camera-model')?.value || '',
+            description: document.getElementById('edit-instrument-description')?.value || ''
+        };
+
+        // Compare key fields
+        return (
+            currentValues.display_name !== (originalData.display_name || '') ||
+            currentValues.instrument_type !== (originalData.instrument_type || '') ||
+            currentValues.status !== (originalData.status || '') ||
+            currentValues.camera_brand !== (originalData.camera_brand || '') ||
+            currentValues.camera_model !== (originalData.camera_model || '') ||
+            currentValues.description !== (originalData.description || '')
+        );
     }
 
     async saveInstrumentEdit(instrumentId) {
         try {
+            // Show loading state
+            const submitBtn = document.getElementById('save-instrument-btn');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
             const formData = {
                 display_name: document.getElementById('edit-instrument-display-name').value.trim(),
                 instrument_type: document.getElementById('edit-instrument-type').value,
@@ -1079,6 +1199,14 @@ class SitesStationDashboard {
 
                 // Reload data to show changes
                 await this.loadPlatformsAndInstruments();
+
+                // UX Enhancement: Return to updated details view
+                setTimeout(() => {
+                    const updatedInstrument = this.instruments.find(i => i.id == instrumentId);
+                    if (updatedInstrument) {
+                        this.showInstrumentDetailsModal(updatedInstrument);
+                    }
+                }, 500);
             } else {
                 throw new Error(response.error || 'Failed to update instrument');
             }
@@ -1088,7 +1216,7 @@ class SitesStationDashboard {
             showNotification(`Failed to update instrument: ${error.message}`, 'error');
 
             // Restore button state
-            const submitBtn = document.querySelector('#edit-instrument-form button[type="submit"]');
+            const submitBtn = document.getElementById('save-instrument-btn');
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';

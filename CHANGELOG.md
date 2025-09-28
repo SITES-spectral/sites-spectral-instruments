@@ -15,6 +15,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.1] - 2025-09-28
+
+### 🔧 PATCH: Fixed Edit Instrument Modal Data Loading and Modal Transition Issues
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Complete resolution of edit instrument modal data population and smooth modal transitions
+
+#### 🐛 **Bug Fixes**
+- **Edit Instrument Modal Data Loading**: Fixed field ID mismatches preventing database data from populating in edit forms
+  - Corrected `saveInstrumentEdit()` function to use proper field IDs
+  - Fixed form field referencing in `showEditInstrumentModal()`
+  - Ensured consistent field ID mapping across all instrument form fields
+- **Modal Transition Issues**: Enhanced modal hierarchy management for smooth UX
+  - Fixed modal not disappearing when transitioning to edit mode
+  - Implemented `transitionToEditMode()` with proper timing and opacity transitions
+  - Added smooth modal closing animation before opening edit modal
+  - Improved focus management and accessibility for modal transitions
+
+#### 🔧 **Technical Improvements**
+- **Form Field Consistency**: Aligned JavaScript form collection with dynamically generated field IDs
+- **Modal State Management**: Enhanced modal lifecycle management with proper cleanup
+- **UX Optimization**: Added loading states and smooth transitions for better user experience
+- **Field Validation**: Improved form data validation and error handling
+
+#### 🎯 **Team Resolution**
+- **Specialist Agent Coordination**: Successful collaborative troubleshooting by Pebble QA, UX Flow Designer, and Backend Architecture specialists
+- **Root Cause Analysis**: Identified and resolved field ID mapping inconsistencies
+- **Quality Assurance**: Comprehensive testing of modal workflows and data flow
+
 ## [5.2.0] - 2025-09-28
 
 ### 🚀 MAJOR: Enhanced CRUD Operations with Ecosystem Codes, Status Management, and API Enhancements
