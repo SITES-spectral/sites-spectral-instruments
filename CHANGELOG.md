@@ -15,6 +15,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.7] - 2025-09-28
+
+### 🎯 PATCH: Complete Legacy Name Display Implementation with Proper Labels
+
+**📅 Deployment Date**: 2025-09-28
+**🎯 Major Achievement**: Comprehensive resolution of legacy name display issues and proper field labeling across all card interfaces
+
+#### 🔍 **Critical Issues Resolved**
+- **Database Field Mismatch**: Fixed incorrect use of `legacy_name` field - corrected to use `legacy_acronym` for instruments
+- **Missing Instrument Legacy Names**: Added complete legacy name display in instrument cards using correct database field
+- **Platform Legacy Name Error**: Removed non-existent legacy name display for platforms (database has no such field)
+- **Missing Labels**: Added proper "platform:" and "instrument:" labels before normalized names
+
+#### ✨ **Legacy Name Display Implementation**
+- **Instrument Cards**: Now show 4-line layout with proper legacy name display:
+  1. Display name (bold)
+  2. "instrument:" + normalized name
+  3. "legacy name:" + legacy acronym (when available)
+  4. Status with icon
+- **Platform Cards**: Added "platform:" label before normalized names for clarity
+- **Instrument Details Modal**: Added "Legacy Name:" field with proper styling and formatting
+- **Conditional Display**: Legacy names only appear when data exists in database
+
+#### 🔧 **Technical Corrections**
+- **Database Field Names**: Updated from `legacy_name` to `legacy_acronym` for instruments (station-dashboard.js:717)
+- **Field ID Consistency**: Aligned JavaScript references with actual database schema
+- **Platform Card Structure**: Updated `createPlatformCard()` function with proper "platform:" labeling (station-dashboard.js:395-396)
+- **Instrument Card Structure**: Enhanced `createInstrumentCard()` function with complete legacy name support (station-dashboard.js:714-717)
+
+#### 🎯 **Agent Team Collaboration**
+- **Pebble QA Specialist**: Comprehensive diagnosis of missing legacy names and database field mismatches
+- **Root Cause Analysis**: Identified incorrect field names and missing display logic
+- **Complete Implementation**: Full legacy name display system with proper labeling and conditional rendering
+- **Quality Assurance**: Verified correct database field usage and proper display formatting
+
+#### 🎨 **User Experience Improvements**
+- **Clear Identification**: Users can now see both current normalized names and legacy identifiers
+- **Proper Labeling**: Consistent "platform:" and "instrument:" prefixes for technical clarity
+- **4-Line Instrument Layout**: Complete information display as originally requested
+- **Professional Styling**: Monospace fonts for technical identifiers, proper spacing and hierarchy
+
 ## [5.2.6] - 2025-09-28
 
 ### 🎨 PATCH: Final Platform Display Polish and Legacy Name Enhancement

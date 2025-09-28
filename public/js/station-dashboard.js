@@ -392,11 +392,11 @@ class SitesStationDashboard {
                 <div class="platform-header">
                     <h4>${this.escapeHtml(platform.display_name)}</h4>
                     <div class="platform-normalized-name">
+                        <span style="font-size: 0.75em; color: #6b7280; font-weight: 500;">platform:</span>
                         <span style="color: #059669; font-family: 'Courier New', monospace; font-weight: 600;">${platform.normalized_name || 'N/A'}</span>
                     </div>
                     <div class="platform-meta">
                         ${platform.ecosystem_code ? `<span class="ecosystem-badge">${platform.ecosystem_code}</span>` : ''}
-                        ${platform.legacy_name ? `<div class="legacy-name" style="font-size: 0.8em; color: #6b7280; margin-top: 4px;">legacy name: ${platform.legacy_name}</div>` : ''}
                     </div>
                 </div>
 
@@ -710,7 +710,11 @@ class SitesStationDashboard {
                     `}
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-weight: 600; font-size: 0.85em; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.escapeHtml(instrument.display_name || instrument.name || 'Unnamed')}</div>
-                        <div style="font-size: 0.75em; color: #6b7280; font-family: 'Courier New', monospace;">${instrument.normalized_name || 'No ID'}</div>
+                        <div style="font-size: 0.75em; color: #6b7280;">
+                            <span style="font-weight: 500;">instrument:</span>
+                            <span style="font-family: 'Courier New', monospace;">${instrument.normalized_name || 'No ID'}</span>
+                        </div>
+                        ${instrument.legacy_acronym ? `<div style="font-size: 0.7em; color: #6b7280; margin-top: 2px;"><span style="font-weight: 500;">legacy name:</span> <span style="font-family: 'Courier New', monospace;">${instrument.legacy_acronym}</span></div>` : ''}
                         ${instrument.status ? `<div style="font-size: 0.7em; margin-top: 2px;">${this.getStatusIcon(instrument.status)} ${instrument.status}</div>` : ''}
                     </div>
                 </div>
@@ -756,6 +760,11 @@ class SitesStationDashboard {
                             <div class="detail-item">
                                 <strong>Normalized Name:</strong> <code>${instrument.normalized_name || 'N/A'}</code>
                             </div>
+                            ${instrument.legacy_acronym ? `
+                            <div class="detail-item">
+                                <strong>Legacy Name:</strong> <code>${instrument.legacy_acronym}</code>
+                            </div>
+                            ` : ''}
                             <div class="detail-item">
                                 <strong>Type:</strong> ${this.escapeHtml(instrument.instrument_type || 'N/A')}
                             </div>
