@@ -341,7 +341,13 @@ async function createInstrument(user, request, env) {
 
   // For station users, ensure they can only create instruments for their own station's platforms
   if (user.role === 'station') {
-    if (user.station_normalized_name !== platform.station_normalized_name) {
+    // Check by both integer ID and normalized name for robust validation
+    const userCanAccessPlatform =
+      user.station_id === platform.station_id ||
+      user.station_normalized_name === platform.station_normalized_name;
+
+    if (!userCanAccessPlatform) {
+      console.log(`Station access denied: user station_id=${user.station_id}, platform station_id=${platform.station_id}, user station_name=${user.station_normalized_name}, platform station_name=${platform.station_normalized_name}`);
       return createForbiddenResponse();
     }
   }

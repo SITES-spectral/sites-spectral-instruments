@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.25",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.25 - HOTFIX: Fixed Platform Rendering Issue in dev-production Branch",
+  "version": "5.2.26",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.26 - FEATURE: Enhanced Station User Authentication and Permissions",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
