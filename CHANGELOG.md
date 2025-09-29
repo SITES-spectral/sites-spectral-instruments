@@ -11,9 +11,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced user management interface
 - Bulk data operations
 - Advanced analytics dashboard
-- ROI visualization overlays on phenocam images
 - Full phenocam image API integration
-- Missing camera specification fields implementation
+
+## [5.2.22] - 2025-09-29
+
+### 🎯 FEATURE: ROI Cards & Maintenance Log System - Complete Instrument Details Enhancement
+
+**📅 Deployment Date**: 2025-09-29
+**🎯 Major Achievement**: Comprehensive ROI (Region of Interest) visualization and maintenance history tracking for scientific instrument management
+
+#### 🔬 **ROI Cards System Implementation**
+- **Professional ROI Cards**: Streamlit-style interactive cards displaying each ROI with color indicators and metadata
+- **ROI Details Modal**: Complete technical specifications modal when clicking ROI cards, showing points, color, type, and auto-generation status
+- **ROI_00 Auto-Detection**: Special handling for auto-generated sky detection ROIs with distinct visual indicators
+- **Color-Coded Visualization**: RGB color indicators matching actual ROI data structure from stations.yaml
+- **Interactive Elements**: Click-to-expand functionality with professional modal overlays
+
+#### 📋 **Maintenance Log Timeline**
+- **Timeline Display**: Professional maintenance history with chronological timeline layout
+- **Type-Specific Styling**: Color-coded maintenance entries (maintenance, calibration, repair, inspection)
+- **Date Formatting**: Proper timestamp display with relative time indicators and professional formatting
+- **Entry Details**: Complete maintenance record display with technician information and detailed notes
+- **Empty State Handling**: Professional "No maintenance records" state for instruments without history
+
+#### 🛡️ **Scientific Data Integrity**
+- **Demo Data Warnings**: Clear "⚠️ DEMO DATA" warnings throughout mock data sections
+- **Scientific Integrity**: Prevents confusion about data availability status in research environment
+- **Visual Indicators**: Amber warning banners in mock data sections with warning icons
+- **Professional Messaging**: Clear distinction between demo data and actual instrument data
+
+#### 🎨 **Enhanced Camera Specifications**
+- **Complete Field Display**: Added missing camera specification fields (focus_type, white_balance, etc.)
+- **Professional Layout**: Enhanced camera specifications section with comprehensive technical details
+- **Maintenance Notes Integration**: Added maintenance_notes field to instrument editing forms
+- **Role-Based Editing**: Edit capabilities restricted to admin and station users only
+
+#### 🔧 **Technical Implementation**
+- **CSS Grid Layouts**: Responsive ROI cards grid with professional hover effects and animations
+- **Modal System**: Enhanced modal dialog system with ROI details and maintenance log overlays
+- **JavaScript ES6**: Modern class-based implementation with proper DOM manipulation
+- **Mobile Responsive**: ROI cards and maintenance timeline adapt to different screen sizes
+- **Permission Integration**: Role-based access control for editing capabilities
+
+#### 📱 **User Experience Enhancements**
+- **Streamlit-Style Cards**: Professional scientific interface design patterns
+- **Hover Effects**: Smooth transitions and interactive feedback on ROI cards
+- **Loading States**: Proper loading indicators during modal operations
+- **Error Handling**: Graceful fallback for missing ROI or maintenance data
+- **Accessibility**: Screen reader friendly with proper ARIA labels and semantic HTML
+
+#### 🚀 **API Integration Ready**
+- **Data Structure Compatibility**: ROI cards system matches existing stations.yaml structure
+- **Maintenance Log Framework**: Timeline system ready for real maintenance API integration
+- **Mock Data Framework**: Professional demo system with clear warnings for development
+- **Future-Proof Design**: Extensible architecture for additional ROI and maintenance features
 
 ## [5.2.19] - 2025-09-29
 
