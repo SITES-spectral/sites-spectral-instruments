@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.24",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.7 - PATCH: Complete Legacy Name Display Implementation with Proper Labels",
+  "version": "5.2.25",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.25 - HOTFIX: Fixed Platform Rendering Issue in dev-production Branch",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

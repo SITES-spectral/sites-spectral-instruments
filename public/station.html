@@ -21,10 +21,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.24">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.25">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.24">
+    <meta name="app-version" content="5.2.25">
     <meta name="build-date" content="2025-09-29">
 
     <style>
@@ -1714,16 +1714,16 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.24"></script>
-    <script src="/js/api.js?v=5.2.24"></script>
-    <script src="/js/components.js?v=5.2.24"></script>
+    <script src="/js/utils.js?v=5.2.25"></script>
+    <script src="/js/api.js?v=5.2.25"></script>
+    <script src="/js/components.js?v=5.2.25"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.24"></script>
-    <script src="/js/station-dashboard.js?v=5.2.24"></script>
-    <script src="/js/navigation.js?v=5.2.24"></script>
-    <script src="/js/export.js?v=5.2.24"></script>
+    <script src="/js/interactive-map.js?v=5.2.25"></script>
+    <script src="/js/station-dashboard.js?v=5.2.25"></script>
+    <script src="/js/navigation.js?v=5.2.25"></script>
+    <script src="/js/export.js?v=5.2.25"></script>
     <script>
         let currentUser = null;
         let stationData = null;
@@ -2009,85 +2009,19 @@
         }
 
         // Platform and Instrument Management Functions
-        async function loadPlatformsAndInstruments() {
-            console.log('Loading platforms and instruments...');
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) {
-                console.error('No token for loading platforms and instruments');
-                return;
-            }
-
-            const platformsGrid = document.getElementById('platforms-grid');
-
-            // Load image manifest for metadata display (async, don't wait)
-            console.log('Loading image manifest...');
-            loadImageManifest().catch(error => {
-                console.warn('Failed to load image manifest:', error);
-            });
-
-            try {
-                console.log('Fetching platforms for station:', stationData.acronym);
-                // Fetch platforms for this station
-                const platformsResponse = await fetch(`/api/platforms?station=${stationData.acronym}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                console.log('Platforms response status:', platformsResponse.status);
-
-                console.log('Fetching instruments for station:', stationData.acronym);
-                // Fetch instruments for this station
-                const instrumentsResponse = await fetch(`/api/instruments?station=${stationData.acronym}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                console.log('Instruments response status:', instrumentsResponse.status);
-
-                if (platformsResponse.ok && instrumentsResponse.ok) {
-                    const platformsData = await platformsResponse.json();
-                    const instrumentsData = await instrumentsResponse.json();
-
-                    console.log('Platforms data:', platformsData);
-                    console.log('Instruments data:', instrumentsData);
-
-                    const platforms = platformsData.platforms || [];
-                    const instruments = instrumentsData.instruments || [];
-
-                    console.log('Found', platforms.length, 'platforms and', instruments.length, 'instruments');
-
-                    // Group instruments by platform
-                    const instrumentsByPlatform = {};
-                    instruments.forEach(instrument => {
-                        if (!instrumentsByPlatform[instrument.platform_id]) {
-                            instrumentsByPlatform[instrument.platform_id] = [];
-                        }
-                        instrumentsByPlatform[instrument.platform_id].push(instrument);
-                    });
-
-                    console.log('Generating platform cards...');
-                    // Generate platform cards
-                    platformsGrid.innerHTML = platforms.map(platform =>
-                        createPlatformCard(platform, instrumentsByPlatform[platform.id] || [])
-                    ).join('');
-
-                    console.log('Platform cards generated successfully');
-
-                } else {
-                    console.error('Failed API calls - platforms:', platformsResponse.status, 'instruments:', instrumentsResponse.status);
-                    platformsGrid.innerHTML = '<div class="error-card">Failed to load platforms and instruments</div>';
-                }
-            } catch (error) {
-                console.error('Error loading platforms and instruments:', error);
-                platformsGrid.innerHTML = '<div class="error-card">Error loading platforms and instruments: ' + error.message + '</div>';
-            }
+        // loadPlatformsAndInstruments now handled by modular station-dashboard.js
+        async function loadPlatformsAndInstruments_DISABLED() {
+            // This embedded function has been disabled in favor of the modular version
+            // The global loadPlatformsAndInstruments() function is provided by station-dashboard.js
+            return;
         }
 
-        function createPlatformCard(platform, instruments) {
+        // createPlatformCard now handled by modular station-dashboard.js
+        function createPlatformCard_DISABLED(platform, instruments) {
+            // This embedded function has been disabled in favor of the modular version
+            // The modular version filters instruments internally and has different signature
+            return '';
+
             const statusClass = `status-${platform.status?.toLowerCase() || 'unknown'}`;
             const locationInfo = platform.location_code
                 ? `Location: ${platform.location_code}`
