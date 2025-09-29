@@ -723,8 +723,8 @@ class SitesStationDashboard {
                             <img src="${imageUrl}" alt="Phenocam image for ${this.escapeHtml(instrument.display_name)}" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                     ` : `
-                        <div style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1d5db;">
-                            <i class="fas fa-camera" style="color: #6b7280; font-size: 14px;"></i>
+                        <div class="phenocam-placeholder-icon" style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex !important; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1d5db;">
+                            <i class="fas fa-camera" style="color: #6b7280 !important; font-size: 14px !important;"></i>
                         </div>
                     `}
                     <div style="flex: 1; min-width: 0;">
