@@ -327,7 +327,7 @@ async function createInstrument(user, request, env) {
 
   // Verify platform exists and get platform/station info
   const platformQuery = `
-    SELECT p.id, p.normalized_name as platform_normalized_name, p.ecosystem_code,
+    SELECT p.id, p.normalized_name as platform_normalized_name,
            s.id as station_id, s.normalized_name as station_normalized_name
     FROM platforms p
     JOIN stations s ON p.station_id = s.id
@@ -400,7 +400,7 @@ async function createInstrument(user, request, env) {
     instrumentData.legacy_acronym || null,
     instrumentData.platform_id,
     instrumentData.instrument_type,
-    instrumentData.ecosystem_code || platform.ecosystem_code,
+    instrumentData.ecosystem_code || null,
     instrumentNumber,
     instrumentData.status || 'Active',
     instrumentData.deployment_date || null,
