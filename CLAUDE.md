@@ -2,12 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.23 - ENHANCED INSTRUMENT MARKER POPUPS & COMPREHENSIVE CSV EXPORT (2025-09-29)
+## Version 5.2.24 - EXPORT API HOTFIX & ENHANCED INSTRUMENT MARKER POPUPS (2025-09-29)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-29 ✅ DEPLOYED v5.2.23 🚀
-**🎯 Major Achievement:** Enhanced instrument marker popups with status indicators and fixed comprehensive CSV export functionality
+**📅 Deployment Date:** 2025-09-29 ✅ DEPLOYED v5.2.24 🚀
+**🎯 Major Achievement:** Fixed critical export API 500 error and enhanced instrument marker popups with status indicators
+
+### 🚨 Critical Export API Fix in v5.2.24
+- **Fixed 500 Server Error**: Resolved SQL column mismatch causing export API failures
+- **Database Schema Correction**: Removed invalid `platform_ecosystem_code` column reference from platforms table
+- **SQL Query Optimization**: Fixed JOIN query to only select existing database columns
+- **CSV Headers Alignment**: Synchronized CSV headers with actual available data fields
+- **Production Validation**: Confirmed export functionality working for all station users
+
+### 🔧 Technical Resolution in v5.2.24
+- **Root Cause**: SQL query attempted to select non-existent `p.ecosystem_code` from platforms table
+- **Solution**: Removed `platform_ecosystem_code` from SQL SELECT, CSV headers, and data processing
+- **Files Modified**: `/src/handlers/export.js` - corrected SQL query and CSV generation logic
+- **Testing**: Verified export API returns HTTP 200 with proper CSV data for station "ANS"
 
 ### 🗺️ Instrument Marker Popup Enhancements in v5.2.23
 - **Removed Location Code**: Eliminated confusing "Location: BL01" line from instrument popups
@@ -320,9 +333,9 @@ All 12 official ecosystem codes are supported:
 
 ### Deployment Information
 - **Production URL**: https://sites.jobelab.com
-- **Current Version**: 5.2.23
+- **Current Version**: 5.2.24
 - **Last Deployed**: 2025-09-29
-- **Status**: Fully operational with enhanced instrument popups and comprehensive CSV export
+- **Status**: Fully operational with fixed export API and enhanced instrument popups
 - **Environment**: Cloudflare Workers with D1 database
 
 ### Admin CRUD Operations Usage
