@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.17",
+  "version": "5.2.19",
   "description": "SITES Spectral Stations & Instruments Management System v5.2.7 - PATCH: Complete Legacy Name Display Implementation with Proper Labels",
   "main": "src/worker.js",
   "scripts": {

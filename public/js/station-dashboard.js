@@ -720,11 +720,11 @@ class SitesStationDashboard {
                 <div style="display: flex; align-items: center; gap: 8px;">
                     ${imageUrl ? `
                         <div style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex-shrink: 0; background: #f3f4f6;">
-                            <img src="${imageUrl}" alt="Phenocam image for ${this.escapeHtml(instrument.display_name)}" style="width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;" loading="lazy">
+                            <img src="${imageUrl}" alt="" style="width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'width: 100%; height: 100%; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center; border: 1px solid #d1d5db;\\'>  <i class=\\'fas fa-camera\\' style=\\'color: #6b7280; font-size: 14px;\\'></i></div>'">
                         </div>
                     ` : `
                         <div class="phenocam-placeholder-icon" style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex !important; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1d5db;">
-                            <i class="fas fa-camera" style="color: #6b7280 !important; font-size: 14px !important;"></i>
+                            <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="width: 28px; height: auto; opacity: 0.7;">
                         </div>
                     `}
                     <div style="flex: 1; min-width: 0;">
@@ -796,7 +796,7 @@ class SitesStationDashboard {
         if (!imageUrl) {
             return `
                 <div class="phenocam-placeholder">
-                    <i class="fas fa-camera-retro"></i>
+                    <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="width: 80px; height: auto; opacity: 0.6; margin-bottom: 8px;">
                     <p>No phenocam image available</p>
                 </div>
             `;

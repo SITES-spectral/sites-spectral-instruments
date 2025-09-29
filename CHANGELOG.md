@@ -15,6 +15,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.19] - 2025-09-29
+
+### 🚨 HOTFIX: Critical UI Fixes - Camera Icons & Broken Text Resolution
+
+**📅 Deployment Date**: 2025-09-29
+**🎯 Major Achievement**: Urgent fixes for UI issues identified in user screenshot - restored proper camera icons and eliminated broken text
+
+#### 🚨 **Critical Issues Resolved**
+- **Microscope Icon Error**: Fixed incorrect microscope icons that were inappropriately used for phenocam instruments
+- **Broken Text Display**: Eliminated truncated "Phen imag" text appearing when phenocam images failed to load
+- **Semantic Accuracy**: Restored proper camera icons for all phenocam-related functionality since phenocams ARE cameras
+
+#### 📷 **Camera Icon Restoration**
+- **Platform Cards**: Restored camera icons for instrument counts (was incorrectly showing microscope icons)
+- **Instrument Sections**: Fixed section headers to show camera icons instead of microscope icons
+- **Modal Headers**: Corrected instrument details modal headers to display camera icons
+- **Empty States**: Updated "No instruments" states to show appropriate camera icons
+
+#### 🔧 **Broken Text Fix**
+- **Image Error Handling**: Added comprehensive `onerror` handlers to replace broken images with clean camera icon placeholders
+- **Alt Text Removal**: Removed problematic alt text that was being truncated in small 40x40px containers
+- **Graceful Fallback**: Implemented professional camera icon placeholders for missing phenocam images
+- **Clean UI**: Eliminated unsightly broken text display when image files don't exist
+
+#### 🎯 **User Experience Improvements**
+- **Semantic Correctness**: All phenocam interfaces now properly represent that phenocams are cameras
+- **Professional Appearance**: Clean fallback icons instead of broken text or inappropriate symbols
+- **Consistent Iconography**: Unified camera icon usage across all phenocam-related features
+- **Error State Handling**: Graceful degradation when images are unavailable
+
+## [5.2.18] - 2025-09-29
+
+### 🎨 PATCH: SITES Logo Integration - Professional Placeholder System
+
+**📅 Deployment Date**: 2025-09-29
+**🎯 Major Achievement**: Replaced generic camera icons with SITES Spectral logo for missing phenocam images
+
+#### 🏢 **Brand Integration**
+- **Logo Placeholders**: Replaced camera icons with SITES Spectral logo for instruments without phenocam images
+- **Professional Appearance**: Clean branded placeholders in both instrument cards (28px) and details modal (80px)
+- **Visual Hierarchy**: Proper opacity and sizing for professional brand representation
+
 ## [5.2.17] - 2025-09-29
 
 ### 🛠️ PATCH: Thumbnail Generation Script - Automated Image Optimization Infrastructure
