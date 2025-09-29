@@ -716,15 +716,15 @@ class SitesStationDashboard {
         const imageUrl = this.getLatestPhenocamImage(instrument.id);
 
         return `
-            <div class="instrument-card-compact" onclick="sitesStationDashboard.viewInstrumentDetails('${instrument.id}')" style="cursor: pointer; margin: 4px 0; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; transition: background 0.2s;">
+            <div class="instrument-card-compact" style="margin: 4px 0; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; transition: all 0.2s;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     ${imageUrl ? `
                         <div style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
-                            <img src="${imageUrl}" alt="Latest image" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="${imageUrl}" alt="Phenocam image for ${this.escapeHtml(instrument.display_name)}" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                     ` : `
-                        <div style="width: 40px; height: 40px; border-radius: 4px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="fas fa-camera" style="color: #9ca3af;"></i>
+                        <div style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1d5db;">
+                            <i class="fas fa-camera" style="color: #6b7280; font-size: 14px;"></i>
                         </div>
                     `}
                     <div style="flex: 1; min-width: 0;">
@@ -735,6 +735,12 @@ class SitesStationDashboard {
                         </div>
                         ${instrument.legacy_acronym ? `<div style="font-size: 0.7em; color: #6b7280; margin-top: 2px;"><span style="font-weight: 500;">legacy name:</span> <span style="font-family: 'Courier New', monospace;">${instrument.legacy_acronym}</span></div>` : ''}
                         ${instrument.status ? `<div style="font-size: 0.7em; margin-top: 2px;">${this.getStatusIcon(instrument.status)} ${instrument.status}</div>` : ''}
+                    </div>
+                    <div style="flex-shrink: 0;">
+                        <button onclick="event.stopPropagation(); sitesStationDashboard.viewInstrumentDetails('${instrument.id}')" style="background: #059669; color: white; border: none; border-radius: 4px; padding: 6px 8px; font-size: 0.75em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+                            <i class="fas fa-eye" style="font-size: 10px;"></i>
+                            <span>Details</span>
+                        </button>
                     </div>
                 </div>
             </div>

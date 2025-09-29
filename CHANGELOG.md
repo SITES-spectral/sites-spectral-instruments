@@ -15,6 +15,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.13] - 2025-09-29
+
+### 🎨 PATCH: Enhanced Instrument Cards with Professional Camera Icons and Details Buttons
+
+**📅 Deployment Date**: 2025-09-29
+**🎯 Major Achievement**: Improved user experience with enhanced default camera icons and dedicated details buttons in instrument cards
+
+#### ✨ **Enhanced Default Camera Icons**
+- **Professional Gradient Background**: Upgraded from flat `#e5e7eb` to stylish `linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)`
+- **Improved Visual Design**: Added subtle border `1px solid #d1d5db` for better definition
+- **Enhanced Icon Styling**: Improved camera icon color (`#6b7280`) and size (`14px`) for better visibility
+- **Better Alt Text**: Added meaningful alt text for phenocam images with instrument names
+
+#### 🔘 **Dedicated Details Buttons**
+- **Professional Button Design**: Green-themed button matching SITES Spectral brand colors (`#059669`)
+- **Interactive States**: Hover effect transitions to darker green (`#047857`) for better UX
+- **Icon Integration**: Eye icon (`fas fa-eye`) with "Details" text for clear action indication
+- **Event Handling**: Proper `event.stopPropagation()` to prevent card click interference
+- **Responsive Layout**: Button positioned with `flex-shrink: 0` for consistent placement
+
+#### 🔧 **Technical Implementation**
+- **Card Layout Enhancement**: Improved flex layout with new button column
+- **Click Event Management**: Separated button clicks from card clicks for better interaction
+- **Styling Consistency**: Maintained SITES Spectral design system colors and typography
+- **Performance Optimization**: Inline styles for immediate rendering without CSS dependencies
+
+#### 🌟 **User Experience Improvements**
+- **Clear Call-to-Action**: Obvious "Details" button eliminates guesswork about how to view instrument details
+- **Visual Hierarchy**: Professional camera icons clearly indicate which instruments have photos vs placeholders
+- **Consistent Interface**: Uniform button styling across all instrument cards
+- **Accessibility**: Proper button semantics and hover states for better usability
+
+#### 🎯 **Production Ready Features**
+- **No Breaking Changes**: Maintains all existing functionality while adding new features
+- **Cross-Browser Compatibility**: Standard CSS properties and FontAwesome icons ensure wide support
+- **Mobile Responsive**: Button and icon sizing optimized for different screen sizes
+- **Error Resilience**: Fallback behaviors for missing images and instrument data
+
 ## [5.2.12] - 2025-09-29
 
 ### 🎯 PATCH: Simplified Assets Structure - Phenocam Images Finally Working!
