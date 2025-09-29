@@ -15,6 +15,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full phenocam image API integration
 - Missing camera specification fields implementation
 
+## [5.2.12] - 2025-09-29
+
+### 🎯 PATCH: Simplified Assets Structure - Phenocam Images Finally Working!
+
+**📅 Deployment Date**: 2025-09-29
+**🎯 Major Achievement**: Complete resolution of broken image links through simplified asset structure and proper path mapping
+
+#### 🚨 **Root Cause Analysis and Fix**
+- **Path Mapping Issue**: Fixed incorrect use of station `acronym` instead of `normalized_name` for folder paths
+- **Complex Structure Problem**: Eliminated complex nested `/images/stations/{station}/instruments/` structure
+- **Simplified Solution**: Implemented user-suggested `/assets/instruments/` flat structure for maximum simplicity
+
+#### ✨ **Simplified Asset Architecture**
+- **Single Assets Folder**: All 13 phenocam images moved to `/assets/instruments/` directory
+- **Direct Path Mapping**: Simple URL structure: `/assets/instruments/{normalized_name}.jpg`
+- **Eliminated Dependencies**: No more station name mapping or complex path construction required
+- **Production Verified**: All image URLs tested and confirmed working in production
+
+#### 🔧 **Technical Implementation**
+- **Path Construction**: Updated from complex station-based paths to simple `"/assets/instruments/${instrument.normalized_name}.jpg"`
+- **Station Mapping Fix**: Corrected `acronym` vs `normalized_name` confusion (SKC→skogaryd, LON→lonnstorp, etc.)
+- **Deployment Optimization**: Asset count increased from 57 to 72 files, confirming all images deployed
+- **Code Simplification**: Removed station dependency from image URL generation methods
+
+#### 🌟 **Production Success Verification**
+- **Working Examples Confirmed**:
+  - ✅ `/assets/instruments/SKC_CEM_FOR_PL02_PHE01.jpg` - Skogaryd phenocam loading
+  - ✅ `/assets/instruments/LON_AGR_PL01_PHE01.jpg` - Lönnstorp phenocam loading
+  - ✅ All 13 available phenocam images now display correctly
+- **User Experience**: Thumbnails in instrument cards and zoomable images in modals working perfectly
+- **Cross-Station Functionality**: Images working across all stations (SKC, LON, RBD, GRI, ANS)
+
+#### 🏗️ **Developer Experience Improvements**
+- **Maintenance Simplicity**: Adding new images now requires simple file drop in `/assets/instruments/`
+- **Debugging Ease**: Clear, predictable URL structure with no complex mappings
+- **Performance Gain**: Eliminated station lookup logic and path construction complexity
+- **Future-Proof**: Scalable structure ready for additional phenocam images
+
 ## [5.2.10] - 2025-09-28
 
 ### 🔧 PATCH: Intelligent Image Availability System with Manifest Integration

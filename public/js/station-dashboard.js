@@ -758,14 +758,8 @@ class SitesStationDashboard {
             }
         }
 
-        // Construct image path based on station and instrument normalized name
-        const stationAcronym = this.stationData?.acronym?.toLowerCase();
-        if (!stationAcronym) {
-            return null;
-        }
-
-        // Image path: /images/stations/{station}/instruments/{normalized_name}.jpg
-        const imagePath = `/images/stations/${stationAcronym}/instruments/${instrument.normalized_name}.jpg`;
+        // Simple image path using assets folder structure
+        const imagePath = `/assets/instruments/${instrument.normalized_name}.jpg`;
 
         return imagePath;
     }
@@ -786,12 +780,7 @@ class SitesStationDashboard {
             }
         }
 
-        const stationAcronym = this.stationData?.acronym?.toLowerCase();
-        if (!stationAcronym) {
-            return null;
-        }
-
-        return `/images/stations/${stationAcronym}/instruments/${instrument.normalized_name}.jpg`;
+        return `/assets/instruments/${instrument.normalized_name}.jpg`;
     }
 
     getPhenocamImageHtml(instrument) {
