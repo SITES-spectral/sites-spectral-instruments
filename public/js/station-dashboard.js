@@ -712,15 +712,15 @@ class SitesStationDashboard {
     }
 
     createInstrumentCard(instrument) {
-        // Get the latest image URL - this will be implemented to fetch actual phenocam images
-        const imageUrl = this.getLatestPhenocamImage(instrument.id);
+        // Get the latest image URL optimized for thumbnails
+        const imageUrl = this.getLatestPhenocamImage(instrument.id, true);
 
         return `
             <div class="instrument-card-compact" style="margin: 4px 0; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; transition: all 0.2s;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     ${imageUrl ? `
-                        <div style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
-                            <img src="${imageUrl}" alt="Phenocam image for ${this.escapeHtml(instrument.display_name)}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex-shrink: 0; background: #f3f4f6;">
+                            <img src="${imageUrl}" alt="Phenocam image for ${this.escapeHtml(instrument.display_name)}" style="width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;" loading="lazy">
                         </div>
                     ` : `
                         <div class="phenocam-placeholder-icon" style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex !important; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1d5db;">
@@ -747,7 +747,7 @@ class SitesStationDashboard {
         `;
     }
 
-    getLatestPhenocamImage(instrumentId) {
+    getLatestPhenocamImage(instrumentId, thumbnail = false) {
         // Find the instrument by ID to get its normalized name
         const instrument = this.instruments.find(i => i.id == instrumentId);
         if (!instrument || !instrument.normalized_name) {
@@ -764,10 +764,12 @@ class SitesStationDashboard {
             }
         }
 
-        // Simple image path using assets folder structure
-        const imagePath = `/assets/instruments/${instrument.normalized_name}.jpg`;
-
-        return imagePath;
+        // Return thumbnail or full image path
+        if (thumbnail) {
+            return `/assets/instruments/${instrument.normalized_name}.jpg`; // For now, same as full image but with CSS optimization
+        } else {
+            return `/assets/instruments/${instrument.normalized_name}.jpg`;
+        }
     }
 
     getInstrumentImageUrl(instrument) {
