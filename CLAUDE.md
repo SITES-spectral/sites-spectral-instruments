@@ -2,11 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.2 - ENHANCED PLATFORM AND INSTRUMENT CARD LABELS WITH LEGACY NAME DISPLAY (2025-09-28)
+## Version 5.2.23 - ENHANCED INSTRUMENT MARKER POPUPS & COMPREHENSIVE CSV EXPORT (2025-09-29)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-28 ✅ DEPLOYED v5.2.2 🚀
+**📅 Deployment Date:** 2025-09-29 ✅ DEPLOYED v5.2.23 🚀
+**🎯 Major Achievement:** Enhanced instrument marker popups with status indicators and fixed comprehensive CSV export functionality
+
+### 🗺️ Instrument Marker Popup Enhancements in v5.2.23
+- **Removed Location Code**: Eliminated confusing "Location: BL01" line from instrument popups
+- **Professional Labeling**: Added clear "Instrument:" label before normalized names for better UX
+- **Legacy Name Support**: Added "Legacy Name:" display when legacy_acronym data exists
+- **Status Integration**: Added color-coded status badges with professional styling:
+  - **Active**: Green background with dark green text
+  - **Inactive**: Red background with dark red text
+  - **Maintenance**: Orange background with dark orange text
+  - **Testing**: Yellow background with dark yellow text
+  - **Decommissioned**: Gray background with dark gray text
+- **Visual Consistency**: Orange monospace font for instrument names matching marker colors
+- **Improved Information Hierarchy**: Flows from identifier → legacy name → status for optimal UX
+
+### 📊 Comprehensive CSV Export System in v5.2.23
+- **Fixed Export Functionality**: Resolved export button not working due to JSON vs CSV format mismatch
+- **Complete Data Export**: CSV now includes 58 data fields across all entities:
+  - **Station Fields** (9): name, acronym, normalized_name, status, coordinates, elevation, description
+  - **Platform Fields** (13): comprehensive platform metadata including ecosystem codes and deployment info
+  - **Instrument Fields** (25): complete instrument specifications, camera details, and maintenance notes
+  - **ROI Fields** (11): region of interest data including color coding and generation metadata
+- **Professional CSV Format**: Proper escaping, headers, and metadata comments
+- **Intelligent Deduplication**: Prevents duplicate rows from complex JOIN operations
+- **Dynamic Filenames**: Station-specific filenames with date stamps (e.g., `SVB_export_2025-09-29.csv`)
+- **Enhanced Security**: Maintained role-based access control and authentication requirements
+
+### 🔧 Technical Improvements in v5.2.23
+- **Map Popup Refactoring**: Updated `createInstrumentPopup()` method in `/public/js/interactive-map.js`
+- **Export Handler Rewrite**: Complete overhaul of `/src/handlers/export.js` with proper CSV generation
+- **CSV Processing Functions**: Added `generateStationCSV()` and `escapeCSVField()` utilities
+- **Content-Type Correction**: Fixed response headers to serve proper `text/csv` format
+- **Error Handling Enhancement**: Comprehensive error messaging for authentication and data issues
+
+## Previous Version: 5.2.2 - ENHANCED PLATFORM AND INSTRUMENT CARD LABELS WITH LEGACY NAME DISPLAY (2025-09-28)
+**📅 Previous Version**
 **🎯 Major Achievement:** Improved card layout clarity with descriptive labels and legacy name information display
 
 ### 🎨 Card Layout Enhancements in v5.2.2
@@ -284,9 +320,9 @@ All 12 official ecosystem codes are supported:
 
 ### Deployment Information
 - **Production URL**: https://sites.jobelab.com
-- **Current Version**: 4.9.1
-- **Last Deployed**: 2025-09-26
-- **Status**: Fully operational with admin dashboard and complete CRUD functionality
+- **Current Version**: 5.2.23
+- **Last Deployed**: 2025-09-29
+- **Status**: Fully operational with enhanced instrument popups and comprehensive CSV export
 - **Environment**: Cloudflare Workers with D1 database
 
 ### Admin CRUD Operations Usage

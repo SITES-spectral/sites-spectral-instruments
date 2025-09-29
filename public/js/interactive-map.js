@@ -224,14 +224,41 @@ class SitesInteractiveMap {
 
     // Create instrument popup content
     createInstrumentPopup(instrumentData) {
+        // Use normalized_name as the primary identifier
+        const instrumentName = instrumentData.normalized_name || instrumentData.name || 'Instrument';
+        const legacyName = instrumentData.legacy_acronym || '';
+        const status = instrumentData.status || '';
+
+        // Create status badge with appropriate styling
+        const getStatusBadge = (status) => {
+            if (!status) return '';
+            const statusLower = status.toLowerCase();
+
+            // Define status colors matching the existing CSS
+            let badgeStyle = 'display: inline-block; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;';
+
+            if (statusLower === 'active') {
+                badgeStyle += ' background: rgba(34, 197, 94, 0.1); color: #16a34a;';
+            } else if (statusLower === 'inactive') {
+                badgeStyle += ' background: rgba(239, 68, 68, 0.1); color: #dc2626;';
+            } else if (statusLower === 'maintenance') {
+                badgeStyle += ' background: rgba(249, 115, 22, 0.1); color: #ea580c;';
+            } else if (statusLower === 'testing') {
+                badgeStyle += ' background: rgba(245, 158, 11, 0.1); color: #d97706;';
+            } else if (statusLower === 'decommissioned') {
+                badgeStyle += ' background: rgba(55, 65, 81, 0.1); color: #374151;';
+            } else {
+                badgeStyle += ' background: rgba(55, 65, 81, 0.1); color: #374151;';
+            }
+
+            return `<span style="${badgeStyle}">${status}</span>`;
+        };
+
         return `
             <div class="map-popup instrument-popup">
-                <h6>${instrumentData.name || 'Instrument'}</h6>
-                ${instrumentData.type ? `<p><strong>Type:</strong> ${instrumentData.type}</p>` : ''}
-                ${instrumentData.serial_number ? `<p><strong>Serial:</strong> ${instrumentData.serial_number}</p>` : ''}
-                ${instrumentData.status ? `<p><strong>Status:</strong>
-                    <span class="status-badge status-${instrumentData.status.toLowerCase()}">${instrumentData.status}</span>
-                </p>` : ''}
+                <p><strong>Instrument:</strong> <span style="color: #f59e0b; font-family: 'Courier New', monospace; font-weight: 600;">${instrumentName}</span></p>
+                ${legacyName ? `<p><strong>Legacy Name:</strong> ${legacyName}</p>` : ''}
+                ${status ? `<p><strong>Status:</strong> ${getStatusBadge(status)}</p>` : ''}
             </div>
         `;
     }

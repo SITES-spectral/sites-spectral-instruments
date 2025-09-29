@@ -151,148 +151,16 @@ export async function handleStationExport(stationId, user, env) {
       return createNotFoundResponse();
     }
 
-    // Process the flat data into a hierarchical structure
-    const exportData = {
-      station: {},
-      platforms: [],
-      export_metadata: {
-        exported_at: new Date().toISOString(),
-        exported_by: user.username,
-        export_format: 'hierarchical_json',
-        sites_spectral_version: '5.0.0',
-        total_platforms: 0,
-        total_instruments: 0,
-        total_rois: 0
-      }
-    };
-
-    const platformsMap = new Map();
-    const instrumentsMap = new Map();
-
-    rows.forEach(row => {
-      // Station data (same for all rows)
-      if (!exportData.station.station_name) {
-        exportData.station = {
-          station_name: row.station_name,
-          station_acronym: row.station_acronym,
-          station_normalized_name: row.station_normalized_name,
-          station_status: row.station_status,
-          station_country: row.station_country,
-          station_latitude: row.station_latitude,
-          station_longitude: row.station_longitude,
-          station_elevation: row.station_elevation,
-          station_description: row.station_description
-        };
-      }
-
-      // Platform data
-      if (row.platform_id && !platformsMap.has(row.platform_id)) {
-        const platform = {
-          platform_id: row.platform_id,
-          platform_normalized_name: row.platform_normalized_name,
-          platform_name: row.platform_name,
-          platform_location_code: row.platform_location_code,
-          platform_ecosystem_code: row.platform_ecosystem_code,
-          platform_mounting_structure: row.platform_mounting_structure,
-          platform_height: row.platform_height,
-          platform_status: row.platform_status,
-          platform_latitude: row.platform_latitude,
-          platform_longitude: row.platform_longitude,
-          platform_deployment_date: row.platform_deployment_date,
-          platform_description: row.platform_description,
-          platform_operation_programs: row.platform_operation_programs,
-          instruments: []
-        };
-        platformsMap.set(row.platform_id, platform);
-        exportData.platforms.push(platform);
-      }
-
-      // Instrument data
-      if (row.instrument_id && !instrumentsMap.has(row.instrument_id)) {
-        const instrument = {
-          instrument_id: row.instrument_id,
-          instrument_normalized_name: row.instrument_normalized_name,
-          instrument_name: row.instrument_name,
-          instrument_legacy_acronym: row.instrument_legacy_acronym,
-          instrument_type: row.instrument_type,
-          instrument_ecosystem_code: row.instrument_ecosystem_code,
-          instrument_number: row.instrument_number,
-          instrument_status: row.instrument_status,
-          instrument_deployment_date: row.instrument_deployment_date,
-          instrument_latitude: row.instrument_latitude,
-          instrument_longitude: row.instrument_longitude,
-          instrument_viewing_direction: row.instrument_viewing_direction,
-          instrument_azimuth: row.instrument_azimuth,
-          instrument_nadir_degrees: row.instrument_nadir_degrees,
-          instrument_camera_brand: row.instrument_camera_brand,
-          instrument_camera_model: row.instrument_camera_model,
-          instrument_camera_resolution: row.instrument_camera_resolution,
-          instrument_camera_serial: row.instrument_camera_serial,
-          instrument_first_year: row.instrument_first_year,
-          instrument_last_year: row.instrument_last_year,
-          instrument_measurement_status: row.instrument_measurement_status,
-          instrument_height: row.instrument_height,
-          instrument_description: row.instrument_description,
-          instrument_installation_notes: row.instrument_installation_notes,
-          instrument_maintenance_notes: row.instrument_maintenance_notes,
-          rois: []
-        };
-        instrumentsMap.set(row.instrument_id, instrument);
-
-        // Add instrument to its platform
-        const platform = platformsMap.get(row.platform_id);
-        if (platform) {
-          platform.instruments.push(instrument);
-        }
-      }
-
-      // ROI data
-      if (row.roi_id) {
-        const roi = {
-          roi_id: row.roi_id,
-          roi_name: row.roi_name,
-          roi_description: row.roi_description,
-          roi_alpha: row.roi_alpha,
-          roi_auto_generated: row.roi_auto_generated,
-          roi_color_r: row.roi_color_r,
-          roi_color_g: row.roi_color_g,
-          roi_color_b: row.roi_color_b,
-          roi_thickness: row.roi_thickness,
-          roi_generated_date: row.roi_generated_date,
-          roi_source_image: row.roi_source_image,
-          roi_points: null
-        };
-
-        // Parse points JSON if it exists
-        if (row.roi_points_json) {
-          try {
-            roi.roi_points = JSON.parse(row.roi_points_json);
-          } catch (e) {
-            console.warn('Failed to parse ROI points JSON:', e);
-            roi.roi_points = [];
-          }
-        }
-
-        // Add ROI to its instrument
-        const instrument = instrumentsMap.get(row.instrument_id);
-        if (instrument) {
-          instrument.rois.push(roi);
-        }
-      }
-    });
-
-    // Update metadata counts
-    exportData.export_metadata.total_platforms = exportData.platforms.length;
-    exportData.export_metadata.total_instruments = Array.from(instrumentsMap.keys()).length;
-    exportData.export_metadata.total_rois = rows.filter(row => row.roi_id).length;
+    // Generate CSV content
+    const csvContent = generateStationCSV(rows, station, user);
 
     // Generate filename
-    const filename = `${station.acronym || station.normalized_name}_export_${new Date().toISOString().split('T')[0]}.json`;
+    const filename = `${station.acronym || station.normalized_name}_export_${new Date().toISOString().split('T')[0]}.csv`;
 
-    return new Response(JSON.stringify(exportData, null, 2), {
+    return new Response(csvContent, {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/csv',
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Cache-Control': 'no-cache'
       }
@@ -302,6 +170,157 @@ export async function handleStationExport(stationId, user, env) {
     console.error('Station export error:', error);
     return createErrorResponse(`Failed to export station data: ${error.message}`, 500);
   }
+}
+
+/**
+ * Generate CSV content from station data
+ * @param {Array} rows - Database rows containing station, platform, instrument, and ROI data
+ * @param {Object} station - Station data
+ * @param {Object} user - User data
+ * @returns {string} CSV content
+ */
+function generateStationCSV(rows, station, user) {
+  // CSV headers with all available fields
+  const headers = [
+    // Station fields
+    'station_name', 'station_acronym', 'station_normalized_name', 'station_status',
+    'station_country', 'station_latitude', 'station_longitude', 'station_elevation', 'station_description',
+
+    // Platform fields
+    'platform_id', 'platform_normalized_name', 'platform_name', 'platform_location_code',
+    'platform_ecosystem_code', 'platform_mounting_structure', 'platform_height', 'platform_status',
+    'platform_latitude', 'platform_longitude', 'platform_deployment_date', 'platform_description', 'platform_operation_programs',
+
+    // Instrument fields
+    'instrument_id', 'instrument_normalized_name', 'instrument_name', 'instrument_legacy_acronym',
+    'instrument_type', 'instrument_ecosystem_code', 'instrument_number', 'instrument_status',
+    'instrument_deployment_date', 'instrument_latitude', 'instrument_longitude', 'instrument_viewing_direction',
+    'instrument_azimuth', 'instrument_nadir_degrees', 'instrument_camera_brand', 'instrument_camera_model',
+    'instrument_camera_resolution', 'instrument_camera_serial', 'instrument_first_year', 'instrument_last_year',
+    'instrument_measurement_status', 'instrument_height', 'instrument_description', 'instrument_installation_notes', 'instrument_maintenance_notes',
+
+    // ROI fields
+    'roi_id', 'roi_name', 'roi_description', 'roi_alpha', 'roi_auto_generated',
+    'roi_color_r', 'roi_color_g', 'roi_color_b', 'roi_thickness', 'roi_generated_date', 'roi_source_image'
+  ];
+
+  // Start CSV with headers
+  let csvContent = headers.join(',') + '\n';
+
+  // Add metadata header row
+  csvContent += `# Station Export Data for ${station.display_name || station.acronym}\n`;
+  csvContent += `# Exported by: ${user.username}\n`;
+  csvContent += `# Export Date: ${new Date().toISOString()}\n`;
+  csvContent += `# SITES Spectral Version: 5.2.22\n`;
+  csvContent += `# Total Records: ${rows.length}\n`;
+  csvContent += '\n';
+
+  // Process data rows
+  const processedRows = new Set();
+
+  for (const row of rows) {
+    // Create a unique key for deduplication (platform + instrument + roi combination)
+    const rowKey = `${row.platform_id || 'no-platform'}_${row.instrument_id || 'no-instrument'}_${row.roi_id || 'no-roi'}`;
+
+    // Skip if we've already processed this exact combination
+    if (processedRows.has(rowKey)) {
+      continue;
+    }
+    processedRows.add(rowKey);
+
+    // Build the row data
+    const rowData = [
+      // Station data
+      escapeCSVField(row.station_name || ''),
+      escapeCSVField(row.station_acronym || ''),
+      escapeCSVField(row.station_normalized_name || ''),
+      escapeCSVField(row.station_status || ''),
+      escapeCSVField(row.station_country || ''),
+      row.station_latitude || '',
+      row.station_longitude || '',
+      row.station_elevation || '',
+      escapeCSVField(row.station_description || ''),
+
+      // Platform data
+      row.platform_id || '',
+      escapeCSVField(row.platform_normalized_name || ''),
+      escapeCSVField(row.platform_name || ''),
+      escapeCSVField(row.platform_location_code || ''),
+      escapeCSVField(row.platform_ecosystem_code || ''),
+      escapeCSVField(row.platform_mounting_structure || ''),
+      row.platform_height || '',
+      escapeCSVField(row.platform_status || ''),
+      row.platform_latitude || '',
+      row.platform_longitude || '',
+      escapeCSVField(row.platform_deployment_date || ''),
+      escapeCSVField(row.platform_description || ''),
+      escapeCSVField(row.platform_operation_programs || ''),
+
+      // Instrument data
+      row.instrument_id || '',
+      escapeCSVField(row.instrument_normalized_name || ''),
+      escapeCSVField(row.instrument_name || ''),
+      escapeCSVField(row.instrument_legacy_acronym || ''),
+      escapeCSVField(row.instrument_type || ''),
+      escapeCSVField(row.instrument_ecosystem_code || ''),
+      row.instrument_number || '',
+      escapeCSVField(row.instrument_status || ''),
+      escapeCSVField(row.instrument_deployment_date || ''),
+      row.instrument_latitude || '',
+      row.instrument_longitude || '',
+      escapeCSVField(row.instrument_viewing_direction || ''),
+      row.instrument_azimuth || '',
+      row.instrument_nadir_degrees || '',
+      escapeCSVField(row.instrument_camera_brand || ''),
+      escapeCSVField(row.instrument_camera_model || ''),
+      escapeCSVField(row.instrument_camera_resolution || ''),
+      escapeCSVField(row.instrument_camera_serial || ''),
+      row.instrument_first_year || '',
+      row.instrument_last_year || '',
+      escapeCSVField(row.instrument_measurement_status || ''),
+      row.instrument_height || '',
+      escapeCSVField(row.instrument_description || ''),
+      escapeCSVField(row.instrument_installation_notes || ''),
+      escapeCSVField(row.instrument_maintenance_notes || ''),
+
+      // ROI data
+      row.roi_id || '',
+      escapeCSVField(row.roi_name || ''),
+      escapeCSVField(row.roi_description || ''),
+      row.roi_alpha || '',
+      row.roi_auto_generated || '',
+      row.roi_color_r || '',
+      row.roi_color_g || '',
+      row.roi_color_b || '',
+      row.roi_thickness || '',
+      escapeCSVField(row.roi_generated_date || ''),
+      escapeCSVField(row.roi_source_image || '')
+    ];
+
+    csvContent += rowData.join(',') + '\n';
+  }
+
+  return csvContent;
+}
+
+/**
+ * Escape CSV field values to handle commas, quotes, and newlines
+ * @param {string} field - Field value to escape
+ * @returns {string} Escaped field value
+ */
+function escapeCSVField(field) {
+  if (field === null || field === undefined) {
+    return '';
+  }
+
+  const stringField = String(field);
+
+  // If field contains comma, quote, or newline, wrap in quotes and escape internal quotes
+  if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n') || stringField.includes('\r')) {
+    return '"' + stringField.replace(/"/g, '""') + '"';
+  }
+
+  return stringField;
 }
 
 /**
