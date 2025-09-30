@@ -2,11 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.31 - COMPLETE STATION USER INSTRUMENT MANAGEMENT & SPECTRAL INSTRUMENT TYPES (2025-09-30)
+## Version 5.2.32 - CRITICAL FIX: SQL Column/Value Mismatch in Instrument Creation (2025-09-30)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-30 ✅ DEPLOYED v5.2.31 🚀
+**📅 Deployment Date:** 2025-09-30 ✅ DEPLOYED v5.2.32 🚨
+**🎯 Major Achievement:** Fixed critical database INSERT error blocking all instrument creation
+
+### 🚨 Critical Database Bug Fixed in v5.2.32
+- **Error**: `D1_ERROR: 45 values for 46 columns: SQLITE_ERROR`
+- **Impact**: ALL instrument creation attempts failed with HTTP 500 error despite passing authentication
+- **Root Cause**: INSERT statement declared 46 columns but only provided 45 placeholders (`?`)
+- **Location**: `/src/handlers/instruments.js` line 415
+- **Solution**: Added missing placeholder to match 46 columns with 46 values
+- **Verification**: Confirmed working in production - instruments now create successfully
+
+### 🔧 Technical Fix in v5.2.32
+**File Modified:** `/src/handlers/instruments.js`
+
+**Line 415 - Added Missing Placeholder:**
+```javascript
+// Before: 45 placeholders for 46 columns
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+// After: 46 placeholders for 46 columns ✅
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+```
+
+**Database Schema:**
+- Total columns: 47 (including auto-increment `id`)
+- INSERT columns: 46 (excluding `id`)
+- VALUES array: 46 values (lines 419-464)
+- Placeholders: 46 `?` (now matches)
+
+### 📋 Debugging Process in v5.2.32
+1. **Permission Validation**: ✅ PASSED - Station user access granted
+2. **Type Coercion Fix**: ✅ IMPLEMENTED - Integer comparison with `parseInt()`
+3. **Database Query**: ❌ FAILED - Column/value mismatch detected
+4. **Column Count Analysis**: Identified 46 columns vs 45 placeholders
+5. **Placeholder Fix**: Added missing `?` to line 415
+6. **Deployment**: Verified working in production
+
+## Previous Version: 5.2.31 - COMPLETE STATION USER INSTRUMENT MANAGEMENT & SPECTRAL INSTRUMENT TYPES (2025-09-30)
+**📅 Previous Version**
 **🎯 Major Achievement:** Complete station user CRUD workflow with fixed instrument creation and SITES Spectral-specific instrument types
 
 ### 🎯 Complete Features in v5.2.31

@@ -341,15 +341,36 @@ async function createInstrument(user, request, env) {
 
   // For station users, ensure they can only create instruments for their own station's platforms
   if (user.role === 'station') {
-    // Check by both integer ID and normalized name for robust validation
+    // Type-safe comparisons with multiple fallback checks
+    const userStationId = parseInt(user.station_id, 10);
+    const platformStationId = parseInt(platform.station_id, 10);
+
+    console.log('🔐 Station Access Validation:', {
+      user_role: user.role,
+      user_station_id: user.station_id,
+      user_station_id_type: typeof user.station_id,
+      user_station_id_parsed: userStationId,
+      user_station_normalized_name: user.station_normalized_name,
+      platform_station_id: platform.station_id,
+      platform_station_id_type: typeof platform.station_id,
+      platform_station_id_parsed: platformStationId,
+      platform_station_normalized_name: platform.station_normalized_name,
+      integer_match: userStationId === platformStationId,
+      name_match: user.station_normalized_name === platform.station_normalized_name
+    });
+
     const userCanAccessPlatform =
-      user.station_id === platform.station_id ||
-      user.station_normalized_name === platform.station_normalized_name;
+      // Integer ID comparison (type-safe)
+      (userStationId === platformStationId) ||
+      // Normalized name comparison (case-insensitive)
+      (user.station_normalized_name?.toLowerCase() === platform.station_normalized_name?.toLowerCase());
 
     if (!userCanAccessPlatform) {
-      console.log(`Station access denied: user station_id=${user.station_id}, platform station_id=${platform.station_id}, user station_name=${user.station_normalized_name}, platform station_name=${platform.station_normalized_name}`);
+      console.log(`❌ Station access DENIED`);
       return createForbiddenResponse();
     }
+
+    console.log(`✅ Station access GRANTED`);
   }
 
   // Generate normalized name and instrument number if not provided (admin can override)
@@ -391,7 +412,7 @@ async function createInstrument(user, request, env) {
       first_measurement_year, last_measurement_year, measurement_status,
       instrument_height_m, description, installation_notes, maintenance_notes,
       created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [

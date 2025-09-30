@@ -21,10 +21,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.31">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.32">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.31">
+    <meta name="app-version" content="5.2.32">
     <meta name="build-date" content="2025-09-30">
 
     <style>
@@ -1714,16 +1714,16 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.31"></script>
-    <script src="/js/api.js?v=5.2.31"></script>
-    <script src="/js/components.js?v=5.2.31"></script>
+    <script src="/js/utils.js?v=5.2.32"></script>
+    <script src="/js/api.js?v=5.2.32"></script>
+    <script src="/js/components.js?v=5.2.32"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.31"></script>
-    <script src="/js/station-dashboard.js?v=5.2.31"></script>
-    <script src="/js/navigation.js?v=5.2.31"></script>
-    <script src="/js/export.js?v=5.2.31"></script>
+    <script src="/js/interactive-map.js?v=5.2.32"></script>
+    <script src="/js/station-dashboard.js?v=5.2.32"></script>
+    <script src="/js/navigation.js?v=5.2.32"></script>
+    <script src="/js/export.js?v=5.2.32"></script>
     <script src="/js/modal-system.js?v=5.2.26"></script>
     <script src="/js/admin-modals.js?v=5.2.26"></script>
     <script>
@@ -3936,8 +3936,15 @@
                     body: JSON.stringify(instrumentData)
                 });
 
+                console.log('📤 Instrument creation request:', {
+                    url: '/api/instruments',
+                    method: 'POST',
+                    data: instrumentData
+                });
+
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('✅ Instrument created successfully:', result);
                     showNotification(`Instrument ${result.normalized_name} created successfully!`);
                     closeCreateInstrumentModal();
 
@@ -3945,11 +3952,16 @@
                     await loadPlatformsAndInstruments();
                     await refreshOpenModals();
                 } else {
+                    console.error('❌ Instrument creation failed:', {
+                        status: response.status,
+                        statusText: response.statusText
+                    });
                     const error = await response.json().catch(() => ({}));
-                    throw new Error(error.message || 'Failed to create instrument');
+                    console.error('❌ Error response:', error);
+                    throw new Error(error.message || error.error || `Failed to create instrument (${response.status})`);
                 }
             } catch (error) {
-                console.error('Error creating instrument:', error);
+                console.error('💥 Exception during instrument creation:', error);
                 showNotification(error.message || 'Failed to create instrument', 'error');
             } finally {
                 saveBtn.disabled = false;
