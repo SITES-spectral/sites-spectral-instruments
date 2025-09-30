@@ -4,6 +4,7 @@
 class SitesStationDashboard {
     constructor() {
         this.currentUser = null;
+        this.canEdit = false; // Will be set after authentication in verifyAccess()
         this.stationData = null;
         this.stationMap = null;
         this.platforms = [];
@@ -78,6 +79,14 @@ class SitesStationDashboard {
         }
 
         console.debug('Access verification passed');
+
+        // Set canEdit property based on user role (admin and station users can edit)
+        this.canEdit = this.currentUser && (
+            this.currentUser.role === 'admin' ||
+            this.currentUser.role === 'station'
+        );
+        console.debug('User edit permission:', this.canEdit);
+
         this.updateUserDisplay();
     }
 
@@ -450,6 +459,12 @@ class SitesStationDashboard {
                         <i class="fas fa-eye"></i> View Details
                     </button>
 
+                    ${this.canEdit ? `
+                        <button class="btn btn-success btn-sm" onclick="sitesStationDashboard.showCreateInstrumentModal(${platform.id})" title="Add New Instrument to this Platform">
+                            <i class="fas fa-plus"></i> <i class="fas fa-camera"></i> Instrument
+                        </button>
+                    ` : ''}
+
                     ${this.currentUser?.role === 'admin' ? `
                         <button class="btn btn-secondary btn-sm" onclick="sitesStationDashboard.editPlatform('${platform.id}')">
                             <i class="fas fa-edit"></i> Edit
@@ -496,6 +511,22 @@ class SitesStationDashboard {
         if (modal) {
             showModal('create-platform-modal');
             this.resetCreatePlatformForm();
+        }
+    }
+
+    // Instrument management
+    showCreateInstrumentModal(platformId) {
+        if (!this.canEdit) {
+            showNotification('Edit privileges required', 'error');
+            return;
+        }
+
+        // Call the global addInstrument function from station.html
+        if (typeof addInstrument === 'function') {
+            addInstrument(platformId);
+        } else {
+            console.error('addInstrument function not found');
+            showNotification('Error: Instrument creation not available', 'error');
         }
     }
 
@@ -676,6 +707,103 @@ class SitesStationDashboard {
                 <div class="detail-field">
                     <span class="detail-label">Description</span>
                     <span class="detail-value">${platform.description || 'No description provided'}</span>
+                </div>
+            </div>
+            ${this.renderInstrumentsSection(platform.id, canEdit)}
+        `;
+    }
+
+    renderInstrumentsSection(platformId, canEdit) {
+        // Get instruments for this platform
+        const platformInstruments = this.instruments.filter(inst => inst.platform_id === platformId);
+
+        return `
+            <div class="detail-section" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4><i class="fas fa-camera"></i> Instruments (${platformInstruments.length})</h4>
+                    ${canEdit ? `
+                        <button class="btn btn-success btn-sm" onclick="sitesStationDashboard.showCreateInstrumentModal(${platformId})" title="Add New Instrument to this Platform">
+                            <i class="fas fa-plus"></i> Add Instrument
+                        </button>
+                    ` : ''}
+                </div>
+
+                ${platformInstruments.length > 0 ? `
+                    <div class="instruments-modal-list">
+                        ${platformInstruments.map(inst => this.createInstrumentModalRow(inst, canEdit)).join('')}
+                    </div>
+                ` : `
+                    <div class="empty-state-inline" style="padding: 2rem; text-align: center; background: #f9fafb; border-radius: 8px; border: 2px dashed #e5e7eb;">
+                        <i class="fas fa-camera" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
+                        <span style="color: #6b7280; font-size: 0.95rem;">No instruments configured for this platform</span>
+                        ${canEdit ? `
+                            <p style="margin-top: 1rem;">
+                                <button class="btn btn-primary" onclick="sitesStationDashboard.showCreateInstrumentModal(${platformId})">
+                                    <i class="fas fa-plus-circle"></i> Add Your First Instrument
+                                </button>
+                            </p>
+                        ` : ''}
+                    </div>
+                `}
+            </div>
+        `;
+    }
+
+    createInstrumentModalRow(instrument, canEdit) {
+        const imageUrl = this.getLatestPhenocamImage(instrument.id, true);
+        const statusClass = instrument.status ? instrument.status.toLowerCase().replace(/\s+/g, '-') : 'unknown';
+
+        return `
+            <div class="instrument-modal-row" style="display: flex; align-items: center; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; background: #fafdfb; transition: all 0.2s;">
+
+                <!-- Thumbnail -->
+                <div class="instrument-thumbnail" style="width: 60px; height: 60px; border-radius: 6px; overflow: hidden; margin-right: 12px; flex-shrink: 0; background: #f3f4f6;">
+                    ${imageUrl ? `
+                        <img src="${imageUrl}" alt="${this.escapeHtml(instrument.display_name)}"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    ` : `
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+                            <i class="fas fa-camera" style="color: #9ca3af; font-size: 20px;"></i>
+                        </div>
+                    `}
+                </div>
+
+                <!-- Instrument Info -->
+                <div class="instrument-info" style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; font-size: 0.95rem; color: #1f2937; margin-bottom: 4px;">
+                        ${this.escapeHtml(instrument.display_name)}
+                    </div>
+                    <div style="display: flex; gap: 12px; font-size: 0.8rem; color: #6b7280; flex-wrap: wrap;">
+                        <span><i class="fas fa-tag"></i> ${instrument.normalized_name || 'No ID'}</span>
+                        ${instrument.legacy_acronym ? `<span><i class="fas fa-history"></i> ${instrument.legacy_acronym}</span>` : ''}
+                        <span class="status-badge status-${statusClass}" style="padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">
+                            ${this.getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="instrument-actions" style="display: flex; gap: 6px; flex-shrink: 0; margin-left: 12px;">
+                    <button onclick="sitesStationDashboard.viewInstrumentDetails('${instrument.id}')"
+                            class="btn btn-primary btn-sm"
+                            title="View Details"
+                            style="min-width: 32px; padding: 6px 10px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    ${canEdit ? `
+                        <button onclick="sitesStationDashboard.editInstrument('${instrument.id}')"
+                                class="btn btn-secondary btn-sm"
+                                title="Edit Instrument"
+                                style="min-width: 32px; padding: 6px 10px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="sitesStationDashboard.deleteInstrument('${instrument.id}', '${this.escapeHtml(instrument.display_name)}')"
+                                class="btn btn-danger btn-sm"
+                                title="Delete Instrument"
+                                style="min-width: 32px; padding: 6px 10px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
         `;

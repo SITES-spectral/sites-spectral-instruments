@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Platform Card - UX Mockup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --primary-hover: #1e3a8a;
+            --success-color: #059669;
+            --success-hover: #047857;
+            --secondary-color: #64748b;
+            --danger-color: #dc2626;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .mockup-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mockup-header {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .mockup-header h1 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 24px;
+        }
+
+        .mockup-header p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card-example {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-example h3 {
+            margin: 0 0 16px 0;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge.current {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.proposed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Platform Card Styles */
+        .platform-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .platform-card:hover {
+            box-shadow: 0 8px 16px -2px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+
+        .platform-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .platform-header h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .platform-normalized-name {
+            margin: 8px 0;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .platform-normalized-name .label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .platform-normalized-name .value {
+            color: #059669;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .platform-meta {
+            margin-top: 8px;
+        }
+
+        .ecosystem-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .platform-content {
+            padding: 16px;
+        }
+
+        .instrument-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .instruments-preview {
+            margin-top: 12px;
+        }
+
+        .instruments-preview h5 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .instrument-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 4px 4px 4px 0;
+            color: var(--text-primary);
+        }
+
+        .instrument-chip .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .instrument-chip.more {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-color: #cbd5e1;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .no-instruments {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .no-instruments i {
+            display: block;
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.3;
+        }
+
+        .platform-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn:focus {
+            outline: 3px solid rgba(30, 64, 175, 0.3);
+            outline-offset: 2px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+            color: white;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, var(--success-hover), var(--success-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #475569);
+            color: white;
+            box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #475569, var(--secondary-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #b91c1c);
+            color: white;
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #b91c1c, var(--danger-color));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn i + i {
+            margin-left: -2px;
+        }
+
+        /* Annotation Styles */
+        .annotation {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin-top: 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #92400e;
+        }
+
+        .annotation.success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+
+        .annotation strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .platform-actions {
+                flex-direction: column;
+            }
+
+            .platform-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-container">
+        <div class="mockup-header">
+            <h1><i class="fas fa-palette"></i> Platform Card Enhancement - UX Mockup</h1>
+            <p>Comparing current vs. proposed design for station user instrument management</p>
+        </div>
+
+        <div class="comparison-grid">
+            <!-- CURRENT DESIGN (BROKEN) -->
+            <div class="card-example">
+                <h3>
+                    <i class="fas fa-circle-xmark" style="color: #dc2626;"></i>
+                    Current Design (Broken)
+                    <span class="status-badge current">HIDDEN BUTTON</span>
+                </h3>
+
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <h4>Pine Forest Tower</h4>
+                        <div class="platform-normalized-name">
+                            <span class="label">platform:</span>
+                            <span class="value">SVB_FOR_P02</span>
+                        </div>
+                        <div class="platform-meta">
+                            <span class="ecosystem-badge">FOR</span>
+                        </div>
+                    </div>
+
+                    <div class="platform-content">
+                        <div class="instrument-count">
+                            <i class="fas fa-camera"></i>
+                            <span>3 instruments</span>
+                        </div>
+
+                        <div class="instruments-preview">
+                            <h5><i class="fas fa-camera"></i> Instruments</h5>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_PHE_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_RAD_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_FLU_01
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="platform-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <!-- MISSING: Add Instrument button for station users -->
+                    </div>
+                </div>
+
+                <div class="annotation">
+                    <strong>Issue:</strong>
+                    Station users cannot see the "Add Instrument" button despite having permission in the backend. The button is conditionally hidden due to <code>canEdit</code> check failing.
+                </div>
+            </div>
+
+            <!-- PROPOSED DESIGN (STATION USER) -->
+            <div class="card-example">
+                <h3>
+                    <i class="fas fa-circle-check" style="color: #10b981;"></i>
+                    Proposed Design (Station User)
+                    <span class="status-badge proposed">VISIBLE & CLEAR</span>
+                </h3>
+
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <h4>Pine Forest Tower</h4>
+                        <div class="platform-normalized-name">
+                            <span class="label">platform:</span>
+                            <span class="value">SVB_FOR_P02</span>
+                        </div>
+                        <div class="platform-meta">
+                            <span class="ecosystem-badge">FOR</span>
+                        </div>
+                    </div>
+
+                    <div class="platform-content">
+                        <div class="instrument-count">
+                            <i class="fas fa-camera"></i>
+                            <span>3 instruments</span>
+                        </div>
+
+                        <div class="instruments-preview">
+                            <h5><i class="fas fa-camera"></i> Instruments</h5>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_PHE_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_RAD_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_FLU_01
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="platform-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-success btn-sm" style="animation: pulse 2s infinite;">
+                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-camera"></i>
+                            Add Instrument
+                        </button>
+                    </div>
+                </div>
+
+                <div class="annotation success">
+                    <strong>Solution:</strong>
+                    Station users now see the "Add Instrument" button clearly. The button uses green color (success action), includes both icon and text label, and is positioned prominently in the actions row.
+                </div>
+            </div>
+
+            <!-- PROPOSED DESIGN (ADMIN USER) -->
+            <div class="card-example">
+                <h3>
+                    <i class="fas fa-user-shield" style="color: var(--primary-color);"></i>
+                    Proposed Design (Admin User)
+                    <span class="status-badge proposed">FULL CONTROLS</span>
+                </h3>
+
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <h4>Pine Forest Tower</h4>
+                        <div class="platform-normalized-name">
+                            <span class="label">platform:</span>
+                            <span class="value">SVB_FOR_P02</span>
+                        </div>
+                        <div class="platform-meta">
+                            <span class="ecosystem-badge">FOR</span>
+                        </div>
+                    </div>
+
+                    <div class="platform-content">
+                        <div class="instrument-count">
+                            <i class="fas fa-camera"></i>
+                            <span>3 instruments</span>
+                        </div>
+
+                        <div class="instruments-preview">
+                            <h5><i class="fas fa-camera"></i> Instruments</h5>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_PHE_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_RAD_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_FLU_01
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="platform-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-camera"></i>
+                            Add Instrument
+                        </button>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-edit"></i> Edit Platform
+                        </button>
+                        <button class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Delete Platform
+                        </button>
+                    </div>
+                </div>
+
+                <div class="annotation success">
+                    <strong>Admin View:</strong>
+                    Admin users see all controls including platform-level edit and delete buttons. The visual hierarchy clearly separates instrument actions (green) from platform actions (gray/red).
+                </div>
+            </div>
+
+            <!-- PROPOSED DESIGN (READ-ONLY USER) -->
+            <div class="card-example">
+                <h3>
+                    <i class="fas fa-eye" style="color: var(--text-secondary);"></i>
+                    Proposed Design (Read-Only User)
+                    <span class="status-badge" style="background: #e2e8f0; color: #475569;">VIEW ONLY</span>
+                </h3>
+
+                <div class="platform-card">
+                    <div class="platform-header">
+                        <h4>Pine Forest Tower</h4>
+                        <div class="platform-normalized-name">
+                            <span class="label">platform:</span>
+                            <span class="value">SVB_FOR_P02</span>
+                        </div>
+                        <div class="platform-meta">
+                            <span class="ecosystem-badge">FOR</span>
+                        </div>
+                    </div>
+
+                    <div class="platform-content">
+                        <div class="instrument-count">
+                            <i class="fas fa-camera"></i>
+                            <span>3 instruments</span>
+                        </div>
+
+                        <div class="instruments-preview">
+                            <h5><i class="fas fa-camera"></i> Instruments</h5>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_PHE_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_RAD_01
+                            </span>
+                            <span class="instrument-chip">
+                                <span class="status-dot"></span>
+                                SVB_FOR_FLU_01
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="platform-actions">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="annotation" style="background: #e2e8f0; border-left-color: #64748b; color: #475569;">
+                    <strong>Read-Only View:</strong>
+                    Users without edit permissions only see the "View Details" button. This maintains security while still providing access to comprehensive platform and instrument information.
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Design Principles -->
+        <div class="card-example" style="max-width: 100%;">
+            <h3><i class="fas fa-lightbulb"></i> Key Design Principles Applied</h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 16px;">
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 14px; color: var(--primary-color);">
+                        <i class="fas fa-route"></i> Path of Least Resistance
+                    </h4>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">
+                        Instrument creation is now 3 clicks away: Dashboard → Add Instrument → Save. No hidden menus or unclear navigation.
+                    </p>
+                </div>
+
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 14px; color: var(--success-color);">
+                        <i class="fas fa-text"></i> Clear Language
+                    </h4>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">
+                        Button reads "Add Instrument" not just an icon. Users immediately understand the action without guessing.
+                    </p>
+                </div>
+
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 14px; color: var(--text-secondary);">
+                        <i class="fas fa-palette"></i> Visual Hierarchy
+                    </h4>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">
+                        Green for creation actions, blue for viewing, gray for editing, red for deletion. Consistent color language across all interfaces.
+                    </p>
+                </div>
+
+                <div style="padding: 16px; background: var(--bg-secondary); border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 14px; color: var(--danger-color);">
+                        <i class="fas fa-shield-halved"></i> Permission Clarity
+                    </h4>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">
+                        Users only see actions they can perform. No confusing disabled buttons or error messages after clicking.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+            }
+            50% {
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+            }
+        }
+    </style>
+</body>
+</html>

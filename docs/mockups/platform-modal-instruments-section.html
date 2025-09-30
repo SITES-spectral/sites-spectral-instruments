@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Details Modal with Instruments Section - UX Mockup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --success-color: #059669;
+            --secondary-color: #64748b;
+            --danger-color: #dc2626;
+            --warning-color: #f59e0b;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .platform-modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header-large {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 2px solid var(--border-color);
+            background: linear-gradient(135deg, var(--bg-secondary), white);
+        }
+
+        .modal-header-large h3 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-header-large h3 i {
+            color: var(--primary-color);
+        }
+
+        .modal-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-edit-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--secondary-color), #475569);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-edit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(100, 116, 139, 0.3);
+        }
+
+        .modal-close-large {
+            background: none;
+            border: none;
+            font-size: 32px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-large:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body-large {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .detail-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-section h4 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .detail-section h4 i {
+            color: var(--primary-color);
+        }
+
+        .detail-field {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .detail-field:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .detail-value.monospace {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* NEW: Instruments Section Styles */
+        .instruments-section {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .instruments-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .instruments-section-header h4 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .instruments-section-header h4 i {
+            color: var(--warning-color);
+        }
+
+        .instruments-section-header .count {
+            background: var(--warning-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-add-instrument {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--success-color), #047857);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .btn-add-instrument:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+            background: linear-gradient(135deg, #047857, var(--success-color));
+        }
+
+        .instruments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .instrument-card-compact {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .instrument-card-compact:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: var(--warning-color);
+        }
+
+        .instrument-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .instrument-title-section {
+            flex: 1;
+        }
+
+        .instrument-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instrument-name i {
+            color: var(--warning-color);
+        }
+
+        .instrument-normalized {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .instrument-normalized-value {
+            color: var(--warning-color);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 13px;
+            background: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .instrument-legacy {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 4px;
+        }
+
+        .instrument-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+
+        .btn-icon.view {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-icon.view:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-icon.edit {
+            background: linear-gradient(135deg, var(--secondary-color), #475569);
+            color: white;
+        }
+
+        .btn-icon.edit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-icon.delete {
+            background: linear-gradient(135deg, var(--danger-color), #b91c1c);
+            color: white;
+        }
+
+        .btn-icon.delete:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .instrument-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .instrument-detail-item {
+            font-size: 12px;
+        }
+
+        .instrument-detail-item .label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .instrument-detail-item .value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .status-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.active i {
+            color: #10b981;
+        }
+
+        .status-badge.maintenance {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .status-badge.maintenance i {
+            color: var(--warning-color);
+        }
+
+        .status-badge.inactive {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        .status-badge.inactive i {
+            color: #ef4444;
+        }
+
+        .roi-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--success-color);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .no-instruments-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-instruments-message i {
+            font-size: 48px;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .no-instruments-message p {
+            margin: 8px 0 20px 0;
+            font-size: 14px;
+        }
+
+        /* Annotations */
+        .annotation {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 12px 16px;
+            margin-top: 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #1e40af;
+        }
+
+        .annotation strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .detail-field {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+
+            .instrument-card-header {
+                flex-direction: column;
+            }
+
+            .instrument-actions {
+                margin-top: 12px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .instruments-section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="platform-modal">
+        <div class="modal-header-large">
+            <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
+            <div class="modal-header-actions">
+                <button class="modal-edit-btn">
+                    <i class="fas fa-edit"></i> Edit Platform
+                </button>
+                <button class="modal-close-large">&times;</button>
+            </div>
+        </div>
+
+        <div class="modal-body-large">
+            <!-- General Information Section -->
+            <div class="detail-section">
+                <h4><i class="fas fa-info-circle"></i> General Information</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Platform Name</span>
+                    <span class="detail-value">Pine Forest Tower</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Normalized ID</span>
+                    <span class="detail-value monospace">SVB_FOR_P02</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Legacy Name</span>
+                    <span class="detail-value">Svartberget Forest Tower 2</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value"><i class="fas fa-circle" style="color: #10b981;"></i> Active</span>
+                </div>
+            </div>
+
+            <!-- Location & Positioning Section -->
+            <div class="detail-section">
+                <h4><i class="fas fa-map-marker-alt"></i> Location & Positioning</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Latitude</span>
+                    <span class="detail-value monospace">64.256789</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Longitude</span>
+                    <span class="detail-value monospace">19.774567</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Platform Height</span>
+                    <span class="detail-value">12m</span>
+                </div>
+            </div>
+
+            <!-- Technical Specifications Section -->
+            <div class="detail-section">
+                <h4><i class="fas fa-cogs"></i> Technical Specifications</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Mounting Structure</span>
+                    <span class="detail-value">Steel tower with stabilized platform</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Deployment Date</span>
+                    <span class="detail-value">2018-03-15</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Station</span>
+                    <span class="detail-value">Svartberget (SVB)</span>
+                </div>
+            </div>
+
+            <!-- NEW: INSTRUMENTS SECTION -->
+            <div class="detail-section">
+                <h4><i class="fas fa-camera"></i> Instruments Section (NEW)</h4>
+
+                <div class="instruments-section">
+                    <div class="instruments-section-header">
+                        <h4>
+                            <i class="fas fa-camera"></i>
+                            INSTRUMENTS
+                            <span class="count">3</span>
+                        </h4>
+                        <button class="btn-add-instrument" style="animation: pulse 2s infinite;">
+                            <i class="fas fa-plus"></i>
+                            Add Instrument
+                        </button>
+                    </div>
+
+                    <div class="instruments-list">
+                        <!-- Instrument 1: Phenocam -->
+                        <div class="instrument-card-compact">
+                            <div class="instrument-card-header">
+                                <div class="instrument-title-section">
+                                    <p class="instrument-name">
+                                        <i class="fas fa-camera"></i>
+                                        Phenocam - Pine Forest View
+                                    </p>
+                                    <div>
+                                        <span class="instrument-normalized">instrument:</span>
+                                        <span class="instrument-normalized-value">SVB_FOR_PHE_01</span>
+                                    </div>
+                                    <p class="instrument-legacy">legacy name: SVB-Tower-Phenocam</p>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-circle"></i>
+                                        Active
+                                    </span>
+                                    <div class="roi-indicator">
+                                        <i class="fas fa-vector-square"></i>
+                                        3 ROIs configured
+                                    </div>
+                                </div>
+                                <div class="instrument-actions">
+                                    <button class="btn-icon view" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon edit" title="Edit Instrument">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon delete" title="Delete Instrument">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="instrument-details-grid">
+                                <div class="instrument-detail-item">
+                                    <span class="label">Type</span>
+                                    <span class="value">Phenocam</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Make</span>
+                                    <span class="value">StarDot Technologies</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Model</span>
+                                    <span class="value">NetCam SC 5MP</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Serial Number</span>
+                                    <span class="value">SC5MP-2018-045</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instrument 2: Radiation Sensor -->
+                        <div class="instrument-card-compact">
+                            <div class="instrument-card-header">
+                                <div class="instrument-title-section">
+                                    <p class="instrument-name">
+                                        <i class="fas fa-sun"></i>
+                                        Radiation Sensor
+                                    </p>
+                                    <div>
+                                        <span class="instrument-normalized">instrument:</span>
+                                        <span class="instrument-normalized-value">SVB_FOR_RAD_01</span>
+                                    </div>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-circle"></i>
+                                        Active
+                                    </span>
+                                </div>
+                                <div class="instrument-actions">
+                                    <button class="btn-icon view" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon edit" title="Edit Instrument">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon delete" title="Delete Instrument">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="instrument-details-grid">
+                                <div class="instrument-detail-item">
+                                    <span class="label">Type</span>
+                                    <span class="value">Radiation Sensor</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Make</span>
+                                    <span class="value">Kipp & Zonen</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Model</span>
+                                    <span class="value">CMP11 Pyranometer</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Serial Number</span>
+                                    <span class="value">KZ-2019-123</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instrument 3: Fluorescence Camera (Maintenance) -->
+                        <div class="instrument-card-compact">
+                            <div class="instrument-card-header">
+                                <div class="instrument-title-section">
+                                    <p class="instrument-name">
+                                        <i class="fas fa-microscope"></i>
+                                        Fluorescence Camera
+                                    </p>
+                                    <div>
+                                        <span class="instrument-normalized">instrument:</span>
+                                        <span class="instrument-normalized-value">SVB_FOR_FLU_01</span>
+                                    </div>
+                                    <p class="instrument-legacy">legacy name: SVB-Fluorescence-Cam</p>
+                                    <span class="status-badge maintenance">
+                                        <i class="fas fa-wrench"></i>
+                                        Maintenance
+                                    </span>
+                                </div>
+                                <div class="instrument-actions">
+                                    <button class="btn-icon view" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon edit" title="Edit Instrument">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon delete" title="Delete Instrument">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="instrument-details-grid">
+                                <div class="instrument-detail-item">
+                                    <span class="label">Type</span>
+                                    <span class="value">Fluorescence Camera</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Make</span>
+                                    <span class="value">PhotosynQ</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Model</span>
+                                    <span class="value">MultispeQ v2.0</span>
+                                </div>
+                                <div class="instrument-detail-item">
+                                    <span class="label">Serial Number</span>
+                                    <span class="value">MSQ-2020-089</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="annotation">
+                        <strong><i class="fas fa-lightbulb"></i> NEW FEATURE</strong>
+                        This instruments section provides station users with complete visibility and management capabilities. Each instrument card shows key information at a glance, with quick action buttons for View, Edit, and Delete operations. The "Add Instrument" button is prominently placed in the section header for easy discovery.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information Section -->
+            <div class="detail-section">
+                <h4><i class="fas fa-sticky-note"></i> Additional Information</h4>
+                <div class="detail-field">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">Primary observation platform in mature pine forest stand. Equipped with comprehensive environmental monitoring instruments for continuous vegetation and climate data collection.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+            }
+            50% {
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.5);
+            }
+        }
+    </style>
+</body>
+</html>

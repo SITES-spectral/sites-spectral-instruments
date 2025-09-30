@@ -2,11 +2,116 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.24 - EXPORT API HOTFIX & ENHANCED INSTRUMENT MARKER POPUPS (2025-09-29)
+## Version 5.2.31 - COMPLETE STATION USER INSTRUMENT MANAGEMENT & SPECTRAL INSTRUMENT TYPES (2025-09-30)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Deployment Date:** 2025-09-29 ✅ DEPLOYED v5.2.24 🚀
+**📅 Deployment Date:** 2025-09-30 ✅ DEPLOYED v5.2.31 🚀
+**🎯 Major Achievement:** Complete station user CRUD workflow with fixed instrument creation and SITES Spectral-specific instrument types
+
+### 🎯 Complete Features in v5.2.31
+- **Station User CRUD**: Full create/read/update/delete for instruments from platform cards and platform modals
+- **Dual Creation Pathways**: Add instruments from platform cards OR platform details modal
+- **Platform Modal Integration**: Complete instruments section with inline management (view/edit/delete)
+- **Fixed Instrument Creation**: Added missing `instrument_type` required field
+- **Spectral-Specific Types**: Instrument types tailored to SITES Spectral network (Phenocam, Multispectral, Hyperspectral, PAR)
+
+### 📋 SITES Spectral Instrument Types (v5.2.31)
+1. **Phenocam** (default)
+2. **Multispectral Sensor**
+3. **Hyperspectral Sensor**
+4. **PAR Sensor**
+
+*Removed non-spectral types: Weather Station, Soil Sensor, Eddy Covariance, Other*
+
+### 🚨 Critical Bug Fixed in v5.2.30
+- **Missing Required Field**: Backend API required `instrument_type` but form didn't collect it
+- **Impact**: ALL instrument creation attempts failed for both admin and station users with "error adding new instrument"
+- **Root Cause**: Form only collected display_name, ecosystem_code, and description - missing instrument_type (line 3902-3906)
+- **Solution**: Added instrument_type dropdown with 7 options, defaulting to "Phenocam"
+- **Validation**: Added client-side validation for required fields before API submission
+
+### 🔧 Technical Implementation in v5.2.30
+**Files Modified:** `/public/station.html`
+
+1. **Added Instrument Type Field** (Lines 3850-3861):
+   - New dropdown selector for instrument type
+   - Options: Phenocam (default), Weather Station, Soil Sensor, Eddy Covariance, Spectrometer, PAR Sensor, Other
+   - Marked as required with red asterisk
+   - "Phenocam" pre-selected as default value
+
+2. **Updated Form Submission** (Lines 3913, 3921-3923, 3928):
+   - Collect instrument_type value from new field
+   - Client-side validation: "Instrument type is required"
+   - Include instrument_type in API request payload
+
+3. **Enhanced Error Handling**:
+   - Clear error messages for missing required fields
+   - Validates both display_name and instrument_type before submission
+   - Prevents API call if validation fails
+
+### 📋 Backend Validation Requirements
+**From `/src/handlers/instruments.js` line 315:**
+```javascript
+const requiredFields = ['display_name', 'platform_id', 'instrument_type'];
+```
+
+All three fields are now properly collected and sent by the frontend form.
+
+## Previous Version: 5.2.29 - COMPLETE STATION USER INSTRUMENT MANAGEMENT (2025-09-30)
+**📅 Previous Version**
+**🎯 Major Achievement:** Complete station user instrument CRUD workflow with platform cards AND platform details modal integration
+
+### 🎯 Complete Instrument Management Workflow in v5.2.29
+- **Platform Card Integration**: "Add Instrument" button now visible on every platform card for station users
+- **Platform Modal Enhancement**: New instruments section displays all instruments with full management controls
+- **Dual Creation Pathways**: Station users can create instruments from platform cards OR platform details modal
+- **Inline Instrument Management**: View, edit, and delete instruments directly from platform modal
+- **Smart Empty States**: Helpful prompts guide users to add their first instrument when platforms are empty
+- **Permission-Based UI**: All instrument management controls respect role-based access (admin + station users)
+
+### 🔧 Technical Implementation in v5.2.29
+**Three Critical Fixes Applied:**
+
+1. **`canEdit` Property Initialization** (Line 7, 83-88):
+   - Added `this.canEdit = false` in constructor
+   - Set to `true` in `verifyAccess()` for admin and station users
+   - Fixed root cause: property was undefined, causing all edit buttons to hide
+
+2. **Platform Card Button** (Line 462-466):
+   - Green "Add Instrument" button with camera icon
+   - Uses `this.canEdit` to control visibility
+   - Calls `showCreateInstrumentModal(platformId)` method
+
+3. **Platform Modal Instruments Section** (Line 712, 716-810):
+   - New `renderInstrumentsSection()` method displays instruments for current platform
+   - Shows instrument count, thumbnail, status badges, and ROI indicators
+   - "Add Instrument" button in section header
+   - Each instrument has View/Edit/Delete action buttons
+   - Empty state with prominent "Add Your First Instrument" CTA
+
+### 📋 Complete CRUD Status After v5.2.29
+**Platforms:**
+- ✅ Create: Admin only (by design)
+- ✅ Read: All users can view platform details with instruments section
+- ✅ Update: Backend supports station users, UI shows edit button for admin
+- ⚠️ Delete: Admin only (intentional restriction)
+
+**Instruments (Station Users):**
+- ✅ **Create**: Button visible in platform cards AND platform modal - **TWO PATHWAYS**
+- ✅ **Read**: Full instrument details via "View Details" button in platform modal
+- ✅ **Update**: Edit button visible in platform modal instrument rows
+- ✅ **Delete**: Delete button visible in platform modal with dependency checking
+- ✅ **Management**: Complete workflow from platform context without leaving page
+
+### 🎯 Comprehensive QA Testing Results
+- **Backend Architecture**: Excellent - proper JWT auth, role-based access, multi-layer security
+- **Permission System**: Robust - station data isolation, field-level permissions, comprehensive validation
+- **Database Schema**: Well-designed - cascade constraints, foreign keys, referential integrity
+- **API Endpoints**: Complete - all CRUD operations with proper HTTP status codes and error handling
+
+## Previous Version: 5.2.24 - EXPORT API HOTFIX & ENHANCED INSTRUMENT MARKER POPUPS (2025-09-29)
+**📅 Previous Version**
 **🎯 Major Achievement:** Fixed critical export API 500 error and enhanced instrument marker popups with status indicators
 
 ### 🚨 Critical Export API Fix in v5.2.24

@@ -21,10 +21,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.27">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.31">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.27">
+    <meta name="app-version" content="5.2.31">
     <meta name="build-date" content="2025-09-30">
 
     <style>
@@ -1714,16 +1714,16 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.27"></script>
-    <script src="/js/api.js?v=5.2.27"></script>
-    <script src="/js/components.js?v=5.2.27"></script>
+    <script src="/js/utils.js?v=5.2.31"></script>
+    <script src="/js/api.js?v=5.2.31"></script>
+    <script src="/js/components.js?v=5.2.31"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.27"></script>
-    <script src="/js/station-dashboard.js?v=5.2.27"></script>
-    <script src="/js/navigation.js?v=5.2.27"></script>
-    <script src="/js/export.js?v=5.2.27"></script>
+    <script src="/js/interactive-map.js?v=5.2.31"></script>
+    <script src="/js/station-dashboard.js?v=5.2.31"></script>
+    <script src="/js/navigation.js?v=5.2.31"></script>
+    <script src="/js/export.js?v=5.2.31"></script>
     <script src="/js/modal-system.js?v=5.2.26"></script>
     <script src="/js/admin-modals.js?v=5.2.26"></script>
     <script>
@@ -3843,8 +3843,18 @@
                         </p>
 
                         <div class="form-group">
-                            <label for="create-display-name">Display Name</label>
-                            <input type="text" id="create-display-name" placeholder="e.g., Platform Phenocam 01">
+                            <label for="create-display-name">Display Name <span style="color: #ef4444;">*</span></label>
+                            <input type="text" id="create-display-name" placeholder="e.g., Platform Phenocam 01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="create-instrument-type">Instrument Type <span style="color: #ef4444;">*</span></label>
+                            <select id="create-instrument-type" required>
+                                <option value="Phenocam" selected>Phenocam</option>
+                                <option value="Multispectral Sensor">Multispectral Sensor</option>
+                                <option value="Hyperspectral Sensor">Hyperspectral Sensor</option>
+                                <option value="PAR Sensor">PAR Sensor</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -3896,12 +3906,22 @@
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
 
                 const displayName = document.getElementById('create-display-name').value.trim();
+                const instrumentType = document.getElementById('create-instrument-type').value;
                 const ecosystemCode = document.getElementById('create-ecosystem-code').value;
                 const description = document.getElementById('create-description').value.trim();
+
+                // Validate required fields
+                if (!displayName) {
+                    throw new Error('Display name is required');
+                }
+                if (!instrumentType) {
+                    throw new Error('Instrument type is required');
+                }
 
                 const instrumentData = {
                     platform_id: platformId,
                     display_name: displayName,
+                    instrument_type: instrumentType,
                     ecosystem_code: ecosystemCode,
                     description: description
                 };

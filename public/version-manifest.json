@@ -1,16 +1,16 @@
 {
-  "version": "5.2.27",
+  "version": "5.2.31",
   "buildDate": "2025-09-30",
-  "timestamp": 1759206493308,
+  "timestamp": 1759211329707,
   "files": {
-    "/css/styles.css?v=5.2.27": "5.2.27",
-    "/js/utils.js?v=5.2.27": "5.2.27",
-    "/js/api.js?v=5.2.27": "5.2.27",
-    "/js/components.js?v=5.2.27": "5.2.27",
-    "/js/interactive-map.js?v=5.2.27": "5.2.27",
-    "/js/dashboard.js?v=5.2.27": "5.2.27",
-    "/js/station-dashboard.js?v=5.2.27": "5.2.27",
-    "/js/navigation.js?v=5.2.27": "5.2.27",
-    "/js/export.js?v=5.2.27": "5.2.27"
+    "/css/styles.css?v=5.2.31": "5.2.31",
+    "/js/utils.js?v=5.2.31": "5.2.31",
+    "/js/api.js?v=5.2.31": "5.2.31",
+    "/js/components.js?v=5.2.31": "5.2.31",
+    "/js/interactive-map.js?v=5.2.31": "5.2.31",
+    "/js/dashboard.js?v=5.2.31": "5.2.31",
+    "/js/station-dashboard.js?v=5.2.31": "5.2.31",
+    "/js/navigation.js?v=5.2.31": "5.2.31",
+    "/js/export.js?v=5.2.31": "5.2.31"
   }
 }
