@@ -13,6 +13,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.27] - 2025-09-30
+
+### ✅ MAINTENANCE: Architecture Verification & Production Deployment
+
+**📅 Deployment Date**: 2025-09-30
+**🎯 Achievement**: Verified modular architecture integrity and confirmed proper function delegation system
+
+#### 🔍 **Architecture Verification**
+- **Embedded Functions Status**: Confirmed disabled embedded functions (`_DISABLED` suffix) in station.html (lines 2015-2027)
+- **Modular System**: Verified station-dashboard.js provides all platform/instrument management functionality
+- **Global Wrapper Functions**: Confirmed global convenience functions (lines 2053-2055 in station-dashboard.js) properly delegate to class methods
+- **Function Calls**: All 8+ calls to `loadPlatformsAndInstruments()` correctly use modular version from station-dashboard.js
+
+#### ✅ **System Integrity Confirmed**
+- **No Conflicts**: Embedded code properly disabled, modular code operational
+- **Architecture Pattern**: Clean separation between embedded (disabled) and modular (active) implementations
+- **Backward Compatibility**: Global wrapper functions allow inline HTML event handlers to work seamlessly
+- **Production Ready**: All components verified and ready for deployment
+
+#### 🎯 **Technical Details**
+- **Version**: 5.2.27
+- **Build Date**: 2025-09-30
+- **Files Updated**: version-manifest.json with cache-busting version tags
+- **Architecture**: Modular JavaScript with proper class-based organization and global delegation pattern
+
+## [5.2.25] - 2025-09-29
+
+### 🚨 HOTFIX: Platform Rendering Issue Resolution
+
+**📅 Deployment Date**: 2025-09-29
+**🎯 Critical Fix**: Resolved missing platform display issue in dev-production branch affecting Svartberget station
+
+#### 🔧 **Root Cause Analysis**
+- **Issue**: Platform SVB_MIR_PL02 not showing in platform cards for Svartberget station in dev-production branch
+- **Root Cause**: Embedded JavaScript functions in station.html conflicting with modular station-dashboard.js
+- **Architecture Conflict**: Function signature mismatch between embedded `createPlatformCard(platform, instruments)` and modular `createPlatformCard(platform)` versions
+
+#### 🛠️ **Technical Resolution**
+- **Disabled Conflicting Functions**: Removed embedded `loadPlatformsAndInstruments()` and `createPlatformCard()` functions from station.html
+- **Modular Architecture**: Ensured station.html relies exclusively on station-dashboard.js for platform rendering
+- **API Verification**: Confirmed backend correctly returns all platforms including SVB_MIR_PL02 via authenticated API calls
+- **Frontend Fix**: Eliminated function override conflicts that prevented proper platform display
+
+#### ✅ **Validation Results**
+- **Backend Confirmed**: API endpoint `/api/platforms?station=SVB` correctly returns SVB_MIR_PL02 platform data
+- **Authentication Working**: JWT token validation and station-specific data access functioning properly
+- **Modular System**: Station-dashboard.js now handles all platform rendering without interference
+- **Architecture Cleanup**: Removed dual implementation approach in favor of consistent modular pattern
+
+#### 🎯 **Impact**
+- **User Experience**: Svartberget station users can now see all platforms including SVB_MIR_PL02
+- **Code Quality**: Eliminated embedded/modular code conflicts for better maintainability
+- **System Reliability**: Consistent platform rendering across all station types
+
 ## [5.2.22] - 2025-09-29
 
 ### 🎯 FEATURE: ROI Cards & Maintenance Log System - Complete Instrument Details Enhancement
