@@ -2,7 +2,53 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.32 - CRITICAL FIX: SQL Column/Value Mismatch in Instrument Creation (2025-09-30)
+## Version 5.2.33 - CRITICAL FIX: Automatic Instrument Naming with Type Code Prefix (2025-09-30)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
+**🌐 Production URL:** https://sites.jobelab.com
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Deployment Date:** 2025-09-30 ✅ DEPLOYED v5.2.33 🔧
+**🎯 Major Achievement:** Fixed automatic instrument naming to generate proper type-prefixed numbers
+
+### 🚨 Critical Naming Bug Fixed in v5.2.33
+- **Error**: Instrument names generating as `SVB_MIR_PL02_PHE_NaN` instead of `SVB_MIR_PL02_PHE02`
+- **Root Cause**: `getNextInstrumentNumber()` tried to parse "PHE01" as integer, resulting in `NaN`
+- **Impact**: All new instruments created with invalid NaN in their normalized names
+- **Solution**: Extract numeric suffix with regex, generate full instrument_number with type prefix
+
+### 🔧 Technical Fixes in v5.2.33
+**File Modified:** `/src/handlers/instruments.js`
+
+**1. Fixed `getNextInstrumentNumber()` Function (lines 561-570):**
+```javascript
+// Extract numeric suffix from instrument_number (e.g., "PHE01" -> "01", "MSP02" -> "02")
+const match = result.instrument_number.match(/(\d+)$/);
+if (!match) {
+  return '01';
+}
+const number = parseInt(match[1], 10) + 1;
+return number.toString().padStart(2, '0');
+```
+
+**2. Fixed Instrument Number Generation (lines 387-391):**
+```javascript
+// Build full instrument number with type code prefix (e.g., "PHE01", "MUL02")
+instrumentNumber = `${instrumentTypeCode}${nextInstrumentNumber}`;
+
+// Generate normalized name: {PLATFORM}_{INSTRUMENT_TYPE}_{NUMBER}
+normalizedName = `${platform.platform_normalized_name}_${instrumentTypeCode}${nextInstrumentNumber}`;
+```
+
+### 📋 Naming Convention Standards in v5.2.33
+- **Instrument Number Format**: `{TYPE_CODE}{NUMBER}` (e.g., "PHE01", "MUL02", "HYP03")
+- **Normalized Name Format**: `{PLATFORM}_{TYPE_CODE}{NUMBER}` (e.g., "SVB_MIR_PL02_PHE02")
+- **Type Codes**: PHE (Phenocam), MUL (Multispectral), HYP (Hyperspectral), PAR (PAR Sensor)
+- **Number Format**: Zero-padded 2-digit sequential number per platform
+
+### 🗑️ Database Cleanup in v5.2.33
+- Deleted instrument ID 41 with invalid `instrument_number = "NaN"`
+- Cleaned up `normalized_name = "SVB_MIR_PL02_PHE_NaN"` from database
+
+## Previous Version: 5.2.32 - CRITICAL FIX: SQL Column/Value Mismatch in Instrument Creation (2025-09-30)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev

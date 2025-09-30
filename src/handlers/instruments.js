@@ -380,11 +380,15 @@ async function createInstrument(user, request, env) {
   if (!normalizedName || user.role !== 'admin') {
     // Auto-generate instrument number for this platform
     const nextInstrumentNumber = await getNextInstrumentNumber(platform.id, env);
-    instrumentNumber = nextInstrumentNumber;
+
+    // Generate instrument type code (e.g., "PHE" for Phenocam, "MUL" for Multispectral)
+    const instrumentTypeCode = instrumentData.instrument_type.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
+
+    // Build full instrument number with type code prefix (e.g., "PHE01", "MUL02")
+    instrumentNumber = `${instrumentTypeCode}${nextInstrumentNumber}`;
 
     // Generate normalized name: {PLATFORM}_{INSTRUMENT_TYPE}_{NUMBER}
-    const instrumentTypeCode = instrumentData.instrument_type.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
-    normalizedName = `${platform.platform_normalized_name}_${instrumentTypeCode}_${instrumentNumber}`;
+    normalizedName = `${platform.platform_normalized_name}_${instrumentTypeCode}${nextInstrumentNumber}`;
   }
 
   // Check for duplicate normalized names
@@ -558,7 +562,14 @@ async function getNextInstrumentNumber(platformId, env) {
     return '01';
   }
 
+  // Extract numeric suffix from instrument_number (e.g., "PHE01" -> "01", "MSP02" -> "02")
+  const match = result.instrument_number.match(/(\d+)$/);
+  if (!match) {
+    // If no numeric suffix found, start from 01
+    return '01';
+  }
+
   // Increment number
-  const number = parseInt(result.instrument_number, 10) + 1;
+  const number = parseInt(match[1], 10) + 1;
   return number.toString().padStart(2, '0');
 }
