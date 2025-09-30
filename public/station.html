@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.26">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.27">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.26">
-    <meta name="build-date" content="2025-09-29">
+    <meta name="app-version" content="5.2.27">
+    <meta name="build-date" content="2025-09-30">
 
     <style>
         body {
@@ -1714,16 +1714,18 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.26"></script>
-    <script src="/js/api.js?v=5.2.26"></script>
-    <script src="/js/components.js?v=5.2.26"></script>
+    <script src="/js/utils.js?v=5.2.27"></script>
+    <script src="/js/api.js?v=5.2.27"></script>
+    <script src="/js/components.js?v=5.2.27"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.26"></script>
-    <script src="/js/station-dashboard.js?v=5.2.26"></script>
-    <script src="/js/navigation.js?v=5.2.26"></script>
-    <script src="/js/export.js?v=5.2.26"></script>
+    <script src="/js/interactive-map.js?v=5.2.27"></script>
+    <script src="/js/station-dashboard.js?v=5.2.27"></script>
+    <script src="/js/navigation.js?v=5.2.27"></script>
+    <script src="/js/export.js?v=5.2.27"></script>
+    <script src="/js/modal-system.js?v=5.2.26"></script>
+    <script src="/js/admin-modals.js?v=5.2.26"></script>
     <script>
         let currentUser = null;
         let stationData = null;
@@ -2021,76 +2023,7 @@
             // This embedded function has been disabled in favor of the modular version
             // The modular version filters instruments internally and has different signature
             return '';
-
-            const statusClass = `status-${platform.status?.toLowerCase() || 'unknown'}`;
-            const locationInfo = platform.location_code
-                ? `Location: ${platform.location_code}`
-                : 'Location: N/A';
-
-            const instrumentCards = instruments.map(instrument =>
-                createInstrumentCard(instrument)
-            ).join('');
-
-            // Check if user can edit (admin or station user for their station)
-            const canEdit = currentUser && (currentUser.role === 'admin' ||
-                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
-
-            // Check if recently updated
-            const recentlyUpdatedBadge = shouldShowRecentUpdate(platform.updated_at) ?
-                `<div class="recently-updated">
-                    <i class="fas fa-sparkles"></i>
-                    <span>Updated</span>
-                    <span class="update-timestamp">${getTimeSinceUpdate(platform.updated_at)}</span>
-                </div>` : '';
-
-            return `
-                <div class="platform-card" data-platform-id="${platform.id}" style="position: relative;">
-                    ${recentlyUpdatedBadge}
-                    <div class="platform-header" onclick="showPlatformDetails(${platform.id})" style="cursor: pointer;">
-                        <div class="platform-title">
-                            <i class="fas fa-tower-observation"></i>
-                            ${platform.display_name}
-                            <br><small style="opacity: 0.7; font-weight: normal; color: #059669; font-family: 'Courier New', monospace;">${platform.normalized_name || 'N/A'}</small>
-                            <i class="fas fa-question-circle help-icon" title="🔍 Click this card to view platform details, instruments, and technical specifications. Admin and station users can also edit platform information." style="margin-left: 8px; font-size: 0.8em; opacity: 0.6; cursor: help;" onclick="event.stopPropagation()"></i>
-                        </div>
-                        <div class="platform-meta">
-                            <div class="platform-structure">
-                                <i class="fas fa-cog"></i>
-                                ${platform.mounting_structure || 'Unknown'} • ${platform.platform_height_m || 'N/A'}m
-                            </div>
-                            <div class="platform-status ${statusClass}">
-                                ${getStatusIcon(platform.status)} ${platform.status || 'Unknown'}
-                            </div>
-                            <div class="platform-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                ${locationInfo}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="instruments-section">
-                        <h4 style="display: flex; align-items: center; justify-content: space-between;">
-                            <span><i class="fas fa-camera"></i> Instruments (${instruments.length})</span>
-                            ${canEdit ? `
-                                <button onclick="addInstrument(${platform.id})" style="padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; font-size: 0.8em; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                                    + Add Instrument
-                                </button>
-                            ` : ''}
-                        </h4>
-                        <div class="instruments-grid">
-                            ${instrumentCards || `<div class="no-instruments">No instruments configured yet</div>`}
-                        </div>
-                    </div>
-                    ${currentUser && currentUser.role === 'admin' ? `
-                        <div style="padding: 12px; background: rgba(239, 68, 68, 0.05); border-top: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: center;">
-                            <button onclick="event.stopPropagation(); showDeletePlatformModal(${platform.id}, '${platform.display_name.replace(/'/g, '\\\'')}')"
-                                    class="btn btn-danger" style="padding: 6px 16px; font-size: 0.85em;"
-                                    title="Delete Platform (Admin Only)">
-                                <i class="fas fa-exclamation-triangle"></i> Delete Platform
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
+            // All unreachable code after return statement has been removed
         }
 
         function createInstrumentCard(instrument) {
