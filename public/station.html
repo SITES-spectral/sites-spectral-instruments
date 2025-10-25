@@ -21,12 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.34">
-    <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.34">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.35">
+    <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.35">
 
     <!-- Version Meta -->
     <meta name="app-version" content="5.2.34">
-    <meta name="build-date" content="2025-09-30">
+    <meta name="build-date" content="2025-10-25">
 
     <style>
         body {
@@ -1715,19 +1715,19 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.34"></script>
-    <script src="/js/api.js?v=5.2.34"></script>
-    <script src="/js/components.js?v=5.2.34"></script>
-    <script src="/js/form-components.js?v=5.2.34"></script>
+    <script src="/js/utils.js?v=5.2.35"></script>
+    <script src="/js/api.js?v=5.2.35"></script>
+    <script src="/js/components.js?v=5.2.35"></script>
+    <script src="/js/form-components.js?v=5.2.35"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.34"></script>
-    <script src="/js/station-dashboard.js?v=5.2.34"></script>
-    <script src="/js/navigation.js?v=5.2.34"></script>
-    <script src="/js/export.js?v=5.2.34"></script>
-    <script src="/js/modal-system.js?v=5.2.34"></script>
-    <script src="/js/admin-modals.js?v=5.2.34"></script>
+    <script src="/js/interactive-map.js?v=5.2.35"></script>
+    <script src="/js/station-dashboard.js?v=5.2.35"></script>
+    <script src="/js/navigation.js?v=5.2.35"></script>
+    <script src="/js/export.js?v=5.2.35"></script>
+    <script src="/js/modal-system.js?v=5.2.35"></script>
+    <script src="/js/admin-modals.js?v=5.2.35"></script>
     <script>
         let currentUser = null;
         let stationData = null;
@@ -3295,6 +3295,7 @@
                             <label>Deployment Date</label>
                             <input type="date" id="edit-platform-deployment-date" value="${platform.deployment_date || ''}"
                                    class="form-control">
+                            <small class="form-text">Format: YYYY-MM-DD</small>
                         </div>
                     </div>
 
@@ -3533,6 +3534,7 @@
                             <label>Deployment Date</label>
                             <input type="date" id="edit-instrument-deployment" value="${instrument.deployment_date || ''}"
                                    class="form-control">
+                            <small class="form-text">Format: YYYY-MM-DD</small>
                         </div>
                         <div class="form-group">
                             <label>First Measurement Year</label>
@@ -3884,6 +3886,12 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="create-deployment-date">Deployment Date</label>
+                            <input type="date" id="create-deployment-date" class="form-control">
+                            <small class="form-text">Format: YYYY-MM-DD (optional)</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="create-description">Description</label>
                             <textarea id="create-description" rows="3" placeholder="Optional description for this instrument..."></textarea>
                         </div>
@@ -3925,11 +3933,14 @@
                     throw new Error('Instrument type is required');
                 }
 
+                const deploymentDate = document.getElementById('create-deployment-date')?.value || null;
+
                 const instrumentData = {
                     platform_id: platformId,
                     display_name: displayName,
                     instrument_type: instrumentType,
                     ecosystem_code: ecosystemCode,
+                    deployment_date: deploymentDate,
                     description: description
                 };
 
@@ -4906,16 +4917,19 @@
                             <label for="platform-latitude">Latitude</label>
                             <input type="number" id="platform-latitude" class="form-input" step="any"
                                    placeholder="Decimal degrees" min="-90" max="90">
+                            <small class="form-text">Rounded to 6 decimals before saving</small>
                         </div>
                         <div class="form-group">
                             <label for="platform-longitude">Longitude</label>
                             <input type="number" id="platform-longitude" class="form-input" step="any"
                                    placeholder="Decimal degrees" min="-180" max="180">
+                            <small class="form-text">Rounded to 6 decimals before saving</small>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="platform-deployment-date">Deployment Date</label>
                         <input type="date" id="platform-deployment-date" class="form-input">
+                        <small class="form-text">Format: YYYY-MM-DD (e.g., 2025-10-25)</small>
                     </div>
                 </div>
 
