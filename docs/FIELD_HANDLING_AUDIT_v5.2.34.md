@@ -1,7 +1,7 @@
-# SITES Spectral v5.2.34: Complete Field Handling Audit Report
+# SITES Spectral v5.2.34 & v5.2.35: Complete Field Handling Audit Report
 
 **Report Date:** 2025-10-25
-**Version:** 5.2.34
+**Versions:** 5.2.34 (EDIT Modals), 5.2.35 (CREATE Modals)
 **Author:** SITES Spectral Development Team
 **Status:** ✅ All Issues Resolved
 
@@ -9,13 +9,14 @@
 
 ## Executive Summary
 
-This document provides a comprehensive analysis of field handling issues in the SITES Spectral Instruments Management System that were reported by users and subsequently resolved in version 5.2.34. The audit covered both backend API handlers and frontend form implementations for platform and instrument edit modals.
+This document provides a comprehensive analysis of field handling issues in the SITES Spectral Instruments Management System that were reported by users and subsequently resolved across versions 5.2.34 and 5.2.35. The audit covered both backend API handlers and frontend form implementations for platform and instrument EDIT and CREATE modals.
 
 ### Key Findings
 
-- **6 Critical Field Saving Issues** identified and resolved
-- **Backend API gaps** in coordinate precision handling and permission management
-- **Frontend form issues** with coordinate restrictions and multiselect components
+- **6 Critical Field Saving Issues** identified and resolved in v5.2.34
+- **Backend API gaps** in coordinate precision handling and permission management fixed
+- **Frontend form issues** with coordinate restrictions and multiselect components resolved
+- **CREATE modal enhancements** in v5.2.35 for improved date handling and UX
 - **100% resolution rate** for all user-reported problems
 - **Zero database migrations** required - all fixes implemented in application layer
 
@@ -891,16 +892,213 @@ Database Storage: "ANS-FOR-P01"
 
 ---
 
+## Part 10: CREATE Modal Enhancements (v5.2.35)
+
+### 10.1 Date Handling Improvements
+
+**Version:** 5.2.35
+**Focus:** Enhanced date field UX and guidance in CREATE and EDIT modals
+
+#### Problems Identified
+
+1. **No Format Guidance**: Date fields lacked help text explaining expected format
+2. **Missing Deployment Date**: Instrument CREATE modal didn't include deployment_date field
+3. **No Coordinate Help in CREATE**: CREATE modals missing coordinate rounding guidance present in EDIT modals
+4. **Inconsistent UX**: CREATE modals had less user guidance than EDIT modals
+
+#### Fixes Implemented
+
+**File Modified:** `public/station.html`
+
+**1. Platform CREATE Modal - Establishment Date (Line 4919)**
+
+```html
+<!-- BEFORE v5.2.35 - No help text -->
+<div class="form-group">
+    <label for="create-platform-establishment-date">Establishment Date</label>
+    <input type="date" id="create-platform-establishment-date" class="form-control">
+</div>
+
+<!-- AFTER v5.2.35 - Clear format guidance -->
+<div class="form-group">
+    <label for="create-platform-establishment-date">Establishment Date</label>
+    <input type="date" id="create-platform-establishment-date" class="form-control">
+    <small class="form-text">Format: YYYY-MM-DD (e.g., 2025-10-25)</small>
+</div>
+```
+
+**2. Platform CREATE Modal - Coordinate Fields (Lines 4909, 4915)**
+
+```html
+<!-- Added coordinate rounding help text -->
+<div class="form-group">
+    <label for="create-platform-latitude">Latitude (decimal degrees)</label>
+    <input type="number" id="create-platform-latitude" class="form-control" step="any"
+           placeholder="e.g., 68.353729" required>
+    <small class="form-text">Enter any precision - will be rounded to 6 decimal places before saving</small>
+</div>
+
+<div class="form-group">
+    <label for="create-platform-longitude">Longitude (decimal degrees)</label>
+    <input type="number" id="create-platform-longitude" class="form-control" step="any"
+           placeholder="e.g., 18.816522" required>
+    <small class="form-text">Enter any precision - will be rounded to 6 decimal places before saving</small>
+</div>
+```
+
+**3. Instrument CREATE Modal - Deployment Date Field (Lines 3888-3892)**
+
+```html
+<!-- ADDED in v5.2.35 - New field for deployment date -->
+<div class="form-group">
+    <label for="create-deployment-date">Deployment Date</label>
+    <input type="date" id="create-deployment-date" class="form-control">
+    <small class="form-text">Format: YYYY-MM-DD (optional)</small>
+</div>
+```
+
+**4. Updated saveNewInstrument Function (Lines 3936-3943)**
+
+```javascript
+// ADDED deployment_date collection
+const deploymentDate = document.getElementById('create-deployment-date')?.value || null;
+
+const instrumentData = {
+    platform_id: platformId,
+    display_name: displayName,
+    instrument_type: instrumentType,
+    ecosystem_code: ecosystemCode,
+    deployment_date: deploymentDate,  // NEW FIELD in v5.2.35
+    description: description
+};
+```
+
+**5. Platform EDIT Modal - Date Help Text (Line 3298)**
+
+```html
+<!-- Enhanced date field in EDIT modal -->
+<div class="form-group">
+    <label>Establishment Date</label>
+    <input type="date" id="edit-platform-deployment-date" value="${platform.deployment_date || ''}"
+           class="form-control">
+    <small class="form-text">Format: YYYY-MM-DD (e.g., 2025-10-25)</small>
+</div>
+```
+
+**6. Instrument EDIT Modal - Date Help Text (Line 3537)**
+
+```html
+<!-- Enhanced deployment date field in EDIT modal -->
+<div class="form-group">
+    <label>Deployment Date</label>
+    <input type="date" id="edit-instrument-deployment" value="${instrument.deployment_date || ''}"
+           class="form-control">
+    <small class="form-text">Format: YYYY-MM-DD (optional)</small>
+</div>
+```
+
+### 10.2 UX Consistency Improvements
+
+**Goal:** Ensure CREATE modals have same level of user guidance as EDIT modals
+
+| Modal Type | Date Help Text | Coordinate Help Text | Status |
+|------------|----------------|---------------------|--------|
+| Platform CREATE | ✅ Added v5.2.35 | ✅ Added v5.2.35 | Complete |
+| Platform EDIT | ✅ Added v5.2.35 | ✅ Added v5.2.34 | Complete |
+| Instrument CREATE | ✅ Added v5.2.35 | N/A (coordinates not in CREATE) | Complete |
+| Instrument EDIT | ✅ Added v5.2.35 | ✅ Added v5.2.34 | Complete |
+
+### 10.3 Date Format Standardization
+
+**HTML5 Date Input Behavior:**
+- Native `type="date"` inputs use YYYY-MM-DD format internally
+- Browser displays date in user's locale format (e.g., MM/DD/YYYY for US)
+- JavaScript receives/sends YYYY-MM-DD regardless of display format
+- Database stores YYYY-MM-DD format (DATE column type)
+
+**Help Text Purpose:**
+- Clarifies what format will be stored in database
+- Provides example date for context (e.g., 2025-10-25)
+- Reduces user confusion about date formatting
+- Maintains consistency across all date fields
+
+### 10.4 CREATE Modal Field Completeness
+
+**Platform CREATE Modal - All Fields:**
+```
+✅ display_name (required)
+✅ location_code (required)
+✅ ecosystem_code (required)
+✅ mounting_structure (optional)
+✅ platform_height_m (optional, with coordinate help text)
+✅ latitude (required, with coordinate help text)
+✅ longitude (required, with coordinate help text)
+✅ establishment_date (optional, with format help text) ← Enhanced v5.2.35
+✅ description (optional)
+```
+
+**Instrument CREATE Modal - All Fields:**
+```
+✅ display_name (required)
+✅ instrument_type (required)
+✅ ecosystem_code (required)
+✅ deployment_date (optional, with format help text) ← ADDED v5.2.35
+✅ description (optional)
+```
+
+### 10.5 Verification Testing
+
+**Test Case 1: Platform CREATE - Establishment Date**
+- Input: Select date from calendar picker
+- Expected: Date saved in YYYY-MM-DD format
+- Help Text: "Format: YYYY-MM-DD (e.g., 2025-10-25)"
+- Result: ✅ **PASS** - Clear guidance, proper format
+
+**Test Case 2: Instrument CREATE - Deployment Date**
+- Input: Select date from calendar picker
+- Expected: Date saved in YYYY-MM-DD format, included in instrument data
+- Help Text: "Format: YYYY-MM-DD (optional)"
+- Result: ✅ **PASS** - New field working correctly
+
+**Test Case 3: Platform CREATE - Coordinate Precision**
+- Input: Latitude `68.3537291234567`
+- Expected: Backend rounds to `68.353729`
+- Help Text: "Enter any precision - will be rounded to 6 decimal places before saving"
+- Result: ✅ **PASS** - Consistent with EDIT modal behavior
+
+**Test Case 4: All EDIT Modals - Date Help Text**
+- Platform EDIT: ✅ Date help text present
+- Instrument EDIT: ✅ Date help text present
+- Result: ✅ **PASS** - All modals have consistent guidance
+
+### 10.6 Impact Assessment
+
+**Before v5.2.35:**
+- ❌ No date format guidance in any modal
+- ❌ Instrument CREATE missing deployment_date field
+- ❌ CREATE modals had less help text than EDIT modals
+- ❌ Users uncertain about date format expectations
+
+**After v5.2.35:**
+- ✅ Clear "YYYY-MM-DD" format help text on all date fields
+- ✅ Instrument CREATE includes deployment_date with guidance
+- ✅ CREATE and EDIT modals have consistent UX
+- ✅ Coordinate help text present in all relevant modals
+- ✅ Users receive clear guidance for all data entry
+
+---
+
 ## Conclusion
 
-The v5.2.34 audit successfully identified and resolved **6 critical field saving issues** affecting both platform and instrument edit modals. All problems were traced to either:
+The v5.2.34 and v5.2.35 audits successfully identified and resolved **6 critical field saving issues** (v5.2.34) and **enhanced CREATE modal UX** (v5.2.35) affecting both platform and instrument forms. All problems were traced to either:
 
 1. **Backend API gaps** in data type handling and permission management
 2. **Frontend form restrictions** limiting user input unnecessarily
 3. **Missing user guidance** about field behavior
 
-The comprehensive fixes implemented in v5.2.34 ensure:
+The comprehensive fixes implemented in v5.2.34 and v5.2.35 ensure:
 
+**v5.2.34 - EDIT Modal Fixes:**
 - ✅ **100% resolution** of all user-reported issues
 - ✅ **Robust data type handling** with validation and transformation
 - ✅ **Flexible coordinate input** accepting any precision, rounded to 6 decimals server-side
@@ -908,10 +1106,17 @@ The comprehensive fixes implemented in v5.2.34 ensure:
 - ✅ **Professional UX** with enhanced styling, validation feedback, and loading states
 - ✅ **Maintainable codebase** with reusable components and clear separation of concerns
 
+**v5.2.35 - CREATE Modal Enhancements:**
+- ✅ **Date format guidance** on all date fields with "YYYY-MM-DD" help text
+- ✅ **Deployment date field** added to instrument CREATE modal
+- ✅ **Coordinate help text** added to platform CREATE modal for consistency
+- ✅ **UX parity** between CREATE and EDIT modals achieved
+- ✅ **Clear user guidance** for all data entry fields across all forms
+
 **All user-reported issues have been resolved and verified through comprehensive testing.**
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 2.0 (Updated for v5.2.35)
 **Last Updated:** 2025-10-25
 **Next Review:** After major version update or user feedback
