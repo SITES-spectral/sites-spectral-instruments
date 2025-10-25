@@ -13,6 +13,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.34] - 2025-10-25
+
+### 🚨 CRITICAL FIX: Complete Edit Modal Audit & Field Saving Resolution
+
+**📅 Deployment Date**: 2025-10-25
+**🎯 Major Achievement**: Resolved all user-reported field saving issues in platform and instrument edit modals
+
+#### 🔧 **Critical Field Saving Fixes**
+- **Fixed azimuth_degrees not saving**: Instrument azimuth field now properly persists to database
+- **Fixed platform_height_m not saving**: Platform mast height field now correctly stored
+- **Fixed coordinate precision handling**: Coordinates accept any decimals, rounded to exactly 6 decimals before database save
+- **Fixed operation_programs not saving**: Research programs multiselect now correctly collects and persists values
+- **Fixed legacy_acronym permissions**: Moved from admin-only to station-editable fields
+
+#### 🔐 **Backend API Improvements**
+- **Coordinate Rounding Helper**: Added `roundCoordinate()` function in both instruments.js and platforms.js
+  - Accepts unlimited decimal precision from frontend
+  - Rounds to exactly 6 decimal places: `Math.round(value * 1000000) / 1000000`
+  - Prevents precision loss and ensures consistent database storage
+- **legacy_acronym Permission Update**: Moved from `adminOnlyFields` to `stationEditableFields` (instruments.js:235)
+- **Enhanced Data Type Handling**: Added proper parsing for all numeric, integer, and boolean fields
+  - Numeric fields: instrument_height_m, azimuth_degrees, degrees_from_nadir, platform_height_m
+  - Integer fields: first_measurement_year, last_measurement_year, camera_iso
+  - Boolean fields: image_processing_enabled
+
+#### 🎨 **Frontend UX Enhancements**
+
+**New Component Library (`public/js/form-components.js`)**:
+- `EnhancedMultiselect`: Visual tag display for multiselect fields with remove buttons
+- `FormValidator`: Real-time validation with green/red visual feedback
+- `LoadingOverlay`: Professional loading states during save operations
+- `EnhancedNotification`: Improved success/error notifications with field counts
+
+**New Enhanced Styling (`public/css/form-enhancements.css`)**:
+- Card-based form sections with gradient backgrounds and hover effects
+- Professional input styling with focus states and transitions
+- Validation state styling (green checkmarks for valid, red borders for invalid)
+- Enhanced multiselect tags with gradient backgrounds and hover animations
+- Loading overlays with blur effects
+- Responsive design for mobile/tablet support
+- Accessibility features (focus indicators, high contrast support, reduced motion)
+
+#### 📋 **Platform Edit Modal Improvements**
+- **Coordinate Inputs**: Changed step from `0.000001` to `any` - accepts unlimited decimals
+- **Help Text**: Added informative text "Enter any precision - will be rounded to 6 decimal places before saving"
+- **Platform Height**: Verified field ID consistency (edit-platform-height)
+- **Multiselect Enhancement**: Research programs now using enhanced multiselect component with visual tags
+
+#### 📋 **Instrument Edit Modal Improvements**
+- **legacy_acronym Field**: Removed readonly restriction for station users, added placeholder and help text
+- **Coordinate Inputs**: Changed step from `0.000001` to `any` - accepts unlimited decimals
+- **Help Text**: Added informative text about 6-decimal rounding for both lat/lon fields
+- **Field ID Verification**: Confirmed all field IDs match between form generation and save function
+  - edit-instrument-azimuth → azimuth_degrees (line 3739)
+  - edit-instrument-height → instrument_height_m (line 3737)
+  - edit-instrument-nadir → degrees_from_nadir (line 3740)
+
+#### ✨ **User Experience Improvements**
+- Form sections with visual hierarchy and section icons
+- Input fields with enhanced focus states and transitions
+- Real-time validation feedback (valid/invalid states)
+- Professional loading states during save operations
+- Success notifications showing number of fields saved
+- Help text throughout forms explaining field behavior
+- Placeholder text with examples for all fields
+
+#### 🧪 **Testing & Validation**
+- ✅ Station users can edit instrument legacy_acronym field
+- ✅ Coordinates with 8, 10, 12+ decimals accepted and properly rounded to 6
+- ✅ Platform height saves correctly and persists
+- ✅ Instrument azimuth saves correctly and persists
+- ✅ Instrument height saves correctly and persists
+- ✅ Operation programs multiselect saves correctly
+- ✅ All form fields refresh after successful save
+
+#### 🗂️ **Files Modified**
+1. `src/handlers/instruments.js` - Coordinate rounding, legacy_acronym permissions, data type handling
+2. `src/handlers/platforms.js` - Coordinate rounding, enhanced field processing
+3. `public/station.html` - Updated modals, coordinate inputs, version bumps
+4. `public/js/form-components.js` - NEW: Enhanced form component library
+5. `public/css/form-enhancements.css` - NEW: Professional form styling
+6. `package.json` - Version bump to 5.2.34
+
+#### 📊 **Impact Summary**
+- **User-Reported Issues**: 6 critical issues resolved (azimuth, height, coordinates, programs, legacy names, general saving)
+- **Code Quality**: Clean separation of concerns with reusable components
+- **UX Improvement**: Significant enhancement in form usability and visual feedback
+- **Backend Robustness**: Proper data type validation and coordinate precision handling
+- **Backward Compatibility**: 100% maintained - no breaking changes
+
 ## [5.2.27] - 2025-09-30
 
 ### ✅ MAINTENANCE: Architecture Verification & Production Deployment

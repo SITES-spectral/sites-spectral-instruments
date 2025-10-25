@@ -221,9 +221,18 @@ async function updateInstrument(id, user, request, env) {
   const allowedFields = [];
   const values = [];
 
+  // Helper function to round coordinates to exactly 6 decimal places
+  const roundCoordinate = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const num = parseFloat(value);
+    if (isNaN(num)) return null;
+    // Round to 6 decimal places: multiply by 1000000, round, divide by 1000000
+    return Math.round(num * 1000000) / 1000000;
+  };
+
   // Fields that station users can edit
   const stationEditableFields = [
-    'display_name', 'status',
+    'display_name', 'status', 'legacy_acronym',  // Added legacy_acronym for station users
     // Camera specifications (all new camera fields from migration 0025 & 0026)
     'camera_brand', 'camera_model', 'camera_resolution', 'camera_serial_number',
     'camera_aperture', 'camera_exposure_time', 'camera_focal_length_mm',
@@ -244,14 +253,34 @@ async function updateInstrument(id, user, request, env) {
     'description', 'installation_notes', 'maintenance_notes'
   ];
 
-  // Fields that only admin can edit
-  const adminOnlyFields = ['legacy_acronym', 'normalized_name', 'instrument_number'];
+  // Fields that only admin can edit (legacy_acronym moved to station-editable)
+  const adminOnlyFields = ['normalized_name', 'instrument_number'];
 
-  // Add station editable fields
+  // Add station editable fields with proper data type handling
   stationEditableFields.forEach(field => {
     if (instrumentData[field] !== undefined) {
+      let value = instrumentData[field];
+
+      // Apply coordinate rounding to latitude and longitude
+      if (field === 'latitude' || field === 'longitude') {
+        value = roundCoordinate(value);
+      }
+      // Ensure numeric fields are properly parsed
+      else if (['instrument_height_m', 'azimuth_degrees', 'degrees_from_nadir',
+                 'instrument_degrees_from_nadir', 'camera_focal_length_mm'].includes(field)) {
+        value = value ? parseFloat(value) : null;
+      }
+      // Ensure integer fields are properly parsed
+      else if (['first_measurement_year', 'last_measurement_year', 'camera_iso'].includes(field)) {
+        value = value ? parseInt(value, 10) : null;
+      }
+      // Ensure boolean fields are properly parsed
+      else if (field === 'image_processing_enabled') {
+        value = Boolean(value);
+      }
+
       allowedFields.push(`${field} = ?`);
-      values.push(instrumentData[field]);
+      values.push(value);
     }
   });
 
