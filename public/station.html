@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.36">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.37">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.36">
+    <meta name="app-version" content="5.2.37">
     <meta name="build-date" content="2025-11-14">
 
     <style>
@@ -1715,17 +1715,17 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.36"></script>
-    <script src="/js/api.js?v=5.2.36"></script>
-    <script src="/js/components.js?v=5.2.36"></script>
+    <script src="/js/utils.js?v=5.2.37"></script>
+    <script src="/js/api.js?v=5.2.37"></script>
+    <script src="/js/components.js?v=5.2.37"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.36"></script>
-    <script src="/js/station-dashboard.js?v=5.2.36"></script>
-    <script src="/js/navigation.js?v=5.2.36"></script>
-    <script src="/js/export.js?v=5.2.36"></script>
+    <script src="/js/interactive-map.js?v=5.2.37"></script>
+    <script src="/js/station-dashboard.js?v=5.2.37"></script>
+    <script src="/js/navigation.js?v=5.2.37"></script>
+    <script src="/js/export.js?v=5.2.37"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
@@ -1803,6 +1803,16 @@
                         stationData = window.sitesStationDashboard.stationData;
                         currentUser = window.sitesStationDashboard.currentUser;
                         console.log('Successfully synced station data after waiting:', stationData);
+
+                        // Verify sync actually worked
+                        console.log('🔍 Sync verification:', {
+                            stationDataExists: !!stationData,
+                            hasId: !!stationData?.id,
+                            stationId: stationData?.id,
+                            stationAcronym: stationData?.acronym,
+                            currentUserRole: currentUser?.role,
+                            isAdmin: currentUser?.role === 'admin'
+                        });
                     } else {
                         throw new Error('SitesStationDashboard failed to load station data within timeout');
                     }
@@ -1882,10 +1892,14 @@
                 document.getElementById('station-name').textContent = stationData.display_name;
                 document.title = `${stationData.display_name} - SITES Spectral`;
 
-                // Show admin controls if user is admin
-                if (currentUser && currentUser.role === 'admin') {
+                // Show admin controls if user is admin AND stationData is loaded
+                if (currentUser && currentUser.role === 'admin' && stationData && stationData.id) {
                     document.getElementById('admin-station-controls').style.display = 'block';
                     document.getElementById('admin-platform-controls').style.display = 'block';
+                    console.log('✅ Admin controls shown with station ID:', stationData.id);
+                } else if (currentUser && currentUser.role === 'admin') {
+                    console.error('❌ Admin user detected but stationData not loaded:', stationData);
+                    showNotification('Station data not fully loaded. Please refresh the page.', 'warning');
                 }
 
                 // Set station description if available
@@ -4857,21 +4871,42 @@
 
         // Platform Creation Functions (Admin Only)
         function handleCreatePlatformClick() {
-            if (!stationData || !stationData.id) {
-                console.error('Station data not loaded');
+            // Use dashboard instance as source of truth, fallback to global variable
+            const data = window.sitesStationDashboard?.stationData || stationData;
+
+            console.log('🔵 Platform creation requested. Station data:', {
+                dashboardData: window.sitesStationDashboard?.stationData,
+                globalData: stationData,
+                using: data,
+                hasId: !!data?.id
+            });
+
+            if (!data || !data.id) {
+                console.error('❌ Station data not loaded. Dashboard:',
+                    window.sitesStationDashboard?.stationData,
+                    'Global:', stationData);
                 showNotification('Station data not available. Please refresh the page.', 'error');
                 return;
             }
-            showCreatePlatformModal(stationData.id);
+
+            console.log('✅ Creating platform for station ID:', data.id);
+            showCreatePlatformModal(data.id);
         }
 
         function showCreatePlatformModal(stationId) {
+            console.log('🔵 INLINE showCreatePlatformModal called with stationId:', stationId);
+            console.log('🔵 currentUser:', currentUser);
+            console.log('🔵 currentUser?.role:', currentUser?.role);
+
             if (!currentUser || currentUser.role !== 'admin') {
+                console.error('❌ Admin check failed');
                 showNotification('Admin privileges required', 'error');
                 return;
             }
 
+            console.log('✅ Admin check passed, generating form...');
             const form = document.getElementById('create-platform-form');
+            console.log('🔵 Form element:', form);
             form.innerHTML = `
                 <div class="form-section">
                     <h4><i class="fas fa-info-circle"></i> Basic Information</h4>

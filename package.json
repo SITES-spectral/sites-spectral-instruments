@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.36",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.36 - BUG FIX: Platform Creation Button & Form Field Debugging",
+  "version": "5.2.37",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.37 - CRITICAL FIX: Platform Creation Button Function Conflicts & Data Loading",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

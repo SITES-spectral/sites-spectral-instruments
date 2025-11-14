@@ -2182,9 +2182,12 @@ function loadPlatformsAndInstruments() {
     return window.sitesStationDashboard.loadPlatformsAndInstruments();
 }
 
-function showCreatePlatformModal() {
-    return window.sitesStationDashboard.showCreatePlatformModal();
-}
+// DISABLED: This global override was conflicting with inline implementation in station.html
+// The inline version (station.html lines 4886+) accepts stationId parameter and generates form HTML
+// This module version expects pre-existing form, causing button click failures
+// function showCreatePlatformModal() {
+//     return window.sitesStationDashboard.showCreatePlatformModal();
+// }
 
 function saveNewPlatform() {
     return window.sitesStationDashboard.saveNewPlatform();
