@@ -1762,11 +1762,11 @@ stations:
     country: Sweden
     description: Svartberget Research Station
     platforms:
-      SVB_FOR_P02:
-        id: SVB_FOR_P02
-        normalized_name: SVB_FOR_P02
+      SVB_FOR_PL02:
+        id: SVB_FOR_PL02
+        normalized_name: SVB_FOR_PL02
         display_name: SVB Forest Below Canopy Platform 02 (below canopy)
-        location_code: P02
+        location_code: PL02
         operation_programs:
         - SITES
         mounting_structure: Tripod
@@ -1775,9 +1775,9 @@ stations:
         elevation_m: null
         instruments:
           phenocams:
-            SVB_FOR_P02_PHE01:
-              id: SVB_FOR_P02_PHE01
-              normalized_name: SVB_FOR_P02_PHE01
+            SVB_FOR_PL02_PHE01:
+              id: SVB_FOR_PL02_PHE01
+              normalized_name: SVB_FOR_PL02_PHE01
               display_name: SVB Forest Below Canopy Phenocam 01
               instrument_type: Phenocam
               ecosystem_code: FOR
@@ -2079,6 +2079,44 @@ stations:
             epsg: epsg:4326
             latitude_dd: 64.182536
             longitude_dd: 19.558045
+      SVB_MIR_PL04:
+        id: SVB_MIR_PL04
+        normalized_name: SVB_MIR_PL04
+        display_name: DEG PL04 wet PAR pole
+        location_code: PL04
+        operation_programs:
+        - SITES
+        mounting_structure: Pole
+        platform_height_m: 2.0
+        status: Active
+        elevation_m: null
+        deployment_date: '2024-04-18'
+        description: Degerö wet PAR pole
+        instruments: {}
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: 64.182779
+            longitude_dd: 19.557327
+      SVB_FOR_PL03:
+        id: SVB_FOR_PL03
+        normalized_name: SVB_FOR_PL03
+        display_name: SVB P03 Below Canopy CPEC
+        location_code: PL03
+        operation_programs:
+        - SITES
+        mounting_structure: Tripod
+        platform_height_m: 3.22
+        status: Active
+        elevation_m: null
+        deployment_date: '2016-09-12'
+        description: Svartberget below canopy CPEC tripod
+        instruments: {}
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: 64.25586
+            longitude_dd: 19.773851
     geolocation:
       point:
         epsg: epsg:4326

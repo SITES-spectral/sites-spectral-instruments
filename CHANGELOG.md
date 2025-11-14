@@ -13,6 +13,104 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.38] - 2025-11-14
+
+### 📊 DATABASE UPDATE: Added SVB Platforms & Naming Consistency
+
+**📅 Update Date**: 2025-11-14
+**🎯 Major Achievement**: Added two new Svartberget platforms and fixed naming consistency across all SVB platforms
+
+#### 🆕 **New Platforms Added**
+
+**1. SVB_MIR_PL04 - Degerö Wet PAR Pole** (ID: 31)
+- **Display Name**: DEG PL04 wet PAR pole
+- **Description**: Degerö wet PAR pole
+- **Location Code**: PL04
+- **Ecosystem**: Mire (MIR)
+- **Mounting Structure**: Pole
+- **Platform Height**: 2.0 m
+- **Coordinates**: 64.182779°N, 19.557327°E
+- **Deployment Date**: 2024-04-18
+- **Status**: Active
+
+**2. SVB_FOR_PL03 - Below Canopy CPEC Tripod** (ID: 32)
+- **Display Name**: SVB P03 Below Canopy CPEC
+- **Description**: Svartberget below canopy CPEC tripod
+- **Location Code**: PL03
+- **Ecosystem**: Forest (FOR)
+- **Mounting Structure**: Tripod
+- **Platform Height**: 3.22 m
+- **Coordinates**: 64.25586°N, 19.773851°E
+- **Deployment Date**: 2016-09-12
+- **Status**: Active
+
+#### 🔧 **Naming Consistency Fixes**
+
+**Updated Existing Platforms:**
+- **SVB_FOR_P02** → **SVB_FOR_PL02** (ID: 30)
+  - Updated normalized_name to use consistent "PL" prefix
+  - Updated location_code from P02 to PL02
+
+**Naming Convention Standard:**
+- All Svartberget platforms now use consistent location code format: `PL##`
+- Normalized names follow pattern: `{STATION}_{ECOSYSTEM}_PL##`
+- Ensures consistency across database and YAML configuration
+
+#### 📋 **Complete Svartberget Platform Inventory**
+
+**Total Platforms: 7**
+
+**Forest Ecosystem (FOR):**
+1. SVB_FOR_PL01 - 150m tower (70m)
+2. SVB_FOR_PL02 - Below Canopy North (3.2m) - Updated naming
+3. SVB_FOR_PL03 - Below Canopy CPEC (3.22m) - **NEW**
+
+**Mire Ecosystem (MIR):**
+4. SVB_MIR_PL01 - DEG flag pole W (17.5m)
+5. SVB_MIR_PL02 - DEG ICOS mast (3.3m)
+6. SVB_MIR_PL03 - DEG dry PAR pole (2m)
+7. SVB_MIR_PL04 - DEG wet PAR pole (2m) - **NEW**
+
+#### 🗂️ **Files Modified**
+1. **Production Database** - Direct SQL INSERT and UPDATE operations
+2. **yamls/stations_latest_production.yaml** - Added new platforms, updated naming
+3. **package.json** - Version bump to 5.2.38
+4. **CHANGELOG.md** - This changelog entry
+5. **CLAUDE.md** - Updated documentation
+
+#### 💾 **Database Operations Performed**
+
+```sql
+-- Added SVB_MIR_PL04
+INSERT INTO platforms (station_id, normalized_name, display_name, location_code,
+    mounting_structure, platform_height_m, status, latitude, longitude,
+    deployment_date, description)
+VALUES (7, 'SVB_MIR_PL04', 'DEG PL04 wet PAR pole', 'PL04', 'Pole', 2.0,
+    'Active', 64.182779, 19.557327, '2024-04-18', 'Degerö wet PAR pole');
+
+-- Added SVB_FOR_PL03
+INSERT INTO platforms (station_id, normalized_name, display_name, location_code,
+    mounting_structure, platform_height_m, status, latitude, longitude,
+    deployment_date, description)
+VALUES (7, 'SVB_FOR_PL03', 'SVB P03 Below Canopy CPEC', 'PL03', 'Tripod', 3.22,
+    'Active', 64.25586, 19.773851, '2016-09-12',
+    'Svartberget below canopy CPEC tripod');
+
+-- Fixed naming consistency
+UPDATE platforms SET normalized_name = 'SVB_FOR_PL02', location_code = 'PL02'
+WHERE id = 30;
+
+UPDATE platforms SET normalized_name = 'SVB_FOR_PL03', location_code = 'PL03'
+WHERE id = 32;
+```
+
+#### ✅ **Verification**
+- ✅ Both new platforms inserted successfully to production database
+- ✅ Naming consistency updated across database
+- ✅ YAML configuration synchronized with database
+- ✅ All 7 Svartberget platforms now live and visible
+- ✅ Coordinates and metadata verified
+
 ## [5.2.37] - 2025-11-14
 
 ### 🚨 CRITICAL FIX: Platform Creation Button Function Conflicts & Data Loading

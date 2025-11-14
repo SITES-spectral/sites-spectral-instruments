@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.37",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.37 - CRITICAL FIX: Platform Creation Button Function Conflicts & Data Loading",
+  "version": "5.2.38",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.38 - DATABASE UPDATE: Added SVB Platforms & Naming Consistency",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

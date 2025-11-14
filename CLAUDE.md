@@ -2,7 +2,105 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.37 - CRITICAL FIX: Platform Creation Button Function Conflicts & Data Loading (2025-11-14)
+## Version 5.2.38 - DATABASE UPDATE: Added SVB Platforms & Naming Consistency (2025-11-14)
+**✅ STATUS: SUCCESSFULLY COMPLETED**
+**🌐 Production URL:** https://sites.jobelab.com
+**📅 Update Date:** 2025-11-14
+**🎯 Major Achievement:** Added two new Svartberget platforms and standardized naming conventions across all SVB platforms
+
+### 🆕 New Platforms Added in v5.2.38
+
+#### SVB_MIR_PL04 - Degerö Wet PAR Pole
+- **Database ID**: 31
+- **Normalized Name**: SVB_MIR_PL04
+- **Display Name**: DEG PL04 wet PAR pole
+- **Location Code**: PL04
+- **Ecosystem**: Mire (MIR)
+- **Mounting Structure**: Pole
+- **Height**: 2.0 m
+- **Coordinates**: 64.182779°N, 19.557327°E
+- **Deployment Date**: 2024-04-18
+- **Description**: Degerö wet PAR pole
+- **Status**: Active
+
+#### SVB_FOR_PL03 - Below Canopy CPEC Tripod
+- **Database ID**: 32
+- **Normalized Name**: SVB_FOR_PL03
+- **Display Name**: SVB P03 Below Canopy CPEC
+- **Location Code**: PL03
+- **Ecosystem**: Forest (FOR)
+- **Mounting Structure**: Tripod
+- **Height**: 3.22 m
+- **Coordinates**: 64.25586°N, 19.773851°E
+- **Deployment Date**: 2016-09-12
+- **Description**: Svartberget below canopy CPEC tripod
+- **Status**: Active
+
+### 🔧 Naming Consistency Updates in v5.2.38
+
+Fixed inconsistent naming convention for existing platform:
+- **SVB_FOR_P02** → **SVB_FOR_PL02** (ID: 30)
+  - Updated `normalized_name` to use consistent "PL" prefix
+  - Updated `location_code` from "P02" to "PL02"
+
+**Naming Convention Standard:**
+All Svartberget platforms now follow consistent pattern:
+- **Format**: `{STATION}_{ECOSYSTEM}_PL##`
+- **Location Codes**: Always use `PL##` (not `P##`)
+- **Examples**: SVB_FOR_PL01, SVB_MIR_PL04
+
+### 📊 Complete Svartberget Platform Inventory
+
+**Total: 7 Platforms**
+
+**Forest Ecosystem (FOR) - 3 Platforms:**
+1. **SVB_FOR_PL01** - SVB PL01 150m tower (Tower, 70m)
+2. **SVB_FOR_PL02** - SVB PL02 Below Canopy North (Tripod, 3.2m) *Updated*
+3. **SVB_FOR_PL03** - SVB P03 Below Canopy CPEC (Tripod, 3.22m) *NEW*
+
+**Mire Ecosystem (MIR) - 4 Platforms:**
+4. **SVB_MIR_PL01** - DEG PL01 flag pole W (Pole, 17.5m)
+5. **SVB_MIR_PL02** - DEG PL02 ICOS mast (Mast, 3.3m)
+6. **SVB_MIR_PL03** - DEG PL03 dry PAR pole (Pole, 2m)
+7. **SVB_MIR_PL04** - DEG PL04 wet PAR pole (Pole, 2m) *NEW*
+
+### 💾 Database Operations Performed
+
+Direct SQL operations on production database:
+```sql
+-- Insert SVB_MIR_PL04
+INSERT INTO platforms VALUES (7, 'SVB_MIR_PL04', 'DEG PL04 wet PAR pole', 'PL04',
+    'Pole', 2.0, 'Active', 64.182779, 19.557327, '2024-04-18',
+    'Degerö wet PAR pole', datetime('now'), datetime('now'));
+
+-- Insert SVB_FOR_PL03
+INSERT INTO platforms VALUES (7, 'SVB_FOR_PL03', 'SVB P03 Below Canopy CPEC', 'PL03',
+    'Tripod', 3.22, 'Active', 64.25586, 19.773851, '2016-09-12',
+    'Svartberget below canopy CPEC tripod', datetime('now'), datetime('now'));
+
+-- Update naming consistency
+UPDATE platforms
+SET normalized_name = 'SVB_FOR_PL02', location_code = 'PL02', updated_at = datetime('now')
+WHERE id = 30;
+
+UPDATE platforms
+SET normalized_name = 'SVB_FOR_PL03', location_code = 'PL03', updated_at = datetime('now')
+WHERE id = 32;
+```
+
+### 📝 Files Updated in v5.2.38
+
+1. **Production Database** - Direct INSERT and UPDATE via wrangler CLI
+2. **yamls/stations_latest_production.yaml** - Added new platforms, updated naming
+3. **package.json** - Version bump to 5.2.38
+4. **CHANGELOG.md** - Comprehensive changelog entry
+5. **CLAUDE.md** - This documentation update
+
+### ⚠️ Platform Creation Button Issue
+
+**Note**: Platforms were added directly via database CLI due to ongoing investigation of platform creation button functionality. The button click issue (reported in v5.2.36-37) is still being investigated. Workaround: Direct database operations for platform management.
+
+## Previous Version: 5.2.37 - CRITICAL FIX: Platform Creation Button Function Conflicts & Data Loading (2025-11-14)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
