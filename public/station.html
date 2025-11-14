@@ -21,12 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.35">
-    <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.35">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.36">
+    <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.34">
-    <meta name="build-date" content="2025-10-25">
+    <meta name="app-version" content="5.2.36">
+    <meta name="build-date" content="2025-11-14">
 
     <style>
         body {
@@ -1514,7 +1514,7 @@
                     <i class="fas fa-tower-observation"></i> Platforms & Instruments
                 </h2>
                 <div id="admin-platform-controls" style="display: none;">
-                    <button onclick="showCreatePlatformModal(stationData.id)" class="btn btn-success" title="Create New Platform">
+                    <button onclick="handleCreatePlatformClick()" class="btn btn-success" title="Create New Platform">
                         <i class="fas fa-plus"></i> <i class="fas fa-tower-broadcast"></i> Platform
                     </button>
                 </div>
@@ -1715,19 +1715,19 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.35"></script>
-    <script src="/js/api.js?v=5.2.35"></script>
-    <script src="/js/components.js?v=5.2.35"></script>
-    <script src="/js/form-components.js?v=5.2.35"></script>
+    <script src="/js/utils.js?v=5.2.36"></script>
+    <script src="/js/api.js?v=5.2.36"></script>
+    <script src="/js/components.js?v=5.2.36"></script>
+    <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.35"></script>
-    <script src="/js/station-dashboard.js?v=5.2.35"></script>
-    <script src="/js/navigation.js?v=5.2.35"></script>
-    <script src="/js/export.js?v=5.2.35"></script>
-    <script src="/js/modal-system.js?v=5.2.35"></script>
-    <script src="/js/admin-modals.js?v=5.2.35"></script>
+    <script src="/js/interactive-map.js?v=5.2.36"></script>
+    <script src="/js/station-dashboard.js?v=5.2.36"></script>
+    <script src="/js/navigation.js?v=5.2.36"></script>
+    <script src="/js/export.js?v=5.2.36"></script>
+    <script src="/js/modal-system.js?v=5.2.36"></script>
+    <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
         let currentUser = null;
         let stationData = null;
@@ -3197,6 +3197,12 @@
             const editForm = document.getElementById('platform-edit-form');
             const isAdmin = currentUser.role === 'admin';
 
+            console.log('showPlatformEditModal called with platform:', platform);
+            console.log('Platform critical fields:', {
+                deployment_date: platform.deployment_date,
+                description: platform.description
+            });
+
             // Build comprehensive edit form based on user permissions
             editForm.innerHTML = `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
@@ -3351,6 +3357,15 @@
 
             // FIX #1: Add debugging and data validation
             console.log('showInstrumentEditModal called with instrument:', instrument);
+            console.log('Instrument critical fields:', {
+                deployment_date: instrument.deployment_date,
+                camera_serial_number: instrument.camera_serial_number,
+                instrument_height_m: instrument.instrument_height_m,
+                degrees_from_nadir: instrument.degrees_from_nadir,
+                description: instrument.description,
+                installation_notes: instrument.installation_notes,
+                maintenance_notes: instrument.maintenance_notes
+            });
 
             if (!instrument || !instrument.id) {
                 console.error('Invalid instrument data provided to showInstrumentEditModal');
@@ -3686,6 +3701,12 @@
                     updated_at: new Date().toISOString()
                 };
 
+                console.log('Saving platform data:', platformData);
+                console.log('Critical fields being saved:', {
+                    deployment_date: platformData.deployment_date,
+                    description: platformData.description
+                });
+
                 const response = await fetch(`/api/platforms/${platformId}`, {
                     method: 'PUT',
                     headers: {
@@ -3763,6 +3784,17 @@
 
                     updated_at: new Date().toISOString()
                 };
+
+                console.log('Saving instrument data:', instrumentData);
+                console.log('Critical fields being saved:', {
+                    deployment_date: instrumentData.deployment_date,
+                    camera_serial_number: instrumentData.camera_serial_number,
+                    instrument_height_m: instrumentData.instrument_height_m,
+                    degrees_from_nadir: instrumentData.degrees_from_nadir,
+                    description: instrumentData.description,
+                    installation_notes: instrumentData.installation_notes,
+                    maintenance_notes: instrumentData.maintenance_notes
+                });
 
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
                     method: 'PUT',
@@ -4824,6 +4856,15 @@
         }
 
         // Platform Creation Functions (Admin Only)
+        function handleCreatePlatformClick() {
+            if (!stationData || !stationData.id) {
+                console.error('Station data not loaded');
+                showNotification('Station data not available. Please refresh the page.', 'error');
+                return;
+            }
+            showCreatePlatformModal(stationData.id);
+        }
+
         function showCreatePlatformModal(stationId) {
             if (!currentUser || currentUser.role !== 'admin') {
                 showNotification('Admin privileges required', 'error');

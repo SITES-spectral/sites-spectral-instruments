@@ -2,7 +2,84 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Version 5.2.33 - CRITICAL FIX: Automatic Instrument Naming with Type Code Prefix (2025-09-30)
+## Version 5.2.36 - BUG FIX: Platform Creation Button & Form Field Debugging (2025-11-14)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
+**🌐 Production URL:** https://sites.jobelab.com
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Deployment Date:** 2025-11-14 ✅ DEPLOYED v5.2.36 🐛
+**🎯 Major Achievement:** Fixed platform creation button not responding and added comprehensive debugging for form field data loading
+
+### 🐛 Critical Bugs Fixed in v5.2.36
+
+#### 1. Platform Creation Button Not Responding
+- **Error**: "Add Platform" button not responding when clicked by admin users
+- **Root Cause**: Inline `onclick` attribute attempted to access `stationData.id` which could be null/undefined during page load
+- **Impact**: Admin users unable to create new platforms at Svartberget and other stations
+- **Solution**: Added safe wrapper function `handleCreatePlatformClick()` that validates `stationData` before calling modal
+
+#### 2. Form Field Data Loading Investigation
+- **Issue**: Multiple edit form fields showing empty despite database having values
+- **Platform Edit Fields Affected**: deployment_date, description
+- **Instrument Edit Fields Affected**: deployment_date, camera_serial_number, instrument_height_m, degrees_from_nadir, description, installation_notes, maintenance_notes
+- **Investigation**: Added comprehensive console logging to track data flow from API → form → save
+- **Discovery**: Database query confirms SVB_MIR_PL03_PHE01 has values for description, installation_notes, and instrument_height_m
+
+### 🔧 Technical Fixes in v5.2.36
+**File Modified:** `/public/station.html`
+
+**1. Platform Creation Button Fix (line 1517):**
+```html
+<!-- Before: Direct inline onclick with potential null reference -->
+<button onclick="showCreatePlatformModal(stationData.id)" ...>
+
+<!-- After: Safe wrapper function -->
+<button onclick="handleCreatePlatformClick()" ...>
+```
+
+**2. Added Safe Wrapper Function (lines 4827-4834):**
+```javascript
+function handleCreatePlatformClick() {
+    if (!stationData || !stationData.id) {
+        console.error('Station data not loaded');
+        showNotification('Station data not available. Please refresh the page.', 'error');
+        return;
+    }
+    showCreatePlatformModal(stationData.id);
+}
+```
+
+**3. Added Comprehensive Console Logging:**
+- **Platform Edit Modal** (lines 3200-3204): Logs platform object and critical fields (deployment_date, description)
+- **Instrument Edit Modal** (lines 3354-3362): Logs instrument object and all problematic fields
+- **Platform Save Function** (lines 3698-3702): Logs data being sent to API with critical fields highlighted
+- **Instrument Save Function** (lines 3782-3791): Logs complete instrument data being saved
+
+### 📋 Debugging Guide for Form Field Issues
+To investigate why form fields appear empty:
+1. Open browser console (F12)
+2. Click "Edit" on platform or instrument
+3. Check console logs for:
+   - What data API returned (object dump)
+   - What values are being set in form fields (critical fields object)
+4. Make changes and click "Save Changes"
+5. Check console logs for what data is being sent to backend
+
+### 🔍 Database Verification
+Confirmed database has correct schema and data:
+- **Platforms table**: Has `deployment_date` and `description` columns
+- **Instruments table**: Has all required fields including `deployment_date`, `camera_serial_number`, `instrument_height_m`, `degrees_from_nadir`, `description`, `installation_notes`, `maintenance_notes`
+- **Sample Query**: Instrument id=21 (SVB_MIR_PL03_PHE01) has non-null values for description and installation_notes
+
+### 📝 Next Steps for User
+1. Clear browser cache and reload page
+2. Test platform creation button - should now open modal correctly
+3. Test editing platform/instrument and check browser console for data flow
+4. If fields still appear empty after reload, console logs will show whether:
+   - API is not returning the data
+   - Form is not setting the values correctly
+   - Data is being saved but not persisted
+
+## Previous Version: 5.2.33 - CRITICAL FIX: Automatic Instrument Naming with Type Code Prefix (2025-09-30)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev

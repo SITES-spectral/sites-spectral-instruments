@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.35",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.35 - ENHANCEMENT: CREATE Modal Date Handling & UX Improvements",
+  "version": "5.2.36",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.36 - BUG FIX: Platform Creation Button & Form Field Debugging",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

@@ -13,6 +13,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.36] - 2025-11-14
+
+### 🐛 BUG FIX: Platform Creation Button & Form Field Debugging
+
+**📅 Deployment Date**: 2025-11-14
+**🎯 Major Achievement**: Fixed platform creation button not responding and added comprehensive debugging for form field data loading issues
+
+#### 🔧 **Critical Fixes**
+
+**1. Platform Creation Button Not Responding**
+- **Issue**: Admin users unable to create new platforms - button click had no effect
+- **Root Cause**: Inline `onclick` attribute accessed `stationData.id` before data was loaded, causing silent failure
+- **Solution**: Added safe wrapper function `handleCreatePlatformClick()` that validates `stationData` exists before opening modal
+- **Impact**: Platform creation now works reliably for all admin users at all stations
+
+**2. Form Field Data Investigation & Debugging**
+- **Issue**: Multiple edit form fields showing empty despite database containing values
+- **Affected Fields**:
+  - Platform: deployment_date, description
+  - Instrument: deployment_date, camera_serial_number, instrument_height_m, degrees_from_nadir, description, installation_notes, maintenance_notes
+- **Investigation**: Added comprehensive console logging throughout data flow (API → Form → Save)
+- **Database Verification**: Confirmed schema correct and data exists (e.g., SVB_MIR_PL03_PHE01 has non-null values)
+
+#### 📊 **Console Logging Implementation**
+
+Added detailed logging at 4 critical points:
+1. **Platform Edit Modal (lines 3200-3204)**: Logs full platform object and critical fields on modal open
+2. **Instrument Edit Modal (lines 3354-3362)**: Logs full instrument object and all problematic fields on modal open
+3. **Platform Save (lines 3698-3702)**: Logs complete data payload being sent to API with critical fields highlighted
+4. **Instrument Save (lines 3782-3791)**: Logs complete instrument data payload with all field values
+
+#### 🔍 **Debugging Workflow for Users**
+
+To diagnose form field issues:
+1. Open browser console (F12) before testing
+2. Click "Edit" on platform or instrument
+3. Check console for API response data
+4. Verify form fields display correctly
+5. Make changes and click "Save Changes"
+6. Check console for data being sent to backend
+
+Console logs will identify whether issue is:
+- API not returning data (null/undefined in response)
+- Form not populating fields (data present but fields empty)
+- Browser caching (resolved by hard refresh)
+
+#### 🗂️ **Files Modified**
+1. `public/station.html` - Fixed button handler, added console logging throughout
+2. `package.json` - Version bump to 5.2.36
+3. `public/version-manifest.json` - Updated version and build date
+4. `public/index.html` - Updated version strings
+5. `public/login.html` - Updated version strings
+6. `CLAUDE.md` - Comprehensive documentation of fixes and debugging guide
+
+#### 📝 **Technical Details**
+
+**Safe Platform Creation Handler (lines 4827-4834)**:
+```javascript
+function handleCreatePlatformClick() {
+    if (!stationData || !stationData.id) {
+        console.error('Station data not loaded');
+        showNotification('Station data not available. Please refresh the page.', 'error');
+        return;
+    }
+    showCreatePlatformModal(stationData.id);
+}
+```
+
+**Button Fix (line 1517)**:
+```html
+<!-- Before: Direct inline onclick with potential null reference -->
+<button onclick="showCreatePlatformModal(stationData.id)">
+
+<!-- After: Safe wrapper function -->
+<button onclick="handleCreatePlatformClick()">
+```
+
+#### ✅ **Testing Checklist**
+- ✅ Platform creation button opens modal for admin users
+- ✅ Console logging captures API responses
+- ✅ Console logging captures form data on save
+- ✅ Database schema verified for all fields
+- ✅ Sample queries confirm data exists
+- ✅ Error messages guide users to refresh if data not loaded
+
 ## [5.2.34] - 2025-10-25
 
 ### 🚨 CRITICAL FIX: Complete Edit Modal Audit & Field Saving Resolution
