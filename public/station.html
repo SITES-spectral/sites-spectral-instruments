@@ -1396,6 +1396,293 @@
             color: #6b7280;
         }
 
+        /* Collapsible Form Sections */
+        .form-section {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .form-section h4 {
+            margin: 0;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-bottom: 1px solid #d1d5db;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .form-section h4:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+        }
+
+        .form-section h4 i {
+            color: #059669;
+        }
+
+        .form-section h4::after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            margin-left: auto;
+            font-size: 0.75rem;
+            transition: transform 0.3s;
+        }
+
+        .form-section.collapsed h4::after {
+            transform: rotate(-90deg);
+        }
+
+        .form-section-content {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .form-section.collapsed .form-section-content {
+            max-height: 0;
+            padding: 0 1.5rem;
+        }
+
+        .form-section-content .form-group {
+            grid-column: span 1;
+        }
+
+        .form-section-content .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #059669;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+        }
+
+        /* Range Slider */
+        .range-slider-container {
+            padding: 0.5rem 0;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1f2937;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1f2937;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-value-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .quality-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .quality-badge.low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .quality-badge.medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .quality-badge.high {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Character Counter */
+        .char-counter {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+
+        .char-counter.error {
+            color: #ef4444;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .status-badge.valid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.expiring {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Progressive Disclosure */
+        .progressive-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+        }
+
+        .progressive-section.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Field Icons */
+        .field-with-icon {
+            position: relative;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        .field-with-icon .form-control {
+            padding-left: 2.5rem;
+        }
+
+        /* Validation States */
+        .form-control.valid {
+            border-color: #10b981;
+        }
+
+        .form-control.valid:focus {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Responsive Grid */
+        @media (max-width: 768px) {
+            .form-section-content {
+                grid-template-columns: 1fr;
+            }
+
+            .form-section-content .form-group {
+                grid-column: span 1 !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -3398,225 +3685,403 @@
                 return;
             }
 
-            // Build comprehensive edit form matching detail modal structure and order
+            // Build comprehensive edit form with 7 collapsible sections and 46 fields
             editForm.innerHTML = `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
                 <form id="instrument-update-form">
                     <input type="hidden" id="edit-instrument-id" value="${instrument.id}">
 
-                    <!-- General Information Section -->
+                    <!-- SECTION 1: General Information (5 fields) -->
                     <div class="form-section">
-                        <h4><i class="fas fa-info-circle"></i> General Information</h4>
-                        <div class="form-group">
-                            <label>Instrument Name</label>
-                            <input type="text" id="edit-instrument-name" value="${instrument.display_name || ''}"
-                                   class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Legacy Acronym</label>
-                            <input type="text" id="edit-instrument-legacy" value="${instrument.legacy_acronym || ''}"
-                                   class="form-control" placeholder="e.g., ANS-FOR-P01">
-                            <small class="form-text">Legacy identifier for historical data compatibility</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Normalized ID</label>
-                            <input type="text" id="edit-instrument-normalized" value="${instrument.normalized_name || ''}"
-                                   class="form-control field-readonly" readonly title="System-generated identifier">
-                        </div>
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select id="edit-instrument-status" class="form-control">
-                                <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-                                <option value="Testing" ${instrument.status === 'Testing' ? 'selected' : ''}>Testing</option>
-                                <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
-                                <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
-                                <option value="Planned" ${instrument.status === 'Planned' ? 'selected' : ''}>Planned</option>
-                            </select>
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-info-circle"></i> General Information</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Instrument Name <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="edit-instrument-name" value="${instrument.display_name || ''}"
+                                       class="form-control" required aria-label="Instrument Name">
+                            </div>
+                            <div class="form-group">
+                                <label>Normalized ID</label>
+                                <input type="text" id="edit-instrument-normalized" value="${instrument.normalized_name || ''}"
+                                       class="form-control field-readonly" readonly aria-label="Normalized ID">
+                                <small class="form-text">System-generated identifier</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Legacy Acronym</label>
+                                <input type="text" id="edit-instrument-legacy" value="${instrument.legacy_acronym || ''}"
+                                       class="form-control" placeholder="e.g., ANS-FOR-P01" aria-label="Legacy Acronym">
+                                <small class="form-text">Historical data compatibility</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="edit-instrument-status" class="form-control" aria-label="Instrument Status">
+                                    <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Testing" ${instrument.status === 'Testing' ? 'selected' : ''}>Testing</option>
+                                    <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                    <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                                    <option value="Planned" ${instrument.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Measurement Status</label>
+                                <select id="edit-instrument-measurement-status" class="form-control" aria-label="Measurement Status">
+                                    <option value="">Select status...</option>
+                                    <option value="Active" ${instrument.measurement_status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${instrument.measurement_status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Intermittent" ${instrument.measurement_status === 'Intermittent' ? 'selected' : ''}>Intermittent</option>
+                                    <option value="Seasonal" ${instrument.measurement_status === 'Seasonal' ? 'selected' : ''}>Seasonal</option>
+                                    <option value="Completed" ${instrument.measurement_status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Camera Specifications Section -->
+                    <!-- SECTION 2: Camera Specifications (11 fields) -->
                     <div class="form-section">
-                        <h4><i class="fas fa-camera"></i> Camera Specifications</h4>
-                        <div class="form-group">
-                            <label>Camera Brand</label>
-                            <select id="edit-instrument-camera-brand" class="form-control">
-                                <option value="">Select brand...</option>
-                                <option value="Mobotix" ${instrument.camera_brand === 'Mobotix' ? 'selected' : ''}>Mobotix</option>
-                                <option value="Axis" ${instrument.camera_brand === 'Axis' ? 'selected' : ''}>Axis</option>
-                                <option value="Canon" ${instrument.camera_brand === 'Canon' ? 'selected' : ''}>Canon</option>
-                                <option value="Nikon" ${instrument.camera_brand === 'Nikon' ? 'selected' : ''}>Nikon</option>
-                                <option value="Sony" ${instrument.camera_brand === 'Sony' ? 'selected' : ''}>Sony</option>
-                                <option value="Other" ${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? 'selected' : ''}>Other</option>
-                            </select>
-                            <input type="text" id="edit-instrument-camera-brand-other" value="${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? instrument.camera_brand : ''}"
-                                   class="form-control mt-2" placeholder="Enter other brand..." style="display: ${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? 'block' : 'none'};">
-                        </div>
-                        <div class="form-group">
-                            <label>Camera Model</label>
-                            <input type="text" id="edit-instrument-camera-model" value="${instrument.camera_model || ''}"
-                                   class="form-control" placeholder="e.g., M16B, P1437-E">
-                        </div>
-                        <div class="form-group">
-                            <label>Resolution</label>
-                            <select id="edit-instrument-camera-resolution" class="form-control">
-                                <option value="">Select resolution...</option>
-                                <option value="4096x3072" ${instrument.camera_resolution === '4096x3072' ? 'selected' : ''}>4096x3072 (12MP)</option>
-                                <option value="3264x2448" ${instrument.camera_resolution === '3264x2448' ? 'selected' : ''}>3264x2448 (8MP)</option>
-                                <option value="2592x1944" ${instrument.camera_resolution === '2592x1944' ? 'selected' : ''}>2592x1944 (5MP)</option>
-                                <option value="2048x1536" ${instrument.camera_resolution === '2048x1536' ? 'selected' : ''}>2048x1536 (3MP)</option>
-                                <option value="1920x1080" ${instrument.camera_resolution === '1920x1080' ? 'selected' : ''}>1920x1080 (2MP/FHD)</option>
-                                <option value="Other" ${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? 'selected' : ''}>Other</option>
-                            </select>
-                            <input type="text" id="edit-instrument-camera-resolution-other" value="${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? instrument.camera_resolution : ''}"
-                                   class="form-control mt-2" placeholder="e.g., 5472x3648" style="display: ${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? 'block' : 'none'};">
-                        </div>
-                        <div class="form-group">
-                            <label>Serial Number</label>
-                            <input type="text" id="edit-instrument-camera-serial" value="${instrument.camera_serial_number || ''}"
-                                   class="form-control" placeholder="Camera serial number">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-camera"></i> Camera Specifications</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Camera Brand</label>
+                                <select id="edit-instrument-camera-brand" class="form-control" aria-label="Camera Brand">
+                                    <option value="">Select brand...</option>
+                                    <option value="Mobotix" ${instrument.camera_brand === 'Mobotix' ? 'selected' : ''}>Mobotix</option>
+                                    <option value="Axis" ${instrument.camera_brand === 'Axis' ? 'selected' : ''}>Axis</option>
+                                    <option value="Canon" ${instrument.camera_brand === 'Canon' ? 'selected' : ''}>Canon</option>
+                                    <option value="Nikon" ${instrument.camera_brand === 'Nikon' ? 'selected' : ''}>Nikon</option>
+                                    <option value="Sony" ${instrument.camera_brand === 'Sony' ? 'selected' : ''}>Sony</option>
+                                    <option value="Other" ${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-camera-brand-other" value="${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? instrument.camera_brand : ''}"
+                                       class="form-control mt-2" placeholder="Enter other brand..." style="display: ${instrument.camera_brand && !['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony'].includes(instrument.camera_brand) ? 'block' : 'none'};" aria-label="Other Camera Brand">
+                            </div>
+                            <div class="form-group">
+                                <label>Camera Model</label>
+                                <input type="text" id="edit-instrument-camera-model" value="${instrument.camera_model || ''}"
+                                       class="form-control" placeholder="e.g., M16B, P1437-E" aria-label="Camera Model">
+                            </div>
+                            <div class="form-group">
+                                <label>Serial Number</label>
+                                <input type="text" id="edit-instrument-camera-serial" value="${instrument.camera_serial_number || ''}"
+                                       class="form-control" placeholder="Camera serial number" aria-label="Camera Serial Number">
+                            </div>
+                            <div class="form-group">
+                                <label>Resolution</label>
+                                <select id="edit-instrument-camera-resolution" class="form-control" aria-label="Camera Resolution">
+                                    <option value="">Select resolution...</option>
+                                    <option value="4096x3072" ${instrument.camera_resolution === '4096x3072' ? 'selected' : ''}>4096x3072 (12MP)</option>
+                                    <option value="3264x2448" ${instrument.camera_resolution === '3264x2448' ? 'selected' : ''}>3264x2448 (8MP)</option>
+                                    <option value="2592x1944" ${instrument.camera_resolution === '2592x1944' ? 'selected' : ''}>2592x1944 (5MP)</option>
+                                    <option value="2048x1536" ${instrument.camera_resolution === '2048x1536' ? 'selected' : ''}>2048x1536 (3MP)</option>
+                                    <option value="1920x1080" ${instrument.camera_resolution === '1920x1080' ? 'selected' : ''}>1920x1080 (2MP/FHD)</option>
+                                    <option value="Other" ${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-camera-resolution-other" value="${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? instrument.camera_resolution : ''}"
+                                       class="form-control mt-2" placeholder="e.g., 5472x3648" style="display: ${instrument.camera_resolution && !['4096x3072', '3264x2448', '2592x1944', '2048x1536', '1920x1080'].includes(instrument.camera_resolution) ? 'block' : 'none'};" aria-label="Other Camera Resolution">
+                            </div>
+                            <div class="form-group">
+                                <label>Mega Pixels</label>
+                                <input type="number" id="edit-instrument-camera-megapixels" value="${instrument.camera_mega_pixels || ''}"
+                                       class="form-control" step="0.1" min="0" placeholder="e.g., 12.3" aria-label="Camera Megapixels">
+                            </div>
+                            <div class="form-group">
+                                <label>Lens</label>
+                                <input type="text" id="edit-instrument-camera-lens" value="${instrument.camera_lens || ''}"
+                                       class="form-control" placeholder="e.g., 18-55mm f/3.5-5.6" aria-label="Camera Lens">
+                            </div>
+                            <div class="form-group">
+                                <label>Focal Length (mm)</label>
+                                <input type="number" id="edit-instrument-camera-focal-length" value="${instrument.camera_focal_length_mm || ''}"
+                                       class="form-control" step="0.1" min="0" placeholder="e.g., 50" aria-label="Camera Focal Length">
+                            </div>
+                            <div class="form-group">
+                                <label>Aperture (f-stop)</label>
+                                <select id="edit-instrument-camera-aperture" class="form-control" aria-label="Camera Aperture">
+                                    <option value="">Select aperture...</option>
+                                    <option value="f/1.4" ${instrument.camera_aperture === 'f/1.4' ? 'selected' : ''}>f/1.4</option>
+                                    <option value="f/1.8" ${instrument.camera_aperture === 'f/1.8' ? 'selected' : ''}>f/1.8</option>
+                                    <option value="f/2.0" ${instrument.camera_aperture === 'f/2.0' ? 'selected' : ''}>f/2.0</option>
+                                    <option value="f/2.8" ${instrument.camera_aperture === 'f/2.8' ? 'selected' : ''}>f/2.8</option>
+                                    <option value="f/4.0" ${instrument.camera_aperture === 'f/4.0' ? 'selected' : ''}>f/4.0</option>
+                                    <option value="f/5.6" ${instrument.camera_aperture === 'f/5.6' ? 'selected' : ''}>f/5.6</option>
+                                    <option value="f/8.0" ${instrument.camera_aperture === 'f/8.0' ? 'selected' : ''}>f/8.0</option>
+                                    <option value="Auto" ${instrument.camera_aperture === 'Auto' ? 'selected' : ''}>Auto</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Exposure Time</label>
+                                <input type="text" id="edit-instrument-camera-exposure" value="${instrument.camera_exposure_time || ''}"
+                                       class="form-control" placeholder="e.g., 1/250s, Auto" pattern="^(1/\\d+|\\d+)s?$|^Auto$" aria-label="Camera Exposure Time">
+                                <small class="form-text">Format: 1/250s or Auto</small>
+                            </div>
+                            <div class="form-group">
+                                <label>ISO</label>
+                                <select id="edit-instrument-camera-iso" class="form-control" aria-label="Camera ISO">
+                                    <option value="">Select ISO...</option>
+                                    <option value="100" ${instrument.camera_iso === '100' ? 'selected' : ''}>100</option>
+                                    <option value="200" ${instrument.camera_iso === '200' ? 'selected' : ''}>200</option>
+                                    <option value="400" ${instrument.camera_iso === '400' ? 'selected' : ''}>400</option>
+                                    <option value="800" ${instrument.camera_iso === '800' ? 'selected' : ''}>800</option>
+                                    <option value="1600" ${instrument.camera_iso === '1600' ? 'selected' : ''}>1600</option>
+                                    <option value="3200" ${instrument.camera_iso === '3200' ? 'selected' : ''}>3200</option>
+                                    <option value="Auto" ${instrument.camera_iso === 'Auto' ? 'selected' : ''}>Auto</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>White Balance</label>
+                                <select id="edit-instrument-camera-wb" class="form-control" aria-label="Camera White Balance">
+                                    <option value="">Select white balance...</option>
+                                    <option value="Auto" ${instrument.camera_white_balance === 'Auto' ? 'selected' : ''}>Auto</option>
+                                    <option value="Daylight" ${instrument.camera_white_balance === 'Daylight' ? 'selected' : ''}>Daylight</option>
+                                    <option value="Cloudy" ${instrument.camera_white_balance === 'Cloudy' ? 'selected' : ''}>Cloudy</option>
+                                    <option value="Shade" ${instrument.camera_white_balance === 'Shade' ? 'selected' : ''}>Shade</option>
+                                    <option value="Tungsten" ${instrument.camera_white_balance === 'Tungsten' ? 'selected' : ''}>Tungsten</option>
+                                    <option value="Fluorescent" ${instrument.camera_white_balance === 'Fluorescent' ? 'selected' : ''}>Fluorescent</option>
+                                    <option value="Flash" ${instrument.camera_white_balance === 'Flash' ? 'selected' : ''}>Flash</option>
+                                    <option value="Custom" ${instrument.camera_white_balance === 'Custom' ? 'selected' : ''}>Custom</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Position & Orientation Section -->
+                    <!-- SECTION 3: Position & Orientation (6 fields) -->
                     <div class="form-section">
-                        <h4><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
-                        <div class="form-group">
-                            <label>Latitude</label>
-                            <input type="number" id="edit-instrument-latitude" value="${instrument.latitude || ''}"
-                                   class="form-control" step="any" placeholder="Decimal degrees (rounded to 6 decimals)">
-                            <small class="form-text">Enter any precision - will be rounded to 6 decimal places before saving</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Longitude</label>
-                            <input type="number" id="edit-instrument-longitude" value="${instrument.longitude || ''}"
-                                   class="form-control" step="any" placeholder="Decimal degrees (rounded to 6 decimals)">
-                            <small class="form-text">Enter any precision - will be rounded to 6 decimal places before saving</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Height (meters)</label>
-                            <input type="number" id="edit-instrument-height" value="${instrument.instrument_height_m || ''}"
-                                   class="form-control" step="0.01" placeholder="Height above ground">
-                        </div>
-                        <div class="form-group">
-                            <label>Viewing Direction</label>
-                            <select id="edit-instrument-viewing-direction" class="form-control">
-                                <option value="">Select direction...</option>
-                                <option value="North" ${instrument.viewing_direction === 'North' ? 'selected' : ''}>North</option>
-                                <option value="Northeast" ${instrument.viewing_direction === 'Northeast' ? 'selected' : ''}>Northeast</option>
-                                <option value="East" ${instrument.viewing_direction === 'East' ? 'selected' : ''}>East</option>
-                                <option value="Southeast" ${instrument.viewing_direction === 'Southeast' ? 'selected' : ''}>Southeast</option>
-                                <option value="South" ${instrument.viewing_direction === 'South' ? 'selected' : ''}>South</option>
-                                <option value="Southwest" ${instrument.viewing_direction === 'Southwest' ? 'selected' : ''}>Southwest</option>
-                                <option value="West" ${instrument.viewing_direction === 'West' ? 'selected' : ''}>West</option>
-                                <option value="Northwest" ${instrument.viewing_direction === 'Northwest' ? 'selected' : ''}>Northwest</option>
-                                <option value="Other" ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'selected' : ''}>Other</option>
-                            </select>
-                            <input type="text" id="edit-instrument-viewing-direction-other" value="${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? instrument.viewing_direction : ''}"
-                                   class="form-control mt-2" placeholder="Specify direction..." style="display: ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'block' : 'none'};">
-                        </div>
-                        <div class="form-group">
-                            <label>Azimuth (degrees)</label>
-                            <input type="number" id="edit-instrument-azimuth" value="${instrument.azimuth_degrees || ''}"
-                                   class="form-control" step="0.1" min="0" max="360" placeholder="0-360 degrees">
-                        </div>
-                        <div class="form-group">
-                            <label>Degrees from Nadir</label>
-                            <input type="number" id="edit-instrument-nadir" value="${instrument.degrees_from_nadir || ''}"
-                                   class="form-control" step="0.1" min="0" max="90" placeholder="0-90 degrees">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Latitude</label>
+                                <input type="number" id="edit-instrument-latitude" value="${instrument.latitude || ''}"
+                                       class="form-control" step="any" placeholder="Decimal degrees" aria-label="Latitude">
+                                <small class="form-text">Rounded to 6 decimal places</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Longitude</label>
+                                <input type="number" id="edit-instrument-longitude" value="${instrument.longitude || ''}"
+                                       class="form-control" step="any" placeholder="Decimal degrees" aria-label="Longitude">
+                                <small class="form-text">Rounded to 6 decimal places</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Height (meters)</label>
+                                <input type="number" id="edit-instrument-height" value="${instrument.instrument_height_m || ''}"
+                                       class="form-control" step="0.01" placeholder="Height above ground" aria-label="Instrument Height">
+                            </div>
+                            <div class="form-group">
+                                <label>Viewing Direction</label>
+                                <select id="edit-instrument-viewing-direction" class="form-control" aria-label="Viewing Direction">
+                                    <option value="">Select direction...</option>
+                                    <option value="North" ${instrument.viewing_direction === 'North' ? 'selected' : ''}>North</option>
+                                    <option value="Northeast" ${instrument.viewing_direction === 'Northeast' ? 'selected' : ''}>Northeast</option>
+                                    <option value="East" ${instrument.viewing_direction === 'East' ? 'selected' : ''}>East</option>
+                                    <option value="Southeast" ${instrument.viewing_direction === 'Southeast' ? 'selected' : ''}>Southeast</option>
+                                    <option value="South" ${instrument.viewing_direction === 'South' ? 'selected' : ''}>South</option>
+                                    <option value="Southwest" ${instrument.viewing_direction === 'Southwest' ? 'selected' : ''}>Southwest</option>
+                                    <option value="West" ${instrument.viewing_direction === 'West' ? 'selected' : ''}>West</option>
+                                    <option value="Northwest" ${instrument.viewing_direction === 'Northwest' ? 'selected' : ''}>Northwest</option>
+                                    <option value="Other" ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-viewing-direction-other" value="${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? instrument.viewing_direction : ''}"
+                                       class="form-control mt-2" placeholder="Specify direction..." style="display: ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'block' : 'none'};" aria-label="Other Viewing Direction">
+                            </div>
+                            <div class="form-group">
+                                <label>Azimuth (degrees)</label>
+                                <input type="number" id="edit-instrument-azimuth" value="${instrument.azimuth_degrees || ''}"
+                                       class="form-control" step="0.1" min="0" max="360" placeholder="0-360 degrees" aria-label="Azimuth">
+                            </div>
+                            <div class="form-group">
+                                <label>Degrees from Nadir</label>
+                                <input type="number" id="edit-instrument-nadir" value="${instrument.degrees_from_nadir || ''}"
+                                       class="form-control" step="0.1" min="0" max="90" placeholder="0-90 degrees" aria-label="Degrees from Nadir">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Timeline & Classification Section -->
+                    <!-- SECTION 4: Timeline & Deployment (7 fields) -->
                     <div class="form-section">
-                        <h4><i class="fas fa-calendar-alt"></i> Timeline & Classification</h4>
-                        <div class="form-group">
-                            <label>Instrument Type</label>
-                            <select id="edit-instrument-type" class="form-control">
-                                <option value="">Select type...</option>
-                                <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
-                                <option value="Weather Station" ${instrument.instrument_type === 'Weather Station' ? 'selected' : ''}>Weather Station</option>
-                                <option value="Sensor" ${instrument.instrument_type === 'Sensor' ? 'selected' : ''}>Sensor</option>
-                                <option value="Other" ${instrument.instrument_type && !['Phenocam', 'Weather Station', 'Sensor'].includes(instrument.instrument_type) ? 'selected' : ''}>Other</option>
-                            </select>
-                            <input type="text" id="edit-instrument-type-other" value="${instrument.instrument_type && !['Phenocam', 'Weather Station', 'Sensor'].includes(instrument.instrument_type) ? instrument.instrument_type : ''}"
-                                   class="form-control mt-2" placeholder="Specify type..." style="display: ${instrument.instrument_type && !['Phenocam', 'Weather Station', 'Sensor'].includes(instrument.instrument_type) ? 'block' : 'none'};">
-                        </div>
-                        <div class="form-group">
-                            <label>Ecosystem Code</label>
-                            <select id="edit-instrument-ecosystem" class="form-control">
-                                <option value="">Select ecosystem...</option>
-                                <option value="HEA" ${instrument.ecosystem_code === 'HEA' ? 'selected' : ''}>HEA - Heathland</option>
-                                <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Arable Land</option>
-                                <option value="MIR" ${instrument.ecosystem_code === 'MIR' ? 'selected' : ''}>MIR - Mires</option>
-                                <option value="LAK" ${instrument.ecosystem_code === 'LAK' ? 'selected' : ''}>LAK - Lake</option>
-                                <option value="WET" ${instrument.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
-                                <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
-                                <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
-                                <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine Forest</option>
-                                <option value="CON" ${instrument.ecosystem_code === 'CON' ? 'selected' : ''}>CON - Coniferous Forest</option>
-                                <option value="DEC" ${instrument.ecosystem_code === 'DEC' ? 'selected' : ''}>DEC - Deciduous Forest</option>
-                                <option value="MAR" ${instrument.ecosystem_code === 'MAR' ? 'selected' : ''}>MAR - Marshland</option>
-                                <option value="PEA" ${instrument.ecosystem_code === 'PEA' ? 'selected' : ''}>PEA - Peatland</option>
-                                <option value="Other" ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'selected' : ''}>Other</option>
-                            </select>
-                            <input type="text" id="edit-instrument-ecosystem-other" value="${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? instrument.ecosystem_code : ''}"
-                                   class="form-control mt-2" placeholder="Enter ecosystem code..." style="display: ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'block' : 'none'};">
-                        </div>
-                        <div class="form-group">
-                            <label>Deployment Date</label>
-                            <input type="date" id="edit-instrument-deployment" value="${instrument.deployment_date || ''}"
-                                   class="form-control">
-                            <small class="form-text">Format: YYYY-MM-DD</small>
-                        </div>
-                        <div class="form-group">
-                            <label>First Measurement Year</label>
-                            <input type="number" id="edit-instrument-first-year" value="${instrument.first_measurement_year || ''}"
-                                   class="form-control" min="2000" max="2030" placeholder="e.g., 2010">
-                        </div>
-                        <div class="form-group">
-                            <label>Last Measurement Year</label>
-                            <input type="number" id="edit-instrument-last-year" value="${instrument.last_measurement_year || ''}"
-                                   class="form-control" min="2000" max="2030" placeholder="e.g., 2024">
-                        </div>
-                        <div class="form-group">
-                            <label>Measurement Status</label>
-                            <select id="edit-instrument-measurement-status" class="form-control">
-                                <option value="">Select status...</option>
-                                <option value="Active" ${instrument.measurement_status === 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${instrument.measurement_status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-                                <option value="Intermittent" ${instrument.measurement_status === 'Intermittent' ? 'selected' : ''}>Intermittent</option>
-                                <option value="Seasonal" ${instrument.measurement_status === 'Seasonal' ? 'selected' : ''}>Seasonal</option>
-                                <option value="Completed" ${instrument.measurement_status === 'Completed' ? 'selected' : ''}>Completed</option>
-                            </select>
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-calendar-alt"></i> Timeline & Deployment</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Instrument Type</label>
+                                <select id="edit-instrument-type" class="form-control" aria-label="Instrument Type">
+                                    <option value="">Select type...</option>
+                                    <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
+                                    <option value="Multispectral Sensor" ${instrument.instrument_type === 'Multispectral Sensor' ? 'selected' : ''}>Multispectral Sensor</option>
+                                    <option value="Hyperspectral Sensor" ${instrument.instrument_type === 'Hyperspectral Sensor' ? 'selected' : ''}>Hyperspectral Sensor</option>
+                                    <option value="PAR Sensor" ${instrument.instrument_type === 'PAR Sensor' ? 'selected' : ''}>PAR Sensor</option>
+                                    <option value="Other" ${instrument.instrument_type && !['Phenocam', 'Multispectral Sensor', 'Hyperspectral Sensor', 'PAR Sensor'].includes(instrument.instrument_type) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-type-other" value="${instrument.instrument_type && !['Phenocam', 'Multispectral Sensor', 'Hyperspectral Sensor', 'PAR Sensor'].includes(instrument.instrument_type) ? instrument.instrument_type : ''}"
+                                       class="form-control mt-2" placeholder="Specify type..." style="display: ${instrument.instrument_type && !['Phenocam', 'Multispectral Sensor', 'Hyperspectral Sensor', 'PAR Sensor'].includes(instrument.instrument_type) ? 'block' : 'none'};" aria-label="Other Instrument Type">
+                            </div>
+                            <div class="form-group">
+                                <label>Ecosystem Code</label>
+                                <select id="edit-instrument-ecosystem" class="form-control" aria-label="Ecosystem Code">
+                                    <option value="">Select ecosystem...</option>
+                                    <option value="HEA" ${instrument.ecosystem_code === 'HEA' ? 'selected' : ''}>HEA - Heathland</option>
+                                    <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Arable Land</option>
+                                    <option value="MIR" ${instrument.ecosystem_code === 'MIR' ? 'selected' : ''}>MIR - Mires</option>
+                                    <option value="LAK" ${instrument.ecosystem_code === 'LAK' ? 'selected' : ''}>LAK - Lake</option>
+                                    <option value="WET" ${instrument.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
+                                    <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                    <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
+                                    <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine Forest</option>
+                                    <option value="CON" ${instrument.ecosystem_code === 'CON' ? 'selected' : ''}>CON - Coniferous Forest</option>
+                                    <option value="DEC" ${instrument.ecosystem_code === 'DEC' ? 'selected' : ''}>DEC - Deciduous Forest</option>
+                                    <option value="MAR" ${instrument.ecosystem_code === 'MAR' ? 'selected' : ''}>MAR - Marshland</option>
+                                    <option value="PEA" ${instrument.ecosystem_code === 'PEA' ? 'selected' : ''}>PEA - Peatland</option>
+                                    <option value="Other" ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-ecosystem-other" value="${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? instrument.ecosystem_code : ''}"
+                                       class="form-control mt-2" placeholder="Enter ecosystem code..." style="display: ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'block' : 'none'};" aria-label="Other Ecosystem Code">
+                            </div>
+                            <div class="form-group">
+                                <label>Deployment Date</label>
+                                <input type="date" id="edit-instrument-deployment" value="${instrument.deployment_date || ''}"
+                                       class="form-control" aria-label="Deployment Date">
+                                <small class="form-text">Format: YYYY-MM-DD</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Calibration Date</label>
+                                <input type="date" id="edit-instrument-calibration-date" value="${instrument.calibration_date || ''}"
+                                       class="form-control" onchange="updateCalibrationStatus(this)" aria-label="Calibration Date">
+                                <small class="form-text" id="calibration-status"></small>
+                            </div>
+                            <div class="form-group">
+                                <label>First Measurement Year</label>
+                                <input type="number" id="edit-instrument-first-year" value="${instrument.first_measurement_year || ''}"
+                                       class="form-control" min="2000" max="2030" placeholder="e.g., 2010" aria-label="First Measurement Year">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Measurement Year</label>
+                                <input type="number" id="edit-instrument-last-year" value="${instrument.last_measurement_year || ''}"
+                                       class="form-control" min="2000" max="2030" placeholder="e.g., 2024" aria-label="Last Measurement Year">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Platform & Station</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                    <input type="text" value="${instrument.platform_name || ''}" class="form-control field-readonly" readonly title="Platform is managed separately" aria-label="Platform">
+                                    <input type="text" value="${(instrument.station_name || '') + (instrument.station_acronym ? ' (' + instrument.station_acronym + ')' : '')}" class="form-control field-readonly" readonly title="Station is managed separately" aria-label="Station">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Notes & Context Section -->
+                    <!-- SECTION 5: System Configuration (6 fields) -->
                     <div class="form-section">
-                        <h4><i class="fas fa-sticky-note"></i> Notes & Context</h4>
-                        <div class="form-group">
-                            <label>Platform</label>
-                            <input type="text" id="edit-instrument-platform" value="${instrument.platform_name || ''}"
-                                   class="form-control field-readonly" readonly title="Platform is managed separately">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-cog"></i> System Configuration</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Power Source</label>
+                                <select id="edit-instrument-power-source" class="form-control" aria-label="Power Source">
+                                    <option value="">Select power source...</option>
+                                    <option value="Solar" ${instrument.power_source === 'Solar' ? 'selected' : ''}>☀️ Solar</option>
+                                    <option value="Grid" ${instrument.power_source === 'Grid' ? 'selected' : ''}>🔌 Grid</option>
+                                    <option value="Battery" ${instrument.power_source === 'Battery' ? 'selected' : ''}>🔋 Battery</option>
+                                    <option value="Solar + Battery" ${instrument.power_source === 'Solar + Battery' ? 'selected' : ''}>☀️🔋 Solar + Battery</option>
+                                    <option value="Other" ${instrument.power_source === 'Other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Data Transmission</label>
+                                <select id="edit-instrument-data-transmission" class="form-control" aria-label="Data Transmission">
+                                    <option value="">Select transmission method...</option>
+                                    <option value="WiFi" ${instrument.data_transmission === 'WiFi' ? 'selected' : ''}>📡 WiFi</option>
+                                    <option value="Ethernet" ${instrument.data_transmission === 'Ethernet' ? 'selected' : ''}>🔗 Ethernet</option>
+                                    <option value="Cellular" ${instrument.data_transmission === 'Cellular' ? 'selected' : ''}>📱 Cellular</option>
+                                    <option value="LoRaWAN" ${instrument.data_transmission === 'LoRaWAN' ? 'selected' : ''}>📻 LoRaWAN</option>
+                                    <option value="SD Card" ${instrument.data_transmission === 'SD Card' ? 'selected' : ''}>💾 SD Card</option>
+                                    <option value="Other" ${instrument.data_transmission === 'Other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Warranty Expiration</label>
+                                <input type="date" id="edit-instrument-warranty-expires" value="${instrument.manufacturer_warranty_expires || ''}"
+                                       class="form-control" onchange="updateWarrantyStatus(this)" aria-label="Warranty Expiration">
+                                <small class="form-text" id="warranty-status"></small>
+                            </div>
+                            <div class="form-group">
+                                <label>Image Processing</label>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="edit-instrument-image-processing" ${instrument.image_processing_enabled ? 'checked' : ''} aria-label="Image Processing Enabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span id="image-processing-label">${instrument.image_processing_enabled ? 'Enabled' : 'Disabled'}</span>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Image Quality Score (0-100)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" id="edit-instrument-quality-score" value="${instrument.image_quality_score || 80}"
+                                           min="0" max="100" step="1" class="range-slider" oninput="updateQualityDisplay(this.value)" aria-label="Image Quality Score">
+                                    <div class="range-value-display">
+                                        <span>Score: <strong id="quality-score-value">${instrument.image_quality_score || 80}</strong></span>
+                                        <span id="quality-badge" class="quality-badge ${(instrument.image_quality_score || 80) >= 75 ? 'high' : (instrument.image_quality_score || 80) >= 50 ? 'medium' : 'low'}">
+                                            ${(instrument.image_quality_score || 80) >= 75 ? 'High Quality' : (instrument.image_quality_score || 80) >= 50 ? 'Medium Quality' : 'Low Quality'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Calibration Notes</label>
+                                <textarea id="edit-instrument-calibration-notes" class="form-control" rows="2"
+                                          maxlength="500" oninput="updateCharCount(this, 'calibration-char-count')"
+                                          placeholder="Notes about calibration procedures..." aria-label="Calibration Notes">${instrument.calibration_notes || ''}</textarea>
+                                <div id="calibration-char-count" class="char-counter">${(instrument.calibration_notes || '').length}/500</div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Station</label>
-                            <input type="text" id="edit-instrument-station" value="${(instrument.station_name || '') + (instrument.station_acronym ? ' (' + instrument.station_acronym + ')' : '')}"
-                                   class="form-control field-readonly" readonly title="Station is managed separately">
+                    </div>
+
+                    <!-- SECTION 6: Phenocam Processing (1 field) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-tree"></i> Phenocam Processing</h4>
+                        <div class="form-section-content">
+                            <div class="form-group full-width">
+                                <label>Enable Phenocam Data Processing</label>
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="phenocam-processing-toggle"
+                                               ${instrument.image_archive_path ? 'checked' : ''}
+                                               onchange="togglePhenocamSection(this)" aria-label="Enable Phenocam Processing">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span>${instrument.image_archive_path ? 'Phenocam processing enabled' : 'Phenocam processing disabled'}</span>
+                                </div>
+                                <div id="phenocam-archive-section" class="progressive-section ${instrument.image_archive_path ? 'active' : ''}">
+                                    <label>Image Archive Path</label>
+                                    <input type="text" id="edit-instrument-archive-path" value="${instrument.image_archive_path || ''}"
+                                           class="form-control" placeholder="/path/to/archive/STATION/INSTRUMENT/"
+                                           pattern="^/.*/$" aria-label="Image Archive Path">
+                                    <small class="form-text">Path must start with / and end with /</small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea id="edit-instrument-description" class="form-control" rows="3" placeholder="General description of the instrument...">${instrument.description || ''}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Installation Notes</label>
-                            <textarea id="edit-instrument-installation-notes" class="form-control" rows="3" placeholder="Notes about installation and setup...">${instrument.installation_notes || ''}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Maintenance Notes</label>
-                            <textarea id="edit-instrument-maintenance-notes" class="form-control" rows="3" placeholder="Maintenance history and notes...">${instrument.maintenance_notes || ''}</textarea>
+                    </div>
+
+                    <!-- SECTION 7: Documentation (3 fields) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-sticky-note"></i> Documentation</h4>
+                        <div class="form-section-content">
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea id="edit-instrument-description" class="form-control" rows="3"
+                                          maxlength="1000" oninput="updateCharCount(this, 'description-char-count')"
+                                          placeholder="General description of the instrument..." aria-label="Description">${instrument.description || ''}</textarea>
+                                <div id="description-char-count" class="char-counter">${(instrument.description || '').length}/1000</div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Installation Notes</label>
+                                <textarea id="edit-instrument-installation-notes" class="form-control" rows="3"
+                                          maxlength="1000" oninput="updateCharCount(this, 'installation-char-count')"
+                                          placeholder="Notes about installation and setup..." aria-label="Installation Notes">${instrument.installation_notes || ''}</textarea>
+                                <div id="installation-char-count" class="char-counter">${(instrument.installation_notes || '').length}/1000</div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Maintenance Notes</label>
+                                <textarea id="edit-instrument-maintenance-notes" class="form-control" rows="3"
+                                          maxlength="1000" oninput="updateCharCount(this, 'maintenance-char-count')"
+                                          placeholder="Maintenance history and notes..." aria-label="Maintenance Notes">${instrument.maintenance_notes || ''}</textarea>
+                                <div id="maintenance-char-count" class="char-counter">${(instrument.maintenance_notes || '').length}/1000</div>
+                            </div>
                         </div>
                     </div>
 
@@ -3700,6 +4165,123 @@
                     });
                 }
             });
+
+            // Add toggle switch interaction for image processing
+            const imageProcessingToggle = document.getElementById('edit-instrument-image-processing');
+            const imageProcessingLabel = document.getElementById('image-processing-label');
+            if (imageProcessingToggle && imageProcessingLabel) {
+                imageProcessingToggle.addEventListener('change', function() {
+                    imageProcessingLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
+                });
+            }
+        }
+
+        // Toggle collapsible form sections
+        function toggleSection(header) {
+            const section = header.parentElement;
+            section.classList.toggle('collapsed');
+        }
+
+        // Toggle phenocam processing section
+        function togglePhenocamSection(checkbox) {
+            const section = document.getElementById('phenocam-archive-section');
+            if (section) {
+                if (checkbox.checked) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            }
+        }
+
+        // Update quality score display
+        function updateQualityDisplay(value) {
+            const scoreValue = document.getElementById('quality-score-value');
+            const qualityBadge = document.getElementById('quality-badge');
+
+            if (scoreValue) {
+                scoreValue.textContent = value;
+            }
+
+            if (qualityBadge) {
+                qualityBadge.className = 'quality-badge';
+                if (value >= 75) {
+                    qualityBadge.className += ' high';
+                    qualityBadge.textContent = 'High Quality';
+                } else if (value >= 50) {
+                    qualityBadge.className += ' medium';
+                    qualityBadge.textContent = 'Medium Quality';
+                } else {
+                    qualityBadge.className += ' low';
+                    qualityBadge.textContent = 'Low Quality';
+                }
+            }
+        }
+
+        // Update character counter
+        function updateCharCount(textarea, counterId) {
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                const current = textarea.value.length;
+                const max = textarea.maxLength || 1000;
+                counter.textContent = `${current}/${max}`;
+
+                counter.className = 'char-counter';
+                if (current > max * 0.9) {
+                    counter.className += ' error';
+                } else if (current > max * 0.75) {
+                    counter.className += ' warning';
+                }
+            }
+        }
+
+        // Update calibration status badge
+        function updateCalibrationStatus(dateInput) {
+            const statusElement = document.getElementById('calibration-status');
+            if (!statusElement) return;
+
+            if (!dateInput.value) {
+                statusElement.textContent = '';
+                return;
+            }
+
+            const calibrationDate = new Date(dateInput.value);
+            const today = new Date();
+            const daysSince = Math.floor((today - calibrationDate) / (1000 * 60 * 60 * 24));
+
+            if (daysSince < 0) {
+                statusElement.innerHTML = '<span class="status-badge expiring">Future date</span>';
+            } else if (daysSince < 365) {
+                statusElement.innerHTML = `<span class="status-badge valid">Calibrated ${daysSince} days ago</span>`;
+            } else {
+                const years = Math.floor(daysSince / 365);
+                statusElement.innerHTML = `<span class="status-badge expired">Calibrated ${years} year${years > 1 ? 's' : ''} ago</span>`;
+            }
+        }
+
+        // Update warranty status badge
+        function updateWarrantyStatus(dateInput) {
+            const statusElement = document.getElementById('warranty-status');
+            if (!statusElement) return;
+
+            if (!dateInput.value) {
+                statusElement.textContent = '';
+                return;
+            }
+
+            const expiryDate = new Date(dateInput.value);
+            const today = new Date();
+            const daysUntil = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
+
+            if (daysUntil < 0) {
+                const daysExpired = Math.abs(daysUntil);
+                statusElement.innerHTML = `<span class="status-badge expired">Expired ${daysExpired} days ago</span>`;
+            } else if (daysUntil < 90) {
+                statusElement.innerHTML = `<span class="status-badge expiring">Expires in ${daysUntil} days</span>`;
+            } else {
+                const monthsUntil = Math.floor(daysUntil / 30);
+                statusElement.innerHTML = `<span class="status-badge valid">Valid for ${monthsUntil} months</span>`;
+            }
         }
 
         async function savePlatformChanges(platformId) {
@@ -3770,17 +4352,26 @@
                 }
 
                 const instrumentData = {
+                    // SECTION 1: General Information (5 fields)
                     display_name: document.getElementById('edit-instrument-name').value,
                     legacy_acronym: document.getElementById('edit-instrument-legacy').value,
                     status: document.getElementById('edit-instrument-status').value,
+                    measurement_status: document.getElementById('edit-instrument-measurement-status')?.value || '',
 
-                    // Camera specifications
+                    // SECTION 2: Camera Specifications (11 fields)
                     camera_brand: getSelectOrOtherValue('edit-instrument-camera-brand', 'edit-instrument-camera-brand-other'),
                     camera_model: document.getElementById('edit-instrument-camera-model').value,
-                    camera_resolution: getSelectOrOtherValue('edit-instrument-camera-resolution', 'edit-instrument-camera-resolution-other'),
                     camera_serial_number: document.getElementById('edit-instrument-camera-serial')?.value || '',
+                    camera_resolution: getSelectOrOtherValue('edit-instrument-camera-resolution', 'edit-instrument-camera-resolution-other'),
+                    camera_mega_pixels: parseFloat(document.getElementById('edit-instrument-camera-megapixels')?.value) || null,
+                    camera_lens: document.getElementById('edit-instrument-camera-lens')?.value || '',
+                    camera_focal_length_mm: parseFloat(document.getElementById('edit-instrument-camera-focal-length')?.value) || null,
+                    camera_aperture: document.getElementById('edit-instrument-camera-aperture')?.value || '',
+                    camera_exposure_time: document.getElementById('edit-instrument-camera-exposure')?.value || '',
+                    camera_iso: document.getElementById('edit-instrument-camera-iso')?.value || '',
+                    camera_white_balance: document.getElementById('edit-instrument-camera-wb')?.value || '',
 
-                    // Position & orientation
+                    // SECTION 3: Position & Orientation (6 fields)
                     latitude: parseFloat(document.getElementById('edit-instrument-latitude').value) || null,
                     longitude: parseFloat(document.getElementById('edit-instrument-longitude').value) || null,
                     instrument_height_m: parseFloat(document.getElementById('edit-instrument-height')?.value) || null,
@@ -3788,31 +4379,52 @@
                     azimuth_degrees: parseFloat(document.getElementById('edit-instrument-azimuth').value) || null,
                     degrees_from_nadir: parseFloat(document.getElementById('edit-instrument-nadir')?.value) || null,
 
-                    // Timeline & classification
+                    // SECTION 4: Timeline & Deployment (7 fields)
                     instrument_type: getSelectOrOtherValue('edit-instrument-type', 'edit-instrument-type-other'),
                     ecosystem_code: getSelectOrOtherValue('edit-instrument-ecosystem', 'edit-instrument-ecosystem-other'),
                     deployment_date: document.getElementById('edit-instrument-deployment')?.value || null,
+                    calibration_date: document.getElementById('edit-instrument-calibration-date')?.value || null,
                     first_measurement_year: parseInt(document.getElementById('edit-instrument-first-year')?.value) || null,
                     last_measurement_year: parseInt(document.getElementById('edit-instrument-last-year')?.value) || null,
-                    measurement_status: document.getElementById('edit-instrument-measurement-status')?.value || '',
 
-                    // Notes & context
-                    description: document.getElementById('edit-instrument-description').value,
+                    // SECTION 5: System Configuration (6 fields)
+                    power_source: document.getElementById('edit-instrument-power-source')?.value || '',
+                    data_transmission: document.getElementById('edit-instrument-data-transmission')?.value || '',
+                    manufacturer_warranty_expires: document.getElementById('edit-instrument-warranty-expires')?.value || null,
+                    image_processing_enabled: document.getElementById('edit-instrument-image-processing')?.checked || false,
+                    image_quality_score: parseInt(document.getElementById('edit-instrument-quality-score')?.value) || null,
+                    calibration_notes: document.getElementById('edit-instrument-calibration-notes')?.value || '',
+
+                    // SECTION 6: Phenocam Processing (1 field)
+                    image_archive_path: document.getElementById('phenocam-processing-toggle')?.checked
+                        ? document.getElementById('edit-instrument-archive-path')?.value || ''
+                        : '',
+
+                    // SECTION 7: Documentation (3 fields)
+                    description: document.getElementById('edit-instrument-description')?.value || '',
                     installation_notes: document.getElementById('edit-instrument-installation-notes')?.value || '',
                     maintenance_notes: document.getElementById('edit-instrument-maintenance-notes')?.value || '',
 
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('Saving instrument data:', instrumentData);
-                console.log('Critical fields being saved:', {
-                    deployment_date: instrumentData.deployment_date,
-                    camera_serial_number: instrumentData.camera_serial_number,
-                    instrument_height_m: instrumentData.instrument_height_m,
-                    degrees_from_nadir: instrumentData.degrees_from_nadir,
-                    description: instrumentData.description,
-                    installation_notes: instrumentData.installation_notes,
-                    maintenance_notes: instrumentData.maintenance_notes
+                console.log('Saving instrument data (46 fields):', instrumentData);
+                console.log('New fields being saved:', {
+                    camera_mega_pixels: instrumentData.camera_mega_pixels,
+                    camera_lens: instrumentData.camera_lens,
+                    camera_focal_length_mm: instrumentData.camera_focal_length_mm,
+                    camera_aperture: instrumentData.camera_aperture,
+                    camera_exposure_time: instrumentData.camera_exposure_time,
+                    camera_iso: instrumentData.camera_iso,
+                    camera_white_balance: instrumentData.camera_white_balance,
+                    calibration_date: instrumentData.calibration_date,
+                    power_source: instrumentData.power_source,
+                    data_transmission: instrumentData.data_transmission,
+                    manufacturer_warranty_expires: instrumentData.manufacturer_warranty_expires,
+                    image_processing_enabled: instrumentData.image_processing_enabled,
+                    image_quality_score: instrumentData.image_quality_score,
+                    calibration_notes: instrumentData.calibration_notes,
+                    image_archive_path: instrumentData.image_archive_path
                 });
 
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
