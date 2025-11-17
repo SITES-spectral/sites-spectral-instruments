@@ -16,6 +16,105 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
 
+## [5.2.44] - 2025-11-17
+
+### 🔧 DATABASE UPDATE: Svartberget Station Instrument Cleanup
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Corrected Svartberget MIR platform instrument data and verified deployment date functionality
+
+#### 🗑️ **Instrument Deletion**
+
+**Removed Duplicate Instrument:**
+- **SVB_MIR_PL03_PHE01** (Database ID: 21)
+  - Associated ROI (id=51) also removed
+  - Reason: Duplicate/incorrect instrument entry
+
+#### ✏️ **Instrument Updates**
+
+**SVB_MIR_PL01_PHE02** (Database ID: 42):
+- ✅ **Display Name Corrected**: "SVB MIR PL03 PHE01" → "SVB MIR PL01 PHE02"
+- ✅ **Legacy Name Added**: "DEG-MIR-P03"
+- ✅ **Deployment Date Preserved**: "2024-04-18"
+- ✅ **Updated Timestamp**: 2025-11-17 16:20:56
+
+**Rationale:**
+- Corrected normalized name to match actual platform assignment (PL01, not PL03)
+- Added legacy acronym for historical data continuity
+- Ensured deployment date accuracy
+
+#### 📊 **Updated Svartberget MIR Inventory**
+
+**After Cleanup (3 Instruments):**
+1. **SVB_MIR_PL01_PHE01** - Legacy: DEG-MIR-P01, Platform PL01
+2. **SVB_MIR_PL01_PHE02** - Legacy: DEG-MIR-P03, Platform PL01, Deployed: 2024-04-18
+3. **SVB_MIR_PL02_PHE01** - Legacy: DEG-MIR-P02, Platform PL02
+
+**Before Cleanup (4 Instruments):**
+- Included incorrect SVB_MIR_PL03_PHE01 entry
+
+#### ✅ **Deployment Date Functionality Verification**
+
+**Confirmed Working:**
+- ✅ Database accepts deployment_date updates
+- ✅ Backend API includes `deployment_date` in `stationEditableFields`
+- ✅ Frontend form collects and submits deployment_date correctly
+- ✅ Test update successful (verified: 2024-04-08 → 2024-04-18)
+
+**Implementation Verified:**
+- **Backend**: `deployment_date` in editable fields (instruments.js:244)
+- **Frontend Form**: `id="edit-instrument-deployment"` (station.html:4817)
+- **Data Collection**: Properly collected at save (station.html:5264)
+- **Date Format**: YYYY-MM-DD (ISO 8601 standard)
+
+#### 🔧 **Technical Changes**
+
+**Database Operations Executed:**
+```sql
+-- Deleted ROI dependency
+DELETE FROM instrument_rois WHERE instrument_id = 21;
+
+-- Deleted duplicate instrument
+DELETE FROM instruments WHERE id = 21;
+
+-- Updated instrument data
+UPDATE instruments
+SET
+  display_name = 'SVB MIR PL01 PHE02',
+  legacy_acronym = 'DEG-MIR-P03',
+  updated_at = datetime('now')
+WHERE id = 42;
+```
+
+**Verification Queries:**
+- Confirmed deletion: No results for id=21
+- Confirmed updates: All fields correct for id=42
+- Tested deployment_date: Successfully updated and persisted
+
+#### 📋 **User Instructions**
+
+**To Update Deployment Dates via UI:**
+1. Login as admin or station user
+2. Navigate to instrument details
+3. Click "Edit" button
+4. Scroll to "Timeline & Deployment" section
+5. Update "Deployment Date" field (YYYY-MM-DD format)
+6. Click "Save Changes"
+7. Hard refresh browser if needed (Ctrl+F5 / Cmd+Shift+R)
+
+#### 🎯 **Impact Summary**
+
+**Data Quality Improvements:**
+- Removed duplicate instrument entry
+- Corrected instrument naming to match platform assignment
+- Preserved historical legacy names for data continuity
+- Verified all date field functionality working correctly
+
+**Database Consistency:**
+- Clean instrument-to-platform relationships
+- Proper legacy name tracking
+- Accurate deployment date records
+
 ## [5.2.43] - 2025-11-17
 
 ### 🎨 MAJOR FEATURE: Dual-Mode ROI Creation Modal with Canvas Drawing & YAML Upload
