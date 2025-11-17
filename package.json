@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.42",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.42 - UI FIX: Login Page Label Correction (Username Only)",
+  "version": "5.2.43",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.43 - MAJOR FEATURE: Dual-Mode ROI Creation Modal with Canvas Drawing & YAML Upload",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

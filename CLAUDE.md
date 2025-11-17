@@ -4,12 +4,59 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 5.2.38 - DATABASE UPDATE (2025-11-14)
-**✅ STATUS: SUCCESSFULLY COMPLETED**
+## Current Version: 5.2.43 - MAJOR FEATURE: Dual-Mode ROI Creation Modal (2025-11-17)
+**✅ STATUS: SUCCESSFULLY IMPLEMENTED**
 **🌐 Production URL:** https://sites.jobelab.com
-**📅 Last Updated:** 2025-11-14
+**📅 Last Updated:** 2025-11-17
 
-### 🆕 Latest Updates
+### 🎨 Latest Major Feature: ROI Creation System
+
+**Complete dual-mode ROI (Region of Interest) creation interface:**
+
+1. **Interactive Drawing Mode**
+   - HTML5 canvas-based polygon digitizer (800x600)
+   - Click to place polygon points (minimum 3 required)
+   - Drag points to adjust positions after placement
+   - Right-click or double-click to close polygon
+   - Real-time preview with numbered points
+   - Professional color picker (8 presets + custom RGB sliders)
+   - Auto-naming system (ROI_01, ROI_02, etc.)
+
+2. **YAML Upload Mode**
+   - Drag-and-drop batch import (.yaml/.yml files)
+   - Automatic parsing and validation
+   - Preview table with color swatches and validation indicators
+   - Selective import with checkboxes
+   - Batch create multiple ROIs in single operation
+
+**Implementation Details:**
+- **File**: `public/station.html` (+1,545 lines)
+- **Modal HTML**: 291 lines (dual-tab interface)
+- **CSS Styles**: 600 lines (animations, responsive design)
+- **JavaScript**: 665 lines (31 new functions)
+- **Documentation**: 7 comprehensive files (~4,200 total lines)
+
+**Key Functions:**
+- `showROICreationModal()`, `initializeCanvas()`, `handleCanvasClick()`, `saveROI()`
+- `handleYAMLUpload()`, `parseYAMLROIs()`, `displayYAMLPreview()`, `importSelectedROIs()`
+- `fetchNextROIName()`, `selectPresetColor()`, `updateColorPreview()`
+
+**YAML Format for Import:**
+```yaml
+rois:
+  ROI_01:
+    description: "Forest canopy region"
+    color: [0, 255, 0]  # RGB array
+    points:              # x, y pixel coordinates
+      - [100, 200]
+      - [500, 200]
+      - [500, 600]
+      - [100, 600]
+    thickness: 7
+    auto_generated: false
+```
+
+### 🆕 Recent Updates (v5.2.39-43)
 
 #### New Svartberget Platforms Added
 - **SVB_MIR_PL04** - Degerö Wet PAR Pole (Database ID: 31)

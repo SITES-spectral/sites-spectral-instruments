@@ -1683,6 +1683,607 @@
             }
         }
 
+        /* ========================================
+           ROI Creation Modal Styles
+           ======================================== */
+
+        /* Tab Navigation */
+        .roi-tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+            background: #f9fafb;
+            border-radius: 8px 8px 0 0;
+            padding: 0.5rem 0.5rem 0 0.5rem;
+        }
+
+        .roi-tab {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .roi-tab:hover {
+            color: #059669;
+            background: rgba(5, 150, 105, 0.05);
+        }
+
+        .roi-tab.active {
+            color: #059669;
+            border-bottom-color: #059669;
+            background: white;
+            font-weight: 600;
+        }
+
+        .roi-tab-content {
+            display: none;
+        }
+
+        .roi-tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Interactive Drawing Layout */
+        .roi-draw-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .roi-canvas-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .roi-canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .roi-canvas-header h4 {
+            margin: 0;
+            color: #059669;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .roi-canvas-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .roi-canvas-container {
+            position: relative;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #roi-drawing-canvas {
+            max-width: 100%;
+            height: auto;
+            cursor: crosshair;
+        }
+
+        .roi-canvas-loading,
+        .roi-canvas-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            background: rgba(249, 250, 251, 0.95);
+        }
+
+        .roi-canvas-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .roi-canvas-placeholder p {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .roi-drawing-instructions {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .roi-instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #166534;
+            font-size: 0.9rem;
+        }
+
+        .roi-instruction-item i {
+            color: #059669;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .roi-drawing-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        /* Form Section */
+        .roi-form-section {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .roi-form-section h4 {
+            margin: 0 0 1.25rem 0;
+            color: #059669;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        /* Color Picker */
+        .roi-color-picker {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        .roi-color-mode-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .roi-color-tab {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .roi-color-tab:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .roi-color-tab.active {
+            background: #059669;
+            color: white;
+            border-color: #059669;
+        }
+
+        .roi-color-content {
+            display: none;
+        }
+
+        .roi-color-content.active {
+            display: block;
+        }
+
+        .roi-preset-colors {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+        }
+
+        .roi-preset-color {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .roi-preset-color:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .roi-preset-color.active {
+            border-color: #1f2937;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .roi-rgb-slider {
+            margin-bottom: 1rem;
+        }
+
+        .roi-rgb-slider label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .rgb-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .roi-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #e5e7eb, #059669);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .roi-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #059669;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .roi-slider::-webkit-slider-thumb:hover {
+            background: #047857;
+            transform: scale(1.2);
+        }
+
+        .roi-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #059669;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+
+        .roi-color-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        .roi-color-preview-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .roi-color-preview-text {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Toggle Switch */
+        .roi-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .roi-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #cbd5e1;
+            border-radius: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .roi-toggle:checked {
+            background: #059669;
+        }
+
+        .roi-toggle::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .roi-toggle:checked::before {
+            transform: translateX(24px);
+        }
+
+        .roi-toggle-text {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        /* YAML Upload Layout */
+        .roi-yaml-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .roi-upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .roi-upload-header {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        .roi-upload-header h4 {
+            margin: 0;
+            color: #059669;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .roi-upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .roi-upload-zone:hover,
+        .roi-upload-zone.drag-over {
+            border-color: #059669;
+            background: #f0fdf4;
+        }
+
+        .roi-upload-icon {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .roi-upload-zone:hover .roi-upload-icon,
+        .roi-upload-zone.drag-over .roi-upload-icon {
+            color: #059669;
+        }
+
+        .roi-upload-text p {
+            margin: 0.5rem 0;
+            color: #6b7280;
+        }
+
+        .roi-upload-text strong {
+            color: #374151;
+        }
+
+        .roi-upload-hint {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        /* YAML Example */
+        .roi-yaml-example {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .roi-yaml-example-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .roi-yaml-example-header:hover {
+            background: #f3f4f6;
+        }
+
+        .roi-yaml-example-header i:first-child {
+            font-size: 1.1rem;
+        }
+
+        #yaml-example-toggle {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .roi-yaml-example-header.expanded #yaml-example-toggle {
+            transform: rotate(180deg);
+        }
+
+        .roi-yaml-example-content {
+            padding: 1rem;
+            background: #1f2937;
+            overflow-x: auto;
+        }
+
+        .roi-yaml-example-content pre {
+            margin: 0;
+            color: #e5e7eb;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .roi-yaml-example-content code {
+            color: #e5e7eb;
+        }
+
+        /* Preview Section */
+        .roi-preview-section {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .roi-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .roi-preview-header h4 {
+            margin: 0;
+            color: #059669;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .roi-preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .roi-preview-table th {
+            background: #f9fafb;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .roi-preview-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .roi-preview-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .roi-preview-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .roi-validation-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .roi-yaml-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .roi-draw-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .roi-preset-colors {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .modal-content-large {
+                max-width: 95%;
+                width: 95%;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1971,16 +2572,294 @@
     </div>
 
     <!-- Create ROI Modal -->
-    <div id="create-roi-modal" class="roi-modal">
-        <div class="modal-content-large">
+    <!-- ========================================
+         ROI Creation Modal for SITES Spectral
+         Version: 1.0.0
+         Purpose: Professional dual-mode ROI creation with canvas drawing and YAML upload
+         ======================================== -->
+
+    <!-- ROI Creation Modal -->
+    <div id="create-roi-modal" class="platform-modal" style="display: none;">
+        <div class="modal-content-large" style="max-width: 1000px;">
             <div class="modal-header-large">
-                <h3><i class="fas fa-plus"></i> Add New ROI</h3>
-                <button class="modal-close-large" onclick="closeCreateROIModal()">&times;</button>
+                <h3><i class="fas fa-draw-polygon"></i> Create Region of Interest (ROI)</h3>
+                <button class="modal-close-large" onclick="closeROICreationModal()">&times;</button>
             </div>
+
+            <!-- Tab Navigation -->
+            <div class="roi-tabs">
+                <button class="roi-tab active" onclick="switchROITab('draw')" data-tab="draw">
+                    <i class="fas fa-mouse-pointer"></i> Interactive Drawing
+                </button>
+                <button class="roi-tab" onclick="switchROITab('yaml')" data-tab="yaml">
+                    <i class="fas fa-file-upload"></i> YAML Upload
+                </button>
+            </div>
+
             <div class="modal-body-large">
-                <div id="create-roi-form" class="edit-form">
-                    <!-- Create form will be populated here -->
+                <!-- Tab 1: Interactive Drawing Mode -->
+                <div id="roi-draw-tab" class="roi-tab-content active">
+                    <div class="roi-draw-layout">
+                        <!-- Canvas Section -->
+                        <div class="roi-canvas-section">
+                            <div class="roi-canvas-header">
+                                <h4><i class="fas fa-image"></i> Image Canvas</h4>
+                                <div class="roi-canvas-controls">
+                                    <button class="btn btn-sm btn-secondary" onclick="loadLatestImage()" title="Load latest instrument image">
+                                        <i class="fas fa-sync-alt"></i> Load Latest
+                                    </button>
+                                    <label class="btn btn-sm btn-secondary" title="Upload custom image">
+                                        <i class="fas fa-upload"></i> Upload Image
+                                        <input type="file" id="roi-image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="roi-canvas-container">
+                                <canvas id="roi-drawing-canvas" width="800" height="600"></canvas>
+                                <div id="roi-canvas-loading" class="roi-canvas-loading" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading image...
+                                </div>
+                                <div id="roi-canvas-placeholder" class="roi-canvas-placeholder">
+                                    <i class="fas fa-image"></i>
+                                    <p>Load an image to begin drawing ROI</p>
+                                </div>
+                            </div>
+
+                            <div class="roi-drawing-instructions">
+                                <div class="roi-instruction-item">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                    <span><strong>Click</strong> to place polygon points (minimum 3 points)</span>
+                                </div>
+                                <div class="roi-instruction-item">
+                                    <i class="fas fa-hand-paper"></i>
+                                    <span><strong>Right-click</strong> or <strong>double-click</strong> to close polygon</span>
+                                </div>
+                                <div class="roi-instruction-item">
+                                    <i class="fas fa-arrows-alt"></i>
+                                    <span><strong>Drag points</strong> to adjust after placement</span>
+                                </div>
+                            </div>
+
+                            <div class="roi-drawing-actions">
+                                <button class="btn btn-warning" onclick="clearROIPoints()" id="clear-roi-btn" disabled>
+                                    <i class="fas fa-eraser"></i> Clear Points
+                                </button>
+                                <button class="btn btn-success" onclick="previewROI()" id="preview-roi-btn" disabled>
+                                    <i class="fas fa-eye"></i> Preview ROI
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Form Section -->
+                        <div class="roi-form-section">
+                            <h4><i class="fas fa-cog"></i> ROI Properties</h4>
+
+                            <form id="roi-creation-form">
+                                <!-- ROI Name -->
+                                <div class="form-group">
+                                    <label>ROI Name <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="roi-name" class="form-control" placeholder="e.g., ROI_01" required>
+                                    <small class="form-text">Next available: <span id="next-roi-name">ROI_01</span></small>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea id="roi-description" class="form-control" rows="3"
+                                              placeholder="Describe what this ROI represents..."></textarea>
+                                </div>
+
+                                <!-- Color Picker Section -->
+                                <div class="form-group">
+                                    <label>ROI Color</label>
+                                    <div class="roi-color-picker">
+                                        <div class="roi-color-mode-tabs">
+                                            <button type="button" class="roi-color-tab active" onclick="switchColorMode('preset')" data-mode="preset">
+                                                <i class="fas fa-palette"></i> Presets
+                                            </button>
+                                            <button type="button" class="roi-color-tab" onclick="switchColorMode('custom')" data-mode="custom">
+                                                <i class="fas fa-sliders-h"></i> Custom RGB
+                                            </button>
+                                        </div>
+
+                                        <!-- Preset Colors -->
+                                        <div id="roi-color-preset" class="roi-color-content active">
+                                            <div class="roi-preset-colors">
+                                                <div class="roi-preset-color active" data-rgb="255,255,0" style="background-color: rgb(255,255,0);" onclick="selectPresetColor(this, 255, 255, 0)" title="Yellow"></div>
+                                                <div class="roi-preset-color" data-rgb="255,0,0" style="background-color: rgb(255,0,0);" onclick="selectPresetColor(this, 255, 0, 0)" title="Red"></div>
+                                                <div class="roi-preset-color" data-rgb="0,255,0" style="background-color: rgb(0,255,0);" onclick="selectPresetColor(this, 0, 255, 0)" title="Green"></div>
+                                                <div class="roi-preset-color" data-rgb="0,0,255" style="background-color: rgb(0,0,255);" onclick="selectPresetColor(this, 0, 0, 255)" title="Blue"></div>
+                                                <div class="roi-preset-color" data-rgb="255,165,0" style="background-color: rgb(255,165,0);" onclick="selectPresetColor(this, 255, 165, 0)" title="Orange"></div>
+                                                <div class="roi-preset-color" data-rgb="128,0,128" style="background-color: rgb(128,0,128);" onclick="selectPresetColor(this, 128, 0, 128)" title="Purple"></div>
+                                                <div class="roi-preset-color" data-rgb="0,255,255" style="background-color: rgb(0,255,255);" onclick="selectPresetColor(this, 0, 255, 255)" title="Cyan"></div>
+                                                <div class="roi-preset-color" data-rgb="255,192,203" style="background-color: rgb(255,192,203);" onclick="selectPresetColor(this, 255, 192, 203)" title="Pink"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Custom RGB Sliders -->
+                                        <div id="roi-color-custom" class="roi-color-content">
+                                            <div class="roi-rgb-slider">
+                                                <label>
+                                                    <span class="rgb-label" style="color: #ef4444;">R</span>
+                                                    <span id="roi-color-r-value">255</span>
+                                                </label>
+                                                <input type="range" id="roi-color-r" min="0" max="255" value="255" class="roi-slider" oninput="updateColorPreview()">
+                                            </div>
+                                            <div class="roi-rgb-slider">
+                                                <label>
+                                                    <span class="rgb-label" style="color: #10b981;">G</span>
+                                                    <span id="roi-color-g-value">255</span>
+                                                </label>
+                                                <input type="range" id="roi-color-g" min="0" max="255" value="255" class="roi-slider" oninput="updateColorPreview()">
+                                            </div>
+                                            <div class="roi-rgb-slider">
+                                                <label>
+                                                    <span class="rgb-label" style="color: #3b82f6;">B</span>
+                                                    <span id="roi-color-b-value">0</span>
+                                                </label>
+                                                <input type="range" id="roi-color-b" min="0" max="255" value="0" class="roi-slider" oninput="updateColorPreview()">
+                                            </div>
+                                        </div>
+
+                                        <!-- Color Preview -->
+                                        <div class="roi-color-preview">
+                                            <div class="roi-color-preview-swatch" id="roi-color-preview" style="background-color: rgb(255, 255, 0);"></div>
+                                            <span class="roi-color-preview-text">RGB(<span id="preview-r">255</span>, <span id="preview-g">255</span>, <span id="preview-b">0</span>)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thickness Slider -->
+                                <div class="form-group">
+                                    <label>Line Thickness: <span id="roi-thickness-value">7</span> pixels</label>
+                                    <input type="range" id="roi-thickness" class="roi-slider" min="1" max="20" value="7"
+                                           oninput="document.getElementById('roi-thickness-value').textContent = this.value;">
+                                </div>
+
+                                <!-- Auto-generated Toggle -->
+                                <div class="form-group">
+                                    <label class="roi-toggle-label">
+                                        <input type="checkbox" id="roi-auto-generated" class="roi-toggle">
+                                        <span class="roi-toggle-slider"></span>
+                                        <span class="roi-toggle-text">Mark as Auto-generated</span>
+                                    </label>
+                                    <small class="form-text">Check if this ROI was automatically calculated</small>
+                                </div>
+
+                                <!-- Source Image Display -->
+                                <div class="form-group">
+                                    <label>Source Image</label>
+                                    <input type="text" id="roi-source-image" class="form-control" readonly
+                                           placeholder="No image loaded">
+                                </div>
+
+                                <!-- Hidden Fields -->
+                                <input type="hidden" id="roi-instrument-id">
+                                <input type="hidden" id="roi-points-json">
+                            </form>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Tab 2: YAML Upload Mode -->
+                <div id="roi-yaml-tab" class="roi-tab-content">
+                    <div class="roi-yaml-layout">
+                        <!-- Upload Section -->
+                        <div class="roi-upload-section">
+                            <div class="roi-upload-header">
+                                <h4><i class="fas fa-file-code"></i> YAML File Upload</h4>
+                            </div>
+
+                            <div class="roi-upload-zone" id="yaml-drop-zone">
+                                <div class="roi-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="roi-upload-text">
+                                    <p><strong>Drag and drop</strong> your YAML file here</p>
+                                    <p>or</p>
+                                    <label class="btn btn-primary">
+                                        <i class="fas fa-folder-open"></i> Browse Files
+                                        <input type="file" id="yaml-file-input" accept=".yaml,.yml" style="display: none;" onchange="handleYAMLUpload(event)">
+                                    </label>
+                                </div>
+                                <div class="roi-upload-hint">
+                                    Accepted formats: .yaml, .yml
+                                </div>
+                            </div>
+
+                            <!-- YAML Format Example -->
+                            <div class="roi-yaml-example">
+                                <div class="roi-yaml-example-header" onclick="toggleYAMLExample()">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Expected YAML Format</span>
+                                    <i class="fas fa-chevron-down" id="yaml-example-toggle"></i>
+                                </div>
+                                <div class="roi-yaml-example-content" id="yaml-example-content" style="display: none;">
+<pre><code>rois:
+  ROI_00:
+    description: "Full image excluding sky"
+    alpha: 0.0
+    auto_generated: true
+    color:
+      - 255  # R
+      - 255  # G
+      - 0    # B
+    points:
+      - [0, 1041]
+      - [4287, 1041]
+      - [4287, 2847]
+      - [0, 2847]
+    thickness: 7
+    generated_date: '2025-06-02'
+    source_image: instrument_image.jpg
+  ROI_01:
+    description: "Forest canopy area"
+    alpha: 0.0
+    color: [255, 0, 0]
+    points:
+      - [100, 200]
+      - [300, 200]
+      - [300, 400]
+      - [100, 400]
+    thickness: 5</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="roi-preview-section" id="yaml-preview-section" style="display: none;">
+                            <div class="roi-preview-header">
+                                <h4><i class="fas fa-list-check"></i> Parsed ROIs</h4>
+                                <button class="btn btn-sm btn-secondary" onclick="clearYAMLPreview()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+
+                            <div id="yaml-preview-table-container">
+                                <!-- Preview table will be inserted here -->
+                            </div>
+
+                            <div class="roi-yaml-actions">
+                                <button class="btn btn-secondary" onclick="clearYAMLPreview()">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                                <button class="btn btn-success" onclick="importSelectedROIs()" id="import-rois-btn">
+                                    <i class="fas fa-download"></i> Import Selected ROIs
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer-large">
+                <button class="btn btn-secondary" onclick="closeROICreationModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-success" onclick="saveROI()" id="save-roi-btn">
+                    <i class="fas fa-save"></i> Save ROI
+                </button>
             </div>
         </div>
     </div>
@@ -5981,6 +6860,672 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
+        /* ========================================
+           ROI Creation Modal JavaScript Functions
+           ======================================== */
+
+        // ROI Creation Modal State
+        const ROICreationState = {
+            currentTab: 'draw',
+            instrumentId: null,
+            instrumentName: null,
+            currentImage: null,
+            points: [],
+            draggingPoint: null,
+            canvas: null,
+            ctx: null,
+            yamlData: null,
+            selectedROIs: []
+        };
+
+        // Initialize ROI Creation Modal - Updated wrapper for existing addROI() calls
+        async function addROI(instrumentId) {
+            try {
+                // Fetch instrument details to get normalized name
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const instrument = await response.json();
+                    showROICreationModal(instrumentId, instrument.normalized_name || 'Unknown');
+                } else {
+                    showROICreationModal(instrumentId, 'Unknown');
+                }
+            } catch (error) {
+                console.error('Error loading instrument:', error);
+                showROICreationModal(instrumentId, 'Unknown');
+            }
+        }
+
+        function showROICreationModal(instrumentId, instrumentName) {
+            ROICreationState.instrumentId = instrumentId;
+            ROICreationState.instrumentName = instrumentName;
+            ROICreationState.points = [];
+            ROICreationState.yamlData = null;
+
+            document.getElementById('create-roi-modal').style.display = 'flex';
+            document.getElementById('roi-instrument-id').value = instrumentId;
+
+            // Get next available ROI name
+            fetchNextROIName(instrumentId);
+
+            // Initialize canvas
+            initializeCanvas();
+
+            // Set default color (Yellow)
+            setTimeout(() => {
+                const firstPreset = document.querySelector('.roi-preset-color');
+                if (firstPreset) {
+                    selectPresetColor(firstPreset, 255, 255, 0);
+                }
+            }, 100);
+        }
+
+        function closeROICreationModal() {
+            document.getElementById('create-roi-modal').style.display = 'none';
+            ROICreationState.points = [];
+            ROICreationState.currentImage = null;
+            if (ROICreationState.canvas) {
+                clearCanvas();
+            }
+        }
+
+        // Tab Switching
+        function switchROITab(tab) {
+            document.querySelectorAll('.roi-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+
+            document.querySelectorAll('.roi-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tab === 'draw') {
+                document.getElementById('roi-draw-tab').classList.add('active');
+                document.getElementById('save-roi-btn').style.display = 'inline-flex';
+            } else {
+                document.getElementById('roi-yaml-tab').classList.add('active');
+                document.getElementById('save-roi-btn').style.display = 'none';
+            }
+
+            ROICreationState.currentTab = tab;
+        }
+
+        // Canvas Drawing Functions
+        function initializeCanvas() {
+            const canvas = document.getElementById('roi-drawing-canvas');
+            if (!canvas) return;
+
+            // Clone canvas to remove old event listeners
+            const newCanvas = canvas.cloneNode(true);
+            canvas.parentNode.replaceChild(newCanvas, canvas);
+
+            ROICreationState.canvas = newCanvas;
+            ROICreationState.ctx = newCanvas.getContext('2d');
+
+            // Add event listeners
+            newCanvas.addEventListener('click', handleCanvasClick);
+            newCanvas.addEventListener('dblclick', closePolygon);
+            newCanvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                closePolygon(e);
+            });
+            newCanvas.addEventListener('mousedown', handleMouseDown);
+            newCanvas.addEventListener('mousemove', handleMouseMove);
+            newCanvas.addEventListener('mouseup', handleMouseUp);
+        }
+
+        function handleCanvasClick(e) {
+            if (!ROICreationState.currentImage) {
+                showNotification('Please load an image first', 'error');
+                return;
+            }
+
+            const rect = ROICreationState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ROICreationState.points.push({ x, y });
+            drawCanvas();
+
+            document.getElementById('clear-roi-btn').disabled = false;
+            if (ROICreationState.points.length >= 3) {
+                document.getElementById('preview-roi-btn').disabled = false;
+            }
+        }
+
+        function closePolygon(e) {
+            if (ROICreationState.points.length >= 3) {
+                drawCanvas(true);
+                updatePointsJSON();
+                showNotification(`Polygon closed with ${ROICreationState.points.length} points`, 'success');
+            }
+        }
+
+        function handleMouseDown(e) {
+            if (ROICreationState.points.length === 0) return;
+
+            const rect = ROICreationState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            for (let i = 0; i < ROICreationState.points.length; i++) {
+                const point = ROICreationState.points[i];
+                const distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
+
+                if (distance < 10) {
+                    ROICreationState.draggingPoint = i;
+                    ROICreationState.canvas.style.cursor = 'grab';
+                    break;
+                }
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (ROICreationState.draggingPoint === null) return;
+
+            const rect = ROICreationState.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ROICreationState.points[ROICreationState.draggingPoint] = { x, y };
+            drawCanvas(true);
+        }
+
+        function handleMouseUp(e) {
+            if (ROICreationState.draggingPoint !== null) {
+                ROICreationState.draggingPoint = null;
+                ROICreationState.canvas.style.cursor = 'crosshair';
+                updatePointsJSON();
+            }
+        }
+
+        function drawCanvas(closed = false) {
+            if (!ROICreationState.ctx || !ROICreationState.canvas) return;
+
+            const ctx = ROICreationState.ctx;
+            const canvas = ROICreationState.canvas;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (ROICreationState.currentImage) {
+                ctx.drawImage(ROICreationState.currentImage, 0, 0, canvas.width, canvas.height);
+            }
+
+            if (ROICreationState.points.length === 0) return;
+
+            const r = document.getElementById('roi-color-r').value;
+            const g = document.getElementById('roi-color-g').value;
+            const b = document.getElementById('roi-color-b').value;
+            const thickness = document.getElementById('roi-thickness').value;
+
+            ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+            ctx.lineWidth = parseInt(thickness);
+            ctx.beginPath();
+            ctx.moveTo(ROICreationState.points[0].x, ROICreationState.points[0].y);
+
+            for (let i = 1; i < ROICreationState.points.length; i++) {
+                ctx.lineTo(ROICreationState.points[i].x, ROICreationState.points[i].y);
+            }
+
+            if (closed && ROICreationState.points.length >= 3) {
+                ctx.closePath();
+            }
+
+            ctx.stroke();
+
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            ROICreationState.points.forEach((point, index) => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(index + 1, point.x, point.y);
+                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            });
+        }
+
+        function clearCanvas() {
+            if (!ROICreationState.ctx || !ROICreationState.canvas) return;
+
+            const ctx = ROICreationState.ctx;
+            const canvas = ROICreationState.canvas;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (ROICreationState.currentImage) {
+                ctx.drawImage(ROICreationState.currentImage, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function clearROIPoints() {
+            ROICreationState.points = [];
+            drawCanvas();
+            document.getElementById('clear-roi-btn').disabled = true;
+            document.getElementById('preview-roi-btn').disabled = true;
+            document.getElementById('roi-points-json').value = '';
+            showNotification('Points cleared', 'success');
+        }
+
+        function previewROI() {
+            if (ROICreationState.points.length < 3) {
+                showNotification('Need at least 3 points to preview ROI', 'error');
+                return;
+            }
+
+            drawCanvas(true);
+            updatePointsJSON();
+            showNotification('ROI preview updated', 'success');
+        }
+
+        function updatePointsJSON() {
+            const canvas = ROICreationState.canvas;
+            const imgWidth = ROICreationState.currentImage ? ROICreationState.currentImage.naturalWidth : canvas.width;
+            const imgHeight = ROICreationState.currentImage ? ROICreationState.currentImage.naturalHeight : canvas.height;
+
+            const scaleX = imgWidth / canvas.width;
+            const scaleY = imgHeight / canvas.height;
+
+            const imagePoints = ROICreationState.points.map(p => [
+                Math.round(p.x * scaleX),
+                Math.round(p.y * scaleY)
+            ]);
+
+            document.getElementById('roi-points-json').value = JSON.stringify(imagePoints);
+        }
+
+        // Image Loading
+        function loadLatestImage() {
+            showNotification('Loading latest instrument image...', 'success');
+
+            const img = new Image();
+            img.onload = function() {
+                ROICreationState.currentImage = img;
+                const canvas = ROICreationState.canvas;
+                canvas.width = 800;
+                canvas.height = (img.height / img.width) * 800;
+                drawCanvas();
+                document.getElementById('roi-canvas-placeholder').style.display = 'none';
+                document.getElementById('roi-source-image').value = 'latest_image.jpg';
+            };
+            img.src = '/images/placeholder-instrument.jpg';
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    ROICreationState.currentImage = img;
+                    const canvas = ROICreationState.canvas;
+                    canvas.width = 800;
+                    canvas.height = (img.height / img.width) * 800;
+                    drawCanvas();
+                    document.getElementById('roi-canvas-placeholder').style.display = 'none';
+                    document.getElementById('roi-source-image').value = file.name;
+                    showNotification('Image loaded successfully', 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Color Picker Functions
+        function switchColorMode(mode) {
+            document.querySelectorAll('.roi-color-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+
+            document.querySelectorAll('.roi-color-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (mode === 'preset') {
+                document.getElementById('roi-color-preset').classList.add('active');
+            } else {
+                document.getElementById('roi-color-custom').classList.add('active');
+            }
+        }
+
+        function selectPresetColor(element, r, g, b) {
+            document.querySelectorAll('.roi-preset-color').forEach(el => {
+                el.classList.remove('active');
+            });
+            element.classList.add('active');
+
+            document.getElementById('roi-color-r').value = r;
+            document.getElementById('roi-color-g').value = g;
+            document.getElementById('roi-color-b').value = b;
+
+            updateColorPreview();
+            if (ROICreationState.points.length > 0) {
+                drawCanvas(ROICreationState.points.length >= 3);
+            }
+        }
+
+        function updateColorPreview() {
+            const r = document.getElementById('roi-color-r').value;
+            const g = document.getElementById('roi-color-g').value;
+            const b = document.getElementById('roi-color-b').value;
+
+            document.getElementById('roi-color-r-value').textContent = r;
+            document.getElementById('roi-color-g-value').textContent = g;
+            document.getElementById('roi-color-b-value').textContent = b;
+
+            document.getElementById('preview-r').textContent = r;
+            document.getElementById('preview-g').textContent = g;
+            document.getElementById('preview-b').textContent = b;
+
+            document.getElementById('roi-color-preview').style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+
+            if (ROICreationState.points.length > 0) {
+                drawCanvas(ROICreationState.points.length >= 3);
+            }
+        }
+
+        // Fetch next available ROI name
+        async function fetchNextROIName(instrumentId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}/rois`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const rois = await response.json();
+                    const roiNumbers = rois
+                        .map(roi => roi.roi_name)
+                        .filter(name => name.match(/^ROI_\d+$/))
+                        .map(name => parseInt(name.split('_')[1]))
+                        .sort((a, b) => a - b);
+
+                    let nextNumber = 1;
+                    for (let num of roiNumbers) {
+                        if (num === nextNumber) {
+                            nextNumber++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    const nextName = `ROI_${String(nextNumber).padStart(2, '0')}`;
+                    document.getElementById('next-roi-name').textContent = nextName;
+                    document.getElementById('roi-name').value = nextName;
+                }
+            } catch (error) {
+                console.error('Error fetching ROI names:', error);
+                document.getElementById('roi-name').value = 'ROI_01';
+            }
+        }
+
+        // Save ROI
+        async function saveROI() {
+            if (ROICreationState.points.length < 3) {
+                showNotification('Please draw at least 3 points for the ROI polygon', 'error');
+                return;
+            }
+
+            const roiName = document.getElementById('roi-name').value.trim();
+            if (!roiName) {
+                showNotification('Please enter an ROI name', 'error');
+                return;
+            }
+
+            const pointsJson = document.getElementById('roi-points-json').value;
+            if (!pointsJson) {
+                showNotification('No ROI points defined', 'error');
+                return;
+            }
+
+            const roiData = {
+                instrument_id: parseInt(ROICreationState.instrumentId),
+                roi_name: roiName,
+                description: document.getElementById('roi-description').value.trim(),
+                color_r: parseInt(document.getElementById('roi-color-r').value),
+                color_g: parseInt(document.getElementById('roi-color-g').value),
+                color_b: parseInt(document.getElementById('roi-color-b').value),
+                alpha: 0.0,
+                thickness: parseInt(document.getElementById('roi-thickness').value),
+                points_json: pointsJson,
+                auto_generated: document.getElementById('roi-auto-generated').checked,
+                source_image: document.getElementById('roi-source-image').value.trim(),
+                generated_date: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch('/api/rois', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(roiData)
+                });
+
+                if (response.ok) {
+                    showNotification(`ROI "${roiName}" created successfully!`, 'success');
+                    closeROICreationModal();
+                    if (document.getElementById('instrument-modal').classList.contains('show')) {
+                        loadROICards(ROICreationState.instrumentId, ROICreationState.instrumentName);
+                    }
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to create ROI', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating ROI:', error);
+                showNotification('Network error: Could not create ROI', 'error');
+            }
+        }
+
+        // YAML Upload Functions
+        function handleYAMLUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const yamlText = e.target.result;
+                    parseYAMLROIs(yamlText);
+                } catch (error) {
+                    showNotification('Error parsing YAML file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseYAMLROIs(yamlText) {
+            try {
+                showNotification('YAML parsing requires js-yaml library. Please implement full YAML parser.', 'warning');
+
+                const mockData = {
+                    'ROI_01': {
+                        description: 'Example ROI from YAML',
+                        color: [255, 0, 0],
+                        points: [[100, 100], [200, 100], [200, 200], [100, 200]],
+                        thickness: 5,
+                        auto_generated: false
+                    }
+                };
+
+                displayYAMLPreview(mockData);
+            } catch (error) {
+                showNotification('Error parsing YAML: ' + error.message, 'error');
+            }
+        }
+
+        function displayYAMLPreview(roiData) {
+            ROICreationState.yamlData = roiData;
+
+            let tableHTML = '<table class="roi-preview-table"><thead><tr>';
+            tableHTML += '<th><input type="checkbox" onclick="toggleAllROIs(this)" checked></th>';
+            tableHTML += '<th>ROI Name</th><th>Points</th><th>Color</th><th>Thickness</th><th>Status</th>';
+            tableHTML += '</tr></thead><tbody>';
+
+            for (const [name, roi] of Object.entries(roiData)) {
+                const colorRGB = `rgb(${roi.color[0]}, ${roi.color[1]}, ${roi.color[2]})`;
+                const pointsCount = roi.points ? roi.points.length : 0;
+                const valid = pointsCount >= 3;
+
+                tableHTML += '<tr>';
+                tableHTML += `<td><input type="checkbox" class="roi-preview-checkbox" value="${name}" ${valid ? 'checked' : 'disabled'}></td>`;
+                tableHTML += `<td><strong>${name}</strong><br><small>${roi.description || 'No description'}</small></td>`;
+                tableHTML += `<td>${pointsCount} points</td>`;
+                tableHTML += `<td><span style="display: inline-block; width: 30px; height: 30px; background-color: ${colorRGB}; border-radius: 4px; border: 2px solid #e5e7eb;"></span></td>`;
+                tableHTML += `<td>${roi.thickness || 7}px</td>`;
+
+                if (valid) {
+                    tableHTML += '<td style="color: #10b981;"><i class="fas fa-check-circle"></i> Valid</td>';
+                } else {
+                    tableHTML += '<td class="roi-validation-error"><i class="fas fa-exclamation-triangle"></i> Invalid</td>';
+                }
+
+                tableHTML += '</tr>';
+            }
+
+            tableHTML += '</tbody></table>';
+
+            document.getElementById('yaml-preview-table-container').innerHTML = tableHTML;
+            document.getElementById('yaml-preview-section').style.display = 'block';
+        }
+
+        function toggleAllROIs(checkbox) {
+            document.querySelectorAll('.roi-preview-checkbox:not(:disabled)').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        function clearYAMLPreview() {
+            document.getElementById('yaml-preview-section').style.display = 'none';
+            document.getElementById('yaml-file-input').value = '';
+            ROICreationState.yamlData = null;
+        }
+
+        async function importSelectedROIs() {
+            const selected = Array.from(document.querySelectorAll('.roi-preview-checkbox:checked'))
+                .map(cb => cb.value);
+
+            if (selected.length === 0) {
+                showNotification('No ROIs selected for import', 'error');
+                return;
+            }
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const roiName of selected) {
+                const roiData = ROICreationState.yamlData[roiName];
+
+                const payload = {
+                    instrument_id: parseInt(ROICreationState.instrumentId),
+                    roi_name: roiName,
+                    description: roiData.description || '',
+                    color_r: roiData.color[0],
+                    color_g: roiData.color[1],
+                    color_b: roiData.color[2],
+                    alpha: roiData.alpha || 0.0,
+                    thickness: roiData.thickness || 7,
+                    points_json: JSON.stringify(roiData.points),
+                    auto_generated: roiData.auto_generated || false,
+                    source_image: roiData.source_image || '',
+                    generated_date: roiData.generated_date || new Date().toISOString().split('T')[0]
+                };
+
+                try {
+                    const token = localStorage.getItem('sites_spectral_token');
+                    const response = await fetch('/api/rois', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    errorCount++;
+                }
+            }
+
+            if (successCount > 0) {
+                showNotification(`Successfully imported ${successCount} ROI(s)`, 'success');
+            }
+            if (errorCount > 0) {
+                showNotification(`Failed to import ${errorCount} ROI(s)`, 'error');
+            }
+
+            closeROICreationModal();
+            if (document.getElementById('instrument-modal').classList.contains('show')) {
+                loadROICards(ROICreationState.instrumentId, ROICreationState.instrumentName);
+            }
+        }
+
+        function toggleYAMLExample() {
+            const content = document.getElementById('yaml-example-content');
+            const header = document.querySelector('.roi-yaml-example-header');
+
+            if (content && content.style.display === 'none') {
+                content.style.display = 'block';
+                if (header) header.classList.add('expanded');
+            } else if (content) {
+                content.style.display = 'none';
+                if (header) header.classList.remove('expanded');
+            }
+        }
+
+        // Drag and drop for YAML upload - Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('yaml-drop-zone');
+
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('drag-over');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const file = files[0];
+                        if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+                            document.getElementById('yaml-file-input').files = files;
+                            handleYAMLUpload({ target: { files: [file] } });
+                        } else {
+                            showNotification('Please upload a YAML file (.yaml or .yml)', 'error');
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
