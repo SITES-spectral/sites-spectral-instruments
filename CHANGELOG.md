@@ -13,6 +13,142 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.41] - 2025-11-17
+
+### 🎨 UX ENHANCEMENT: Professional Instrument Creation Form with 11 Optional Fields
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Enhanced instrument creation form with professional collapsible sections and comprehensive initial setup options
+
+#### ✨ **Enhanced Creation Form**
+
+**Transformed Simple Form:**
+- **Before**: 5 basic fields in single section
+- **After**: 16 fields organized in 3 professional collapsible sections
+
+**New 3-Section Architecture:**
+1. **Basic Information** (5 fields) - Required section, always expanded
+2. **Camera Specifications** (4 fields) - Optional section, collapsible
+3. **Position & Orientation** (6 fields) - Optional section, collapsible
+
+#### 📋 **11 New Optional Fields Added**
+
+**Camera Specifications (4 NEW):**
+- 📷 Camera Brand - Dropdown (Mobotix, Axis, Canon, Nikon, Sony, Other)
+- 📹 Camera Model - Text input for model number
+- 🎞️ Resolution - Dropdown (12MP, 8MP, 5MP, 3MP, 2MP/FHD, Other)
+- 🔢 Serial Number - Text input for camera serial
+
+**Position & Orientation (6 NEW):**
+- 🌍 Latitude - Number input with decimal precision
+- 🌍 Longitude - Number input with decimal precision
+- 📏 Height (meters) - Number input with 0.01m precision
+- 🧭 Viewing Direction - Dropdown (N, NE, E, SE, S, SW, W, NW)
+- 📐 Azimuth (degrees) - Number input (0-360°, 0.1° precision)
+- 📐 Degrees from Nadir - Number input (0-90°, 0.1° precision)
+
+**Existing Fields (5 - maintained):**
+- Display Name (required)
+- Instrument Type (required)
+- Ecosystem Code (optional)
+- Deployment Date (optional)
+- Description (optional)
+
+#### 🎨 **Professional Design Features**
+
+**Collapsible Sections:**
+- Click section headers to expand/collapse
+- Optional sections collapsed by default for clean initial view
+- Smooth animations matching edit form
+- Visual chevron indicators for expand/collapse state
+
+**User Experience:**
+- **Focused Workflow**: Only required fields visible initially
+- **Progressive Disclosure**: Users can add optional details by expanding sections
+- **Flexibility**: Can create minimal instrument or comprehensive setup
+- **Consistency**: Matches professional design of edit form
+
+**Smart Defaults:**
+- Optional sections start collapsed for simplicity
+- Required section always visible and expanded
+- Clear visual distinction between required and optional fields
+
+#### 🔧 **Technical Implementation**
+
+**Files Modified:**
+- `public/station.html` - Enhanced addInstrument() and saveNewInstrument() functions
+
+**Function Updates:**
+
+**1. `addInstrument(platformId)` Function** (lines 4504-4670):
+- Added 3 collapsible sections with professional styling
+- Integrated 11 new optional fields
+- Used same design patterns as edit form
+- Maintained helpful auto-naming explanation
+
+**2. `saveNewInstrument(platformId)` Function** (lines 4672-4772):
+- Expanded data collection from 5 to 16 fields
+- Added proper type conversions (parseFloat for coordinates, heights, angles)
+- Implemented null handling for optional fields
+- Maintained validation for required fields only
+
+**Consistent Styling:**
+- Leverages CSS from v5.2.40 (collapsible sections, form controls)
+- Uses same `toggleSection()` JavaScript function
+- Field IDs follow `create-` prefix convention
+- Responsive grid layout (two-column desktop, single-column mobile)
+
+#### 🎯 **User Benefits**
+
+**For Quick Setup:**
+- Fill only 2 required fields (name and type)
+- Skip optional sections entirely
+- Create instrument in seconds
+
+**For Comprehensive Setup:**
+- Expand camera section to add full camera specs
+- Expand position section to set exact location and viewing angles
+- Complete instrument profile during creation
+
+**Error Prevention:**
+- No required fields hidden in collapsed sections
+- Clear required field indicators (red asterisk)
+- Helpful placeholder text and hints
+- Pattern validation on numeric inputs
+
+#### 📊 **Field Coverage**
+
+- **Total Fields**: 16 (2 required, 14 optional)
+- **Previously**: 5 fields (2 required, 3 optional)
+- **New Fields**: 11 optional fields
+- **Sections**: 3 collapsible groups
+
+#### 🧪 **Testing Checklist**
+
+- [ ] Create instrument with only required fields → succeeds
+- [ ] Create instrument with all fields filled → succeeds
+- [ ] Expand/collapse sections smoothly
+- [ ] Camera brand dropdown works
+- [ ] Resolution dropdown works
+- [ ] Viewing direction dropdown works
+- [ ] Numeric validation on coordinates (latitude/longitude)
+- [ ] Numeric validation on angles (azimuth 0-360, nadir 0-90)
+- [ ] Form responsive on mobile devices
+- [ ] All 16 fields save correctly to database
+
+#### 📝 **Impact**
+
+**Improved Workflow:**
+- Users can now set comprehensive instrument details during creation
+- Reduced need to immediately edit newly created instruments
+- Professional appearance matches modern web applications
+- Consistent UX between create and edit operations
+
+**Data Quality:**
+- Encourages complete instrument metadata from the start
+- Optional fields don't overwhelm users
+- Collapsible sections keep UI clean and focused
+
 ## [5.2.40] - 2025-11-17
 
 ### 🎨 MAJOR UX ENHANCEMENT: Complete Instrument Edit Form with 28 New Fields

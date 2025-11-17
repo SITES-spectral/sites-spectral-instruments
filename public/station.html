@@ -4507,56 +4507,150 @@
                 const createForm = document.getElementById('create-instrument-form');
 
                 createForm.innerHTML = `
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; padding: 0.75rem; background-color: #f3f4f6; border-radius: 6px;">
+                        <i class="fas fa-info-circle" style="color: #3b82f6;"></i> <strong>Auto-naming:</strong> The normalized name will be automatically generated based on the platform (e.g., ANS_FOR_BL01_PHE03). This ensures consistent naming across the SITES Spectral network and prevents duplicates.
+                    </p>
+
+                    <!-- SECTION 1: Basic Information (Required Fields) -->
                     <div class="form-section">
-                        <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
-                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
-                            <strong>Auto-naming:</strong> The normalized name will be automatically generated based on the platform (e.g., ANS_FOR_BL01_PHE03).<br>
-                            <strong>Purpose:</strong> This ensures consistent naming across the SITES Spectral network and prevents duplicates.
-                        </p>
+                        <h4><i class="fas fa-info-circle"></i> Basic Information <span style="color: #ef4444; font-size: 0.875rem;">(Required)</span></h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label for="create-display-name">Display Name <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="create-display-name" class="form-control" placeholder="e.g., Platform Phenocam 01" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="create-display-name">Display Name <span style="color: #ef4444;">*</span></label>
-                            <input type="text" id="create-display-name" placeholder="e.g., Platform Phenocam 01" required>
+                            <div class="form-group">
+                                <label for="create-instrument-type">Instrument Type <span style="color: #ef4444;">*</span></label>
+                                <select id="create-instrument-type" class="form-control" required>
+                                    <option value="Phenocam" selected>Phenocam</option>
+                                    <option value="Multispectral Sensor">Multispectral Sensor</option>
+                                    <option value="Hyperspectral Sensor">Hyperspectral Sensor</option>
+                                    <option value="PAR Sensor">PAR Sensor</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-ecosystem-code">Ecosystem Code</label>
+                                <select id="create-ecosystem-code" class="form-control">
+                                    <option value="">Select ecosystem...</option>
+                                    <option value="HEA">HEA - Heathland</option>
+                                    <option value="AGR">AGR - Arable Land</option>
+                                    <option value="MIR">MIR - Mires</option>
+                                    <option value="LAK">LAK - Lake</option>
+                                    <option value="WET">WET - Wetland</option>
+                                    <option value="GRA">GRA - Grassland</option>
+                                    <option value="FOR">FOR - Forest</option>
+                                    <option value="ALP">ALP - Alpine Forest</option>
+                                    <option value="CON">CON - Coniferous Forest</option>
+                                    <option value="DEC">DEC - Deciduous Forest</option>
+                                    <option value="MAR">MAR - Marshland</option>
+                                    <option value="PEA">PEA - Peatland</option>
+                                </select>
+                                <small class="form-text">Optional - for ecosystem-specific classification</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-deployment-date">Deployment Date</label>
+                                <input type="date" id="create-deployment-date" class="form-control">
+                                <small class="form-text">Format: YYYY-MM-DD (optional)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-description">Description</label>
+                                <textarea id="create-description" class="form-control" rows="3" placeholder="Optional description for this instrument..."></textarea>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="create-instrument-type">Instrument Type <span style="color: #ef4444;">*</span></label>
-                            <select id="create-instrument-type" required>
-                                <option value="Phenocam" selected>Phenocam</option>
-                                <option value="Multispectral Sensor">Multispectral Sensor</option>
-                                <option value="Hyperspectral Sensor">Hyperspectral Sensor</option>
-                                <option value="PAR Sensor">PAR Sensor</option>
-                            </select>
+                    <!-- SECTION 2: Camera Specifications (Optional) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)" style="cursor: pointer;"><i class="fas fa-camera"></i> Camera Specifications <span style="color: #6b7280; font-size: 0.875rem;">(Optional - Click to expand)</span></h4>
+                        <div class="form-section-content" style="display: none;">
+                            <div class="form-group">
+                                <label for="create-camera-brand">Camera Brand</label>
+                                <select id="create-camera-brand" class="form-control">
+                                    <option value="">Select brand...</option>
+                                    <option value="Mobotix">Mobotix</option>
+                                    <option value="Axis">Axis</option>
+                                    <option value="Canon">Canon</option>
+                                    <option value="Nikon">Nikon</option>
+                                    <option value="Sony">Sony</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-camera-model">Camera Model</label>
+                                <input type="text" id="create-camera-model" class="form-control" placeholder="e.g., M16B, P1437-E">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-camera-resolution">Resolution</label>
+                                <select id="create-camera-resolution" class="form-control">
+                                    <option value="">Select resolution...</option>
+                                    <option value="4096x3072">4096x3072 (12MP)</option>
+                                    <option value="3264x2448">3264x2448 (8MP)</option>
+                                    <option value="2592x1944">2592x1944 (5MP)</option>
+                                    <option value="2048x1536">2048x1536 (3MP)</option>
+                                    <option value="1920x1080">1920x1080 (2MP/FHD)</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-camera-serial-number">Serial Number</label>
+                                <input type="text" id="create-camera-serial-number" class="form-control" placeholder="Camera serial number">
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="create-ecosystem-code">Ecosystem Code</label>
-                            <select id="create-ecosystem-code">
-                                <option value="">Select ecosystem...</option>
-                                <option value="HEA">HEA - Heathland</option>
-                                <option value="AGR">AGR - Arable Land</option>
-                                <option value="MIR">MIR - Mires</option>
-                                <option value="LAK">LAK - Lake</option>
-                                <option value="WET">WET - Wetland</option>
-                                <option value="GRA">GRA - Grassland</option>
-                                <option value="FOR">FOR - Forest</option>
-                                <option value="ALP">ALP - Alpine Forest</option>
-                                <option value="CON">CON - Coniferous Forest</option>
-                                <option value="DEC">DEC - Deciduous Forest</option>
-                                <option value="MAR">MAR - Marshland</option>
-                                <option value="PEA">PEA - Peatland</option>
-                            </select>
-                        </div>
+                    <!-- SECTION 3: Position & Orientation (Optional) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)" style="cursor: pointer;"><i class="fas fa-map-marker-alt"></i> Position & Orientation <span style="color: #6b7280; font-size: 0.875rem;">(Optional - Click to expand)</span></h4>
+                        <div class="form-section-content" style="display: none;">
+                            <div class="form-group">
+                                <label for="create-latitude">Latitude</label>
+                                <input type="number" id="create-latitude" class="form-control" step="any" placeholder="Decimal degrees">
+                                <small class="form-text">Rounded to 6 decimal places</small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="create-deployment-date">Deployment Date</label>
-                            <input type="date" id="create-deployment-date" class="form-control">
-                            <small class="form-text">Format: YYYY-MM-DD (optional)</small>
-                        </div>
+                            <div class="form-group">
+                                <label for="create-longitude">Longitude</label>
+                                <input type="number" id="create-longitude" class="form-control" step="any" placeholder="Decimal degrees">
+                                <small class="form-text">Rounded to 6 decimal places</small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="create-description">Description</label>
-                            <textarea id="create-description" rows="3" placeholder="Optional description for this instrument..."></textarea>
+                            <div class="form-group">
+                                <label for="create-instrument-height-m">Height (meters)</label>
+                                <input type="number" id="create-instrument-height-m" class="form-control" step="0.01" placeholder="Height above ground">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-viewing-direction">Viewing Direction</label>
+                                <select id="create-viewing-direction" class="form-control">
+                                    <option value="">Select direction...</option>
+                                    <option value="North">North</option>
+                                    <option value="Northeast">Northeast</option>
+                                    <option value="East">East</option>
+                                    <option value="Southeast">Southeast</option>
+                                    <option value="South">South</option>
+                                    <option value="Southwest">Southwest</option>
+                                    <option value="West">West</option>
+                                    <option value="Northwest">Northwest</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-azimuth-degrees">Azimuth (degrees)</label>
+                                <input type="number" id="create-azimuth-degrees" class="form-control" step="0.1" min="0" max="360" placeholder="0-360 degrees">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="create-degrees-from-nadir">Degrees from Nadir</label>
+                                <input type="number" id="create-degrees-from-nadir" class="form-control" step="0.1" min="0" max="90" placeholder="0-90 degrees">
+                                <small class="form-text">0° = straight down, 90° = horizontal</small>
+                            </div>
                         </div>
                     </div>
 
@@ -4583,9 +4677,11 @@
                 saveBtn.disabled = true;
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
 
+                // Collect Basic Information (Required Section)
                 const displayName = document.getElementById('create-display-name').value.trim();
                 const instrumentType = document.getElementById('create-instrument-type').value;
                 const ecosystemCode = document.getElementById('create-ecosystem-code').value;
+                const deploymentDate = document.getElementById('create-deployment-date')?.value || null;
                 const description = document.getElementById('create-description').value.trim();
 
                 // Validate required fields
@@ -4596,15 +4692,40 @@
                     throw new Error('Instrument type is required');
                 }
 
-                const deploymentDate = document.getElementById('create-deployment-date')?.value || null;
+                // Collect Camera Specifications (Optional Section)
+                const cameraBrand = document.getElementById('create-camera-brand')?.value || null;
+                const cameraModel = document.getElementById('create-camera-model')?.value?.trim() || null;
+                const cameraResolution = document.getElementById('create-camera-resolution')?.value || null;
+                const cameraSerialNumber = document.getElementById('create-camera-serial-number')?.value?.trim() || null;
 
+                // Collect Position & Orientation (Optional Section)
+                const latitude = document.getElementById('create-latitude')?.value || null;
+                const longitude = document.getElementById('create-longitude')?.value || null;
+                const instrumentHeightM = document.getElementById('create-instrument-height-m')?.value || null;
+                const viewingDirection = document.getElementById('create-viewing-direction')?.value || null;
+                const azimuthDegrees = document.getElementById('create-azimuth-degrees')?.value || null;
+                const degreesFromNadir = document.getElementById('create-degrees-from-nadir')?.value || null;
+
+                // Build instrument data object with all 16 fields
                 const instrumentData = {
                     platform_id: platformId,
                     display_name: displayName,
                     instrument_type: instrumentType,
-                    ecosystem_code: ecosystemCode,
+                    ecosystem_code: ecosystemCode || null,
                     deployment_date: deploymentDate,
-                    description: description
+                    description: description || null,
+                    // Camera specifications
+                    camera_brand: cameraBrand,
+                    camera_model: cameraModel,
+                    camera_resolution: cameraResolution,
+                    camera_serial_number: cameraSerialNumber,
+                    // Position & orientation
+                    latitude: latitude ? parseFloat(latitude) : null,
+                    longitude: longitude ? parseFloat(longitude) : null,
+                    instrument_height_m: instrumentHeightM ? parseFloat(instrumentHeightM) : null,
+                    viewing_direction: viewingDirection,
+                    azimuth_degrees: azimuthDegrees ? parseFloat(azimuthDegrees) : null,
+                    degrees_from_nadir: degreesFromNadir ? parseFloat(degreesFromNadir) : null
                 };
 
                 const token = localStorage.getItem('sites_spectral_token');

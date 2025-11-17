@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.40",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.40 - MAJOR UX ENHANCEMENT: Complete Instrument Edit Form with 28 New Fields",
+  "version": "5.2.41",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.41 - UX ENHANCEMENT: Professional Instrument Creation Form with 11 Optional Fields",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
