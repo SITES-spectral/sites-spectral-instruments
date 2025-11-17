@@ -8,10 +8,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
+- ROI creation modal with dual modes (interactive drawing + YAML upload)
+- ROI edit modal with polygon digitizer
 - Enhanced user management interface
 - Bulk data operations
 - Advanced analytics dashboard
 - Full phenocam image API integration
+
+## [5.2.42] - 2025-11-17
+
+### 🔧 UI FIX: Login Page Label Correction
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Fixed misleading authentication labels to reflect Cloudflare credentials system
+
+#### ✨ **Authentication Label Cleanup**
+
+**Login Page Updates:**
+- **Removed**: "Username or Email" misleading label
+- **Updated**: Changed to "Username" only
+- **Placeholder**: "Enter your username or email" → "Enter your username"
+- **Alignment**: Labels now match Cloudflare credential system (no email auth)
+
+#### 🔧 **Technical Implementation**
+
+**Files Modified:**
+- `public/index.html` - Login form labels and placeholders (line 179)
+
+**Changes Made:**
+- Updated `<label for="username">` text from "Username or Email" to "Username"
+- Updated input placeholder to match label accuracy
+- Ensures user expectations align with actual authentication system
+
+#### 🎯 **User Impact**
+
+**Before:**
+- Confusing label suggested email login was supported
+- Users might attempt email authentication (not supported)
+- Misleading UI text didn't match backend capabilities
+
+**After:**
+- Clear, accurate label: "Username"
+- Users understand Cloudflare username credentials required
+- UI accurately represents authentication system
+
+#### 📋 **Related System Context**
+
+**Authentication Architecture:**
+- System uses Cloudflare Workers authentication
+- No email-based login supported
+- Username-only credential system
+- JWT token-based session management
 
 ## [5.2.41] - 2025-11-17
 
