@@ -21,12 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.37">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.44">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.37">
-    <meta name="build-date" content="2025-11-14">
+    <meta name="app-version" content="5.2.44">
+    <meta name="build-date" content="2025-11-17">
 
     <style>
         body {
@@ -2881,17 +2881,17 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.37"></script>
-    <script src="/js/api.js?v=5.2.37"></script>
-    <script src="/js/components.js?v=5.2.37"></script>
+    <script src="/js/utils.js?v=5.2.44"></script>
+    <script src="/js/api.js?v=5.2.44"></script>
+    <script src="/js/components.js?v=5.2.44"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.37"></script>
-    <script src="/js/station-dashboard.js?v=5.2.37"></script>
-    <script src="/js/navigation.js?v=5.2.37"></script>
-    <script src="/js/export.js?v=5.2.37"></script>
+    <script src="/js/interactive-map.js?v=5.2.44"></script>
+    <script src="/js/station-dashboard.js?v=5.2.44"></script>
+    <script src="/js/navigation.js?v=5.2.44"></script>
+    <script src="/js/export.js?v=5.2.44"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
@@ -5207,9 +5207,19 @@
                 // Refresh the platforms display
                 await loadPlatformsAndInstruments();
 
-                // If platform detail modal is open, refresh it with updated data
-                if (document.getElementById('platform-modal').classList.contains('show')) {
-                    await refreshPlatformDetailModal(platformId);
+                // Reopen the platform detail modal with fresh data
+                // This ensures users see their changes immediately
+                const token = localStorage.getItem('sites_spectral_token');
+                const refreshResponse = await fetch(`/api/platforms/${platformId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (refreshResponse.ok) {
+                    const updatedPlatform = await refreshResponse.json();
+                    populatePlatformModal(updatedPlatform);
+                    document.getElementById('platform-modal').classList.add('show');
                 }
             } catch (error) {
                 console.error('Error saving platform:', error);
@@ -5326,9 +5336,18 @@
                 // Refresh the platforms display
                 await loadPlatformsAndInstruments();
 
-                // If instrument detail modal is open, refresh it with updated data
-                if (document.getElementById('instrument-modal').classList.contains('show')) {
-                    await refreshInstrumentDetailModal(instrumentId);
+                // Reopen the instrument detail modal with fresh data
+                // This ensures users see their changes immediately
+                const refreshResponse = await fetch(`/api/instruments/${instrumentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (refreshResponse.ok) {
+                    const updatedInstrument = await refreshResponse.json();
+                    populateInstrumentModal(updatedInstrument);
+                    document.getElementById('instrument-modal').classList.add('show');
                 }
             } catch (error) {
                 console.error('Error saving instrument:', error);

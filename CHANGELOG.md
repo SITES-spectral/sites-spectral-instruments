@@ -16,6 +16,151 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
 
+## [5.2.45] - 2025-11-17
+
+### 🐛 BUG FIX: Platform & Instrument Detail Modal Refresh After Edit
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Fixed modal refresh issue preventing users from seeing updated data after edits
+
+#### 🐛 **Bug Description**
+
+**Problem Identified:**
+When editing platform or instrument details:
+1. User opens detail modal (e.g., platform details)
+2. Clicks "Edit" button → Detail modal closes, edit modal opens
+3. Makes changes (e.g., updates deployment_date)
+4. Clicks "Save Changes" → Edit modal closes
+5. **Detail modal does not reopen** with fresh data
+6. User clicks entity again → Sees **OLD/CACHED data**, not their changes
+
+**User Impact:**
+- Changes appeared to "not save" even though database was updated correctly
+- Confusion about whether data was persisted
+- Required page refresh to see changes
+- Poor user experience with no immediate visual feedback
+
+#### ✅ **Root Cause**
+
+**Code Flow Issue:**
+```javascript
+// OLD CODE (lines 5211-5213)
+if (document.getElementById('platform-modal').classList.contains('show')) {
+    await refreshPlatformDetailModal(platformId);
+}
+```
+
+**Problem:**
+- Detail modal was **already closed** when edit modal opened
+- Check for modal being "show" always failed
+- Refresh function never executed
+- Users saw stale cached data
+
+#### 🔧 **Fix Implemented**
+
+**New Behavior:**
+After saving platform or instrument changes:
+1. Close edit modal
+2. Show success notification
+3. Refresh platform/instrument list (cards)
+4. **Fetch fresh data from API**
+5. **Reopen detail modal** with updated data
+6. User immediately sees their changes
+
+**Code Changes:**
+
+**Platform Save (station.html lines 5210-5223):**
+```javascript
+// Reopen the platform detail modal with fresh data
+// This ensures users see their changes immediately
+const token = localStorage.getItem('sites_spectral_token');
+const refreshResponse = await fetch(`/api/platforms/${platformId}`, {
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+});
+
+if (refreshResponse.ok) {
+    const updatedPlatform = await refreshResponse.json();
+    populatePlatformModal(updatedPlatform);
+    document.getElementById('platform-modal').classList.add('show');
+}
+```
+
+**Instrument Save (station.html lines 5339-5351):**
+```javascript
+// Reopen the instrument detail modal with fresh data
+// This ensures users see their changes immediately
+const refreshResponse = await fetch(`/api/instruments/${instrumentId}`, {
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+});
+
+if (refreshResponse.ok) {
+    const updatedInstrument = await refreshResponse.json();
+    populateInstrumentModal(updatedInstrument);
+    document.getElementById('instrument-modal').classList.add('show');
+}
+```
+
+#### ✨ **Fixed User Experience**
+
+**Before v5.2.45:**
+1. Edit platform deployment_date: 2024-04-18 → 2024-04-20
+2. Click "Save Changes"
+3. Edit modal closes
+4. Click platform again
+5. **Still shows**: 2024-04-18 ❌
+6. Must refresh browser to see: 2024-04-20
+
+**After v5.2.45:**
+1. Edit platform deployment_date: 2024-04-18 → 2024-04-20
+2. Click "Save Changes"
+3. Edit modal closes
+4. **Detail modal reopens automatically**
+5. **Immediately shows**: 2024-04-20 ✅
+6. No browser refresh needed
+
+#### 📋 **Testing Instructions**
+
+**Test Platform Edit:**
+1. Click on any platform card to view details
+2. Click "Edit" button
+3. Change deployment date
+4. Click "Save Changes"
+5. **Expected**: Modal automatically reopens showing new date
+
+**Test Instrument Edit:**
+1. Click on any instrument to view details
+2. Click "Edit" button
+3. Change any field (e.g., deployment_date, camera_brand)
+4. Click "Save Changes"
+5. **Expected**: Modal automatically reopens showing updated values
+
+**Test Multiple Edits:**
+1. Edit platform → Save → Should see changes
+2. Edit again → Save → Should see new changes
+3. No stale data, no refresh needed
+
+#### 🎯 **Impact Summary**
+
+**User Experience Improvements:**
+- ✅ Immediate visual feedback on successful saves
+- ✅ No confusion about whether data saved
+- ✅ No manual page refresh required
+- ✅ Consistent behavior across platforms and instruments
+- ✅ Professional, polished user experience
+
+**Technical Improvements:**
+- ✅ Fresh data fetch after every save
+- ✅ Modal state properly managed
+- ✅ Database and UI in perfect sync
+- ✅ No caching issues
+
+**Files Modified:**
+- `public/station.html` - Updated `savePlatformChanges()` and `saveInstrumentChanges()` functions
+
 ## [5.2.44] - 2025-11-17
 
 ### 🔧 DATABASE UPDATE: Svartberget Station Instrument Cleanup
