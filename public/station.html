@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.46">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.47">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.46">
+    <meta name="app-version" content="5.2.47">
     <meta name="build-date" content="2025-11-17">
 
     <style>
@@ -2881,17 +2881,17 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.46"></script>
-    <script src="/js/api.js?v=5.2.46"></script>
-    <script src="/js/components.js?v=5.2.46"></script>
+    <script src="/js/utils.js?v=5.2.47"></script>
+    <script src="/js/api.js?v=5.2.47"></script>
+    <script src="/js/components.js?v=5.2.47"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.46"></script>
-    <script src="/js/station-dashboard.js?v=5.2.46"></script>
-    <script src="/js/navigation.js?v=5.2.46"></script>
-    <script src="/js/export.js?v=5.2.46"></script>
+    <script src="/js/interactive-map.js?v=5.2.47"></script>
+    <script src="/js/station-dashboard.js?v=5.2.47"></script>
+    <script src="/js/navigation.js?v=5.2.47"></script>
+    <script src="/js/export.js?v=5.2.47"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
@@ -4005,6 +4005,13 @@
         }
 
         function populateInstrumentModal(instrument) {
+            console.log('📋 populateInstrumentModal called with:', {
+                id: instrument.id,
+                display_name: instrument.display_name,
+                deployment_date: instrument.deployment_date,
+                calibration_date: instrument.calibration_date
+            });
+
             const detailsContainer = document.getElementById('instrument-details');
 
             // Update modal header with edit button if user has permissions
@@ -5303,23 +5310,12 @@
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('Saving instrument data (46 fields):', instrumentData);
-                console.log('New fields being saved:', {
-                    camera_mega_pixels: instrumentData.camera_mega_pixels,
-                    camera_lens: instrumentData.camera_lens,
-                    camera_focal_length_mm: instrumentData.camera_focal_length_mm,
-                    camera_aperture: instrumentData.camera_aperture,
-                    camera_exposure_time: instrumentData.camera_exposure_time,
-                    camera_iso: instrumentData.camera_iso,
-                    camera_white_balance: instrumentData.camera_white_balance,
+                console.log('🔵 Saving instrument data (46 fields):', instrumentData);
+                console.log('🔵 Critical fields being saved:', {
+                    deployment_date: instrumentData.deployment_date,
                     calibration_date: instrumentData.calibration_date,
-                    power_source: instrumentData.power_source,
-                    data_transmission: instrumentData.data_transmission,
-                    manufacturer_warranty_expires: instrumentData.manufacturer_warranty_expires,
-                    image_processing_enabled: instrumentData.image_processing_enabled,
-                    image_quality_score: instrumentData.image_quality_score,
-                    calibration_notes: instrumentData.calibration_notes,
-                    image_archive_path: instrumentData.image_archive_path
+                    display_name: instrumentData.display_name,
+                    legacy_acronym: instrumentData.legacy_acronym
                 });
 
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
@@ -5349,6 +5345,7 @@
 
                 // Reopen the instrument detail modal with fresh data
                 // This ensures users see their changes immediately
+                console.log('🔄 Fetching fresh instrument data for ID:', instrumentId);
                 const refreshResponse = await fetch(`/api/instruments/${instrumentId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -5357,9 +5354,19 @@
 
                 if (refreshResponse.ok) {
                     const updatedInstrument = await refreshResponse.json();
+                    console.log('✅ Received fresh instrument data:', {
+                        id: updatedInstrument.id,
+                        display_name: updatedInstrument.display_name,
+                        legacy_acronym: updatedInstrument.legacy_acronym,
+                        deployment_date: updatedInstrument.deployment_date,
+                        calibration_date: updatedInstrument.calibration_date
+                    });
                     currentOpenInstrumentId = instrumentId; // Set state variable
                     populateInstrumentModal(updatedInstrument);
                     document.getElementById('instrument-modal').classList.add('show');
+                    console.log('✅ Instrument modal reopened with fresh data');
+                } else {
+                    console.error('❌ Failed to fetch fresh instrument data:', refreshResponse.status);
                 }
             } catch (error) {
                 console.error('Error saving instrument:', error);

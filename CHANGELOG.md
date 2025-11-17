@@ -16,6 +16,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
 
+## [5.2.48] - 2025-11-17
+
+### 🔍 DIAGNOSTIC: Instrument Modal Refresh Logging
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Added comprehensive diagnostic logging to instrument save and refresh workflow
+
+#### 🔍 **Diagnostic Logging Added**
+
+**Purpose:**
+- Investigate reported issue: deployment_date not refreshing in instrument modal after edit
+- Track data flow through entire save → refresh → display pipeline
+- Identify where data transformation or display might be failing
+
+**Logging Points Added:**
+1. **🔵 Save Stage** (line 5307-5312): Shows deployment_date value being sent to API
+2. **🔄 Fetch Stage** (line 5341): Logs request for fresh instrument data
+3. **✅ Receive Stage** (line 5350-5356): Shows deployment_date returned from API refresh
+4. **📋 Populate Stage** (line 4008-4013): Shows deployment_date used when rendering modal
+5. **✅ Display Stage** (line 5360): Confirms modal reopened with fresh data
+
+#### 📊 **Console Log Output Format**
+
+**During Save:**
+```javascript
+🔵 Saving instrument data (46 fields): {full instrument object}
+🔵 Critical fields being saved: {
+    deployment_date: "2024-04-18",
+    calibration_date: "2024-05-01",
+    display_name: "SVB MIR PL01 PHE02",
+    legacy_acronym: "DEG-MIR-P03"
+}
+```
+
+**During Refresh:**
+```javascript
+🔄 Fetching fresh instrument data for ID: 42
+✅ Received fresh instrument data: {
+    id: 42,
+    display_name: "SVB MIR PL01 PHE02",
+    legacy_acronym: "DEG-MIR-P03",
+    deployment_date: "2024-04-18",
+    calibration_date: "2024-05-01"
+}
+📋 populateInstrumentModal called with: {
+    id: 42,
+    display_name: "SVB MIR PL01 PHE02",
+    deployment_date: "2024-04-18",
+    calibration_date: "2024-05-01"
+}
+✅ Instrument modal reopened with fresh data
+```
+
+#### 🛠️ **Technical Implementation**
+
+**Files Modified:**
+- `public/station.html` (lines 4008-4013, 5307-5312, 5341-5363)
+
+**Changes:**
+1. Replaced generic "New fields being saved" log with focused critical fields log
+2. Added deployment_date to tracked fields (previously missing from logs)
+3. Added fetch, receive, and populate stage logging
+4. Added error logging for failed refresh attempts
+5. Enhanced console output with emoji indicators for easy scanning
+
+#### 🎯 **Debugging Workflow**
+
+**For User Testing:**
+1. Open browser console (F12)
+2. Navigate to any instrument
+3. Click "Edit" and change deployment_date
+4. Click "Save Changes"
+5. Watch console for complete data flow:
+   - Verify deployment_date sent to API
+   - Verify deployment_date returned from API
+   - Verify deployment_date used in modal rendering
+   - Check if displayed value matches returned value
+
+**Expected Behavior:**
+- All 5 log stages should appear in sequence
+- deployment_date values should match across all stages
+- Modal should display the new deployment_date value immediately
+
+**If Issue Persists:**
+- Console logs will reveal which stage fails
+- Data mismatch will be visible in logs
+- Can identify if API, refresh, or display is the problem
+
+#### 📋 **Next Steps**
+
+This is a diagnostic release to gather data:
+- If logs show deployment_date IS being returned and used, issue is likely browser caching
+- If logs show deployment_date NOT being returned, issue is backend/API
+- If logs show deployment_date returned but not displayed, issue is modal rendering
+
+**Note**: This release does NOT fix the issue, it provides comprehensive logging to identify the root cause.
+
 ## [5.2.47] - 2025-11-17
 
 ### 🐛 BUG FIX: JavaScript Const Token Redeclaration Error

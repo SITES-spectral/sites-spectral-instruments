@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.47",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.47 - BUG FIX: JavaScript Const Token Redeclaration Error",
+  "version": "5.2.48",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.48 - DIAGNOSTIC: Instrument Modal Refresh Logging",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
