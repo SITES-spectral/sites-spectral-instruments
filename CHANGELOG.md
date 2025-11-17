@@ -16,6 +16,142 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
 
+## [5.2.46] - 2025-11-17
+
+### 🐛 BUG FIX: Dashboard Counts & Modal Close Button After v5.2.45
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Fixed two issues introduced in v5.2.45 modal refresh implementation
+
+#### 🐛 **Issues Fixed**
+
+**Issue #1: Dashboard Counts Showing 0**
+- **Problem**: Platform and instrument summary counts displayed "0" instead of actual values
+- **Root Cause**: `loadPlatformsAndInstruments()` wasn't updating dashboard statistics
+- **Impact**: Users couldn't see correct station summary metrics
+
+**Issue #2: Platform Detail Close Button Not Working**
+- **Problem**: Close button (×) on platform detail modal stopped responding
+- **Root Cause**: Modal state variable `currentOpenPlatformId` not set when reopening modal
+- **Impact**: Users had to refresh page to close modal
+
+#### ✅ **Root Cause Analysis**
+
+**Dashboard Counts Issue:**
+- v5.2.45 fix called `await loadPlatformsAndInstruments()` to refresh platform cards
+- This function updates the visual cards but **not the dashboard statistics**
+- Dashboard counts require separate `updateDashboard()` function call
+- Result: Cards refreshed but counts stayed at 0
+
+**Close Button Issue:**
+- Modal management uses state variables (`currentOpenPlatformId`, `currentOpenInstrumentId`)
+- v5.2.45 reopened modal by adding 'show' class but didn't set state variable
+- `closePlatformModal()` function (line 6049) tries to clear `currentOpenPlatformId`
+- Without state variable set, modal state became inconsistent
+- Close button stopped functioning properly
+
+#### 🔧 **Fix Implemented**
+
+**Platform Save Function (station.html lines 5207-5229):**
+```javascript
+// Refresh the platforms display AND dashboard counts
+if (typeof loadPlatformsAndInstruments === 'function') {
+    await loadPlatformsAndInstruments();
+}
+if (typeof updateDashboard === 'function') {
+    await updateDashboard(); // NEW: Updates dashboard counts
+}
+
+// Reopen modal with state management
+if (refreshResponse.ok) {
+    const updatedPlatform = await refreshResponse.json();
+    currentOpenPlatformId = platformId; // NEW: Set state variable
+    populatePlatformModal(updatedPlatform);
+    document.getElementById('platform-modal').classList.add('show');
+}
+```
+
+**Instrument Save Function (station.html lines 5342-5363):**
+```javascript
+// Refresh the platforms display AND dashboard counts
+if (typeof loadPlatformsAndInstruments === 'function') {
+    await loadPlatformsAndInstruments();
+}
+if (typeof updateDashboard === 'function') {
+    await updateDashboard(); // NEW: Updates dashboard counts
+}
+
+// Reopen modal with state management
+if (refreshResponse.ok) {
+    const updatedInstrument = await refreshResponse.json();
+    currentOpenInstrumentId = instrumentId; // NEW: Set state variable
+    populateInstrumentModal(updatedInstrument);
+    document.getElementById('instrument-modal').classList.add('show');
+}
+```
+
+**Key Changes:**
+1. ✅ Added `updateDashboard()` call to refresh summary counts
+2. ✅ Added function existence checks (`typeof === 'function'`) for safety
+3. ✅ Set `currentOpenPlatformId` before reopening platform modal
+4. ✅ Set `currentOpenInstrumentId` before reopening instrument modal
+
+#### ✨ **Fixed User Experience**
+
+**Dashboard Counts:**
+- **Before v5.2.46**: Shows "0 Platforms, 0 Instruments" ❌
+- **After v5.2.46**: Shows correct counts (e.g., "7 Platforms, 42 Instruments") ✅
+
+**Close Button:**
+- **Before v5.2.46**: Close button (×) doesn't respond ❌
+- **After v5.2.46**: Close button works immediately ✅
+
+**Complete Workflow:**
+1. Edit platform deployment_date → Save
+2. Modal reopens showing new date ✅
+3. Dashboard counts update correctly ✅
+4. Close button works ✅
+5. All state properly managed ✅
+
+#### 📋 **Testing Instructions**
+
+**Test Dashboard Counts:**
+1. Login and navigate to station page
+2. Check "Station Overview" card shows correct counts
+3. Edit any platform → Save
+4. Verify counts still show correct values (not 0)
+
+**Test Close Button:**
+1. Click on any platform card to view details
+2. Edit platform → Save changes
+3. Modal reopens automatically
+4. Click close button (×) → Should close immediately
+
+**Test Complete Workflow:**
+1. Edit platform deployment date
+2. Save → Modal reopens with new date
+3. Check dashboard shows correct counts
+4. Close modal → Should close
+5. Edit again → Should work smoothly
+
+#### 🎯 **Impact Summary**
+
+**User Experience Improvements:**
+- ✅ Dashboard statistics always accurate after edits
+- ✅ Close button works reliably
+- ✅ Modal state properly managed
+- ✅ No page refresh needed
+- ✅ Professional, polished behavior
+
+**Technical Improvements:**
+- ✅ Proper separation of concerns (cards vs. dashboard)
+- ✅ State variables managed correctly
+- ✅ Function existence checks prevent errors
+- ✅ Complete modal lifecycle management
+
+**Files Modified:**
+- `public/station.html` - Updated `savePlatformChanges()` and `saveInstrumentChanges()` functions
+
 ## [5.2.45] - 2025-11-17
 
 ### 🐛 BUG FIX: Platform & Instrument Detail Modal Refresh After Edit
