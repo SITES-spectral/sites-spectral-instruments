@@ -1638,7 +1638,7 @@
         </div>
     </div>
 
-    <!-- Admin-Only Create Platform Modal -->
+    <!-- Create Platform Modal (Admin & Station Users) -->
     <div id="create-platform-modal" class="platform-modal" style="display: none;">
         <div class="modal-content-large">
             <div class="modal-header-large">
@@ -1892,14 +1892,19 @@
                 document.getElementById('station-name').textContent = stationData.display_name;
                 document.title = `${stationData.display_name} - SITES Spectral`;
 
-                // Show admin controls if user is admin AND stationData is loaded
+                // Show admin station controls if user is admin AND stationData is loaded
                 if (currentUser && currentUser.role === 'admin' && stationData && stationData.id) {
                     document.getElementById('admin-station-controls').style.display = 'block';
-                    document.getElementById('admin-platform-controls').style.display = 'block';
-                    console.log('✅ Admin controls shown with station ID:', stationData.id);
+                    console.log('✅ Admin station controls shown with station ID:', stationData.id);
                 } else if (currentUser && currentUser.role === 'admin') {
                     console.error('❌ Admin user detected but stationData not loaded:', stationData);
                     showNotification('Station data not fully loaded. Please refresh the page.', 'warning');
+                }
+
+                // Show platform controls if user can edit (admin OR station user) AND stationData is loaded
+                if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'station') && stationData && stationData.id) {
+                    document.getElementById('admin-platform-controls').style.display = 'block';
+                    console.log('✅ Platform controls shown for', currentUser.role, 'user with station ID:', stationData.id);
                 }
 
                 // Set station description if available
@@ -4898,13 +4903,14 @@
             console.log('🔵 currentUser:', currentUser);
             console.log('🔵 currentUser?.role:', currentUser?.role);
 
-            if (!currentUser || currentUser.role !== 'admin') {
-                console.error('❌ Admin check failed');
-                showNotification('Admin privileges required', 'error');
+            // Allow both admin and station users to create platforms
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'station')) {
+                console.error('❌ Permission check failed - user role:', currentUser?.role);
+                showNotification('Platform creation requires admin or station user privileges', 'error');
                 return;
             }
 
-            console.log('✅ Admin check passed, generating form...');
+            console.log('✅ Permission check passed for', currentUser.role, 'user, generating form...');
             const form = document.getElementById('create-platform-form');
             console.log('🔵 Form element:', form);
             form.innerHTML = `

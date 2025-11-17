@@ -13,6 +13,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.39] - 2025-11-17
+
+### 🔧 PERMISSION FIX: Station Users Platform Creation Access & Documentation Cleanup
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Fixed UI permission blocks preventing station users from creating platforms, comprehensive audit completed, and documentation reorganized
+
+#### ✅ **Permission Fixes**
+
+**Station User Platform Creation Access Restored:**
+- **Issue**: UI blocked station users from creating platforms despite API allowing it
+- **Fixed**: Platform creation button now visible for both admin AND station users (line 1904-1908)
+- **Fixed**: Modal permission check now allows station users (line 4906-4913)
+- **Updated**: Modal header documentation reflects correct permissions (line 1641)
+- **Verification**: API backend already correct with proper station isolation
+
+**Permission Matrix Clarification:**
+- **Station Users**: Can CREATE and EDIT platforms for their own station only
+- **Station Users**: CANNOT delete platforms (admin-only)
+- **Admin Users**: Full CRUD on platforms across all stations
+
+#### 📚 **Documentation Improvements**
+
+**CLAUDE.md Cleanup:**
+- Reduced from 842 lines to 245 lines (~71% reduction)
+- Created CLAUDE_LEGACY.md backup with complete version history
+- Streamlined to essential reference information
+- Better organized sections with clear navigation
+
+#### 🔍 **Comprehensive System Audit Completed**
+
+**Audit Findings:**
+- ✅ Authentication system: NO email dependencies (uses Cloudflare credentials only)
+- ✅ Role-based permissions: Multi-layer security working correctly
+- ✅ Platform creation: API correct, UI now fixed
+- ⚠️ Instrument edit form: Missing 28 fields (documented for next fix)
+- ⚠️ ROI management: Backend complete, frontend UI missing
+- 📋 Full audit report generated with prioritized fix plan
+
+#### 📝 **Files Modified**
+
+1. **public/station.html** - Platform creation permission fixes
+2. **CLAUDE.md** - Streamlined documentation
+3. **CLAUDE_LEGACY.md** - Complete historical archive (new file)
+4. **CHANGELOG.md** - This update
+
+#### 🎯 **Next Priority Tasks**
+
+1. Expand instrument edit form (28 missing fields)
+2. Expand instrument creation form (11 optional fields)
+3. Implement ROI creation/edit modals
+4. Fix login page label
+5. Add EPSG code to platform edit form
+
 ## [5.2.38] - 2025-11-14
 
 ### 📊 DATABASE UPDATE: Added SVB Platforms & Naming Consistency
