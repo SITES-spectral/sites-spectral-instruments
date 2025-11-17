@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.46",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.46 - BUG FIX: Dashboard Counts & Modal Close Button After v5.2.45",
+  "version": "5.2.47",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.47 - BUG FIX: JavaScript Const Token Redeclaration Error",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
