@@ -16,6 +16,7 @@ import { handleUsers } from './handlers/users.js';
 import { handleAnalytics } from './handlers/analytics.js';
 import { handleChannels } from './handlers/channels.js';
 import { handleSensorModels } from './handlers/sensor-models.js';
+import { handleDocumentation } from './handlers/documentation.js';
 import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
@@ -92,6 +93,9 @@ export async function handleApiRequest(request, env, ctx) {
 
       case 'sensor-models':
         return await handleSensorModels(method, pathSegments, request, env);
+
+      case 'documentation':
+        return await handleDocumentation(method, pathSegments, request, env);
 
       case 'values':
         // Special endpoint for dropdown/multiselect values

@@ -9,9 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📋 Next Steps
 - Complete MS sensor frontend UI (creation/edit modals with tabs)
-- Setup Cloudflare R2 bucket for sensor documentation storage
 - Build sensor models library UI in admin dashboard
-- Pre-populate sensor models (SKR 1800, SKR110, PP Systems, LICOR)
 - Implement channel display and management UI
 - Documentation management UI with file upload
 - Implement station-scoped admin role for enhanced security
@@ -20,6 +18,184 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ROI polygon point editing (canvas-based digitizer)
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
+
+## [6.0.1] - 2025-11-18
+
+### 🔧 PATCH RELEASE: Multispectral Backend Complete
+
+**📅 Release Date**: 2025-11-18
+**🎯 Achievement**: Complete backend infrastructure for MS sensors with R2 storage, documentation management, and pre-populated sensor models
+**🔧 Focus**: Phase 2 completion - R2 setup, documentation handler, sensor models seed data, and MS naming logic
+
+#### 🚀 **New Features**
+
+**1. Cloudflare R2 Storage Integration**
+- Created R2 bucket `sites-spectral-docs` for sensor documentation
+- Added R2 binding `DOCS_BUCKET` to wrangler.toml
+- Configured for storing specification sheets, calibration certificates, and user manuals
+- Supports dual-level documentation (model-level and instrument-level)
+
+**2. Documentation Handler** (`/src/handlers/documentation.js` - 470 lines)
+
+**Endpoints**:
+- `GET /api/documentation?sensor_model_id=X` - List model documentation
+- `GET /api/documentation?instrument_id=X` - List instrument documentation
+- `GET /api/documentation/:id` - Get document metadata
+- `GET /api/documentation/:id/download` - Download document file from R2
+- `POST /api/documentation/upload` - Upload new document (multipart/form-data)
+- `PUT /api/documentation/:id` - Update document metadata
+- `DELETE /api/documentation/:id` - Delete document (removes from R2 and database)
+
+**Features**:
+- Multipart file upload with R2 storage
+- Automatic file path generation with timestamp prefixes
+- Filename sanitization for security
+- Permission-based access (admin for model docs, station users for instrument docs)
+- Support for multiple document types: specification_sheet, calibration_certificate, user_manual, warranty, technical_note
+- Tags system with JSON array storage
+- File metadata tracking (size, MIME type, version, document date)
+
+**3. Pre-Populated Sensor Models** (8 Common Sensors)
+
+**SKYE Sensors**:
+- SKR 1800 (2-4 channel MS, 400-1050nm, cosine corrected, IP68)
+- SKR 110 (PAR sensor, 400-700nm)
+
+**APOGEE Sensors**:
+- SQ-500 (Full Spectrum PAR, 389-692nm)
+- SRS-NDVI-01 (NDVI sensor, Red 650nm + NIR 810nm)
+- SRS-PRI (PRI sensor, 531nm + 570nm for stress detection)
+
+**Other Manufacturers**:
+- PP Systems SRS-NR (Red/Far-Red, ~660nm + ~730nm for phytochrome studies)
+- DECAGON SRS Series NDVI (Red 650nm + NIR 810nm, now METER Group)
+- LICOR LI-190R (PAR quantum sensor, industry standard)
+
+**Specifications Included**:
+- Wavelength ranges and available channel configurations
+- Field of view, angular response, cosine response
+- Calibration procedures and factory interval (typically 24 months)
+- Operating temperature ranges (typically -40°C to +70°C)
+- Physical dimensions, weight, cable types
+- IP ratings (IP68 waterproof for most sensors)
+- Manufacturer URLs and specification sheet links
+
+**4. MS Naming Convention Logic** (Updated instruments handler)
+
+**New Helper Function**: `extractBrandAcronym(sensorBrand, sensorModel)`
+- Supports known brands: SKYE, APOGEE, DECAGON, METER, LICOR, PP Systems
+- Intelligent brand extraction with fallback to first word
+
+**Auto-Naming Logic**:
+- **For MS instruments**: `{PLATFORM}_{BRAND}_MS{NN}_NB{number_of_channels}`
+  - Example: `ANS_FOR_PL01_SKYE_MS01_NB04` (SKYE sensor with 4 bands)
+  - Example: `SVB_MIR_PL01_APOGEE_MS02_NB02` (APOGEE sensor with 2 bands)
+- **For other instruments**: `{PLATFORM}_{TYPE}{NN}` (unchanged)
+  - Example: `ANS_FOR_PL01_PHE01` (Phenocam)
+  - Example: `LON_AGR_PL02_PAR01` (PAR sensor)
+
+**Brand Mapping Support**:
+- SKYE → SKYE
+- APOGEE → APOGEE
+- DECAGON/METER → DECAGON or METER
+- LICOR/LI-COR → LICOR
+- PP Systems/PPSYSTEMS → PP
+
+#### 🗂️ **Files Created**
+
+1. `/scripts/seed_sensor_models.js` (350 lines) - Pre-population script with 8 sensor models
+2. `/src/handlers/documentation.js` (470 lines) - Complete documentation management API
+
+#### ✏️ **Files Modified**
+
+1. `/wrangler.toml` - Added R2 bucket binding, updated version to 6.0.1
+2. `/src/api-handler.js` - Added documentation route
+3. `/src/handlers/instruments.js` - Added `extractBrandAcronym()` function and MS naming logic
+4. `/package.json` - Version bump 6.0.0 → 6.0.1
+
+#### 📊 **Database Status**
+
+- **Total Tables**: 13 (3 new MS tables + 10 existing)
+- **Sensor Models**: 8 pre-populated
+- **Database Size**: ~213 KB
+- **Indexes**: 11 performance indexes on new tables
+
+#### 🔄 **API Endpoints Summary**
+
+**Phase 1 (v6.0.0)**:
+- `/api/channels` - Manage spectral channels (5 operations)
+- `/api/sensor-models` - Manage sensor models library (5 operations)
+
+**Phase 2 (v6.0.1)**:
+- `/api/documentation` - Manage sensor documentation (6 operations)
+
+**Total New Endpoints**: 16 operations across 3 handler families
+
+#### 🎯 **Deployment Strategy**
+
+**Completed (v6.0.0 + v6.0.1)**:
+- ✅ Database schema with 3 new tables
+- ✅ Backend API handlers (channels, sensor-models, documentation)
+- ✅ R2 storage infrastructure
+- ✅ Pre-populated sensor models database
+- ✅ MS naming convention with brand extraction
+- ✅ 1,600+ lines of production backend code
+
+**Next Phase (v6.1.0 - Minor)**:
+- Frontend UI for MS instrument creation/edit
+- Sensor models library UI in admin dashboard
+- Channel management interface
+- Documentation upload/download UI
+
+#### 📚 **Documentation Types Supported**
+
+- `specification_sheet` - Manufacturer datasheets
+- `calibration_certificate` - Factory and field calibration certificates
+- `user_manual` - User guides and manuals
+- `warranty` - Warranty documentation
+- `technical_note` - Technical notes and application guides
+- `firmware_update` - Firmware versions and updates
+- `custom` - Custom documentation types
+
+#### 🔐 **Security Features**
+
+- Filename sanitization prevents path traversal attacks
+- Permission checks for all operations
+- Admin-only for model documentation
+- Station users limited to their own instruments
+- Read-only users cannot upload/modify/delete
+
+#### 🏗️ **Technical Architecture**
+
+**Storage Structure**:
+```
+sites-spectral-docs/
+├── models/{sensor_model_id}/{document_type}/{timestamp}_{filename}
+└── instruments/{instrument_id}/{document_type}/{timestamp}_{filename}
+```
+
+**XOR Constraint**: Each document belongs to EITHER a sensor model OR an instrument (not both)
+
+#### 🎓 **Known Sensor Specifications**
+
+**SKYE SKR 1800** (Most Popular):
+- 2-4 channels configurable
+- Wavelength options: Blue (450nm), Green (530nm), Red (645nm), NIR (850nm)
+- Bandwidth options: 10nm (narrow) or 40nm (wide)
+- Cosine response: f2 < 3% (0-70°)
+- Source: https://www.alliance-technologies.net/app/uploads/2019/04/2-CHANNEL-LIGHT-SENSOR-SKR-1800-v21.pdf
+
+**PP Systems Red/Far-Red**:
+- 2 channels: Red (~660nm), Far-Red (~730nm)
+- Used for phytochrome and shade avoidance studies
+- Source: https://ppsystems.com/wp-content/uploads/RedFarRedSensor.pdf
+
+#### 📈 **Statistics**
+
+- **Total Code Added**: 820 lines (documentation handler + seed script)
+- **Sensor Models Pre-loaded**: 8 models from 5 manufacturers
+- **API Operations**: +6 documentation endpoints
+- **Storage Configured**: Cloudflare R2 with unlimited scalability
 
 ## [6.0.0] - 2025-11-18
 

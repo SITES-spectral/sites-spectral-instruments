@@ -434,8 +434,16 @@ async function createInstrument(user, request, env) {
     // Build full instrument number with type code prefix (e.g., "PHE01", "MS02", "NDVI01")
     instrumentNumber = `${instrumentTypeCode}${nextInstrumentNumber}`;
 
-    // Generate normalized name: {PLATFORM}_{INSTRUMENT_TYPE}_{NUMBER}
-    normalizedName = `${platform.platform_normalized_name}_${instrumentTypeCode}${nextInstrumentNumber}`;
+    // Generate normalized name
+    // For MS instruments: {PLATFORM}_{BRAND}_MS{NN}_NB{number_of_channels}
+    // For other instruments: {PLATFORM}_{TYPE}{NN}
+    if (instrumentTypeCode === 'MS' && instrumentData.sensor_brand) {
+      const brandAcronym = extractBrandAcronym(instrumentData.sensor_brand, instrumentData.sensor_model);
+      const channelsSuffix = instrumentData.number_of_channels ? `_NB${String(instrumentData.number_of_channels).padStart(2, '0')}` : '';
+      normalizedName = `${platform.platform_normalized_name}_${brandAcronym}_MS${nextInstrumentNumber}${channelsSuffix}`;
+    } else {
+      normalizedName = `${platform.platform_normalized_name}_${instrumentTypeCode}${nextInstrumentNumber}`;
+    }
   }
 
   // Check for duplicate normalized names
@@ -630,6 +638,50 @@ function getInstrumentTypeCode(instrumentType) {
 
   // Fallback: extract first 3 uppercase letters
   return instrumentType.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
+}
+
+/**
+ * Extract brand acronym from sensor brand or model
+ * Used for multispectral sensor naming convention
+ * @param {string} sensorBrand - Sensor brand name
+ * @param {string} sensorModel - Sensor model name (fallback)
+ * @returns {string} Brand acronym (e.g., SKYE, APOGEE, DECAGON, LICOR, PP)
+ */
+function extractBrandAcronym(sensorBrand, sensorModel) {
+  if (!sensorBrand && !sensorModel) {
+    return 'MS'; // Fallback to generic MS
+  }
+
+  const brand = (sensorBrand || sensorModel || '').toUpperCase();
+
+  // Known brand mappings
+  const brandMappings = {
+    'SKYE': 'SKYE',
+    'APOGEE': 'APOGEE',
+    'DECAGON': 'DECAGON',
+    'METER': 'METER',
+    'LICOR': 'LICOR',
+    'LI-COR': 'LICOR',
+    'PPSYSTEMS': 'PP',
+    'PP SYSTEMS': 'PP',
+    'PP': 'PP'
+  };
+
+  // Check for exact match
+  if (brandMappings[brand]) {
+    return brandMappings[brand];
+  }
+
+  // Check for partial match
+  for (const [key, value] of Object.entries(brandMappings)) {
+    if (brand.includes(key)) {
+      return value;
+    }
+  }
+
+  // Fallback: use first word in uppercase
+  const firstWord = brand.split(/\s+/)[0];
+  return firstWord || 'MS';
 }
 
 /**
