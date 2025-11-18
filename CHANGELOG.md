@@ -8,13 +8,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
-- ROI edit modal with polygon digitizer
 - Enhanced user management interface
 - Bulk data operations
 - Advanced analytics dashboard
 - Full phenocam image API integration
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
+- ROI polygon point editing (canvas-based digitizer)
+
+## [5.2.51] - 2025-11-18
+
+### ✅ ROI NAME VALIDATION: Enforce Format and Prevent Duplicates
+
+**📅 Update Date**: 2025-11-18
+**🎯 Major Achievement**: Comprehensive ROI name validation to enforce naming conventions and prevent duplicates
+
+#### 🛡️ **ROI Name Validation System**
+
+**Validation Rules Implemented:**
+1. **Format Enforcement**: ROI names must follow `ROI_XX` pattern where XX is 01-99
+   - Valid examples: `ROI_01`, `ROI_02`, `ROI_15`, `ROI_99`
+   - Invalid examples: `ROI_1`, `ROI_100`, `MyROI`, `roi_01`
+2. **Duplicate Prevention**: No two ROIs can have the same name for the same instrument
+3. **Range Validation**: ROI number must be between 01 and 99
+
+**Implementation Details:**
+- Created `validateROIName()` async function with comprehensive validation logic
+- Integrated validation into both **create ROI** and **edit ROI** workflows
+- When editing, validation excludes current ROI ID to allow same name
+- Clear error messages guide users to correct format
+
+#### 🔧 **Technical Implementation**
+
+**Files Modified:**
+- `/public/station.html` - Added validation function and integrated into save workflows
+
+**New Function:**
+```javascript
+async function validateROIName(roiName, instrumentId, currentRoiId = null)
+```
+
+**Validation Logic:**
+1. **Regex Pattern Check**: `/^ROI_\d{2}$/` ensures correct format
+2. **Number Range Check**: Extracts number from `ROI_XX` and validates 01-99 range
+3. **Duplicate Check**: Fetches existing ROIs for instrument and checks for name conflicts
+4. **Edit Exception**: When `currentRoiId` provided, allows keeping same name
+
+**Integration Points:**
+- `saveROI()` at line 7683 - Create new ROI workflow
+- `saveROIChanges(roiId)` at line 4109 - Edit existing ROI workflow
+
+#### ✨ **User Experience Improvements**
+
+**Error Messages:**
+- Format error: "ROI name must follow the format ROI_XX (e.g., ROI_01, ROI_02, ..., ROI_99)"
+- Range error: "ROI number must be between 01 and 99"
+- Duplicate error: "ROI name 'ROI_XX' already exists for this instrument. Please choose a different name."
+
+**Benefits:**
+- **Consistency**: All ROIs follow same naming convention across system
+- **Organization**: Sequential numbering makes ROIs easy to identify and reference
+- **Data Integrity**: Prevents confusion from duplicate ROI names
+- **User Guidance**: Clear error messages help users understand requirements
+
+#### 📊 **Complete ROI Management Features**
+
+**ROI CRUD Operations (v5.2.50-51):**
+- ✅ **Create**: Canvas-based polygon digitizer with validation
+- ✅ **Read**: ROI detail modal with complete metadata display
+- ✅ **Update**: Edit modal with color picker, name, description, thickness
+- ✅ **Delete**: Confirmation dialog with cascade handling
+- ✅ **Validation**: Format enforcement and duplicate prevention
+
+**ROI Edit Modal Features:**
+- Edit ROI name (with validation)
+- Edit description
+- Dual-mode color picker (preset + custom RGB)
+- Adjust line thickness (1-20 pixels)
+- Permission-based visibility (admin + station users)
+
+#### 🔐 **Security and Permissions**
+
+**Validation Security:**
+- API-based duplicate checking ensures server-side validation
+- Network errors don't block legitimate operations
+- Token-based authentication for ROI list fetch
+
+**Permission Model:**
+- Validation applies to all users (admin, station, readonly)
+- Edit/delete buttons only visible for authorized users
+- Station users limited to their own station's instruments
 
 ## [5.2.50] - 2025-11-18
 

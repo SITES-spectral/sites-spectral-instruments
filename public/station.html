@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.49">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.51">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.49">
+    <meta name="app-version" content="5.2.51">
     <meta name="build-date" content="2025-11-18">
 
     <style>
@@ -2864,6 +2864,21 @@
         </div>
     </div>
 
+    <!-- ROI Edit Modal -->
+    <div id="edit-roi-modal" class="platform-modal">
+        <div class="modal-content-large">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-edit"></i> Edit ROI</h3>
+                <button class="modal-close-large" onclick="closeROIEditModal()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <div id="roi-edit-form" class="edit-form">
+                    <!-- Edit form will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div id="delete-confirmation-modal" class="instrument-modal">
         <div class="modal-content-large">
@@ -2881,17 +2896,17 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.49"></script>
-    <script src="/js/api.js?v=5.2.49"></script>
-    <script src="/js/components.js?v=5.2.49"></script>
+    <script src="/js/utils.js?v=5.2.51"></script>
+    <script src="/js/api.js?v=5.2.51"></script>
+    <script src="/js/components.js?v=5.2.51"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.49"></script>
-    <script src="/js/station-dashboard.js?v=5.2.49"></script>
-    <script src="/js/navigation.js?v=5.2.49"></script>
-    <script src="/js/export.js?v=5.2.49"></script>
+    <script src="/js/interactive-map.js?v=5.2.51"></script>
+    <script src="/js/station-dashboard.js?v=5.2.51"></script>
+    <script src="/js/navigation.js?v=5.2.51"></script>
+    <script src="/js/export.js?v=5.2.51"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
@@ -3770,6 +3785,27 @@
         }
 
         function populateROIModal(roi) {
+            // Update modal header with edit/delete buttons if user has permissions
+            const modalHeader = document.querySelector('#roi-modal .modal-header-large');
+            const canEdit = currentUser && (currentUser.role === 'admin' ||
+                (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
+
+            modalHeader.innerHTML = `
+                <h3><i class="fas fa-crop-alt"></i> ROI Details</h3>
+                <div class="modal-header-actions">
+                    ${canEdit ? `
+                        <button class="modal-edit-btn" onclick="editROI(${roi.id})" title="Edit ROI">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="modal-delete-btn" onclick="deleteROI(${roi.id})" title="Delete ROI">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Edit or delete this ROI</small>
+                    ` : ''}
+                    <button class="modal-close-large" onclick="closeROIModal()">&times;</button>
+                </div>
+            `;
+
             const detailsContainer = document.getElementById('roi-details');
             const colorDisplay = `rgb(${roi.color_r}, ${roi.color_g}, ${roi.color_b})`;
             const pointsCount = roi.points ? roi.points.length : 0;
@@ -3864,6 +3900,298 @@
 
         function closeROIModal() {
             document.getElementById('roi-modal').classList.remove('show');
+        }
+
+        async function editROI(roiId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/rois/${roiId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch ROI');
+                const roi = await response.json();
+
+                // Close the detail modal before opening edit modal
+                closeROIModal();
+
+                // Small delay to ensure modal transition completes
+                setTimeout(() => {
+                    showROIEditModal(roi);
+                }, 100);
+            } catch (error) {
+                console.error('Error loading ROI for edit:', error);
+                showNotification('Failed to load ROI data', 'error');
+            }
+        }
+
+        function showROIEditModal(roi) {
+            const editForm = document.getElementById('roi-edit-form');
+
+            editForm.innerHTML = `
+                <form id="roi-update-form">
+                    <input type="hidden" id="edit-roi-id" value="${roi.id}">
+                    <input type="hidden" id="edit-roi-instrument-id" value="${roi.instrument_id}">
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> ROI Properties</h4>
+
+                        <div class="form-group">
+                            <label>ROI Name <span style="color: #ef4444;">*</span></label>
+                            <input type="text" id="edit-roi-name" value="${roi.roi_name || ''}"
+                                   class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="edit-roi-description" class="form-control" rows="3"
+                                      placeholder="Describe what this ROI represents...">${roi.description || ''}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>ROI Color</label>
+                            <div class="roi-color-picker">
+                                <div class="roi-color-mode-tabs">
+                                    <button type="button" class="roi-color-tab active" onclick="switchEditColorMode('preset')" data-mode="preset">
+                                        <i class="fas fa-palette"></i> Presets
+                                    </button>
+                                    <button type="button" class="roi-color-tab" onclick="switchEditColorMode('custom')" data-mode="custom">
+                                        <i class="fas fa-sliders-h"></i> Custom RGB
+                                    </button>
+                                </div>
+
+                                <!-- Preset Colors -->
+                                <div id="roi-edit-color-preset" class="roi-color-content active">
+                                    <div class="roi-preset-colors">
+                                        <div class="roi-preset-color ${roi.color_r===255 && roi.color_g===255 && roi.color_b===0 ? 'active' : ''}"
+                                             data-rgb="255,255,0" style="background-color: rgb(255,255,0);"
+                                             onclick="selectEditPresetColor(this, 255, 255, 0)" title="Yellow"></div>
+                                        <div class="roi-preset-color ${roi.color_r===255 && roi.color_g===0 && roi.color_b===0 ? 'active' : ''}"
+                                             data-rgb="255,0,0" style="background-color: rgb(255,0,0);"
+                                             onclick="selectEditPresetColor(this, 255, 0, 0)" title="Red"></div>
+                                        <div class="roi-preset-color ${roi.color_r===0 && roi.color_g===255 && roi.color_b===0 ? 'active' : ''}"
+                                             data-rgb="0,255,0" style="background-color: rgb(0,255,0);"
+                                             onclick="selectEditPresetColor(this, 0, 255, 0)" title="Green"></div>
+                                        <div class="roi-preset-color ${roi.color_r===0 && roi.color_g===0 && roi.color_b===255 ? 'active' : ''}"
+                                             data-rgb="0,0,255" style="background-color: rgb(0,0,255);"
+                                             onclick="selectEditPresetColor(this, 0, 0, 255)" title="Blue"></div>
+                                        <div class="roi-preset-color ${roi.color_r===255 && roi.color_g===165 && roi.color_b===0 ? 'active' : ''}"
+                                             data-rgb="255,165,0" style="background-color: rgb(255,165,0);"
+                                             onclick="selectEditPresetColor(this, 255, 165, 0)" title="Orange"></div>
+                                        <div class="roi-preset-color ${roi.color_r===128 && roi.color_g===0 && roi.color_b===128 ? 'active' : ''}"
+                                             data-rgb="128,0,128" style="background-color: rgb(128,0,128);"
+                                             onclick="selectEditPresetColor(this, 128, 0, 128)" title="Purple"></div>
+                                        <div class="roi-preset-color ${roi.color_r===0 && roi.color_g===255 && roi.color_b===255 ? 'active' : ''}"
+                                             data-rgb="0,255,255" style="background-color: rgb(0,255,255);"
+                                             onclick="selectEditPresetColor(this, 0, 255, 255)" title="Cyan"></div>
+                                        <div class="roi-preset-color ${roi.color_r===255 && roi.color_g===192 && roi.color_b===203 ? 'active' : ''}"
+                                             data-rgb="255,192,203" style="background-color: rgb(255,192,203);"
+                                             onclick="selectEditPresetColor(this, 255, 192, 203)" title="Pink"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom RGB Sliders -->
+                                <div id="roi-edit-color-custom" class="roi-color-content">
+                                    <div class="roi-rgb-slider">
+                                        <label>
+                                            <span class="rgb-label" style="color: #ef4444;">R</span>
+                                            <span id="roi-edit-color-r-value">${roi.color_r || 255}</span>
+                                        </label>
+                                        <input type="range" id="roi-edit-color-r" min="0" max="255" value="${roi.color_r || 255}"
+                                               class="roi-slider" oninput="updateEditColorPreview()">
+                                    </div>
+                                    <div class="roi-rgb-slider">
+                                        <label>
+                                            <span class="rgb-label" style="color: #10b981;">G</span>
+                                            <span id="roi-edit-color-g-value">${roi.color_g || 255}</span>
+                                        </label>
+                                        <input type="range" id="roi-edit-color-g" min="0" max="255" value="${roi.color_g || 255}"
+                                               class="roi-slider" oninput="updateEditColorPreview()">
+                                    </div>
+                                    <div class="roi-rgb-slider">
+                                        <label>
+                                            <span class="rgb-label" style="color: #3b82f6;">B</span>
+                                            <span id="roi-edit-color-b-value">${roi.color_b || 0}</span>
+                                        </label>
+                                        <input type="range" id="roi-edit-color-b" min="0" max="255" value="${roi.color_b || 0}"
+                                               class="roi-slider" oninput="updateEditColorPreview()">
+                                    </div>
+                                </div>
+
+                                <!-- Color Preview -->
+                                <div class="roi-color-preview">
+                                    <div class="roi-color-preview-swatch" id="roi-edit-color-preview"
+                                         style="background-color: rgb(${roi.color_r}, ${roi.color_g}, ${roi.color_b});"></div>
+                                    <span class="roi-color-preview-text">RGB(<span id="edit-preview-r">${roi.color_r}</span>,
+                                          <span id="edit-preview-g">${roi.color_g}</span>,
+                                          <span id="edit-preview-b">${roi.color_b}</span>)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Line Thickness</label>
+                            <input type="number" id="edit-roi-thickness" value="${roi.thickness || 7}"
+                                   class="form-control" min="1" max="20" step="1">
+                            <small class="form-text">Polygon border thickness (1-20 pixels)</small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-large">
+                        <button type="button" class="btn btn-secondary" onclick="closeROIEditModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="saveROIChanges(${roi.id})">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            document.getElementById('edit-roi-modal').classList.add('show');
+        }
+
+        function switchEditColorMode(mode) {
+            const tabs = document.querySelectorAll('#roi-edit-form .roi-color-tab');
+            const contents = document.querySelectorAll('#roi-edit-form .roi-color-content');
+
+            tabs.forEach(tab => {
+                if (tab.dataset.mode === mode) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            if (mode === 'preset') {
+                document.getElementById('roi-edit-color-preset').classList.add('active');
+                document.getElementById('roi-edit-color-custom').classList.remove('active');
+            } else {
+                document.getElementById('roi-edit-color-custom').classList.add('active');
+                document.getElementById('roi-edit-color-preset').classList.remove('active');
+            }
+        }
+
+        function selectEditPresetColor(element, r, g, b) {
+            // Remove active class from all preset colors
+            document.querySelectorAll('#roi-edit-color-preset .roi-preset-color').forEach(el => {
+                el.classList.remove('active');
+            });
+            element.classList.add('active');
+
+            // Update sliders
+            document.getElementById('roi-edit-color-r').value = r;
+            document.getElementById('roi-edit-color-g').value = g;
+            document.getElementById('roi-edit-color-b').value = b;
+
+            updateEditColorPreview();
+        }
+
+        function updateEditColorPreview() {
+            const r = document.getElementById('roi-edit-color-r').value;
+            const g = document.getElementById('roi-edit-color-g').value;
+            const b = document.getElementById('roi-edit-color-b').value;
+
+            document.getElementById('roi-edit-color-r-value').textContent = r;
+            document.getElementById('roi-edit-color-g-value').textContent = g;
+            document.getElementById('roi-edit-color-b-value').textContent = b;
+
+            document.getElementById('edit-preview-r').textContent = r;
+            document.getElementById('edit-preview-g').textContent = g;
+            document.getElementById('edit-preview-b').textContent = b;
+
+            const preview = document.getElementById('roi-edit-color-preview');
+            preview.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        async function saveROIChanges(roiId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const instrumentId = document.getElementById('edit-roi-instrument-id').value;
+                const roiName = document.getElementById('edit-roi-name').value.trim();
+
+                // Validate ROI name format and uniqueness (excluding current ROI)
+                const validation = await validateROIName(roiName, instrumentId, roiId);
+                if (!validation.valid) {
+                    showNotification(validation.error, 'error');
+                    return;
+                }
+
+                const roiData = {
+                    roi_name: roiName,
+                    description: document.getElementById('edit-roi-description').value || '',
+                    color_r: parseInt(document.getElementById('roi-edit-color-r').value),
+                    color_g: parseInt(document.getElementById('roi-edit-color-g').value),
+                    color_b: parseInt(document.getElementById('roi-edit-color-b').value),
+                    thickness: parseInt(document.getElementById('edit-roi-thickness').value),
+                    updated_at: new Date().toISOString()
+                };
+
+                const response = await fetch(`/api/rois/${roiId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(roiData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to update ROI');
+                }
+
+                closeROIEditModal();
+                showNotification('ROI updated successfully', 'success');
+
+                // Refresh the ROIs display
+                const instrumentId = document.getElementById('edit-roi-instrument-id').value;
+                await loadROICards(instrumentId);
+
+            } catch (error) {
+                console.error('Error saving ROI:', error);
+                showNotification(error.message || 'Failed to save ROI changes', 'error');
+            }
+        }
+
+        function closeROIEditModal() {
+            document.getElementById('edit-roi-modal').classList.remove('show');
+        }
+
+        async function deleteROI(roiId) {
+            if (!confirm('Are you sure you want to delete this ROI? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const response = await fetch(`/api/rois/${roiId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to delete ROI');
+                }
+
+                closeROIModal();
+                showNotification('ROI deleted successfully', 'success');
+
+                // Refresh the current instrument's ROIs if we're on a specific instrument
+                if (currentOpenInstrumentId) {
+                    await loadROICards(currentOpenInstrumentId);
+                }
+
+            } catch (error) {
+                console.error('Error deleting ROI:', error);
+                showNotification(error.message || 'Failed to delete ROI', 'error');
+            }
         }
 
         async function showPlatformDetails(platformId) {
@@ -7311,6 +7639,55 @@
             }
         }
 
+        // ROI Name Validation
+        async function validateROIName(roiName, instrumentId, currentRoiId = null) {
+            // Check format: must be ROI_XX where XX is 01-99
+            const roiNamePattern = /^ROI_\d{2}$/;
+            if (!roiNamePattern.test(roiName)) {
+                return {
+                    valid: false,
+                    error: 'ROI name must follow the format ROI_XX (e.g., ROI_01, ROI_02, ..., ROI_99)'
+                };
+            }
+
+            // Extract number and validate range
+            const roiNumber = parseInt(roiName.split('_')[1]);
+            if (roiNumber < 1 || roiNumber > 99) {
+                return {
+                    valid: false,
+                    error: 'ROI number must be between 01 and 99'
+                };
+            }
+
+            // Check for duplicates
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}/rois`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const existingROIs = await response.json();
+                    const duplicate = existingROIs.find(roi =>
+                        roi.roi_name === roiName &&
+                        (currentRoiId === null || roi.id !== currentRoiId)
+                    );
+
+                    if (duplicate) {
+                        return {
+                            valid: false,
+                            error: `ROI name "${roiName}" already exists for this instrument. Please choose a different name.`
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for duplicate ROI names:', error);
+                // Continue anyway - better to allow than block on network error
+            }
+
+            return { valid: true };
+        }
+
         // Save ROI
         async function saveROI() {
             if (ROICreationState.points.length < 3) {
@@ -7321,6 +7698,13 @@
             const roiName = document.getElementById('roi-name').value.trim();
             if (!roiName) {
                 showNotification('Please enter an ROI name', 'error');
+                return;
+            }
+
+            // Validate ROI name format and uniqueness
+            const validation = await validateROIName(roiName, ROICreationState.instrumentId);
+            if (!validation.valid) {
+                showNotification(validation.error, 'error');
                 return;
             }
 

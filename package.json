@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.50",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.50 - API AUDIT: Missing Fields in Platforms List API",
+  "version": "5.2.51",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.51 - ROI NAME VALIDATION: Enforce Format and Prevent Duplicates",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
