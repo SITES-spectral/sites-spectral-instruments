@@ -4,13 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 5.2.50 - CRITICAL API AUDIT: Complete Field Coverage (2025-11-18)
+## Current Version: 5.2.51 - ROI NAME VALIDATION: Enforce Format & Prevent Duplicates (2025-11-18)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-18
 
-### 🚨 Latest Critical Fixes: API Field Completeness (v5.2.49-50)
+### ✅ Latest Feature: ROI Name Validation System (v5.2.51)
+
+**Comprehensive validation to enforce ROI naming conventions and prevent duplicates:**
+
+#### **Validation Rules:**
+1. **Format Enforcement**: ROI names must follow `ROI_XX` pattern (01-99 range)
+   - Valid: `ROI_01`, `ROI_02`, `ROI_15`, `ROI_99`
+   - Invalid: `ROI_1`, `ROI_100`, `MyROI`, `roi_01`
+2. **Duplicate Prevention**: No two ROIs can have same name for same instrument
+3. **Range Validation**: ROI number must be between 01 and 99
+
+#### **Implementation:**
+- **New Function**: `validateROIName(roiName, instrumentId, currentRoiId = null)`
+- **Integration Points**:
+  - `saveROI()` at line 7695 (create workflow)
+  - `saveROIChanges(roiId)` at line 4115 (edit workflow)
+- **Files Modified**: `/public/station.html`
+
+#### **Error Messages:**
+- Format: "ROI name must follow the format ROI_XX (e.g., ROI_01, ROI_02, ..., ROI_99)"
+- Range: "ROI number must be between 01 and 99"
+- Duplicate: "ROI name 'ROI_XX' already exists for this instrument. Please choose a different name."
+
+#### **Benefits:**
+- **Consistency**: All ROIs follow same naming convention
+- **Organization**: Sequential numbering makes ROIs easy to reference
+- **Data Integrity**: Prevents confusion from duplicate names
+- **User Guidance**: Clear error messages help users understand requirements
+
+### 🚨 Recent Critical Fixes: API Field Completeness (v5.2.49-50)
 
 **Complete API audit revealed and fixed missing fields across all endpoints:**
 
