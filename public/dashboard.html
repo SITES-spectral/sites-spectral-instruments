@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="/css/styles.css?v=5.2.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.4">
-    <meta name="build-date" content="2025-09-27">
+    <meta name="app-version" content="5.2.55">
+    <meta name="build-date" content="2025-11-18">
 
     <style>
         .dashboard-container {
@@ -426,6 +426,508 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Dashboard Tabs */
+        .dashboard-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            background: none;
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-button:hover {
+            color: #059669;
+            background: #f8fafc;
+        }
+
+        .tab-button.active {
+            color: #059669;
+            border-bottom-color: #059669;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Users Management */
+        .users-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .users-header {
+            margin-bottom: 2rem;
+        }
+
+        .users-header h2 {
+            font-size: 1.75rem;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .users-subtitle {
+            color: #6b7280;
+            margin: 0;
+            padding: 0.75rem;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 6px;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .user-card {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .user-card:hover {
+            border-color: #059669;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.1);
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .user-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .user-role-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .role-station {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-readonly {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .user-info-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .user-info-item i {
+            width: 20px;
+            text-align: center;
+            color: #059669;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .security-full-access {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .security-station-edit {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .security-station-readonly {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-analyze {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-analyze:hover {
+            background: #2563eb;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .analytics-header {
+            margin-bottom: 2rem;
+        }
+
+        .analytics-header h2 {
+            font-size: 1.75rem;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .analytics-subtitle {
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .analytics-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid #059669;
+        }
+
+        .analytics-card h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .analytics-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .analytics-card-trend {
+            font-size: 0.875rem;
+            color: #059669;
+            margin-top: 0.5rem;
+        }
+
+        .analytics-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chart-container h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+
+        .chart-placeholder {
+            min-height: 300px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .station-rankings {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .station-rankings h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.125rem;
+            color: #1f2937;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .ranking-position {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #059669;
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .ranking-position.gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+
+        .ranking-position.silver {
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+        }
+
+        .ranking-position.bronze {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-station-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .ranking-stats {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .ranking-score {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        /* Security Warning Modal */
+        .security-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .security-modal.show {
+            display: flex;
+        }
+
+        .security-modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .security-modal-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .security-modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .security-modal-body {
+            padding: 1.5rem;
+        }
+
+        .security-impact-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .impact-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .impact-high {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .impact-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .impact-low {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .warning-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .warning-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+
+        .warning-critical {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .warning-high {
+            background: #fed7aa;
+            border-color: #f97316;
+            color: #9a3412;
+        }
+
+        .warning-medium {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .access-changes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .access-changes-table th {
+            background: #f8fafc;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .access-changes-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .risk-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
     </style>
 </head>
 <body>
@@ -490,11 +992,27 @@
                 </div>
             </div>
 
-            <!-- Loading State -->
-            <div id="loading-state" class="loading-state">
-                <div class="loading-spinner"></div>
-                <span>Loading stations...</span>
+            <!-- Dashboard Tabs -->
+            <div class="dashboard-tabs">
+                <button class="tab-button active" onclick="switchTab('stations')">
+                    <i class="fas fa-broadcast-tower"></i> Stations
+                </button>
+                <button class="tab-button" onclick="switchTab('users')">
+                    <i class="fas fa-users"></i> Users
+                </button>
+                <button class="tab-button" onclick="switchTab('analytics')">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </button>
             </div>
+
+            <!-- Tab Panels -->
+            <!-- Stations Tab -->
+            <div id="stations-tab" class="tab-panel active">
+                <!-- Loading State -->
+                <div id="loading-state" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <span>Loading stations...</span>
+                </div>
 
             <!-- Error State -->
             <div id="error-state" class="error-state" style="display: none;">
@@ -509,6 +1027,80 @@
 
             <!-- Stations Grid -->
             <div id="stations-grid" class="stations-grid" style="display: none;"></div>
+            </div> <!-- End stations-tab -->
+
+            <!-- Users Tab -->
+            <div id="users-tab" class="tab-panel">
+                <div class="users-container">
+                    <div class="users-header">
+                        <h2><i class="fas fa-users-cog"></i> User Management</h2>
+                        <p class="users-subtitle">
+                            <i class="fas fa-info-circle"></i>
+                            Users are managed via Cloudflare secrets. This interface provides read-only access and security analysis.
+                        </p>
+                    </div>
+
+                    <div id="users-loading" class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Loading users...</span>
+                    </div>
+
+                    <div id="users-list" class="users-grid" style="display: none;"></div>
+                </div>
+            </div> <!-- End users-tab -->
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-panel">
+                <div class="analytics-container">
+                    <div class="analytics-header">
+                        <h2><i class="fas fa-chart-line"></i> System Analytics</h2>
+                        <p class="analytics-subtitle">
+                            <i class="fas fa-info-circle"></i>
+                            Real-time statistics and insights across all stations and instruments.
+                        </p>
+                    </div>
+
+                    <div id="analytics-loading" class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Loading analytics...</span>
+                    </div>
+
+                    <div id="analytics-content" style="display: none;">
+                        <!-- Overview Cards -->
+                        <div class="analytics-overview" id="analytics-overview"></div>
+
+                        <!-- Charts Section -->
+                        <div class="analytics-charts">
+                            <div class="chart-container">
+                                <h3><i class="fas fa-chart-pie"></i> Status Distribution</h3>
+                                <div id="status-chart" class="chart-placeholder"></div>
+                            </div>
+
+                            <div class="chart-container">
+                                <h3><i class="fas fa-chart-bar"></i> Instrument Types</h3>
+                                <div id="instrument-types-chart" class="chart-placeholder"></div>
+                            </div>
+
+                            <div class="chart-container">
+                                <h3><i class="fas fa-chart-area"></i> Deployment Timeline</h3>
+                                <div id="deployment-timeline-chart" class="chart-placeholder"></div>
+                            </div>
+
+                            <div class="chart-container">
+                                <h3><i class="fas fa-chart-line"></i> System Health</h3>
+                                <div id="system-health-chart" class="chart-placeholder"></div>
+                            </div>
+                        </div>
+
+                        <!-- Station Rankings -->
+                        <div class="station-rankings">
+                            <h3><i class="fas fa-trophy"></i> Station Rankings by Data Richness</h3>
+                            <div id="station-rankings-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- End analytics-tab -->
+
         </main>
     </div>
 
@@ -1142,6 +1734,463 @@
             setTimeout(() => {
                 toast.remove();
             }, 4000);
+        }
+
+        // ============================================
+        // TAB MANAGEMENT FUNCTIONS
+        // ============================================
+
+        function switchTab(tabName) {
+            // Hide all tab panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Activate selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Load data for the selected tab
+            if (tabName === 'users' && !window.usersLoaded) {
+                loadUsers();
+                window.usersLoaded = true;
+            } else if (tabName === 'analytics' && !window.analyticsLoaded) {
+                loadAnalytics();
+                window.analyticsLoaded = true;
+            }
+        }
+
+        // ============================================
+        // USER MANAGEMENT FUNCTIONS
+        // ============================================
+
+        async function loadUsers() {
+            try {
+                document.getElementById('users-loading').style.display = 'flex';
+                document.getElementById('users-list').style.display = 'none';
+
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch('/api/users/list', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+
+                const data = await response.json();
+                renderUsers(data.users || []);
+
+                document.getElementById('users-loading').style.display = 'none';
+                document.getElementById('users-list').style.display = 'grid';
+
+            } catch (error) {
+                console.error('Failed to load users:', error);
+                showNotification('Failed to load users: ' + error.message, 'error');
+            }
+        }
+
+        function renderUsers(users) {
+            const grid = document.getElementById('users-list');
+
+            if (users.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #6b7280;">
+                        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3>No users found</h3>
+                        <p>Users are configured via Cloudflare secrets.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = users.map(user => `
+                <div class="user-card">
+                    <div class="user-card-header">
+                        <h3 class="user-name">${escapeHtml(user.username)}</h3>
+                        <span class="user-role-badge role-${user.role}">${user.role}</span>
+                    </div>
+
+                    <div class="user-info-grid">
+                        <div class="user-info-item">
+                            <i class="fas fa-building"></i>
+                            <span>${user.station_name || 'All Stations'}</span>
+                        </div>
+                        <div class="user-info-item">
+                            <i class="fas fa-globe"></i>
+                            <span>${user.scope === 'system-wide' ? 'System-wide access' : 'Station-limited'}</span>
+                        </div>
+                        <div class="user-info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="security-badge security-${user.security_level.replace('-', '-')}">${formatSecurityLevel(user.security_level)}</span>
+                        </div>
+                        <div class="user-info-item">
+                            <i class="fas fa-key"></i>
+                            <span>${user.created_source}</span>
+                        </div>
+                    </div>
+
+                    ${user.role === 'station' ? `
+                        <div class="user-actions">
+                            <button class="btn-analyze" onclick="analyzeRoleChange('${escapeHtml(user.username)}', '${user.role}', '${user.station || ''}')">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Analyze Role Change Risk
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function analyzeRoleChange(username, currentRole, station) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+
+                const response = await fetch('/api/users/analyze-role-change', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        current_role: currentRole,
+                        new_role: 'admin', // Analyzing what would happen if promoted to admin
+                        station: station
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to analyze role change');
+                }
+
+                const analysis = await response.json();
+                showSecurityAnalysisModal(analysis);
+
+            } catch (error) {
+                console.error('Role change analysis error:', error);
+                showNotification('Failed to analyze role change: ' + error.message, 'error');
+            }
+        }
+
+        function showSecurityAnalysisModal(analysis) {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('security-analysis-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'security-analysis-modal';
+                modal.className = 'security-modal';
+                document.body.appendChild(modal);
+            }
+
+            const impactClass = `impact-${analysis.security_impact.toLowerCase()}`;
+
+            modal.innerHTML = `
+                <div class="security-modal-content" onclick="event.stopPropagation()">
+                    <div class="security-modal-header">
+                        <h3><i class="fas fa-shield-alt"></i> Security Impact Analysis</h3>
+                        <button class="modal-close-large" onclick="closeSecurityModal()" style="color: white;">&times;</button>
+                    </div>
+                    <div class="security-modal-body">
+                        <div class="security-impact-badge ${impactClass}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Security Impact: ${analysis.security_impact}
+                        </div>
+
+                        <h4 style="margin: 1.5rem 0 0.75rem 0;">Role Change Details</h4>
+                        <p><strong>User:</strong> ${escapeHtml(analysis.username)}</p>
+                        <p><strong>Current Role:</strong> ${analysis.current_role}</p>
+                        <p><strong>Proposed New Role:</strong> ${analysis.new_role}</p>
+                        ${analysis.station ? `<p><strong>Station:</strong> ${escapeHtml(analysis.station)}</p>` : ''}
+
+                        <h4 style="margin: 1.5rem 0 0.75rem 0;"><i class="fas fa-exclamation-circle"></i> Security Warnings</h4>
+                        <ul class="warning-list">
+                            ${analysis.warnings.map(warning => `
+                                <li class="warning-item warning-${warning.level.toLowerCase()}">
+                                    <strong>${warning.level}:</strong> ${warning.message}
+                                </li>
+                            `).join('')}
+                        </ul>
+
+                        <h4 style="margin: 1.5rem 0 0.75rem 0;"><i class="fas fa-exchange-alt"></i> Access Changes</h4>
+                        <table class="access-changes-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Before</th>
+                                    <th>After</th>
+                                    <th>Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${analysis.access_changes.map(change => `
+                                    <tr>
+                                        <td><strong>${change.category}</strong></td>
+                                        <td>${change.before}</td>
+                                        <td>${change.after}</td>
+                                        <td><span class="risk-badge risk-${change.risk.toLowerCase()}">${change.risk}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+
+                        ${analysis.recommendations && analysis.recommendations.length > 0 ? `
+                            <h4 style="margin: 1.5rem 0 0.75rem 0;"><i class="fas fa-lightbulb"></i> Recommendations</h4>
+                            <ul style="margin: 0; padding-left: 1.5rem; color: #374151;">
+                                ${analysis.recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+
+                        <div class="form-actions" style="margin-top: 2rem;">
+                            <button type="button" class="btn btn-secondary" onclick="closeSecurityModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('show');
+            modal.onclick = closeSecurityModal;
+        }
+
+        function closeSecurityModal() {
+            const modal = document.getElementById('security-analysis-modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        function formatSecurityLevel(level) {
+            return level.split('-').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        // ============================================
+        // ANALYTICS FUNCTIONS
+        // ============================================
+
+        async function loadAnalytics() {
+            try {
+                document.getElementById('analytics-loading').style.display = 'flex';
+                document.getElementById('analytics-content').style.display = 'none';
+
+                const token = localStorage.getItem('sites_spectral_token');
+
+                // Load system overview
+                const overviewResponse = await fetch('/api/analytics/overview', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!overviewResponse.ok) {
+                    throw new Error('Failed to load analytics');
+                }
+
+                const overview = await overviewResponse.json();
+
+                // Load station analytics
+                const stationsResponse = await fetch('/api/analytics/stations', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const stationsData = stationsResponse.ok ? await stationsResponse.json() : { stations: [] };
+
+                renderAnalytics(overview, stationsData);
+
+                document.getElementById('analytics-loading').style.display = 'none';
+                document.getElementById('analytics-content').style.display = 'block';
+
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+                showNotification('Failed to load analytics: ' + error.message, 'error');
+            }
+        }
+
+        function renderAnalytics(overview, stationsData) {
+            // Render overview cards
+            const overviewContainer = document.getElementById('analytics-overview');
+            overviewContainer.innerHTML = `
+                <div class="analytics-card">
+                    <h4>Total Stations</h4>
+                    <p class="analytics-card-value">${overview.summary.total_stations}</p>
+                    <p class="analytics-card-trend">Across Sweden</p>
+                </div>
+                <div class="analytics-card">
+                    <h4>Total Platforms</h4>
+                    <p class="analytics-card-value">${overview.summary.total_platforms}</p>
+                    <p class="analytics-card-trend">${overview.summary.avg_platforms_per_station.toFixed(1)} avg per station</p>
+                </div>
+                <div class="analytics-card">
+                    <h4>Total Instruments</h4>
+                    <p class="analytics-card-value">${overview.summary.total_instruments}</p>
+                    <p class="analytics-card-trend">${overview.summary.avg_instruments_per_platform.toFixed(1)} avg per platform</p>
+                </div>
+                <div class="analytics-card">
+                    <h4>Total ROIs</h4>
+                    <p class="analytics-card-value">${overview.summary.total_rois}</p>
+                    <p class="analytics-card-trend">${overview.summary.avg_rois_per_instrument.toFixed(1)} avg per instrument</p>
+                </div>
+            `;
+
+            // Render status distribution
+            renderStatusChart(overview.status_breakdown);
+
+            // Render instrument types
+            renderInstrumentTypesChart(overview.instrument_types);
+
+            // Render deployment timeline
+            renderDeploymentTimeline(overview.deployment_timeline);
+
+            // Render station rankings
+            renderStationRankings(stationsData.stations || []);
+        }
+
+        function renderStatusChart(statusBreakdown) {
+            const container = document.getElementById('status-chart');
+            const stations = statusBreakdown.stations || [];
+            const platforms = statusBreakdown.platforms || [];
+            const instruments = statusBreakdown.instruments || [];
+
+            container.innerHTML = `
+                <div style="padding: 1rem;">
+                    <h5 style="margin: 0 0 1rem 0; color: #059669;">Stations</h5>
+                    ${stations.map(item => `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>${item.status}</span>
+                            <strong>${item.count}</strong>
+                        </div>
+                    `).join('')}
+
+                    <h5 style="margin: 1.5rem 0 1rem 0; color: #059669;">Platforms</h5>
+                    ${platforms.map(item => `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>${item.status}</span>
+                            <strong>${item.count}</strong>
+                        </div>
+                    `).join('')}
+
+                    <h5 style="margin: 1.5rem 0 1rem 0; color: #059669;">Instruments</h5>
+                    ${instruments.map(item => `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>${item.status}</span>
+                            <strong>${item.count}</strong>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderInstrumentTypesChart(instrumentTypes) {
+            const container = document.getElementById('instrument-types-chart');
+
+            if (!instrumentTypes || instrumentTypes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280;">No instrument data available</p>';
+                return;
+            }
+
+            const total = instrumentTypes.reduce((sum, item) => sum + item.count, 0);
+
+            container.innerHTML = `
+                <div style="padding: 1rem;">
+                    ${instrumentTypes.map(item => {
+                        const percentage = ((item.count / total) * 100).toFixed(1);
+                        return `
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>${item.instrument_type}</span>
+                                    <strong>${item.count} (${percentage}%)</strong>
+                                </div>
+                                <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #059669; width: ${percentage}%; height: 100%;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderDeploymentTimeline(timeline) {
+            const container = document.getElementById('deployment-timeline-chart');
+
+            if (!timeline || timeline.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280;">No deployment data available</p>';
+                return;
+            }
+
+            const maxCount = Math.max(...timeline.map(item => item.count));
+
+            container.innerHTML = `
+                <div style="padding: 1rem;">
+                    ${timeline.map(item => {
+                        const height = (item.count / maxCount) * 100;
+                        return `
+                            <div style="display: flex; align-items: flex-end; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="width: 60px; font-weight: 600;">${item.year}</span>
+                                <div style="flex: 1; background: #e5e7eb; height: 20px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #059669 0%, #047857 100%); width: ${height}%; height: 100%; transition: width 0.3s;"></div>
+                                </div>
+                                <strong style="width: 40px; text-align: right;">${item.count}</strong>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderStationRankings(stations) {
+            const container = document.getElementById('station-rankings-list');
+
+            if (stations.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No station data available</p>';
+                return;
+            }
+
+            container.innerHTML = stations.slice(0, 10).map((station, index) => {
+                let positionClass = '';
+                if (index === 0) positionClass = 'gold';
+                else if (index === 1) positionClass = 'silver';
+                else if (index === 2) positionClass = 'bronze';
+
+                return `
+                    <div class="ranking-item">
+                        <div class="ranking-position ${positionClass}">${station.rank}</div>
+                        <div class="ranking-info">
+                            <p class="ranking-station-name">${escapeHtml(station.display_name)} (${station.acronym})</p>
+                            <p class="ranking-stats">
+                                ${station.platform_count} platforms •
+                                ${station.instrument_count} instruments •
+                                ${station.roi_count} ROIs
+                            </p>
+                        </div>
+                        <div class="ranking-score">${station.data_richness_score.toFixed(1)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // System health chart placeholder
+        const healthChart = document.getElementById('system-health-chart');
+        if (healthChart) {
+            healthChart.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                    <i class="fas fa-heartbeat" style="font-size: 3rem; color: #059669; margin-bottom: 1rem;"></i>
+                    <p>System Health: <strong style="color: #059669;">Operational</strong></p>
+                    <p style="font-size: 0.875rem; margin-top: 0.5rem;">All systems running normally</p>
+                </div>
+            `;
+        }
+
+        // Utility function for HTML escaping
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 

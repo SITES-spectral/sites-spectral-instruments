@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.54",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.54 - FRONTEND IMAGE INTEGRATION: Complete Phenocam Display System",
+  "version": "5.2.55",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.55 - USER MANAGEMENT & ANALYTICS DASHBOARD: Complete Admin Interface with Security Analysis",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

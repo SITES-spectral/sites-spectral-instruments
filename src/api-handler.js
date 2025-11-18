@@ -12,6 +12,8 @@ import { handleResearchPrograms, getResearchProgramsValues } from './handlers/re
 import { handlePhenocamROIs } from './handlers/phenocam-rois.js';
 import { handleEcosystems, getEcosystemDropdownValues } from './handlers/ecosystems.js';
 import { handleStatusCodes, getStatusDropdownValues } from './handlers/status-codes.js';
+import { handleUsers } from './handlers/users.js';
+import { handleAnalytics } from './handlers/analytics.js';
 import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
@@ -76,6 +78,12 @@ export async function handleApiRequest(request, env, ctx) {
 
       case 'status-codes':
         return await handleStatusCodes(method, id, request, env);
+
+      case 'users':
+        return await handleUsers(method, pathSegments, request, env);
+
+      case 'analytics':
+        return await handleAnalytics(method, pathSegments, request, env);
 
       case 'values':
         // Special endpoint for dropdown/multiselect values
