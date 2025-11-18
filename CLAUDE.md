@@ -4,13 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 5.2.51 - ROI NAME VALIDATION: Enforce Format & Prevent Duplicates (2025-11-18)
+## Current Version: 5.2.57 - DATABASE UPDATE: Svartberget Instrument Platform Reassignment (2025-11-18)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-18
 
-### ✅ Latest Feature: ROI Name Validation System (v5.2.51)
+### ✅ Latest Update: Svartberget Instrument Platform Reassignment (v5.2.57)
+
+**🌲 Station**: Svartberget (SVB)
+**🎯 Achievement**: Successfully moved phenocam from Platform PL02 to Platform PL03 with naming convention correction
+
+#### **Changes Summary:**
+
+**Instrument Moved**: Below Canopy Phenocam (ID: 38)
+
+**Before Update**:
+- **Platform**: SVB_FOR_PL02 (ID: 30) - "SVB PL02 Below Canopy North"
+- **Instrument**: SVB_FOR_P02_PHE01 (inconsistent naming with "P02" instead of "PL02")
+
+**After Update**:
+- **Platform**: SVB_FOR_PL03 (ID: 32) - "SVB PL03 Below Canopy CPEC"
+- **Instrument**: SVB_FOR_PL03_PHE01 (corrected to consistent "PL03" naming)
+
+#### **Technical Details:**
+```sql
+UPDATE instruments
+SET platform_id = 32,
+    normalized_name = 'SVB_FOR_PL03_PHE01',
+    updated_at = datetime('now')
+WHERE id = 38;
+```
+
+**Rationale**: Moving phenocam to PL03 aligns instrument with correct CPEC (Carbon Precipitation Eddy Covariance) measurement platform for integrated flux and optical measurements.
+
+**Naming Convention Consistency**: This update also corrects the inconsistent "P02" notation to the standard "PL03" format. All Svartberget platforms now follow the pattern: `{STATION}_{ECOSYSTEM}_PL##`
+
+### 🔬 Recent Update: Instrument Types for SITES Spectral (v5.2.56)
+
+**New instrument types dropdown with SITES Spectral specific sensors:**
+- **Phenocams** (PHE)
+- **Multispectral Sensors - Fixed Platform** (MS): SKYE, Decagon, Apogee MS
+- **PRI Sensors** (PRI): 2-band ~530nm/~570nm
+- **NDVI Sensors** (NDVI): Apogee NDVI
+- **PAR Sensors** (PAR): Apogee PAR
+
+**Key Feature**: All multispectral fixed platform sensors share the **MS** acronym regardless of vendor.
+
+### ✅ Previous Feature: ROI Name Validation System (v5.2.51)
 
 **Comprehensive validation to enforce ROI naming conventions and prevent duplicates:**
 

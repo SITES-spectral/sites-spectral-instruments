@@ -15,6 +15,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [5.2.57] - 2025-11-18
+
+### 🔄 DATABASE UPDATE: Svartberget Instrument Platform Reassignment
+
+**📅 Update Date**: 2025-11-18
+**🌲 Station**: Svartberget (SVB)
+**🎯 Achievement**: Successfully moved phenocam from Platform PL02 to Platform PL03 with proper naming convention update
+**🔧 Focus**: Instrument platform reassignment and normalized name correction
+
+#### 📊 **Changes Summary**
+
+**Instrument Moved**: Below Canopy Phenocam
+
+**Before Update**:
+- **Platform**: SVB_FOR_PL02 (ID: 30) - "SVB PL02 Below Canopy North"
+- **Instrument**: SVB_FOR_P02_PHE01 (ID: 38)
+- **Normalized Name**: `SVB_FOR_P02_PHE01` (inconsistent naming with "P02" instead of "PL02")
+
+**After Update**:
+- **Platform**: SVB_FOR_PL03 (ID: 32) - "SVB PL03 Below Canopy CPEC"
+- **Instrument**: SVB_FOR_PL03_PHE01 (ID: 38)
+- **Normalized Name**: `SVB_FOR_PL03_PHE01` (corrected to consistent "PL03" naming)
+
+#### 🔧 **Technical Changes**
+
+**Database Operations**:
+```sql
+UPDATE instruments
+SET
+    platform_id = 32,
+    normalized_name = 'SVB_FOR_PL03_PHE01',
+    updated_at = datetime('now')
+WHERE id = 38;
+```
+
+**Impact**:
+- 1 row updated successfully
+- Instrument metadata preserved (display_name, camera specs, etc.)
+- Platform association updated from PL02 → PL03
+- Naming convention corrected: P02 → PL03
+
+#### 🌲 **Svartberget Platform Context**
+
+**SVB Forest Ecosystem Platforms**:
+1. **SVB_FOR_PL01** (ID: 29) - 150m tower at 70m height
+2. **SVB_FOR_PL02** (ID: 30) - Below Canopy North at 3.2m height
+3. **SVB_FOR_PL03** (ID: 32) - Below Canopy CPEC tripod at 3.22m height
+
+**Rationale**: Moving phenocam to PL03 aligns instrument with correct CPEC (Carbon Precipitation Eddy Covariance) measurement platform for integrated flux and optical measurements.
+
+#### ✅ **Verification**
+
+**Confirmed**:
+- ✅ Instrument successfully reassigned to new platform
+- ✅ Normalized name updated to follow consistent naming convention
+- ✅ Database integrity maintained (foreign key constraints satisfied)
+- ✅ Instrument remains active and operational
+- ✅ Production database updated and deployed
+
+**Files Modified**:
+- Production database: `spectral_stations_db` (remote D1)
+
+**Database Verification Query**:
+```sql
+SELECT i.id, i.normalized_name, i.display_name, i.platform_id,
+       p.normalized_name as platform_name, p.display_name as platform_display
+FROM instruments i
+JOIN platforms p ON i.platform_id = p.id
+WHERE i.id = 38;
+```
+
+#### 📋 **Naming Convention Consistency**
+
+This update also corrects an inconsistency in the original naming:
+- **Old**: `SVB_FOR_P02_PHE01` (used "P02" instead of "PL02")
+- **New**: `SVB_FOR_PL03_PHE01` (uses consistent "PL" prefix for platform/location codes)
+
+All Svartberget platforms now follow the standard pattern: `{STATION}_{ECOSYSTEM}_PL##`
+
 ## [5.2.56] - 2025-11-18
 
 ### 🔬 INSTRUMENT TYPES UPDATE: SITES Spectral Specific Sensor Categories

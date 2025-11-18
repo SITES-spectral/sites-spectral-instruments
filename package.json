@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.56",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.56 - INSTRUMENT TYPES UPDATE: SITES Spectral Specific Sensor Categories",
+  "version": "5.2.57",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.57 - DATABASE UPDATE: Svartberget Instrument Platform Reassignment",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
@@ -42,7 +42,7 @@
   "author": "SITES Spectral Team",
   "license": "MIT",
   "devDependencies": {
-    "wrangler": "^4.35.0"
+    "wrangler": "^4.49.0"
   },
   "dependencies": {
     "jose": "^5.10.0",
