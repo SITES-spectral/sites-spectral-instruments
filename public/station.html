@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.53">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.54">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.53">
+    <meta name="app-version" content="5.2.54">
     <meta name="build-date" content="2025-11-18">
 
     <style>
@@ -2268,6 +2268,153 @@
             border-top: 1px solid #e5e7eb;
         }
 
+        /* Phenocam Image Integration Styles */
+        .instrument-thumbnail-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #6b7280;
+            font-size: 0.85em;
+        }
+
+        .instrument-thumbnail-loading i {
+            font-size: 1.5em;
+            margin-bottom: 0.5em;
+            animation: spin 1s linear infinite;
+        }
+
+        .instrument-thumbnail-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+            font-size: 0.85em;
+        }
+
+        .instrument-thumbnail-placeholder i {
+            font-size: 2em;
+            margin-bottom: 0.3em;
+            opacity: 0.5;
+        }
+
+        .instrument-thumbnail {
+            width: 100%;
+            height: auto;
+            display: block;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .instrument-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-timestamp {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .image-timestamp i {
+            font-size: 0.9em;
+        }
+
+        /* Full Image Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .image-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            transition: background 0.2s;
+        }
+
+        .image-modal-close:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .image-modal-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-modal-body img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .image-modal-info {
+            padding: 15px 20px;
+            background: white;
+        }
+
+        .image-modal-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1em;
+            color: #1f2937;
+        }
+
+        .image-modal-info p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .roi-draw-layout {
@@ -2281,6 +2428,15 @@
             .modal-content-large {
                 max-width: 95%;
                 width: 95%;
+            }
+
+            .image-modal-content {
+                max-width: 95%;
+                max-height: 95%;
+            }
+
+            .image-modal-body img {
+                max-height: 70vh;
             }
         }
 
@@ -2894,21 +3050,37 @@
         </div>
     </div>
 
+    <!-- Full Image Viewer Modal -->
+    <div id="full-image-modal" class="image-modal" onclick="closeFullImageModal()">
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <button class="image-modal-close" onclick="closeFullImageModal()" title="Close (ESC)">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="image-modal-body">
+                <img id="full-image-display" src="" alt="Full size phenocam image" />
+                <div class="image-modal-info">
+                    <h4 id="full-image-instrument-name"></h4>
+                    <p id="full-image-timestamp"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.53"></script>
-    <script src="/js/api.js?v=5.2.53"></script>
-    <script src="/js/components.js?v=5.2.53"></script>
+    <script src="/js/utils.js?v=5.2.54"></script>
+    <script src="/js/api.js?v=5.2.54"></script>
+    <script src="/js/components.js?v=5.2.54"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.53"></script>
-    <script src="/js/station-dashboard.js?v=5.2.53"></script>
-    <script src="/js/navigation.js?v=5.2.53"></script>
-    <script src="/js/export.js?v=5.2.53"></script>
+    <script src="/js/interactive-map.js?v=5.2.54"></script>
+    <script src="/js/station-dashboard.js?v=5.2.54"></script>
+    <script src="/js/navigation.js?v=5.2.54"></script>
+    <script src="/js/export.js?v=5.2.54"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
@@ -3539,24 +3711,151 @@
         }
 
         function createInstrumentThumbnail(instrument) {
-            const imageUrl = getInstrumentImageUrl(instrument);
-
-            if (!imageUrl) {
-                return '<div class="instrument-thumbnail-placeholder"><i class="fas fa-camera"></i></div>';
-            }
-
+            // Show loading state initially
             return `
-                <div class="instrument-thumbnail-container">
-                    <img
-                        src="${imageUrl}"
-                        alt="Phenocam view for ${instrument.display_name || instrument.normalized_name}"
-                        class="instrument-thumbnail"
-                        onerror="this.parentElement.innerHTML='<div class=\\'instrument-thumbnail-placeholder\\'><i class=\\'fas fa-camera\\'></i></div>'"
-                        loading="lazy"
-                    />
+                <div class="instrument-thumbnail-container" id="thumbnail-${instrument.id}">
+                    <div class="instrument-thumbnail-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Loading image...</span>
+                    </div>
                 </div>
             `;
         }
+
+        // Load instrument image asynchronously after card is created
+        async function loadInstrumentImage(instrumentId) {
+            try {
+                const token = localStorage.getItem('sites_spectral_token');
+                const response = await fetch(`/api/instruments/${instrumentId}/latest-image`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load image');
+                }
+
+                const imageData = await response.json();
+                const thumbnailContainer = document.getElementById(`thumbnail-${instrumentId}`);
+
+                if (!thumbnailContainer) return; // Card might have been removed
+
+                if (imageData.image_available && imageData.thumbnail_url) {
+                    thumbnailContainer.innerHTML = `
+                        <img
+                            src="${imageData.thumbnail_url}"
+                            alt="Latest phenocam image"
+                            class="instrument-thumbnail"
+                            onerror="this.parentElement.innerHTML='<div class=\\'instrument-thumbnail-placeholder\\'><i class=\\'fas fa-camera\\'></i><span>Image unavailable</span></div>'"
+                            onclick="event.stopPropagation(); showFullImage(${instrumentId}, '${imageData.image_url}', '${imageData.instrument_name}')"
+                            title="Click to view full-size image"
+                            style="cursor: pointer;"
+                        />
+                        <div class="image-timestamp" title="Last captured: ${imageData.last_image_timestamp}">
+                            <i class="fas fa-clock"></i> ${formatImageTimestamp(imageData.last_image_timestamp)}
+                        </div>
+                    `;
+                } else {
+                    // No image available
+                    thumbnailContainer.innerHTML = `
+                        <div class="instrument-thumbnail-placeholder">
+                            <i class="fas fa-camera"></i>
+                            <span>No image</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error(`Error loading image for instrument ${instrumentId}:`, error);
+                const thumbnailContainer = document.getElementById(`thumbnail-${instrumentId}`);
+                if (thumbnailContainer) {
+                    thumbnailContainer.innerHTML = `
+                        <div class="instrument-thumbnail-placeholder">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Load failed</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function formatImageTimestamp(timestamp) {
+            if (!timestamp) return 'No date';
+
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 60) {
+                    return `${diffMins}m ago`;
+                } else if (diffHours < 24) {
+                    return `${diffHours}h ago`;
+                } else if (diffDays < 7) {
+                    return `${diffDays}d ago`;
+                } else {
+                    return date.toLocaleDateString();
+                }
+            } catch (e) {
+                return 'Unknown';
+            }
+        }
+
+        // Full image modal functions
+        function showFullImage(instrumentId, imageUrl, instrumentName) {
+            if (!imageUrl) {
+                showNotification('No full-size image available', 'warning');
+                return;
+            }
+
+            const modal = document.getElementById('full-image-modal');
+            const img = document.getElementById('full-image-display');
+            const nameEl = document.getElementById('full-image-instrument-name');
+            const timestampEl = document.getElementById('full-image-timestamp');
+
+            img.src = imageUrl;
+            nameEl.textContent = instrumentName || 'Phenocam Image';
+            timestampEl.textContent = 'Loading timestamp...';
+
+            // Fetch additional metadata
+            const token = localStorage.getItem('sites_spectral_token');
+            fetch(`/api/instruments/${instrumentId}/latest-image`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.last_image_timestamp) {
+                    const date = new Date(data.last_image_timestamp);
+                    timestampEl.textContent = `Captured: ${date.toLocaleString()}`;
+                } else {
+                    timestampEl.textContent = 'Timestamp not available';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching image metadata:', error);
+                timestampEl.textContent = 'Timestamp unavailable';
+            });
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeFullImageModal() {
+            const modal = document.getElementById('full-image-modal');
+            modal.classList.remove('show');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('full-image-modal');
+                if (modal && modal.classList.contains('show')) {
+                    closeFullImageModal();
+                }
+            }
+        });
 
         function createInstrumentModalImage(instrument) {
             const imageUrl = getInstrumentImageUrl(instrument);

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.53",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.53 - IMAGE API: Latest Instrument Image Endpoint with Metadata",
+  "version": "5.2.54",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.54 - FRONTEND IMAGE INTEGRATION: Complete Phenocam Display System",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
