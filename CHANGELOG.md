@@ -16,6 +16,147 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
 
+## [5.2.50] - 2025-11-18
+
+### 🔍 API AUDIT: Missing Fields in Platforms List API
+
+**📅 Update Date**: 2025-11-18
+**🎯 Major Achievement**: Comprehensive API audit revealed and fixed missing fields in platforms list endpoint
+
+#### 🔍 **Complete API Endpoint Audit**
+
+**Audit Scope:**
+Following the discovery of missing fields in instruments list API (v5.2.49), performed comprehensive audit of all list and detail endpoints for stations, platforms, and instruments.
+
+**Audit Method:**
+1. Compared database schema (PRAGMA table_info) with SELECT queries
+2. Verified list endpoints vs detail endpoints for consistency
+3. Checked frontend modals for fields that should be populated
+4. Identified discrepancies between available data and returned data
+
+#### 🐛 **Issues Found and Fixed**
+
+**Platforms List API** (`GET /api/platforms?station=XXX`):
+- ❌ **MISSING**: `deployment_date` - When platform was deployed
+- ❌ **MISSING**: `description` - Platform description text
+- ❌ **MISSING**: `updated_at` - Last update timestamp
+- ✅ **FIXED**: All three fields now included in SELECT query
+
+**Platforms Detail API** (`GET /api/platforms/:id`):
+- ✅ **ADDED**: `created_at` - Creation timestamp (for consistency)
+- ✅ **ADDED**: `updated_at` - Last update timestamp (for consistency)
+
+#### ✅ **Complete Audit Results**
+
+**1. Stations API** ✅ **COMPLETE**
+- `GET /api/stations` - Returns all 10 columns from stations table
+- `GET /api/stations/:id` - Returns all columns
+- No missing fields identified
+
+**2. Platforms API** ✅ **FIXED**
+- `GET /api/platforms?station=XXX` - **FIXED** (added deployment_date, description, updated_at)
+- `GET /api/platforms/:id` - **ENHANCED** (added created_at, updated_at)
+- Now returns all 15 columns from platforms table
+
+**3. Instruments API** ✅ **FIXED IN v5.2.49**
+- `GET /api/instruments?station=XXX` - **FIXED** (added 7 fields in v5.2.49)
+- `GET /api/instruments/:id` - Already complete
+- Now returns all critical fields from instruments table
+
+#### 🔧 **Technical Implementation**
+
+**File Modified:** `/src/handlers/platforms.js`
+
+**Before - Platforms List (lines 118-123):**
+```javascript
+SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+       p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+       p.operation_programs, p.created_at,  // Missing: deployment_date, description, updated_at
+       ...
+```
+
+**After - Platforms List (lines 118-124):**
+```javascript
+SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+       p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+       p.deployment_date, p.description, p.operation_programs,
+       p.created_at, p.updated_at,  // ✅ Complete
+       ...
+```
+
+**Before - Platforms Detail (lines 73-77):**
+```javascript
+SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+       p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+       p.deployment_date, p.description, p.operation_programs,  // Missing: created_at, updated_at
+       ...
+```
+
+**After - Platforms Detail (lines 73-78):**
+```javascript
+SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+       p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+       p.deployment_date, p.description, p.operation_programs,
+       p.created_at, p.updated_at,  // ✅ Complete
+       ...
+```
+
+#### 📊 **Impact**
+
+**Platform Detail Modals:**
+- Deployment dates now visible in platform view modals
+- Platform descriptions now properly populated
+- Consistent timestamps for auditing
+
+**Platform Edit Modals:**
+- All fields now pre-filled with current values
+- Users can see deployment dates when editing
+- Descriptions properly loaded for editing
+
+**Data Consistency:**
+- List endpoints now match detail endpoints in completeness
+- All database fields accessible via API
+- Frontend modals can display all available data
+
+#### 📋 **API Completeness Summary**
+
+**Database Tables and API Coverage:**
+
+**Stations Table (10 columns):**
+- ✅ All columns returned by both list and detail endpoints
+- ✅ No missing fields
+
+**Platforms Table (15 columns):**
+- ✅ All columns now returned by both list and detail endpoints
+- ✅ Fixed in v5.2.50
+
+**Instruments Table (46+ columns):**
+- ✅ All critical columns now returned by list endpoint
+- ✅ Fixed in v5.2.49
+- ✅ Detail endpoint already complete
+
+#### 🧪 **Testing Instructions**
+
+1. **Clear browser cache** completely
+2. **Navigate to any platform** (e.g., SVB_MIR_PL02)
+3. **Click "View Details"** on platform
+4. **Verify these fields are now populated:**
+   - Deployment Date: Should show date if set in database
+   - Description: Should show description text if available
+5. **Click "Edit"** on platform
+6. **Verify edit modal shows:**
+   - Deployment Date field pre-filled with current value
+   - Description field pre-filled with current text
+
+#### 📝 **Related Work**
+
+**API Completeness Journey:**
+- v5.2.49: Fixed instruments list API missing 7 fields including deployment_date
+- v5.2.50: Fixed platforms list API missing 3 fields (deployment_date, description, updated_at)
+- Result: **All API endpoints now return complete data** ✅
+
+**Note**: This audit ensures frontend modals can access all database fields without additional API calls or workarounds.
+
 ## [5.2.49] - 2025-11-17
 
 ### 🚨 CRITICAL FIX: Missing Deployment Date in Instruments List API

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.49",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.49 - CRITICAL FIX: Missing Deployment Date in Instruments List API",
+  "version": "5.2.50",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.50 - API AUDIT: Missing Fields in Platforms List API",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
