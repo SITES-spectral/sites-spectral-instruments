@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.57",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.57 - DATABASE UPDATE: Svartberget Instrument Platform Reassignment",
+  "version": "6.0.0",
+  "description": "SITES Spectral Stations & Instruments Management System v6.0.0 - MULTISPECTRAL SENSORS: Foundation Release",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

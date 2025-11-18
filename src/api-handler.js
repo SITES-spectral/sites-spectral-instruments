@@ -14,6 +14,8 @@ import { handleEcosystems, getEcosystemDropdownValues } from './handlers/ecosyst
 import { handleStatusCodes, getStatusDropdownValues } from './handlers/status-codes.js';
 import { handleUsers } from './handlers/users.js';
 import { handleAnalytics } from './handlers/analytics.js';
+import { handleChannels } from './handlers/channels.js';
+import { handleSensorModels } from './handlers/sensor-models.js';
 import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
@@ -84,6 +86,12 @@ export async function handleApiRequest(request, env, ctx) {
 
       case 'analytics':
         return await handleAnalytics(method, pathSegments, request, env);
+
+      case 'channels':
+        return await handleChannels(method, pathSegments, request, env);
+
+      case 'sensor-models':
+        return await handleSensorModels(method, pathSegments, request, env);
 
       case 'values':
         // Special endpoint for dropdown/multiselect values

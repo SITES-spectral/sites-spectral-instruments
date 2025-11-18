@@ -8,12 +8,263 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
+- Complete MS sensor frontend UI (creation/edit modals with tabs)
+- Setup Cloudflare R2 bucket for sensor documentation storage
+- Build sensor models library UI in admin dashboard
+- Pre-populate sensor models (SKR 1800, SKR110, PP Systems, LICOR)
+- Implement channel display and management UI
+- Documentation management UI with file upload
 - Implement station-scoped admin role for enhanced security
 - Audit logging system with activity tracking
 - Bulk data operations (CSV/Excel import/export)
 - ROI polygon point editing (canvas-based digitizer)
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
+
+## [6.0.0] - 2025-11-18
+
+### 🔬 MAJOR RELEASE: Multispectral Sensors Foundation
+
+**📅 Release Date**: 2025-11-18
+**🎯 Achievement**: Foundation for comprehensive multispectral (MS) sensor tracking with nested channel architecture and sensor models library
+**🔧 Focus**: Database schema, backend API handlers, and incremental deployment strategy
+**⚠️ Breaking Change**: New database tables and extended instruments schema - requires migration
+
+#### 🌟 **Why Version 6.0.0?**
+
+This is a **major architectural enhancement** that adds support for multispectral instruments alongside phenocams:
+- **New Entity Type**: Multispectral sensors with nested spectral channels
+- **3 New Database Tables**: sensor_models, instrument_channels, sensor_documentation
+- **12 New Fields**: Extended instruments table for MS-specific metadata
+- **New API Endpoints**: /api/channels, /api/sensor-models
+- **Naming Convention Extension**: {BRAND}_MS{NN}_NB{NN} pattern
+
+#### 🗄️ **Database Schema Updates**
+
+**New Tables Created (3 tables)**:
+
+1. **`sensor_models`** - Reference Library
+   - Centralized repository of sensor models (SKR 1800, SKR110, PP Systems, LICOR, etc.)
+   - Stores manufacturer specifications, calibration procedures, technical documentation
+   - Enables reuse across multiple instrument instances
+   - **Columns**: 30 fields including wavelength ranges, FOV, calibration procedures, physical specs
+   - **Purpose**: Single source of truth for sensor specifications
+
+2. **`instrument_channels`** - Nested Channel/Band Data
+   - Stores individual spectral channels for each MS instrument
+   - 1:many relationship from instruments (similar to ROIs pattern)
+   - **Columns**: 17 fields including channel_name, center_wavelength_nm, bandwidth_nm, calibration coefficients
+   - **Purpose**: Track 2-8+ spectral bands per instrument with precise wavelength characteristics
+
+3. **`sensor_documentation`** - Dual-Level Documentation System
+   - Stores documentation at BOTH model level (spec sheets) AND instrument level (calibration certificates)
+   - Metadata for files stored in Cloudflare R2
+   - **Columns**: 16 fields including file_path, document_type, version, tags
+   - **Purpose**: Comprehensive documentation tracking with proper file management
+
+**Fields Added to `instruments` Table (12 new fields)**:
+- `sensor_brand` (TEXT) - SKYE, DECAGON, APOGEE, PP Systems, LICOR
+- `sensor_model` (TEXT) - Model number (SKR 1800, SKR110, etc.)
+- `sensor_serial_number` (TEXT) - Individual instrument serial
+- `cable_length_m` (REAL) - Cable length in meters
+- `field_of_view_degrees` (REAL) - FOV in degrees
+- `end_date` (DATE) - Decommissioning date
+- `number_of_channels` (INTEGER) - Total spectral bands
+- `datalogger_type` (TEXT) - Campbell Scientific CR1000X, etc.
+- `datalogger_program_normal` (TEXT) - Normal operations program
+- `datalogger_program_calibration` (TEXT) - Calibration program
+- `calibration_logs` (TEXT) - Path or JSON for calibration logs
+- `orientation` (TEXT) - 'uplooking' or 'downlooking'
+
+**Indexes Created (11 performance indexes)**:
+- sensor_models: manufacturer, sensor_type, model_number
+- instrument_channels: instrument_id, band_type, center_wavelength_nm, channel_name
+- sensor_documentation: sensor_model_id, instrument_id, document_type, upload_date
+
+#### 🔌 **API Handlers Created**
+
+**1. Channels Handler** (`/src/handlers/channels.js` - 410 lines)
+
+**Endpoints**:
+- `GET /api/channels?instrument_id=X` - List all channels for an instrument
+- `GET /api/channels/:id` - Get single channel details
+- `POST /api/channels` - Create new channel
+- `PUT /api/channels/:id` - Update channel
+- `DELETE /api/channels/:id` - Delete channel
+
+**Features**:
+- Permission-based access control (admin, station users)
+- Wavelength range validation (300-1200nm typical)
+- Bandwidth validation (1-200nm)
+- Duplicate channel number/name prevention
+- Minimum 1 channel requirement (prevents deleting last channel)
+- Auto-generation of wavelength notation (NW10nm, NW40nm)
+- Channel count validation helper for instruments
+
+**2. Sensor Models Handler** (`/src/handlers/sensor-models.js` - 370 lines)
+
+**Endpoints**:
+- `GET /api/sensor-models` - List all models (all users)
+- `GET /api/sensor-models/:id` - Get model details
+- `POST /api/sensor-models` - Create model (admin only)
+- `PUT /api/sensor-models/:id` - Update model (admin only)
+- `DELETE /api/sensor-models/:id` - Delete model (admin only)
+
+**Features**:
+- Filter by manufacturer or sensor type
+- JSON field parsing for configurations
+- Available channels config storage
+- Typical calibration coefficients
+- Physical dimensions and specs
+- Links to manufacturer documentation
+- Protection against deleting models in use
+
+**3. API Router Updated** (`/src/api-handler.js`)
+- Added imports for new handlers
+- Added route cases for `/api/channels` and `/api/sensor-models`
+- Integrated with existing authentication middleware
+
+#### 🏷️ **Naming Conventions Documented**
+
+**Multispectral Sensor Pattern**:
+```
+{STATION}_{ECOSYSTEM}_{PLATFORM}_{BRAND}_MS{NN}_NB{NN}
+```
+
+**Examples**:
+- `ANS_FOR_PL01_SKYE_MS01_NB04` - 4-band SKYE sensor at Abisko
+- `SVB_MIR_PL02_DECAGON_MS01_NB02` - 2-band DECAGON at Svartberget mire
+- `LON_AGR_PL01_APOGEE_MS01_NB04` - 4-band APOGEE at Lönnstorp agriculture
+
+**Channel Naming Pattern**:
+```
+{INSTRUMENT_NAME}_{WAVELENGTH}_{BANDWIDTH}
+```
+
+**Examples**:
+- `ANS_FOR_PL01_SKYE_MS01_NB04_RED645nm_NW10nm`
+- `ANS_FOR_PL01_SKYE_MS01_NB04_NIR850nm_NW40nm`
+- `SVB_MIR_PL02_DECAGON_MS01_NB02_FER730nm_NW10nm`
+
+#### 📊 **Migration Statistics**
+
+**File**: `/migrations/0027_add_multispectral_support.sql`
+- **Queries Executed**: 26
+- **Rows Read**: 301
+- **Rows Written**: 32
+- **Database Size**: 0.21 MB
+- **Tables Total**: 13 (10 existing + 3 new)
+- **Execution Time**: 9.7ms
+
+#### ✅ **Deployment Strategy: Incremental with Testing**
+
+**Phase 1 Complete** ✅ (This Release):
+- ✅ Database schema migration applied to production
+- ✅ Backend API handlers deployed
+- ✅ API routes integrated
+- ✅ Comprehensive testing of migration
+- ✅ Verified all tables and indexes created
+- ✅ Confirmed 12 new fields added to instruments
+
+**Phase 2 Planned** (v6.0.1 - Patch):
+- ⏳ Cloudflare R2 bucket setup for document storage
+- ⏳ Documentation upload handler with file management
+- ⏳ Pre-populate sensor models (SKR 1800, SKR110, PP Systems)
+- ⏳ Instrument handler updates for MS naming logic
+
+**Phase 3 Planned** (v6.1.0 - Minor):
+- ⏳ Frontend: MS instrument creation modal (5 tabs)
+- ⏳ Frontend: MS instrument edit modal
+- ⏳ Frontend: Sensor models library UI (admin dashboard)
+- ⏳ Frontend: Channel display and management
+- ⏳ Frontend: Documentation management with upload UI
+
+#### 📋 **Document Types Supported**
+
+Valid `document_type` values for sensor documentation:
+- `specification_sheet` - Manufacturer specification sheets
+- `user_manual` - User manuals and operation guides
+- `calibration_certificate` - Factory or field calibration certificates
+- `calibration_procedure` - Calibration procedure documents
+- `datalogger_program` - Datalogger program files (.CR1, .CR6, etc.)
+- `spectral_response` - Spectral sensitivity curve data
+- `installation_guide` - Installation instructions
+- `maintenance_log` - Maintenance records
+- `photo` - Instrument photos
+- `custom` - Custom document types
+
+#### 🔧 **Technical Architecture**
+
+**Follows Existing Patterns**:
+- Separate table for channels (like ROIs use `instrument_rois`)
+- Permission-based API handlers (like existing handlers)
+- CASCADE deletion for data integrity
+- Indexed foreign keys for performance
+- JSON fields for complex configurations
+
+**Security**:
+- Admin-only for sensor model CRUD
+- Station users can manage channels for their instruments
+- Permission validation at handler level
+- Station isolation enforced via SQL joins
+
+**Performance**:
+- 11 indexes for fast queries
+- Efficient JOIN operations
+- Channel queries < 200ms target
+- Database size remains small (0.21 MB)
+
+#### 📚 **Reference Documentation**
+
+**Sensor Model Examples** (To be pre-populated):
+- **SKYE Sensors**: SKR 1800 (2-4 channels, 400-1050nm), SKR110 (4 channels)
+- **PP Systems**: Red/Far-Red Sensor (2 channels, ~660nm/~730nm)
+- **DECAGON**: SRS Series (various configurations)
+- **APOGEE**: SQ-500 (quantum sensor), various multispectral models
+- **LICOR**: Various PAR and quantum sensors
+
+**GitHub Resources**:
+- Spectral response data: https://github.com/aphalo/photobiologySensors
+- SKYE sensor specs: `/R/Skye-sensors.r`
+- LICOR sensor specs: `/R/LICOR-sensors.r`
+
+#### 🎯 **Next Steps**
+
+**Immediate (v6.0.1)**:
+1. Setup Cloudflare R2 bucket (`sites-spectral-docs`)
+2. Create documentation upload handler
+3. Pre-populate 5-10 common sensor models
+4. Update instruments handler for MS naming logic
+
+**Short-term (v6.1.0)**:
+1. Build MS instrument creation modal (tabbed interface)
+2. Build MS instrument edit modal
+3. Build sensor models library UI in admin dashboard
+4. Build channel management UI
+
+**Long-term (v6.2.0+)**:
+1. Spectral sensitivity curve visualization
+2. Calibration coefficient calculator
+3. Bulk sensor import from CSV
+4. Historical calibration tracking
+5. Datalogger program editor/validator
+6. Channel data quality dashboard
+
+#### 📦 **Files Modified**
+
+**New Files**:
+- `/migrations/0027_add_multispectral_support.sql` (350 lines)
+- `/src/handlers/channels.js` (410 lines)
+- `/src/handlers/sensor-models.js` (370 lines)
+
+**Modified Files**:
+- `/src/api-handler.js` (added 2 imports, 2 route cases)
+- `/package.json` (version 5.2.57 → 6.0.0 - MAJOR VERSION BUMP)
+- `/CHANGELOG.md` (this entry)
+
+**Total New Code**: 1,130 lines of production backend code
+
+---
 
 ## [5.2.57] - 2025-11-18
 
