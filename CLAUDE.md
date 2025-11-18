@@ -4,10 +4,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 5.2.43 - MAJOR FEATURE: Dual-Mode ROI Creation Modal (2025-11-17)
-**✅ STATUS: SUCCESSFULLY IMPLEMENTED**
+## Current Version: 5.2.50 - CRITICAL API AUDIT: Complete Field Coverage (2025-11-18)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
-**📅 Last Updated:** 2025-11-17
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Last Updated:** 2025-11-18
+
+### 🚨 Latest Critical Fixes: API Field Completeness (v5.2.49-50)
+
+**Complete API audit revealed and fixed missing fields across all endpoints:**
+
+#### **v5.2.49 - Instruments List API Fix**
+- **Fixed**: 7 missing fields in `GET /api/instruments?station=XXX`
+- **Fields Added**: deployment_date, calibration_date, camera_serial_number, instrument_height_m, degrees_from_nadir, description, instrument_deployment_date
+- **Impact**: Edit modals now properly populate all fields with current database values
+
+#### **v5.2.50 - Platforms List API Fix**
+- **Fixed**: 3 missing fields in `GET /api/platforms?station=XXX`
+- **Fields Added**: deployment_date, description, updated_at
+- **Impact**: Platform modals now display deployment dates and descriptions
+
+#### **Comprehensive Audit Results:**
+- ✅ **Stations API**: Already complete (all 10 columns)
+- ✅ **Platforms API**: FIXED in v5.2.50 (now returns all 15 columns)
+- ✅ **Instruments API**: FIXED in v5.2.49 (returns all critical fields)
+
+**Root Cause**: List endpoints were missing fields that detail endpoints returned, causing empty fields in edit modals even though data was saved in database.
+
+**Resolution**: Updated SELECT queries in `src/handlers/instruments.js` and `src/handlers/platforms.js` to match database schemas.
 
 ### 🎨 Latest Major Feature: ROI Creation System
 
@@ -56,7 +80,21 @@ rois:
     auto_generated: false
 ```
 
-### 🆕 Recent Updates (v5.2.39-43)
+### 📋 Recent Bug Fix Journey (v5.2.44-50)
+
+**Complete resolution of deployment_date and API field completeness issues:**
+
+1. **v5.2.44** - Svartberget cleanup: Deleted duplicate instrument, updated naming
+2. **v5.2.45** - Fixed modal refresh: Added automatic modal reopen after save with fresh data
+3. **v5.2.46** - Fixed dashboard counts and modal state management
+4. **v5.2.47** - Fixed JavaScript const token redeclaration error
+5. **v5.2.48** - Added diagnostic logging to track data flow
+6. **v5.2.49** - 🎯 **ROOT CAUSE FIXED**: Instruments list API missing 7 fields
+7. **v5.2.50** - 🎯 **AUDIT COMPLETE**: Platforms list API missing 3 fields
+
+**Key Learning**: The issue was never frontend or database - it was backend API SELECT queries not returning all fields.
+
+### 🆕 Database Updates (v5.2.38-39)
 
 #### New Svartberget Platforms Added
 - **SVB_MIR_PL04** - Degerö Wet PAR Pole (Database ID: 31)
@@ -80,14 +118,15 @@ rois:
 6. **SVB_MIR_PL03** - DEG PL03 dry PAR pole (Pole, 2m)
 7. **SVB_MIR_PL04** - DEG PL04 wet PAR pole (Pole, 2m)
 
-### ⚠️ Known Issues
-- **Platform Creation Button**: Ongoing investigation of button functionality. **Workaround**: Use direct database operations via wrangler CLI for platform management.
+### ✅ Recently Resolved Issues
+- ✅ **Platform Creation Button** (v5.2.37): Fixed function conflicts and data loading race conditions
+- ✅ **Deployment Date Fields** (v5.2.49-50): Fixed API endpoints missing critical fields
+- ✅ **Modal Refresh** (v5.2.45-46): Fixed edit modals not showing updated values
+- ✅ **Instrument Naming** (v5.2.33): Resolved NaN in normalized names
+- ✅ **SQL Column Mismatch** (v5.2.32): Fixed instrument creation blocking error
 
-### 🔥 Recent Critical Fixes (v5.2.32-37)
-- **v5.2.37**: Fixed platform creation button function conflicts and data loading race conditions
-- **v5.2.36**: Added platform creation button safety wrapper and form field debugging
-- **v5.2.33**: Fixed instrument naming (resolved NaN in normalized names)
-- **v5.2.32**: Fixed SQL column/value mismatch blocking instrument creation
+### ⚠️ Current Known Issues
+- None currently reported - all major issues resolved as of v5.2.50
 
 ---
 
