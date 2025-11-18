@@ -15,6 +15,122 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [5.2.56] - 2025-11-18
+
+### 🔬 INSTRUMENT TYPES UPDATE: SITES Spectral Specific Sensor Categories
+
+**📅 Update Date**: 2025-11-18
+**🎯 Achievement**: Updated instrument type dropdown with actual SITES Spectral sensor types and standardized acronym mapping
+**🔧 Focus**: Multispectral sensors (MS), PRI, NDVI, PAR sensors with proper categorization
+
+#### 📊 **New Instrument Types**
+
+**Phenocams** (Acronym: PHE):
+- Phenocam
+
+**Multispectral Sensors - Fixed Platform** (All use Acronym: MS):
+- SKYE MultiSpectral Sensor (Uplooking)
+- SKYE MultiSpectral Sensor (Downlooking)
+- Decagon Sensor (Uplooking)
+- Decagon Sensor (Downlooking)
+- Apogee MS
+
+**PRI & NDVI Sensors**:
+- PRI Sensor (2-band ~530nm/~570nm) - Acronym: PRI
+- NDVI Sensor - Acronym: NDVI
+- Apogee NDVI - Acronym: NDVI
+
+**PAR Sensors** (Acronym: PAR):
+- PAR Sensor
+- Apogee PAR
+
+#### 🏷️ **Acronym Standardization**
+
+**New Function**: `getInstrumentTypeCode(instrumentType)` in `/src/handlers/instruments.js`
+
+**Acronym Mapping**:
+- **PHE**: Phenocams
+- **MS**: ALL multispectral fixed platform sensors (SKYE, Decagon, Apogee)
+- **PRI**: Photochemical Reflectance Index sensors
+- **NDVI**: Normalized Difference Vegetation Index sensors
+- **PAR**: Photosynthetically Active Radiation sensors
+
+**Example Instrument Names**:
+- `SVB_FOR_PL01_PHE01` - Phenocam
+- `SVB_FOR_PL01_MS01` - SKYE MultiSpectral (Uplooking)
+- `SVB_FOR_PL01_MS02` - SKYE MultiSpectral (Downlooking)
+- `SVB_FOR_PL01_PRI01` - PRI Sensor
+- `SVB_FOR_PL01_NDVI01` - Apogee NDVI
+- `SVB_FOR_PL01_PAR01` - PAR Sensor
+
+#### 🎨 **UI Improvements**
+
+**Grouped Dropdown**:
+- Organized into 3 optgroups: "Multispectral Sensors", "PRI & NDVI Sensors", "PAR Sensors"
+- Clear visual separation between sensor categories
+- Uplooking/Downlooking orientation labels
+- Technical specs in PRI label (~530nm/~570nm)
+
+**Forms Updated**:
+- Create Instrument form: lines 6069-6090
+- Edit Instrument form: lines 5417-5442
+- "Other" option for custom types (backward compatibility)
+
+#### 🔧 **Technical Changes**
+
+**Files Modified**:
+1. `/public/station.html` - Updated dropdowns in create and edit forms
+2. `/src/handlers/instruments.js` - Added `getInstrumentTypeCode()` function (lines 591-633)
+
+**Key Changes**:
+```javascript
+// OLD: Simple 3-letter extraction
+const instrumentTypeCode = instrumentData.instrument_type.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
+
+// NEW: Standardized mapping with fallback
+const instrumentTypeCode = getInstrumentTypeCode(instrumentData.instrument_type);
+```
+
+#### 📋 **Type Reference Table**
+
+| Type | Acronym | Example Name |
+|------|---------|--------------|
+| Phenocam | PHE | SVB_FOR_PL01_PHE01 |
+| SKYE MultiSpectral (Uplooking) | MS | SVB_FOR_PL01_MS01 |
+| SKYE MultiSpectral (Downlooking) | MS | SVB_FOR_PL01_MS02 |
+| Decagon (Uplooking) | MS | SVB_FOR_PL01_MS03 |
+| Decagon (Downlooking) | MS | SVB_FOR_PL01_MS04 |
+| Apogee MS | MS | SVB_FOR_PL01_MS05 |
+| PRI Sensor (~530nm/~570nm) | PRI | SVB_FOR_PL01_PRI01 |
+| NDVI Sensor | NDVI | SVB_FOR_PL01_NDVI01 |
+| Apogee NDVI | NDVI | SVB_FOR_PL01_NDVI02 |
+| PAR Sensor | PAR | SVB_FOR_PL01_PAR01 |
+| Apogee PAR | PAR | SVB_FOR_PL01_PAR02 |
+
+#### ✅ **Benefits**
+
+- **Standardization**: All multispectral sensors use consistent MS acronym
+- **Clarity**: Sensor orientation (uplooking/downlooking) clearly labeled
+- **Organization**: Grouped dropdown improves UX
+- **Compatibility**: Legacy types and "Other" option preserved
+- **SITES Spectral Compliant**: Matches actual sensor inventory
+
+#### 🔄 **Migration Notes**
+
+- No database migration required (instrument_type is TEXT)
+- Existing instruments keep their original types
+- New instruments use updated type names
+- Backward compatible with legacy "Multispectral Sensor" and "Hyperspectral Sensor"
+
+#### 📊 **Statistics**
+
+- **Types**: 11 predefined types (was 4)
+- **Categories**: 3 organized groups
+- **Acronyms**: 5 standardized codes
+- **Files Modified**: 2
+- **Lines Added**: ~80
+- **Backward Compatibility**: 100%
+
 ## [5.2.55] - 2025-11-18
 
 ### 👥 USER MANAGEMENT & 📊 ANALYTICS DASHBOARD: Complete Admin Interface with Security Analysis

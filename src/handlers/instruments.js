@@ -428,10 +428,10 @@ async function createInstrument(user, request, env) {
     // Auto-generate instrument number for this platform
     const nextInstrumentNumber = await getNextInstrumentNumber(platform.id, env);
 
-    // Generate instrument type code (e.g., "PHE" for Phenocam, "MUL" for Multispectral)
-    const instrumentTypeCode = instrumentData.instrument_type.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
+    // Generate instrument type code using SITES Spectral specific mapping
+    const instrumentTypeCode = getInstrumentTypeCode(instrumentData.instrument_type);
 
-    // Build full instrument number with type code prefix (e.g., "PHE01", "MUL02")
+    // Build full instrument number with type code prefix (e.g., "PHE01", "MS02", "NDVI01")
     instrumentNumber = `${instrumentTypeCode}${nextInstrumentNumber}`;
 
     // Generate normalized name: {PLATFORM}_{INSTRUMENT_TYPE}_{NUMBER}
@@ -586,6 +586,50 @@ async function deleteInstrument(id, user, env) {
     id: parseInt(id, 10),
     normalized_name: existingInstrument.normalized_name
   });
+}
+
+/**
+ * Get instrument type code (acronym) for SITES Spectral instruments
+ * Maps full instrument type names to standardized acronyms
+ * @param {string} instrumentType - Full instrument type name
+ * @returns {string} Instrument type code/acronym
+ */
+function getInstrumentTypeCode(instrumentType) {
+  // SITES Spectral specific instrument type mappings
+  const typeMapping = {
+    // Phenocams
+    'Phenocam': 'PHE',
+
+    // Multispectral Sensors (Fixed Platform) - All use MS acronym
+    'SKYE MultiSpectral Sensor (Uplooking)': 'MS',
+    'SKYE MultiSpectral Sensor (Downlooking)': 'MS',
+    'Decagon Sensor (Uplooking)': 'MS',
+    'Decagon Sensor (Downlooking)': 'MS',
+    'Apogee MS': 'MS',
+
+    // PRI Sensors
+    'PRI Sensor (2-band ~530nm/~570nm)': 'PRI',
+
+    // NDVI Sensors
+    'NDVI Sensor': 'NDVI',
+    'Apogee NDVI': 'NDVI',
+
+    // PAR Sensors
+    'PAR Sensor': 'PAR',
+    'Apogee PAR': 'PAR',
+
+    // Legacy types (for backward compatibility)
+    'Multispectral Sensor': 'MS',
+    'Hyperspectral Sensor': 'HYP'
+  };
+
+  // Return mapped code if exists, otherwise generate from first 3 uppercase letters
+  if (typeMapping[instrumentType]) {
+    return typeMapping[instrumentType];
+  }
+
+  // Fallback: extract first 3 uppercase letters
+  return instrumentType.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
 }
 
 /**

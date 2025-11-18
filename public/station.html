@@ -5419,13 +5419,26 @@
                                 <select id="edit-instrument-type" class="form-control" aria-label="Instrument Type">
                                     <option value="">Select type...</option>
                                     <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
-                                    <option value="Multispectral Sensor" ${instrument.instrument_type === 'Multispectral Sensor' ? 'selected' : ''}>Multispectral Sensor</option>
-                                    <option value="Hyperspectral Sensor" ${instrument.instrument_type === 'Hyperspectral Sensor' ? 'selected' : ''}>Hyperspectral Sensor</option>
-                                    <option value="PAR Sensor" ${instrument.instrument_type === 'PAR Sensor' ? 'selected' : ''}>PAR Sensor</option>
-                                    <option value="Other" ${instrument.instrument_type && !['Phenocam', 'Multispectral Sensor', 'Hyperspectral Sensor', 'PAR Sensor'].includes(instrument.instrument_type) ? 'selected' : ''}>Other</option>
+                                    <optgroup label="Multispectral Sensors (Fixed Platform - MS)">
+                                        <option value="SKYE MultiSpectral Sensor (Uplooking)" ${instrument.instrument_type === 'SKYE MultiSpectral Sensor (Uplooking)' ? 'selected' : ''}>SKYE MultiSpectral (Uplooking)</option>
+                                        <option value="SKYE MultiSpectral Sensor (Downlooking)" ${instrument.instrument_type === 'SKYE MultiSpectral Sensor (Downlooking)' ? 'selected' : ''}>SKYE MultiSpectral (Downlooking)</option>
+                                        <option value="Decagon Sensor (Uplooking)" ${instrument.instrument_type === 'Decagon Sensor (Uplooking)' ? 'selected' : ''}>Decagon (Uplooking)</option>
+                                        <option value="Decagon Sensor (Downlooking)" ${instrument.instrument_type === 'Decagon Sensor (Downlooking)' ? 'selected' : ''}>Decagon (Downlooking)</option>
+                                        <option value="Apogee MS" ${instrument.instrument_type === 'Apogee MS' ? 'selected' : ''}>Apogee MS</option>
+                                    </optgroup>
+                                    <optgroup label="PRI & NDVI Sensors">
+                                        <option value="PRI Sensor (2-band ~530nm/~570nm)" ${instrument.instrument_type === 'PRI Sensor (2-band ~530nm/~570nm)' ? 'selected' : ''}>PRI Sensor (2-band ~530nm/~570nm)</option>
+                                        <option value="NDVI Sensor" ${instrument.instrument_type === 'NDVI Sensor' ? 'selected' : ''}>NDVI Sensor</option>
+                                        <option value="Apogee NDVI" ${instrument.instrument_type === 'Apogee NDVI' ? 'selected' : ''}>Apogee NDVI</option>
+                                    </optgroup>
+                                    <optgroup label="PAR Sensors">
+                                        <option value="PAR Sensor" ${instrument.instrument_type === 'PAR Sensor' ? 'selected' : ''}>PAR Sensor</option>
+                                        <option value="Apogee PAR" ${instrument.instrument_type === 'Apogee PAR' ? 'selected' : ''}>Apogee PAR</option>
+                                    </optgroup>
+                                    <option value="Other" ${instrument.instrument_type && !['Phenocam', 'SKYE MultiSpectral Sensor (Uplooking)', 'SKYE MultiSpectral Sensor (Downlooking)', 'Decagon Sensor (Uplooking)', 'Decagon Sensor (Downlooking)', 'Apogee MS', 'PRI Sensor (2-band ~530nm/~570nm)', 'NDVI Sensor', 'Apogee NDVI', 'PAR Sensor', 'Apogee PAR'].includes(instrument.instrument_type) ? 'selected' : ''}>Other</option>
                                 </select>
-                                <input type="text" id="edit-instrument-type-other" value="${instrument.instrument_type && !['Phenocam', 'Multispectral Sensor', 'Hyperspectral Sensor', 'PAR Sensor'].includes(instrument.instrument_type) ? instrument.instrument_type : ''}"
-                                       class="form-control mt-2" placeholder="Specify type..." style="display: ${instrument.instrument_type && !['Phenocam', 'Multispectral Sensor', 'Hyperspectral Sensor', 'PAR Sensor'].includes(instrument.instrument_type) ? 'block' : 'none'};" aria-label="Other Instrument Type">
+                                <input type="text" id="edit-instrument-type-other" value="${instrument.instrument_type && !['Phenocam', 'SKYE MultiSpectral Sensor (Uplooking)', 'SKYE MultiSpectral Sensor (Downlooking)', 'Decagon Sensor (Uplooking)', 'Decagon Sensor (Downlooking)', 'Apogee MS', 'PRI Sensor (2-band ~530nm/~570nm)', 'NDVI Sensor', 'Apogee NDVI', 'PAR Sensor', 'Apogee PAR'].includes(instrument.instrument_type) ? instrument.instrument_type : ''}"
+                                       class="form-control mt-2" placeholder="Specify type..." style="display: ${instrument.instrument_type && !['Phenocam', 'SKYE MultiSpectral Sensor (Uplooking)', 'SKYE MultiSpectral Sensor (Downlooking)', 'Decagon Sensor (Uplooking)', 'Decagon Sensor (Downlooking)', 'Apogee MS', 'PRI Sensor (2-band ~530nm/~570nm)', 'NDVI Sensor', 'Apogee NDVI', 'PAR Sensor', 'Apogee PAR'].includes(instrument.instrument_type) ? 'block' : 'none'};" aria-label="Other Instrument Type">
                             </div>
                             <div class="form-group">
                                 <label>Ecosystem Code</label>
@@ -6070,9 +6083,22 @@
                                 <label for="create-instrument-type">Instrument Type <span style="color: #ef4444;">*</span></label>
                                 <select id="create-instrument-type" class="form-control" required>
                                     <option value="Phenocam" selected>Phenocam</option>
-                                    <option value="Multispectral Sensor">Multispectral Sensor</option>
-                                    <option value="Hyperspectral Sensor">Hyperspectral Sensor</option>
-                                    <option value="PAR Sensor">PAR Sensor</option>
+                                    <optgroup label="Multispectral Sensors (Fixed Platform - MS)">
+                                        <option value="SKYE MultiSpectral Sensor (Uplooking)">SKYE MultiSpectral (Uplooking)</option>
+                                        <option value="SKYE MultiSpectral Sensor (Downlooking)">SKYE MultiSpectral (Downlooking)</option>
+                                        <option value="Decagon Sensor (Uplooking)">Decagon (Uplooking)</option>
+                                        <option value="Decagon Sensor (Downlooking)">Decagon (Downlooking)</option>
+                                        <option value="Apogee MS">Apogee MS</option>
+                                    </optgroup>
+                                    <optgroup label="PRI & NDVI Sensors">
+                                        <option value="PRI Sensor (2-band ~530nm/~570nm)">PRI Sensor (2-band ~530nm/~570nm)</option>
+                                        <option value="NDVI Sensor">NDVI Sensor</option>
+                                        <option value="Apogee NDVI">Apogee NDVI</option>
+                                    </optgroup>
+                                    <optgroup label="PAR Sensors">
+                                        <option value="PAR Sensor">PAR Sensor</option>
+                                        <option value="Apogee PAR">Apogee PAR</option>
+                                    </optgroup>
                                 </select>
                             </div>
 

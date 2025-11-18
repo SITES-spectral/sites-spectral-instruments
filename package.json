@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.55",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.55 - USER MANAGEMENT & ANALYTICS DASHBOARD: Complete Admin Interface with Security Analysis",
+  "version": "5.2.56",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.56 - INSTRUMENT TYPES UPDATE: SITES Spectral Specific Sensor Categories",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
