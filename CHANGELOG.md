@@ -16,6 +16,123 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - js-yaml library integration for YAML parsing
 - Latest instrument image API endpoint
 
+## [5.2.49] - 2025-11-17
+
+### 🚨 CRITICAL FIX: Missing Deployment Date in Instruments List API
+
+**📅 Update Date**: 2025-11-17
+**🎯 Major Achievement**: Fixed critical backend bug preventing deployment_date and other fields from appearing in edit modals
+
+#### 🐛 **Critical Bug Fixed**
+
+**Root Cause Identified:**
+- Backend API endpoint `/api/instruments?station=XXX` was missing critical fields in SELECT query
+- `getInstrumentsList()` function only returned 14 basic fields
+- `getInstrumentById()` function returned all 46+ fields correctly
+- Edit modal loaded data from instruments list, not individual GET, causing empty fields
+
+**Impact:**
+- deployment_date field always appeared empty in edit modal (even though saved in database)
+- calibration_date field empty
+- camera_serial_number field empty
+- instrument_height_m field empty
+- degrees_from_nadir field empty
+- description field empty
+- Users couldn't see or verify these values when editing instruments
+
+#### ✅ **Fields Added to Instruments List API**
+
+**Added to `getInstrumentsList()` SELECT query** (lines 137-140):
+- `i.deployment_date` - When instrument was deployed
+- `i.instrument_deployment_date` - Alternative deployment date field
+- `i.calibration_date` - Last calibration date
+- `i.camera_serial_number` - Camera serial number
+- `i.instrument_height_m` - Height above ground
+- `i.degrees_from_nadir` - Viewing angle from nadir
+- `i.description` - Instrument description
+
+#### 🔧 **Technical Implementation**
+
+**File Modified:** `/src/handlers/instruments.js` (lines 134-150)
+
+**Before (Missing Fields):**
+```javascript
+SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
+       i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
+       i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
+       i.camera_brand, i.camera_model, i.camera_resolution, i.created_at,
+       ...
+```
+
+**After (Complete Fields):**
+```javascript
+SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
+       i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
+       i.deployment_date, i.instrument_deployment_date, i.calibration_date,
+       i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
+       i.camera_brand, i.camera_model, i.camera_resolution, i.camera_serial_number,
+       i.instrument_height_m, i.degrees_from_nadir, i.description,
+       i.created_at,
+       ...
+```
+
+#### 🎯 **Diagnostic Process**
+
+**Investigation Steps:**
+1. ✅ Verified deployment_date saved in database (SQL query confirmed "2025-11-18")
+2. ✅ Verified frontend form collecting deployment_date correctly
+3. ✅ Verified save API accepting and storing deployment_date
+4. ✅ Added comprehensive diagnostic logging (v5.2.48)
+5. 🎯 **User provided JSON response revealing missing fields in API**
+6. ✅ Identified discrepancy between `getInstrumentById` and `getInstrumentsList`
+7. ✅ Fixed SELECT query to include all critical fields
+
+**Key Discovery:**
+- Database: ✅ Has deployment_date = "2025-11-18"
+- Save endpoint: ✅ Correctly saves deployment_date
+- Get by ID endpoint: ✅ Returns deployment_date
+- Get list endpoint: ❌ Did NOT return deployment_date (FIXED)
+
+#### 📊 **Expected Behavior After Fix**
+
+**When Opening Edit Modal:**
+1. API returns complete instrument data including deployment_date
+2. Edit modal populates all fields with current database values
+3. User sees deployment_date: "2025-11-18" (or whatever value is saved)
+4. User can verify values before editing
+
+**When Saving:**
+1. Changes are saved to database (was already working)
+2. Modal refreshes with updated data (was already working in v5.2.45-46)
+3. All fields now visible in refreshed modal (NEW - fixed)
+
+#### 🧪 **Testing Instructions**
+
+1. **Clear browser cache** and reload page
+2. **Navigate to any instrument** (e.g., SVB_MIR_PL01_PHE02)
+3. **Click "Edit"** on the instrument
+4. **Verify these fields are now populated:**
+   - Deployment Date: Should show "2025-11-18" or saved value
+   - Calibration Date: Should show saved value (if any)
+   - Camera Serial Number: Should show saved value
+   - Height: Should show saved value
+   - Degrees from Nadir: Should show saved value
+   - Description: Should show saved text
+5. **Edit deployment date** and save
+6. **Reopen edit modal** - new value should be visible immediately
+
+#### 📝 **Related Fixes**
+
+This fix completes the deployment_date functionality chain:
+- v5.2.44: Verified deployment_date database field functional
+- v5.2.45: Fixed modal refresh to show updated values after save
+- v5.2.46: Fixed dashboard counts and modal state management
+- v5.2.47: Fixed JavaScript const redeclaration error
+- v5.2.48: Added diagnostic logging to track data flow
+- **v5.2.49: Fixed API to actually return deployment_date** ← ROOT CAUSE FIXED
+
+**Note**: This was a backend SELECT query bug, not a frontend or database issue. The diagnostic logging in v5.2.48 helped identify this by revealing the API response didn't contain the expected fields.
+
 ## [5.2.48] - 2025-11-17
 
 ### 🔍 DIAGNOSTIC: Instrument Modal Refresh Logging

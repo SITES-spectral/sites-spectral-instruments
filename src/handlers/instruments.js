@@ -134,8 +134,11 @@ async function getInstrumentsList(user, request, env) {
   let query = `
     SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
            i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
+           i.deployment_date, i.instrument_deployment_date, i.calibration_date,
            i.latitude, i.longitude, i.viewing_direction, i.azimuth_degrees,
-           i.camera_brand, i.camera_model, i.camera_resolution, i.created_at,
+           i.camera_brand, i.camera_model, i.camera_resolution, i.camera_serial_number,
+           i.instrument_height_m, i.degrees_from_nadir, i.description,
+           i.created_at,
            p.display_name as platform_name, p.location_code, p.normalized_name as platform_normalized_name,
            s.acronym as station_acronym, s.display_name as station_name,
            s.normalized_name as station_normalized_name,

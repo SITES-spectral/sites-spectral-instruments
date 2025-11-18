@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.48",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.48 - DIAGNOSTIC: Instrument Modal Refresh Logging",
+  "version": "5.2.49",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.49 - CRITICAL FIX: Missing Deployment Date in Instruments List API",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
