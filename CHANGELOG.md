@@ -8,12 +8,144 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
-- Latest instrument image API endpoint
-- Full phenocam image API integration
+- Full phenocam image API integration with actual image serving
 - Enhanced user management interface
 - Advanced analytics dashboard
 - Bulk data operations
 - ROI polygon point editing (canvas-based digitizer)
+
+## [5.2.53] - 2025-11-18
+
+### 📸 IMAGE API: Latest Instrument Image Endpoint with Metadata
+
+**📅 Update Date**: 2025-11-18
+**🎯 Major Achievement**: Complete backend API endpoint for retrieving latest phenocam image metadata per instrument
+
+#### 🆕 **New API Endpoints**
+
+**`GET /api/instruments/:id/latest-image`**
+- Returns latest phenocam image metadata for specific instrument
+- Includes timestamp, quality score, archive path, and processing status
+- Permission-based access (admin, station users, readonly)
+- Returns 404 if instrument doesn't exist or user lacks access
+
+**`GET /api/instruments/:id/rois`**
+- Returns all ROIs for specific instrument
+- Ordered by ROI name for consistent display
+- Complete ROI data including points, colors, and metadata
+
+#### 🔧 **API Handler Refactoring**
+
+**Modified**: `/src/api-handler.js`
+- Changed `handleInstruments(method, id, request, env)` to accept `pathSegments` array
+- Enables sub-resource routing (e.g., `/instruments/42/latest-image`)
+- Maintains backward compatibility with existing endpoints
+
+**Modified**: `/src/handlers/instruments.js`
+- Updated function signature to handle path segments
+- Added sub-resource detection logic
+- Routes to appropriate handler based on path structure
+
+#### 📊 **Latest Image Response Format**
+
+```json
+{
+  "instrument_id": 42,
+  "instrument_name": "SVB_MIR_PL02_PHE01",
+  "display_name": "SVB MIR PL02 PHE01",
+  "instrument_type": "Phenocam",
+  "status": "Active",
+  "image_available": true,
+  "last_image_timestamp": "2025-11-18T14:30:00Z",
+  "image_quality_score": 0.92,
+  "image_archive_path": "sites/svb/2025/11/18/SVB_MIR_PL02_PHE01_20251118_1430.jpg",
+  "image_processing_enabled": true,
+  "image_url": "/api/images/sites/svb/2025/11/18/SVB_MIR_PL02_PHE01_20251118_1430.jpg",
+  "thumbnail_url": "/api/images/thumbnails/sites/svb/2025/11/18/SVB_MIR_PL02_PHE01_20251118_1430.jpg"
+}
+```
+
+**Fields:**
+- `instrument_id`: Database ID of instrument
+- `instrument_name`: Normalized instrument name
+- `display_name`: Human-readable display name
+- `instrument_type`: Type (Phenocam, Multispectral, etc.)
+- `status`: Current operational status
+- `image_available`: Boolean indicating if image exists
+- `last_image_timestamp`: ISO timestamp of latest image (null if none)
+- `image_quality_score`: Quality score 0-1 (null if none)
+- `image_archive_path`: File path in archive (null if none)
+- `image_processing_enabled`: Whether image processing is enabled
+- `image_url`: Placeholder URL for full image (null if no image)
+- `thumbnail_url`: Placeholder URL for thumbnail (null if no image)
+
+#### 🔐 **Permission System**
+
+**Access Control:**
+- **Admin**: Access to all instruments across all stations
+- **Station Users**: Access only to instruments at their assigned station
+- **Readonly Users**: Access to view all instruments (no modifications)
+
+**Helper Function**: `getInstrumentForUser(id, user, env)`
+- Validates instrument exists
+- Checks user permissions based on role and station assignment
+- Returns null if no access (resulting in 404 response)
+
+#### 📁 **Database Integration**
+
+**Image-Related Fields Used:**
+- `image_archive_path` (TEXT): Path to stored image file
+- `last_image_timestamp` (DATETIME): Timestamp of latest capture
+- `image_quality_score` (REAL): Quality assessment score (0-1)
+- `image_processing_enabled` (BOOLEAN): Processing status flag
+
+**Query Optimization:**
+- Single SELECT query for image metadata
+- Minimal JOIN overhead (only for permission checking)
+- Indexed lookups on instrument ID
+
+#### 🚀 **Integration Ready**
+
+**Current Status:**
+- ✅ Backend API endpoint fully functional
+- ✅ Permission checks implemented
+- ✅ Response format defined
+- ⏳ Frontend integration pending (Task #4)
+- ⏳ Actual image serving pending (requires image storage setup)
+
+**Next Steps (Task #4):**
+- Frontend integration to display images on instrument cards
+- Image placeholder/fallback for instruments without images
+- Loading states and error handling
+- Thumbnail display in lists
+- Full image modal viewer
+
+#### 🧪 **Testing**
+
+**Test Endpoint:**
+```bash
+# Get latest image for instrument ID 42
+curl -X GET "https://sites.jobelab.com/api/instruments/42/latest-image" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Get all ROIs for instrument ID 42
+curl -X GET "https://sites.jobelab.com/api/instruments/42/rois" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Expected Response (no image yet):**
+```json
+{
+  "instrument_id": 42,
+  "instrument_name": "SVB_MIR_PL02_PHE01",
+  "image_available": false,
+  "last_image_timestamp": null,
+  "image_quality_score": null,
+  "image_archive_path": null,
+  "image_url": null,
+  "thumbnail_url": null
+}
+```
 
 ## [5.2.52] - 2025-11-18
 

@@ -15,12 +15,12 @@ import { validateCameraSpecifications } from '../utils/camera-validation.js';
 /**
  * Handle instrument requests
  * @param {string} method - HTTP method
- * @param {string} id - Instrument identifier (optional)
+ * @param {Array} pathSegments - Path segments from URL (e.g., ['instruments', '42', 'latest-image'])
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Response} Instrument response
  */
-export async function handleInstruments(method, id, request, env) {
+export async function handleInstruments(method, pathSegments, request, env) {
   if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
     return createMethodNotAllowedResponse();
   }
@@ -31,9 +31,24 @@ export async function handleInstruments(method, id, request, env) {
     return user; // Return error response
   }
 
+  // Extract ID and sub-resource from path segments
+  // pathSegments[0] = 'instruments'
+  // pathSegments[1] = instrument ID (optional)
+  // pathSegments[2] = sub-resource (e.g., 'latest-image', 'rois')
+  const id = pathSegments[1];
+  const subResource = pathSegments[2];
+
   try {
     switch (method) {
       case 'GET':
+        // Handle sub-resources first
+        if (id && subResource === 'latest-image') {
+          return await getLatestImage(id, user, env);
+        }
+        if (id && subResource === 'rois') {
+          return await getInstrumentROIs(id, user, env);
+        }
+        // Regular instrument requests
         if (id) {
           return await getInstrumentById(id, user, env);
         } else {
@@ -604,4 +619,145 @@ async function getNextInstrumentNumber(platformId, env) {
   // Increment number
   const number = parseInt(match[1], 10) + 1;
   return number.toString().padStart(2, '0');
+}
+
+/**
+ * Get latest phenocam image metadata for an instrument
+ * @param {string} id - Instrument ID
+ * @param {Object} user - Authenticated user
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Response} Latest image metadata
+ */
+async function getLatestImage(id, user, env) {
+  // Check if instrument exists and user has access
+  const instrument = await getInstrumentForUser(id, user, env);
+  if (!instrument) {
+    return createNotFoundResponse();
+  }
+
+  // Query for latest image metadata from the instrument
+  const query = `
+    SELECT
+      id,
+      normalized_name,
+      display_name,
+      instrument_type,
+      status,
+      image_archive_path,
+      last_image_timestamp,
+      image_quality_score,
+      image_processing_enabled
+    FROM instruments
+    WHERE id = ?
+  `;
+
+  const result = await executeQueryFirst(env, query, [id], 'getLatestImage');
+
+  if (!result) {
+    return createNotFoundResponse();
+  }
+
+  // Build response with image metadata
+  const imageMetadata = {
+    instrument_id: result.id,
+    instrument_name: result.normalized_name,
+    display_name: result.display_name,
+    instrument_type: result.instrument_type,
+    status: result.status,
+    image_available: !!result.last_image_timestamp,
+    last_image_timestamp: result.last_image_timestamp || null,
+    image_quality_score: result.image_quality_score || null,
+    image_archive_path: result.image_archive_path || null,
+    image_processing_enabled: result.image_processing_enabled || false,
+    // Placeholder for future image URL generation
+    image_url: result.last_image_timestamp && result.image_archive_path
+      ? `/api/images/${result.image_archive_path}`
+      : null,
+    thumbnail_url: result.last_image_timestamp && result.image_archive_path
+      ? `/api/images/thumbnails/${result.image_archive_path}`
+      : null
+  };
+
+  return createSuccessResponse(imageMetadata);
+}
+
+/**
+ * Get all ROIs for a specific instrument
+ * @param {string} id - Instrument ID
+ * @param {Object} user - Authenticated user
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Response} Instrument ROIs list
+ */
+async function getInstrumentROIs(id, user, env) {
+  // Check if instrument exists and user has access
+  const instrument = await getInstrumentForUser(id, user, env);
+  if (!instrument) {
+    return createNotFoundResponse();
+  }
+
+  // Query for all ROIs for this instrument
+  const query = `
+    SELECT
+      id,
+      instrument_id,
+      roi_name,
+      description,
+      color_r,
+      color_g,
+      color_b,
+      alpha,
+      thickness,
+      points_json,
+      auto_generated,
+      source_image,
+      generated_date,
+      roi_processing_enabled,
+      created_at,
+      updated_at
+    FROM instrument_rois
+    WHERE instrument_id = ?
+    ORDER BY roi_name
+  `;
+
+  const rois = await executeQuery(env, query, [id], 'getInstrumentROIs');
+
+  return createSuccessResponse(rois || []);
+}
+
+/**
+ * Helper function to get instrument and verify user access
+ * @param {string} id - Instrument ID
+ * @param {Object} user - Authenticated user
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Object|null} Instrument if found and accessible, null otherwise
+ */
+async function getInstrumentForUser(id, user, env) {
+  const query = `
+    SELECT i.id, i.normalized_name, s.normalized_name as station_normalized_name
+    FROM instruments i
+    JOIN platforms p ON i.platform_id = p.id
+    JOIN stations s ON p.station_id = s.id
+    WHERE i.id = ?
+  `;
+
+  const instrument = await executeQueryFirst(env, query, [id], 'getInstrumentForUser');
+
+  if (!instrument) {
+    return null;
+  }
+
+  // Check permissions
+  if (user.role === 'admin') {
+    return instrument;
+  }
+
+  if (user.role === 'station' && user.station_normalized_name === instrument.station_normalized_name) {
+    return instrument;
+  }
+
+  if (user.role === 'readonly') {
+    return instrument;
+  }
+
+  return null; // No access
 }

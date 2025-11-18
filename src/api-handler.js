@@ -57,7 +57,7 @@ export async function handleApiRequest(request, env, ctx) {
         return await handlePlatforms(method, id, request, env);
 
       case 'instruments':
-        return await handleInstruments(method, id, request, env);
+        return await handleInstruments(method, pathSegments, request, env);
 
       case 'rois':
         return await handleROIs(method, id, request, env);
