@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=5.2.51">
+    <link rel="stylesheet" href="/css/styles.css?v=5.2.52">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="5.2.51">
+    <meta name="app-version" content="5.2.52">
     <meta name="build-date" content="2025-11-18">
 
     <style>
@@ -2896,17 +2896,19 @@
 
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=5.2.51"></script>
-    <script src="/js/api.js?v=5.2.51"></script>
-    <script src="/js/components.js?v=5.2.51"></script>
+    <script src="/js/utils.js?v=5.2.52"></script>
+    <script src="/js/api.js?v=5.2.52"></script>
+    <script src="/js/components.js?v=5.2.52"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <!-- js-yaml for YAML parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=5.2.51"></script>
-    <script src="/js/station-dashboard.js?v=5.2.51"></script>
-    <script src="/js/navigation.js?v=5.2.51"></script>
-    <script src="/js/export.js?v=5.2.51"></script>
+    <script src="/js/interactive-map.js?v=5.2.52"></script>
+    <script src="/js/station-dashboard.js?v=5.2.52"></script>
+    <script src="/js/navigation.js?v=5.2.52"></script>
+    <script src="/js/export.js?v=5.2.52"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
     <script>
@@ -7775,20 +7777,94 @@
 
         function parseYAMLROIs(yamlText) {
             try {
-                showNotification('YAML parsing requires js-yaml library. Please implement full YAML parser.', 'warning');
+                // Check if js-yaml library is loaded
+                if (typeof jsyaml === 'undefined') {
+                    showNotification('YAML parsing library not loaded. Please refresh the page.', 'error');
+                    return;
+                }
 
-                const mockData = {
-                    'ROI_01': {
-                        description: 'Example ROI from YAML',
-                        color: [255, 0, 0],
-                        points: [[100, 100], [200, 100], [200, 200], [100, 200]],
-                        thickness: 5,
-                        auto_generated: false
+                // Parse YAML text
+                const parsedData = jsyaml.load(yamlText);
+
+                if (!parsedData) {
+                    showNotification('YAML file is empty or invalid', 'error');
+                    return;
+                }
+
+                // Extract ROI data - support both 'rois' key and root-level ROIs
+                let roiData = {};
+
+                if (parsedData.rois && typeof parsedData.rois === 'object') {
+                    roiData = parsedData.rois;
+                } else if (typeof parsedData === 'object' && !Array.isArray(parsedData)) {
+                    // Assume root level contains ROI definitions
+                    roiData = parsedData;
+                } else {
+                    showNotification('YAML format not recognized. Expected "rois:" key or root-level ROI definitions.', 'error');
+                    return;
+                }
+
+                // Validate ROI data structure
+                const validatedROIs = {};
+                let validCount = 0;
+                let invalidCount = 0;
+
+                for (const [name, roi] of Object.entries(roiData)) {
+                    // Skip non-object entries
+                    if (typeof roi !== 'object' || roi === null) {
+                        console.warn(`Skipping invalid ROI: ${name}`);
+                        invalidCount++;
+                        continue;
                     }
-                };
 
-                displayYAMLPreview(mockData);
+                    // Validate and normalize ROI structure
+                    const normalizedROI = {
+                        description: roi.description || roi.desc || '',
+                        color: Array.isArray(roi.color) && roi.color.length === 3
+                            ? roi.color
+                            : [255, 255, 0], // Default to yellow
+                        points: Array.isArray(roi.points) && roi.points.length >= 3
+                            ? roi.points
+                            : [],
+                        thickness: typeof roi.thickness === 'number'
+                            ? roi.thickness
+                            : (typeof roi.line_thickness === 'number' ? roi.line_thickness : 7),
+                        auto_generated: roi.auto_generated === true || roi.autoGenerated === true || false
+                    };
+
+                    // Validate points structure
+                    const validPoints = normalizedROI.points.every(point =>
+                        Array.isArray(point) && point.length === 2 &&
+                        typeof point[0] === 'number' && typeof point[1] === 'number'
+                    );
+
+                    if (!validPoints && normalizedROI.points.length > 0) {
+                        console.warn(`Invalid points structure for ROI: ${name}`);
+                        normalizedROI.points = []; // Clear invalid points
+                    }
+
+                    validatedROIs[name] = normalizedROI;
+
+                    if (normalizedROI.points.length >= 3) {
+                        validCount++;
+                    } else {
+                        invalidCount++;
+                    }
+                }
+
+                if (Object.keys(validatedROIs).length === 0) {
+                    showNotification('No valid ROIs found in YAML file', 'error');
+                    return;
+                }
+
+                // Show success message with count
+                const message = `Loaded ${validCount} valid ROI${validCount !== 1 ? 's' : ''}` +
+                    (invalidCount > 0 ? ` (${invalidCount} invalid)` : '');
+                showNotification(message, validCount > 0 ? 'success' : 'warning');
+
+                displayYAMLPreview(validatedROIs);
             } catch (error) {
+                console.error('YAML parsing error:', error);
                 showNotification('Error parsing YAML: ' + error.message, 'error');
             }
         }

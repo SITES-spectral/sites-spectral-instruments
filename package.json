@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.51",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.51 - ROI NAME VALIDATION: Enforce Format and Prevent Duplicates",
+  "version": "5.2.52",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.52 - YAML IMPORT: Complete js-yaml Integration for Batch ROI Import",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
