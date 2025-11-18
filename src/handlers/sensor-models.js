@@ -15,7 +15,7 @@
  * @module handlers/sensor-models
  */
 
-import { requireAuthentication } from '../auth.js';
+import { requireAuthentication } from '../auth/permissions.js';
 import { createSuccessResponse, createErrorResponse } from '../utils/responses.js';
 
 /**
