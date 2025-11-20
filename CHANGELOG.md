@@ -13,6 +13,119 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.58] - 2025-11-20
+
+### 📚 DOCUMENTATION: Svartberget Excel Metadata Migration
+
+**📅 Update Date**: 2025-11-20
+**🎯 Major Achievement**: Successfully processed and documented 22 Svartberget instruments from legacy Excel metadata
+
+#### 📊 **Excel Data Processing Results**
+
+**Migration Statistics:**
+- **Source File**: `metadata shared.xlsx` (76 rows of instrument data)
+- **Platforms Processed**: 7 (SVB_FOR_PL01-03, SVB_MIR_PL01-04)
+- **Total Instruments Extracted**: 22
+- **Existing Phenocams Detected**: 3 (skipped to avoid conflicts)
+- **New Instruments Ready for Integration**: 19
+
+**Instrument Breakdown:**
+- **Phenocams**: 2 new (SVB_FOR_PL01_PHE01, SVB_FOR_PL03_PHE01)
+- **Multispectral Sensors**: 15 (SKYE, Decagon models)
+- **PAR Sensors**: 2 (Licor at MIR platforms)
+
+#### 🏗️ **Platform-Specific Details**
+
+**SVB_FOR_PL01 (150m Tower)**: 6 instruments
+- 1 Mobotix phenocam (active)
+- 5 SKYE MS sensors (mix of active, removed, pending installation)
+
+**SVB_FOR_PL02 (Below Canopy North)**: 2 instruments
+- 2 SKYE MS sensors (pending installation, calibrated 2024)
+
+**SVB_FOR_PL03 (Below Canopy CPEC)**: 1 instrument
+- 1 Mobotix phenocam (active, installed Dec 2024)
+
+**SVB_MIR_PL01 (Degerö Flag Pole)**: 8 instruments
+- 8 MS sensors (SKYE 4-channel, Decagon 2-channel, various statuses)
+- Includes both active and historical (removed/dismounted) instruments
+
+**SVB_MIR_PL03 (Dry PAR Pole)**: 1 instrument
+- 1 Licor PAR sensor (active, installed 2024-04-19)
+
+**SVB_MIR_PL04 (Wet PAR Pole)**: 1 instrument
+- 1 Licor PAR sensor (active, installed 2024-04-18)
+
+#### 🔧 **Data Mapping Rules Applied**
+
+✅ **Platform Naming Auto-Correction**: P01 → PL01, P02 → PL02, P03 → PL03
+✅ **Site Inclusion**: Included "Degerö" rows as part of Svartberget (mire ecosystem)
+✅ **Wavelength Range Handling**: Used lower end of ranges (e.g., 620nm from "620-670nm")
+✅ **Legacy Name Preservation**: Preserved in `legacy_acronym` field
+✅ **Status Detection**: Automatically determined from comments (Active, Removed, Inactive, Pending Installation)
+✅ **Conflict Prevention**: Skipped 3 existing phenocams (SVB_MIR_PL01_PHE01/02, SVB_MIR_PL02_PHE01)
+
+#### 📁 **Generated Migration Files**
+
+All files available in `docs/migrations/`:
+
+1. **`svb_instruments_generated.yaml`** (6.8 KB)
+   - Ready-to-integrate YAML instrument definitions
+   - Follows naming convention: `{PLATFORM}_{BRAND}_MS{NN}_NB{channels}`
+   - Complete metadata: channels, calibration dates, coordinates, status
+
+2. **`SVB_INSTRUMENT_MIGRATION_SUMMARY.md`** (9.3 KB)
+   - Comprehensive summary with all 19 instruments detailed
+   - Platform breakdown and instrument specifications
+   - Integration steps and manual adjustment guide
+   - Known issues and validation checklist
+
+3. **`process_svb_instruments.py`** (15 KB)
+   - Python processing script with encoding handling
+   - CSV parsing with wavelength/bandwidth validation
+   - Channel grouping and status detection logic
+   - Reusable for future Excel/CSV migrations
+
+#### 🚀 **Next Steps for Integration**
+
+**Manual Tasks Required:**
+1. Review generated instruments for accuracy
+2. Adjust instrument numbering (MS01, MS02, etc.) as needed
+3. Merge any split multi-channel instruments
+4. Add missing serial numbers if available
+5. Standardize calibration date formats
+6. Integrate into `yamls/stations_latest_production.yaml`
+7. Validate YAML syntax
+8. Migrate to production database
+
+#### 📝 **Notable Instruments**
+
+**Active Multi-Channel Systems:**
+- SKYE SKR1860 4-channel sensors at SVB_MIR_PL01 (704nm, 740nm, 860nm, 1640nm)
+- NDVI sensor pairs (RED ~650nm, NIR ~850nm) at multiple platforms
+
+**Recently Calibrated (2024-2025):**
+- SKYE MS sensors with serial numbers 53914-53919
+- Calibration dates: 07/17/2024, 09/10/2025, 09/11/2025
+
+**Historical Documentation:**
+- Removed sensors from 2022 (flooded junction box issue)
+- Dismounted Decagon sensors from 09/30/2025
+- Legacy naming preserved for data continuity
+
+#### 🔍 **Data Quality Notes**
+
+- **Channel Wavelengths**: Preserved exact values from Excel (531nm, 530nm, 645nm, etc.)
+- **Bandwidth Values**: Included where available (10-50nm typical)
+- **Legacy Parameter Names**: Preserved (e.g., "Up_530_150m_Avg", "Dw_650_100m_Avg")
+- **Installation Notes**: Captured verbatim from Excel comments
+- **Coordinate Precision**: Maintained from source data
+
+---
+
+**🤖 Generated with [Claude Code](https://claude.com/claude-code)**
+**Co-Authored-By: Claude <noreply@anthropic.com>**
+
 ## [5.2.38] - 2025-11-14
 
 ### 📊 DATABASE UPDATE: Added SVB Platforms & Naming Consistency

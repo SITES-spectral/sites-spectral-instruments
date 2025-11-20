@@ -1,0 +1,213 @@
+SVB_FOR_PL01:
+  phenocams:
+    SVB_FOR_PL01_PHE01:
+      id: SVB_FOR_PL01_PHE01
+      normalized_name: SVB_FOR_PL01_PHE01
+      display_name: SVB FOR PL01 Phenocam
+      instrument_type: Phenocam
+      status: Active
+      legacy_acronym: SWE-SVB-SVB-FOR-P01
+      instrument_height_m: 52.0
+      camera_specifications:
+        brand: Mobotix
+        model: MX-M25-D061
+        serial_number: 10.20.84.196
+      installation_notes: Mounted on tall tower
+      calibration_date: '-'
+  multispectral_sensors:
+    SVB_FOR_PL01_SKYE_MS01_NB02:
+      id: SVB_FOR_PL01_SKYE_MS01_NB02
+      normalized_name: SVB_FOR_PL01_SKYE_MS01_NB02
+      display_name: SVB FOR PL01 SKYE MS Sensor 1
+      instrument_type: Multispectral Sensor
+      status: Removed
+      legacy_acronym: SWE-SVB-SVB-FOR-F01
+      instrument_height_m: 150.0
+      sensor_specifications:
+        brand: SKYE
+        model: SKR1860
+        number_of_channels: 2
+      spectral_channels:
+      - channel_number: 1
+        channel_name: GREEN531nm_NW11nm
+        center_wavelength_nm: 531
+        band_type: Green
+        bandwidth_nm: 11.5
+        legacy_parameter_name: Up_530_150m_Avg
+      - channel_number: 2
+        channel_name: GREEN530nm_NW11nm
+        center_wavelength_nm: 530
+        band_type: Green
+        bandwidth_nm: 11.5
+        legacy_parameter_name: Dw_530_100m_Avg
+      installation_notes: Removed 2022-10-31,  because of suspicious data, but the
+        flooded junction box might be the reason
+    SVB_FOR_PL01_SKYE_MS01_NB01:
+      id: SVB_FOR_PL01_SKYE_MS01_NB01
+      normalized_name: SVB_FOR_PL01_SKYE_MS01_NB01
+      display_name: SVB FOR PL01 SKYE MS Sensor 1
+      instrument_type: Multispectral Sensor
+      status: Pending Installation
+      instrument_height_m: 50.0
+      sensor_specifications:
+        brand: SKYE
+        model: SKR1860D/A/LT
+        number_of_channels: 1
+        serial_number: '53916'
+        cable_length_m: 8.0
+      spectral_channels:
+      - channel_number: 1
+        channel_name: RED671nm_NW42nm
+        center_wavelength_nm: 671
+        band_type: Red
+        bandwidth_nm: 42.4
+      installation_notes: calibrated, not installed yet
+      calibration_date: 09/10/2025
+  par_sensors: {}
+SVB_FOR_PL02:
+  phenocams: {}
+  multispectral_sensors:
+    SVB_FOR_PL02_SKYE_MS01_NB01:
+      id: SVB_FOR_PL02_SKYE_MS01_NB01
+      normalized_name: SVB_FOR_PL02_SKYE_MS01_NB01
+      display_name: SVB FOR PL02 SKYE MS Sensor 1
+      instrument_type: Multispectral Sensor
+      status: Pending Installation
+      instrument_height_m: 2.0
+      sensor_specifications:
+        brand: SKYE
+        model: SKR1840D/LT
+        number_of_channels: 1
+        serial_number: '53914'
+        cable_length_m: 6.0
+      spectral_channels:
+      - channel_number: 1
+        channel_name: RED670nm_NB
+        center_wavelength_nm: 670
+        band_type: Red
+      installation_notes: calibrated, not installed yet, // decagon, towards W (or
+        east if easier)
+      calibration_date: 07/17/2024
+  par_sensors: {}
+SVB_FOR_PL03:
+  phenocams:
+    SVB_FOR_PL03_PHE01:
+      id: SVB_FOR_PL03_PHE01
+      normalized_name: SVB_FOR_PL03_PHE01
+      display_name: SVB FOR PL03 Phenocam
+      instrument_type: Phenocam
+      status: Active
+      legacy_acronym: SWE-SVB-SVB-FOR-P02
+      instrument_height_m: 3.22
+      camera_specifications:
+        brand: Mobotix
+        model: MX-M25-D061
+        serial_number: 10.29.45.241
+      installation_notes: Mounted in a small tower below canopy, SW of tall tower,
+        19/12/2024
+      calibration_date: '-'
+  multispectral_sensors: {}
+  par_sensors: {}
+SVB_MIR_PL01:
+  phenocams: {}
+  multispectral_sensors:
+    SVB_MIR_PL01_SKYE_MS01_NB02:
+      id: SVB_MIR_PL01_SKYE_MS01_NB02
+      normalized_name: SVB_MIR_PL01_SKYE_MS01_NB02
+      display_name: SVB MIR PL01 SKYE MS Sensor 1
+      instrument_type: Multispectral Sensor
+      status: Inactive
+      legacy_acronym: SWE-SVB-DEG-MIR-F01
+      instrument_height_m: 17.5
+      sensor_specifications:
+        brand: SKYE
+        model: SKR1850
+        number_of_channels: 2
+      spectral_channels:
+      - channel_number: 1
+        channel_name: GREEN531nm_NB
+        center_wavelength_nm: 531
+        band_type: Green
+        legacy_parameter_name: Up_531_18m_2_Avg
+      - channel_number: 2
+        channel_name: GREEN531nm_NB
+        center_wavelength_nm: 531
+        band_type: Green
+        legacy_parameter_name: Dw_531_18m_2_Avg
+      installation_notes: old
+      calibration_date: todo
+    SVB_MIR_PL01_SKYE_MS01_NB01:
+      id: SVB_MIR_PL01_SKYE_MS01_NB01
+      normalized_name: SVB_MIR_PL01_SKYE_MS01_NB01
+      display_name: SVB MIR PL01 SKYE MS Sensor 1
+      instrument_type: Multispectral Sensor
+      status: Pending Installation
+      sensor_specifications:
+        brand: SKYE
+        model: SKR1860ND/A/LT
+        number_of_channels: 1
+        serial_number: '53919'
+        cable_length_m: 20.0
+      spectral_channels:
+      - channel_number: 1
+        channel_name: RED671nm_NB
+        center_wavelength_nm: 671
+        band_type: Red
+      installation_notes: calibated, not installed 2025-10-24
+      calibration_date: 09/11/2025
+    SVB_MIR_PL01_DECAGON_MS01_NB01:
+      id: SVB_MIR_PL01_DECAGON_MS01_NB01
+      normalized_name: SVB_MIR_PL01_DECAGON_MS01_NB01
+      display_name: SVB MIR PL01 Decagon MS Sensor 1
+      instrument_type: Multispectral Sensor
+      status: Removed
+      legacy_acronym: SWE-SVB-DEG-MIR-F01
+      instrument_height_m: 17.5
+      sensor_specifications:
+        brand: Decagon
+        model: SRS-Pr
+        number_of_channels: 1
+      spectral_channels:
+      - channel_number: 1
+        channel_name: GREEN532nm_NB
+        center_wavelength_nm: 532
+        band_type: Green
+        legacy_parameter_name: Dw_532_2_Avg
+      installation_notes: stopped working, dismounted 30/09/2025
+  par_sensors: {}
+SVB_MIR_PL03:
+  phenocams: {}
+  multispectral_sensors: {}
+  par_sensors:
+    SVB_MIR_PL03_LICOR_PAR01:
+      id: SVB_MIR_PL03_LICOR_PAR01
+      normalized_name: SVB_MIR_PL03_LICOR_PAR01
+      display_name: SVB MIR PL03 Licor PAR
+      instrument_type: Par Sensor
+      status: Active
+      legacy_acronym: SWE-SVB-DEG-MIR-F01
+      sensor_specifications:
+        brand: Licor
+        model: PAR Sensor
+        wavelength_range: 400-700nm
+      installation_notes: installed in 2024-04-19
+SVB_MIR_PL04:
+  phenocams: {}
+  multispectral_sensors: {}
+  par_sensors:
+    SVB_MIR_PL04_LICOR_PAR01:
+      id: SVB_MIR_PL04_LICOR_PAR01
+      normalized_name: SVB_MIR_PL04_LICOR_PAR01
+      display_name: SVB MIR PL04 Licor PAR
+      instrument_type: Par Sensor
+      status: Active
+      legacy_acronym: SWE-SVB-DEG-MIR-F01
+      sensor_specifications:
+        brand: Licor
+        model: PAR Sensor
+        wavelength_range: 400-700nm
+      installation_notes: installed in 2024-04-18
+SVB_MIR_PL02:
+  phenocams: {}
+  multispectral_sensors: {}
+  par_sensors: {}
