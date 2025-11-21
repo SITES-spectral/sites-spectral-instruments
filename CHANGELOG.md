@@ -13,6 +13,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced analytics dashboard
 - Full phenocam image API integration
 
+## [5.2.59] - 2025-11-21
+
+### 📚 DOCUMENTATION: Claude.md Cleanup & Legacy Archive
+
+**📅 Update Date**: 2025-11-21
+**🎯 Major Achievement**: Streamlined Claude.md documentation and created legacy archive for better performance
+
+#### 🧹 **Documentation Cleanup**
+
+**Problem Identified:**
+- CLAUDE.md had grown to 932 lines with extensive historical version documentation
+- Large file size impacting Claude Code context window performance
+- Historical information valuable but not needed for current development
+
+**Solution Implemented:**
+- **Reduced CLAUDE.md**: Cleaned from 932 lines → 243 lines (74% reduction)
+- **Created CLAUDE_LEGACY.md**: New historical archive with all previous version documentation
+- **Improved Structure**: Current file now focuses only on relevant development info
+
+#### 📋 **What's in the New CLAUDE.md**
+
+**Current Development Focus:**
+- Latest version info (v5.2.58) with pending tasks
+- System architecture overview
+- Development workflow and commands
+- Naming conventions and standards
+- Security best practices
+- Git workflow guidelines
+- Link to legacy documentation for historical reference
+
+#### 📜 **What's in CLAUDE_LEGACY.md**
+
+**Historical Archive Contains:**
+- Version 5.2.38 - SVB Platforms & Naming Consistency
+- Version 5.2.37 - Platform Creation Button Fixes
+- Version 5.2.36 - Form Field Debugging
+- Version 5.2.33 - Instrument Naming Fixes
+- Version 5.2.32 - SQL Column/Value Mismatch
+- Version 5.2.31 - Station User Instrument Management
+- Version 5.2.29 - Complete Instrument CRUD
+- Version 5.2.24 - Export API Hotfix
+- Version 5.2.2 - Card Label Enhancements
+- Version 4.9.5 - Database Connectivity Restoration
+- Version 4.9.1 - Admin Dashboard
+- Version 4.9.0 - Admin-Only CRUD Operations
+
+#### ✨ **Benefits**
+
+**Performance:**
+- Faster context loading for Claude Code
+- Reduced token usage
+- Better focus on current development needs
+
+**Organization:**
+- Clear separation of current vs historical information
+- Historical context preserved for reference
+- Easy navigation between current and legacy docs
+
+**Maintainability:**
+- New versions add small updates to CLAUDE.md
+- Historical versions move to legacy file periodically
+- Documentation stays lean and relevant
+
+#### 📝 **Files Modified**
+
+1. **CLAUDE.md** - Completely restructured and streamlined
+2. **CLAUDE_LEGACY.md** - NEW file with historical documentation
+3. **package.json** - Version bump to 5.2.59
+4. **CHANGELOG.md** - This entry
+
+#### 🎯 **Future Documentation Strategy**
+
+**Going Forward:**
+- Keep CLAUDE.md focused on current development (< 300 lines)
+- Archive major version milestones to CLAUDE_LEGACY.md
+- Update legacy file quarterly or after major releases
+- Maintain clear links between current and historical docs
+
 ## [5.2.58] - 2025-11-20
 
 ### 📚 DOCUMENTATION: Svartberget Excel Metadata Migration

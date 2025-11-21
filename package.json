@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "5.2.58",
-  "description": "SITES Spectral Stations & Instruments Management System v5.2.58 - DOCUMENTATION: Svartberget Excel Metadata Migration",
+  "version": "5.2.59",
+  "description": "SITES Spectral Stations & Instruments Management System v5.2.59 - DOCUMENTATION: Claude.md Cleanup & Legacy Archive",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
