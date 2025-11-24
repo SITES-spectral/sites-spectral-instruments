@@ -406,6 +406,18 @@ class SitesStationDashboard {
 
         const platformCards = this.platforms.map(platform => this.createPlatformCard(platform)).join('');
         platformsContainer.innerHTML = platformCards;
+
+        // Load images asynchronously after rendering
+        this.loadAllInstrumentImages();
+    }
+
+    async loadAllInstrumentImages() {
+        // Load images for all instruments using the new API endpoint
+        for (const instrument of this.instruments) {
+            if (typeof window.loadInstrumentImage === 'function') {
+                await window.loadInstrumentImage(instrument.id);
+            }
+        }
     }
 
     createPlatformCard(platform) {

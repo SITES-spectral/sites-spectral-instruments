@@ -2,65 +2,224 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**For historical version information, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)**
+> **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
----
-
-## Current Version: 5.2.59 - Documentation Cleanup & Legacy Archive (2025-11-21)
-**✅ STATUS: SUCCESSFULLY COMPLETED**
+## Current Version: 5.2.57 - DATABASE UPDATE: Svartberget Instrument Platform Reassignment (2025-11-18)
+**✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
-**📅 Last Update:** 2025-11-21
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
+**📅 Last Updated:** 2025-11-18
 
-### 📚 Latest Updates (v5.2.59)
+### ✅ Latest Update: Svartberget Instrument Platform Reassignment (v5.2.57)
 
-**Documentation Restructure:**
-- **CLAUDE.md reduced**: 932 lines → 243 lines (74% reduction)
-- **CLAUDE_LEGACY.md created**: Historical archive with all previous versions
-- **Performance improvement**: Faster context loading, reduced token usage
-- **Better maintainability**: Clear separation of current vs historical info
+**🌲 Station**: Svartberget (SVB)
+**🎯 Achievement**: Successfully moved phenocam from Platform PL02 to Platform PL03 with naming convention correction
 
-### 📊 Previous Update (v5.2.58 - 2025-11-20)
+#### **Changes Summary:**
 
-**Migration Statistics:**
-- **Source File**: `metadata shared.xlsx` (76 rows of instrument data)
-- **Platforms Processed**: 7 (SVB_FOR_PL01-03, SVB_MIR_PL01-04)
-- **Total Instruments Extracted**: 22
-- **New Instruments Ready**: 19 (Phenocams, Multispectral, PAR sensors)
+**Instrument Moved**: Below Canopy Phenocam (ID: 38)
 
-**Generated Files** (in `docs/migrations/`):
-- `svb_instruments_generated.yaml` - Ready-to-integrate YAML definitions
-- `SVB_INSTRUMENT_MIGRATION_SUMMARY.md` - Comprehensive integration guide
-- `process_svb_instruments.py` - Reusable processing script
+**Before Update**:
+- **Platform**: SVB_FOR_PL02 (ID: 30) - "SVB PL02 Below Canopy North"
+- **Instrument**: SVB_FOR_P02_PHE01 (inconsistent naming with "P02" instead of "PL02")
 
-### 🎯 Pending Tasks (v5.2.58)
-1. Review generated instruments for accuracy
-2. Adjust instrument numbering (MS01, MS02, etc.)
-3. Merge split multi-channel instruments
-4. Integrate into `yamls/stations_latest_production.yaml`
-5. Migrate to production database
+**After Update**:
+- **Platform**: SVB_FOR_PL03 (ID: 32) - "SVB PL03 Below Canopy CPEC"
+- **Instrument**: SVB_FOR_PL03_PHE01 (corrected to consistent "PL03" naming)
+
+#### **Technical Details:**
+```sql
+UPDATE instruments
+SET platform_id = 32,
+    normalized_name = 'SVB_FOR_PL03_PHE01',
+    updated_at = datetime('now')
+WHERE id = 38;
+```
+
+**Rationale**: Moving phenocam to PL03 aligns instrument with correct CPEC (Carbon Precipitation Eddy Covariance) measurement platform for integrated flux and optical measurements.
+
+**Naming Convention Consistency**: This update also corrects the inconsistent "P02" notation to the standard "PL03" format. All Svartberget platforms now follow the pattern: `{STATION}_{ECOSYSTEM}_PL##`
+
+### 🔬 Recent Update: Instrument Types for SITES Spectral (v5.2.56)
+
+**New instrument types dropdown with SITES Spectral specific sensors:**
+- **Phenocams** (PHE)
+- **Multispectral Sensors - Fixed Platform** (MS): SKYE, Decagon, Apogee MS
+- **PRI Sensors** (PRI): 2-band ~530nm/~570nm
+- **NDVI Sensors** (NDVI): Apogee NDVI
+- **PAR Sensors** (PAR): Apogee PAR
+
+**Key Feature**: All multispectral fixed platform sensors share the **MS** acronym regardless of vendor.
+
+### ✅ Previous Feature: ROI Name Validation System (v5.2.51)
+
+**Comprehensive validation to enforce ROI naming conventions and prevent duplicates:**
+
+#### **Validation Rules:**
+1. **Format Enforcement**: ROI names must follow `ROI_XX` pattern (01-99 range)
+   - Valid: `ROI_01`, `ROI_02`, `ROI_15`, `ROI_99`
+   - Invalid: `ROI_1`, `ROI_100`, `MyROI`, `roi_01`
+2. **Duplicate Prevention**: No two ROIs can have same name for same instrument
+3. **Range Validation**: ROI number must be between 01 and 99
+
+#### **Implementation:**
+- **New Function**: `validateROIName(roiName, instrumentId, currentRoiId = null)`
+- **Integration Points**:
+  - `saveROI()` at line 7695 (create workflow)
+  - `saveROIChanges(roiId)` at line 4115 (edit workflow)
+- **Files Modified**: `/public/station.html`
+
+#### **Error Messages:**
+- Format: "ROI name must follow the format ROI_XX (e.g., ROI_01, ROI_02, ..., ROI_99)"
+- Range: "ROI number must be between 01 and 99"
+- Duplicate: "ROI name 'ROI_XX' already exists for this instrument. Please choose a different name."
+
+#### **Benefits:**
+- **Consistency**: All ROIs follow same naming convention
+- **Organization**: Sequential numbering makes ROIs easy to reference
+- **Data Integrity**: Prevents confusion from duplicate names
+- **User Guidance**: Clear error messages help users understand requirements
+
+### 🚨 Recent Critical Fixes: API Field Completeness (v5.2.49-50)
+
+**Complete API audit revealed and fixed missing fields across all endpoints:**
+
+#### **v5.2.49 - Instruments List API Fix**
+- **Fixed**: 7 missing fields in `GET /api/instruments?station=XXX`
+- **Fields Added**: deployment_date, calibration_date, camera_serial_number, instrument_height_m, degrees_from_nadir, description, instrument_deployment_date
+- **Impact**: Edit modals now properly populate all fields with current database values
+
+#### **v5.2.50 - Platforms List API Fix**
+- **Fixed**: 3 missing fields in `GET /api/platforms?station=XXX`
+- **Fields Added**: deployment_date, description, updated_at
+- **Impact**: Platform modals now display deployment dates and descriptions
+
+#### **Comprehensive Audit Results:**
+- ✅ **Stations API**: Already complete (all 10 columns)
+- ✅ **Platforms API**: FIXED in v5.2.50 (now returns all 15 columns)
+- ✅ **Instruments API**: FIXED in v5.2.49 (returns all critical fields)
+
+**Root Cause**: List endpoints were missing fields that detail endpoints returned, causing empty fields in edit modals even though data was saved in database.
+
+**Resolution**: Updated SELECT queries in `src/handlers/instruments.js` and `src/handlers/platforms.js` to match database schemas.
+
+### 🎨 Latest Major Feature: ROI Creation System
+
+**Complete dual-mode ROI (Region of Interest) creation interface:**
+
+1. **Interactive Drawing Mode**
+   - HTML5 canvas-based polygon digitizer (800x600)
+   - Click to place polygon points (minimum 3 required)
+   - Drag points to adjust positions after placement
+   - Right-click or double-click to close polygon
+   - Real-time preview with numbered points
+   - Professional color picker (8 presets + custom RGB sliders)
+   - Auto-naming system (ROI_01, ROI_02, etc.)
+
+2. **YAML Upload Mode**
+   - Drag-and-drop batch import (.yaml/.yml files)
+   - Automatic parsing and validation
+   - Preview table with color swatches and validation indicators
+   - Selective import with checkboxes
+   - Batch create multiple ROIs in single operation
+
+**Implementation Details:**
+- **File**: `public/station.html` (+1,545 lines)
+- **Modal HTML**: 291 lines (dual-tab interface)
+- **CSS Styles**: 600 lines (animations, responsive design)
+- **JavaScript**: 665 lines (31 new functions)
+- **Documentation**: 7 comprehensive files (~4,200 total lines)
+
+**Key Functions:**
+- `showROICreationModal()`, `initializeCanvas()`, `handleCanvasClick()`, `saveROI()`
+- `handleYAMLUpload()`, `parseYAMLROIs()`, `displayYAMLPreview()`, `importSelectedROIs()`
+- `fetchNextROIName()`, `selectPresetColor()`, `updateColorPreview()`
+
+**YAML Format for Import:**
+```yaml
+rois:
+  ROI_01:
+    description: "Forest canopy region"
+    color: [0, 255, 0]  # RGB array
+    points:              # x, y pixel coordinates
+      - [100, 200]
+      - [500, 200]
+      - [500, 600]
+      - [100, 600]
+    thickness: 7
+    auto_generated: false
+```
+
+### 📋 Recent Bug Fix Journey (v5.2.44-50)
+
+**Complete resolution of deployment_date and API field completeness issues:**
+
+1. **v5.2.44** - Svartberget cleanup: Deleted duplicate instrument, updated naming
+2. **v5.2.45** - Fixed modal refresh: Added automatic modal reopen after save with fresh data
+3. **v5.2.46** - Fixed dashboard counts and modal state management
+4. **v5.2.47** - Fixed JavaScript const token redeclaration error
+5. **v5.2.48** - Added diagnostic logging to track data flow
+6. **v5.2.49** - 🎯 **ROOT CAUSE FIXED**: Instruments list API missing 7 fields
+7. **v5.2.50** - 🎯 **AUDIT COMPLETE**: Platforms list API missing 3 fields
+
+**Key Learning**: The issue was never frontend or database - it was backend API SELECT queries not returning all fields.
+
+### 🆕 Database Updates (v5.2.38-39)
+
+#### New Svartberget Platforms Added
+- **SVB_MIR_PL04** - Degerö Wet PAR Pole (Database ID: 31)
+- **SVB_FOR_PL03** - Below Canopy CPEC Tripod (Database ID: 32)
+
+#### Naming Convention Standardization
+- Fixed inconsistent naming: **SVB_FOR_P02** → **SVB_FOR_PL02**
+- **Standard Format**: `{STATION}_{ECOSYSTEM}_PL##`
+- **Location Codes**: Always use `PL##` (not `P##`)
+
+### 📊 Complete Svartberget Platform Inventory (7 Platforms)
+
+**Forest Ecosystem (FOR) - 3 Platforms:**
+1. **SVB_FOR_PL01** - SVB PL01 150m tower (Tower, 70m)
+2. **SVB_FOR_PL02** - SVB PL02 Below Canopy North (Tripod, 3.2m)
+3. **SVB_FOR_PL03** - SVB P03 Below Canopy CPEC (Tripod, 3.22m)
+
+**Mire Ecosystem (MIR) - 4 Platforms:**
+4. **SVB_MIR_PL01** - DEG PL01 flag pole W (Pole, 17.5m)
+5. **SVB_MIR_PL02** - DEG PL02 ICOS mast (Mast, 3.3m)
+6. **SVB_MIR_PL03** - DEG PL03 dry PAR pole (Pole, 2m)
+7. **SVB_MIR_PL04** - DEG PL04 wet PAR pole (Pole, 2m)
+
+### ✅ Recently Resolved Issues
+- ✅ **Platform Creation Button** (v5.2.37): Fixed function conflicts and data loading race conditions
+- ✅ **Deployment Date Fields** (v5.2.49-50): Fixed API endpoints missing critical fields
+- ✅ **Modal Refresh** (v5.2.45-46): Fixed edit modals not showing updated values
+- ✅ **Instrument Naming** (v5.2.33): Resolved NaN in normalized names
+- ✅ **SQL Column Mismatch** (v5.2.32): Fixed instrument creation blocking error
+
+### ⚠️ Current Known Issues
+- None currently reported - all major issues resolved as of v5.2.50
 
 ---
 
 ## System Architecture
 
-### Authentication & Security
+### Authentication System
 - **Role-Based Access**: Three user roles (admin, station, readonly) with granular permissions
 - **JWT Authentication**: Secure token-based authentication with session management
-- **Permission Matrix**: Field-level permissions via `user_field_permissions` table
-- **Credentials**: Cloudflare usernames (NOT emails/passwords)
+- **Permission Matrix**: Field-level permissions controlled via `user_field_permissions` table
+- **Important**: Do NOT use email/password for login - use Cloudflare username credentials
 
-### Database Schema (Cloudflare D1)
+### Database Schema
 - **Core Tables**: `stations`, `platforms`, `instruments`, `instrument_rois`
 - **User Management**: `users`, `user_sessions`, `activity_log`
-- **Relationships**: Proper foreign key constraints with cascade rules
-- **Migration System**: Numbered SQL migrations in `/migrations/`
+- **Normalized Design**: Proper relationships with foreign key constraints
+- **Migration System**: Structured database evolution with numbered migrations
 
 ### Key Features
 - **Complete CRUD Operations**: Full create/read/update/delete for all entities
-- **Interactive Mapping**: Leaflet-based maps with SWEREF 99 coordinate system
+- **Interactive Mapping**: Leaflet-based maps with Swedish coordinate system (SWEREF 99)
 - **Professional UI**: Responsive design with comprehensive modal systems
-- **ROI Management**: Region of Interest functionality with visual editing
-- **Export Capabilities**: Multi-format data export (CSV, TSV, JSON)
+- **ROI Management**: Complete Region of Interest functionality with visual editing
+- **Export Capabilities**: Multi-format data export (CSV, TSV, JSON) with filtering options
 
 ---
 
@@ -79,7 +238,7 @@ npm run db:migrate         # Apply migrations to remote database
 npm run db:migrate:local   # Apply migrations to local database
 npm run db:studio          # Open database studio interface
 
-# Direct database commands
+# Direct database operations
 npx wrangler d1 migrations apply spectral_stations_db --remote
 npx wrangler d1 execute spectral_stations_db --remote --command="SELECT * FROM stations;"
 ```
@@ -90,7 +249,11 @@ npm run deploy             # Build and deploy to production
 npm run deploy:bump        # Build with version bump and deploy
 ```
 
-**IMPORTANT**: Always bump version and update changelog before committing!
+**Deployment Checklist:**
+1. Always bump version before commit
+2. Update CHANGELOG.md with changes
+3. Use git worktrees for parallel sessions
+4. Test locally before deploying to production
 
 ---
 
@@ -101,15 +264,7 @@ public/
 ├── index.html              # Login redirect page
 ├── login.html              # Main login portal
 ├── station.html            # Station details and management
-├── css/                    # Stylesheets
-├── js/                     # JavaScript modules
-│   ├── api.js              # API communication layer
-│   ├── components.js       # UI components
-│   ├── interactive-map.js  # Leaflet mapping
-│   ├── station-dashboard.js # Station management
-│   ├── navigation.js       # Client-side routing
-│   └── export.js           # Data export functionality
-└── images/                 # Static assets
+└── css/, js/, images/      # Static assets
 
 src/
 ├── worker.js               # Main Cloudflare Worker
@@ -119,132 +274,127 @@ src/
     ├── stations.js
     ├── platforms.js
     ├── instruments.js
-    ├── export.js
-    └── ...
+    └── export.js
 
 migrations/
-└── *.sql                   # Database schema migrations
+├── *.sql                   # Database schema and data migrations
 
 yamls/
-└── stations_latest_production.yaml  # Station metadata source
+├── stations_latest_production.yaml  # Production data reference
 ```
 
 ---
 
-## Naming Conventions
+## Important References
 
-### Platform Naming
-- **Format**: `{STATION}_{ECOSYSTEM}_PL##`
-- **Location Codes**: Always use `PL##` (not `P##`)
-- **Examples**: `SVB_FOR_PL01`, `SVB_MIR_PL04`, `ANS_AGR_PL01`
-
-### Instrument Naming
-- **Format**: `{PLATFORM}_{TYPE_CODE}{NUMBER}`
-- **Type Codes**:
-  - `PHE` - Phenocam
-  - `MUL` - Multispectral Sensor
-  - `HYP` - Hyperspectral Sensor
-  - `PAR` - PAR Sensor
-- **Number Format**: Zero-padded 2-digit (e.g., `01`, `02`)
-- **Examples**: `SVB_MIR_PL02_PHE01`, `ANS_AGR_PL01_MUL02`
-
-### Ecosystem Codes
-All 12 official ecosystem codes:
+### Ecosystem Codes (12 Official Types)
 - **FOR** - Forest
-- **CON** - Coniferous Forest
-- **DEC** - Deciduous Forest
-- **ALP** - Alpine Forest
 - **AGR** - Arable Land
+- **MIR** - Mires
+- **LAK** - Lake
+- **WET** - Wetland
 - **GRA** - Grassland
 - **HEA** - Heathland
-- **MIR** - Mires
-- **PEA** - Peatland
-- **WET** - Wetland
+- **ALP** - Alpine Forest
+- **CON** - Coniferous Forest
+- **DEC** - Deciduous Forest
 - **MAR** - Marshland
-- **LAK** - Lake
+- **PEA** - Peatland
+
+### SITES Spectral Instrument Types
+1. **Phenocam** (default)
+2. **Multispectral Sensor**
+3. **Hyperspectral Sensor**
+4. **PAR Sensor**
+
+### Naming Conventions
+- **Stations**: `{ACRONYM}` (e.g., SVB, ANS, LON)
+- **Platforms**: `{STATION}_{ECOSYSTEM}_PL##` (e.g., SVB_FOR_PL01)
+- **Instruments**: `{PLATFORM}_{TYPE_CODE}{NUMBER}` (e.g., SVB_FOR_PL01_PHE01)
+- **Location Codes**: Always `PL##` format (not `P##`)
+- **Instrument Numbers**: `{TYPE_CODE}{NUMBER}` (e.g., PHE01, MUL02, HYP03)
 
 ---
 
-## Security Best Practices
+## Development Best Practices
 
-1. **No Public Access**: All functionality requires user authentication
-2. **Input Sanitization**: All user input validated and sanitized
-3. **Permission Enforcement**: Server-side validation of all permissions
-4. **Activity Logging**: Complete audit trail for compliance
-5. **Session Security**: Secure JWT token management
-6. **Documentation Security**: Never include actual server names or credentials
+### Security First
+- All operations must check authentication and permissions
+- No public access - all functionality requires user authentication
+- Input sanitization on all user inputs
+- Server-side validation of all permissions
+- Complete audit trail via activity logging
+- Never include actual server names or credentials in documentation
 
----
+### Code Quality
+- Prefer clean, functional, and robust code over backward compatibility
+- Use absolute package imports over relative imports
+- Always create enterprise-grade `.gitignore` files
+- Use plain Python type conversions rather than package-specific casting
+- Use git worktrees for parallel Claude sessions with separation of concerns
 
-## Important Development Notes
+### Data Integrity
+- Validate all inputs and maintain referential integrity
+- Use efficient queries and minimize API calls
+- Data-first architecture: if data exists and is not null/empty/NA, it should process when requested
+- Proper cascade handling and foreign key constraint management
 
-### Admin CRUD Operations
-- **Station Management**: Create/delete stations via admin controls
-- **Platform Management**: Create/delete platforms with dependency checking
-- **Data Safety**: All deletions include cascade analysis and optional backup
-- **Validation**: Real-time conflict checking with intelligent suggestions
+### User Experience
+- Provide clear instructions and feedback at every step
+- Professional modal design with loading states and error handling
+- Real-time validation with helpful error messages
+- Intelligent conflict resolution with smart suggestions
 
-### Station User Permissions
-- **Instrument Management**: Full CRUD for instruments on their station
-- **Platform Access**: Read-only access to platforms
-- **Data Export**: Can export data for their station
-- **UI Controls**: Permission-based visibility of management buttons
-
-### Known Issues & Workarounds
-- **Platform Creation Button**: If button doesn't respond, use direct database operations
-- **Form Field Loading**: Console logging added for debugging empty form fields
-- **Modal Conflicts**: Ensure proper data synchronization between dashboard and globals
-
-### Development Principles
-1. **Security First**: All operations must check authentication and permissions
-2. **User Experience**: Provide clear instructions and feedback at every step
-3. **Data Integrity**: Validate all inputs and maintain referential integrity
-4. **Performance**: Use efficient queries and minimize API calls
-5. **Documentation**: Keep this file updated as features evolve
+### Documentation
+- Always bump version and update CHANGELOG.md before git commit
+- Keep CLAUDE.md updated as features evolve
+- Use descriptive commit messages with emojis for clarity
 
 ---
 
-## Current Production Status
+## Production Information
 
 - **Production URL**: https://sites.jobelab.com
 - **Worker URL**: https://sites-spectral-instruments.jose-e5f.workers.dev
-- **Current Version**: 5.2.59
-- **Last Updated**: 2025-11-21
+- **Current Version**: 5.2.38
+- **Last Deployed**: 2025-11-14
 - **Status**: Fully operational
 - **Environment**: Cloudflare Workers with D1 database
 
 ---
 
-## Git Workflow Best Practices
+## Admin CRUD Operations
 
-### Before Every Commit
-1. **Use git worktrees** for parallel sessions with agents team
-2. **Bump version** in `package.json`
-3. **Update CHANGELOG.md** with comprehensive entry
-4. **Test locally** if changes affect functionality
-5. **Update this CLAUDE.md** if architecture changes
+### Station Management (Admin Only)
+- Create/delete stations via admin controls in station header
+- Real-time validation with duplicate detection
+- Automatic normalized name generation
+- Comprehensive backup on deletion
 
-### Commit Message Format
-```
-📚 SITES Spectral v{VERSION}: {TYPE} - {BRIEF DESCRIPTION}
+### Platform Management (Admin Only)
+- Create platforms via section header button
+- Delete via platform card buttons (admin only)
+- Smart naming following `{STATION}_{ECOSYSTEM}_PL##` format
+- Dependency analysis and cascade deletion warnings
 
-{Detailed description with bullet points}
+### Instrument Management (Admin + Station Users)
+- Full CRUD operations from platform cards and modals
+- Dual creation pathways for flexibility
+- Automatic type-prefixed sequential numbering
+- Complete ROI integration
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-### Types
-- 📚 DOCUMENTATION
-- 🚀 FEATURE
-- 🔧 FIX / CRITICAL FIX
-- 🚨 HOTFIX
-- 📊 DATABASE UPDATE
-- 🐛 BUG FIX
-- ✨ ENHANCEMENT
-- 🎨 UI/UX
+### Data Safety
+- All deletions include dependency analysis
+- Optional comprehensive JSON backup generation
+- Validation with intelligent name suggestions
+- Complete audit trail in activity log
 
 ---
 
-*For historical version documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)*
+## Environment Setup Notes
+
+- **No root access**: Plan everything to be local to user
+- **Python**: Use `uv` for package management with Python 3.12.9
+- **Virtual Environments**: Always source from project folder
+- **Database Access**: Use Cloudflare API directly to query database remotely
+- **Git Workflow**: Use worktrees for parallel sessions, always bump version before commit

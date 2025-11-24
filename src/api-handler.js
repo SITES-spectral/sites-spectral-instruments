@@ -12,6 +12,11 @@ import { handleResearchPrograms, getResearchProgramsValues } from './handlers/re
 import { handlePhenocamROIs } from './handlers/phenocam-rois.js';
 import { handleEcosystems, getEcosystemDropdownValues } from './handlers/ecosystems.js';
 import { handleStatusCodes, getStatusDropdownValues } from './handlers/status-codes.js';
+import { handleUsers } from './handlers/users.js';
+import { handleAnalytics } from './handlers/analytics.js';
+import { handleChannels } from './handlers/channels.js';
+import { handleSensorModels } from './handlers/sensor-models.js';
+import { handleDocumentation } from './handlers/documentation.js';
 import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
@@ -57,7 +62,7 @@ export async function handleApiRequest(request, env, ctx) {
         return await handlePlatforms(method, id, request, env);
 
       case 'instruments':
-        return await handleInstruments(method, id, request, env);
+        return await handleInstruments(method, pathSegments, request, env);
 
       case 'rois':
         return await handleROIs(method, id, request, env);
@@ -76,6 +81,21 @@ export async function handleApiRequest(request, env, ctx) {
 
       case 'status-codes':
         return await handleStatusCodes(method, id, request, env);
+
+      case 'users':
+        return await handleUsers(method, pathSegments, request, env);
+
+      case 'analytics':
+        return await handleAnalytics(method, pathSegments, request, env);
+
+      case 'channels':
+        return await handleChannels(method, pathSegments, request, env);
+
+      case 'sensor-models':
+        return await handleSensorModels(method, pathSegments, request, env);
+
+      case 'documentation':
+        return await handleDocumentation(method, pathSegments, request, env);
 
       case 'values':
         // Special endpoint for dropdown/multiselect values

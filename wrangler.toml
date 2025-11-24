@@ -24,10 +24,15 @@ binding = "DB"
 database_name = "spectral_stations_db"
 database_id = "2a6e433a-db6e-4b75-bba3-eb7e59363e1d"
 
+# R2 Object Storage for Sensor Documentation
+[[r2_buckets]]
+bucket_name = "sites-spectral-docs"
+binding = "DOCS_BUCKET"
+
 [vars]
 ENVIRONMENT = "production"
 APP_NAME = "SITES Spectral Stations & Instruments"
-APP_VERSION = "2.0.2"
+APP_VERSION = "6.0.1"
 USE_CLOUDFLARE_SECRETS = "true"
 
 # Custom domain routing
