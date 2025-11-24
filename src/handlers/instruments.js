@@ -143,8 +143,10 @@ async function getInstrumentById(id, user, env) {
  */
 async function getInstrumentsList(user, request, env) {
   const url = new URL(request.url);
-  const stationParam = url.searchParams.get('station');
-  const platformParam = url.searchParams.get('platform');
+  // Support both 'station' and 'station_id' query parameters
+  const stationParam = url.searchParams.get('station') || url.searchParams.get('station_id');
+  // Support both 'platform' and 'platform_id' query parameters
+  const platformParam = url.searchParams.get('platform') || url.searchParams.get('platform_id');
 
   let query = `
     SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
@@ -167,16 +169,32 @@ async function getInstrumentsList(user, request, env) {
   let params = [];
   let whereConditions = [];
 
-  // Filter by specific station if requested
+  // Filter by specific station if requested (supports ID, acronym, or normalized name)
   if (stationParam) {
-    whereConditions.push('(s.acronym = ? OR s.normalized_name = ?)');
-    params.push(stationParam, stationParam);
+    const numericStationId = parseInt(stationParam, 10);
+    if (!isNaN(numericStationId) && String(numericStationId) === String(stationParam)) {
+      // Numeric ID provided
+      whereConditions.push('s.id = ?');
+      params.push(numericStationId);
+    } else {
+      // String identifier (acronym or normalized name)
+      whereConditions.push('(s.acronym = ? OR s.normalized_name = ?)');
+      params.push(stationParam, stationParam);
+    }
   }
 
-  // Filter by specific platform if requested
+  // Filter by specific platform if requested (supports ID or normalized name)
   if (platformParam) {
-    whereConditions.push('(p.id = ? OR p.normalized_name = ?)');
-    params.push(platformParam, platformParam);
+    const numericPlatformId = parseInt(platformParam, 10);
+    if (!isNaN(numericPlatformId) && String(numericPlatformId) === String(platformParam)) {
+      // Numeric ID provided
+      whereConditions.push('p.id = ?');
+      params.push(numericPlatformId);
+    } else {
+      // String identifier (normalized name)
+      whereConditions.push('p.normalized_name = ?');
+      params.push(platformParam);
+    }
   }
 
   // Add permission filtering for station users

@@ -71,20 +71,40 @@ export async function executeQueryRun(env, query, params = [], operation = 'modi
 }
 
 /**
- * Get station data by identifier (normalized name or acronym)
- * @param {string} identifier - Station normalized name or acronym
+ * Get station data by identifier (ID, normalized name, or acronym)
+ * @param {string|number} identifier - Station ID, normalized name, or acronym
  * @param {Object} env - Environment variables and bindings
  * @returns {Object|null} Station data or null
  */
 export async function getStationData(identifier, env) {
-  const query = `
-    SELECT id, display_name, acronym, normalized_name, latitude, longitude,
-           elevation_m, status, country, description
-    FROM stations
-    WHERE normalized_name = ? OR acronym = ?
-  `;
+  // Check if identifier is a numeric ID
+  const numericId = parseInt(identifier, 10);
+  const isNumeric = !isNaN(numericId) && String(numericId) === String(identifier);
 
-  return await executeQueryFirst(env, query, [identifier, identifier], 'getStationData');
+  let query;
+  let params;
+
+  if (isNumeric) {
+    // Query by numeric ID
+    query = `
+      SELECT id, display_name, acronym, normalized_name, latitude, longitude,
+             elevation_m, status, country, description
+      FROM stations
+      WHERE id = ?
+    `;
+    params = [numericId];
+  } else {
+    // Query by normalized name or acronym
+    query = `
+      SELECT id, display_name, acronym, normalized_name, latitude, longitude,
+             elevation_m, status, country, description
+      FROM stations
+      WHERE normalized_name = ? OR acronym = ?
+    `;
+    params = [identifier, identifier];
+  }
+
+  return await executeQueryFirst(env, query, params, 'getStationData');
 }
 
 /**

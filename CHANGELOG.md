@@ -17,6 +17,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.1.3] - 2025-11-24
+
+### 🔧 FIX: Single-Resource Endpoints & Query Parameter Filtering
+
+**📅 Release Date**: 2025-11-24
+**🎯 Achievement**: Fixed single-resource GET endpoints and query parameter filtering for stations and instruments
+
+#### 🐛 **Bugs Fixed**
+
+1. **Single Station GET (`/api/stations/:id`)**
+   - Fixed "Resource not found" error when accessing individual stations
+   - Root cause: Handler path segment routing mismatch
+   - Now correctly returns station details by ID
+
+2. **Single Instrument GET (`/api/instruments/:id`)**
+   - Fixed "Resource not found" error when accessing individual instruments
+   - Root cause: Handler path segment routing mismatch
+   - Now correctly returns instrument details by ID
+
+3. **Query Parameter Filtering**
+   - Fixed `?station_id=X` returning all instruments instead of filtered
+   - Fixed `?platform_id=X` returning all instruments instead of filtered
+   - Query parameters now properly filter results
+
+#### 🔍 **Testing Results**
+
+- All 15 API endpoints tested
+- 100% pass rate after fixes
+- Single-resource endpoints verified working
+- Query filtering verified working
+
+---
+
 ## [6.1.2] - 2025-11-24
 
 ### 🚨 CRITICAL FIX: API Routing & MS Sensor Modal Integration
