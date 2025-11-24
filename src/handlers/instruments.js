@@ -86,7 +86,11 @@ export async function handleInstruments(method, pathSegments, request, env) {
  * @param {Object} env - Environment variables and bindings
  * @returns {Response} Instrument data response
  */
-async function getInstrumentById(id, user, env) {
+async function getInstrumentById(identifier, user, env) {
+  // Support both numeric ID and normalized_name/legacy_acronym
+  const numericId = parseInt(identifier, 10);
+  const isNumeric = !isNaN(numericId) && String(numericId) === String(identifier);
+
   let query = `
     SELECT i.id, i.normalized_name, i.display_name, i.legacy_acronym, i.platform_id,
            i.instrument_type, i.ecosystem_code, i.instrument_number, i.status,
@@ -113,11 +117,18 @@ async function getInstrumentById(id, user, env) {
     JOIN platforms p ON i.platform_id = p.id
     JOIN stations s ON p.station_id = s.id
     LEFT JOIN instrument_rois r ON i.id = r.instrument_id
-    WHERE i.id = ?
   `;
 
-  // Add permission filtering for station users
-  const params = [id];
+  // Build WHERE clause based on identifier type
+  let params;
+  if (isNumeric) {
+    query += ' WHERE i.id = ?';
+    params = [numericId];
+  } else {
+    // Search by normalized_name or legacy_acronym
+    query += ' WHERE (i.normalized_name = ? OR i.legacy_acronym = ?)';
+    params = [identifier, identifier];
+  }
   if (user.role === 'station' && user.station_normalized_name) {
     query += ' AND s.normalized_name = ?';
     params.push(user.station_normalized_name);
