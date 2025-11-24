@@ -1,0 +1,591 @@
+# SITES Spectral Instruments Database Export
+# Generated: 2025-11-24 08:16:48
+# Total Stations: 9
+# Total Instruments: 41
+
+ANS:
+  display_name: "Abisko"
+  platforms:
+    ANS_FOR_BL01:
+      display_name: "Abisko Meteorological Station"
+      location_code: "BL01"
+      mounting_structure: "Building RoofTop"
+      platform_height_m: 4.5
+      latitude: 68.35368325999725
+      longitude: 18.816555032266894
+      instruments:
+        ANS_FOR_BL01_PHE01:
+          display_name: "Abisko Meteorological Station Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "ANS_FOR_P01"
+          instrument_height_m: 4.5
+          camera:
+            brand: "Nikon"
+            model: "NIKON D300S DSLR"
+        ANS_FOR_BL01_PHE02:
+          display_name: "Abisko Met Station Phenocam 02"
+          instrument_type: "Phenocam"
+          status: "Active"
+          camera:
+            brand: "Canon"
+            model: "EOS RP"
+    ANS_MJH_PL01:
+      display_name: "Abisko Miellejokka Heath"
+      location_code: "HE01"
+      latitude: 68.311722
+      longitude: 18.91527
+      instruments:
+        ANS_MJH_PL01_MUL01:
+          display_name: "Decagon NI_E"
+          instrument_type: "Other"
+          instrument_number: "MUL01"
+          status: "Inactive"
+        ANS_MJH_PL01_PHE01:
+          display_name: "Abisko Miellejokka Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+          camera:
+            brand: "Mobotix"
+    ANS_SBF_FOR_PL01:
+      display_name: "Abisko Stordalen Birch Forest"
+      location_code: "BF01"
+      latitude: 68.34980602492992
+      longitude: 19.04258100806418
+      instruments:
+        ANS_SBF_FOR_PL01_PHE01:
+          display_name: "Abisko Stordalen Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+          camera:
+            brand: "Mobotix"
+ASA:
+  display_name: "Asa"
+  platforms:
+    ASA_FOR_PL01:
+      display_name: "Asa Nybigget Tower 01"
+      location_code: "PL01"
+      mounting_structure: "Tower"
+      platform_height_m: 7.5
+      latitude: 57.149034
+      longitude: 14.738967
+      instruments:
+        ASA_FOR_PL01_PHE01:
+          display_name: "Nybygget Tower Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Decommissioned"
+          legacy_acronym: "NYB-FOR-P01"
+          instrument_height_m: 30
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+    ASA_NYB_FOR_PL02:
+      display_name: "Asa Nybigget Tower 02"
+      location_code: "PL02"
+      mounting_structure: "Tower"
+      platform_height_m: 30
+      latitude: 57.150215997341355
+      longitude: 14.735910292294493
+      instruments:
+        ASA_NYB_FOR_PL02_PHE01:
+          display_name: "Asa Nybigget Tower 02 Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Testing"
+          instrument_height_m: 30
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+          installation_notes: "Mounted on a 30 meter Tower in Nybbyget forest"
+BOL:
+  display_name: "Bolmen Research Station"
+  platforms:
+    BOL_FOR_PL01:
+      display_name: "Bolmen Forest Platform 01"
+      location_code: "PL01"
+      latitude: 56.996567
+      longitude: 13.783417
+      instruments:
+        BOL_FOR_PL01_PHE01:
+          display_name: "Bolmen Forest Platform 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Planned"
+ERK:
+  display_name: "Erken Laboratory"
+  platforms:
+    ERK_LAK_PL01:
+      display_name: "Erken Lake Platform 01"
+      location_code: "PL01"
+      latitude: 59.88374339980456
+      longitude: 18.655476188993664
+      instruments:
+        ERK_LAK_PL01_PHE01:
+          display_name: "Erken Lake Platform 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Planned"
+GRI:
+  display_name: "Grimsö"
+  platforms:
+    GRI_FOR_BL01:
+      display_name: "Grimsö Forest Building 01"
+      location_code: "BL01"
+      mounting_structure: "Building Wall"
+      platform_height_m: 4
+      latitude: 59.72868
+      longitude: 15.47249
+      instruments:
+        GRI_FOR_BL01_PHE01:
+          display_name: "Grimsö Forest Building 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          instrument_height_m: 3.5
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M15 IP"
+          installation_notes: "Wall-mounted phenocam"
+LON:
+  display_name: "Lönnstorp"
+  platforms:
+    LON_AGR_PL01:
+      display_name: "Lönnstorp Agriculture Platform 01"
+      location_code: "PL01"
+      mounting_structure: "Mast"
+      platform_height_m: 10
+      latitude: 55.66852797461607
+      longitude: 13.11002468545483
+      instruments:
+        LON_AGR_PL01_PHE01:
+          display_name: "Lönnstorp Agriculture Platform 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "SFA-AGR-P01"
+          instrument_height_m: 10
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M16 IP"
+        LON_AGR_PL01_PHE02:
+          display_name: "LON AGR PL01 PHE02"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE02"
+          status: "Active"
+          legacy_acronym: "SFA-AGR-P02"
+          instrument_height_m: 10
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M15 IP"
+          installation_notes: "Mast-mounted phenocam viewing XX"
+        LON_AGR_PL01_PHE03:
+          display_name: "LON AGR PL01 PHE03"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE03"
+          status: "Active"
+          legacy_acronym: "SFA-AGR-P03"
+          instrument_height_m: 10
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M15 IP"
+    LON_AGR_PL02:
+      display_name: "Lonnstorp Agriculture Platform 02"
+      location_code: "PL02"
+      instruments:
+        LON_AGR_PL02_PHE01:
+          display_name: "Lonnstorp Agriculture Platform 02 Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+RBD:
+  display_name: "Röbäcksdalen"
+  platforms:
+    RBD_AGR_PL01:
+      display_name: "RBD AGR Platform 01"
+      location_code: "PL01"
+      mounting_structure: "Mast"
+      platform_height_m: 10
+      latitude: 63.80633652088793
+      longitude: 20.23278887845085
+      instruments:
+        RBD_AGR_PL01_PHE01:
+          display_name: "RBD AGR PL01 PHE01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "RBD-AGR-P01"
+          instrument_height_m: 10
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M15 IP"
+          installation_notes: "Mast-mounted phenocam viewing West"
+    RBD_AGR_PL02:
+      display_name: "RBD AGR Platform 02"
+      location_code: "PL02"
+      mounting_structure: "Mast"
+      platform_height_m: 4
+      latitude: 63.80887623165294
+      longitude: 20.239035233753672
+      instruments:
+        RBD_AGR_PL02_PHE01:
+          display_name: "RBD AGR PL02 PHE01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "RBD-AGR-P02"
+          instrument_height_m: 4
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M15 IP"
+          installation_notes: "Mast-mounted phenocam viewing West"
+    RBD_AGR_PL03:
+      display_name: "Robacksdalen Agriculture Platform 03"
+      location_code: "PL03"
+      instruments:
+        RBD_AGR_PL03_PHE01:
+          display_name: "Robacksdalen Agriculture Platform 03 Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+SKC:
+  display_name: "Skogaryd"
+  platforms:
+    SKC_CEM_FOR_PL01:
+      display_name: "SKC CEM FOR Platform  01"
+      location_code: "PL01"
+      mounting_structure: "Tower"
+      platform_height_m: 38
+      latitude: 56.779249
+      longitude: 13.539627
+      instruments:
+        SKC_CEM_FOR_PL01_PHE01:
+          display_name: "SKC CEM FOR PL01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "CEM01-FOR-P01"
+          instrument_height_m: 38
+          deployment_date: "2018-05-15"
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+    SKC_CEM_FOR_PL02:
+      display_name: "SKC CEM FOR Platform 02"
+      location_code: "PL02"
+      mounting_structure: "Mast"
+      platform_height_m: 3
+      latitude: 58.363759
+      longitude: 12.149442
+      instruments:
+        SKC_CEM_FOR_PL02_PHE01:
+          display_name: "SKC CEM FOR PL02"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "CEM02-FOR-P02"
+          instrument_height_m: 3.2
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+    SKC_CEM_FOR_PL03:
+      display_name: "SKC CEM FOR Platform 03"
+      location_code: "PL03"
+      mounting_structure: "Mast"
+      platform_height_m: 3
+      latitude: 58.363596
+      longitude: 12.149933
+      instruments:
+        SKC_CEM_FOR_PL03_PHE01:
+          display_name: "SKC CEM FOR PL03"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "CEM03-FOR-P03"
+          instrument_height_m: 3.2
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+    SKC_III_FOL_PL01:
+      display_name: "Skogaryd III Fen on Lake Platform 01"
+      location_code: "FOL_PL01"
+      instruments:
+        SKC_III_FOL_PL01_PHE01:
+          display_name: "Skogaryd III Fen on Lake Platform 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+    SKC_III_FOR_PL01:
+      display_name: "Skogaryd III Forest Platform 01"
+      location_code: "FOR_PL01"
+      instruments:
+        SKC_III_FOR_PL01_PHE01:
+          display_name: "Skogaryd III Forest Platform 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+    SKC_III_MIR_PL01:
+      display_name: "Skogaryd III Mire Platform 01"
+      location_code: "MIR_PL01"
+      instruments:
+        SKC_III_MIR_PL01_PHE01:
+          display_name: "Skogaryd III Mire Platform 01 Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Planned"
+    SKC_LAK_PL01:
+      display_name: "SKC LAK Platform 01"
+      location_code: "PL01"
+      mounting_structure: "Mast"
+      platform_height_m: 38
+      latitude: 58.37109394956773
+      longitude: 12.161222928836889
+      instruments:
+        SKC_LAK_PL01_PHE01:
+          display_name: "SKC LAK PL01 PHE01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "ERS-LAK-P01"
+          instrument_height_m: 38
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+          installation_notes: "Mast-mounted phenocam viewing South"
+    SKC_MAD_FOR_PL02:
+      display_name: "SKC MAD Platform 02"
+      location_code: "PL02"
+      mounting_structure: "Mast"
+      latitude: 58.368601
+      longitude: 12.145319
+      instruments:
+        SKC_MAD_FOR_PL02_PHE01:
+          display_name: "SKC MAD FOR PL02"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "MAD-FOR-P01"
+          instrument_height_m: 4.6
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+    SKC_MAD_WET_PL01:
+      display_name: "SKC MAD Platform 01"
+      location_code: "PL01"
+      mounting_structure: "Mast"
+      instruments:
+        SKC_MAD_WET_PL01_PHE01:
+          display_name: "SKC MAD WET PL01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "MAD-WET-P01"
+          instrument_height_m: 8.6
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix 25"
+    SKC_SRC_FOL_WET_PL01:
+      display_name: "SKC FOL WET Platform01"
+      location_code: "PL01"
+      mounting_structure: "Mast"
+      platform_height_m: 5.6
+      latitude: 58.375942
+      longitude: 12.153736
+      instruments:
+        SKC_SRC_FOL_WET_PL01_PHE01:
+          display_name: "SKC SRC FOL WET"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "FOL-WET-P01"
+          instrument_height_m: 5.6
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25"
+    SKC_SRC_FOL_WET_PL02:
+      display_name: "SKC SRC FOL  Platform 02"
+      location_code: "PL02"
+      mounting_structure: "Mast"
+      platform_height_m: 6
+      latitude: 58.375927
+      longitude: 12.153713
+      instruments:
+        SKC_SRC_FOL_WET_PL02_PHE01:
+          display_name: "SKC SRC FOL WET"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "FOL-WET-P02"
+          instrument_height_m: 6
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25"
+            serial_number: "10-20-84-160"
+    STM_FOR_PL01:
+      display_name: "STM FOR Platform 01"
+      location_code: "PL01"
+      mounting_structure: "Mast"
+      latitude: 58.381090921121576
+      longitude: 12.144717670820102
+      instruments:
+        STM_FOR_PL01_PHE01:
+          display_name: "STM FOR PL01 PHE01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "STM-FOR-P01"
+          instrument_height_m: 14.4
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+SVB:
+  display_name: "Svartberget"
+  platforms:
+    SVB_FOR_PL01:
+      display_name: "SVB PL01 150m tower"
+      location_code: "PL01"
+      mounting_structure: "Tower"
+      platform_height_m: 150
+      latitude: 64.256105
+      longitude: 19.7745
+      instruments:
+        SVB_FOR_PL01_PHE01:
+          display_name: "SVB FOR PL01 Phenocam"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "SWE-SVB-SVB-FOR-P01"
+          instrument_height_m: 52
+        SVB_FOR_PL01_PHE02:
+          display_name: "SVB_FOR_PL01_PHE02"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE02"
+          status: "Active"
+          legacy_acronym: "SVB-FOR-P02"
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M25 IP"
+        SVB_FOR_PL01_SKYE_MS01_NB02:
+          display_name: "SVB FOR PL01 SKYE MS Sensor 1"
+          instrument_type: "Multispectral Sensor"
+          instrument_number: "MS01"
+          status: "Removed"
+          legacy_acronym: "SWE-SVB-SVB-FOR-F01"
+          instrument_height_m: 150
+    SVB_FOR_PL02:
+      display_name: "SVB PL02 Below Canopy North"
+      location_code: "PL02"
+      mounting_structure: "Tripod"
+      platform_height_m: 3.2
+      latitude: 64.256407
+      longitude: 19.774066
+      instruments:
+        SVB_FOR_PL02_SKYE_MS01_NB01:
+          display_name: "SVB FOR PL02 SKYE MS Sensor 1"
+          instrument_type: "Multispectral Sensor"
+          instrument_number: "MS01"
+          status: "Pending Installation"
+          instrument_height_m: 2
+    SVB_FOR_PL03:
+      display_name: "SVB PL03 Below Canopy CPEC"
+      location_code: "PL03"
+      mounting_structure: "Tripod"
+      platform_height_m: 3.2
+      latitude: 64.25586
+      longitude: 19.773851
+      instruments:
+        SVB_FOR_PL03_PHE01:
+          display_name: "SVB Forest Below Canopy Phenocam 01"
+          instrument_type: "Phenocam"
+          status: "Active"
+          deployment_date: "2025-11-11"
+          camera:
+            brand: "Mobotix"
+            model: "MX-M25-D061"
+    SVB_MIR_PL01:
+      display_name: "DEG PL01 flag pole"
+      location_code: "PL01"
+      mounting_structure: "Pole"
+      platform_height_m: 17.5
+      latitude: 64.182585
+      longitude: 19.558029
+      instruments:
+        SVB_MIR_PL01_DECAGON_MS01_NB01:
+          display_name: "SVB MIR PL01 Decagon MS Sensor 1"
+          instrument_type: "Multispectral Sensor"
+          instrument_number: "MS02"
+          status: "Removed"
+          legacy_acronym: "SWE-SVB-DEG-MIR-F01"
+          instrument_height_m: 17.5
+        SVB_MIR_PL01_PHE01:
+          display_name: "SVB_MIR_PL01_PHE01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "DEG-MIR-P01"
+          deployment_date: "2025-11-18"
+          camera:
+            brand: "Mobotix"
+            model: "M26B-6D061"
+        SVB_MIR_PL01_PHE02:
+          display_name: "SVB_MIR_PL01_PHE02"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE02"
+          status: "Active"
+          legacy_acronym: "DEG-MIR-P03"
+          instrument_height_m: 10
+          deployment_date: "2025-11-18"
+          camera:
+            brand: "Mobotix"
+            model: "M26B-6D061"
+          installation_notes: "testing save. CHeck heights and deployment date"
+        SVB_MIR_PL01_SKYE_MS01_NB02:
+          display_name: "SVB MIR PL01 SKYE MS Sensor 1"
+          instrument_type: "Multispectral Sensor"
+          instrument_number: "MS01"
+          status: "Inactive"
+          legacy_acronym: "SWE-SVB-DEG-MIR-F01"
+          instrument_height_m: 17.5
+    SVB_MIR_PL02:
+      display_name: "DEG PL02 ICOS mast"
+      location_code: "PL02"
+      mounting_structure: "Mast"
+      platform_height_m: 3.3
+      latitude: 64.18201
+      longitude: 19.556576
+      instruments:
+        SVB_MIR_PL02_PHE01:
+          display_name: "SVB MIR PL02 PHE01"
+          instrument_type: "Phenocam"
+          instrument_number: "PHE01"
+          status: "Active"
+          legacy_acronym: "DEG-MIR-P02"
+          instrument_height_m: 3.3
+          camera:
+            brand: "Mobotix"
+            model: "Mobotix M15 IP"
+          installation_notes: "Mast-mounted phenocam viewing North"
+    SVB_MIR_PL03:
+      display_name: "DEG PL03 pole PAR dry"
+      location_code: "PL03"
+      mounting_structure: "Pole"
+      platform_height_m: 2
+      latitude: 64.182529
+      longitude: 19.55835
+      instruments:
+        SVB_MIR_PL03_LICOR_PAR01:
+          display_name: "SVB MIR PL03 Licor PAR"
+          instrument_type: "PAR Sensor"
+          instrument_number: "PAR01"
+          status: "Active"
+          legacy_acronym: "SWE-SVB-DEG-MIR-F01"
+    SVB_MIR_PL04:
+      display_name: "DEG PL04 wet PAR pole"
+      location_code: "PL04"
+      mounting_structure: "Pole"
+      platform_height_m: 2
+      latitude: 64.182779
+      longitude: 19.557327
+      instruments:
+        SVB_MIR_PL04_LICOR_PAR01:
+          display_name: "SVB MIR PL04 Licor PAR"
+          instrument_type: "PAR Sensor"
+          instrument_number: "PAR01"
+          status: "Active"
+          legacy_acronym: "SWE-SVB-DEG-MIR-F01"
