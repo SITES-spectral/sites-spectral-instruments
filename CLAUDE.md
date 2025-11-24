@@ -4,43 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 5.2.57 - DATABASE UPDATE: Svartberget Instrument Platform Reassignment (2025-11-18)
+## Current Version: 6.1.1 - DATA QUALITY: Fixes & Export Tools (2025-11-24)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-11-18
+**📅 Last Updated:** 2025-11-24
 
-### ✅ Latest Update: Svartberget Instrument Platform Reassignment (v5.2.57)
+### ✅ Latest Update: Data Quality Fixes & Export Tools (v6.1.1)
 
-**🌲 Station**: Svartberget (SVB)
-**🎯 Achievement**: Successfully moved phenocam from Platform PL02 to Platform PL03 with naming convention correction
+**🎯 Achievement**: Database cleanup, UNIQUE constraint, and YAML export tooling
 
-#### **Changes Summary:**
+#### **Data Quality Fixes:**
+- Removed duplicate instrument (GRI_FOR_BL01_PHE01)
+- Standardized instrument_type casing (17 records updated to "Phenocam")
+- Added 7 missing SVB instruments from Excel metadata
 
-**Instrument Moved**: Below Canopy Phenocam (ID: 38)
+#### **Database Integrity:**
+- Added UNIQUE index on `instruments.normalized_name`
+- Prevents future duplicate entries
 
-**Before Update**:
-- **Platform**: SVB_FOR_PL02 (ID: 30) - "SVB PL02 Below Canopy North"
-- **Instrument**: SVB_FOR_P02_PHE01 (inconsistent naming with "P02" instead of "PL02")
+#### **Export Tools:**
+Export database to YAML using `scripts/export_db_to_yaml.py`:
 
-**After Update**:
-- **Platform**: SVB_FOR_PL03 (ID: 32) - "SVB PL03 Below Canopy CPEC"
-- **Instrument**: SVB_FOR_PL03_PHE01 (corrected to consistent "PL03" naming)
-
-#### **Technical Details:**
-```sql
-UPDATE instruments
-SET platform_id = 32,
-    normalized_name = 'SVB_FOR_PL03_PHE01',
-    updated_at = datetime('now')
-WHERE id = 38;
+```bash
+npx wrangler d1 execute spectral_stations_db --remote --json --command="SELECT
+  s.acronym, s.display_name as station_display,
+  p.normalized_name as platform, p.display_name as platform_display,
+  p.location_code, p.mounting_structure, p.platform_height_m,
+  p.latitude as plat_lat, p.longitude as plat_lon,
+  i.normalized_name as instrument, i.display_name as instr_display,
+  i.instrument_type, i.instrument_number, i.status, i.legacy_acronym,
+  i.instrument_height_m, i.deployment_date, i.camera_brand, i.camera_model,
+  i.camera_serial_number, i.sensor_brand, i.sensor_model, i.installation_notes
+FROM stations s
+JOIN platforms p ON s.id = p.station_id
+JOIN instruments i ON p.id = i.platform_id
+ORDER BY s.acronym, p.normalized_name, i.normalized_name;" 2>/dev/null \
+| python3 scripts/export_db_to_yaml.py > docs/migrations/instruments_export_$(date +%Y-%m-%d).yaml
 ```
 
-**Rationale**: Moving phenocam to PL03 aligns instrument with correct CPEC (Carbon Precipitation Eddy Covariance) measurement platform for integrated flux and optical measurements.
+### 🚀 Major Release: v6.1.0 - Complete Multispectral Sensor Frontend
 
-**Naming Convention Consistency**: This update also corrects the inconsistent "P02" notation to the standard "PL03" format. All Svartberget platforms now follow the pattern: `{STATION}_{ECOSYSTEM}_PL##`
+Merged two feature branches with 26+ commits:
+- Complete MS sensor backend (v6.0.0-6.0.1)
+- Modular MS frontend (~2000 lines new JS)
+- New handlers: analytics, channels, documentation, sensor-models, users
+- ROI dual-mode creation (interactive + YAML)
 
-### 🔬 Recent Update: Instrument Types for SITES Spectral (v5.2.56)
+### 🔬 Instrument Types for SITES Spectral
 
 **New instrument types dropdown with SITES Spectral specific sensors:**
 - **Phenocams** (PHE)

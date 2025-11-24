@@ -17,6 +17,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.1.1] - 2025-11-24
+
+### 🔧 PATCH RELEASE: Data Quality Fixes & Export Tools
+
+**📅 Release Date**: 2025-11-24
+**🎯 Achievement**: Database cleanup, data integrity constraints, and YAML export tooling
+
+#### 🗃️ **Data Quality Fixes**
+
+1. **Duplicate Instrument Removed**
+   - Deleted duplicate `GRI_FOR_BL01_PHE01` (ID 29, status: Planned)
+   - Kept original ID 4 (status: Active)
+
+2. **Instrument Type Standardization**
+   - Updated 17 records from "phenocam" to "Phenocam" (proper case)
+   - All 33 phenocams now have consistent casing
+
+3. **SVB Instruments Added**
+   - Added 7 missing Svartberget instruments from Excel metadata
+   - SVB now has 12 instruments (was 5)
+   - Includes: Phenocams, Multispectral Sensors, PAR Sensors
+
+#### 🛡️ **Database Integrity**
+
+- **UNIQUE Constraint**: Added `idx_instruments_normalized_name` unique index
+- Prevents future duplicate `normalized_name` entries
+- Database now enforces instrument naming uniqueness
+
+#### 📦 **New Export Tools**
+
+- **`scripts/export_db_to_yaml.py`**: Python script to generate YAML exports from live database
+- **`docs/migrations/instruments_database_export_2025-11-24.yaml`**: Fresh database snapshot (41 instruments, 9 stations)
+
+**Usage**:
+```bash
+npx wrangler d1 execute spectral_stations_db --remote --json --command="SELECT ... FROM stations s JOIN platforms p ... JOIN instruments i ..." | python3 scripts/export_db_to_yaml.py > output.yaml
+```
+
+#### 📊 **Current Database Stats**
+
+| Metric | Count |
+|--------|-------|
+| Total Stations | 9 |
+| Total Platforms | 32 |
+| Total Instruments | 41 |
+| Active Phenocams | 23 |
+| Planned Phenocams | 9 |
+| Multispectral Sensors | 4 |
+| PAR Sensors | 2 |
+
+---
+
 ## [6.1.0] - 2025-11-24
 
 ### 🚀 MAJOR RELEASE: Complete Multispectral Sensor Frontend
