@@ -8,9 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
-- Complete MS sensor frontend UI (creation/edit modals with tabs)
 - Build sensor models library UI in admin dashboard
-- Implement channel display and management UI
 - Documentation management UI with file upload
 - Implement station-scoped admin role for enhanced security
 - Audit logging system with activity tracking
@@ -18,6 +16,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ROI polygon point editing (canvas-based digitizer)
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
+
+## [6.1.0] - 2025-11-24
+
+### 🚀 MAJOR RELEASE: Complete Multispectral Sensor Frontend
+
+**📅 Release Date**: 2025-11-24
+**🎯 Achievement**: Complete frontend UI for multispectral sensor management with modular architecture
+**🔧 Focus**: Merged two major feature branches with 26+ commits bringing full MS sensor support
+
+#### 🔀 **Merged Feature Branches**
+
+**1. feature/comprehensive-form-audit-fixes (v6.0.0-v6.0.1)**
+- Complete multispectral sensor backend infrastructure
+- Form audit fixes series (v5.2.39-v5.2.57)
+- Database migration for multispectral support (0027_add_multispectral_support.sql)
+- New API handlers: analytics, channels, documentation, sensor-models, users
+- ROI dual-mode creation system (interactive drawing + YAML upload)
+- User management dashboard
+- Image display integration
+
+**2. feature/ms-sensor-frontend (v6.1.0)**
+- Modular frontend architecture for MS sensors
+- New JavaScript modules (~2000 lines):
+  - `ms-channel-manager.js` (491 lines) - Spectral channel configuration UI
+  - `ms-sensor-modal.js` (427 lines) - Modal UI for MS sensor editing
+  - `ms-sensor-models.js` (315 lines) - Sensor model selection and display
+  - `ms-validation.js` (323 lines) - Input validation for MS parameters
+- Comprehensive MS sensor parameter documentation (MS_SENSOR_PARAMETERS.md)
+- Integration with station.html for complete workflow
+
+#### 🆕 **New Files Added**
+
+**Frontend Modules**:
+- `/public/js/ms-channel-manager.js` - Spectral channel management
+- `/public/js/ms-sensor-modal.js` - MS sensor editing modal
+- `/public/js/ms-sensor-models.js` - Sensor model database
+- `/public/js/ms-validation.js` - Parameter validation
+
+**Backend Handlers**:
+- `/src/handlers/analytics.js` - User analytics dashboard
+- `/src/handlers/channels.js` - Spectral channel API
+- `/src/handlers/documentation.js` - Document management
+- `/src/handlers/sensor-models.js` - Sensor model library
+- `/src/handlers/users.js` - User management
+
+**Documentation**:
+- `/docs/MS_SENSOR_PARAMETERS.md` - MS sensor parameter reference
+- `/ROI_ARCHITECTURE.md` - ROI system architecture
+- `/ROI_QUICKSTART.md` - Quick start guide for ROI
+
+**Database**:
+- `/migrations/0027_add_multispectral_support.sql` - MS sensor schema
+
+#### ✅ **Merge Resolution**
+
+Successfully resolved merge conflicts in:
+- package.json (version consolidation)
+- public/index.html, login.html, station.html (version references)
+- public/version-manifest.json (build metadata)
+- CLAUDE.md, CLAUDE_LEGACY.md (documentation)
+
+---
 
 ## [6.0.1] - 2025-11-18
 
