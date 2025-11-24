@@ -108,11 +108,9 @@ async function getInstrumentById(identifier, user, env) {
            i.instrument_height_m, i.description, i.installation_notes, i.maintenance_notes,
            i.created_at, i.updated_at,
            p.display_name as platform_name, p.location_code, p.mounting_structure,
-           p.research_programs,
            s.acronym as station_acronym, s.display_name as station_name,
            s.normalized_name as station_normalized_name,
-           COUNT(r.id) as roi_count,
-           COUNT(CASE WHEN r.roi_processing_enabled = true THEN 1 END) as active_roi_count
+           COUNT(r.id) as roi_count
     FROM instruments i
     JOIN platforms p ON i.platform_id = p.id
     JOIN stations s ON p.station_id = s.id
