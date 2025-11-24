@@ -26,23 +26,24 @@ export async function handleChannels(method, pathSegments, request, env) {
   const user = await requireAuthentication(request, env);
 
   // Route to appropriate handler based on method and path
-  if (method === 'GET' && pathSegments.length === 2) {
+  // Note: pathSegments has 'api' already removed, so ['channels'] or ['channels', ':id']
+  if (method === 'GET' && pathSegments.length === 1) {
     // GET /api/channels?instrument_id=X
     return await getChannelsList(user, request, env);
-  } else if (method === 'GET' && pathSegments.length === 3) {
+  } else if (method === 'GET' && pathSegments.length === 2) {
     // GET /api/channels/:id
-    const channelId = parseInt(pathSegments[2]);
+    const channelId = parseInt(pathSegments[1]);
     return await getChannelById(channelId, user, env);
-  } else if (method === 'POST' && pathSegments.length === 2) {
+  } else if (method === 'POST' && pathSegments.length === 1) {
     // POST /api/channels
     return await createChannel(user, request, env);
-  } else if (method === 'PUT' && pathSegments.length === 3) {
+  } else if (method === 'PUT' && pathSegments.length === 2) {
     // PUT /api/channels/:id
-    const channelId = parseInt(pathSegments[2]);
+    const channelId = parseInt(pathSegments[1]);
     return await updateChannel(channelId, user, request, env);
-  } else if (method === 'DELETE' && pathSegments.length === 3) {
+  } else if (method === 'DELETE' && pathSegments.length === 2) {
     // DELETE /api/channels/:id
-    const channelId = parseInt(pathSegments[2]);
+    const channelId = parseInt(pathSegments[1]);
     return await deleteChannel(channelId, user, env);
   }
 

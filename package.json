@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "6.1.1",
-  "description": "SITES Spectral Stations & Instruments Management System v6.1.1 - DATA QUALITY: Fixes & Export Tools",
+  "version": "6.1.2",
+  "description": "SITES Spectral Stations & Instruments Management System v6.1.2 - CRITICAL: API Routing & MS Sensor Modals",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

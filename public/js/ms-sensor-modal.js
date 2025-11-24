@@ -67,7 +67,7 @@ const MSSensorModal = (() => {
     async function showEditModal(instrumentId, instrumentData) {
         currentInstrumentId = instrumentId;
         currentPlatformId = instrumentData.platform_id;
-        current SensorModel = null;
+        currentSensorModel = null;
 
         // Load existing channels
         const channels = await MSChannelManager.loadChannelsFromServer(instrumentId);

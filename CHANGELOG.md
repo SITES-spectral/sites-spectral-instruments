@@ -17,6 +17,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.1.2] - 2025-11-24
+
+### 🚨 CRITICAL FIX: API Routing & MS Sensor Modal Integration
+
+**📅 Release Date**: 2025-11-24
+**🎯 Achievement**: Fixed critical API routing bugs and added complete MS sensor modal HTML
+
+#### 🔧 **API Routing Fixes**
+
+1. **Channels API (`src/handlers/channels.js`)**
+   - Fixed path segment length checks (2/3 → 1/2)
+   - GET /api/channels now correctly returns channel list
+   - GET /api/channels/:id returns individual channel details
+   - All CRUD operations (POST, PUT, DELETE) now functional
+
+2. **Sensor Models API (`src/handlers/sensor-models.js`)**
+   - Fixed identical routing bug with path segment lengths
+   - GET /api/sensor-models returns model library
+   - GET /api/sensor-models/:id returns model details
+   - Admin-only create/update/delete operations functional
+
+#### 🎨 **Frontend Modal Integration**
+
+1. **MS Sensor Creation Modal** (station.html lines 3075-3456)
+   - Complete 5-tab interface: Basic Info, Sensor Specs, Spectral Channels, Position, Notes
+   - Platform info display section
+   - Sensor model dropdown with auto-population
+   - Spectral channel management table with add/remove
+   - Deployment date, calibration date, notes fields
+
+2. **MS Sensor Edit Modal** (station.html lines 3457-3880)
+   - Pre-populated edit form with all sensor fields
+   - Status dropdown for lifecycle management
+   - Channel editing with existing data display
+   - Record info (created/updated timestamps)
+   - Delete and save action buttons
+
+#### 🛠️ **JavaScript Fix**
+
+- **`public/js/ms-sensor-modal.js` line 70**: Fixed syntax error `current SensorModel` → `currentSensorModel`
+
+#### 📋 **Testing Documentation**
+
+- Created comprehensive testing checklist: `docs/MS_SENSOR_INTEGRATION_TESTING_CHECKLIST.md`
+- 35+ API test cases covering all endpoints
+- Frontend modal tests for creation and editing workflows
+- Permission tests for admin, station user, and read-only roles
+
+---
+
 ## [6.1.1] - 2025-11-24
 
 ### 🔧 PATCH RELEASE: Data Quality Fixes & Export Tools

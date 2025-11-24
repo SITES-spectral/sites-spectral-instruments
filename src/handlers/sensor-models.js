@@ -26,23 +26,24 @@ export async function handleSensorModels(method, pathSegments, request, env) {
   const user = await requireAuthentication(request, env);
 
   // Route to appropriate handler
-  if (method === 'GET' && pathSegments.length === 2) {
+  // Note: pathSegments has 'api' already removed, so ['sensor-models'] or ['sensor-models', ':id']
+  if (method === 'GET' && pathSegments.length === 1) {
     // GET /api/sensor-models
     return await getSensorModelsList(user, request, env);
-  } else if (method === 'GET' && pathSegments.length === 3) {
+  } else if (method === 'GET' && pathSegments.length === 2) {
     // GET /api/sensor-models/:id
-    const modelId = parseInt(pathSegments[2]);
+    const modelId = parseInt(pathSegments[1]);
     return await getSensorModelById(modelId, user, env);
-  } else if (method === 'POST' && pathSegments.length === 2) {
+  } else if (method === 'POST' && pathSegments.length === 1) {
     // POST /api/sensor-models (admin only)
     return await createSensorModel(user, request, env);
-  } else if (method === 'PUT' && pathSegments.length === 3) {
+  } else if (method === 'PUT' && pathSegments.length === 2) {
     // PUT /api/sensor-models/:id (admin only)
-    const modelId = parseInt(pathSegments[2]);
+    const modelId = parseInt(pathSegments[1]);
     return await updateSensorModel(modelId, user, request, env);
-  } else if (method === 'DELETE' && pathSegments.length === 3) {
+  } else if (method === 'DELETE' && pathSegments.length === 2) {
     // DELETE /api/sensor-models/:id (admin only)
-    const modelId = parseInt(pathSegments[2]);
+    const modelId = parseInt(pathSegments[1]);
     return await deleteSensorModel(modelId, user, env);
   }
 

@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=6.1.1">
+    <link rel="stylesheet" href="/css/styles.css?v=6.1.2">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="6.1.1">
+    <meta name="app-version" content="6.1.2">
     <meta name="build-date" content="2025-11-24">
 
     <style>
@@ -3066,21 +3066,883 @@
         </div>
     </div>
 
+    <!-- ========================================
+         MS (Multispectral) Sensor Creation Modal
+         Version: 6.1.0
+         Purpose: Create new multispectral instruments with 5-tab interface
+         Required by: ms-sensor-modal.js
+         ======================================== -->
+    <div id="ms-sensor-creation-modal" class="platform-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="ms-creation-modal-title">
+        <div class="modal-content-large" style="max-width: 1100px; max-height: 90vh; overflow: hidden;">
+            <div class="modal-header-large">
+                <h3 id="ms-creation-modal-title"><i class="fas fa-satellite-dish"></i> Create Multispectral Sensor</h3>
+                <button class="modal-close-large" onclick="MSSensorModal.closeCreationModal()" aria-label="Close modal">&times;</button>
+            </div>
+
+            <!-- Platform Info Display -->
+            <div style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-tower-observation" style="color: #10b981;"></i>
+                    <span style="color: #94a3b8; font-size: 0.875rem;">Platform:</span>
+                    <span id="ms-platform-name" style="color: #e2e8f0; font-weight: 600;"></span>
+                </div>
+            </div>
+
+            <!-- 5-Tab Navigation -->
+            <div class="ms-tab-navigation" style="display: flex; background: #1e293b; border-bottom: 2px solid var(--border-color); padding: 0;">
+                <button type="button" class="ms-tab-button active" data-tab="basic-info" onclick="MSSensorModal.showTab('basic-info')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-info-circle"></i> Basic Info
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="sensor-specs" onclick="MSSensorModal.showTab('sensor-specs')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-microchip"></i> Sensor Specs
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="spectral-channels" onclick="MSSensorModal.showTab('spectral-channels')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-rainbow"></i> Spectral Channels
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="position" onclick="MSSensorModal.showTab('position')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-compass"></i> Position
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="notes" onclick="MSSensorModal.showTab('notes')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </button>
+            </div>
+
+            <div class="modal-body-large" style="max-height: calc(90vh - 280px); overflow-y: auto; padding: 1.5rem;">
+                <form id="ms-creation-form">
+                    <!-- Hidden Fields -->
+                    <input type="hidden" id="ms-instrument-type" value="Multispectral Sensor">
+
+                    <!-- Tab 1: Basic Info -->
+                    <div id="ms-tab-basic-info" class="ms-tab-content active">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-tag" style="color: #10b981;"></i> Identification
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-display-name">Display Name <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="ms-display-name" class="form-control" placeholder="e.g., MUL 6-channel spectral sensor North" required>
+                                    <small class="form-text">Descriptive name for this sensor</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-ecosystem-code">Ecosystem Code</label>
+                                    <select id="ms-ecosystem-code" class="form-control">
+                                        <option value="">Select ecosystem...</option>
+                                        <optgroup label="Forest">
+                                            <option value="FOR">FOR - Forest</option>
+                                            <option value="ALP">ALP - Alpine Forest</option>
+                                            <option value="CON">CON - Coniferous Forest</option>
+                                            <option value="DEC">DEC - Deciduous Forest</option>
+                                        </optgroup>
+                                        <optgroup label="Agricultural">
+                                            <option value="AGR">AGR - Arable Land</option>
+                                            <option value="GRA">GRA - Grassland</option>
+                                        </optgroup>
+                                        <optgroup label="Wetland">
+                                            <option value="MIR">MIR - Mires</option>
+                                            <option value="WET">WET - Wetland</option>
+                                            <option value="MAR">MAR - Marshland</option>
+                                            <option value="PEA">PEA - Peatland</option>
+                                        </optgroup>
+                                        <optgroup label="Other">
+                                            <option value="HEA">HEA - Heathland</option>
+                                            <option value="LAK">LAK - Lake</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-deployment-date">Deployment Date <span style="color: #ef4444;">*</span></label>
+                                    <input type="date" id="ms-deployment-date" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-database" style="color: #3b82f6;"></i> Sensor Model Library
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-sensor-model-select">Select from Library</label>
+                                    <select id="ms-sensor-model-select" class="form-control" onchange="MSSensorModal.handleSensorModelSelection()">
+                                        <option value="">Loading sensor models...</option>
+                                    </select>
+                                    <small class="form-text">Choose a known sensor model to auto-populate specifications</small>
+                                </div>
+
+                                <div id="ms-channel-config-options" style="margin-top: 1rem;">
+                                    <!-- Channel configuration suggestions will appear here -->
+                                </div>
+
+                                <div id="ms-wavelength-range-info" style="margin-top: 0.5rem;">
+                                    <!-- Wavelength range info will appear here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Sensor Specs -->
+                    <div id="ms-tab-sensor-specs" class="ms-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-industry" style="color: #f59e0b;"></i> Manufacturer Details
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-sensor-brand">Sensor Brand <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="ms-sensor-brand" class="form-control" placeholder="e.g., SKYE, APOGEE, Decagon" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-sensor-model">Sensor Model <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="ms-sensor-model" class="form-control" placeholder="e.g., SKR-1850, SS-110" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-sensor-serial">Serial Number <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="ms-sensor-serial" class="form-control" placeholder="Enter serial number" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-number-of-channels">Number of Channels</label>
+                                    <input type="number" id="ms-number-of-channels" class="form-control" min="2" max="8" placeholder="2-8 channels">
+                                    <small class="form-text">Multispectral sensors typically have 2-8 spectral channels</small>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-cogs" style="color: #8b5cf6;"></i> Data Acquisition
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-datalogger-type">Datalogger Type</label>
+                                    <select id="ms-datalogger-type" class="form-control">
+                                        <option value="">Select datalogger...</option>
+                                        <option value="Campbell Scientific CR1000X" selected>Campbell Scientific CR1000X</option>
+                                        <option value="Campbell Scientific CR6">Campbell Scientific CR6</option>
+                                        <option value="Campbell Scientific CR300">Campbell Scientific CR300</option>
+                                        <option value="Campbell Scientific CR3000">Campbell Scientific CR3000</option>
+                                        <option value="Campbell Scientific CR1000">Campbell Scientific CR1000</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-datalogger-program">Normal Program</label>
+                                    <input type="text" id="ms-datalogger-program" class="form-control" placeholder="e.g., spectral_v2.3.CR1X">
+                                    <small class="form-text">Datalogger program for normal operation</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-cable-length">Cable Length (m)</label>
+                                    <input type="number" id="ms-cable-length" class="form-control" min="0" step="0.1" placeholder="e.g., 15">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-field-of-view">Field of View (degrees)</label>
+                                    <input type="number" id="ms-field-of-view" class="form-control" min="0" max="180" step="0.1" placeholder="e.g., 25">
+                                    <small class="form-text">Sensor's angular field of view</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Spectral Channels -->
+                    <div id="ms-tab-spectral-channels" class="ms-tab-content" style="display: none;">
+                        <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-rainbow" style="color: #ec4899;"></i> Spectral Channel Configuration
+                        </h4>
+
+                        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <p style="color: #94a3b8; margin: 0; font-size: 0.875rem;">
+                                <i class="fas fa-info-circle"></i>
+                                Define each spectral channel with its center wavelength and bandwidth.
+                                Typical multispectral sensors measure 2-8 distinct wavelength bands.
+                            </p>
+                        </div>
+
+                        <!-- Channel Creation Form Container -->
+                        <div id="ms-channel-form-container" style="background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <!-- Channel form will be rendered here by MSChannelManager.renderChannelForm() -->
+                            <div class="row" style="display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 0.75rem; align-items: end;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Band Type <span style="color: #ef4444;">*</span></label>
+                                    <select id="channel-band-type" class="form-control" style="font-size: 0.875rem;">
+                                        <option value="">Select...</option>
+                                        <option value="Blue">Blue (400-500nm)</option>
+                                        <option value="Green">Green (500-600nm)</option>
+                                        <option value="Red">Red (600-700nm)</option>
+                                        <option value="Far-Red">Far-Red (700-750nm)</option>
+                                        <option value="NIR">NIR (750-1000nm)</option>
+                                        <option value="Custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Wavelength (nm) <span style="color: #ef4444;">*</span></label>
+                                    <input type="number" id="channel-wavelength" class="form-control" min="300" max="1200" step="1" placeholder="e.g., 645" style="font-size: 0.875rem;">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Bandwidth (nm) <span style="color: #ef4444;">*</span></label>
+                                    <select id="channel-bandwidth" class="form-control" style="font-size: 0.875rem;">
+                                        <option value="">Select...</option>
+                                        <option value="10">Narrow (10nm)</option>
+                                        <option value="20">Medium (20nm)</option>
+                                        <option value="40">Wide (40nm)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                    <input type="number" id="channel-bandwidth-custom" class="form-control" style="display: none; margin-top: 0.25rem; font-size: 0.875rem;" min="1" max="200" placeholder="Custom BW">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Channel Name</label>
+                                    <input type="text" id="channel-name" class="form-control" placeholder="Auto-generated" readonly style="font-size: 0.875rem; background: #0f172a;">
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="MSChannelManager.addChannelFromForm()" title="Add Channel">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="MSChannelManager.resetChannelForm()" title="Reset">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Channels Table Container -->
+                        <div id="ms-channels-table" style="background: #0f172a; padding: 1rem; border-radius: 8px; min-height: 150px;">
+                            <p style="color: #64748b; text-align: center; margin: 2rem 0;">
+                                <i class="fas fa-layer-group" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                                No channels added yet. Use the form above to add spectral channels.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Position -->
+                    <div id="ms-tab-position" class="ms-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-arrows-alt" style="color: #06b6d4;"></i> Orientation & Mounting
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-orientation">Orientation <span style="color: #ef4444;">*</span></label>
+                                    <select id="ms-orientation" class="form-control" onchange="MSSensorModal.handleOrientationChange()" required>
+                                        <option value="">Select orientation...</option>
+                                        <option value="uplooking" selected>Uplooking (measuring incoming radiation)</option>
+                                        <option value="downlooking">Downlooking (measuring reflected radiation)</option>
+                                    </select>
+                                    <small class="form-text">Uplooking = towards sky, Downlooking = towards ground/vegetation</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-height">Instrument Height (m) <span style="color: #ef4444;">*</span></label>
+                                    <input type="number" id="ms-height" class="form-control" min="0" step="0.01" placeholder="e.g., 2.5" required>
+                                    <small class="form-text">Height above ground surface in meters</small>
+                                </div>
+
+                                <!-- Conditional fields for downlooking -->
+                                <div id="ms-azimuth-group" class="form-group" style="display: none;">
+                                    <label for="ms-azimuth">Azimuth (degrees)</label>
+                                    <input type="number" id="ms-azimuth" class="form-control" min="0" max="360" step="0.1" placeholder="0-360">
+                                    <small class="form-text">Compass direction (0=N, 90=E, 180=S, 270=W)</small>
+                                </div>
+
+                                <div id="ms-nadir-group" class="form-group" style="display: none;">
+                                    <label for="ms-nadir">Tilt from Nadir (degrees)</label>
+                                    <input type="number" id="ms-nadir" class="form-control" min="0" max="90" step="0.1" placeholder="0-90">
+                                    <small class="form-text">0 = looking straight down, 90 = horizontal</small>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-map-marker-alt" style="color: #ef4444;"></i> Coordinates (Optional)
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-latitude">Latitude</label>
+                                    <input type="number" id="ms-latitude" class="form-control" min="-90" max="90" step="0.000001" placeholder="e.g., 64.182779">
+                                    <small class="form-text">Decimal degrees (WGS84)</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-longitude">Longitude</label>
+                                    <input type="number" id="ms-longitude" class="form-control" min="-180" max="180" step="0.000001" placeholder="e.g., 19.557327">
+                                </div>
+
+                                <div style="background: #1e3a5f; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                                    <p style="color: #94a3b8; margin: 0; font-size: 0.875rem;">
+                                        <i class="fas fa-lightbulb" style="color: #f59e0b;"></i>
+                                        <strong>Tip:</strong> If left empty, coordinates will be inherited from the parent platform.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: Notes -->
+                    <div id="ms-tab-notes" class="ms-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-tools" style="color: #f59e0b;"></i> Calibration Information
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-calibration-date">Last Calibration Date</label>
+                                    <input type="date" id="ms-calibration-date" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-calibration-program">Calibration Program</label>
+                                    <input type="text" id="ms-calibration-program" class="form-control" placeholder="e.g., calibration_v1.CR1X">
+                                    <small class="form-text">Datalogger program for calibration mode</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-calibration-notes">Calibration Notes</label>
+                                    <textarea id="ms-calibration-notes" class="form-control" rows="3" placeholder="Enter calibration details, coefficients, reference standards used..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-clipboard" style="color: #10b981;"></i> Documentation
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-description">Description</label>
+                                    <textarea id="ms-description" class="form-control" rows="3" placeholder="General description of this sensor installation..."></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-installation-notes">Installation Notes</label>
+                                    <textarea id="ms-installation-notes" class="form-control" rows="4" placeholder="Installation details, mounting specifics, cable routing, maintenance access notes..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer-large" style="display: flex; justify-content: space-between; padding: 1rem 1.5rem; background: #1e293b; border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" onclick="MSSensorModal.closeCreationModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" id="ms-save-button" class="btn btn-success" onclick="MSSensorModal.saveMSSensor()">
+                    <i class="fas fa-save"></i> Save MS Sensor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MS (Multispectral) Sensor Edit Modal
+         Version: 6.1.0
+         Purpose: Edit existing multispectral instruments
+         Required by: ms-sensor-modal.js
+         ======================================== -->
+    <div id="ms-sensor-edit-modal" class="platform-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="ms-edit-modal-title">
+        <div class="modal-content-large" style="max-width: 1100px; max-height: 90vh; overflow: hidden;">
+            <div class="modal-header-large">
+                <h3 id="ms-edit-modal-title"><i class="fas fa-edit"></i> Edit Multispectral Sensor</h3>
+                <button class="modal-close-large" onclick="MSSensorModal.closeEditModal()" aria-label="Close modal">&times;</button>
+            </div>
+
+            <!-- Instrument Info Display -->
+            <div style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-satellite-dish" style="color: #10b981;"></i>
+                        <span style="color: #94a3b8; font-size: 0.875rem;">Instrument:</span>
+                        <span id="ms-edit-instrument-name" style="color: #e2e8f0; font-weight: 600;"></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-tower-observation" style="color: #3b82f6;"></i>
+                        <span style="color: #94a3b8; font-size: 0.875rem;">Platform:</span>
+                        <span id="ms-edit-platform-name" style="color: #e2e8f0;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5-Tab Navigation (Edit Mode) -->
+            <div class="ms-tab-navigation" style="display: flex; background: #1e293b; border-bottom: 2px solid var(--border-color); padding: 0;">
+                <button type="button" class="ms-tab-button active" data-tab="edit-basic-info" onclick="MSSensorModal.showTab('edit-basic-info')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-info-circle"></i> Basic Info
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="edit-sensor-specs" onclick="MSSensorModal.showTab('edit-sensor-specs')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-microchip"></i> Sensor Specs
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="edit-spectral-channels" onclick="MSSensorModal.showTab('edit-spectral-channels')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-rainbow"></i> Spectral Channels
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="edit-position" onclick="MSSensorModal.showTab('edit-position')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-compass"></i> Position
+                </button>
+                <button type="button" class="ms-tab-button" data-tab="edit-notes" onclick="MSSensorModal.showTab('edit-notes')" style="flex: 1; padding: 0.875rem 1rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; border-bottom: 3px solid transparent;">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </button>
+            </div>
+
+            <div class="modal-body-large" style="max-height: calc(90vh - 280px); overflow-y: auto; padding: 1.5rem;">
+                <form id="ms-edit-form">
+                    <!-- Hidden Fields -->
+                    <input type="hidden" id="ms-edit-instrument-id">
+                    <input type="hidden" id="ms-edit-instrument-type" value="Multispectral Sensor">
+
+                    <!-- Tab 1: Basic Info (Edit) -->
+                    <div id="ms-tab-edit-basic-info" class="ms-tab-content active">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-tag" style="color: #10b981;"></i> Identification
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-display-name">Display Name <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="ms-edit-display-name" class="form-control" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-normalized-name">Normalized Name</label>
+                                    <input type="text" id="ms-edit-normalized-name" class="form-control" readonly style="background: #0f172a; color: #10b981; font-family: monospace;">
+                                    <small class="form-text">Auto-generated system identifier</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-ecosystem-code">Ecosystem Code</label>
+                                    <select id="ms-edit-ecosystem-code" class="form-control">
+                                        <option value="">Select ecosystem...</option>
+                                        <optgroup label="Forest">
+                                            <option value="FOR">FOR - Forest</option>
+                                            <option value="ALP">ALP - Alpine Forest</option>
+                                            <option value="CON">CON - Coniferous Forest</option>
+                                            <option value="DEC">DEC - Deciduous Forest</option>
+                                        </optgroup>
+                                        <optgroup label="Agricultural">
+                                            <option value="AGR">AGR - Arable Land</option>
+                                            <option value="GRA">GRA - Grassland</option>
+                                        </optgroup>
+                                        <optgroup label="Wetland">
+                                            <option value="MIR">MIR - Mires</option>
+                                            <option value="WET">WET - Wetland</option>
+                                            <option value="MAR">MAR - Marshland</option>
+                                            <option value="PEA">PEA - Peatland</option>
+                                        </optgroup>
+                                        <optgroup label="Other">
+                                            <option value="HEA">HEA - Heathland</option>
+                                            <option value="LAK">LAK - Lake</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-deployment-date">Deployment Date</label>
+                                    <input type="date" id="ms-edit-deployment-date" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-status">Status</label>
+                                    <select id="ms-edit-status" class="form-control">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Maintenance">Under Maintenance</option>
+                                        <option value="Testing">Testing</option>
+                                        <option value="Decommissioned">Decommissioned</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-history" style="color: #3b82f6;"></i> Record Information
+                                </h4>
+
+                                <div class="form-group">
+                                    <label>Created At</label>
+                                    <input type="text" id="ms-edit-created-at" class="form-control" readonly style="background: #0f172a;">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Last Updated</label>
+                                    <input type="text" id="ms-edit-updated-at" class="form-control" readonly style="background: #0f172a;">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-legacy-acronym">Legacy Acronym</label>
+                                    <input type="text" id="ms-edit-legacy-acronym" class="form-control" placeholder="Optional legacy identifier">
+                                    <small class="form-text">For instruments migrated from old systems</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Sensor Specs (Edit) -->
+                    <div id="ms-tab-edit-sensor-specs" class="ms-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-industry" style="color: #f59e0b;"></i> Manufacturer Details
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-sensor-brand">Sensor Brand</label>
+                                    <input type="text" id="ms-edit-sensor-brand" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-sensor-model">Sensor Model</label>
+                                    <input type="text" id="ms-edit-sensor-model" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-sensor-serial">Serial Number</label>
+                                    <input type="text" id="ms-edit-sensor-serial" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-number-of-channels">Number of Channels</label>
+                                    <input type="number" id="ms-edit-number-of-channels" class="form-control" min="2" max="8">
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-cogs" style="color: #8b5cf6;"></i> Data Acquisition
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-datalogger-type">Datalogger Type</label>
+                                    <select id="ms-edit-datalogger-type" class="form-control">
+                                        <option value="">Select datalogger...</option>
+                                        <option value="Campbell Scientific CR1000X">Campbell Scientific CR1000X</option>
+                                        <option value="Campbell Scientific CR6">Campbell Scientific CR6</option>
+                                        <option value="Campbell Scientific CR300">Campbell Scientific CR300</option>
+                                        <option value="Campbell Scientific CR3000">Campbell Scientific CR3000</option>
+                                        <option value="Campbell Scientific CR1000">Campbell Scientific CR1000</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-datalogger-program">Normal Program</label>
+                                    <input type="text" id="ms-edit-datalogger-program" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-cable-length">Cable Length (m)</label>
+                                    <input type="number" id="ms-edit-cable-length" class="form-control" min="0" step="0.1">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-field-of-view">Field of View (degrees)</label>
+                                    <input type="number" id="ms-edit-field-of-view" class="form-control" min="0" max="180" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Spectral Channels (Edit) -->
+                    <div id="ms-tab-edit-spectral-channels" class="ms-tab-content" style="display: none;">
+                        <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-rainbow" style="color: #ec4899;"></i> Configured Spectral Channels
+                        </h4>
+
+                        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <p style="color: #94a3b8; margin: 0; font-size: 0.875rem;">
+                                <i class="fas fa-info-circle"></i>
+                                Review and modify the spectral channels configured for this sensor.
+                                Changes will be saved when you click "Save Changes".
+                            </p>
+                        </div>
+
+                        <!-- Add Channel Form for Edit Mode -->
+                        <div id="ms-edit-channel-form-container" style="background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <div class="row" style="display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 0.75rem; align-items: end;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Band Type <span style="color: #ef4444;">*</span></label>
+                                    <select id="edit-channel-band-type" class="form-control" style="font-size: 0.875rem;">
+                                        <option value="">Select...</option>
+                                        <option value="Blue">Blue (400-500nm)</option>
+                                        <option value="Green">Green (500-600nm)</option>
+                                        <option value="Red">Red (600-700nm)</option>
+                                        <option value="Far-Red">Far-Red (700-750nm)</option>
+                                        <option value="NIR">NIR (750-1000nm)</option>
+                                        <option value="Custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Wavelength (nm) <span style="color: #ef4444;">*</span></label>
+                                    <input type="number" id="edit-channel-wavelength" class="form-control" min="300" max="1200" step="1" style="font-size: 0.875rem;">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Bandwidth (nm) <span style="color: #ef4444;">*</span></label>
+                                    <select id="edit-channel-bandwidth" class="form-control" style="font-size: 0.875rem;">
+                                        <option value="">Select...</option>
+                                        <option value="10">Narrow (10nm)</option>
+                                        <option value="20">Medium (20nm)</option>
+                                        <option value="40">Wide (40nm)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.75rem; color: #94a3b8;">Channel Name</label>
+                                    <input type="text" id="edit-channel-name" class="form-control" readonly style="font-size: 0.875rem; background: #0f172a;">
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="MSChannelManager.addChannelFromForm()" title="Add Channel">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Edit Channels Table Container -->
+                        <div id="ms-edit-channels-table" style="background: #0f172a; padding: 1rem; border-radius: 8px; min-height: 150px;">
+                            <p style="color: #64748b; text-align: center; margin: 2rem 0;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                                Loading channels...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Position (Edit) -->
+                    <div id="ms-tab-edit-position" class="ms-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-arrows-alt" style="color: #06b6d4;"></i> Orientation & Mounting
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-orientation">Orientation</label>
+                                    <select id="ms-edit-orientation" class="form-control">
+                                        <option value="">Select orientation...</option>
+                                        <option value="uplooking">Uplooking (measuring incoming radiation)</option>
+                                        <option value="downlooking">Downlooking (measuring reflected radiation)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-height">Instrument Height (m)</label>
+                                    <input type="number" id="ms-edit-height" class="form-control" min="0" step="0.01">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-azimuth">Azimuth (degrees)</label>
+                                    <input type="number" id="ms-edit-azimuth" class="form-control" min="0" max="360" step="0.1">
+                                    <small class="form-text">Compass direction (0=N, 90=E, 180=S, 270=W)</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-nadir">Tilt from Nadir (degrees)</label>
+                                    <input type="number" id="ms-edit-nadir" class="form-control" min="0" max="90" step="0.1">
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-map-marker-alt" style="color: #ef4444;"></i> Coordinates
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-latitude">Latitude</label>
+                                    <input type="number" id="ms-edit-latitude" class="form-control" min="-90" max="90" step="0.000001">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-longitude">Longitude</label>
+                                    <input type="number" id="ms-edit-longitude" class="form-control" min="-180" max="180" step="0.000001">
+                                </div>
+
+                                <div style="background: #1e3a5f; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                                    <p style="color: #94a3b8; margin: 0; font-size: 0.875rem;">
+                                        <i class="fas fa-info-circle" style="color: #3b82f6;"></i>
+                                        Leave empty to use platform coordinates.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: Notes (Edit) -->
+                    <div id="ms-tab-edit-notes" class="ms-tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-tools" style="color: #f59e0b;"></i> Calibration Information
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-calibration-date">Last Calibration Date</label>
+                                    <input type="date" id="ms-edit-calibration-date" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-calibration-program">Calibration Program</label>
+                                    <input type="text" id="ms-edit-calibration-program" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-calibration-notes">Calibration Notes</label>
+                                    <textarea id="ms-edit-calibration-notes" class="form-control" rows="3"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-maintenance-notes">Maintenance Notes</label>
+                                    <textarea id="ms-edit-maintenance-notes" class="form-control" rows="3" placeholder="Record maintenance history, issues, repairs..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #e2e8f0; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-clipboard" style="color: #10b981;"></i> Documentation
+                                </h4>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-description">Description</label>
+                                    <textarea id="ms-edit-description" class="form-control" rows="4"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ms-edit-installation-notes">Installation Notes</label>
+                                    <textarea id="ms-edit-installation-notes" class="form-control" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer-large" style="display: flex; justify-content: space-between; padding: 1rem 1.5rem; background: #1e293b; border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" onclick="MSSensorModal.closeEditModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" class="btn btn-danger" onclick="MSSensorModal.confirmDelete()" style="margin-right: 1rem;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button type="button" id="ms-edit-save-button" class="btn btn-success" onclick="MSSensorModal.saveEditedMSSensor()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MS Sensor Modal CSS Styles -->
+    <style>
+        /* MS Tab Button Styles */
+        .ms-tab-button.active {
+            color: #e2e8f0 !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+            border-bottom-color: #10b981 !important;
+        }
+
+        .ms-tab-button:hover:not(.active) {
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* MS Tab Content */
+        .ms-tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .ms-tab-content:not(.active) {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* MS Modal Show State */
+        #ms-sensor-creation-modal.show,
+        #ms-sensor-edit-modal.show {
+            display: flex !important;
+        }
+
+        /* Channel Table Styles */
+        #ms-channels-table table,
+        #ms-edit-channels-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        #ms-channels-table th,
+        #ms-edit-channels-table th {
+            background: #1e3a5f;
+            color: #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        #ms-channels-table td,
+        #ms-edit-channels-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        #ms-channels-table tr:hover,
+        #ms-edit-channels-table tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        #ms-channels-table .badge,
+        #ms-edit-channels-table .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        #ms-channels-table .badge-primary,
+        #ms-edit-channels-table .badge-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+    </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=6.1.1"></script>
-    <script src="/js/api.js?v=6.1.1"></script>
-    <script src="/js/components.js?v=6.1.1"></script>
+    <script src="/js/utils.js?v=6.1.2"></script>
+    <script src="/js/api.js?v=6.1.2"></script>
+    <script src="/js/components.js?v=6.1.2"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=6.1.1"></script>
-    <script src="/js/station-dashboard.js?v=6.1.1"></script>
-    <script src="/js/navigation.js?v=6.1.1"></script>
-    <script src="/js/export.js?v=6.1.1"></script>
+    <script src="/js/interactive-map.js?v=6.1.2"></script>
+    <script src="/js/station-dashboard.js?v=6.1.2"></script>
+    <script src="/js/navigation.js?v=6.1.2"></script>
+    <script src="/js/export.js?v=6.1.2"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
