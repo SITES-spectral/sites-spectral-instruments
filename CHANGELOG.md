@@ -17,6 +17,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.1.8] - 2025-11-25
+
+### 🐛 FIX: Map Rendering with Robust Error Handling
+
+**📅 Release Date**: 2025-11-25
+**🎯 Achievement**: Added defensive error handling to ensure map always renders even if tab/platform rendering encounters issues
+
+#### 🔧 **Technical Improvements**
+
+**File Modified:** `/public/js/station-dashboard.js`
+
+1. **Separated Error Handling for Display Components** (lines 257-280):
+   - Split single try-catch into separate blocks for platforms, map, and counts
+   - **Platforms**: Errors shown to user but don't block other components
+   - **Map**: Always attempts to render even if platform rendering fails
+   - **Counts**: Independent error handling prevents cascading failures
+
+2. **Defensive Programming in `groupInstrumentsByType()`** (lines 867-899):
+   - Added array validation check
+   - Added instrument object validation
+   - Logs warnings for invalid data instead of crashing
+   - Returns empty object on invalid input
+
+3. **Input Validation in `createInstrumentTabs()`** (lines 907-917):
+   - Validates instruments array before processing
+   - Returns empty string instead of throwing on invalid input
+   - Prevents rendering errors from breaking page
+
+4. **Error Handling in `switchInstrumentTab()`** (lines 978-1001):
+   - Wrapped entire function in try-catch
+   - Logs specific warnings for missing elements
+   - Gracefully handles missing platform cards or tabs
+
+#### 🎯 **Problem Solved**
+
+When tabbed interface encountered an error (e.g., invalid data, missing instrument types), it would throw an exception that prevented:
+- Map markers from being added
+- Platform cards from rendering
+- Station counts from updating
+
+Now each component has independent error handling, ensuring the station page always renders completely.
+
+#### ✅ **Benefits**
+
+- Map always renders even if platform cards have issues
+- Better debugging with specific console error messages
+- Graceful degradation - page remains functional with partial data
+- Improved stability and user experience
+
+---
+
 ## [6.1.7] - 2025-11-25
 
 ### 🐛 FIX: Station Summary Count Race Condition (Final Fix)

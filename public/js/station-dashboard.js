@@ -257,13 +257,26 @@ class SitesStationDashboard {
             // Update displays even if some data failed to load
             try {
                 this.renderPlatforms();
-                this.updateMapMarkers();
-                // Update counts after data is loaded - ensures correct counts are shown
-                this.updateCounts();
-                console.debug('Successfully updated platform and instrument displays');
             } catch (error) {
-                console.error('Error updating displays:', error);
-                this.showError(`Failed to update display: ${error.message}`);
+                console.error('Error rendering platforms:', error);
+                this.showError(`Failed to render platforms: ${error.message}`);
+            }
+
+            // Always try to update map, even if platform rendering failed
+            try {
+                this.updateMapMarkers();
+                console.debug('Map markers updated successfully');
+            } catch (error) {
+                console.error('Error updating map markers:', error);
+                // Don't show error to user for map issues, just log it
+            }
+
+            // Update counts after data is loaded - ensures correct counts are shown
+            try {
+                this.updateCounts();
+                console.debug('Successfully updated counts');
+            } catch (error) {
+                console.error('Error updating counts:', error);
             }
 
         } catch (error) {
@@ -852,6 +865,11 @@ class SitesStationDashboard {
      * @returns {Object} Object with category keys and arrays of instruments
      */
     groupInstrumentsByType(instruments) {
+        if (!Array.isArray(instruments)) {
+            console.warn('groupInstrumentsByType: instruments is not an array', instruments);
+            return {};
+        }
+
         const categories = {
             phenocam: { label: 'Phenocams', icon: 'fa-camera', instruments: [] },
             multispectral: { label: 'MS Sensors', icon: 'fa-satellite', instruments: [] },
@@ -859,6 +877,10 @@ class SitesStationDashboard {
         };
 
         instruments.forEach(inst => {
+            if (!inst || !inst.instrument_type) {
+                console.warn('Invalid instrument object:', inst);
+                return;
+            }
             const type = (inst.instrument_type || '').toLowerCase();
             if (type.includes('phenocam') || type === 'phenocam') {
                 categories.phenocam.instruments.push(inst);
@@ -883,6 +905,10 @@ class SitesStationDashboard {
      * @returns {string} HTML string for the tabbed interface
      */
     createInstrumentTabs(instruments, platformId) {
+        if (!Array.isArray(instruments) || instruments.length === 0) {
+            return '';
+        }
+
         const grouped = this.groupInstrumentsByType(instruments);
         const categoryKeys = Object.keys(grouped);
 
@@ -950,21 +976,28 @@ class SitesStationDashboard {
      * @param {string} tabKey - The tab key to switch to
      */
     switchInstrumentTab(platformId, tabKey) {
-        // Find the platform card
-        const platformCard = document.querySelector(`.platform-card[data-platform-id="${platformId}"]`);
-        if (!platformCard) return;
+        try {
+            // Find the platform card
+            const platformCard = document.querySelector(`.platform-card[data-platform-id="${platformId}"]`);
+            if (!platformCard) {
+                console.warn(`Platform card not found for ID: ${platformId}`);
+                return;
+            }
 
-        // Update tab buttons
-        const tabBtns = platformCard.querySelectorAll(`.instrument-tab-btn[data-platform="${platformId}"]`);
-        tabBtns.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tabKey);
-        });
+            // Update tab buttons
+            const tabBtns = platformCard.querySelectorAll(`.instrument-tab-btn[data-platform="${platformId}"]`);
+            tabBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabKey);
+            });
 
-        // Update tab content
-        const tabContents = platformCard.querySelectorAll(`.instrument-tab-content[data-platform="${platformId}"]`);
-        tabContents.forEach(content => {
-            content.classList.toggle('active', content.dataset.tabContent === tabKey);
-        });
+            // Update tab content
+            const tabContents = platformCard.querySelectorAll(`.instrument-tab-content[data-platform="${platformId}"]`);
+            tabContents.forEach(content => {
+                content.classList.toggle('active', content.dataset.tabContent === tabKey);
+            });
+        } catch (error) {
+            console.error('Error switching instrument tab:', error);
+        }
     }
 
     createInstrumentCard(instrument) {
