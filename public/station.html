@@ -6239,8 +6239,8 @@
             // Initialize form event listeners and dynamic behaviors
             initializeEditFormBehaviors();
 
-            // Show the modal
-            document.getElementById('editInstrumentModal').style.display = 'block';
+            // Show the modal (must match closeInstrumentEditModal method)
+            document.getElementById('instrument-edit-modal').classList.add('show');
         }
 
         // ============================================================================
