@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=6.1.6">
+    <link rel="stylesheet" href="/css/styles.css?v=6.1.7">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="6.1.6">
+    <meta name="app-version" content="6.1.7">
     <meta name="build-date" content="2025-11-25">
 
     <style>
@@ -3930,19 +3930,19 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=6.1.6"></script>
-    <script src="/js/api.js?v=6.1.6"></script>
-    <script src="/js/components.js?v=6.1.6"></script>
+    <script src="/js/utils.js?v=6.1.7"></script>
+    <script src="/js/api.js?v=6.1.7"></script>
+    <script src="/js/components.js?v=6.1.7"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=6.1.6"></script>
-    <script src="/js/station-dashboard.js?v=6.1.6"></script>
-    <script src="/js/navigation.js?v=6.1.6"></script>
-    <script src="/js/export.js?v=6.1.6"></script>
+    <script src="/js/interactive-map.js?v=6.1.7"></script>
+    <script src="/js/station-dashboard.js?v=6.1.7"></script>
+    <script src="/js/navigation.js?v=6.1.7"></script>
+    <script src="/js/export.js?v=6.1.7"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -4159,76 +4159,34 @@
 
         async function updateDashboard() {
             try {
-                // Fetch real platform and instrument counts from API
-                await fetchDashboardData();
-
-                // Update coordinates if available
+                // Platform/instrument counts are managed by SitesStationDashboard class
+                // Only update coordinates here
                 if (stationData.latitude && stationData.longitude) {
                     const coords = `${stationData.latitude.toFixed(4)}, ${stationData.longitude.toFixed(4)}`;
                     document.getElementById('coordinates').textContent = coords;
                 }
+
+                // Trigger count update through the dashboard class if it exists
+                if (window.sitesStationDashboard && typeof window.sitesStationDashboard.updateCounts === 'function') {
+                    window.sitesStationDashboard.updateCounts();
+                }
             } catch (error) {
                 console.error('Error updating dashboard:', error);
-                // Fallback to default values if API fails
-                document.getElementById('platforms-count').textContent = '0';
-                document.getElementById('instruments-count').textContent = '0';
+                // Do NOT reset counts to 0 on error - let SitesStationDashboard manage counts
             }
         }
 
         async function fetchDashboardData() {
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) {
-                console.warn('No authentication token available');
-                return;
-            }
+            // NOTE: Platform and instrument counts are now managed by SitesStationDashboard class
+            // This function is deprecated but kept for backwards compatibility
+            // The SitesStationDashboard.updateCounts() is the single source of truth for counts
 
-            try {
-                // Fetch platforms for this station
-                const platformsResponse = await fetch(`/api/platforms?station=${stationData.acronym}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+            console.debug('fetchDashboardData() called - counts managed by SitesStationDashboard class');
 
-                // Fetch instruments for this station
-                const instrumentsResponse = await fetch(`/api/instruments?station=${stationData.acronym}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                let platformCount = 0;
-                let instrumentCount = 0;
-
-                let platformsData = null;
-                let instrumentsData = null;
-
-                if (platformsResponse.ok) {
-                    platformsData = await platformsResponse.json();
-                    platformCount = platformsData.platforms ? platformsData.platforms.length : 0;
-                }
-
-                if (instrumentsResponse.ok) {
-                    instrumentsData = await instrumentsResponse.json();
-                    instrumentCount = instrumentsData.instruments ? instrumentsData.instruments.length : 0;
-                }
-
-                // Update the display
-                document.getElementById('platforms-count').textContent = platformCount;
-                document.getElementById('instruments-count').textContent = instrumentCount;
-
-                // Store for map use
-                window.stationPlatforms = platformsData ? (platformsData.platforms || []) : [];
-                window.stationInstruments = instrumentsData ? (instrumentsData.instruments || []) : [];
-
-                // Map markers will be updated automatically by SitesStationDashboard
-
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-                throw error;
-            }
+            // No longer fetches or updates counts - handled by SitesStationDashboard
+            // If you need to access platforms/instruments, use:
+            //   window.sitesStationDashboard.platforms
+            //   window.sitesStationDashboard.instruments
         }
 
 

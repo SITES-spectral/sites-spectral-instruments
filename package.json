@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "6.1.6",
-  "description": "SITES Spectral Stations & Instruments Management System v6.1.6 - UI: Tabbed Instrument Interface in Platform Cards",
+  "version": "6.1.7",
+  "description": "SITES Spectral Stations & Instruments Management System v6.1.7 - FIX: Station Summary Count Race Condition (Final Fix)",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

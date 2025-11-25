@@ -17,6 +17,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.1.7] - 2025-11-25
+
+### 🐛 FIX: Station Summary Count Race Condition (Final Fix)
+
+**📅 Release Date**: 2025-11-25
+**🎯 Achievement**: Resolved persistent race condition causing station summary to show 0 platforms/instruments
+
+#### 🚨 **Root Cause Identified**
+
+While v6.1.5 fixed the sequential loading issue in `SitesStationDashboard`, there was **ANOTHER race condition** with duplicate count update systems:
+
+1. **Old legacy system** (station.html): `updateDashboard()` → `fetchDashboardData()` made direct API calls
+2. **New modular system** (station-dashboard.js): `SitesStationDashboard.updateCounts()` used class data
+
+Both systems tried to update counts simultaneously, and the old system's error handler would reset counts to '0' on any failure.
+
+#### 🔧 **Technical Solution**
+
+**File Modified:** `/public/station.html`
+
+1. **Deprecated `fetchDashboardData()`** (lines 4178-4189):
+   - Removed duplicate API calls for platforms/instruments
+   - Function now only logs debug message
+   - Directs developers to use `window.sitesStationDashboard` instead
+
+2. **Refactored `updateDashboard()`** (lines 4160-4177):
+   ```javascript
+   // BEFORE: Made its own API calls, reset counts to '0' on error
+   await fetchDashboardData();
+   // Fallback: document.getElementById('platforms-count').textContent = '0';
+
+   // AFTER: Delegates to SitesStationDashboard class
+   if (window.sitesStationDashboard) {
+       window.sitesStationDashboard.updateCounts();
+   }
+   // No fallback that resets to '0'
+   ```
+
+3. **Single Source of Truth**:
+   - `SitesStationDashboard.updateCounts()` is now the ONLY function updating counts
+   - Eliminated race condition between two competing systems
+   - No more accidental resets to '0' from error handlers
+
+#### ✅ **Verification**
+
+Production testing confirms:
+- SVB station: **7 platforms, 12 instruments** (correct)
+- API endpoints working properly
+- `SitesStationDashboard` class loading data correctly
+
+---
+
+## [6.1.6] - 2025-11-25
+
+### 🎨 UI: Tabbed Instrument Interface & Type-Aware Modals
+
+**📅 Release Date**: 2025-11-25
+**🎯 Achievement**: Implemented tabbed platform interface and type-aware instrument modals
+
+#### ✨ **New Features**
+
+1. **Tabbed Instrument Display in Platform Cards**
+   - Instruments organized by type: Phenocams, MS Sensors, Other
+   - Count badges show quantities per category
+   - Smart fallback for single categories
+   - Smooth tab switching with green theme
+
+2. **Type-Aware Instrument Modals**
+   - MS sensors no longer show "Phenocam Image" section
+   - Type-specific placeholders with icons and colors
+   - Only Phenocam instruments display image loading
+
+#### 🔧 **Files Modified**
+- `/public/js/station-dashboard.js`: +140 lines (3 new methods)
+- `/public/css/styles.css`: +86 lines (tab styling)
+- `/public/station.html`: Type-aware thumbnail and modal functions
+
+---
+
 ## [6.1.5] - 2025-11-24
 
 ### 🐛 FIX: Station Summary Count Race Condition
