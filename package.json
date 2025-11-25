@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "6.1.8",
-  "description": "SITES Spectral Stations & Instruments Management System v6.1.8 - FIX: Map Rendering with Robust Error Handling",
+  "version": "6.2.0",
+  "description": "SITES Spectral Stations & Instruments Management System v6.2.0 - Type-Specific Instrument Modals",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

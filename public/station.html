@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=6.1.8">
+    <link rel="stylesheet" href="/css/styles.css?v=6.2.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="6.1.8">
+    <meta name="app-version" content="6.2.0">
     <meta name="build-date" content="2025-11-25">
 
     <style>
@@ -3930,19 +3930,19 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=6.1.8"></script>
-    <script src="/js/api.js?v=6.1.8"></script>
-    <script src="/js/components.js?v=6.1.8"></script>
+    <script src="/js/utils.js?v=6.2.0"></script>
+    <script src="/js/api.js?v=6.2.0"></script>
+    <script src="/js/components.js?v=6.2.0"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=6.1.8"></script>
-    <script src="/js/station-dashboard.js?v=6.1.8"></script>
-    <script src="/js/navigation.js?v=6.1.8"></script>
-    <script src="/js/export.js?v=6.1.8"></script>
+    <script src="/js/interactive-map.js?v=6.2.0"></script>
+    <script src="/js/station-dashboard.js?v=6.2.0"></script>
+    <script src="/js/navigation.js?v=6.2.0"></script>
+    <script src="/js/export.js?v=6.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -6137,9 +6137,41 @@
             document.getElementById('platform-edit-modal').classList.add('show');
         }
 
+        /**
+         * Determines instrument category for conditional modal sections
+         * @param {string} instrumentType - The instrument_type value
+         * @returns {string} 'phenocam', 'multispectral', or 'other'
+         */
+        function getInstrumentCategory(instrumentType) {
+            if (!instrumentType) return 'other';
+
+            const type = instrumentType.toLowerCase();
+
+            // Phenocam category
+            if (type.includes('phenocam')) {
+                return 'phenocam';
+            }
+
+            // Multispectral sensor category
+            if (type.includes('multispectral') ||
+                type.includes('skye') ||
+                type.includes('decagon') ||
+                type.includes('apogee ms') ||
+                type === 'ms sensor') {
+                return 'multispectral';
+            }
+
+            // Everything else (PAR, NDVI, PRI, Other, legacy types)
+            return 'other';
+        }
+
         function showInstrumentEditModal(instrument) {
             const editForm = document.getElementById('instrument-edit-form');
             const isAdmin = currentUser.role === 'admin';
+
+            // Determine instrument category for conditional sections
+            const instrumentCategory = getInstrumentCategory(instrument.instrument_type);
+            console.log('Instrument category:', instrumentCategory, 'Type:', instrument.instrument_type);
 
             // FIX #1: Add debugging and data validation
             console.log('showInstrumentEditModal called with instrument:', instrument);
@@ -6217,8 +6249,8 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 2: Camera Specifications (11 fields) -->
-                    <div class="form-section">
+                    <!-- SECTION 2A: Camera Specifications (11 fields) - PHENOCAM ONLY -->
+                    <div class="form-section section-phenocam-only" style="display: ${instrumentCategory === 'phenocam' ? 'block' : 'none'};">
                         <h4 onclick="toggleSection(this)"><i class="fas fa-camera"></i> Camera Specifications</h4>
                         <div class="form-section-content">
                             <div class="form-group">
@@ -6320,6 +6352,87 @@
                                     <option value="Flash" ${instrument.camera_white_balance === 'Flash' ? 'selected' : ''}>Flash</option>
                                     <option value="Custom" ${instrument.camera_white_balance === 'Custom' ? 'selected' : ''}>Custom</option>
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2B: Sensor Specifications (12 fields) - MULTISPECTRAL ONLY -->
+                    <div class="form-section section-multispectral-only" style="display: ${instrumentCategory === 'multispectral' ? 'block' : 'none'};">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-satellite"></i> Sensor Specifications</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Sensor Brand</label>
+                                <input type="text" id="edit-sensor-brand" value="${instrument.sensor_brand || ''}"
+                                       class="form-control" placeholder="e.g., SKYE, Decagon, Apogee" aria-label="Sensor Brand">
+                            </div>
+                            <div class="form-group">
+                                <label>Sensor Model</label>
+                                <input type="text" id="edit-sensor-model" value="${instrument.sensor_model || ''}"
+                                       class="form-control" placeholder="e.g., SKR 1800, SKR110" aria-label="Sensor Model">
+                            </div>
+                            <div class="form-group">
+                                <label>Sensor Serial Number</label>
+                                <input type="text" id="edit-sensor-serial" value="${instrument.sensor_serial_number || ''}"
+                                       class="form-control" placeholder="Sensor serial number" aria-label="Sensor Serial Number">
+                            </div>
+                            <div class="form-group">
+                                <label>Orientation</label>
+                                <select id="edit-sensor-orientation" class="form-control" aria-label="Sensor Orientation">
+                                    <option value="">Select orientation...</option>
+                                    <option value="uplooking" ${instrument.orientation === 'uplooking' ? 'selected' : ''}>Uplooking</option>
+                                    <option value="downlooking" ${instrument.orientation === 'downlooking' ? 'selected' : ''}>Downlooking</option>
+                                </select>
+                                <small class="form-text">Sensor pointing direction</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Channels</label>
+                                <input type="number" id="edit-number-channels" value="${instrument.number_of_channels || ''}"
+                                       class="form-control" min="1" max="8" placeholder="e.g., 2, 4" aria-label="Number of Channels">
+                                <small class="form-text">Spectral bands/wavelengths (typically 2-8)</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Field of View (degrees)</label>
+                                <input type="number" id="edit-field-of-view" value="${instrument.field_of_view_degrees || ''}"
+                                       class="form-control" step="0.1" min="0" max="180" placeholder="e.g., 180" aria-label="Field of View">
+                            </div>
+                            <div class="form-group">
+                                <label>Cable Length (meters)</label>
+                                <input type="number" id="edit-cable-length" value="${instrument.cable_length_m || ''}"
+                                       class="form-control" step="0.1" min="0" placeholder="e.g., 10.0" aria-label="Cable Length">
+                            </div>
+                            <div class="form-group">
+                                <label>Datalogger Type</label>
+                                <input type="text" id="edit-datalogger-type" value="${instrument.datalogger_type || 'Campbell Scientific CR1000X'}"
+                                       class="form-control" placeholder="e.g., Campbell Scientific CR1000X" aria-label="Datalogger Type">
+                            </div>
+                            <div class="form-group">
+                                <label>Normal Datalogger Program</label>
+                                <input type="text" id="edit-datalogger-program-normal" value="${instrument.datalogger_program_normal || ''}"
+                                       class="form-control" placeholder="Program name or file path" aria-label="Normal Program">
+                                <small class="form-text">Program used for regular measurements</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Calibration Datalogger Program</label>
+                                <input type="text" id="edit-datalogger-program-calibration" value="${instrument.datalogger_program_calibration || ''}"
+                                       class="form-control" placeholder="Program name or file path" aria-label="Calibration Program">
+                                <small class="form-text">Program used for calibration procedures</small>
+                            </div>
+                            <div class="form-group">
+                                <label>End Date</label>
+                                <input type="date" id="edit-end-date" value="${instrument.end_date || ''}"
+                                       class="form-control" aria-label="End Date">
+                                <small class="form-text">Date sensor was decommissioned (if applicable)</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Calibration Logs</label>
+                                <textarea id="edit-calibration-logs" class="form-control" rows="3"
+                                          placeholder="Calibration history and notes..." aria-label="Calibration Logs">${instrument.calibration_logs || ''}</textarea>
+                                <small class="form-text">Calibration history, coefficients, and procedures</small>
+                            </div>
+                            <div class="form-group">
+                                <p class="form-text"><i class="fas fa-info-circle"></i> <strong>Channel Management:</strong>
+                                Individual spectral channels/bands can be configured after saving.
+                                Use the channel manager to define wavelengths, calibration coefficients, and processing parameters for each band.</p>
                             </div>
                         </div>
                     </div>
@@ -6524,8 +6637,8 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 6: Phenocam Processing (1 field) -->
-                    <div class="form-section">
+                    <!-- SECTION 6: Phenocam Processing (1 field) - PHENOCAM ONLY -->
+                    <div class="form-section section-phenocam-only" style="display: ${instrumentCategory === 'phenocam' ? 'block' : 'none'};">
                         <h4 onclick="toggleSection(this)"><i class="fas fa-tree"></i> Phenocam Processing</h4>
                         <div class="form-section-content">
                             <div class="form-group full-width">
@@ -6879,6 +6992,20 @@
                     camera_exposure_time: document.getElementById('edit-instrument-camera-exposure')?.value || '',
                     camera_iso: document.getElementById('edit-instrument-camera-iso')?.value || '',
                     camera_white_balance: document.getElementById('edit-instrument-camera-wb')?.value || '',
+
+                    // SECTION 2B: Sensor Specifications (12 fields) - Multispectral sensors
+                    sensor_brand: document.getElementById('edit-sensor-brand')?.value || '',
+                    sensor_model: document.getElementById('edit-sensor-model')?.value || '',
+                    sensor_serial_number: document.getElementById('edit-sensor-serial')?.value || '',
+                    orientation: document.getElementById('edit-sensor-orientation')?.value || '',
+                    number_of_channels: parseInt(document.getElementById('edit-number-channels')?.value) || null,
+                    field_of_view_degrees: parseFloat(document.getElementById('edit-field-of-view')?.value) || null,
+                    cable_length_m: parseFloat(document.getElementById('edit-cable-length')?.value) || null,
+                    datalogger_type: document.getElementById('edit-datalogger-type')?.value || '',
+                    datalogger_program_normal: document.getElementById('edit-datalogger-program-normal')?.value || '',
+                    datalogger_program_calibration: document.getElementById('edit-datalogger-program-calibration')?.value || '',
+                    end_date: document.getElementById('edit-end-date')?.value || null,
+                    calibration_logs: document.getElementById('edit-calibration-logs')?.value || '',
 
                     // SECTION 3: Position & Orientation (6 fields)
                     latitude: parseFloat(document.getElementById('edit-instrument-latitude').value) || null,
