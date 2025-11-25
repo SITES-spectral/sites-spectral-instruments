@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 📋 Next Steps
-- Complete MS Sensor modal UI (Phase 3) - copy sections from Phenocam modal and add Sensor Specifications
 - Build sensor models library UI in admin dashboard
 - Documentation management UI with file upload
 - Implement station-scoped admin role for enhanced security
@@ -17,6 +16,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ROI polygon point editing (canvas-based digitizer)
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
+
+## [6.4.0] - 2025-11-25
+
+### ✅ PHASE 3 COMPLETE: MS Sensor Modal UI
+
+**📅 Release Date**: 2025-11-25
+**🎯 Achievement**: Completed MS sensor edit modal with full 6-section interface
+**🔄 Continuation**: Building on v6.3.0 modal architecture refactoring
+
+#### 🏗️ **MS Sensor Modal - 100% Complete**
+
+**Status**: Fully functional and production-ready
+
+**6 Sections Implemented:**
+1. **General Information** (5 fields) - name, normalized_id, status, measurement status, legacy_acronym
+2. **Sensor Specifications** (12 fields) - **MS-SPECIFIC SECTION**
+   - sensor_brand, sensor_model, sensor_serial_number
+   - orientation (uplooking/downlooking dropdown)
+   - number_of_channels (1-8), field_of_view_degrees, cable_length_m
+   - datalogger_type (default: Campbell Scientific CR1000X)
+   - datalogger_program_normal, datalogger_program_calibration
+   - end_date (decommissioning), calibration_logs (textarea)
+3. **Position & Orientation** (6 fields) - lat/lon, height, viewing direction, azimuth, nadir
+4. **Timeline & Deployment** (7 fields) - type, ecosystem, deployment date, calibration, measurement years
+5. **System Configuration** (6 fields) - power, transmission, warranty, processing, quality score
+6. **Documentation** (3 fields) - description, installation notes, maintenance notes
+
+**Key Features:**
+- ✅ Save button enabled - full edit functionality restored
+- ✅ Clean separation from Phenocam modal (no camera fields)
+- ✅ No Phenocam Processing section (Section 6 removed)
+- ✅ All 39 MS sensor fields properly mapped to save function
+- ✅ Section 2B (Sensor Specifications) replaces Section 2A (Camera Specifications)
+
+#### 📁 **Files Modified**
+
+**`public/station.html`**:
+- `buildMSSensorModalHTML()` function (lines 6670-7041) - Replaced 43-line placeholder with 372-line complete modal
+- File grew from ~9435 to 9785 lines (+350 lines)
+- Backup created: `public/station.html.backup-phase3`
+
+**`package.json`**:
+- Version bumped: 6.3.0 → 6.4.0
+- Description updated: "Phase 3: Complete MS Sensor Modal"
+
+#### 🎯 **Implementation Process**
+
+**Section Extraction:**
+- Extracted sections 1, 3, 4, 5, 7 from Phenocam modal using sed commands
+- Created custom Section 2B (Sensor Specifications) with 12 MS-specific fields
+- Assembled complete 372-line modal function
+- Verified all field IDs match save function expectations
+
+**Quality Assurance:**
+- ✅ Save button verified as enabled (no disabled attribute)
+- ✅ All sections properly structured with collapsible headers
+- ✅ Form actions properly positioned at bottom
+- ✅ No duplicate sections or form elements
+- ✅ Proper admin/readonly permission handling
+
+#### 🔄 **Architecture Continuity**
+
+This release completes the modal architecture refactoring started in v6.3.0:
+- **v6.3.0**: Router system + complete Phenocam modal
+- **v6.4.0**: Complete MS sensor modal (Phase 3)
+
+**Next Instrument Types Ready for Implementation:**
+- PAR Sensors
+- NDVI Sensors
+- PRI Sensors
+- Hyperspectral Sensors
+
+Each can now be added following the same clean pattern:
+1. Add routing condition in `showInstrumentEditModal()`
+2. Create `build{Type}ModalHTML()` function
+3. Copy shared sections, add type-specific sections
 
 ## [6.3.0] - 2025-11-25
 

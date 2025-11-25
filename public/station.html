@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=6.3.0">
+    <link rel="stylesheet" href="/css/styles.css?v=6.4.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="6.3.0">
+    <meta name="app-version" content="6.4.0">
     <meta name="build-date" content="2025-11-25">
 
     <style>
@@ -3930,19 +3930,19 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=6.3.0"></script>
-    <script src="/js/api.js?v=6.3.0"></script>
-    <script src="/js/components.js?v=6.3.0"></script>
+    <script src="/js/utils.js?v=6.4.0"></script>
+    <script src="/js/api.js?v=6.4.0"></script>
+    <script src="/js/components.js?v=6.4.0"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=6.3.0"></script>
-    <script src="/js/station-dashboard.js?v=6.3.0"></script>
-    <script src="/js/navigation.js?v=6.3.0"></script>
-    <script src="/js/export.js?v=6.3.0"></script>
+    <script src="/js/interactive-map.js?v=6.4.0"></script>
+    <script src="/js/station-dashboard.js?v=6.4.0"></script>
+    <script src="/js/navigation.js?v=6.4.0"></script>
+    <script src="/js/export.js?v=6.4.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -6668,43 +6668,372 @@
         // BUILD MS SENSOR MODAL HTML (Complete, no conditionals, NO ROI, NO Phenocam Processing)
         // ============================================================================
         function buildMSSensorModalHTML(instrument, isAdmin) {
-            // MS Sensor Modal uses same structure as Phenocam but with Sensor Specs instead of Camera Specs
-            // For full implementation: copy all sections from buildPhenocamModalHTML except:
-            // - Replace Section 2A (Camera) with Section 2B (Sensor)
-            // - Remove Section 6 (Phenocam Processing)
-
             return `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
                 <form id="instrument-update-form">
                     <input type="hidden" id="edit-instrument-id" value="${instrument.id}">
 
-                    <!-- MS SENSOR NOTE: For Phase 2 full implementation, all sections from Phenocam modal -->
-                    <!-- will be copied here, replacing Camera Specs with Sensor Specs -->
-                    <!-- Current implementation: Key MS sensor fields only -->
-
+                    <!-- SECTION 1: General Information (5 fields) -->
                     <div class="form-section">
-                        <h4 onclick="toggleSection(this)"><i class="fas fa-satellite"></i> MS Sensor Configuration</h4>
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-info-circle"></i> General Information</h4>
                         <div class="form-section-content">
-                            <p><i class="fas fa-info-circle"></i> <strong>MS Sensor Modal - Phase 2</strong></p>
-                            <p>This modal shares most sections with the Phenocam modal (General Info, Position, Timeline, System Config, Documentation).</p>
-                            <p><strong>Key Difference:</strong> Uses Sensor Specifications instead of Camera Specifications.</p>
-                            <p><strong>Status:</strong> Functional - all MS sensor fields are being saved correctly via the save function.</p>
-                            <p><strong>Next:</strong> Full modal UI with all sections will be implemented in next iteration.</p>
                             <div class="form-group">
-                                <label>Instrument Type</label>
-                                <input type="text" value="${instrument.instrument_type || 'Multispectral Sensor'}" class="form-control" readonly>
+                                <label>Instrument Name <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="edit-instrument-name" value="${instrument.display_name || ''}"
+                                       class="form-control" required aria-label="Instrument Name">
                             </div>
                             <div class="form-group">
-                                <label>Normalized Name</label>
-                                <input type="text" value="${instrument.normalized_name || ''}" class="form-control" readonly>
+                                <label>Normalized ID</label>
+                                <input type="text" id="edit-instrument-normalized" value="${instrument.normalized_name || ''}"
+                                       class="form-control field-readonly" readonly aria-label="Normalized ID">
+                                <small class="form-text">System-generated identifier</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Legacy Acronym</label>
+                                <input type="text" id="edit-instrument-legacy" value="${instrument.legacy_acronym || ''}"
+                                       class="form-control" placeholder="e.g., ANS-FOR-P01" aria-label="Legacy Acronym">
+                                <small class="form-text">Historical data compatibility</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="edit-instrument-status" class="form-control" aria-label="Instrument Status">
+                                    <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Testing" ${instrument.status === 'Testing' ? 'selected' : ''}>Testing</option>
+                                    <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                    <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                                    <option value="Planned" ${instrument.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Measurement Status</label>
+                                <select id="edit-instrument-measurement-status" class="form-control" aria-label="Measurement Status">
+                                    <option value="">Select status...</option>
+                                    <option value="Active" ${instrument.measurement_status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${instrument.measurement_status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Intermittent" ${instrument.measurement_status === 'Intermittent' ? 'selected' : ''}>Intermittent</option>
+                                    <option value="Seasonal" ${instrument.measurement_status === 'Seasonal' ? 'selected' : ''}>Seasonal</option>
+                                    <option value="Completed" ${instrument.measurement_status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2A: Camera Specifications (11 fields) -->
+                    <!-- SECTION 2B: Sensor Specifications (12 fields) - MS SENSORS ONLY -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-satellite"></i> Sensor Specifications</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Sensor Brand</label>
+                                <input type="text" id="edit-sensor-brand" value="${instrument.sensor_brand || ''}"
+                                       class="form-control" placeholder="e.g., SKYE, Decagon, Apogee" aria-label="Sensor Brand">
+                            </div>
+                            <div class="form-group">
+                                <label>Sensor Model</label>
+                                <input type="text" id="edit-sensor-model" value="${instrument.sensor_model || ''}"
+                                       class="form-control" placeholder="e.g., SKR 1800, SKR110" aria-label="Sensor Model">
+                            </div>
+                            <div class="form-group">
+                                <label>Sensor Serial Number</label>
+                                <input type="text" id="edit-sensor-serial" value="${instrument.sensor_serial_number || ''}"
+                                       class="form-control" placeholder="Sensor serial number" aria-label="Sensor Serial Number">
+                            </div>
+                            <div class="form-group">
+                                <label>Orientation</label>
+                                <select id="edit-sensor-orientation" class="form-control" aria-label="Sensor Orientation">
+                                    <option value="">Select orientation...</option>
+                                    <option value="uplooking" ${instrument.orientation === 'uplooking' ? 'selected' : ''}>Uplooking</option>
+                                    <option value="downlooking" ${instrument.orientation === 'downlooking' ? 'selected' : ''}>Downlooking</option>
+                                </select>
+                                <small class="form-text">Sensor pointing direction</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Channels</label>
+                                <input type="number" id="edit-number-channels" value="${instrument.number_of_channels || ''}"
+                                       class="form-control" min="1" max="8" placeholder="e.g., 2, 4" aria-label="Number of Channels">
+                                <small class="form-text">Spectral bands/wavelengths (typically 2-8)</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Field of View (degrees)</label>
+                                <input type="number" id="edit-field-of-view" value="${instrument.field_of_view_degrees || ''}"
+                                       class="form-control" step="0.1" min="0" max="180" placeholder="e.g., 180" aria-label="Field of View">
+                            </div>
+                            <div class="form-group">
+                                <label>Cable Length (meters)</label>
+                                <input type="number" id="edit-cable-length" value="${instrument.cable_length_m || ''}"
+                                       class="form-control" step="0.1" min="0" placeholder="e.g., 10.0" aria-label="Cable Length">
+                            </div>
+                            <div class="form-group">
+                                <label>Datalogger Type</label>
+                                <input type="text" id="edit-datalogger-type" value="${instrument.datalogger_type || 'Campbell Scientific CR1000X'}"
+                                       class="form-control" placeholder="e.g., Campbell Scientific CR1000X" aria-label="Datalogger Type">
+                            </div>
+                            <div class="form-group">
+                                <label>Normal Datalogger Program</label>
+                                <input type="text" id="edit-datalogger-program-normal" value="${instrument.datalogger_program_normal || ''}"
+                                       class="form-control" placeholder="Program name or file path" aria-label="Normal Program">
+                                <small class="form-text">Program used for regular measurements</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Calibration Datalogger Program</label>
+                                <input type="text" id="edit-datalogger-program-calibration" value="${instrument.datalogger_program_calibration || ''}"
+                                       class="form-control" placeholder="Program name or file path" aria-label="Calibration Program">
+                                <small class="form-text">Program used for calibration procedures</small>
+                            </div>
+                            <div class="form-group">
+                                <label>End Date</label>
+                                <input type="date" id="edit-end-date" value="${instrument.end_date || ''}"
+                                       class="form-control" aria-label="End Date">
+                                <small class="form-text">Date sensor was decommissioned (if applicable)</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Calibration Logs</label>
+                                <textarea id="edit-calibration-logs" class="form-control" rows="3"
+                                          placeholder="Calibration history and notes..." aria-label="Calibration Logs">${instrument.calibration_logs || ''}</textarea>
+                                <small class="form-text">Calibration history, coefficients, and procedures</small>
+                            </div>
+                            <div class="form-group">
+                                <p class="form-text"><i class="fas fa-info-circle"></i> <strong>Channel Management:</strong>
+                                Individual spectral channels/bands can be configured after saving.
+                                Use the channel manager to define wavelengths, calibration coefficients, and processing parameters for each band.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Latitude</label>
+                                <input type="number" id="edit-instrument-latitude" value="${instrument.latitude || ''}"
+                                       class="form-control" step="any" placeholder="Decimal degrees" aria-label="Latitude">
+                                <small class="form-text">Rounded to 6 decimal places</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Longitude</label>
+                                <input type="number" id="edit-instrument-longitude" value="${instrument.longitude || ''}"
+                                       class="form-control" step="any" placeholder="Decimal degrees" aria-label="Longitude">
+                                <small class="form-text">Rounded to 6 decimal places</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Height (meters)</label>
+                                <input type="number" id="edit-instrument-height" value="${instrument.instrument_height_m || ''}"
+                                       class="form-control" step="0.01" placeholder="Height above ground" aria-label="Instrument Height">
+                            </div>
+                            <div class="form-group">
+                                <label>Viewing Direction</label>
+                                <select id="edit-instrument-viewing-direction" class="form-control" aria-label="Viewing Direction">
+                                    <option value="">Select direction...</option>
+                                    <option value="North" ${instrument.viewing_direction === 'North' ? 'selected' : ''}>North</option>
+                                    <option value="Northeast" ${instrument.viewing_direction === 'Northeast' ? 'selected' : ''}>Northeast</option>
+                                    <option value="East" ${instrument.viewing_direction === 'East' ? 'selected' : ''}>East</option>
+                                    <option value="Southeast" ${instrument.viewing_direction === 'Southeast' ? 'selected' : ''}>Southeast</option>
+                                    <option value="South" ${instrument.viewing_direction === 'South' ? 'selected' : ''}>South</option>
+                                    <option value="Southwest" ${instrument.viewing_direction === 'Southwest' ? 'selected' : ''}>Southwest</option>
+                                    <option value="West" ${instrument.viewing_direction === 'West' ? 'selected' : ''}>West</option>
+                                    <option value="Northwest" ${instrument.viewing_direction === 'Northwest' ? 'selected' : ''}>Northwest</option>
+                                    <option value="Other" ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-viewing-direction-other" value="${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? instrument.viewing_direction : ''}"
+                                       class="form-control mt-2" placeholder="Specify direction..." style="display: ${instrument.viewing_direction && !['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'].includes(instrument.viewing_direction) ? 'block' : 'none'};" aria-label="Other Viewing Direction">
+                            </div>
+                            <div class="form-group">
+                                <label>Azimuth (degrees)</label>
+                                <input type="number" id="edit-instrument-azimuth" value="${instrument.azimuth_degrees || ''}"
+                                       class="form-control" step="0.1" min="0" max="360" placeholder="0-360 degrees" aria-label="Azimuth">
+                            </div>
+                            <div class="form-group">
+                                <label>Degrees from Nadir</label>
+                                <input type="number" id="edit-instrument-nadir" value="${instrument.degrees_from_nadir || ''}"
+                                       class="form-control" step="0.1" min="0" max="90" placeholder="0-90 degrees" aria-label="Degrees from Nadir">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: Timeline & Deployment (7 fields) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-calendar-alt"></i> Timeline & Deployment</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Instrument Type</label>
+                                <select id="edit-instrument-type" class="form-control" aria-label="Instrument Type">
+                                    <option value="">Select type...</option>
+                                    <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
+                                    <optgroup label="Multispectral Sensors (Fixed Platform - MS)">
+                                        <option value="SKYE MultiSpectral Sensor (Uplooking)" ${instrument.instrument_type === 'SKYE MultiSpectral Sensor (Uplooking)' ? 'selected' : ''}>SKYE MultiSpectral (Uplooking)</option>
+                                        <option value="SKYE MultiSpectral Sensor (Downlooking)" ${instrument.instrument_type === 'SKYE MultiSpectral Sensor (Downlooking)' ? 'selected' : ''}>SKYE MultiSpectral (Downlooking)</option>
+                                        <option value="Decagon Sensor (Uplooking)" ${instrument.instrument_type === 'Decagon Sensor (Uplooking)' ? 'selected' : ''}>Decagon (Uplooking)</option>
+                                        <option value="Decagon Sensor (Downlooking)" ${instrument.instrument_type === 'Decagon Sensor (Downlooking)' ? 'selected' : ''}>Decagon (Downlooking)</option>
+                                        <option value="Apogee MS" ${instrument.instrument_type === 'Apogee MS' ? 'selected' : ''}>Apogee MS</option>
+                                    </optgroup>
+                                    <optgroup label="PRI & NDVI Sensors">
+                                        <option value="PRI Sensor (2-band ~530nm/~570nm)" ${instrument.instrument_type === 'PRI Sensor (2-band ~530nm/~570nm)' ? 'selected' : ''}>PRI Sensor (2-band ~530nm/~570nm)</option>
+                                        <option value="NDVI Sensor" ${instrument.instrument_type === 'NDVI Sensor' ? 'selected' : ''}>NDVI Sensor</option>
+                                        <option value="Apogee NDVI" ${instrument.instrument_type === 'Apogee NDVI' ? 'selected' : ''}>Apogee NDVI</option>
+                                    </optgroup>
+                                    <optgroup label="PAR Sensors">
+                                        <option value="PAR Sensor" ${instrument.instrument_type === 'PAR Sensor' ? 'selected' : ''}>PAR Sensor</option>
+                                        <option value="Apogee PAR" ${instrument.instrument_type === 'Apogee PAR' ? 'selected' : ''}>Apogee PAR</option>
+                                    </optgroup>
+                                    <option value="Other" ${instrument.instrument_type && !['Phenocam', 'SKYE MultiSpectral Sensor (Uplooking)', 'SKYE MultiSpectral Sensor (Downlooking)', 'Decagon Sensor (Uplooking)', 'Decagon Sensor (Downlooking)', 'Apogee MS', 'PRI Sensor (2-band ~530nm/~570nm)', 'NDVI Sensor', 'Apogee NDVI', 'PAR Sensor', 'Apogee PAR'].includes(instrument.instrument_type) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-type-other" value="${instrument.instrument_type && !['Phenocam', 'SKYE MultiSpectral Sensor (Uplooking)', 'SKYE MultiSpectral Sensor (Downlooking)', 'Decagon Sensor (Uplooking)', 'Decagon Sensor (Downlooking)', 'Apogee MS', 'PRI Sensor (2-band ~530nm/~570nm)', 'NDVI Sensor', 'Apogee NDVI', 'PAR Sensor', 'Apogee PAR'].includes(instrument.instrument_type) ? instrument.instrument_type : ''}"
+                                       class="form-control mt-2" placeholder="Specify type..." style="display: ${instrument.instrument_type && !['Phenocam', 'SKYE MultiSpectral Sensor (Uplooking)', 'SKYE MultiSpectral Sensor (Downlooking)', 'Decagon Sensor (Uplooking)', 'Decagon Sensor (Downlooking)', 'Apogee MS', 'PRI Sensor (2-band ~530nm/~570nm)', 'NDVI Sensor', 'Apogee NDVI', 'PAR Sensor', 'Apogee PAR'].includes(instrument.instrument_type) ? 'block' : 'none'};" aria-label="Other Instrument Type">
+                            </div>
+                            <div class="form-group">
+                                <label>Ecosystem Code</label>
+                                <select id="edit-instrument-ecosystem" class="form-control" aria-label="Ecosystem Code">
+                                    <option value="">Select ecosystem...</option>
+                                    <option value="HEA" ${instrument.ecosystem_code === 'HEA' ? 'selected' : ''}>HEA - Heathland</option>
+                                    <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Arable Land</option>
+                                    <option value="MIR" ${instrument.ecosystem_code === 'MIR' ? 'selected' : ''}>MIR - Mires</option>
+                                    <option value="LAK" ${instrument.ecosystem_code === 'LAK' ? 'selected' : ''}>LAK - Lake</option>
+                                    <option value="WET" ${instrument.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
+                                    <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                    <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
+                                    <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine Forest</option>
+                                    <option value="CON" ${instrument.ecosystem_code === 'CON' ? 'selected' : ''}>CON - Coniferous Forest</option>
+                                    <option value="DEC" ${instrument.ecosystem_code === 'DEC' ? 'selected' : ''}>DEC - Deciduous Forest</option>
+                                    <option value="MAR" ${instrument.ecosystem_code === 'MAR' ? 'selected' : ''}>MAR - Marshland</option>
+                                    <option value="PEA" ${instrument.ecosystem_code === 'PEA' ? 'selected' : ''}>PEA - Peatland</option>
+                                    <option value="Other" ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'selected' : ''}>Other</option>
+                                </select>
+                                <input type="text" id="edit-instrument-ecosystem-other" value="${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? instrument.ecosystem_code : ''}"
+                                       class="form-control mt-2" placeholder="Enter ecosystem code..." style="display: ${instrument.ecosystem_code && !['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA'].includes(instrument.ecosystem_code) ? 'block' : 'none'};" aria-label="Other Ecosystem Code">
+                            </div>
+                            <div class="form-group">
+                                <label>Deployment Date</label>
+                                <input type="date" id="edit-instrument-deployment" value="${instrument.deployment_date || ''}"
+                                       class="form-control" aria-label="Deployment Date">
+                                <small class="form-text">Format: YYYY-MM-DD</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Calibration Date</label>
+                                <input type="date" id="edit-instrument-calibration-date" value="${instrument.calibration_date || ''}"
+                                       class="form-control" onchange="updateCalibrationStatus(this)" aria-label="Calibration Date">
+                                <small class="form-text" id="calibration-status"></small>
+                            </div>
+                            <div class="form-group">
+                                <label>First Measurement Year</label>
+                                <input type="number" id="edit-instrument-first-year" value="${instrument.first_measurement_year || ''}"
+                                       class="form-control" min="2000" max="2030" placeholder="e.g., 2010" aria-label="First Measurement Year">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Measurement Year</label>
+                                <input type="number" id="edit-instrument-last-year" value="${instrument.last_measurement_year || ''}"
+                                       class="form-control" min="2000" max="2030" placeholder="e.g., 2024" aria-label="Last Measurement Year">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Platform & Station</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                    <input type="text" value="${instrument.platform_name || ''}" class="form-control field-readonly" readonly title="Platform is managed separately" aria-label="Platform">
+                                    <input type="text" value="${(instrument.station_name || '') + (instrument.station_acronym ? ' (' + instrument.station_acronym + ')' : '')}" class="form-control field-readonly" readonly title="Station is managed separately" aria-label="Station">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: System Configuration (6 fields) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-cog"></i> System Configuration</h4>
+                        <div class="form-section-content">
+                            <div class="form-group">
+                                <label>Power Source</label>
+                                <select id="edit-instrument-power-source" class="form-control" aria-label="Power Source">
+                                    <option value="">Select power source...</option>
+                                    <option value="Solar" ${instrument.power_source === 'Solar' ? 'selected' : ''}>☀️ Solar</option>
+                                    <option value="Grid" ${instrument.power_source === 'Grid' ? 'selected' : ''}>🔌 Grid</option>
+                                    <option value="Battery" ${instrument.power_source === 'Battery' ? 'selected' : ''}>🔋 Battery</option>
+                                    <option value="Solar + Battery" ${instrument.power_source === 'Solar + Battery' ? 'selected' : ''}>☀️🔋 Solar + Battery</option>
+                                    <option value="Other" ${instrument.power_source === 'Other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Data Transmission</label>
+                                <select id="edit-instrument-data-transmission" class="form-control" aria-label="Data Transmission">
+                                    <option value="">Select transmission method...</option>
+                                    <option value="WiFi" ${instrument.data_transmission === 'WiFi' ? 'selected' : ''}>📡 WiFi</option>
+                                    <option value="Ethernet" ${instrument.data_transmission === 'Ethernet' ? 'selected' : ''}>🔗 Ethernet</option>
+                                    <option value="Cellular" ${instrument.data_transmission === 'Cellular' ? 'selected' : ''}>📱 Cellular</option>
+                                    <option value="LoRaWAN" ${instrument.data_transmission === 'LoRaWAN' ? 'selected' : ''}>📻 LoRaWAN</option>
+                                    <option value="SD Card" ${instrument.data_transmission === 'SD Card' ? 'selected' : ''}>💾 SD Card</option>
+                                    <option value="Other" ${instrument.data_transmission === 'Other' ? 'selected' : ''}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Warranty Expiration</label>
+                                <input type="date" id="edit-instrument-warranty-expires" value="${instrument.manufacturer_warranty_expires || ''}"
+                                       class="form-control" onchange="updateWarrantyStatus(this)" aria-label="Warranty Expiration">
+                                <small class="form-text" id="warranty-status"></small>
+                            </div>
+                            <div class="form-group">
+                                <label>Image Processing</label>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="edit-instrument-image-processing" ${instrument.image_processing_enabled ? 'checked' : ''} aria-label="Image Processing Enabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span id="image-processing-label">${instrument.image_processing_enabled ? 'Enabled' : 'Disabled'}</span>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Image Quality Score (0-100)</label>
+                                <div class="range-slider-container">
+                                    <input type="range" id="edit-instrument-quality-score" value="${instrument.image_quality_score || 80}"
+                                           min="0" max="100" step="1" class="range-slider" oninput="updateQualityDisplay(this.value)" aria-label="Image Quality Score">
+                                    <div class="range-value-display">
+                                        <span>Score: <strong id="quality-score-value">${instrument.image_quality_score || 80}</strong></span>
+                                        <span id="quality-badge" class="quality-badge ${(instrument.image_quality_score || 80) >= 75 ? 'high' : (instrument.image_quality_score || 80) >= 50 ? 'medium' : 'low'}">
+                                            ${(instrument.image_quality_score || 80) >= 75 ? 'High Quality' : (instrument.image_quality_score || 80) >= 50 ? 'Medium Quality' : 'Low Quality'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Calibration Notes</label>
+                                <textarea id="edit-instrument-calibration-notes" class="form-control" rows="2"
+                                          maxlength="500" oninput="updateCharCount(this, 'calibration-char-count')"
+                                          placeholder="Notes about calibration procedures..." aria-label="Calibration Notes">${instrument.calibration_notes || ''}</textarea>
+                                <div id="calibration-char-count" class="char-counter">${(instrument.calibration_notes || '').length}/500</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: Phenocam Processing (1 field) -->
+                    <div class="form-section">
+                        <h4 onclick="toggleSection(this)"><i class="fas fa-sticky-note"></i> Documentation</h4>
+                        <div class="form-section-content">
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea id="edit-instrument-description" class="form-control" rows="3"
+                                          maxlength="1000" oninput="updateCharCount(this, 'description-char-count')"
+                                          placeholder="General description of the instrument..." aria-label="Description">${instrument.description || ''}</textarea>
+                                <div id="description-char-count" class="char-counter">${(instrument.description || '').length}/1000</div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Installation Notes</label>
+                                <textarea id="edit-instrument-installation-notes" class="form-control" rows="3"
+                                          maxlength="1000" oninput="updateCharCount(this, 'installation-char-count')"
+                                          placeholder="Notes about installation and setup..." aria-label="Installation Notes">${instrument.installation_notes || ''}</textarea>
+                                <div id="installation-char-count" class="char-counter">${(instrument.installation_notes || '').length}/1000</div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Maintenance Notes</label>
+                                <textarea id="edit-instrument-maintenance-notes" class="form-control" rows="3"
+                                          maxlength="1000" oninput="updateCharCount(this, 'maintenance-char-count')"
+                                          placeholder="Maintenance history and notes..." aria-label="Maintenance Notes">${instrument.maintenance_notes || ''}</textarea>
+                                <div id="maintenance-char-count" class="char-counter">${(instrument.maintenance_notes || '').length}/1000</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-actions">
+
+                    <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">Cancel</button>
-                        <button type="submit" class="save-btn" disabled title="Full MS sensor modal UI coming in Phase 2">
-                            <i class="fas fa-save"></i> Save Changes (Phase 2)
+                        <button type="submit" class="save-btn">
+                            <i class="fas fa-save"></i> Save Changes
                         </button>
                     </div>
                 </form>

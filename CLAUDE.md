@@ -4,14 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 6.3.0 - ARCHITECTURE: Modal Separation Refactoring (2025-11-25)
+## Current Version: 6.4.0 - PHASE 3: Complete MS Sensor Modal (2025-11-25)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-25
-**🌿 Branch:** Merged from `refactor/modals-separation`
 
-### ✅ Latest Update: Modal Architecture Refactoring (v6.3.0)
+### ✅ Latest Update: MS Sensor Modal Complete (v6.4.0)
+
+**🎯 Achievement**: Completed MS sensor edit modal with full 6-section interface, building on v6.3.0 modal architecture
+
+#### **MS Sensor Modal - 100% Complete:**
+
+**Status**: Fully functional and production-ready
+
+**6 Sections Implemented:**
+1. **General Information** (5 fields) - name, normalized_id, status, measurement status, legacy_acronym
+2. **Sensor Specifications** (12 fields) - **MS-SPECIFIC SECTION**
+   - sensor_brand, sensor_model, sensor_serial_number
+   - orientation (uplooking/downlooking), number_of_channels, field_of_view_degrees
+   - cable_length_m, datalogger_type, datalogger programs (normal/calibration)
+   - end_date, calibration_logs
+3. **Position & Orientation** (6 fields) - lat/lon, height, viewing direction, azimuth, nadir
+4. **Timeline & Deployment** (7 fields) - type, ecosystem, deployment dates, calibration, measurement years
+5. **System Configuration** (6 fields) - power, transmission, warranty, processing, quality score
+6. **Documentation** (3 fields) - description, installation notes, maintenance notes
+
+**Key Features:**
+- ✅ Save button enabled - full edit functionality
+- ✅ Clean separation from Phenocam modal (no camera fields)
+- ✅ All 39 MS sensor fields properly mapped to save function
+- ✅ Section 2B (Sensor Specifications) replaces Camera Specifications
+
+#### **Files Modified:**
+- `public/station.html` - buildMSSensorModalHTML() replaced (lines 6670-7041, +350 lines)
+- `package.json` - Version 6.3.0 → 6.4.0
+
+### Previous Update: Modal Architecture Refactoring (v6.3.0)
 
 **🎯 Achievement**: Complete architectural refactoring - replaced monolithic conditional modals with clean, type-specific rendering functions
 

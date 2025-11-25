@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "6.3.0",
-  "description": "SITES Spectral Stations & Instruments Management System v6.3.0 - Modal Architecture Refactoring",
+  "version": "6.4.0",
+  "description": "SITES Spectral Stations & Instruments Management System v6.4.0 - Phase 3: Complete MS Sensor Modal",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
