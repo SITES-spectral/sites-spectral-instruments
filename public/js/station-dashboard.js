@@ -1723,10 +1723,14 @@ class SitesStationDashboard {
                         <select id="edit-instrument-type" class="form-select" required>
                             <option value="">Select Type</option>
                             <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
-                            <option value="Weather Station" ${instrument.instrument_type === 'Weather Station' ? 'selected' : ''}>Weather Station</option>
-                            <option value="Soil Sensor" ${instrument.instrument_type === 'Soil Sensor' ? 'selected' : ''}>Soil Sensor</option>
-                            <option value="Eddy Covariance" ${instrument.instrument_type === 'Eddy Covariance' ? 'selected' : ''}>Eddy Covariance</option>
-                            <option value="Other" ${instrument.instrument_type === 'Other' ? 'selected' : ''}>Other</option>
+                            <option value="Multispectral Sensor" ${instrument.instrument_type === 'Multispectral Sensor' ? 'selected' : ''}>Multispectral Sensor</option>
+                            <option value="SKYE MS" ${instrument.instrument_type === 'SKYE MS' ? 'selected' : ''}>SKYE MS Sensor</option>
+                            <option value="Decagon MS" ${instrument.instrument_type === 'Decagon MS' ? 'selected' : ''}>Decagon MS Sensor</option>
+                            <option value="Apogee MS" ${instrument.instrument_type === 'Apogee MS' ? 'selected' : ''}>Apogee MS Sensor</option>
+                            <option value="PAR Sensor" ${instrument.instrument_type === 'PAR Sensor' ? 'selected' : ''}>PAR Sensor</option>
+                            <option value="NDVI Sensor" ${instrument.instrument_type === 'NDVI Sensor' ? 'selected' : ''}>NDVI Sensor</option>
+                            <option value="PRI Sensor" ${instrument.instrument_type === 'PRI Sensor' ? 'selected' : ''}>PRI Sensor</option>
+                            <option value="Hyperspectral Sensor" ${instrument.instrument_type === 'Hyperspectral Sensor' ? 'selected' : ''}>Hyperspectral Sensor</option>
                         </select>
                     </div>
                 </div>
