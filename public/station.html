@@ -21,12 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=6.1.3">
+    <link rel="stylesheet" href="/css/styles.css?v=6.1.6">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="6.1.3">
-    <meta name="build-date" content="2025-11-24">
+    <meta name="app-version" content="6.1.6">
+    <meta name="build-date" content="2025-11-25">
 
     <style>
         body {
@@ -3930,19 +3930,19 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=6.1.3"></script>
-    <script src="/js/api.js?v=6.1.3"></script>
-    <script src="/js/components.js?v=6.1.3"></script>
+    <script src="/js/utils.js?v=6.1.6"></script>
+    <script src="/js/api.js?v=6.1.6"></script>
+    <script src="/js/components.js?v=6.1.6"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=6.1.3"></script>
-    <script src="/js/station-dashboard.js?v=6.1.3"></script>
-    <script src="/js/navigation.js?v=6.1.3"></script>
-    <script src="/js/export.js?v=6.1.3"></script>
+    <script src="/js/interactive-map.js?v=6.1.6"></script>
+    <script src="/js/station-dashboard.js?v=6.1.6"></script>
+    <script src="/js/navigation.js?v=6.1.6"></script>
+    <script src="/js/export.js?v=6.1.6"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -4579,13 +4579,45 @@
             return `/images/stations/${stationDir}/instruments/${instrument.normalized_name}.jpg`;
         }
 
+        // Helper function to get instrument type icon and color (used by multiple functions)
+        function getInstrumentTypeIcon(instrumentType) {
+            switch (instrumentType) {
+                case 'Phenocam':
+                    return { icon: 'fa-camera', color: '#10b981' };
+                case 'Multispectral Sensor':
+                    return { icon: 'fa-wave-square', color: '#6366f1' };
+                case 'PAR Sensor':
+                    return { icon: 'fa-sun', color: '#eab308' };
+                case 'Hyperspectral Sensor':
+                    return { icon: 'fa-rainbow', color: '#8b5cf6' };
+                default:
+                    return { icon: 'fa-microchip', color: '#6b7280' };
+            }
+        }
+
         function createInstrumentThumbnail(instrument) {
-            // Show loading state initially
+            const instrumentType = instrument.instrument_type || 'Unknown';
+
+            // Only show image loading for Phenocam instruments
+            if (instrumentType === 'Phenocam') {
+                // Show loading state initially
+                return `
+                    <div class="instrument-thumbnail-container" id="thumbnail-${instrument.id}">
+                        <div class="instrument-thumbnail-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Loading image...</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // For non-Phenocam instruments, show type-specific placeholder
+            const typeInfo = getInstrumentTypeIcon(instrumentType);
             return `
                 <div class="instrument-thumbnail-container" id="thumbnail-${instrument.id}">
-                    <div class="instrument-thumbnail-loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>Loading image...</span>
+                    <div class="instrument-thumbnail-placeholder" style="background: linear-gradient(135deg, ${typeInfo.color}15, ${typeInfo.color}05);">
+                        <i class="fas ${typeInfo.icon}" style="color: ${typeInfo.color}; font-size: 2rem;"></i>
+                        <span style="color: ${typeInfo.color}; font-weight: 500; font-size: 0.75rem;">${instrumentType}</span>
                     </div>
                 </div>
             `;
@@ -4727,45 +4759,109 @@
         });
 
         function createInstrumentModalImage(instrument) {
-            const imageUrl = getInstrumentImageUrl(instrument);
+            const instrumentType = instrument.instrument_type || 'Unknown';
 
-            if (!imageUrl) {
+            // Only show phenocam image section for Phenocam instruments
+            if (instrumentType === 'Phenocam') {
+                const imageUrl = getInstrumentImageUrl(instrument);
+
+                if (!imageUrl) {
+                    return `
+                        <div class="instrument-modal-image-placeholder">
+                            <i class="fas fa-camera"></i>
+                            <span>No representative phenocam image available</span>
+                        </div>
+                    `;
+                }
+
                 return `
-                    <div class="instrument-modal-image-placeholder">
-                        <i class="fas fa-camera"></i>
-                        <span>No representative image available</span>
+                    <div class="instrument-modal-image-container">
+                        <img
+                            src="${imageUrl}"
+                            alt="Current phenocam view for ${instrument.display_name || instrument.normalized_name}"
+                            class="instrument-modal-image"
+                            onerror="this.parentElement.innerHTML='<div class=\\'instrument-modal-image-placeholder\\'><i class=\\'fas fa-camera\\'></i><span>Image not available</span></div>'"
+                        />
+                        <div class="image-caption">
+                            <i class="fas fa-camera"></i>
+                            Representative phenocam view
+                            <span class="image-note">Updated weekly/monthly to show vegetation status</span>
+                        </div>
                     </div>
                 `;
             }
 
-            return `
-                <div class="instrument-modal-image-container">
-                    <img
-                        src="${imageUrl}"
-                        alt="Current phenocam view for ${instrument.display_name || instrument.normalized_name}"
-                        class="instrument-modal-image"
-                        onerror="this.parentElement.innerHTML='<div class=\\'instrument-modal-image-placeholder\\'><i class=\\'fas fa-camera\\'></i><span>Image not available</span></div>'"
-                    />
-                    <div class="image-caption">
-                        <i class="fas fa-camera"></i>
-                        Representative phenocam view
-                        <span class="image-note">Updated weekly/monthly to show vegetation status</span>
+            // For Multispectral Sensor, show spectral channels info
+            if (instrumentType === 'Multispectral Sensor') {
+                return `
+                    <div class="instrument-type-info-placeholder">
+                        <i class="fas fa-wave-square" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Multispectral Sensor</h4>
+                        <span style="color: #6b7280; font-size: 0.9rem;">This instrument captures spectral reflectance data across multiple wavelength bands.</span>
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd;">
+                            <span style="color: #0369a1; font-size: 0.85rem;"><i class="fas fa-info-circle"></i> Spectral data is processed through the SITES Spectral pipeline</span>
+                        </div>
                     </div>
+                `;
+            }
+
+            // For PAR Sensor
+            if (instrumentType === 'PAR Sensor') {
+                return `
+                    <div class="instrument-type-info-placeholder">
+                        <i class="fas fa-sun" style="font-size: 3rem; color: #eab308; margin-bottom: 1rem;"></i>
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">PAR Sensor</h4>
+                        <span style="color: #6b7280; font-size: 0.9rem;">This instrument measures Photosynthetically Active Radiation (400-700nm).</span>
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: #fefce8; border-radius: 8px; border: 1px solid #fde047;">
+                            <span style="color: #a16207; font-size: 0.85rem;"><i class="fas fa-chart-line"></i> PAR data is used to analyze light availability for photosynthesis</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // For Hyperspectral Sensor
+            if (instrumentType === 'Hyperspectral Sensor') {
+                return `
+                    <div class="instrument-type-info-placeholder">
+                        <i class="fas fa-rainbow" style="font-size: 3rem; color: #8b5cf6; margin-bottom: 1rem;"></i>
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Hyperspectral Sensor</h4>
+                        <span style="color: #6b7280; font-size: 0.9rem;">This instrument captures continuous spectral data across hundreds of narrow bands.</span>
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: #faf5ff; border-radius: 8px; border: 1px solid #e9d5ff;">
+                            <span style="color: #7c3aed; font-size: 0.85rem;"><i class="fas fa-microscope"></i> High-resolution spectral analysis for detailed vegetation characterization</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Default fallback for unknown instrument types
+            return `
+                <div class="instrument-type-info-placeholder">
+                    <i class="fas fa-microchip" style="font-size: 3rem; color: #6b7280; margin-bottom: 1rem;"></i>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #374151;">${instrumentType}</h4>
+                    <span style="color: #6b7280; font-size: 0.9rem;">Instrument type: ${instrumentType}</span>
                 </div>
             `;
         }
 
         function createImageMetadataSection(instrument) {
+            const instrumentType = instrument.instrument_type || 'Unknown';
+
+            // Only show image metadata section for Phenocam instruments
+            if (instrumentType !== 'Phenocam') {
+                // Return empty string for non-Phenocam instruments
+                return '';
+            }
+
             const imageMetadata = getImageMetadata(instrument.normalized_name);
 
             if (!imageMetadata || !imageMetadata.success) {
                 return `
                     <div class="detail-section">
-                        <h4><i class="fas fa-image"></i> Image Information</h4>
+                        <h4><i class="fas fa-image"></i> Phenocam Image Information</h4>
                         <div class="detail-field">
                             <span class="detail-label">Status</span>
                             <span class="detail-value status-missing">
-                                <i class="fas fa-exclamation-triangle"></i> No image available
+                                <i class="fas fa-exclamation-triangle"></i> No phenocam image available
                             </span>
                         </div>
                         ${imageMetadata?.error ? `
@@ -4780,7 +4876,7 @@
 
             return `
                 <div class="detail-section">
-                    <h4><i class="fas fa-image"></i> Image Information</h4>
+                    <h4><i class="fas fa-image"></i> Phenocam Image Information</h4>
                     <div class="detail-field">
                         <span class="detail-label">Image Captured</span>
                         <span class="detail-value">
@@ -4803,7 +4899,7 @@
                     <div class="detail-field">
                         <span class="detail-label">Update Status</span>
                         <span class="detail-value status-active">
-                            <i class="fas fa-check-circle"></i> Representative image available
+                            <i class="fas fa-check-circle"></i> Representative phenocam image available
                         </span>
                     </div>
                 </div>
@@ -5502,15 +5598,35 @@
             }
         }
 
+        // Helper function to get instrument type icon and color
+        function getInstrumentTypeIcon(instrumentType) {
+            switch (instrumentType) {
+                case 'Phenocam':
+                    return { icon: 'fa-camera', color: '#10b981' };
+                case 'Multispectral Sensor':
+                    return { icon: 'fa-wave-square', color: '#6366f1' };
+                case 'PAR Sensor':
+                    return { icon: 'fa-sun', color: '#eab308' };
+                case 'Hyperspectral Sensor':
+                    return { icon: 'fa-rainbow', color: '#8b5cf6' };
+                default:
+                    return { icon: 'fa-microchip', color: '#6b7280' };
+            }
+        }
+
         function populateInstrumentModal(instrument) {
             console.log('📋 populateInstrumentModal called with:', {
                 id: instrument.id,
                 display_name: instrument.display_name,
+                instrument_type: instrument.instrument_type,
                 deployment_date: instrument.deployment_date,
                 calibration_date: instrument.calibration_date
             });
 
             const detailsContainer = document.getElementById('instrument-details');
+            const instrumentType = instrument.instrument_type || 'Unknown';
+            const typeInfo = getInstrumentTypeIcon(instrumentType);
+            const isPhenocam = instrumentType === 'Phenocam';
 
             // Update modal header with edit button if user has permissions
             const modalHeader = document.querySelector('#instrument-modal .modal-header-large');
@@ -5518,7 +5634,7 @@
                 (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
 
             modalHeader.innerHTML = `
-                <h3><i class="fas fa-camera"></i> Instrument Details</h3>
+                <h3><i class="fas ${typeInfo.icon}" style="color: ${typeInfo.color};"></i> ${instrumentType} Details</h3>
                 <div class="modal-header-actions">
                     ${canEdit ? `
                         <button class="modal-edit-btn" onclick="editInstrument(${instrument.id})" title="Edit Instrument">
@@ -5559,6 +5675,7 @@
                         <span class="detail-value status-${instrument.status?.toLowerCase() || 'unknown'}">${getStatusIcon(instrument.status)} ${instrument.status || 'Unknown'}</span>
                     </div>
                 </div>
+                ${isPhenocam ? `
                 <div class="detail-section">
                     <h4><i class="fas fa-camera"></i> Camera Specifications</h4>
                     <div class="detail-field">
@@ -5578,6 +5695,23 @@
                         <span class="detail-value monospace">${instrument.camera_serial_number || 'N/A'}</span>
                     </div>
                 </div>
+                ` : `
+                <div class="detail-section">
+                    <h4><i class="fas ${typeInfo.icon}" style="color: ${typeInfo.color};"></i> Sensor Specifications</h4>
+                    <div class="detail-field">
+                        <span class="detail-label">Sensor Brand</span>
+                        <span class="detail-value">${instrument.camera_brand || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Sensor Model</span>
+                        <span class="detail-value">${instrument.camera_model || 'N/A'}</span>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Serial Number</span>
+                        <span class="detail-value monospace">${instrument.camera_serial_number || 'N/A'}</span>
+                    </div>
+                </div>
+                `}
                 <div class="detail-section">
                     <h4><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
                     <div class="detail-field">
@@ -5632,11 +5766,12 @@
                         <span class="detail-value">${instrument.measurement_status || 'N/A'}</span>
                     </div>
                 </div>
+                ${isPhenocam ? `
                 <div class="detail-section">
                     <h4>
                         <i class="fas fa-crop-alt"></i> Regions of Interest (ROIs)
                         ${canEdit ? `
-                            <button class="add-roi-btn" onclick="addROI(${instrument.id})" title="➕ Add new Region of Interest (ROI) to this instrument. ROIs are used to define specific areas for vegetation analysis in phenocam images."
+                            <button class="add-roi-btn" onclick="addROI(${instrument.id})" title="Add new Region of Interest (ROI) to this instrument. ROIs are used to define specific areas for vegetation analysis in phenocam images.">
                                 <i class="fas fa-plus"></i>
                             </button>
                         ` : ''}
@@ -5647,6 +5782,7 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
                 <div class="detail-section">
                     <h4><i class="fas fa-sticky-note"></i> Notes & Context</h4>
                     <div class="detail-field">
@@ -5673,8 +5809,10 @@
                 ${createImageMetadataSection(instrument)}
             `;
 
-            // Load ROI data for this instrument
-            loadROICards(instrument.id, instrument.normalized_name);
+            // Load ROI data only for Phenocam instruments
+            if (isPhenocam) {
+                loadROICards(instrument.id, instrument.normalized_name);
+            }
         }
 
         function closePlatformModal() {

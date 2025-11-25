@@ -161,11 +161,10 @@ class SitesStationDashboard {
 
             console.debug(`Loaded station data:`, this.stationData);
 
-            // Load platforms and instruments with proper error handling
-            await Promise.all([
-                this.loadPlatformsAndInstruments(),
-                this.updateStationDisplay()
-            ]);
+            // Load platforms and instruments, then update display
+            // IMPORTANT: Must load data BEFORE updating display to ensure counts are correct
+            await this.loadPlatformsAndInstruments();
+            await this.updateStationDisplay();
 
         } catch (error) {
             console.error('Error loading station data:', error);
@@ -259,6 +258,8 @@ class SitesStationDashboard {
             try {
                 this.renderPlatforms();
                 this.updateMapMarkers();
+                // Update counts after data is loaded - ensures correct counts are shown
+                this.updateCounts();
                 console.debug('Successfully updated platform and instrument displays');
             } catch (error) {
                 console.error('Error updating displays:', error);
@@ -452,13 +453,7 @@ class SitesStationDashboard {
                         </div>
                     </div>
 
-                    ${instrumentCount > 0 ? `
-                        <div class="instruments-preview">
-                            <h5 style="margin: 8px 0 4px 0; font-size: 0.9em; color: #374151;"><i class="fas fa-camera"></i> Instruments</h5>
-                            ${instruments.slice(0, 3).map(inst => this.createInstrumentCard(inst)).join('')}
-                            ${instrumentCount > 3 ? `<div class="instrument-chip more">+${instrumentCount - 3} more</div>` : ''}
-                        </div>
-                    ` : `
+                    ${instrumentCount > 0 ? this.createInstrumentTabs(instruments, platform.id) : `
                         <div class="no-instruments">
                             <i class="fas fa-camera" style="opacity: 0.3;"></i>
                             <span style="opacity: 0.6;">No instruments configured</span>
@@ -849,6 +844,127 @@ class SitesStationDashboard {
             'Decommissioned': '<i class="fas fa-archive" style="color: #9ca3af;"></i>'
         };
         return statusIcons[status] || '<i class="fas fa-question-circle" style="color: #6b7280;"></i>';
+    }
+
+    /**
+     * Groups instruments by their type category for tabbed display
+     * @param {Array} instruments - Array of instrument objects
+     * @returns {Object} Object with category keys and arrays of instruments
+     */
+    groupInstrumentsByType(instruments) {
+        const categories = {
+            phenocam: { label: 'Phenocams', icon: 'fa-camera', instruments: [] },
+            multispectral: { label: 'MS Sensors', icon: 'fa-satellite', instruments: [] },
+            other: { label: 'Other', icon: 'fa-microchip', instruments: [] }
+        };
+
+        instruments.forEach(inst => {
+            const type = (inst.instrument_type || '').toLowerCase();
+            if (type.includes('phenocam') || type === 'phenocam') {
+                categories.phenocam.instruments.push(inst);
+            } else if (type.includes('multispectral') || type.includes('ms sensor')) {
+                categories.multispectral.instruments.push(inst);
+            } else {
+                // PAR, Hyperspectral, and any other types go here
+                categories.other.instruments.push(inst);
+            }
+        });
+
+        // Filter out empty categories
+        return Object.fromEntries(
+            Object.entries(categories).filter(([_, cat]) => cat.instruments.length > 0)
+        );
+    }
+
+    /**
+     * Creates the tabbed instrument interface HTML for a platform card
+     * @param {Array} instruments - Array of instruments for this platform
+     * @param {number} platformId - The platform ID for unique tab IDs
+     * @returns {string} HTML string for the tabbed interface
+     */
+    createInstrumentTabs(instruments, platformId) {
+        const grouped = this.groupInstrumentsByType(instruments);
+        const categoryKeys = Object.keys(grouped);
+
+        if (categoryKeys.length === 0) {
+            return '';
+        }
+
+        // If only one category with few instruments, use simple list instead of tabs
+        if (categoryKeys.length === 1 && instruments.length <= 3) {
+            return `
+                <div class="instruments-preview">
+                    <h5 style="margin: 8px 0 4px 0; font-size: 0.9em; color: #374151;">
+                        <i class="fas ${grouped[categoryKeys[0]].icon}"></i>
+                        ${grouped[categoryKeys[0]].label} (${instruments.length})
+                    </h5>
+                    ${instruments.map(inst => this.createInstrumentCard(inst)).join('')}
+                </div>
+            `;
+        }
+
+        // Build tabs header
+        const tabsHeader = categoryKeys.map((key, index) => {
+            const cat = grouped[key];
+            const isActive = index === 0 ? 'active' : '';
+            return `
+                <button class="instrument-tab-btn ${isActive}"
+                        data-tab="${key}"
+                        data-platform="${platformId}"
+                        onclick="sitesStationDashboard.switchInstrumentTab('${platformId}', '${key}')">
+                    <i class="fas ${cat.icon} tab-icon"></i>
+                    <span>${cat.label}</span>
+                    <span class="tab-count">${cat.instruments.length}</span>
+                </button>
+            `;
+        }).join('');
+
+        // Build tabs content
+        const tabsContent = categoryKeys.map((key, index) => {
+            const cat = grouped[key];
+            const isActive = index === 0 ? 'active' : '';
+            return `
+                <div class="instrument-tab-content ${isActive}"
+                     data-tab-content="${key}"
+                     data-platform="${platformId}">
+                    <div class="instruments-list">
+                        ${cat.instruments.map(inst => this.createInstrumentCard(inst)).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="instrument-tabs">
+                <div class="instrument-tabs-header">
+                    ${tabsHeader}
+                </div>
+                ${tabsContent}
+            </div>
+        `;
+    }
+
+    /**
+     * Switches the active tab in the instrument tabs interface
+     * @param {number} platformId - The platform ID
+     * @param {string} tabKey - The tab key to switch to
+     */
+    switchInstrumentTab(platformId, tabKey) {
+        // Find the platform card
+        const platformCard = document.querySelector(`.platform-card[data-platform-id="${platformId}"]`);
+        if (!platformCard) return;
+
+        // Update tab buttons
+        const tabBtns = platformCard.querySelectorAll(`.instrument-tab-btn[data-platform="${platformId}"]`);
+        tabBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabKey);
+        });
+
+        // Update tab content
+        const tabContents = platformCard.querySelectorAll(`.instrument-tab-content[data-platform="${platformId}"]`);
+        tabContents.forEach(content => {
+            content.classList.toggle('active', content.dataset.tabContent === tabKey);
+        });
     }
 
     createInstrumentCard(instrument) {

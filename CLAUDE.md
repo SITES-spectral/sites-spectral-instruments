@@ -4,13 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 6.1.1 - DATA QUALITY: Fixes & Export Tools (2025-11-24)
+## Current Version: 6.1.4 - UI: Tabbed Instrument Interface in Platform Cards (2025-11-24)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-24
 
-### ✅ Latest Update: Data Quality Fixes & Export Tools (v6.1.1)
+### ✅ Latest Update: Tabbed Instrument Interface (v6.1.4)
+
+**🎯 Achievement**: Implemented tabbed interface in platform cards to organize instruments by type
+
+#### **New Features:**
+- Platform cards now show instruments organized by type in tabs
+- Three categories: Phenocams, MS Sensors (Multispectral), Other (PAR, Hyperspectral, etc.)
+- Only tabs with instruments are displayed (empty tabs hidden)
+- Count badge shows number of instruments per category (e.g., "Phenocams (3)")
+- Smart fallback: single category with few instruments shows simple list
+
+#### **Files Modified:**
+- `/public/js/station-dashboard.js`: Added groupInstrumentsByType(), createInstrumentTabs(), switchInstrumentTab()
+- `/public/css/styles.css`: Added instrument-tabs CSS styling
+
+### Previous Update: Data Quality Fixes & Export Tools (v6.1.1)
 
 **🎯 Achievement**: Database cleanup, UNIQUE constraint, and YAML export tooling
 
@@ -409,3 +424,4 @@ yamls/
 - **Virtual Environments**: Always source from project folder
 - **Database Access**: Use Cloudflare API directly to query database remotely
 - **Git Workflow**: Use worktrees for parallel sessions, always bump version before commit
+- for temporal scripts, always use a tmp folder inside the project and add that to gitignore. Move previous scripts from ../../../../../../../../tmp/ to the new tmp folder, and use those scripts from the local tmp folder..

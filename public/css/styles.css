@@ -1203,6 +1203,92 @@ body {
     gap: 0.75rem;
 }
 
+/* Instrument Type Tabs in Platform Cards */
+.instrument-tabs {
+    margin-top: 0.5rem;
+}
+
+.instrument-tabs-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    padding-bottom: 6px;
+}
+
+.instrument-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, #6b7280);
+    background: var(--bg-secondary, #f9fafb);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.instrument-tab-btn:hover {
+    background: var(--bg-tertiary, #f3f4f6);
+    border-color: var(--primary-color, #059669);
+    color: var(--primary-color, #059669);
+}
+
+.instrument-tab-btn.active {
+    background: var(--primary-color, #059669);
+    border-color: var(--primary-color, #059669);
+    color: white;
+}
+
+.instrument-tab-btn .tab-icon {
+    font-size: 0.7rem;
+}
+
+.instrument-tab-btn .tab-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1px 5px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+.instrument-tab-btn.active .tab-count {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.instrument-tab-content {
+    display: none;
+}
+
+.instrument-tab-content.active {
+    display: block;
+}
+
+.instrument-tab-content .instruments-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Compact styling for instruments in tabs */
+.instrument-tab-content .instrument-card-compact {
+    margin: 4px 0;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
+    transition: all 0.2s;
+}
+
+.instrument-tab-content .instrument-card-compact:hover {
+    border-color: var(--primary-color, #059669);
+    background: #f3f4f6;
+}
+
 .instrument-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);

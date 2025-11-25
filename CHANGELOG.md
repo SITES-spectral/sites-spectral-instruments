@@ -17,6 +17,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.1.5] - 2025-11-24
+
+### 🐛 FIX: Station Summary Count Race Condition
+
+**📅 Release Date**: 2025-11-24
+**🎯 Achievement**: Fixed station summary showing 0 platforms and 0 instruments due to race condition
+
+#### 🚨 **Bug Fixed**
+
+**Problem**: Station summary header showed "0 Platforms" and "0 Instruments" even when data existed in the database.
+
+**Root Cause**: Race condition in `station-dashboard.js` where `updateCounts()` was called in parallel with `loadPlatformsAndInstruments()`:
+```javascript
+// BEFORE: Race condition - updateCounts() runs before data is loaded
+await Promise.all([
+    this.loadPlatformsAndInstruments(),  // <-- loads platforms/instruments
+    this.updateStationDisplay()           // <-- calls updateCounts() with empty arrays!
+]);
+```
+
+**Impact**: Users always saw 0 counts in the station overview card until page refresh or manual re-navigation.
+
+#### 🔧 **Technical Fixes**
+
+**File Modified:** `/public/js/station-dashboard.js`
+
+1. **Fixed Data Loading Order** (lines 164-167):
+   ```javascript
+   // AFTER: Sequential loading ensures data is available before display update
+   await this.loadPlatformsAndInstruments();
+   await this.updateStationDisplay();
+   ```
+
+2. **Added Redundant Count Update** (lines 261-262):
+   - Added `this.updateCounts()` call after `renderPlatforms()` and `updateMapMarkers()`
+   - Ensures counts are updated even if `updateStationDisplay()` timing varies
+   - Provides defense-in-depth for count accuracy
+
+#### 📋 **Testing Instructions**
+
+1. Navigate to any station page (e.g., `/station.html?station=SVB`)
+2. Observe the "Station Overview" card
+3. Platform and Instrument counts should now display correctly immediately
+4. Counts should match the number of platform cards shown below
+
+#### ✅ **Expected Behavior After Fix**
+
+- Counts display correctly on initial page load
+- No need to refresh page to see accurate counts
+- Counts update immediately after adding/removing platforms or instruments
+
+---
+
+## [6.1.4] - 2025-11-24
+
+### 🎨 UI: Tabbed Instrument Interface in Platform Cards
+
+**📅 Release Date**: 2025-11-24
+**🎯 Achievement**: Implemented tabbed interface in platform cards to organize instruments by type
+
+#### ✨ **New Features**
+
+1. **Tabbed Instrument Display**
+   - Platform cards now show instruments organized by type in tabs
+   - Three tab categories: Phenocams, MS Sensors (Multispectral), and Other (PAR, Hyperspectral, etc.)
+   - Only tabs with instruments are displayed (empty tabs are hidden)
+   - Count badge shows number of instruments per category (e.g., "Phenocams (3)")
+
+2. **Smart Tab Behavior**
+   - Default to first non-empty tab automatically
+   - For single category with 3 or fewer instruments, shows simple list instead of tabs
+   - Smooth tab switching with visual feedback
+
+3. **Compact Design**
+   - Tabs are compact and don't take excessive space
+   - Green theme styling consistent with SITES Spectral design
+   - Active tab highlighted with primary green color
+   - Scrollable instrument list for categories with many instruments
+
+#### 🔧 **Technical Implementation**
+
+**Files Modified:**
+- `/public/js/station-dashboard.js`:
+  - Added `groupInstrumentsByType(instruments)` method for categorizing instruments
+  - Added `createInstrumentTabs(instruments, platformId)` method for generating tabbed HTML
+  - Added `switchInstrumentTab(platformId, tabKey)` method for tab switching logic
+  - Updated `createPlatformCard(platform)` to use new tabbed interface
+
+- `/public/css/styles.css`:
+  - Added `.instrument-tabs` container styling
+  - Added `.instrument-tabs-header` for tab button container
+  - Added `.instrument-tab-btn` with active/hover states
+  - Added `.instrument-tab-content` with show/hide logic
+  - Added `.tab-icon` and `.tab-count` badge styling
+
+#### 🎯 **Design Decisions**
+
+- **Category Mapping**:
+  - `phenocam` -> "Phenocams" (camera icon)
+  - `multispectral`, `ms sensor` -> "MS Sensors" (satellite icon)
+  - All others (PAR, Hyperspectral, etc.) -> "Other" (microchip icon)
+
+- **Fallback Behavior**: Single category with few instruments shows simplified list without tabs
+
 ## [6.1.3] - 2025-11-24
 
 ### 🔧 FIX: Single-Resource Endpoints & Query Parameter Filtering
