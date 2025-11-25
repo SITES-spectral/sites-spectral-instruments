@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "6.2.1",
-  "description": "SITES Spectral Stations & Instruments Management System v6.2.1 - Fixed Instrument Type Dropdown",
+  "version": "6.3.0",
+  "description": "SITES Spectral Stations & Instruments Management System v6.3.0 - Modal Architecture Refactoring",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

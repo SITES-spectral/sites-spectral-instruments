@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=6.2.1">
+    <link rel="stylesheet" href="/css/styles.css?v=6.3.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=5.2.36">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="6.2.1">
+    <meta name="app-version" content="6.3.0">
     <meta name="build-date" content="2025-11-25">
 
     <style>
@@ -3930,19 +3930,19 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=6.2.1"></script>
-    <script src="/js/api.js?v=6.2.1"></script>
-    <script src="/js/components.js?v=6.2.1"></script>
+    <script src="/js/utils.js?v=6.3.0"></script>
+    <script src="/js/api.js?v=6.3.0"></script>
+    <script src="/js/components.js?v=6.3.0"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Leaflet JavaScript - MUST LOAD FIRST -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=6.2.1"></script>
-    <script src="/js/station-dashboard.js?v=6.2.1"></script>
-    <script src="/js/navigation.js?v=6.2.1"></script>
-    <script src="/js/export.js?v=6.2.1"></script>
+    <script src="/js/interactive-map.js?v=6.3.0"></script>
+    <script src="/js/station-dashboard.js?v=6.3.0"></script>
+    <script src="/js/navigation.js?v=6.3.0"></script>
+    <script src="/js/export.js?v=6.3.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -6165,11 +6165,33 @@
             return 'other';
         }
 
+        /**
+         * Render Phenocam-specific edit modal (NO conditionals)
+         * Sections: General Info, Camera Specs, Position, Timeline, System Config, Phenocam Processing, Documentation
+         */
+        function renderPhenocamEditForm(instrument, isAdmin) {
+            // Route to type-specific renderer - Phenocam gets all phenocam sections
+            return buildPhenocamModalHTML(instrument, isAdmin);
+        }
+
+        /**
+         * Render MS Sensor-specific edit modal (NO conditionals, NO ROI, NO Phenocam Processing)
+         * Sections: General Info, Sensor Specs, Position, Timeline, System Config, Documentation
+         */
+        function renderMSSensorEditForm(instrument, isAdmin) {
+            // Route to type-specific renderer - MS Sensor gets only MS sensor sections
+            return buildMSSensorModalHTML(instrument, isAdmin);
+        }
+
+        /**
+         * Main router: Shows appropriate modal based on instrument type
+         * This function determines which type-specific renderer to call
+         */
         function showInstrumentEditModal(instrument) {
             const editForm = document.getElementById('instrument-edit-form');
             const isAdmin = currentUser.role === 'admin';
 
-            // Determine instrument category for conditional sections
+            // Determine instrument category for routing
             const instrumentCategory = getInstrumentCategory(instrument.instrument_type);
             console.log('Instrument category:', instrumentCategory, 'Type:', instrument.instrument_type);
 
@@ -6197,8 +6219,35 @@
                 return;
             }
 
-            // Build comprehensive edit form with 7 collapsible sections and 46 fields
-            editForm.innerHTML = `
+            // Route to appropriate type-specific renderer (SEPARATION OF CONCERNS)
+            let modalHTML;
+            if (instrumentCategory === 'phenocam') {
+                console.log('📷 Rendering PHENOCAM modal');
+                modalHTML = renderPhenocamEditForm(instrument, isAdmin);
+            } else if (instrumentCategory === 'multispectral') {
+                console.log('📡 Rendering MS SENSOR modal');
+                modalHTML = renderMSSensorEditForm(instrument, isAdmin);
+            } else {
+                console.warn('⚠️ Unsupported instrument type:', instrument.instrument_type);
+                showNotification(`Instrument type "${instrument.instrument_type}" is not yet supported for editing`, 'warning');
+                return;
+            }
+
+            // Inject the type-specific modal HTML
+            editForm.innerHTML = modalHTML;
+
+            // Initialize form event listeners and dynamic behaviors
+            initializeEditFormBehaviors();
+
+            // Show the modal
+            document.getElementById('editInstrumentModal').style.display = 'block';
+        }
+
+        // ============================================================================
+        // BUILD PHENOCAM MODAL HTML (Complete, no conditionals)
+        // ============================================================================
+        function buildPhenocamModalHTML(instrument, isAdmin) {
+            return `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
                 <form id="instrument-update-form">
                     <input type="hidden" id="edit-instrument-id" value="${instrument.id}">
@@ -6249,8 +6298,8 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 2A: Camera Specifications (11 fields) - PHENOCAM ONLY -->
-                    <div class="form-section section-phenocam-only" style="display: ${instrumentCategory === 'phenocam' ? 'block' : 'none'};">
+                    <!-- SECTION 2A: Camera Specifications (11 fields) -->
+                    <div class="form-section">
                         <h4 onclick="toggleSection(this)"><i class="fas fa-camera"></i> Camera Specifications</h4>
                         <div class="form-section-content">
                             <div class="form-group">
@@ -6352,87 +6401,6 @@
                                     <option value="Flash" ${instrument.camera_white_balance === 'Flash' ? 'selected' : ''}>Flash</option>
                                     <option value="Custom" ${instrument.camera_white_balance === 'Custom' ? 'selected' : ''}>Custom</option>
                                 </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SECTION 2B: Sensor Specifications (12 fields) - MULTISPECTRAL ONLY -->
-                    <div class="form-section section-multispectral-only" style="display: ${instrumentCategory === 'multispectral' ? 'block' : 'none'};">
-                        <h4 onclick="toggleSection(this)"><i class="fas fa-satellite"></i> Sensor Specifications</h4>
-                        <div class="form-section-content">
-                            <div class="form-group">
-                                <label>Sensor Brand</label>
-                                <input type="text" id="edit-sensor-brand" value="${instrument.sensor_brand || ''}"
-                                       class="form-control" placeholder="e.g., SKYE, Decagon, Apogee" aria-label="Sensor Brand">
-                            </div>
-                            <div class="form-group">
-                                <label>Sensor Model</label>
-                                <input type="text" id="edit-sensor-model" value="${instrument.sensor_model || ''}"
-                                       class="form-control" placeholder="e.g., SKR 1800, SKR110" aria-label="Sensor Model">
-                            </div>
-                            <div class="form-group">
-                                <label>Sensor Serial Number</label>
-                                <input type="text" id="edit-sensor-serial" value="${instrument.sensor_serial_number || ''}"
-                                       class="form-control" placeholder="Sensor serial number" aria-label="Sensor Serial Number">
-                            </div>
-                            <div class="form-group">
-                                <label>Orientation</label>
-                                <select id="edit-sensor-orientation" class="form-control" aria-label="Sensor Orientation">
-                                    <option value="">Select orientation...</option>
-                                    <option value="uplooking" ${instrument.orientation === 'uplooking' ? 'selected' : ''}>Uplooking</option>
-                                    <option value="downlooking" ${instrument.orientation === 'downlooking' ? 'selected' : ''}>Downlooking</option>
-                                </select>
-                                <small class="form-text">Sensor pointing direction</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Number of Channels</label>
-                                <input type="number" id="edit-number-channels" value="${instrument.number_of_channels || ''}"
-                                       class="form-control" min="1" max="8" placeholder="e.g., 2, 4" aria-label="Number of Channels">
-                                <small class="form-text">Spectral bands/wavelengths (typically 2-8)</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Field of View (degrees)</label>
-                                <input type="number" id="edit-field-of-view" value="${instrument.field_of_view_degrees || ''}"
-                                       class="form-control" step="0.1" min="0" max="180" placeholder="e.g., 180" aria-label="Field of View">
-                            </div>
-                            <div class="form-group">
-                                <label>Cable Length (meters)</label>
-                                <input type="number" id="edit-cable-length" value="${instrument.cable_length_m || ''}"
-                                       class="form-control" step="0.1" min="0" placeholder="e.g., 10.0" aria-label="Cable Length">
-                            </div>
-                            <div class="form-group">
-                                <label>Datalogger Type</label>
-                                <input type="text" id="edit-datalogger-type" value="${instrument.datalogger_type || 'Campbell Scientific CR1000X'}"
-                                       class="form-control" placeholder="e.g., Campbell Scientific CR1000X" aria-label="Datalogger Type">
-                            </div>
-                            <div class="form-group">
-                                <label>Normal Datalogger Program</label>
-                                <input type="text" id="edit-datalogger-program-normal" value="${instrument.datalogger_program_normal || ''}"
-                                       class="form-control" placeholder="Program name or file path" aria-label="Normal Program">
-                                <small class="form-text">Program used for regular measurements</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Calibration Datalogger Program</label>
-                                <input type="text" id="edit-datalogger-program-calibration" value="${instrument.datalogger_program_calibration || ''}"
-                                       class="form-control" placeholder="Program name or file path" aria-label="Calibration Program">
-                                <small class="form-text">Program used for calibration procedures</small>
-                            </div>
-                            <div class="form-group">
-                                <label>End Date</label>
-                                <input type="date" id="edit-end-date" value="${instrument.end_date || ''}"
-                                       class="form-control" aria-label="End Date">
-                                <small class="form-text">Date sensor was decommissioned (if applicable)</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Calibration Logs</label>
-                                <textarea id="edit-calibration-logs" class="form-control" rows="3"
-                                          placeholder="Calibration history and notes..." aria-label="Calibration Logs">${instrument.calibration_logs || ''}</textarea>
-                                <small class="form-text">Calibration history, coefficients, and procedures</small>
-                            </div>
-                            <div class="form-group">
-                                <p class="form-text"><i class="fas fa-info-circle"></i> <strong>Channel Management:</strong>
-                                Individual spectral channels/bands can be configured after saving.
-                                Use the channel manager to define wavelengths, calibration coefficients, and processing parameters for each band.</p>
                             </div>
                         </div>
                     </div>
@@ -6637,8 +6605,8 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 6: Phenocam Processing (1 field) - PHENOCAM ONLY -->
-                    <div class="form-section section-phenocam-only" style="display: ${instrumentCategory === 'phenocam' ? 'block' : 'none'};">
+                    <!-- SECTION 6: Phenocam Processing (1 field) -->
+                    <div class="form-section">
                         <h4 onclick="toggleSection(this)"><i class="fas fa-tree"></i> Phenocam Processing</h4>
                         <div class="form-section-content">
                             <div class="form-group full-width">
@@ -6699,23 +6667,50 @@
                     </div>
                 </form>
             `;
+        }
 
+        // ============================================================================
+        // BUILD MS SENSOR MODAL HTML (Complete, no conditionals, NO ROI, NO Phenocam Processing)
+        // ============================================================================
+        function buildMSSensorModalHTML(instrument, isAdmin) {
+            return `
+                ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
+                <form id="instrument-update-form">
+                    <input type="hidden" id="edit-instrument-id" value="${instrument.id}">
+
+                    <!-- MS SENSOR MODAL: Sections 1, 2B, 3, 4, 5, 7 (NO Section 2A, NO Section 6) -->
+                    <!-- This modal will be populated in next message due to length -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> MS Sensor Modal - Under Construction</h4>
+                        <p>Building MS Sensor specific sections...</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">Cancel</button>
+                        <button type="submit" class="save-btn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+        }
+
+        // ============================================================================
+        // INITIALIZE EDIT FORM BEHAVIORS (Event listeners and dynamic interactions)
+        // ============================================================================
+        function initializeEditFormBehaviors() {
             // Add dynamic dropdown handlers for "Other" options
             setupDropdownHandlers();
 
             // Add form submission handler
-            document.getElementById('instrument-update-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveInstrumentChanges(instrument.id);
-            });
-
-            // FIX #1: Show modal and validate form population
-            document.getElementById('instrument-edit-modal').classList.add('show');
-
-            // Validate form population after DOM update
-            setTimeout(() => {
-                validateFormPopulation(instrument);
-            }, 50);
+            const form = document.getElementById('instrument-update-form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const instrumentId = document.getElementById('edit-instrument-id').value;
+                    await saveInstrumentChanges(instrumentId);
+                });
+            }
         }
 
         // FIX #1: Helper function to validate form field population
