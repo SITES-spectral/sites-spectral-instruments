@@ -1,6 +1,120 @@
-# CLAUDE.md
+# CLAUDE_LEGACY.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **Note**: This file contains historical documentation for SITES Spectral Instruments.
+> For current documentation, see [CLAUDE.md](./CLAUDE.md)
+
+---
+
+## Version 6.x Series (2025-11-21 to 2025-11-26)
+
+### v6.5.0 - Complete Sensor Type Modals (2025-11-26)
+
+**Achievement**: Implemented dedicated edit modals for ALL SITES Spectral sensor types
+
+**New Sensor Modals:**
+1. **PAR Sensor** (☀️) - Photosynthetically Active Radiation (400-700 nm)
+2. **NDVI Sensor** (🌿) - Normalized Difference Vegetation Index (Red/NIR)
+3. **PRI Sensor** (🔬) - Photochemical Reflectance Index (~531nm/~570nm)
+4. **Hyperspectral** (🌈) - Multi-band spectral sensor
+
+**Router Updates:**
+- `getInstrumentCategory()` now recognizes 6 categories
+- 4 new render functions and modal builders added
+
+### v6.4.0 - MS Sensor Modal Complete (2025-11-25)
+
+**Achievement**: Completed MS sensor edit modal with full 6-section interface
+
+**6 Sections:**
+1. General Information (5 fields)
+2. Sensor Specifications (12 fields) - MS-specific
+3. Position & Orientation (6 fields)
+4. Timeline & Deployment (7 fields)
+5. System Configuration (6 fields)
+6. Documentation (3 fields)
+
+### v6.3.0 - Modal Architecture Refactoring (2025-11-25)
+
+**Achievement**: Complete architectural refactoring - replaced monolithic conditional modals with clean, type-specific rendering functions
+
+**Core Changes:**
+- **Before**: Single 5,000+ line modal with scattered conditionals
+- **After**: Clean routing system with dedicated functions per type
+- **Result**: Zero conditionals within modals, scalable architecture
+
+**Architecture:**
+```javascript
+function showInstrumentEditModal(instrument) {
+    const category = getInstrumentCategory(instrument.instrument_type);
+    if (category === 'phenocam') modalHTML = renderPhenocamEditForm(instrument, isAdmin);
+    else if (category === 'multispectral') modalHTML = renderMSSensorEditForm(instrument, isAdmin);
+    // ...etc
+}
+```
+
+### v6.2.1 - Instrument Type Dropdown Fix (2025-11-24)
+
+- Removed unsupported instrument types from dropdown
+
+### v6.1.4 - Tabbed Instrument Interface (2025-11-23)
+
+**Achievement**: Implemented tabbed interface in platform cards to organize instruments by type
+
+- Three categories: Phenocams, MS Sensors, Other
+- Only tabs with instruments displayed
+- Count badges per category
+
+### v6.1.1 - Data Quality Fixes (2025-11-22)
+
+- Removed duplicate instrument (GRI_FOR_BL01_PHE01)
+- Standardized instrument_type casing (17 records)
+- Added 7 missing SVB instruments
+- Added UNIQUE index on instruments.normalized_name
+
+### v6.1.0 - Complete Multispectral Sensor Frontend (2025-11-21)
+
+**Major Release**: Merged two feature branches with 26+ commits
+- Complete MS sensor backend
+- Modular MS frontend (~2000 lines new JS)
+- New handlers: analytics, channels, documentation, sensor-models, users
+- ROI dual-mode creation (interactive + YAML)
+
+---
+
+## Version 5.x Series (2025-09 to 2025-11)
+
+### ROI Features (v5.2.51)
+
+**ROI Name Validation System:**
+- Format: ROI_XX pattern (01-99)
+- Duplicate prevention per instrument
+- Error messages for format, range, duplicates
+
+### API Field Completeness (v5.2.49-50)
+
+**Critical Fixes:**
+- v5.2.49: Added 7 missing fields to Instruments API
+- v5.2.50: Added 3 missing fields to Platforms API
+
+**Root Cause**: List endpoints missing fields that detail endpoints returned.
+
+### ROI Creation System
+
+**Dual-mode interface:**
+1. Interactive Drawing Mode - Canvas-based polygon digitizer
+2. YAML Upload Mode - Batch import from files
+
+### Bug Fix Journey (v5.2.44-50)
+
+1. v5.2.44 - Svartberget cleanup
+2. v5.2.45 - Modal refresh fix
+3. v5.2.46 - Dashboard counts fix
+4. v5.2.47 - JavaScript const error
+5. v5.2.48 - Diagnostic logging
+6. v5.2.49 - Instruments API fix
+7. v5.2.50 - Platforms API fix
+
+---
 
 ## Version 5.2.38 - DATABASE UPDATE: Added SVB Platforms & Naming Consistency (2025-11-14)
 **✅ STATUS: SUCCESSFULLY COMPLETED**
