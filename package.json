@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "6.5.0",
-  "description": "SITES Spectral Stations & Instruments Management System v6.5.0 - Complete Sensor Type Modals (PAR, NDVI, PRI, Hyperspectral)",
+  "version": "7.0.0",
+  "description": "SITES Spectral Stations & Instruments Management System v7.0.0 - Major Refactoring with Versioned API, Modular Architecture, and Accessibility Improvements",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

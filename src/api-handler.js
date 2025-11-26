@@ -1,5 +1,6 @@
-// SITES Spectral API Handler v5.0.0
+// SITES Spectral API Handler v7.0.0
 // Modular architecture with clean separation of concerns
+// Now includes versioned API (v2) with pagination support
 
 import { handleAuth } from './auth/authentication.js';
 import { handleStations } from './handlers/stations.js';
@@ -24,6 +25,9 @@ import {
   createInternalServerErrorResponse
 } from './utils/responses.js';
 
+// V2 API Handler with pagination
+import { handleApiV2Request } from './v2/api-handler-v2.js';
+
 /**
  * Main API request handler with modular routing
  * @param {Request} request - The incoming request
@@ -38,6 +42,11 @@ export async function handleApiRequest(request, env, ctx) {
   // Remove 'api' from path segments
   if (pathSegments[0] === 'api') {
     pathSegments.shift();
+  }
+
+  // Route to V2 API if requested
+  if (pathSegments[0] === 'v2') {
+    return await handleApiV2Request(request, env, ctx);
   }
 
   const method = request.method;
@@ -135,9 +144,10 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '5.0.0',
+      version: '7.0.0',
       database: dbTest ? 'connected' : 'disconnected',
-      architecture: 'modular'
+      architecture: 'modular',
+      apiVersions: ['v1', 'v2']
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -147,10 +157,11 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '5.0.0',
+      version: '7.0.0',
       error: error.message,
       database: 'disconnected',
-      architecture: 'modular'
+      architecture: 'modular',
+      apiVersions: ['v1', 'v2']
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }

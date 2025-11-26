@@ -17,6 +17,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [7.0.0] - 2025-11-26
+
+### 🚀 MAJOR REFACTORING: Modular Architecture, Versioned API, Accessibility
+
+**📅 Release Date**: 2025-11-26
+**🎯 Achievement**: Comprehensive codebase audit and refactoring based on SITES Spectral Agents Team analysis
+**🔄 Breaking Changes**: Deprecated files removed, API versioning introduced
+
+#### 🗑️ **Deprecated Code Removal** (~9,500 lines removed)
+
+**Files Deleted:**
+- `src/api-handler-v4.9.5-original.js` (3,175 lines) - Legacy API handler backup
+- `public/station-old.html` (5,024 lines) - Legacy station template
+- `public/station-v5.html` (844 lines) - Legacy v5 template
+- `public/dashboard-enhanced.html` (715 lines) - Unused dashboard variant
+
+**Impact:** Reduced codebase confusion and maintenance burden
+
+#### 🔀 **Versioned API Architecture**
+
+**New `/api/v2/` Endpoints:**
+- Implements pagination support (limit/offset parameters)
+- Enhanced input validation middleware
+- Consistent error response formatting
+- Rate limiting on authentication endpoints
+
+**Backward Compatibility:**
+- Existing `/api/` endpoints maintained unchanged
+- Gradual client migration path to v2
+
+#### 🏗️ **Modular Handler Architecture**
+
+**Handler Splitting:**
+- `instruments.js` → `instruments/get.js`, `instruments/mutate.js`, `instruments/subresources.js`
+- Extracted authentication middleware to `src/middleware/auth-middleware.js`
+- Created configuration modules in `src/config/`
+
+#### 🎨 **Frontend Refactoring**
+
+**Modal Section Extraction:**
+- Created `public/js/modal-sections/` directory
+- Extracted shared sections: general-info, position, timeline, system-config, documentation
+- Reduced modal code duplication by ~1,400 lines
+- Configuration-driven modal builder system
+
+**Dashboard Decomposition:**
+- Split `station-dashboard.js` (2,549 lines) into modular components
+- Created `public/js/dashboard/` directory with specialized modules
+
+#### ♿ **Accessibility Improvements**
+
+**ARIA Compliance:**
+- Added keyboard navigation for section toggles (Enter/Space)
+- Implemented proper button semantics with `role="button"`
+- Added `aria-live` regions for status updates
+- Linked character counters with `aria-describedby`
+- Form validation with `aria-invalid` and `aria-errormessage`
+
+#### 🗃️ **Database Schema Consolidation**
+
+**Field Cleanup:**
+- Removed redundant `instrument_degrees_from_nadir` (use `degrees_from_nadir`)
+- Removed redundant `instrument_deployment_date` (use `deployment_date`)
+- Added ecosystem foreign key constraint
+- Added coordinate validation CHECK constraints
+
+#### 🧪 **Testing Foundation**
+
+**Framework Setup:**
+- Installed Vitest testing framework
+- Created `/tests` directory structure
+- CI/CD integration with GitHub Actions
+- Coverage reporting configured
+
+#### 📁 **Files Modified**
+
+**Backend:**
+- `package.json` - Version bump, description update
+- `src/api-handler.js` - V2 router integration
+- `src/handlers/instruments.js` - Refactored to router pattern
+- New: `src/middleware/auth-middleware.js`
+- New: `src/middleware/validation-middleware.js`
+- New: `src/config/constants.js`
+
+**Frontend:**
+- `public/station.html` - Modal section extraction
+- New: `public/js/modal-sections/*.js` (5 files)
+- New: `public/js/dashboard/*.js` (6 modules)
+
+**Tests:**
+- New: `tests/unit/auth/` - Authentication tests
+- New: `tests/unit/handlers/` - Handler tests
+- New: `tests/integration/` - Integration tests
+
+---
+
 ## [6.5.0] - 2025-11-26
 
 ### ✅ COMPLETE: All Sensor Type Modals (PAR, NDVI, PRI, Hyperspectral)
