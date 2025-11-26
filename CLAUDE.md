@@ -4,41 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 6.4.0 - PHASE 3: Complete MS Sensor Modal (2025-11-25)
+## Current Version: 6.5.0 - Complete Sensor Type Modals (2025-11-26)
 **✅ STATUS: SUCCESSFULLY DEPLOYED AND OPERATIONAL**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-11-25
+**📅 Last Updated:** 2025-11-26
 
-### ✅ Latest Update: MS Sensor Modal Complete (v6.4.0)
+### ✅ Latest Update: All Sensor Type Modals Complete (v6.5.0)
 
-**🎯 Achievement**: Completed MS sensor edit modal with full 6-section interface, building on v6.3.0 modal architecture
+**🎯 Achievement**: Implemented dedicated edit modals for ALL SITES Spectral sensor types
 
-#### **MS Sensor Modal - 100% Complete:**
+#### **New Sensor Modals Implemented:**
 
-**Status**: Fully functional and production-ready
+**1. PAR Sensor Modal (☀️)** - Photosynthetically Active Radiation
+- Spectral range: 400-700 nm
+- Key fields: spectral_range, calibration_coefficient (µmol m⁻² s⁻¹ per mV)
+- Brands: Apogee, LI-COR, Kipp & Zonen
 
-**6 Sections Implemented:**
-1. **General Information** (5 fields) - name, normalized_id, status, measurement status, legacy_acronym
-2. **Sensor Specifications** (12 fields) - **MS-SPECIFIC SECTION**
-   - sensor_brand, sensor_model, sensor_serial_number
-   - orientation (uplooking/downlooking), number_of_channels, field_of_view_degrees
-   - cable_length_m, datalogger_type, datalogger programs (normal/calibration)
-   - end_date, calibration_logs
-3. **Position & Orientation** (6 fields) - lat/lon, height, viewing direction, azimuth, nadir
-4. **Timeline & Deployment** (7 fields) - type, ecosystem, deployment dates, calibration, measurement years
-5. **System Configuration** (6 fields) - power, transmission, warranty, processing, quality score
-6. **Documentation** (3 fields) - description, installation notes, maintenance notes
+**2. NDVI Sensor Modal (🌿)** - Normalized Difference Vegetation Index
+- 2-band sensor: Red (~650nm) + NIR (~810nm)
+- Formula: NDVI = (NIR - Red) / (NIR + Red)
+- Brands: Apogee, Decagon, METER
 
-**Key Features:**
-- ✅ Save button enabled - full edit functionality
-- ✅ Clean separation from Phenocam modal (no camera fields)
-- ✅ All 39 MS sensor fields properly mapped to save function
-- ✅ Section 2B (Sensor Specifications) replaces Camera Specifications
+**3. PRI Sensor Modal (🔬)** - Photochemical Reflectance Index
+- 2-band sensor: ~531nm (xanthophyll) + ~570nm (reference)
+- Formula: PRI = (R531 - R570) / (R531 + R570)
+- Brands: SKYE, Decagon
 
-#### **Files Modified:**
-- `public/station.html` - buildMSSensorModalHTML() replaced (lines 6670-7041, +350 lines)
-- `package.json` - Version 6.3.0 → 6.4.0
+**4. Hyperspectral Sensor Modal (🌈)** - Multi-band Spectral Sensor
+- Key fields: spectral_range_start/end_nm, spectral_resolution_nm, number_of_bands
+- Additional: integration_time_ms
+- Brands: Ocean Optics, ASD, Specim
+
+#### **Router System Updates:**
+- `getInstrumentCategory()` now recognizes 6 categories
+- 4 new render functions added
+- 4 new modal builder functions (~1,450 lines each)
+
+#### **Full Instrument Type Coverage:**
+- ✅ Phenocam (v6.3.0)
+- ✅ Multispectral Sensor (v6.4.0)
+- ✅ PAR Sensor (v6.5.0)
+- ✅ NDVI Sensor (v6.5.0)
+- ✅ PRI Sensor (v6.5.0)
+- ✅ Hyperspectral Sensor (v6.5.0)
+
+### Previous Update: MS Sensor Modal Complete (v6.4.0)
+
+**🎯 Achievement**: Completed MS sensor edit modal with full 6-section interface
 
 ### Previous Update: Modal Architecture Refactoring (v6.3.0)
 

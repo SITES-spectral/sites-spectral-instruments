@@ -17,6 +17,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [6.5.0] - 2025-11-26
+
+### ✅ COMPLETE: All Sensor Type Modals (PAR, NDVI, PRI, Hyperspectral)
+
+**📅 Release Date**: 2025-11-26
+**🎯 Achievement**: Implemented dedicated edit modals for all remaining SITES Spectral sensor types
+**🔄 Continuation**: Building on v6.4.0 modal architecture (Phenocam + MS Sensor modals)
+
+#### 🏗️ **New Sensor Type Modals**
+
+**1. PAR Sensor Modal (☀️)**
+- Photosynthetically Active Radiation (400-700 nm)
+- 6 sections with PAR-specific fields
+- Key fields: spectral_range, calibration_coefficient (µmol m⁻² s⁻¹ per mV)
+- Orientation: Uplooking (incident) or Downlooking (reflected)
+- Common brands: Apogee, LI-COR, Kipp & Zonen
+
+**2. NDVI Sensor Modal (🌿)**
+- Normalized Difference Vegetation Index
+- 6 sections with NDVI-specific fields
+- Key fields: red_wavelength_nm (~650nm), nir_wavelength_nm (~810nm)
+- Formula hint: NDVI = (NIR - Red) / (NIR + Red)
+- Common brands: Apogee, Decagon, METER
+
+**3. PRI Sensor Modal (🔬)**
+- Photochemical Reflectance Index
+- 6 sections with PRI-specific fields
+- Key fields: band1_wavelength_nm (~531nm), band2_wavelength_nm (~570nm)
+- Formula hint: PRI = (R531 - R570) / (R531 + R570)
+- Common brands: SKYE, Decagon
+
+**4. Hyperspectral Sensor Modal (🌈)**
+- Multi-band spectral sensor (many wavelengths)
+- 6 sections with hyperspectral-specific fields
+- Key fields: spectral_range_start_nm, spectral_range_end_nm, spectral_resolution_nm
+- Additional: number_of_bands, integration_time_ms
+- Common brands: Ocean Optics, ASD, Specim
+
+#### 🔀 **Router System Updates**
+
+**`getInstrumentCategory()` Enhanced:**
+- Now recognizes 6 categories: phenocam, multispectral, par, ndvi, pri, hyperspectral
+- Proper routing for all SITES Spectral instrument types
+
+**New Render Functions:**
+- `renderPARSensorEditForm()` - Routes to PAR modal
+- `renderNDVISensorEditForm()` - Routes to NDVI modal
+- `renderPRISensorEditForm()` - Routes to PRI modal
+- `renderHyperspectralEditForm()` - Routes to Hyperspectral modal
+
+**Console Logging:**
+- ☀️ PAR SENSOR modal
+- 🌿 NDVI SENSOR modal
+- 🔬 PRI SENSOR modal
+- 🌈 HYPERSPECTRAL modal
+
+#### 📁 **Files Modified**
+
+**`public/station.html`**:
+- `getInstrumentCategory()` - Added PAR, NDVI, PRI, Hyperspectral detection
+- `showInstrumentEditModal()` - Extended router with 4 new routes
+- Added 4 new render functions
+- Added 4 new modal builder functions (~1,450 lines each)
+- File grew significantly (~+5,800 lines total)
+
+**`package.json`**:
+- Version bumped: 6.4.0 → 6.5.0
+- Description updated
+
+#### 🎯 **Implementation Pattern**
+
+All modals follow the established architecture:
+1. **Section 1**: General Information (5 fields)
+2. **Section 2**: Type-Specific Sensor Specifications
+3. **Section 3**: Position & Orientation (6 fields)
+4. **Section 4**: Timeline & Deployment (7 fields)
+5. **Section 5**: System Configuration (6 fields)
+6. **Section 6**: Documentation (3 fields)
+
+#### ✅ **Full Instrument Type Coverage**
+
+SITES Spectral now supports editing ALL instrument types:
+- ✅ Phenocam (v6.3.0)
+- ✅ Multispectral Sensor (v6.4.0)
+- ✅ PAR Sensor (v6.5.0)
+- ✅ NDVI Sensor (v6.5.0)
+- ✅ PRI Sensor (v6.5.0)
+- ✅ Hyperspectral Sensor (v6.5.0)
+
 ## [6.4.0] - 2025-11-25
 
 ### ✅ PHASE 3 COMPLETE: MS Sensor Modal UI
