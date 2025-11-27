@@ -17,6 +17,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [7.0.2] - 2025-11-27
+
+### 🐛 Critical Fix: Multispectral Sensor Modal Display
+
+**📅 Release Date**: 2025-11-27
+
+#### 🔧 **Sensor View Modal Fix**
+
+**Problem:** Multispectral sensor detail modals were displaying phenocam fields (`camera_brand`, `camera_model`, `camera_serial_number`) instead of sensor-specific fields.
+
+**Solution:** Updated `populateInstrumentModal()` in `station.html` to use correct sensor fields:
+- `sensor_brand` instead of `camera_brand`
+- `sensor_model` instead of `camera_model`
+- `sensor_serial_number` instead of `camera_serial_number`
+
+**Added Sensor Fields:**
+- Orientation (uplooking/downlooking)
+- Number of Channels
+- Field of View (degrees)
+- Datalogger Type
+- Cable Length (meters)
+
+#### 📦 **Cache Busting**
+
+- Updated modal script version tags to v7.0.2
+- Forces browser cache refresh for modal components
+
+---
+
 ## [7.0.1] - 2025-11-27
 
 ### 🔧 Bug Fixes and Deployment Verification
