@@ -125,6 +125,43 @@ export async function getStationByNormalizedName(normalizedName, env) {
 }
 
 /**
+ * Get platform data by ID or normalized name
+ * @param {Object} env - Environment variables and bindings
+ * @param {string|number} identifier - Platform ID or normalized name
+ * @returns {Object|null} Platform data or null
+ */
+export async function getPlatformData(env, identifier) {
+  // Check if identifier is a numeric ID
+  const numericId = parseInt(identifier, 10);
+  const isNumeric = !isNaN(numericId) && String(numericId) === String(identifier);
+
+  let query;
+  let params;
+
+  if (isNumeric) {
+    // Query by numeric ID
+    query = `
+      SELECT id, display_name, normalized_name, ecosystem_code, location_code,
+             status, description, station_id, created_at
+      FROM platforms
+      WHERE id = ?
+    `;
+    params = [numericId];
+  } else {
+    // Query by normalized name
+    query = `
+      SELECT id, display_name, normalized_name, ecosystem_code, location_code,
+             status, description, station_id, created_at
+      FROM platforms
+      WHERE normalized_name = ?
+    `;
+    params = [identifier];
+  }
+
+  return await executeQueryFirst(env, query, params, 'getPlatformData');
+}
+
+/**
  * Get stations data with platform and instrument counts, filtered by user permissions
  * @param {Object} user - User object from token
  * @param {Object} env - Environment variables and bindings

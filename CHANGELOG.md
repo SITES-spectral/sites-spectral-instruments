@@ -17,6 +17,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [7.0.1] - 2025-11-27
+
+### 🔧 Bug Fixes and Deployment Verification
+
+**📅 Release Date**: 2025-11-27
+
+#### 🐛 **Import Path Corrections**
+
+**Fixed V2 Handler Imports:**
+- Corrected `requireAuthentication` import path in all v2 handlers
+- Function correctly imported from `src/auth/permissions.js` (not `authentication.js`)
+- Affected files: `stations-v2.js`, `platforms-v2.js`, `instruments-v2.js`, `rois-v2.js`
+
+#### 🔧 **Database Utility Enhancement**
+
+**Added Missing Function:**
+- Created `getPlatformData(env, identifier)` in `src/utils/database.js`
+- Supports lookup by numeric ID or normalized name
+- Follows same pattern as existing `getStationData` function
+
+#### 📦 **Deployment Fixes**
+
+**Static Asset Permissions:**
+- Fixed file permissions on `modal-sections.js` (644 instead of 600)
+- Verified all static assets serving correctly from Cloudflare CDN
+
+#### ✅ **Verification Completed**
+
+**Test Results:**
+- Health endpoint: v7.0.0 reporting healthy with database connected
+- Static assets: All JS/CSS files serving correctly (modal-sections.js: 27KB, instrument-modals.js: 38KB)
+- API v1 endpoints: Responding with proper authentication enforcement
+- API v2 endpoints: Responding with proper authentication enforcement
+- Frontend: Version meta tag showing 7.0.1
+
 ## [7.0.0] - 2025-11-26
 
 ### 🚀 MAJOR REFACTORING: Modular Architecture, Versioned API, Accessibility

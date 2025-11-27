@@ -1,8 +1,7 @@
 // SITES Spectral Platforms Handler v2.0.0
 // Enhanced with pagination support
 
-import { requireAuthentication } from '../../auth/authentication.js';
-import { checkUserPermissions } from '../../auth/permissions.js';
+import { requireAuthentication, checkUserPermissions } from '../../auth/permissions.js';
 import { executeQuery, executeQueryFirst, getStationData } from '../../utils/database.js';
 import {
   createSuccessResponse,
