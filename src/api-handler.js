@@ -30,6 +30,9 @@ import {
 // V2 API Handler with pagination
 import { handleApiV2Request } from './v2/api-handler-v2.js';
 
+// V3 API Handler with domain-based routing, spatial queries, campaigns, products
+import { handleApiV3Request } from './v3/api-handler-v3.js';
+
 /**
  * Main API request handler with modular routing
  * @param {Request} request - The incoming request
@@ -44,6 +47,11 @@ export async function handleApiRequest(request, env, ctx) {
   // Remove 'api' from path segments
   if (pathSegments[0] === 'api') {
     pathSegments.shift();
+  }
+
+  // Route to V3 API if requested (domain-based routing)
+  if (pathSegments[0] === 'v3') {
+    return await handleApiV3Request(request, env, ctx);
   }
 
   // Route to V2 API if requested

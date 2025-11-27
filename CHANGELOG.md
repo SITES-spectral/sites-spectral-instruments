@@ -8,8 +8,117 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v8.0.0 Roadmap)
-- **Phase 5**: V3 API with domain-based routing and spatial queries
-- **Phase 6**: Integration testing and documentation
+- **Phase 6**: Integration testing, deployment, and final documentation
+
+---
+
+## [8.0.0-rc.1] - 2025-11-27
+
+### Phase 5: V3 API - Domain-Based Routing with Spatial Queries
+
+**Release Date**: 2025-11-27
+**Phase**: Phase 5 - V3 API
+
+This release introduces the V3 API with comprehensive domain-based routing, spatial query support, campaign management, and product catalog endpoints.
+
+#### V3 API Architecture (`src/v3/`)
+
+**Main Router** (`api-handler-v3.js`):
+- Domain-based routing for cleaner endpoint structure
+- Helper functions for pagination, sorting, GeoJSON responses
+- Centralized error handling with consistent responses
+
+**Handler Files:**
+- `platforms-v3.js` - Platform CRUD with type filtering
+- `aois-v3.js` - AOI management with spatial queries
+- `campaigns-v3.js` - Acquisition campaign management
+- `products-v3.js` - Product catalog and filtering
+- `uav-platforms-v3.js` - UAV-specific extensions
+- `satellite-platforms-v3.js` - Satellite-specific extensions
+
+#### Platform Endpoints (`/api/v3/platforms`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v3/platforms` | List all platforms (paginated) |
+| GET | `/api/v3/platforms/:id` | Get platform by ID |
+| GET | `/api/v3/platforms/type/:type` | Filter by type (uav, satellite, fixed) |
+| GET | `/api/v3/platforms/:id/uav` | Get UAV extension data |
+| GET | `/api/v3/platforms/:id/satellite` | Get satellite extension data |
+| GET | `/api/v3/platforms/:id/campaigns` | Get platform campaigns |
+| GET | `/api/v3/platforms/:id/products` | Get platform products |
+| GET | `/api/v3/platforms/:id/aois` | Get platform AOIs |
+
+#### Spatial Query Endpoints (`/api/v3/aois/spatial`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v3/aois/spatial/bbox` | Query AOIs within bounding box |
+| GET | `/api/v3/aois/spatial/point` | Query AOIs containing a point |
+| POST | `/api/v3/aois/spatial/intersects` | Query AOIs intersecting geometry |
+| POST | `/api/v3/aois/spatial/within` | Query AOIs within geometry |
+| GET | `/api/v3/aois/spatial/nearest` | Query nearest AOIs to a point |
+| GET | `/api/v3/aois/geojson` | Get all AOIs as FeatureCollection |
+| GET | `/api/v3/aois/:id/geojson` | Get single AOI as GeoJSON Feature |
+
+#### Campaign Endpoints (`/api/v3/campaigns`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v3/campaigns` | List campaigns (paginated) |
+| GET | `/api/v3/campaigns/:id` | Get campaign by ID |
+| GET | `/api/v3/campaigns/status/:status` | Filter by status |
+| GET | `/api/v3/campaigns/station/:id` | Campaigns for station |
+| GET | `/api/v3/campaigns/platform/:id` | Campaigns for platform |
+| GET | `/api/v3/campaigns/:id/products` | Products from campaign |
+| PUT | `/api/v3/campaigns/:id/status` | Update campaign status |
+
+#### Product Catalog Endpoints (`/api/v3/products`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v3/products` | List products (paginated) |
+| GET | `/api/v3/products/type/:type` | Filter by product type |
+| GET | `/api/v3/products/date/:date` | Filter by date |
+| GET | `/api/v3/products/spatial/bbox` | Products within bounds |
+| GET | `/api/v3/products/spatial/coverage` | Coverage statistics |
+
+#### UAV & Satellite Specific Endpoints
+
+**UAV (`/api/v3/uav`):**
+- Flight campaigns management
+- Maintenance tracking
+- RTK/PPK status
+
+**Satellite (`/api/v3/satellite`):**
+- Spectral bands info
+- Coverage information
+- Acquisition records
+
+#### Documentation Plan Created
+
+**File:** `docs/DOCUMENTATION_PLAN.md`
+
+**Structure:**
+- User guides for station administrators
+- Platform-specific guides (Fixed, UAV, Satellite)
+- Instrument guides (6 types)
+- Developer documentation
+- API reference
+- Configuration guides
+- Reference materials
+
+**Implementation Schedule:** 6-week phased approach
+
+#### Statistics
+
+| Metric | Value |
+|--------|-------|
+| New Handler Files | 7 |
+| V3 API Endpoints | 50+ |
+| Spatial Query Types | 5 |
+| Documentation Files Planned | 40+ |
+| Total New Code | ~4,500 lines |
 
 ---
 
