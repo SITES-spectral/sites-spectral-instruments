@@ -57,14 +57,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### 🎨 **Frontend Refactoring**
 
 **Modal Section Extraction:**
-- Created `public/js/modal-sections/` directory
-- Extracted shared sections: general-info, position, timeline, system-config, documentation
-- Reduced modal code duplication by ~1,400 lines
-- Configuration-driven modal builder system
-
-**Dashboard Decomposition:**
-- Split `station-dashboard.js` (2,549 lines) into modular components
-- Created `public/js/dashboard/` directory with specialized modules
+- Created `public/js/modal-sections.js` with shared form sections
+- Created `public/js/instrument-modals.js` with type-specific modal builders
+- Extracted shared sections: general-info, position, timeline, system-config, documentation, phenocam-processing
+- Reduced `station.html` from 11,302 lines to 8,970 lines (~2,330 lines removed)
+- All 6 instrument types now use modular composable components
+- Configuration-driven modal builder with DRY architecture
 
 #### ♿ **Accessibility Improvements**
 
