@@ -8,7 +8,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v8.0.0 Roadmap)
-- **Phase 6**: Integration testing, deployment, and final documentation
+- **Phase 7**: Production hardening and performance optimization
+
+---
+
+## [8.0.0-rc.2] - 2025-11-27
+
+### Phase 6: Comprehensive V3 API Test Suite
+
+**Release Date**: 2025-11-27
+**Phase**: Phase 6 - Integration Testing
+
+This release adds a comprehensive test suite for the V3 API using Vitest and Cloudflare's vitest-pool-workers.
+
+#### Test Infrastructure
+
+**Test Framework:**
+- Vitest with `@cloudflare/vitest-pool-workers` for Workers testing
+- Mock D1 database with automatic schema setup
+- Test utilities for request/response handling
+
+**Test Structure:**
+```
+tests/
+├── fixtures/
+│   └── mock-data.js          # Mock stations, platforms, AOIs, campaigns, products
+├── utils/
+│   ├── test-helpers.js       # Request creation, token generation
+│   └── db-setup.js           # Database schema and seeding
+└── integration/
+    ├── v3-api-info.test.js   # Health and info endpoint tests
+    ├── v3-platforms.test.js  # Platform CRUD and filtering tests
+    ├── v3-aois.test.js       # AOI CRUD and spatial query tests
+    ├── v3-campaigns.test.js  # Campaign management tests
+    └── v3-products.test.js   # Product catalog tests
+```
+
+#### Test Coverage
+
+| Test File | Tests | Description |
+|-----------|-------|-------------|
+| `v3-api-info.test.js` | 6 | API info, health, error handling |
+| `v3-platforms.test.js` | 22 | CRUD, filtering, UAV extensions |
+| `v3-aois.test.js` | 28 | CRUD, 5 spatial query types, GeoJSON |
+| `v3-campaigns.test.js` | 18 | CRUD, status, scheduling |
+| `v3-products.test.js` | 22 | CRUD, spatial, statistics |
+| **Total** | **96** | Comprehensive V3 API coverage |
+
+#### NPM Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm test` | Run all tests once |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run test:integration` | Run only integration tests |
 
 ---
 
