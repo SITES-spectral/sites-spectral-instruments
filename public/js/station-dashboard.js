@@ -1771,9 +1771,13 @@ class SitesStationDashboard {
             return;
         }
 
+        // Determine instrument type for conditional form fields
+        const instrumentType = instrument.instrument_type || 'Unknown';
+        const isPhenocam = instrumentType === 'Phenocam';
+
         // Populate the edit form with instrument data
         formContainer.innerHTML = `
-            <form id="edit-instrument-form" class="modal-form">
+            <form id="edit-instrument-form" class="modal-form" data-instrument-type="${instrumentType}">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="edit-instrument-display-name">Instrument Name</label>
@@ -1813,6 +1817,7 @@ class SitesStationDashboard {
                     </div>
                 </div>
 
+                ${isPhenocam ? `
                 <h4>Camera Specifications</h4>
                 <div class="form-row">
                     <div class="form-group">
@@ -1840,6 +1845,65 @@ class SitesStationDashboard {
                                value="${this.escapeHtml(instrument.camera_serial_number || '')}">
                     </div>
                 </div>
+                ` : `
+                <h4>Sensor Specifications</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-sensor-brand">Sensor Brand</label>
+                        <input type="text" id="edit-instrument-sensor-brand" class="form-input"
+                               value="${this.escapeHtml(instrument.sensor_brand || '')}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-sensor-model">Sensor Model</label>
+                        <input type="text" id="edit-instrument-sensor-model" class="form-input"
+                               value="${this.escapeHtml(instrument.sensor_model || '')}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-sensor-serial">Serial Number</label>
+                        <input type="text" id="edit-instrument-sensor-serial" class="form-input"
+                               value="${this.escapeHtml(instrument.sensor_serial_number || '')}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-orientation">Orientation</label>
+                        <select id="edit-instrument-orientation" class="form-select">
+                            <option value="">Select Orientation</option>
+                            <option value="uplooking" ${instrument.orientation === 'uplooking' ? 'selected' : ''}>Uplooking</option>
+                            <option value="downlooking" ${instrument.orientation === 'downlooking' ? 'selected' : ''}>Downlooking</option>
+                            <option value="horizontal" ${instrument.orientation === 'horizontal' ? 'selected' : ''}>Horizontal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-channels">Number of Channels</label>
+                        <input type="number" id="edit-instrument-channels" class="form-input"
+                               value="${instrument.number_of_channels || ''}" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-fov">Field of View (degrees)</label>
+                        <input type="number" id="edit-instrument-fov" class="form-input"
+                               value="${instrument.field_of_view_degrees || ''}" step="0.1" min="0" max="180">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-instrument-datalogger">Datalogger Type</label>
+                        <input type="text" id="edit-instrument-datalogger" class="form-input"
+                               value="${this.escapeHtml(instrument.datalogger_type || '')}"
+                               placeholder="e.g., Campbell Scientific CR1000X">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-instrument-cable">Cable Length (m)</label>
+                        <input type="number" id="edit-instrument-cable" class="form-input"
+                               value="${instrument.cable_length_m || ''}" step="0.1" min="0">
+                    </div>
+                </div>
+                `}
 
                 <h4>Location & Orientation</h4>
                 <div class="form-row">
@@ -2015,15 +2079,16 @@ class SitesStationDashboard {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
+            // Get instrument type to determine which fields to collect
+            const instrumentType = document.getElementById('edit-instrument-type').value;
+            const isPhenocam = instrumentType === 'Phenocam';
+
+            // Base form data (common to all instrument types)
             const formData = {
                 display_name: document.getElementById('edit-instrument-display-name').value.trim(),
-                instrument_type: document.getElementById('edit-instrument-type').value,
+                instrument_type: instrumentType,
                 status: document.getElementById('edit-instrument-status').value,
                 deployment_date: document.getElementById('edit-instrument-deployment').value || null,
-                camera_brand: document.getElementById('edit-instrument-camera-brand').value.trim() || null,
-                camera_model: document.getElementById('edit-instrument-camera-model').value.trim() || null,
-                camera_resolution: document.getElementById('edit-instrument-camera-resolution').value.trim() || null,
-                camera_serial_number: document.getElementById('edit-instrument-camera-serial').value.trim() || null,
                 latitude: parseFloat(document.getElementById('edit-instrument-latitude').value) || null,
                 longitude: parseFloat(document.getElementById('edit-instrument-longitude').value) || null,
                 instrument_height_m: parseFloat(document.getElementById('edit-instrument-height').value) || null,
@@ -2034,6 +2099,25 @@ class SitesStationDashboard {
                 installation_notes: document.getElementById('edit-instrument-installation').value.trim() || null,
                 maintenance_notes: document.getElementById('edit-instrument-maintenance').value.trim() || null
             };
+
+            // Add type-specific fields
+            if (isPhenocam) {
+                // Camera fields for Phenocams
+                formData.camera_brand = document.getElementById('edit-instrument-camera-brand')?.value.trim() || null;
+                formData.camera_model = document.getElementById('edit-instrument-camera-model')?.value.trim() || null;
+                formData.camera_resolution = document.getElementById('edit-instrument-camera-resolution')?.value.trim() || null;
+                formData.camera_serial_number = document.getElementById('edit-instrument-camera-serial')?.value.trim() || null;
+            } else {
+                // Sensor fields for non-Phenocam instruments
+                formData.sensor_brand = document.getElementById('edit-instrument-sensor-brand')?.value.trim() || null;
+                formData.sensor_model = document.getElementById('edit-instrument-sensor-model')?.value.trim() || null;
+                formData.sensor_serial_number = document.getElementById('edit-instrument-sensor-serial')?.value.trim() || null;
+                formData.orientation = document.getElementById('edit-instrument-orientation')?.value || null;
+                formData.number_of_channels = parseInt(document.getElementById('edit-instrument-channels')?.value) || null;
+                formData.field_of_view_degrees = parseFloat(document.getElementById('edit-instrument-fov')?.value) || null;
+                formData.datalogger_type = document.getElementById('edit-instrument-datalogger')?.value.trim() || null;
+                formData.cable_length_m = parseFloat(document.getElementById('edit-instrument-cable')?.value) || null;
+            }
 
             // Validation
             if (!formData.display_name) {

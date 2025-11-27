@@ -17,6 +17,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [7.0.4] - 2025-11-27
+
+### 🐛 Fix: Station Dashboard Edit Instrument Modal
+
+**📅 Release Date**: 2025-11-27
+
+#### 🔧 **Edit Modal Now Type-Aware**
+
+**Problem:** The `showEditInstrumentModal()` function was showing "Camera Specifications" form fields for ALL instrument types, even for Multispectral Sensors.
+
+**Solution:** Updated edit modal to show type-appropriate form fields:
+
+**For Phenocams:**
+- Camera Brand, Camera Model, Camera Resolution, Serial Number
+
+**For Other Sensors (MS, PAR, NDVI, PRI, Hyperspectral):**
+- Sensor Brand, Sensor Model, Serial Number
+- Orientation (uplooking/downlooking/horizontal)
+- Number of Channels
+- Field of View (degrees)
+- Datalogger Type
+- Cable Length (m)
+
+#### 🔧 **Save Function Updated**
+
+Updated `saveInstrumentEdit()` to collect type-appropriate fields:
+- Checks `isPhenocam` before collecting form data
+- Camera fields only collected for Phenocams
+- Sensor fields only collected for other instrument types
+
+---
+
 ## [7.0.3] - 2025-11-27
 
 ### 🐛 Critical Fix: Station Dashboard Instrument Details Modal

@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "description": "SITES Spectral Stations & Instruments Management System v7.0.0 - Major Refactoring with Versioned API, Modular Architecture, and Accessibility Improvements",
   "main": "src/worker.js",
   "scripts": {
