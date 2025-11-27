@@ -4,6 +4,14 @@
  */
 
 /**
+ * Get the mock environment
+ * @returns {Object} Mock environment
+ */
+export function getMockEnv() {
+  return globalThis.env;
+}
+
+/**
  * Create a mock Request object
  * @param {string} url - Request URL
  * @param {Object} options - Request options

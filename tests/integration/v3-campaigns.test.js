@@ -4,17 +4,20 @@
  */
 
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { env } from 'cloudflare:test';
 import {
   createMockRequest,
   createMockCtx,
   apiUrl,
   parseJsonResponse,
   generateTestToken,
+  getMockEnv,
 } from '../utils/test-helpers.js';
 import { initializeTestDatabase, seedTestDatabase, resetTestDatabase } from '../utils/db-setup.js';
 import { handleApiV3Request } from '../../src/v3/api-handler-v3.js';
 import { generateCampaign } from '../fixtures/mock-data.js';
+
+// Get mock environment
+const env = getMockEnv();
 
 describe('V3 Campaigns - Read Operations', () => {
   beforeAll(async () => {

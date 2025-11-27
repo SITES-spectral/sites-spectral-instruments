@@ -1,20 +1,13 @@
-import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
+import { defineConfig } from 'vitest/config';
 
-export default defineWorkersConfig({
+export default defineConfig({
   test: {
     globals: true,
-    poolOptions: {
-      workers: {
-        wrangler: { configPath: './wrangler.toml' },
-        miniflare: {
-          // Mock D1 database for testing
-          d1Databases: ['DB'],
-          kvNamespaces: ['KV'],
-        },
-      },
-    },
+    environment: 'node',
     // Test file patterns
     include: ['tests/**/*.test.js', 'tests/**/*.spec.js'],
+    // Exclude patterns
+    exclude: ['node_modules/**', 'dist/**'],
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -26,5 +19,7 @@ export default defineWorkersConfig({
     testTimeout: 30000,
     // Reporter
     reporters: ['verbose'],
+    // Setup files
+    setupFiles: ['./tests/setup.js'],
   },
 });
