@@ -1,94 +1,16 @@
 {
   "version": "8.0.0-rc.1",
   "buildDate": "2025-11-27",
-  "timestamp": 1764295000000,
-  "phase": "rc",
-  "phaseNumber": 1,
+  "timestamp": 1764252870850,
   "files": {
     "/css/styles.css?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/core/config-loader.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/core/state.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/core/app.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/core/error-messages.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/core/map-config.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/api/api-client.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/map/tile-layers.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/map/markers.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/map/geojson-layer.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/map/map-controller.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/utils/validators.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/utils/toast.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/instruments/instrument-manager.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/aoi/aoi-drawing-tools.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/aoi/aoi-modal.js?v=8.0.0-rc.1": "8.0.0-rc.1",
-    "/js/aoi/aoi-manager.js?v=8.0.0-rc.1": "8.0.0-rc.1"
-  },
-  "api": {
-    "v3/api-handler-v3.js": "8.0.0-rc.1",
-    "v3/handlers/platforms-v3.js": "8.0.0-rc.1",
-    "v3/handlers/aois-v3.js": "8.0.0-rc.1",
-    "v3/handlers/campaigns-v3.js": "8.0.0-rc.1",
-    "v3/handlers/products-v3.js": "8.0.0-rc.1",
-    "v3/handlers/uav-platforms-v3.js": "8.0.0-rc.1",
-    "v3/handlers/satellite-platforms-v3.js": "8.0.0-rc.1"
-  },
-  "yamls": {
-    "platforms": {
-      "platform-types.yaml": "8.0.0-alpha.1",
-      "fixed-platform.yaml": "8.0.0-alpha.1",
-      "uav-dji-mavic3-ms.yaml": "8.0.0-beta.1",
-      "uav-dji-phantom4-ms.yaml": "8.0.0-beta.1",
-      "satellite-sentinel2.yaml": "8.0.0-beta.1",
-      "satellite-sentinel3.yaml": "8.0.0-beta.1",
-      "satellite-landsat.yaml": "8.0.0-beta.1"
-    },
-    "products": {
-      "vegetation-indices.yaml": "8.0.0-beta.1",
-      "water-quality.yaml": "8.0.0-beta.1",
-      "snow-products.yaml": "8.0.0-beta.1"
-    },
-    "aoi": {
-      "aoi-config.yaml": "8.0.0-beta.2"
-    }
-  },
-  "documentation": {
-    "DOCUMENTATION_PLAN.md": "8.0.0-rc.1"
-  },
-  "migrations": {
-    "0029_platform_types_and_aoi.sql": "8.0.0-beta.1"
-  },
-  "changelog": {
-    "8.0.0-rc.1": {
-      "date": "2025-11-27",
-      "phase": "Phase 5: V3 API",
-      "changes": [
-        "Created V3 API handler with domain-based routing",
-        "Added 50+ API endpoints across 7 handler files",
-        "Implemented spatial query endpoints (bbox, point, intersects, within, nearest)",
-        "Added campaign management endpoints",
-        "Added product catalog endpoints",
-        "Added UAV and satellite platform-specific endpoints",
-        "Created comprehensive documentation plan (40+ files)"
-      ]
-    },
-    "8.0.0-beta.2": {
-      "date": "2025-11-27",
-      "phase": "Phase 4: AOI System",
-      "changes": [
-        "Created AOI drawing tools with polygon drawing and GeoJSON import",
-        "Created AOI modal for create/view/edit operations",
-        "Created AOI manager for state management and map display",
-        "Created AOI API handler with full CRUD operations"
-      ]
-    },
-    "8.0.0-beta.1": {
-      "date": "2025-11-27",
-      "phase": "Phase 3: Platform Types & Database",
-      "changes": [
-        "Created UAV and satellite platform configurations",
-        "Created product configurations",
-        "Database migration 0029 with new tables"
-      ]
-    }
+    "/js/utils.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/api.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/components.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/interactive-map.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/dashboard.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/station-dashboard.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/navigation.js?v=8.0.0-rc.1": "8.0.0-rc.1",
+    "/js/export.js?v=8.0.0-rc.1": "8.0.0-rc.1"
   }
 }
