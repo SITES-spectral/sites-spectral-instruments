@@ -42,15 +42,16 @@ api-credentials*.json
 *api_key*
 *private_key*
 credentials*
-auth*
+auth*.json
+auth*.key
+# Note: src/auth/ and src/middleware/auth-* are tracked source code
 
-# Deprecated, secure patterns (all forms, all locations)
+# Deprecated patterns - EXCEPT docs/deprecated which is tracked
 *deprecated*
 *DEPRECATED*
 *Deprecated*
-*/deprecated/*
-*/DEPRECATED/*
-*/Deprecated/*
+!docs/deprecated
+!docs/deprecated/*
 *secure*
 *SECURE*
 *Secure*
