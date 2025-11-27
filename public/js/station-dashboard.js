@@ -1648,12 +1648,14 @@ class SitesStationDashboard {
                         </div>
                     ` : ''}
 
+                    ${isPhenocam ? `
                     <div class="detail-section roi-section">
                         <h4><i class="fas fa-vector-square"></i> Regions of Interest (ROIs)</h4>
                         <div id="roi-container-${instrument.id}">
                             ${this.getRoiCardsHtml(instrument)}
                         </div>
                     </div>
+                    ` : ''}
 
                     <div class="detail-section maintenance-section">
                         ${this.getMaintenanceLogHtml(instrument)}

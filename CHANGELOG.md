@@ -17,6 +17,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [7.0.5] - 2025-11-27
+
+### 🐛 Fix: Hide ROI Section for Non-Phenocam Instruments
+
+**📅 Release Date**: 2025-11-27
+
+#### 🔧 **ROI Section Now Phenocam-Only**
+
+**Problem:** The "Regions of Interest (ROIs)" section was shown in the detail modal for ALL instrument types, including Multispectral Sensors where ROIs don't apply.
+
+**Solution:** Wrapped ROI section in `isPhenocam` conditional in `station-dashboard.js`:
+- ROIs only displayed for Phenocam instruments
+- Non-phenocam instruments (MS, PAR, NDVI, PRI, Hyperspectral) no longer show ROI section
+
+**Note:** `station.html` already had this fix in place (lines 5750-5766).
+
+---
+
 ## [7.0.4] - 2025-11-27
 
 ### 🐛 Fix: Station Dashboard Edit Instrument Modal
