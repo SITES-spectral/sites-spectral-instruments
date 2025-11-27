@@ -17,6 +17,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Actual image serving from storage (requires image storage setup)
 - Enhanced charting with visualization library integration
 
+## [7.0.3] - 2025-11-27
+
+### 🐛 Critical Fix: Station Dashboard Instrument Details Modal
+
+**📅 Release Date**: 2025-11-27
+
+#### 🔧 **station-dashboard.js Modal Fix**
+
+**Problem:** The `showInstrumentDetailsModal()` function in `station-dashboard.js` was showing "Phenocam Image" and "Camera Specifications" sections for ALL instrument types, including Multispectral Sensors.
+
+**Solution:** Updated modal to be type-aware:
+- Added `isPhenocam` check to show appropriate sections
+- Phenocams show: Phenocam Image + Camera Specifications
+- Other sensors show: Sensor Specifications with sensor_brand, sensor_model, orientation, channels, etc.
+
+**New Method Added:**
+- `getInstrumentTypeIcon(instrumentType)` - Returns appropriate icon and color for each instrument type
+
+**Supported Icons:**
+| Type | Icon | Color |
+|------|------|-------|
+| Phenocam | fa-camera | #10b981 |
+| Multispectral Sensor | fa-wave-square | #6366f1 |
+| PAR Sensor | fa-sun | #eab308 |
+| NDVI Sensor | fa-leaf | #22c55e |
+| PRI Sensor | fa-microscope | #8b5cf6 |
+| Hyperspectral Sensor | fa-rainbow | #ec4899 |
+
+---
+
 ## [7.0.2] - 2025-11-27
 
 ### 🐛 Critical Fix: Multispectral Sensor Modal Display

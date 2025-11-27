@@ -860,6 +860,23 @@ class SitesStationDashboard {
     }
 
     /**
+     * Get icon and color for instrument type
+     * @param {string} instrumentType - The instrument type string
+     * @returns {Object} Object with icon class and color
+     */
+    getInstrumentTypeIcon(instrumentType) {
+        const typeIcons = {
+            'Phenocam': { icon: 'fa-camera', color: '#10b981' },
+            'Multispectral Sensor': { icon: 'fa-wave-square', color: '#6366f1' },
+            'PAR Sensor': { icon: 'fa-sun', color: '#eab308' },
+            'NDVI Sensor': { icon: 'fa-leaf', color: '#22c55e' },
+            'PRI Sensor': { icon: 'fa-microscope', color: '#8b5cf6' },
+            'Hyperspectral Sensor': { icon: 'fa-rainbow', color: '#ec4899' }
+        };
+        return typeIcons[instrumentType] || { icon: 'fa-microchip', color: '#6b7280' };
+    }
+
+    /**
      * Groups instruments by their type category for tabbed display
      * @param {Array} instruments - Array of instrument objects
      * @returns {Object} Object with category keys and arrays of instruments
@@ -1470,10 +1487,15 @@ class SitesStationDashboard {
         // Check permissions for edit/delete buttons
         const canEdit = this.currentUser?.role === 'admin' || this.currentUser?.role === 'station';
 
+        // Determine instrument type for icon and sections
+        const instrumentType = instrument.instrument_type || 'Unknown';
+        const isPhenocam = instrumentType === 'Phenocam';
+        const typeIcon = this.getInstrumentTypeIcon(instrumentType);
+
         modal.innerHTML = `
             <div class="modal-content-large">
                 <div class="modal-header-large">
-                    <h3><i class="fas fa-camera"></i> ${this.escapeHtml(instrument.display_name || 'Instrument Details')}</h3>
+                    <h3><i class="fas ${typeIcon.icon}" style="color: ${typeIcon.color}"></i> ${this.escapeHtml(instrument.display_name || 'Instrument Details')}</h3>
                     <button class="modal-close-large" onclick="closeInstrumentDetailsModal()">&times;</button>
                 </div>
                 <div class="modal-body-large">
@@ -1500,6 +1522,7 @@ class SitesStationDashboard {
                         </div>
                     </div>
 
+                    ${isPhenocam ? `
                     <div class="detail-section">
                         <h4>Phenocam Image</h4>
                         <div class="phenocam-image-container">
@@ -1559,6 +1582,45 @@ class SitesStationDashboard {
                             ` : ''}
                         </div>
                     </div>
+                    ` : `
+                    <div class="detail-section">
+                        <h4><i class="fas ${typeIcon.icon}" style="color: ${typeIcon.color}"></i> Sensor Specifications</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Brand:</strong> ${this.escapeHtml(instrument.sensor_brand || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Model:</strong> ${this.escapeHtml(instrument.sensor_model || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Serial Number:</strong> ${this.escapeHtml(instrument.sensor_serial_number || 'N/A')}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Orientation:</strong> ${this.escapeHtml(instrument.orientation || 'N/A')}
+                            </div>
+                            ${instrument.number_of_channels ? `
+                                <div class="detail-item">
+                                    <strong>Channels:</strong> ${instrument.number_of_channels}
+                                </div>
+                            ` : ''}
+                            ${instrument.field_of_view_degrees ? `
+                                <div class="detail-item">
+                                    <strong>Field of View:</strong> ${instrument.field_of_view_degrees}°
+                                </div>
+                            ` : ''}
+                            ${instrument.datalogger_type ? `
+                                <div class="detail-item">
+                                    <strong>Datalogger:</strong> ${this.escapeHtml(instrument.datalogger_type)}
+                                </div>
+                            ` : ''}
+                            ${instrument.cable_length_m ? `
+                                <div class="detail-item">
+                                    <strong>Cable Length:</strong> ${instrument.cable_length_m}m
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    `}
 
                     <div class="detail-section">
                         <h4>Location & Orientation</h4>
