@@ -1,0 +1,110 @@
+# NDVI Sensor Configuration
+# SITES Spectral v8.0.0-alpha.2
+# Configuration-driven field definitions for NDVI (Normalized Difference Vegetation Index) sensors
+
+metadata:
+  type: ndvi
+  version: "1.0.0"
+  icon: fa-leaf
+  display_name: NDVI Sensor
+  category: spectral
+  description: Two-band sensor for vegetation index measurement (Red/NIR)
+
+# Type detection patterns
+detection_patterns:
+  - ndvi
+
+# Type-specific fields
+fields:
+  sensor_brand:
+    type: text
+    label: Sensor Brand
+    required: false
+    placeholder: e.g., Apogee, Decagon, SKYE
+    max_length: 100
+
+  sensor_model:
+    type: text
+    label: Sensor Model
+    required: false
+    placeholder: e.g., SI-111, NDVI Sensor
+    max_length: 100
+
+  sensor_serial_number:
+    type: text
+    label: Sensor Serial Number
+    required: false
+    placeholder: Sensor serial number
+    max_length: 100
+
+  red_wavelength_nm:
+    type: number
+    label: Red Band Wavelength (nm)
+    required: false
+    default: 650
+    step: 1
+    min: 600
+    max: 700
+    placeholder: e.g., 650
+    help_text: Typical 650-680 nm
+
+  nir_wavelength_nm:
+    type: number
+    label: NIR Band Wavelength (nm)
+    required: false
+    default: 810
+    step: 1
+    min: 750
+    max: 900
+    placeholder: e.g., 810
+    help_text: Typical 800-850 nm
+
+  orientation:
+    type: select
+    label: Orientation
+    required: false
+    options:
+      - value: uplooking
+        label: Uplooking
+      - value: downlooking
+        label: Downlooking
+    placeholder: Select orientation...
+
+  field_of_view_degrees:
+    type: number
+    label: Field of View (degrees)
+    required: false
+    step: 0.1
+    min: 0
+    max: 180
+    placeholder: e.g., 25
+
+  cable_length_m:
+    type: number
+    label: Cable Length (meters)
+    required: false
+    step: 0.1
+    min: 0
+    placeholder: e.g., 10.0
+
+  datalogger_type:
+    type: text
+    label: Datalogger Type
+    required: false
+    placeholder: e.g., Campbell Scientific CR1000X
+    max_length: 100
+
+# Section definition
+section:
+  title: NDVI Sensor Specifications
+  icon: fa-leaf
+  collapsed: false
+
+# Validation rules
+validation:
+  red_wavelength_nm:
+    min: 600
+    max: 700
+  nir_wavelength_nm:
+    min: 750
+    max: 900

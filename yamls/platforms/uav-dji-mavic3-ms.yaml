@@ -1,0 +1,160 @@
+# DJI Mavic 3 Multispectral Platform Configuration
+# SITES Spectral v8.0.0 - UAV Platform
+# For agricultural and environmental monitoring at SITES stations
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "DJI Mavic 3 Multispectral UAV platform for precision agriculture and environmental research"
+
+platform:
+  id: "mavic3_ms"
+  name: "DJI Mavic 3 Multispectral"
+  manufacturer: "DJI"
+  type: "uav"
+  category: "multirotor"
+  icon: "fa-helicopter"
+  color: "#059669"
+
+# Aircraft Specifications
+aircraft:
+  model: "Mavic 3 Multispectral"
+  release_year: 2023
+  weight_kg: 0.951  # Without RTK module
+  weight_rtk_kg: 1.032  # With RTK module
+  max_takeoff_weight_kg: 1.1
+  dimensions:
+    folded_mm: [221, 96.3, 90.3]  # L x W x H
+    unfolded_mm: [347.5, 283, 107.7]
+
+# Flight Capabilities
+flight:
+  max_flight_time_min: 43  # No wind, constant speed
+  max_hover_time_min: 37
+  max_speed_ms: 21  # S mode, no wind
+  max_wind_resistance_ms: 12  # Force 6 wind
+  max_altitude_m: 6000  # Above sea level
+  max_range_km: 15  # CE/FCC compliant
+  operating_temperature_c: [-10, 40]
+
+# RTK Positioning
+rtk:
+  enabled: true
+  module: "DJI D-RTK 2 Mobile Station"
+  horizontal_accuracy_cm: 1  # 1 cm + 1 ppm
+  vertical_accuracy_cm: 1.5  # 1.5 cm + 1 ppm
+  positioning_mode: ["RTK", "PPK"]
+  gnss_systems: ["GPS", "GLONASS", "Galileo", "BeiDou"]
+
+# Camera Systems
+cameras:
+  rgb:
+    name: "Hasselblad RGB Camera"
+    sensor_size: "4/3 CMOS"
+    resolution_mp: 20
+    pixel_size_um: 3.3
+    focal_length_mm: 12.29
+    aperture: "f/2.8-f/11"
+    fov_degrees: 84
+    image_size_px: [5280, 3956]
+    shutter_speed: "8s - 1/8000s"
+    iso_range: [100, 6400]
+
+  multispectral:
+    name: "Multispectral Camera Array"
+    sensor_count: 4
+    sensor_type: "CMOS"
+    resolution_mp: 5  # Per sensor
+    pixel_size_um: 2.4
+    gsd_at_100m_cm: 6.7  # Ground Sample Distance
+    image_size_px: [2592, 1944]
+
+# Multispectral Bands
+spectral_bands:
+  green:
+    band_name: "Green"
+    band_number: 1
+    center_wavelength_nm: 560
+    bandwidth_nm: 16
+    applications: ["Vegetation vigor", "Chlorophyll assessment"]
+
+  red:
+    band_name: "Red"
+    band_number: 2
+    center_wavelength_nm: 650
+    bandwidth_nm: 16
+    applications: ["Chlorophyll absorption", "Plant stress"]
+
+  red_edge:
+    band_name: "Red Edge"
+    band_number: 3
+    center_wavelength_nm: 730
+    bandwidth_nm: 16
+    applications: ["Chlorophyll content", "LAI estimation", "Nitrogen status"]
+
+  nir:
+    band_name: "Near-Infrared"
+    band_number: 4
+    center_wavelength_nm: 860
+    bandwidth_nm: 26
+    applications: ["Biomass", "NDVI", "Plant health"]
+
+# Supported Vegetation Indices
+vegetation_indices:
+  ndvi:
+    name: "Normalized Difference Vegetation Index"
+    formula: "(NIR - Red) / (NIR + Red)"
+    bands: [4, 2]
+    range: [-1, 1]
+
+  ndre:
+    name: "Normalized Difference Red Edge"
+    formula: "(NIR - RedEdge) / (NIR + RedEdge)"
+    bands: [4, 3]
+    range: [-1, 1]
+
+  gndvi:
+    name: "Green NDVI"
+    formula: "(NIR - Green) / (NIR + Green)"
+    bands: [4, 1]
+    range: [-1, 1]
+
+  lci:
+    name: "Leaf Chlorophyll Index"
+    formula: "(NIR - RedEdge) / (NIR + Red)"
+    bands: [4, 3, 2]
+    range: [-1, 1]
+
+# Flight Planning
+flight_planning:
+  recommended_altitude_m: [30, 120]
+  overlap_frontal_percent: 75
+  overlap_side_percent: 70
+  flight_speed_ms: [3, 10]
+  terrain_follow: true
+  waypoint_missions: true
+  corridor_mapping: true
+
+# Data Output
+data_output:
+  formats: ["JPEG", "DNG (RAW)", "TIFF"]
+  geotag: true
+  exif_data: true
+  xmp_data: true
+  radiometric_calibration: true
+  sunlight_sensor: true  # For irradiance compensation
+
+# Ground Control
+ground_control:
+  controller: "DJI RC Pro Enterprise"
+  transmission: "O3 Enterprise"
+  live_feed: true
+  screen_size_inch: 5.5
+  brightness_nits: 1000
+
+# Regulatory
+regulatory:
+  ce_marking: true
+  fcc_compliant: true
+  c1_class: true  # EU drone class
+  remote_id: true

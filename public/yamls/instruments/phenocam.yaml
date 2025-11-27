@@ -1,0 +1,183 @@
+# Phenocam Instrument Configuration
+# SITES Spectral v8.0.0-alpha.2
+# Configuration-driven field definitions for Phenocam instruments
+
+metadata:
+  type: phenocam
+  version: "1.0.0"
+  icon: fa-camera
+  display_name: Phenocam
+  category: imaging
+  description: Digital camera for vegetation phenology monitoring
+
+# Type-specific fields (in addition to shared sections)
+fields:
+  camera_brand:
+    type: select
+    label: Camera Brand
+    required: false
+    options:
+      - value: Mobotix
+        label: Mobotix
+      - value: Axis
+        label: Axis
+      - value: Canon
+        label: Canon
+      - value: Nikon
+        label: Nikon
+      - value: Sony
+        label: Sony
+    allow_other: true
+    placeholder: Select brand...
+
+  camera_model:
+    type: text
+    label: Camera Model
+    required: false
+    placeholder: e.g., M16B, P1437-E
+    max_length: 100
+
+  camera_serial_number:
+    type: text
+    label: Serial Number
+    required: false
+    placeholder: Camera serial number
+    max_length: 100
+
+  camera_resolution:
+    type: select
+    label: Resolution
+    required: false
+    options:
+      - value: "4096x3072"
+        label: 4096x3072 (12MP)
+      - value: "3264x2448"
+        label: 3264x2448 (8MP)
+      - value: "2592x1944"
+        label: 2592x1944 (5MP)
+      - value: "2048x1536"
+        label: 2048x1536 (3MP)
+      - value: "1920x1080"
+        label: 1920x1080 (2MP/FHD)
+    allow_other: true
+    placeholder: Select resolution...
+
+  camera_mega_pixels:
+    type: number
+    label: Mega Pixels
+    required: false
+    step: 0.1
+    min: 0
+    placeholder: e.g., 12.3
+
+  camera_lens:
+    type: text
+    label: Lens
+    required: false
+    placeholder: e.g., 18-55mm f/3.5-5.6
+    max_length: 100
+
+  camera_focal_length_mm:
+    type: number
+    label: Focal Length (mm)
+    required: false
+    step: 0.1
+    min: 0
+    placeholder: e.g., 50
+
+  camera_aperture:
+    type: select
+    label: Aperture (f-stop)
+    required: false
+    options:
+      - value: "f/1.4"
+        label: f/1.4
+      - value: "f/1.8"
+        label: f/1.8
+      - value: "f/2.0"
+        label: f/2.0
+      - value: "f/2.8"
+        label: f/2.8
+      - value: "f/4.0"
+        label: f/4.0
+      - value: "f/5.6"
+        label: f/5.6
+      - value: "f/8.0"
+        label: f/8.0
+      - value: Auto
+        label: Auto
+    placeholder: Select aperture...
+
+  camera_exposure_time:
+    type: text
+    label: Exposure Time
+    required: false
+    placeholder: e.g., 1/250s, Auto
+    help_text: Format 1/250s or Auto
+    max_length: 50
+
+  camera_iso:
+    type: select
+    label: ISO
+    required: false
+    options:
+      - value: "100"
+        label: "100"
+      - value: "200"
+        label: "200"
+      - value: "400"
+        label: "400"
+      - value: "800"
+        label: "800"
+      - value: "1600"
+        label: "1600"
+      - value: "3200"
+        label: "3200"
+      - value: Auto
+        label: Auto
+    placeholder: Select ISO...
+
+  camera_white_balance:
+    type: select
+    label: White Balance
+    required: false
+    options:
+      - value: Auto
+        label: Auto
+      - value: Daylight
+        label: Daylight
+      - value: Cloudy
+        label: Cloudy
+      - value: Shade
+        label: Shade
+      - value: Tungsten
+        label: Tungsten
+      - value: Fluorescent
+        label: Fluorescent
+      - value: Custom
+        label: Custom
+    placeholder: Select white balance...
+
+  image_archive_path:
+    type: text
+    label: Image Archive Path
+    required: false
+    placeholder: /path/to/archive/STATION/INSTRUMENT/
+    help_text: Path must start with / and end with /
+    pattern: ^/.*/$
+    section: phenocam_processing
+
+# Section definition for type-specific section
+section:
+  title: Camera Specifications
+  icon: fa-camera
+  collapsed: false
+
+# Validation rules
+validation:
+  camera_mega_pixels:
+    min: 0
+    max: 200
+  camera_focal_length_mm:
+    min: 0
+    max: 2000

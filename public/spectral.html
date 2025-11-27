@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITES Spectral - Platforms & Instruments</title>
+    <meta name="description" content="SITES Spectral Multi-Platform Observation Network - Manage stations, platforms, and instruments">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
+
+    <!-- Leaflet Draw Plugin CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.0-alpha.1">
+    <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-alpha.1">
+
+    <!-- Version Meta -->
+    <meta name="app-version" content="8.0.0-alpha.1">
+    <meta name="build-date" content="2025-11-27">
+
+    <style>
+        :root {
+            /* Color palette from YAML config - loaded dynamically but with fallbacks */
+            --color-primary: #059669;
+            --color-primary-dark: #064e3b;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #3b82f6;
+            --color-text: #1f2937;
+            --color-text-muted: #6b7280;
+            --color-bg: #f8fafc;
+            --color-card: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .brand-version {
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--radius-sm);
+            margin-left: 0.5rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+        }
+
+        .user-badge i {
+            font-size: 1rem;
+        }
+
+        .user-badge .role {
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .welcome-info {
+            flex: 1;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .welcome-subtitle {
+            color: var(--color-text-muted);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .station-badges {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .card-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .card-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Map Container */
+        #station-map {
+            height: 350px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Platform Section */
+        .platforms-section {
+            margin-top: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--color-bg);
+            color: var(--color-text);
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Platform Type Tabs */
+        .platform-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        .platform-tab {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .platform-tab:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .platform-tab.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .platform-tab .count {
+            background: rgba(0,0,0,0.1);
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .platform-tab.active .count {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Platform Grid */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Platform Card */
+        .platform-card {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .platform-card-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 1rem 1.25rem;
+        }
+
+        .platform-card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .platform-card-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .platform-type-badge {
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .platform-card-meta {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .platform-card-body {
+            padding: 1.25rem;
+        }
+
+        /* Instrument Tabs within Platform */
+        .instrument-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .instrument-tab {
+            padding: 0.4rem 0.75rem;
+            background: var(--color-bg);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+
+        .instrument-tab:hover {
+            background: #e5e7eb;
+            color: var(--color-text);
+        }
+
+        .instrument-tab.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        /* Instrument List */
+        .instrument-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .instrument-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
+        }
+
+        .instrument-item:hover {
+            background: #e5e7eb;
+        }
+
+        .instrument-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .instrument-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .instrument-icon.phenocam { background: #fef3c7; color: #92400e; }
+        .instrument-icon.multispectral { background: #dbeafe; color: #1e40af; }
+        .instrument-icon.par { background: #fef9c3; color: #854d0e; }
+        .instrument-icon.ndvi { background: #d1fae5; color: #065f46; }
+        .instrument-icon.pri { background: #cffafe; color: #155e75; }
+        .instrument-icon.hyperspectral { background: #fce7f3; color: #9d174d; }
+
+        .instrument-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .instrument-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .instrument-meta {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .instrument-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.active { background: var(--color-success); }
+        .status-dot.inactive { background: var(--color-text-muted); }
+        .status-dot.maintenance { background: var(--color-warning); }
+
+        .instrument-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .instrument-btn {
+            padding: 0.4rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .instrument-btn:hover {
+            background: var(--color-card);
+            color: var(--color-primary);
+        }
+
+        /* Loading State */
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--color-text-muted);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: var(--color-primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--color-text);
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            padding: 2rem;
+        }
+
+        .modal-backdrop.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--color-card);
+            border-radius: var(--radius-lg);
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background: var(--color-bg);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .form-section-header:hover {
+            background: #e5e7eb;
+        }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-toggle {
+            color: var(--color-text-muted);
+            transition: transform 0.2s;
+        }
+
+        .form-section.collapsed .form-section-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .form-section.collapsed .form-section-content {
+            display: none;
+        }
+
+        .form-section-content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-section-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .form-label .required {
+            color: var(--color-error);
+        }
+
+        .form-input {
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--color-error);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .form-error {
+            font-size: 0.75rem;
+            color: var(--color-error);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .form-success {
+            font-size: 0.75rem;
+            color: var(--color-success);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .welcome-header {
+                flex-direction: column;
+            }
+
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="brand-logo" onerror="this.style.display='none'">
+                <span class="brand-text">SITES Spectral</span>
+                <span class="brand-version">v8.0.0-alpha.1</span>
+            </div>
+            <div class="nav-actions">
+                <div class="user-badge" id="user-badge">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="user-name">Loading...</span>
+                    <span class="role" id="user-role"></span>
+                </div>
+                <button class="nav-btn" id="export-btn" title="Export Data">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                </button>
+                <a href="/dashboard.html" class="nav-btn" id="admin-link" style="display: none;">
+                    <i class="fas fa-cog"></i>
+                    <span>Admin</span>
+                </a>
+                <button class="nav-btn" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <section class="welcome-section" id="welcome-section">
+            <div class="welcome-header">
+                <div class="welcome-info">
+                    <h1 class="welcome-title">
+                        <i class="fas fa-broadcast-tower"></i>
+                        <span id="station-name">Loading Station...</span>
+                    </h1>
+                    <p class="welcome-subtitle" id="station-description">Loading station information...</p>
+                    <div class="station-badges" id="station-badges">
+                        <!-- Badges populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Station Summary Card -->
+            <div class="card" id="summary-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar"></i> Station Summary</h3>
+                </div>
+                <div class="card-content">
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="stat-platforms">-</div>
+                            <div class="stat-label">Platforms</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="stat-instruments">-</div>
+                            <div class="stat-label">Instruments</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="stat-active">-</div>
+                            <div class="stat-label">Active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Card -->
+            <div class="card" id="map-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-map-marker-alt"></i> Station Location</h3>
+                    <div class="card-actions">
+                        <button class="card-btn" id="map-layer-toggle" title="Toggle Map Layer">
+                            <i class="fas fa-layer-group"></i>
+                        </button>
+                        <button class="card-btn" id="map-fullscreen" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content" style="padding: 0;">
+                    <div id="station-map"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platforms Section -->
+        <section class="platforms-section" id="platforms-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-server"></i>
+                    Platforms & Instruments
+                </h2>
+                <div class="section-actions" id="admin-actions" style="display: none;">
+                    <button class="btn btn-secondary" id="add-aoi-btn">
+                        <i class="fas fa-draw-polygon"></i>
+                        Add AOI
+                    </button>
+                    <button class="btn btn-primary" id="add-platform-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Platform
+                    </button>
+                </div>
+            </div>
+
+            <!-- Platform Type Tabs -->
+            <div class="platform-tabs" id="platform-tabs">
+                <button class="platform-tab active" data-type="all">
+                    <i class="fas fa-th-list"></i>
+                    All
+                    <span class="count" id="count-all">0</span>
+                </button>
+                <button class="platform-tab" data-type="fixed">
+                    <i class="fas fa-tower-observation"></i>
+                    Fixed
+                    <span class="count" id="count-fixed">0</span>
+                </button>
+                <button class="platform-tab" data-type="uav">
+                    <i class="fas fa-helicopter"></i>
+                    UAV
+                    <span class="count" id="count-uav">0</span>
+                </button>
+                <button class="platform-tab" data-type="satellite">
+                    <i class="fas fa-satellite"></i>
+                    Satellite
+                    <span class="count" id="count-satellite">0</span>
+                </button>
+            </div>
+
+            <!-- Platform Grid -->
+            <div class="platform-grid" id="platform-grid">
+                <!-- Platform cards populated dynamically -->
+                <div class="loading-state" id="platforms-loading">
+                    <div class="spinner"></div>
+                    <span>Loading platforms...</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Container -->
+    <div class="modal-backdrop" id="modal-backdrop">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-edit"></i> Edit</h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Modal content populated dynamically -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="modal-save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+
+    <!-- Core Modules -->
+    <script src="/js/core/error-messages.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/core/config-loader.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/core/state.js?v=8.0.0-alpha.1"></script>
+
+    <!-- Utility Modules -->
+    <script src="/js/utils/validators.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/utils/toast.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/utils.js?v=8.0.0-alpha.1"></script>
+
+    <!-- API Module -->
+    <script src="/js/api/api-client.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/api.js?v=8.0.0-alpha.1"></script>
+
+    <!-- Map Modules -->
+    <script src="/js/core/map-config.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/map/tile-layers.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/map/markers.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/map/geojson-layer.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/map/map-controller.js?v=8.0.0-alpha.1"></script>
+
+    <!-- Legacy Support (for backward compatibility) -->
+    <script src="/js/components.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/modal-sections.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/instrument-modals.js?v=8.0.0-alpha.1"></script>
+    <script src="/js/station-dashboard.js?v=8.0.0-alpha.1"></script>
+
+    <!-- Application Controller -->
+    <script src="/js/core/app.js?v=8.0.0-alpha.1"></script>
+
+    <script>
+        /**
+         * SITES Spectral v8.0.0 - Application Initializer
+         *
+         * This initializes the modular application with:
+         * - Configuration loading from YAML
+         * - State management
+         * - Map initialization with new modules
+         * - Platform/Instrument rendering
+         */
+
+        (function() {
+            'use strict';
+
+            // Application state
+            let mapController = null;
+            let currentStation = null;
+            let currentUser = null;
+
+            /**
+             * Initialize the application
+             */
+            async function init() {
+                console.log('[Spectral] Initializing SITES Spectral v8.0.0-alpha.1');
+
+                try {
+                    // 1. Check authentication
+                    const auth = await checkAuth();
+                    if (!auth) {
+                        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+                        return;
+                    }
+                    currentUser = auth;
+                    updateUserBadge(currentUser);
+
+                    // 2. Get station from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const stationAcronym = urlParams.get('station');
+
+                    if (!stationAcronym) {
+                        showError('No station specified. Please select a station.');
+                        return;
+                    }
+
+                    // 3. Load station data
+                    currentStation = await loadStation(stationAcronym);
+                    if (!currentStation) {
+                        showError('Station not found: ' + stationAcronym);
+                        return;
+                    }
+
+                    // 4. Update UI with station info
+                    updateStationInfo(currentStation);
+
+                    // 5. Initialize map
+                    await initializeMap(currentStation);
+
+                    // 6. Load platforms and instruments
+                    await loadPlatformsAndInstruments(currentStation.id);
+
+                    // 7. Setup event listeners
+                    setupEventListeners();
+
+                    // 8. Show admin actions if authorized
+                    if (canEdit(currentUser, currentStation)) {
+                        document.getElementById('admin-actions').style.display = 'flex';
+                    }
+
+                    if (currentUser.role === 'admin') {
+                        document.getElementById('admin-link').style.display = 'flex';
+                    }
+
+                    console.log('[Spectral] Application initialized successfully');
+
+                } catch (error) {
+                    console.error('[Spectral] Initialization error:', error);
+                    showError('Failed to initialize application: ' + error.message);
+                }
+            }
+
+            /**
+             * Check authentication status
+             */
+            async function checkAuth() {
+                const token = localStorage.getItem('sites_spectral_token');
+                if (!token) return null;
+
+                try {
+                    const response = await fetch('/api/auth/verify', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) {
+                        localStorage.removeItem('sites_spectral_token');
+                        localStorage.removeItem('sites_spectral_user');
+                        return null;
+                    }
+
+                    const data = await response.json();
+                    return data.valid ? data.user : null;
+                } catch (error) {
+                    console.error('[Spectral] Auth check failed:', error);
+                    return null;
+                }
+            }
+
+            /**
+             * Load station data
+             */
+            async function loadStation(acronym) {
+                try {
+                    const token = localStorage.getItem('sites_spectral_token');
+                    const response = await fetch(`/api/stations?acronym=${acronym}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load station');
+
+                    const data = await response.json();
+                    return data.data && data.data.length > 0 ? data.data[0] : null;
+                } catch (error) {
+                    console.error('[Spectral] Station load error:', error);
+                    return null;
+                }
+            }
+
+            /**
+             * Update station information in UI
+             */
+            function updateStationInfo(station) {
+                document.getElementById('station-name').textContent = station.display_name || station.acronym;
+                document.getElementById('station-description').textContent = station.description || 'SITES Research Station';
+
+                // Update page title
+                document.title = `${station.display_name || station.acronym} - SITES Spectral`;
+
+                // Add badges
+                const badgesContainer = document.getElementById('station-badges');
+                badgesContainer.innerHTML = `
+                    <span class="badge badge-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${station.latitude ? station.latitude.toFixed(4) : '-'}°N, ${station.longitude ? station.longitude.toFixed(4) : '-'}°E
+                    </span>
+                    <span class="badge badge-success">
+                        <i class="fas fa-check-circle"></i>
+                        Active
+                    </span>
+                `;
+            }
+
+            /**
+             * Update user badge
+             */
+            function updateUserBadge(user) {
+                document.getElementById('user-name').textContent = user.username || 'User';
+                document.getElementById('user-role').textContent = user.role || 'viewer';
+            }
+
+            /**
+             * Initialize the map
+             */
+            async function initializeMap(station) {
+                const mapContainer = document.getElementById('station-map');
+                if (!mapContainer) return;
+
+                try {
+                    // Use new MapController if available
+                    if (typeof MapController !== 'undefined') {
+                        mapController = new MapController('station-map');
+                        await mapController.initialize({
+                            center: [station.latitude || 63.0, station.longitude || 17.0],
+                            zoom: 10
+                        });
+
+                        // Add station marker
+                        if (station.latitude && station.longitude) {
+                            mapController.addStationMarker(
+                                station.latitude,
+                                station.longitude,
+                                {
+                                    name: station.display_name || station.acronym,
+                                    description: station.description
+                                }
+                            );
+                        }
+
+                        console.log('[Spectral] Map initialized with new MapController');
+                    } else {
+                        // Fallback to basic Leaflet
+                        console.log('[Spectral] MapController not available, using basic Leaflet');
+                        initBasicMap(station);
+                    }
+                } catch (error) {
+                    console.error('[Spectral] Map initialization error:', error);
+                    initBasicMap(station);
+                }
+            }
+
+            /**
+             * Basic map initialization fallback
+             */
+            function initBasicMap(station) {
+                const lat = station.latitude || 63.0;
+                const lng = station.longitude || 17.0;
+
+                const map = L.map('station-map').setView([lat, lng], 10);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    crossOrigin: 'anonymous'
+                }).addTo(map);
+
+                if (station.latitude && station.longitude) {
+                    L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup(`<b>${station.display_name || station.acronym}</b>`);
+                }
+            }
+
+            /**
+             * Load platforms and instruments
+             */
+            async function loadPlatformsAndInstruments(stationId) {
+                const gridContainer = document.getElementById('platform-grid');
+                const loadingEl = document.getElementById('platforms-loading');
+
+                try {
+                    const token = localStorage.getItem('sites_spectral_token');
+                    const response = await fetch(`/api/v2/platforms?station_id=${stationId}&include_instruments=true`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load platforms');
+
+                    const data = await response.json();
+                    const platforms = data.data || [];
+
+                    // Update stats
+                    updateStats(platforms);
+
+                    // Update platform type counts
+                    updatePlatformCounts(platforms);
+
+                    // Render platforms
+                    renderPlatforms(platforms);
+
+                    // Hide loading
+                    if (loadingEl) loadingEl.style.display = 'none';
+
+                } catch (error) {
+                    console.error('[Spectral] Platforms load error:', error);
+                    if (loadingEl) {
+                        loadingEl.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h4>Failed to Load Platforms</h4>
+                                <p>${error.message}</p>
+                            </div>
+                        `;
+                    }
+                }
+            }
+
+            /**
+             * Update statistics
+             */
+            function updateStats(platforms) {
+                let totalInstruments = 0;
+                let activeInstruments = 0;
+
+                platforms.forEach(platform => {
+                    const instruments = platform.instruments || [];
+                    totalInstruments += instruments.length;
+                    activeInstruments += instruments.filter(i => i.status === 'active').length;
+                });
+
+                document.getElementById('stat-platforms').textContent = platforms.length;
+                document.getElementById('stat-instruments').textContent = totalInstruments;
+                document.getElementById('stat-active').textContent = activeInstruments;
+            }
+
+            /**
+             * Update platform type counts
+             */
+            function updatePlatformCounts(platforms) {
+                const counts = { all: platforms.length, fixed: 0, uav: 0, satellite: 0 };
+
+                platforms.forEach(platform => {
+                    const type = platform.platform_type || 'fixed';
+                    if (counts[type] !== undefined) counts[type]++;
+                });
+
+                document.getElementById('count-all').textContent = counts.all;
+                document.getElementById('count-fixed').textContent = counts.fixed;
+                document.getElementById('count-uav').textContent = counts.uav;
+                document.getElementById('count-satellite').textContent = counts.satellite;
+            }
+
+            /**
+             * Render platforms to grid
+             */
+            function renderPlatforms(platforms) {
+                const gridContainer = document.getElementById('platform-grid');
+
+                if (platforms.length === 0) {
+                    gridContainer.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <i class="fas fa-server"></i>
+                            <h4>No Platforms Found</h4>
+                            <p>This station doesn't have any platforms yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                gridContainer.innerHTML = platforms.map(platform => renderPlatformCard(platform)).join('');
+            }
+
+            /**
+             * Render a single platform card
+             */
+            function renderPlatformCard(platform) {
+                const instruments = platform.instruments || [];
+                const platformType = platform.platform_type || 'fixed';
+                const typeIcons = {
+                    fixed: 'fa-tower-observation',
+                    uav: 'fa-helicopter',
+                    satellite: 'fa-satellite'
+                };
+
+                // Group instruments by type
+                const instrumentGroups = {};
+                instruments.forEach(inst => {
+                    const type = getInstrumentType(inst.instrument_type);
+                    if (!instrumentGroups[type]) instrumentGroups[type] = [];
+                    instrumentGroups[type].push(inst);
+                });
+
+                return `
+                    <div class="platform-card" data-platform-id="${platform.id}" data-platform-type="${platformType}">
+                        <div class="platform-card-header">
+                            <div class="platform-card-title">
+                                <span class="platform-card-name">
+                                    <i class="fas ${typeIcons[platformType] || 'fa-server'}"></i>
+                                    ${platform.display_name || platform.normalized_name}
+                                </span>
+                                <span class="platform-type-badge">${platformType}</span>
+                            </div>
+                            <div class="platform-card-meta">
+                                ${platform.ecosystem_code || 'Unknown Ecosystem'} | ${instruments.length} instrument${instruments.length !== 1 ? 's' : ''}
+                            </div>
+                        </div>
+                        <div class="platform-card-body">
+                            ${instruments.length > 0 ? `
+                                <div class="instrument-list">
+                                    ${instruments.slice(0, 5).map(inst => renderInstrumentItem(inst)).join('')}
+                                    ${instruments.length > 5 ? `
+                                        <div class="instrument-item" style="justify-content: center;">
+                                            <span style="color: var(--color-text-muted);">
+                                                + ${instruments.length - 5} more instruments
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : `
+                                <div class="empty-state" style="padding: 1.5rem;">
+                                    <i class="fas fa-microchip" style="font-size: 1.5rem;"></i>
+                                    <p style="margin-top: 0.5rem;">No instruments</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Render a single instrument item
+             */
+            function renderInstrumentItem(instrument) {
+                const type = getInstrumentType(instrument.instrument_type);
+                const typeIcons = {
+                    phenocam: 'fa-camera',
+                    multispectral: 'fa-satellite-dish',
+                    par: 'fa-sun',
+                    ndvi: 'fa-leaf',
+                    pri: 'fa-microscope',
+                    hyperspectral: 'fa-rainbow'
+                };
+
+                const status = instrument.status || 'unknown';
+                const statusClass = status === 'active' ? 'active' : (status === 'maintenance' ? 'maintenance' : 'inactive');
+
+                return `
+                    <div class="instrument-item" data-instrument-id="${instrument.id}" onclick="window.openInstrumentModal && window.openInstrumentModal(${instrument.id})">
+                        <div class="instrument-info">
+                            <div class="instrument-icon ${type}">
+                                <i class="fas ${typeIcons[type] || 'fa-microchip'}"></i>
+                            </div>
+                            <div class="instrument-details">
+                                <span class="instrument-name">${instrument.normalized_name || instrument.id}</span>
+                                <span class="instrument-meta">${instrument.instrument_type}</span>
+                            </div>
+                        </div>
+                        <div class="instrument-status">
+                            <span class="status-dot ${statusClass}"></span>
+                            <span class="instrument-actions">
+                                <button class="instrument-btn" title="View Details" onclick="event.stopPropagation();">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="instrument-btn" title="Edit" onclick="event.stopPropagation();">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Get normalized instrument type
+             */
+            function getInstrumentType(type) {
+                if (!type) return 'unknown';
+                const typeLower = type.toLowerCase();
+
+                if (typeLower.includes('phenocam') || typeLower.includes('camera')) return 'phenocam';
+                if (typeLower.includes('multispectral') || typeLower.includes('skye')) return 'multispectral';
+                if (typeLower.includes('par')) return 'par';
+                if (typeLower.includes('ndvi')) return 'ndvi';
+                if (typeLower.includes('pri')) return 'pri';
+                if (typeLower.includes('hyperspectral')) return 'hyperspectral';
+
+                return 'unknown';
+            }
+
+            /**
+             * Check if user can edit
+             */
+            function canEdit(user, station) {
+                if (!user) return false;
+                if (user.role === 'admin') return true;
+                if (user.role === 'station' && user.station_acronym === station.acronym) return true;
+                return false;
+            }
+
+            /**
+             * Setup event listeners
+             */
+            function setupEventListeners() {
+                // Logout button
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    localStorage.removeItem('sites_spectral_token');
+                    localStorage.removeItem('sites_spectral_user');
+                    window.location.href = '/';
+                });
+
+                // Platform type tabs
+                document.querySelectorAll('.platform-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const type = e.currentTarget.dataset.type;
+                        filterPlatformsByType(type);
+
+                        // Update active tab
+                        document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                    });
+                });
+
+                // Modal close
+                document.getElementById('modal-close').addEventListener('click', closeModal);
+                document.getElementById('modal-cancel').addEventListener('click', closeModal);
+                document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) closeModal();
+                });
+
+                // Map layer toggle
+                document.getElementById('map-layer-toggle').addEventListener('click', () => {
+                    if (mapController && mapController.toggleBaseLayer) {
+                        mapController.toggleBaseLayer();
+                    }
+                });
+
+                // Escape key to close modal
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') closeModal();
+                });
+            }
+
+            /**
+             * Filter platforms by type
+             */
+            function filterPlatformsByType(type) {
+                const cards = document.querySelectorAll('.platform-card');
+                cards.forEach(card => {
+                    if (type === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        const cardType = card.dataset.platformType;
+                        card.style.display = cardType === type ? 'block' : 'none';
+                    }
+                });
+            }
+
+            /**
+             * Close modal
+             */
+            function closeModal() {
+                document.getElementById('modal-backdrop').classList.remove('show');
+            }
+
+            /**
+             * Show error message
+             */
+            function showError(message) {
+                const container = document.getElementById('platform-grid');
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--color-error);"></i>
+                        <h4>Error</h4>
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+
+            // Initialize on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            // Expose some functions globally for backward compatibility
+            window.spectralApp = {
+                init,
+                closeModal,
+                filterPlatformsByType
+            };
+
+        })();
+    </script>
+</body>
+</html>

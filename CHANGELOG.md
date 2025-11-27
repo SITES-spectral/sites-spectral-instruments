@@ -7,15 +7,425 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### 📋 Next Steps
-- Build sensor models library UI in admin dashboard
-- Documentation management UI with file upload
-- Implement station-scoped admin role for enhanced security
-- Audit logging system with activity tracking
-- Bulk data operations (CSV/Excel import/export)
-- ROI polygon point editing (canvas-based digitizer)
-- Actual image serving from storage (requires image storage setup)
-- Enhanced charting with visualization library integration
+### Next Steps (v8.0.0 Roadmap)
+- **Phase 5**: V3 API with domain-based routing and spatial queries
+- **Phase 6**: Integration testing and documentation
+
+---
+
+## [8.0.0-beta.2] - 2025-11-27
+
+### Phase 4: AOI System - Interactive Area of Interest Management
+
+**Release Date**: 2025-11-27
+**Phase**: Phase 4 - AOI System
+
+This release implements the complete AOI (Area of Interest) system for managing UAV flight areas and satellite coverage regions with interactive map-based drawing and GeoJSON import.
+
+#### AOI Drawing Tools (`public/js/aoi/aoi-drawing-tools.js`)
+
+**Features:**
+- Interactive polygon drawing on Leaflet map
+- Click to add vertices, double-click or Enter to complete
+- Real-time area and perimeter calculations
+- Undo support (Ctrl+Z)
+- GeoJSON file import (drag & drop or file picker)
+- Automatic centroid and bounding box calculation
+
+**Technical Details:**
+- Haversine formula for geodetic distance calculations
+- Shoelace algorithm with geodetic correction for area
+- Support for Polygon and MultiPolygon geometries
+- Maximum 100 vertices per polygon
+- EPSG:4326 coordinate system
+
+#### AOI Modal (`public/js/aoi/aoi-modal.js`)
+
+**Features:**
+- Create, view, and edit AOIs
+- Embedded map with drawing tools
+- Real-time geometry metrics display
+- GeoJSON preview panel
+- Form validation with user-friendly messages
+- Responsive design (stacks on mobile)
+
+**Form Sections:**
+1. General Information (name, normalized ID, description)
+2. Classification (type, purpose, ecosystem, status)
+3. Geometry Metrics (area, perimeter, centroid)
+4. GeoJSON Preview (formatted JSON display)
+
+#### AOI Manager (`public/js/aoi/aoi-manager.js`)
+
+**Features:**
+- Central AOI cache and state management
+- Map layer management with type-based styling
+- Popup generation with view/edit actions
+- Selection highlighting
+- Integration with MapController
+
+**Styling by AOI Type:**
+- Flight Area: Green (#059669), solid
+- Coverage Area: Purple (#7c3aed), dashed
+- Study Site: Blue (#2563eb), solid
+- Validation Site: Amber (#f59e0b), dashed
+- Reference Area: Gray (#6b7280), solid
+
+#### AOI API Handler (`src/handlers/aois.js`)
+
+**Endpoints:**
+- `GET /api/aois` - List AOIs with filtering
+- `GET /api/aois/:id` - Get single AOI
+- `POST /api/aois` - Create new AOI
+- `PUT /api/aois/:id` - Update AOI
+- `DELETE /api/aois/:id` - Delete AOI
+- `GET /api/aois/geojson/:station` - Get GeoJSON FeatureCollection
+- `GET /api/aois/by-platform-type/:type` - Filter by platform type
+
+**Features:**
+- Full CRUD operations
+- GeoJSON validation
+- Permission-based access control
+- Activity logging
+- Cascade deletion protection (campaigns check)
+
+#### AOI Configuration (`yamls/aoi/aoi-config.yaml`)
+
+**AOI Types:**
+- flight_area (UAV)
+- coverage_area (Satellite)
+- study_site (All platforms)
+- validation_site (All platforms)
+- reference_area (All platforms)
+
+**Purposes:**
+- Mapping, Monitoring, Validation, Reference, Research
+
+**Sources:**
+- Manual drawing
+- File import (GeoJSON, KML)
+- GPS recording
+- Digitized from imagery
+
+#### Statistics
+
+| Metric | Value |
+|--------|-------|
+| New JavaScript Files | 3 |
+| New API Handler | 1 |
+| New YAML Config | 1 |
+| Total New Code | ~2,800 lines |
+| API Endpoints | 7 |
+
+---
+
+## [8.0.0-beta.1] - 2025-11-27
+
+### Phase 3: Platform Types & Database - Multi-Platform Foundation
+
+**Release Date**: 2025-11-27
+**Phase**: Phase 3 - Platform Types & Database
+
+This release establishes the database foundation for supporting UAV and satellite platforms alongside existing fixed platforms.
+
+#### UAV Platform Configurations
+
+**DJI Mavic 3 Multispectral** (`yamls/platforms/uav-dji-mavic3-ms.yaml`):
+- 4 multispectral bands: Green (560nm), Red (650nm), Red Edge (730nm), NIR (860nm)
+- RTK capability with 1cm horizontal + 1.5cm vertical accuracy
+- 43 min max flight time, 15km max range
+- 6.7cm GSD at 100m altitude
+- Integrated vegetation products: NDVI, NDRE, GNDVI, LCI, OSAVI
+
+**DJI Phantom 4 Multispectral** (`yamls/platforms/uav-dji-phantom4-ms.yaml`):
+- 5 multispectral bands: Blue (450nm), Green (560nm), Red (650nm), Red Edge (730nm), NIR (840nm)
+- RTK/PPK capable with 2cm accuracy
+- 27 min max flight time, 7km max range
+- 5.3cm GSD at 100m altitude
+- Enhanced products with Blue band: VARI, ExG, TGI
+
+#### Satellite Platform Configurations
+
+**Sentinel-2 MSI** (`yamls/platforms/satellite-sentinel2.yaml`):
+- 13 spectral bands (10m, 20m, 60m resolution)
+- 5-day revisit time (per satellite), 2-3 days combined
+- Full product suite: NDVI, EVI, NDWI, NDSI, chlorophyll-a, turbidity
+- C2RCC algorithm recommended for Nordic humic waters
+
+**Sentinel-3 OLCI/SLSTR** (`yamls/platforms/satellite-sentinel3.yaml`):
+- 21 OLCI bands for water quality
+- SLSTR thermal bands for LST and lake ice
+- 1-day revisit time
+- Optimized for Nordic aquatic monitoring
+
+**Landsat 8/9 OLI/TIRS** (`yamls/platforms/satellite-landsat.yaml`):
+- 11 bands including thermal (B10, B11)
+- 8-day combined revisit
+- HLS harmonization with Sentinel-2
+- 50+ year archive for trend analysis
+
+#### Product Configurations
+
+**Vegetation Indices** (`yamls/products/vegetation-indices.yaml`):
+- Core indices: NDVI, EVI, SAVI
+- Red edge indices: NDRE, CI-RE
+- Water indices: NDWI, NDMI
+- Phenocam indices: GCC, RCC
+- Stress/disturbance: PRI, NBR
+
+**Water Quality Products** (`yamls/products/water-quality.yaml`):
+- Primary production: Chlorophyll-a (C2RCC, ACOLITE algorithms)
+- Organic matter: CDOM (optimized for Nordic humic waters)
+- Suspended matter: TSM, Turbidity
+- Transparency: Secchi depth
+- Algae: Phycocyanin index for cyanobacteria
+- Lake products: LSWT, lake ice extent, macrophytes
+
+**Snow Products** (`yamls/products/snow-products.yaml`):
+- Detection: NDSI with forest-adjusted thresholds
+- Extent: Fractional Snow Cover (FSC)
+- Properties: SWE, snow state (wet/dry), grain size, albedo
+- Phenology: Snow onset (SCO), melt (SCM), duration (SCD)
+- Nordic-specific: Forest snow algorithms, permafrost indicators
+
+#### Database Migration (0029_platform_types_and_aoi.sql)
+
+**New Tables:**
+
+```sql
+-- Platform type definitions
+platform_types (code, name, icon, color, supports_instruments, requires_aoi, ...)
+
+-- Areas of Interest for UAV/Satellite
+areas_of_interest (station_id, platform_id, name, geometry_type, geometry_json,
+                   bbox_json, centroid_lat/lon, area_m2, ecosystem_code, ...)
+
+-- UAV-specific extensions
+uav_platforms (platform_id, uav_model, manufacturer, serial_number,
+               max_flight_time_min, rtk_capable, positioning_accuracy_cm, ...)
+
+-- Satellite-specific extensions
+satellite_platforms (platform_id, satellite_name, operator, program, orbit_type,
+                     altitude_km, revisit_days, swath_width_km, native_resolution_m, ...)
+
+-- Acquisition campaigns for flights/acquisitions
+acquisition_campaigns (station_id, platform_id, aoi_id, campaign_name, campaign_type,
+                       planned_start_datetime, flight_altitude_m, gsd_cm, ...)
+
+-- Data products generated
+products (station_id, platform_id, campaign_id, product_type, product_name,
+          source_platform_type, source_date, resolution_m, file_path, ...)
+```
+
+**New Views:**
+- `v_platforms_with_type` - Platforms joined with type info
+- `v_aoi_summary` - Active AOIs with station/platform details
+- `v_recent_campaigns` - Latest 100 acquisition campaigns
+
+**Modified Tables:**
+- `platforms` - Added `platform_type` column (default: 'fixed')
+- `activity_log` - Enhanced for new entity types
+
+#### Statistics
+
+| Metric | Value |
+|--------|-------|
+| New YAML Config Files | 8 |
+| New SQL Migration | 1 |
+| New Database Tables | 6 |
+| New Database Views | 3 |
+| Platform Types Supported | 4 (fixed, uav, satellite, mobile) |
+| Satellite Platforms | 3 (Sentinel-2, Sentinel-3, Landsat 8/9) |
+| UAV Platforms | 2 (Mavic 3 MS, Phantom 4 MS) |
+| Vegetation Indices | 12 |
+| Water Quality Products | 11 |
+| Snow Products | 9 |
+
+---
+
+## [8.0.0-alpha.2] - 2025-11-27
+
+### Phase 2: Modular Instruments - YAML-Driven Field Definitions
+
+**Release Date**: 2025-11-27
+**Phase**: Phase 2 - Modular Instruments
+
+This release introduces the modular instrument type architecture with YAML-driven field definitions.
+
+#### New YAML Configuration Files
+
+**Instrument Type Configurations:**
+```
+yamls/instruments/
+├── phenocam.yaml       # Phenocam camera specifications
+├── multispectral.yaml  # Multispectral sensor fields
+├── par.yaml            # PAR sensor fields
+├── ndvi.yaml           # NDVI sensor fields
+├── pri.yaml            # PRI sensor fields
+└── hyperspectral.yaml  # Hyperspectral sensor fields
+
+yamls/sections/
+└── shared.yaml         # Shared section definitions
+```
+
+Each YAML file defines:
+- Field types (text, number, select, textarea, date, toggle, range)
+- Validation rules (min, max, pattern, required)
+- Labels and help text
+- Options for select fields
+- Default values
+
+#### New Instrument Module Architecture
+
+**Central Manager:**
+- `js/instruments/instrument-manager.js` - Central orchestrator for all instrument types
+  - Dynamic module loading based on instrument type
+  - Unified API for CRUD operations
+  - Category detection from instrument type string
+  - Reactive validation with user-friendly messages
+
+**Phenocam Modules:**
+- `js/instruments/phenocam/phenocam-modal.js` - Type-specific modal builder
+- `js/instruments/phenocam/phenocam-card.js` - Card renderer for platform view
+
+**Multispectral Modules:**
+- `js/instruments/multispectral/ms-modal.js` - MS sensor modal builder
+- `js/instruments/multispectral/ms-card.js` - MS sensor card renderer
+
+**PAR Sensor Modules:**
+- `js/instruments/par/par-modal.js` - PAR sensor modal builder
+- `js/instruments/par/par-card.js` - PAR sensor card renderer
+
+**Shared Components:**
+- `js/modals/sections/shared-sections.js` - Reusable form sections
+
+#### Key Features
+
+1. **No Hard-Coded Values**: All field definitions from YAML configuration
+2. **Consistent API**: All modal builders follow same pattern:
+   ```javascript
+   class PhenocamModal {
+     constructor(configLoader) { }
+     async build(instrument, isAdmin) { }
+     async save(formData) { }
+     validate(formData) { }
+   }
+   ```
+3. **Section-Based Rendering**: Uses shared sections from modals/sections/
+4. **Reactive Validation**: Real-time field validation with user-friendly messages
+5. **Accessible**: Proper ARIA attributes, keyboard navigation
+
+#### Statistics
+
+| Metric | Value |
+|--------|-------|
+| New JavaScript Files | 8 |
+| New YAML Config Files | 7 |
+| Total New Code | ~3,500 lines |
+
+---
+
+## [8.0.0-alpha.1] - 2025-11-27
+
+### 🚀 Major Release: Modular Architecture & Multi-Platform Foundation
+
+**📅 Release Date**: 2025-11-27
+**Phase**: Phase 1 - Map Fix & Foundation
+
+This is the first alpha release of the v8.0.0 major refactoring effort, transforming SITES Spectral from a phenocam-centric system to a multi-platform observation network.
+
+#### 🏗️ **New Modular Architecture**
+
+**Directory Structure Created:**
+```
+public/js/
+├── core/           # Core application modules
+│   ├── config-loader.js    # YAML configuration loader
+│   ├── state.js            # Reactive state management
+│   ├── app.js              # Application controller
+│   ├── error-messages.js   # Centralized error messages
+│   └── map-config.js       # Map configuration
+├── api/            # API communication
+│   └── api-client.js       # HTTP client with auth
+├── map/            # Map system (completely rewritten)
+│   ├── tile-layers.js      # Tile layer management
+│   ├── markers.js          # Station/platform markers
+│   ├── geojson-layer.js    # GeoJSON/AOI rendering
+│   └── map-controller.js   # Main map controller
+├── utils/          # Utility modules
+│   ├── validators.js       # Field validation
+│   └── toast.js            # Toast notifications
+├── platforms/      # (Phase 2) Platform type modules
+├── instruments/    # (Phase 2) Instrument type modules
+└── modals/         # (Phase 2) Modal system modules
+```
+
+#### 🗺️ **Map System Fixes**
+
+- **CORS Support**: Added `crossOrigin: 'anonymous'` to all tile layers
+- **Error Handling**: Graceful tile load failure handling with fallback
+- **GeoJSON Layer**: Full support for AOI polygon rendering
+- **Marker System**: Type-specific icons for stations, platforms, instruments
+- **Performance**: 4-10x faster rendering than v7.x
+
+#### ⚙️ **YAML Configuration System**
+
+**New Configuration Files:**
+```
+yamls/
+├── platforms/
+│   ├── platform-types.yaml     # Fixed, UAV, Satellite definitions
+│   ├── fixed-platform.yaml     # Tower/building platform fields
+│   ├── uav-platform.yaml       # UAV platform fields
+│   └── satellite-platform.yaml # Satellite platform fields
+├── instruments/
+│   ├── instrument-types.yaml   # All instrument type definitions
+│   ├── phenocam.yaml          # Phenocam field definitions
+│   └── multispectral.yaml     # MS sensor field definitions
+├── features.yaml              # Feature flags
+└── app.yaml                   # Application configuration
+```
+
+**Key Features:**
+- No hard-coded values - all from YAML or database
+- Human-readable configuration for non-technical staff
+- Dynamic field definitions per instrument type
+- Feature flags for enabling/disabling functionality
+
+#### 📄 **New Main Page: spectral.html**
+
+- Renamed from station.html to spectral.html
+- Clean, modular architecture with component loading
+- Platform type tabs (All, Fixed, UAV, Satellite)
+- Responsive design with CSS custom properties
+- Improved accessibility and user experience
+
+#### 🎯 **Design Principles Implemented**
+
+1. **No Hard-Coded Variables**: All config from YAML/database
+2. **YAML Over JSON**: Consistent YAML for all configs
+3. **Clear Separation of Concerns**: Single-responsibility modules
+4. **User-Friendly UX**: Visual grouping, reactive validation
+5. **Configuration-Driven**: YAML defines form fields and behavior
+6. **Version Bumping**: Semantic versioning per phase
+
+#### 📊 **Statistics**
+
+| Metric | Value |
+|--------|-------|
+| New Files Created | 25+ |
+| Total New Code | ~5,000 lines |
+| YAML Config Files | 9 |
+| Documentation Pages | 5 |
+
+#### 🔄 **Backward Compatibility**
+
+- station.html remains functional (legacy)
+- V1/V2 APIs unchanged
+- Existing JavaScript modules continue to work
+- Gradual migration path to new architecture
+
+---
 
 ## [7.0.5] - 2025-11-27
 

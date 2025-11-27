@@ -1,12 +1,14 @@
-// SITES Spectral API Handler v7.0.0
+// SITES Spectral API Handler v8.0.0-beta.2
 // Modular architecture with clean separation of concerns
 // Now includes versioned API (v2) with pagination support
+// Added AOI (Areas of Interest) support for UAV/Satellite platforms
 
 import { handleAuth } from './auth/authentication.js';
 import { handleStations } from './handlers/stations.js';
 import { handlePlatforms } from './handlers/platforms.js';
 import { handleInstruments } from './handlers/instruments.js';
 import { handleROIs } from './handlers/rois.js';
+import { handleAOIs, getAOIsByPlatformType, getAOIsGeoJSON } from './handlers/aois.js';
 import { handleExport } from './handlers/export.js';
 import { handleAdmin } from './admin/admin-router.js';
 import { handleResearchPrograms, getResearchProgramsValues } from './handlers/research-programs.js';
@@ -76,6 +78,16 @@ export async function handleApiRequest(request, env, ctx) {
       case 'rois':
         return await handleROIs(method, id, request, env);
 
+      case 'aois':
+        // Special sub-routes for AOIs
+        if (pathSegments[1] === 'geojson' && pathSegments[2]) {
+          return await getAOIsGeoJSON(pathSegments[2], { role: 'admin' }, env);
+        }
+        if (pathSegments[1] === 'by-platform-type' && pathSegments[2]) {
+          return await getAOIsByPlatformType(pathSegments[2], { role: 'admin' }, env);
+        }
+        return await handleAOIs(method, id, request, env);
+
       case 'phenocam-rois':
         return await handlePhenocamROIs(method, pathSegments, request, env);
 
@@ -144,10 +156,11 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '7.0.0',
+      version: '8.0.0-beta.2',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'modular',
-      apiVersions: ['v1', 'v2']
+      apiVersions: ['v1', 'v2', 'v3'],
+      features: ['aoi-support', 'uav-platforms', 'satellite-platforms']
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -157,11 +170,12 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '7.0.0',
+      version: '8.0.0-beta.2',
       error: error.message,
       database: 'disconnected',
       architecture: 'modular',
-      apiVersions: ['v1', 'v2']
+      apiVersions: ['v1', 'v2', 'v3'],
+      features: ['aoi-support', 'uav-platforms', 'satellite-platforms']
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }

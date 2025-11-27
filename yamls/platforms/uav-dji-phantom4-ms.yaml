@@ -1,0 +1,231 @@
+# DJI Phantom 4 Multispectral Platform Configuration
+# SITES Spectral v8.0.0 - UAV Platform
+# For precision agriculture and environmental monitoring at SITES stations
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "DJI Phantom 4 Multispectral UAV platform for agricultural and environmental research"
+
+platform:
+  id: "phantom4_ms"
+  name: "DJI Phantom 4 Multispectral"
+  manufacturer: "DJI"
+  type: "uav"
+  category: "multirotor"
+  icon: "fa-helicopter"
+  color: "#2563eb"
+
+# Aircraft Specifications
+aircraft:
+  model: "Phantom 4 Multispectral"
+  release_year: 2019
+  weight_kg: 1.487
+  max_takeoff_weight_kg: 1.487
+  dimensions:
+    body_mm: [350, 350, 224]  # Diagonal size excluding propellers: 350mm
+  diagonal_mm: 350
+  propeller_size_inch: 9.4
+
+# Flight Capabilities
+flight:
+  max_flight_time_min: 27  # No wind
+  max_hover_time_min: 24
+  max_speed_ms: 14  # P-mode
+  max_speed_sport_ms: 20  # S-mode
+  max_wind_resistance_ms: 10  # Force 5 wind
+  max_altitude_m: 6000  # Above sea level
+  max_range_km: 7  # CE compliant
+  operating_temperature_c: [0, 40]
+
+# RTK Positioning
+rtk:
+  enabled: true
+  module: "D-RTK 2 High Precision GNSS Mobile Station"
+  horizontal_accuracy_cm: 1  # 1 cm + 1 ppm (RTK)
+  vertical_accuracy_cm: 1.5  # 1.5 cm + 1 ppm (RTK)
+  positioning_mode: ["RTK", "PPK"]
+  gnss_systems: ["GPS", "GLONASS", "Galileo", "BeiDou"]
+  initialization_time_s: 45  # Typical
+
+# Imaging System
+imaging_system:
+  name: "Integrated Multispectral Imaging System"
+  total_cameras: 6  # 1 RGB + 5 MS + 1 sunlight sensor
+
+  rgb_camera:
+    name: "RGB Camera"
+    sensor_type: "1/2.9 inch CMOS"
+    resolution_mp: 2
+    image_size_px: [1600, 1300]
+    pixel_size_um: 3.4
+    focal_length_mm: 5.74
+    fov_degrees: 62.7
+
+  multispectral_cameras:
+    name: "Multispectral Camera Array"
+    sensor_count: 5
+    sensor_type: "Global shutter CMOS"
+    resolution_mp: 2  # Per sensor
+    image_size_px: [1600, 1300]
+    pixel_size_um: 3.4
+    focal_length_mm: 5.74
+    gsd_at_100m_cm: 5.3
+
+  sunlight_sensor:
+    name: "Spectral Sunlight Sensor"
+    purpose: "Irradiance compensation for radiometric calibration"
+    bands: 6  # Matches MS bands
+
+# Multispectral Bands
+spectral_bands:
+  blue:
+    band_name: "Blue"
+    band_number: 1
+    center_wavelength_nm: 450
+    bandwidth_nm: 16
+    applications: ["Chlorophyll-a assessment", "Water quality", "Bathymetry"]
+
+  green:
+    band_name: "Green"
+    band_number: 2
+    center_wavelength_nm: 560
+    bandwidth_nm: 16
+    applications: ["Vegetation vigor", "Peak chlorophyll reflectance"]
+
+  red:
+    band_name: "Red"
+    band_number: 3
+    center_wavelength_nm: 650
+    bandwidth_nm: 16
+    applications: ["Chlorophyll absorption", "Plant stress detection"]
+
+  red_edge:
+    band_name: "Red Edge"
+    band_number: 4
+    center_wavelength_nm: 730
+    bandwidth_nm: 16
+    applications: ["Chlorophyll content", "LAI", "Nitrogen status"]
+
+  nir:
+    band_name: "Near-Infrared"
+    band_number: 5
+    center_wavelength_nm: 840
+    bandwidth_nm: 26
+    applications: ["Biomass", "NDVI", "Plant structure"]
+
+# Supported Vegetation Indices
+vegetation_indices:
+  ndvi:
+    name: "Normalized Difference Vegetation Index"
+    formula: "(NIR - Red) / (NIR + Red)"
+    bands: [5, 3]
+    range: [-1, 1]
+    description: "Standard vegetation health indicator"
+
+  ndre:
+    name: "Normalized Difference Red Edge"
+    formula: "(NIR - RedEdge) / (NIR + RedEdge)"
+    bands: [5, 4]
+    range: [-1, 1]
+    description: "More sensitive to chlorophyll variations than NDVI"
+
+  gndvi:
+    name: "Green NDVI"
+    formula: "(NIR - Green) / (NIR + Green)"
+    bands: [5, 2]
+    range: [-1, 1]
+    description: "Chlorophyll content in mature vegetation"
+
+  cire:
+    name: "Chlorophyll Index Red Edge"
+    formula: "(NIR / RedEdge) - 1"
+    bands: [5, 4]
+    range: [0, 10]
+    description: "Leaf chlorophyll concentration"
+
+  osavi:
+    name: "Optimized SAVI"
+    formula: "(NIR - Red) / (NIR + Red + 0.16)"
+    bands: [5, 3]
+    range: [-1, 1]
+    description: "Soil brightness correction for sparse vegetation"
+
+  lci:
+    name: "Leaf Chlorophyll Index"
+    formula: "(NIR - RedEdge) / (NIR + Red)"
+    bands: [5, 4, 3]
+    range: [-1, 1]
+    description: "Chlorophyll and nitrogen content"
+
+# Flight Planning
+flight_planning:
+  recommended_altitude_m: [20, 150]
+  default_altitude_m: 100
+  overlap_frontal_percent: 80
+  overlap_side_percent: 75
+  flight_speed_ms: [2, 8]
+  terrain_follow: true
+  waypoint_missions: true
+  supported_software:
+    - "DJI GS Pro"
+    - "DJI Terra"
+    - "Pix4Dcapture"
+    - "DroneDeploy"
+
+# Calibration
+calibration:
+  radiometric_calibration: true
+  reflectance_panel:
+    type: "MicaSense Calibrated Reflectance Panel"
+    targets: [0.22, 0.44, 0.56]  # Typical reflectance values
+  sunlight_compensation: true
+  vignette_correction: true
+
+# Data Output
+data_output:
+  formats: ["JPEG", "TIFF"]
+  bits_per_pixel: 16  # TIFF
+  geotag: true
+  exif_data: true
+  xmp_data: true
+  metadata:
+    - "GPS coordinates"
+    - "Altitude"
+    - "Gimbal attitude"
+    - "Flight speed"
+    - "Sunlight sensor values"
+    - "ISO"
+    - "Shutter speed"
+
+# Processing Compatibility
+processing_software:
+  native:
+    - "DJI Terra"
+  third_party:
+    - "Pix4Dmapper"
+    - "Agisoft Metashape"
+    - "QGIS"
+    - "ENVI"
+    - "ArcGIS Pro"
+
+# Ground Control
+ground_control:
+  controller: "DJI Remote Controller"
+  transmission: "OcuSync 2.0"
+  live_feed: true
+  max_transmission_range_km: 7
+
+# Battery
+battery:
+  type: "LiPo 4S"
+  capacity_mah: 5870
+  voltage_v: 15.2
+  energy_wh: 89.2
+  charge_time_min: 60
+
+# Regulatory
+regulatory:
+  ce_marking: true
+  fcc_compliant: true
+  remote_id: true

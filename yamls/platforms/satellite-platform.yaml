@@ -1,0 +1,288 @@
+# =============================================================================
+# Satellite Platform Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Field definitions for satellite platforms.
+# These platforms provide regional to global coverage from space.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  platform_type: "satellite"
+  version: "1.0.0"
+  description: "Configuration for satellite-based observation platforms"
+
+# =============================================================================
+# FIELD DEFINITIONS
+# =============================================================================
+
+fields:
+  # ---------------------------------------------------------------------------
+  # SATELLITE IDENTIFICATION
+  # ---------------------------------------------------------------------------
+  satellite_name:
+    label: "Satellite Name"
+    type: "text"
+    required: true
+    help_text: "Official name of the satellite (e.g., 'Sentinel-2A', 'Landsat 9')."
+    validation:
+      max_length: 100
+
+  satellite_id:
+    label: "Satellite ID / NORAD Number"
+    type: "text"
+    required: false
+    help_text: "Unique satellite identifier or NORAD catalog number."
+    validation:
+      max_length: 50
+
+  operator:
+    label: "Operator / Agency"
+    type: "select"
+    required: true
+    help_text: "Organization operating the satellite."
+    options:
+      esa:
+        label: "ESA"
+        description: "European Space Agency"
+      nasa:
+        label: "NASA"
+        description: "National Aeronautics and Space Administration"
+      usgs:
+        label: "USGS"
+        description: "United States Geological Survey"
+      noaa:
+        label: "NOAA"
+        description: "National Oceanic and Atmospheric Administration"
+      jaxa:
+        label: "JAXA"
+        description: "Japan Aerospace Exploration Agency"
+      cnes:
+        label: "CNES"
+        description: "Centre National d'Etudes Spatiales (France)"
+      dlr:
+        label: "DLR"
+        description: "German Aerospace Center"
+      isro:
+        label: "ISRO"
+        description: "Indian Space Research Organisation"
+      planet:
+        label: "Planet Labs"
+        description: "Planet Labs Inc."
+      maxar:
+        label: "Maxar"
+        description: "Maxar Technologies"
+      airbus:
+        label: "Airbus"
+        description: "Airbus Defence and Space"
+      other:
+        label: "Other"
+        description: "Other operator not listed"
+
+  mission_program:
+    label: "Mission Program"
+    type: "text"
+    required: false
+    help_text: "Name of the satellite program or constellation (e.g., 'Copernicus', 'Landsat')."
+    validation:
+      max_length: 100
+
+  # ---------------------------------------------------------------------------
+  # ORBITAL CHARACTERISTICS
+  # ---------------------------------------------------------------------------
+  orbit_type:
+    label: "Orbit Type"
+    type: "select"
+    required: true
+    help_text: "Type of orbit the satellite follows."
+    options:
+      sun_synchronous:
+        label: "Sun-Synchronous"
+        description: "Passes over any given point at same local solar time"
+      polar:
+        label: "Polar"
+        description: "Orbit passing over both poles"
+      geostationary:
+        label: "Geostationary"
+        description: "Fixed position relative to Earth's surface"
+      equatorial:
+        label: "Equatorial"
+        description: "Orbit along the equator"
+      leo:
+        label: "Low Earth Orbit"
+        description: "General low Earth orbit (non-specific)"
+      meo:
+        label: "Medium Earth Orbit"
+        description: "Medium altitude orbit"
+      other:
+        label: "Other"
+        description: "Other orbit type"
+
+  orbit_altitude_km:
+    label: "Orbit Altitude (km)"
+    type: "number"
+    required: false
+    help_text: "Average orbital altitude above Earth's surface in kilometers."
+    validation:
+      min: 200
+      max: 40000
+      step: 1
+
+  inclination_deg:
+    label: "Orbital Inclination (degrees)"
+    type: "number"
+    required: false
+    help_text: "Angle of orbit relative to the equator in degrees."
+    validation:
+      min: 0
+      max: 180
+      step: 0.1
+
+  # ---------------------------------------------------------------------------
+  # TEMPORAL CHARACTERISTICS
+  # ---------------------------------------------------------------------------
+  revisit_days:
+    label: "Revisit Time (days)"
+    type: "number"
+    required: true
+    help_text: "Number of days between repeated observations of the same location."
+    validation:
+      min: 0.1
+      max: 365
+      step: 0.1
+    default: 5
+
+  local_overpass_time:
+    label: "Local Overpass Time"
+    type: "text"
+    required: false
+    help_text: "Typical local time when satellite passes over (e.g., '10:30' for morning pass)."
+    validation:
+      pattern: "^[0-2][0-9]:[0-5][0-9]$"
+      max_length: 5
+
+  launch_date:
+    label: "Launch Date"
+    type: "text"
+    required: false
+    help_text: "Date the satellite was launched (YYYY-MM-DD format)."
+    validation:
+      pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      max_length: 10
+
+  expected_end_of_life:
+    label: "Expected End of Life"
+    type: "text"
+    required: false
+    help_text: "Estimated mission end date (YYYY-MM-DD format)."
+    validation:
+      pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      max_length: 10
+
+  # ---------------------------------------------------------------------------
+  # IMAGING CHARACTERISTICS
+  # ---------------------------------------------------------------------------
+  swath_width_km:
+    label: "Swath Width (km)"
+    type: "number"
+    required: false
+    help_text: "Width of the imaging strip in kilometers."
+    validation:
+      min: 0.1
+      max: 5000
+      step: 0.1
+
+  native_resolution_m:
+    label: "Native Resolution (meters)"
+    type: "number"
+    required: false
+    help_text: "Highest spatial resolution of the sensor in meters."
+    validation:
+      min: 0.1
+      max: 10000
+      step: 0.1
+
+  pointing_capability:
+    label: "Pointing Capability"
+    type: "select"
+    required: false
+    help_text: "Can the satellite point off-nadir for targeted acquisitions?"
+    options:
+      nadir_only:
+        label: "Nadir Only"
+        description: "Only directly downward imaging"
+      off_nadir:
+        label: "Off-Nadir Capable"
+        description: "Can point to sides for targeted imaging"
+      agile:
+        label: "Agile"
+        description: "Highly maneuverable for rapid re-targeting"
+
+  # ---------------------------------------------------------------------------
+  # DATA ACCESS
+  # ---------------------------------------------------------------------------
+  data_access:
+    label: "Data Access"
+    type: "select"
+    required: false
+    help_text: "How satellite data can be accessed."
+    options:
+      open:
+        label: "Open/Free"
+        description: "Data freely available to all users"
+      registered:
+        label: "Free (Registration Required)"
+        description: "Free but requires user registration"
+      commercial:
+        label: "Commercial"
+        description: "Paid data access"
+      restricted:
+        label: "Restricted"
+        description: "Limited access (research agreements, etc.)"
+
+  data_portal:
+    label: "Data Portal URL"
+    type: "text"
+    required: false
+    help_text: "URL where satellite data can be accessed or ordered."
+    validation:
+      max_length: 255
+
+  data_format:
+    label: "Primary Data Format"
+    type: "select"
+    required: false
+    help_text: "Main format in which data is distributed."
+    options:
+      geotiff:
+        label: "GeoTIFF"
+        description: "Georeferenced TIFF images"
+      cog:
+        label: "Cloud-Optimized GeoTIFF"
+        description: "COG format for cloud access"
+      jp2:
+        label: "JPEG 2000"
+        description: "JPEG 2000 format"
+      netcdf:
+        label: "NetCDF"
+        description: "Network Common Data Form"
+      hdf:
+        label: "HDF"
+        description: "Hierarchical Data Format"
+      safe:
+        label: "SAFE"
+        description: "Standard Archive Format for Europe"
+      other:
+        label: "Other"
+        description: "Other format"
+
+  # ---------------------------------------------------------------------------
+  # PROCESSING LEVELS
+  # ---------------------------------------------------------------------------
+  available_products:
+    label: "Available Processing Levels"
+    type: "text"
+    required: false
+    help_text: "Processing levels available (e.g., 'L1C, L2A' or 'Collection 2 Level-1, Level-2')."
+    validation:
+      max_length: 200

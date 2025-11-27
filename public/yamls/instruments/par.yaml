@@ -1,0 +1,106 @@
+# PAR Sensor Configuration
+# SITES Spectral v8.0.0-alpha.2
+# Configuration-driven field definitions for PAR (Photosynthetically Active Radiation) sensors
+
+metadata:
+  type: par
+  version: "1.0.0"
+  icon: fa-sun
+  display_name: PAR Sensor
+  category: spectral
+  description: Photosynthetically Active Radiation sensor (400-700nm)
+
+# Type detection patterns
+detection_patterns:
+  - par
+  - photosynthetically active
+
+# Type-specific fields
+fields:
+  sensor_brand:
+    type: text
+    label: Sensor Brand
+    required: false
+    placeholder: e.g., Apogee, LI-COR
+    max_length: 100
+
+  sensor_model:
+    type: text
+    label: Sensor Model
+    required: false
+    placeholder: e.g., SQ-500, LI-190R
+    max_length: 100
+
+  sensor_serial_number:
+    type: text
+    label: Sensor Serial Number
+    required: false
+    placeholder: Sensor serial number
+    max_length: 100
+
+  spectral_range:
+    type: text
+    label: Spectral Range (nm)
+    required: false
+    default: 400-700
+    placeholder: e.g., 400-700
+    help_text: Photosynthetically Active Radiation range
+    max_length: 50
+
+  calibration_coefficient:
+    type: number
+    label: Calibration Coefficient
+    required: false
+    step: 0.001
+    placeholder: e.g., 5.0
+    help_text: Units in umol m-2 s-1 per mV
+
+  orientation:
+    type: select
+    label: Orientation
+    required: false
+    options:
+      - value: uplooking
+        label: Uplooking (Incoming PAR)
+      - value: downlooking
+        label: Downlooking (Reflected PAR)
+    placeholder: Select orientation...
+
+  field_of_view_degrees:
+    type: number
+    label: Field of View (degrees)
+    required: false
+    step: 0.1
+    min: 0
+    max: 180
+    placeholder: e.g., 180
+
+  cable_length_m:
+    type: number
+    label: Cable Length (meters)
+    required: false
+    step: 0.1
+    min: 0
+    placeholder: e.g., 10.0
+
+  datalogger_type:
+    type: text
+    label: Datalogger Type
+    required: false
+    placeholder: e.g., Campbell Scientific CR1000X
+    max_length: 100
+
+# Section definition
+section:
+  title: PAR Sensor Specifications
+  icon: fa-sun
+  collapsed: false
+
+# Validation rules
+validation:
+  calibration_coefficient:
+    min: 0
+    max: 1000
+  field_of_view_degrees:
+    min: 0
+    max: 180

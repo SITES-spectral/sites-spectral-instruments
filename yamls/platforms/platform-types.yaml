@@ -1,0 +1,91 @@
+# =============================================================================
+# Platform Types Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# This file defines the different types of platforms that can host instruments.
+# Platforms are physical structures or vehicles that carry measurement equipment.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# FIXED PLATFORMS
+# Permanent installations such as towers, buildings, or mounting structures
+# that remain stationary and provide long-term continuous measurements.
+# -----------------------------------------------------------------------------
+fixed:
+  name: "Fixed Platform"
+  description: "Permanent installation on towers, buildings, or other fixed structures for continuous long-term monitoring."
+  icon: "fa-tower-observation"
+  color: "#2563eb"
+
+  # Instruments that can be mounted on fixed platforms
+  supported_instruments:
+    - phenocam
+    - multispectral
+    - par_sensor
+    - ndvi_sensor
+    - pri_sensor
+    - hyperspectral
+
+  # Location is required for fixed platforms
+  requires_location: true
+
+  # Fixed platforms do not require Area of Interest definition
+  requires_aoi: false
+
+  # Additional metadata about this platform type
+  help_text: "Use this for permanent installations like flux towers, meteorological stations, or building-mounted cameras."
+
+# -----------------------------------------------------------------------------
+# UAV PLATFORMS
+# Unmanned Aerial Vehicles (drones) that carry sensors for spatial surveys
+# and can capture data over larger areas with flexible timing.
+# -----------------------------------------------------------------------------
+uav:
+  name: "UAV Platform"
+  description: "Unmanned Aerial Vehicle (drone) for flexible spatial surveys and airborne measurements."
+  icon: "fa-helicopter"
+  color: "#059669"
+
+  # Instruments commonly mounted on UAVs
+  supported_instruments:
+    - phenocam
+    - multispectral
+    - hyperspectral
+    - thermal
+    - lidar
+
+  # UAVs have a launch/base location but fly over areas
+  requires_location: true
+
+  # UAV missions require defining the survey area
+  requires_aoi: true
+
+  # Additional metadata about this platform type
+  help_text: "Use this for drone-based surveys. Requires defining the Area of Interest (AOI) that the UAV will cover."
+
+# -----------------------------------------------------------------------------
+# SATELLITE PLATFORMS
+# Space-based observation platforms that provide regional to global coverage
+# with regular revisit intervals.
+# -----------------------------------------------------------------------------
+satellite:
+  name: "Satellite Platform"
+  description: "Space-based observation platform for regional coverage and systematic temporal sampling."
+  icon: "fa-satellite"
+  color: "#7c3aed"
+
+  # Instruments available on satellite platforms
+  supported_instruments:
+    - multispectral
+    - hyperspectral
+    - thermal
+    - radar
+
+  # Satellites orbit - no single location, but we track ground coverage
+  requires_location: false
+
+  # Satellite data always relates to a ground area
+  requires_aoi: true
+
+  # Additional metadata about this platform type
+  help_text: "Use this for satellite-derived data products. Requires defining the Area of Interest (AOI) on the ground."

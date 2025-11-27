@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "7.0.5",
-  "description": "SITES Spectral Stations & Instruments Management System v7.0.0 - Major Refactoring with Versioned API, Modular Architecture, and Accessibility Improvements",
+  "version": "8.0.0-beta.2",
+  "description": "SITES Spectral Multi-Platform Observation Network v8.0.0 - AOI System with GeoJSON Drawing and Import",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

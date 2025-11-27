@@ -1,0 +1,407 @@
+# Shared Modal Sections Configuration
+# SITES Spectral v8.0.0-alpha.2
+# Configuration-driven field definitions for shared sections across all instrument types
+
+metadata:
+  version: "1.0.0"
+  description: Shared form sections used by all instrument types
+
+# ============================================================================
+# SECTION 1: GENERAL INFORMATION
+# ============================================================================
+general_info:
+  title: General Information
+  icon: fa-info-circle
+  collapsed: false
+  fields:
+    display_name:
+      type: text
+      label: Instrument Name
+      required: true
+      placeholder: Enter instrument name
+      max_length: 200
+      field_id: edit-instrument-name
+
+    normalized_name:
+      type: text
+      label: Normalized ID
+      readonly: true
+      help_text: System-generated identifier
+      field_id: edit-instrument-normalized
+
+    legacy_acronym:
+      type: text
+      label: Legacy Acronym
+      required: false
+      placeholder: e.g., ANS-FOR-P01
+      help_text: Historical data compatibility
+      max_length: 50
+      field_id: edit-instrument-legacy
+
+    status:
+      type: select
+      label: Status
+      required: false
+      field_id: edit-instrument-status
+      options:
+        - value: Active
+          label: Active
+        - value: Inactive
+          label: Inactive
+        - value: Testing
+          label: Testing
+        - value: Maintenance
+          label: Maintenance
+        - value: Decommissioned
+          label: Decommissioned
+        - value: Planned
+          label: Planned
+
+    measurement_status:
+      type: select
+      label: Measurement Status
+      required: false
+      field_id: edit-instrument-measurement-status
+      options:
+        - value: ""
+          label: Select status...
+        - value: Active
+          label: Active
+        - value: Inactive
+          label: Inactive
+        - value: Intermittent
+          label: Intermittent
+        - value: Seasonal
+          label: Seasonal
+        - value: Completed
+          label: Completed
+
+# ============================================================================
+# SECTION 2: POSITION & ORIENTATION
+# ============================================================================
+position:
+  title: Position & Orientation
+  icon: fa-map-marker-alt
+  collapsed: false
+  fields:
+    latitude:
+      type: number
+      label: Latitude
+      required: false
+      step: any
+      min: -90
+      max: 90
+      placeholder: Decimal degrees
+      help_text: Rounded to 6 decimal places (WGS84)
+      field_id: edit-instrument-latitude
+
+    longitude:
+      type: number
+      label: Longitude
+      required: false
+      step: any
+      min: -180
+      max: 180
+      placeholder: Decimal degrees
+      help_text: Rounded to 6 decimal places (WGS84)
+      field_id: edit-instrument-longitude
+
+    instrument_height_m:
+      type: number
+      label: Height Above Ground (m)
+      required: false
+      step: 0.1
+      min: 0
+      placeholder: e.g., 2.5
+      field_id: edit-instrument-height
+
+    viewing_direction:
+      type: select
+      label: Viewing Direction
+      required: false
+      field_id: edit-instrument-viewing-direction
+      options:
+        - value: ""
+          label: Select direction...
+        - value: North
+          label: North
+        - value: Northeast
+          label: Northeast
+        - value: East
+          label: East
+        - value: Southeast
+          label: Southeast
+        - value: South
+          label: South
+        - value: Southwest
+          label: Southwest
+        - value: West
+          label: West
+        - value: Northwest
+          label: Northwest
+        - value: Nadir
+          label: Nadir (Downward)
+        - value: Zenith
+          label: Zenith (Upward)
+
+    azimuth_degrees:
+      type: number
+      label: Azimuth Angle (deg)
+      required: false
+      step: 0.1
+      min: 0
+      max: 360
+      placeholder: 0-360 degrees
+      help_text: Clockwise from North (0 = North)
+      field_id: edit-instrument-azimuth
+
+    degrees_from_nadir:
+      type: number
+      label: Degrees from Nadir
+      required: false
+      step: 0.1
+      min: 0
+      max: 90
+      placeholder: 0-90 degrees
+      help_text: 0 = straight down, 90 = horizontal
+      field_id: edit-instrument-nadir
+
+# ============================================================================
+# SECTION 3: TIMELINE & DEPLOYMENT
+# ============================================================================
+timeline:
+  title: Timeline & Deployment
+  icon: fa-calendar-alt
+  collapsed: false
+  fields:
+    instrument_type:
+      type: select
+      label: Instrument Type
+      required: false
+      allow_other: true
+      field_id: edit-instrument-type
+      groups:
+        - label: ""
+          options:
+            - value: ""
+              label: Select type...
+            - value: Phenocam
+              label: Phenocam
+        - label: Multispectral Sensors (Fixed Platform - MS)
+          options:
+            - value: SKYE MultiSpectral Sensor (Uplooking)
+              label: SKYE MultiSpectral (Uplooking)
+            - value: SKYE MultiSpectral Sensor (Downlooking)
+              label: SKYE MultiSpectral (Downlooking)
+            - value: Decagon Sensor (Uplooking)
+              label: Decagon (Uplooking)
+            - value: Decagon Sensor (Downlooking)
+              label: Decagon (Downlooking)
+            - value: Apogee MS
+              label: Apogee MS
+        - label: PRI & NDVI Sensors
+          options:
+            - value: PRI Sensor (2-band ~530nm/~570nm)
+              label: PRI Sensor (2-band ~530nm/~570nm)
+            - value: NDVI Sensor
+              label: NDVI Sensor
+            - value: Apogee NDVI
+              label: Apogee NDVI
+        - label: PAR Sensors
+          options:
+            - value: PAR Sensor
+              label: PAR Sensor
+            - value: Apogee PAR
+              label: Apogee PAR
+        - label: ""
+          options:
+            - value: Other
+              label: Other
+
+    ecosystem_code:
+      type: select
+      label: Ecosystem Code
+      required: false
+      allow_other: true
+      field_id: edit-instrument-ecosystem
+      options:
+        - value: ""
+          label: Select ecosystem...
+        - value: HEA
+          label: HEA - Heathland
+        - value: AGR
+          label: AGR - Arable Land
+        - value: MIR
+          label: MIR - Mires
+        - value: LAK
+          label: LAK - Lake
+        - value: WET
+          label: WET - Wetland
+        - value: GRA
+          label: GRA - Grassland
+        - value: FOR
+          label: FOR - Forest
+        - value: ALP
+          label: ALP - Alpine Forest
+        - value: CON
+          label: CON - Coniferous Forest
+        - value: DEC
+          label: DEC - Deciduous Forest
+        - value: MAR
+          label: MAR - Marshland
+        - value: PEA
+          label: PEA - Peatland
+
+    deployment_date:
+      type: date
+      label: Deployment Date
+      required: false
+      help_text: Format YYYY-MM-DD
+      field_id: edit-instrument-deployment
+
+    calibration_date:
+      type: date
+      label: Calibration Date
+      required: false
+      field_id: edit-instrument-calibration-date
+
+    first_measurement_year:
+      type: number
+      label: First Measurement Year
+      required: false
+      min: 2000
+      max: 2030
+      placeholder: e.g., 2010
+      field_id: edit-instrument-first-year
+
+    last_measurement_year:
+      type: number
+      label: Last Measurement Year
+      required: false
+      min: 2000
+      max: 2030
+      placeholder: e.g., 2024
+      field_id: edit-instrument-last-year
+
+# ============================================================================
+# SECTION 4: SYSTEM CONFIGURATION
+# ============================================================================
+system_config:
+  title: System Configuration
+  icon: fa-cog
+  collapsed: false
+  fields:
+    power_source:
+      type: select
+      label: Power Source
+      required: false
+      field_id: edit-instrument-power-source
+      options:
+        - value: ""
+          label: Select power source...
+        - value: Solar
+          label: Solar
+          icon: sun
+        - value: Grid
+          label: Grid
+          icon: plug
+        - value: Battery
+          label: Battery
+          icon: battery
+        - value: Solar + Battery
+          label: Solar + Battery
+        - value: Other
+          label: Other
+
+    data_transmission:
+      type: select
+      label: Data Transmission
+      required: false
+      field_id: edit-instrument-data-transmission
+      options:
+        - value: ""
+          label: Select transmission method...
+        - value: WiFi
+          label: WiFi
+        - value: Ethernet
+          label: Ethernet
+        - value: Cellular
+          label: Cellular
+        - value: LoRaWAN
+          label: LoRaWAN
+        - value: SD Card
+          label: SD Card
+        - value: Other
+          label: Other
+
+    manufacturer_warranty_expires:
+      type: date
+      label: Warranty Expiration
+      required: false
+      field_id: edit-instrument-warranty-expires
+
+    image_processing_enabled:
+      type: toggle
+      label: Image Processing
+      required: false
+      default: false
+      field_id: edit-instrument-image-processing
+
+    image_quality_score:
+      type: range
+      label: Image Quality Score (0-100)
+      required: false
+      min: 0
+      max: 100
+      step: 1
+      default: 80
+      full_width: true
+      field_id: edit-instrument-quality-score
+
+    calibration_notes:
+      type: textarea
+      label: Calibration Notes
+      required: false
+      rows: 2
+      max_length: 500
+      placeholder: Notes about calibration procedures...
+      full_width: true
+      field_id: edit-instrument-calibration-notes
+
+# ============================================================================
+# SECTION 5: DOCUMENTATION
+# ============================================================================
+documentation:
+  title: Documentation
+  icon: fa-sticky-note
+  collapsed: false
+  fields:
+    description:
+      type: textarea
+      label: Description
+      required: false
+      rows: 3
+      max_length: 1000
+      placeholder: General description of the instrument...
+      full_width: true
+      field_id: edit-instrument-description
+
+    installation_notes:
+      type: textarea
+      label: Installation Notes
+      required: false
+      rows: 3
+      max_length: 1000
+      placeholder: Notes about installation and setup...
+      full_width: true
+      field_id: edit-instrument-installation-notes
+
+    maintenance_notes:
+      type: textarea
+      label: Maintenance Notes
+      required: false
+      rows: 3
+      max_length: 1000
+      placeholder: Maintenance history and notes...
+      full_width: true
+      field_id: edit-instrument-maintenance-notes

@@ -1,0 +1,326 @@
+# Snow Products Configuration
+# SITES Spectral v8.0.0 - Product Definitions
+# For satellite-based snow monitoring at Nordic SITES stations
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "Snow and ice products for Nordic ecosystem monitoring"
+
+products:
+  # Core Snow Index
+  ndsi:
+    name: "Normalized Difference Snow Index"
+    abbreviation: "NDSI"
+    category: "snow_detection"
+    formula: "(Green - SWIR) / (Green + SWIR)"
+    range: [-1, 1]
+    thresholds:
+      snow: 0.4
+      snow_forest: 0.2  # Lower threshold for forested areas
+
+    platforms:
+      sentinel2:
+        bands: ["B03", "B11"]
+        formula: "(B03 - B11) / (B03 + B11)"
+      landsat:
+        bands: ["B3", "B6"]
+        formula: "(B3 - B6) / (B3 + B6)"
+      modis:
+        bands: ["B4", "B6"]
+
+    applications:
+      - "Snow presence/absence mapping"
+      - "Snow cover area calculation"
+      - "Phenology studies"
+
+    nordic_notes: |
+      Standard index for snow detection. Use lower threshold (0.2)
+      in boreal forests due to canopy effects.
+
+  # Fractional Snow Cover
+  fractional_snow_cover:
+    name: "Fractional Snow Cover"
+    abbreviation: "FSC"
+    category: "snow_extent"
+    units: "percent"
+    range: [0, 100]
+
+    algorithms:
+      linear_unmixing:
+        name: "Linear Spectral Unmixing"
+        description: "Sub-pixel snow fraction estimation"
+        endmembers: ["snow", "vegetation", "soil"]
+
+      ndsi_regression:
+        name: "NDSI Regression"
+        description: "Empirical relationship NDSI to FSC"
+        formula: "FSC = a * NDSI + b"
+        coefficients:
+          a: 100
+          b: 50
+          valid_range: [-0.5, 1.0]
+
+    platforms:
+      sentinel2:
+        algorithm: "linear_unmixing"
+        resolution_m: 20
+        bands: ["B03", "B04", "B11", "B12"]
+      modis:
+        product: "MOD10A1"
+        resolution_m: 500
+
+    products:
+      copernicus_hrsi:
+        name: "HR-S&I FSC"
+        provider: "Copernicus Land Monitoring Service"
+        resolution_m: 20
+        source: "Sentinel-2"
+        url: "https://land.copernicus.eu/pan-european/biophysical-parameters/high-resolution-snow-and-ice-monitoring"
+
+  # Snow Water Equivalent
+  swe:
+    name: "Snow Water Equivalent"
+    abbreviation: "SWE"
+    category: "snow_properties"
+    units: "mm"
+    range: [0, 500]
+
+    note: "Cannot be directly retrieved from optical sensors"
+    methods:
+      passive_microwave:
+        sensors: ["SMOS", "AMSR2"]
+        resolution_km: 25-50
+
+      sar:
+        sensors: ["Sentinel-1"]
+        algorithm: "InSAR"
+        note: "Experimental"
+
+      model_assimilation:
+        description: "Combine optical snow extent with hydrological models"
+
+    products:
+      globsnow:
+        name: "GlobSnow SWE"
+        provider: "Finnish Meteorological Institute"
+        resolution_km: 25
+        url: "https://www.globsnow.info"
+
+  # Snow State (Wet/Dry)
+  snow_state:
+    name: "Snow State"
+    abbreviation: "SWS"
+    category: "snow_properties"
+    classes:
+      - id: 0
+        name: "Snow-free"
+        description: "No snow present"
+      - id: 1
+        name: "Dry snow"
+        description: "Frozen, high reflectance"
+      - id: 2
+        name: "Wet snow"
+        description: "Melting, reduced reflectance"
+
+    algorithms:
+      optical:
+        description: "SWIR reflectance decrease indicates wet snow"
+        bands: ["SWIR1", "SWIR2"]
+
+      sar:
+        description: "C-band backscatter sensitive to liquid water"
+        sensor: "Sentinel-1"
+        note: "More reliable than optical for wet snow"
+
+    platforms:
+      sentinel2:
+        bands: ["B11", "B12"]
+        note: "Compare SWIR bands for wetness"
+
+    products:
+      copernicus_hrsi:
+        name: "HR-S&I Wet/Dry Snow"
+        provider: "Copernicus"
+        resolution_m: 60
+
+  # Snow Grain Size
+  snow_grain_size:
+    name: "Snow Grain Size"
+    abbreviation: "SGS"
+    category: "snow_properties"
+    units: "um"
+    range: [50, 2000]
+
+    algorithms:
+      nolin_dozier:
+        name: "Nolin & Dozier (2000)"
+        description: "SWIR absorption feature"
+        bands: ["1030nm", "1240nm"]
+
+      optical_grain_size:
+        name: "Spectral albedo inversion"
+        bands: ["NIR", "SWIR"]
+
+    platforms:
+      sentinel2:
+        bands: ["B08A", "B11"]
+        note: "Limited bands for grain size"
+
+    nordic_notes: |
+      Grain size affects snow albedo and melt rate.
+      Fresh snow: 50-100 um, Old snow: 500-2000 um
+
+  # Snow Albedo
+  snow_albedo:
+    name: "Snow Surface Albedo"
+    abbreviation: "SSA"
+    category: "snow_properties"
+    units: "fraction"
+    range: [0, 1]
+    typical_values:
+      fresh_snow: [0.8, 0.95]
+      old_snow: [0.5, 0.7]
+      dirty_snow: [0.3, 0.5]
+
+    platforms:
+      sentinel2:
+        method: "Broadband albedo from narrowband"
+        bands: ["B02", "B03", "B04", "B08", "B11", "B12"]
+      modis:
+        product: "MCD43A3"
+        resolution_m: 500
+
+    applications:
+      - "Energy balance modeling"
+      - "Climate feedback studies"
+      - "Snow melt timing"
+
+# Snow Phenology Metrics
+phenology:
+  snow_cover_onset:
+    name: "Snow Cover Onset"
+    abbreviation: "SCO"
+    description: "First day of persistent snow cover"
+    units: "DOY"  # Day of Year
+    method: "Time series analysis of FSC"
+
+  snow_cover_melt:
+    name: "Snow Cover Melt"
+    abbreviation: "SCM"
+    description: "Last day of snow cover"
+    units: "DOY"
+    method: "Time series analysis of FSC"
+
+  snow_cover_duration:
+    name: "Snow Cover Duration"
+    abbreviation: "SCD"
+    description: "Number of days with snow"
+    units: "days"
+    formula: "SCM - SCO"
+
+  maximum_snow_extent:
+    name: "Maximum Snow Extent Date"
+    abbreviation: "MSE"
+    description: "Date of maximum snow coverage"
+    units: "DOY"
+
+# Nordic-Specific Products
+nordic_products:
+  forest_snow:
+    name: "Forest Snow Cover"
+    description: "Snow beneath forest canopy"
+    challenge: "Canopy obscures ground snow"
+
+    methods:
+      gap_fraction:
+        description: "Use canopy gaps from lidar"
+        note: "Requires ALS data"
+
+      sar_penetration:
+        description: "C-band penetrates canopy"
+        sensor: "Sentinel-1"
+
+      view_angle:
+        description: "Multiple view angles"
+        note: "PROBA-V or aggregated S2"
+
+    nordic_notes: |
+      Boreal forests cover most of Nordic region.
+      Standard NDSI underestimates snow in forests.
+      Use forest-specific algorithms or SAR.
+
+  permafrost_indicators:
+    name: "Permafrost Snow Indicators"
+    description: "Snow parameters related to permafrost"
+
+    products:
+      snow_onset:
+        description: "Early snow protects ground from freezing"
+        relevance: "Active layer dynamics"
+
+      snow_melt:
+        description: "Late melt delays thaw"
+        relevance: "Ground temperature"
+
+      snow_depth:
+        description: "Insulation effect"
+        note: "Not directly measurable from optical"
+
+# Data Products
+data_products:
+  copernicus_hr_snow:
+    name: "Copernicus HR-S&I"
+    description: "High Resolution Snow and Ice Monitoring"
+    provider: "European Environment Agency"
+    products:
+      - "Fractional Snow Cover (20m)"
+      - "Wet/Dry Snow (60m)"
+      - "Persistent Snow Area"
+      - "Snow Cover Duration"
+    source: "Sentinel-2"
+    url: "https://land.copernicus.eu/pan-european/biophysical-parameters/high-resolution-snow-and-ice-monitoring"
+    update: "5 days"
+
+  modis_snow:
+    name: "MODIS Snow Products"
+    provider: "NASA"
+    products:
+      MOD10A1:
+        name: "Daily Snow Cover"
+        resolution_m: 500
+      MOD10A2:
+        name: "8-Day Snow Cover"
+        resolution_m: 500
+      MOD10CM:
+        name: "Monthly Climate Snow Cover"
+        resolution_km: 5
+    url: "https://nsidc.org/data/modis/snow"
+
+  era5_snow:
+    name: "ERA5 Snow Reanalysis"
+    provider: "ECMWF/Copernicus"
+    products:
+      - "Snow depth"
+      - "Snow water equivalent"
+      - "Snowfall"
+    resolution_km: 31
+    temporal: "Hourly"
+    url: "https://cds.climate.copernicus.eu"
+
+# Categories
+categories:
+  snow_detection:
+    name: "Snow Detection"
+    icon: "fa-snowflake"
+    color: "#06b6d4"
+
+  snow_extent:
+    name: "Snow Extent"
+    icon: "fa-map"
+    color: "#3b82f6"
+
+  snow_properties:
+    name: "Snow Properties"
+    icon: "fa-thermometer-half"
+    color: "#8b5cf6"

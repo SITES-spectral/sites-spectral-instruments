@@ -1,0 +1,371 @@
+# Sentinel-3 OLCI/SLSTR Satellite Platform Configuration
+# SITES Spectral v8.0.0 - Satellite Platform
+# For water quality, land surface temperature, and snow monitoring
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "Copernicus Sentinel-3 for ocean, land and ice monitoring"
+
+platform:
+  id: "sentinel3"
+  name: "Sentinel-3 OLCI/SLSTR"
+  operator: "European Space Agency (ESA) / EUMETSAT"
+  program: "Copernicus"
+  type: "satellite"
+  constellation:
+    - "Sentinel-3A"  # Launched 2016-02-16
+    - "Sentinel-3B"  # Launched 2018-04-25
+  icon: "fa-satellite"
+  color: "#0ea5e9"
+
+# Orbital Characteristics
+orbit:
+  type: "sun_synchronous"
+  altitude_km: 814.5
+  inclination_deg: 98.65
+  repeat_cycle_days: 27
+  combined_revisit_days: 1  # At high latitudes (Nordic)
+  local_time_descending: "10:00"  # Morning orbit
+  equator_crossing: "Descending node"
+
+# OLCI - Ocean and Land Colour Instrument
+olci:
+  name: "Ocean and Land Colour Instrument"
+  swath_width_km: 1270
+  spatial_resolution_m: 300
+  radiometric_resolution_bits: 12
+
+  spectral_bands:
+    Oa01:
+      name: "Aerosol correction, improved water constituent retrieval"
+      center_wavelength_nm: 400
+      bandwidth_nm: 15
+
+    Oa02:
+      name: "Yellow substance and detrital pigments"
+      center_wavelength_nm: 412.5
+      bandwidth_nm: 10
+
+    Oa03:
+      name: "Chlorophyll absorption maximum, biogeochemistry"
+      center_wavelength_nm: 442.5
+      bandwidth_nm: 10
+
+    Oa04:
+      name: "Chlorophyll, high biomass"
+      center_wavelength_nm: 490
+      bandwidth_nm: 10
+
+    Oa05:
+      name: "Chlorophyll, sediment, turbidity, red tide"
+      center_wavelength_nm: 510
+      bandwidth_nm: 10
+
+    Oa06:
+      name: "Chlorophyll reference (minimum)"
+      center_wavelength_nm: 560
+      bandwidth_nm: 10
+
+    Oa07:
+      name: "Sediment loading"
+      center_wavelength_nm: 620
+      bandwidth_nm: 10
+
+    Oa08:
+      name: "Chlorophyll (2nd absorption maximum)"
+      center_wavelength_nm: 665
+      bandwidth_nm: 10
+
+    Oa09:
+      name: "Improved fluorescence retrieval"
+      center_wavelength_nm: 673.75
+      bandwidth_nm: 7.5
+
+    Oa10:
+      name: "Chlorophyll fluorescence peak"
+      center_wavelength_nm: 681.25
+      bandwidth_nm: 7.5
+
+    Oa11:
+      name: "Chlorophyll fluorescence baseline"
+      center_wavelength_nm: 708.75
+      bandwidth_nm: 10
+
+    Oa12:
+      name: "O2 absorption, clouds, vegetation"
+      center_wavelength_nm: 753.75
+      bandwidth_nm: 7.5
+
+    Oa13:
+      name: "O2 absorption, aerosol correction"
+      center_wavelength_nm: 761.25
+      bandwidth_nm: 2.5
+
+    Oa14:
+      name: "Atmospheric correction"
+      center_wavelength_nm: 764.375
+      bandwidth_nm: 3.75
+
+    Oa15:
+      name: "O2A used for cloud top pressure, fluorescence"
+      center_wavelength_nm: 767.5
+      bandwidth_nm: 2.5
+
+    Oa16:
+      name: "Atmospheric correction, aerosol"
+      center_wavelength_nm: 778.75
+      bandwidth_nm: 15
+
+    Oa17:
+      name: "Atmospheric/aerosol correction, clouds"
+      center_wavelength_nm: 865
+      bandwidth_nm: 20
+
+    Oa18:
+      name: "Water vapor absorption"
+      center_wavelength_nm: 885
+      bandwidth_nm: 10
+
+    Oa19:
+      name: "Water vapor absorption"
+      center_wavelength_nm: 900
+      bandwidth_nm: 10
+
+    Oa20:
+      name: "Water vapor absorption"
+      center_wavelength_nm: 940
+      bandwidth_nm: 20
+
+    Oa21:
+      name: "Atmospheric/aerosol correction"
+      center_wavelength_nm: 1020
+      bandwidth_nm: 40
+
+# SLSTR - Sea and Land Surface Temperature Radiometer
+slstr:
+  name: "Sea and Land Surface Temperature Radiometer"
+  swath_width_km:
+    nadir: 1400
+    oblique: 740
+  views: ["Nadir", "Oblique (55 deg)"]
+
+  spectral_bands:
+    S1:
+      name: "Cloud screening, vegetation monitoring"
+      center_wavelength_nm: 555
+      bandwidth_nm: 20
+      resolution_m: 500
+
+    S2:
+      name: "NDVI, vegetation monitoring"
+      center_wavelength_nm: 659
+      bandwidth_nm: 20
+      resolution_m: 500
+
+    S3:
+      name: "NDVI, cloud flagging"
+      center_wavelength_nm: 865
+      bandwidth_nm: 20
+      resolution_m: 500
+
+    S4:
+      name: "Cirrus detection, vegetation"
+      center_wavelength_nm: 1375
+      bandwidth_nm: 15
+      resolution_m: 500
+
+    S5:
+      name: "Cloud, ice/snow"
+      center_wavelength_nm: 1610
+      bandwidth_nm: 60
+      resolution_m: 500
+
+    S6:
+      name: "Vegetation state, cloud"
+      center_wavelength_nm: 2250
+      bandwidth_nm: 50
+      resolution_m: 500
+
+    S7:
+      name: "SST, LST, active fires"
+      center_wavelength_um: 3.74
+      bandwidth_um: 0.38
+      resolution_m: 1000
+      type: "thermal"
+
+    S8:
+      name: "SST, LST, active fires"
+      center_wavelength_um: 10.85
+      bandwidth_um: 0.9
+      resolution_m: 1000
+      type: "thermal"
+
+    S9:
+      name: "SST, LST"
+      center_wavelength_um: 12.0
+      bandwidth_um: 1.0
+      resolution_m: 1000
+      type: "thermal"
+
+    F1:
+      name: "Active fire monitoring"
+      center_wavelength_um: 3.74
+      bandwidth_um: 0.38
+      resolution_m: 1000
+      type: "thermal"
+
+    F2:
+      name: "Active fire monitoring"
+      center_wavelength_um: 10.85
+      bandwidth_um: 0.9
+      resolution_m: 1000
+      type: "thermal"
+
+# Water Quality Products (OLCI)
+water_quality_products:
+  chlorophyll_a:
+    name: "Chlorophyll-a Concentration"
+    product_id: "CHL_OC4ME"
+    algorithm: "OC4ME (Ocean Colour 4 bands)"
+    bands: ["Oa03", "Oa04", "Oa05", "Oa06"]
+    units: "mg/m3"
+    range: [0.001, 100]
+    note: "Standard ocean algorithm"
+
+  chlorophyll_nn:
+    name: "Chlorophyll-a (Neural Network)"
+    product_id: "CHL_NN"
+    algorithm: "Neural Network"
+    units: "mg/m3"
+    note: "Better for optically complex waters (Nordic lakes)"
+
+  tsm:
+    name: "Total Suspended Matter"
+    product_id: "TSM_NN"
+    algorithm: "Neural Network"
+    units: "g/m3"
+    range: [0, 100]
+
+  cdom:
+    name: "Colored Dissolved Organic Matter"
+    product_id: "ADG443_NN"
+    algorithm: "Neural Network"
+    bands: ["Oa03", "Oa04", "Oa05", "Oa06", "Oa07"]
+    units: "1/m"
+    wavelength_nm: 443
+    note: "Critical for Nordic humic-rich waters"
+
+  turbidity:
+    name: "Turbidity"
+    product_id: "TUR_NN"
+    units: "NTU"
+
+  secchi_depth:
+    name: "Secchi Disk Depth"
+    product_id: "KD490_M07"
+    units: "m"
+    description: "Water transparency indicator"
+
+  phycocyanin:
+    name: "Phycocyanin Index"
+    description: "Cyanobacteria indicator"
+    bands: ["Oa07", "Oa08", "Oa11"]
+    note: "For algal bloom detection"
+
+# Land Surface Products (SLSTR)
+land_products:
+  lst:
+    name: "Land Surface Temperature"
+    product_id: "LST"
+    bands: ["S8", "S9"]
+    units: "K"
+    accuracy_k: 1
+    resolution_m: 1000
+
+  fti:
+    name: "Fire Thermal Index"
+    product_id: "FRP"
+    bands: ["F1", "F2"]
+    description: "Active fire detection"
+
+  ndvi:
+    name: "NDVI (300m)"
+    formula: "(S3 - S2) / (S3 + S2)"
+    bands: ["S3", "S2"]
+    resolution_m: 300
+
+# Snow and Ice Products
+snow_ice_products:
+  snow_cover:
+    name: "Snow Cover"
+    bands: ["S5", "S6", "S3"]
+    algorithm: "NDSI-based with thermal check"
+    resolution_m: 500
+
+  ice_surface_temp:
+    name: "Ice Surface Temperature"
+    product_id: "IST"
+    bands: ["S8", "S9"]
+    units: "K"
+
+  lake_ice:
+    name: "Lake Ice Extent"
+    description: "Nordic lake ice monitoring"
+    bands: ["S3", "S5", "S6"]
+    note: "For phenology studies"
+
+# Processing Levels
+processing_levels:
+  L1:
+    name: "Top-of-Atmosphere Radiance"
+    description: "Calibrated and geolocated radiance"
+
+  L2_WATER:
+    name: "Water Products"
+    description: "Water leaving reflectance and water quality products"
+    processor: "OLCI-L2"
+
+  L2_LAND:
+    name: "Land Products"
+    description: "Surface reflectance and land products"
+    processor: "SLSTR-L2"
+
+# Data Access
+data_access:
+  copernicus_dataspace:
+    url: "https://dataspace.copernicus.eu"
+    api: "OData/STAC"
+    free_access: true
+
+  eumetsat:
+    url: "https://eoportal.eumetsat.int"
+    api: "EO Portal"
+    registration_required: true
+
+  google_earth_engine:
+    collection_olci: "COPERNICUS/S3/OLCI"
+    collection_slstr: "COPERNICUS/S3/SLSTR"
+
+# Nordic Applications
+nordic_applications:
+  lake_monitoring:
+    description: "Monitor water quality in Nordic lakes"
+    products: ["Chlorophyll-a (NN)", "CDOM", "TSM", "Turbidity"]
+    note: "Use NN algorithms for humic-rich brown waters"
+    stations: ["Erken", "Bolmen", "Skogaryd"]
+
+  coastal_monitoring:
+    description: "Baltic Sea and coastal water quality"
+    products: ["Chlorophyll-a", "Turbidity", "Cyanobacteria"]
+    note: "Monitor algal blooms in summer"
+
+  lake_ice_phenology:
+    description: "Track freeze-up and break-up dates"
+    products: ["Lake Ice Extent", "IST"]
+    season: "October - May"
+
+  land_surface_temperature:
+    description: "Monitor thermal dynamics"
+    products: ["LST"]
+    applications: ["Evapotranspiration", "Urban heat", "Permafrost"]

@@ -1,0 +1,213 @@
+# =============================================================================
+# Instrument Types Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Master list of all instrument types supported in the SITES Spectral system.
+# Each type has display properties, icons, and metadata for UI rendering.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  version: "1.0.0"
+  description: "Master configuration for all supported instrument types"
+
+# =============================================================================
+# INSTRUMENT TYPE DEFINITIONS
+# =============================================================================
+# Each instrument type has the following properties:
+#   - name: Human-readable display name
+#   - description: Brief explanation of what this instrument does
+#   - icon: FontAwesome icon class (without 'fa-' prefix)
+#   - color: Hex color code for UI elements
+#   - code: Short code used in instrument naming (e.g., PHE for Phenocam)
+#   - category: Grouping category for organization
+#   - config_file: Reference to detailed field configuration
+#   - platforms: Which platform types support this instrument
+# =============================================================================
+
+instrument_types:
+  # ---------------------------------------------------------------------------
+  # PHENOCAM - Digital repeat photography
+  # ---------------------------------------------------------------------------
+  phenocam:
+    name: "Phenocam"
+    description: "Digital camera for repeat photography and phenology monitoring. Captures RGB images at regular intervals to track vegetation changes."
+    icon: "camera"
+    color: "#3b82f6"
+    code: "PHE"
+    category: "imaging"
+    config_file: "phenocam.yaml"
+    platforms:
+      - fixed
+      - uav
+    help_text: "Standard digital cameras used for phenological monitoring through time-lapse photography."
+
+  # ---------------------------------------------------------------------------
+  # MULTISPECTRAL - Multi-band sensors
+  # ---------------------------------------------------------------------------
+  multispectral:
+    name: "Multispectral Sensor"
+    description: "Sensor capturing discrete spectral bands including visible and near-infrared for vegetation analysis and index calculation."
+    icon: "layer-group"
+    color: "#8b5cf6"
+    code: "MS"
+    category: "spectral"
+    config_file: "multispectral.yaml"
+    platforms:
+      - fixed
+      - uav
+      - satellite
+    help_text: "Multi-band sensors for measuring reflectance in specific wavelength ranges."
+
+  # ---------------------------------------------------------------------------
+  # PAR SENSOR - Photosynthetically Active Radiation
+  # ---------------------------------------------------------------------------
+  par_sensor:
+    name: "PAR Sensor"
+    description: "Measures Photosynthetically Active Radiation (400-700 nm), the light wavelengths used by plants for photosynthesis."
+    icon: "sun"
+    color: "#f59e0b"
+    code: "PAR"
+    category: "radiation"
+    config_file: "par-sensor.yaml"
+    platforms:
+      - fixed
+    help_text: "Quantum sensors measuring photon flux density in the photosynthetically active spectrum."
+
+  # ---------------------------------------------------------------------------
+  # NDVI SENSOR - Normalized Difference Vegetation Index
+  # ---------------------------------------------------------------------------
+  ndvi_sensor:
+    name: "NDVI Sensor"
+    description: "Dedicated sensor measuring red and near-infrared reflectance for calculating the Normalized Difference Vegetation Index."
+    icon: "leaf"
+    color: "#22c55e"
+    code: "NDVI"
+    category: "spectral"
+    config_file: "ndvi-sensor.yaml"
+    platforms:
+      - fixed
+    help_text: "Two-band sensors specifically designed for NDVI measurements."
+
+  # ---------------------------------------------------------------------------
+  # PRI SENSOR - Photochemical Reflectance Index
+  # ---------------------------------------------------------------------------
+  pri_sensor:
+    name: "PRI Sensor"
+    description: "Measures reflectance at 531 nm and 570 nm for calculating the Photochemical Reflectance Index, an indicator of photosynthetic efficiency."
+    icon: "microscope"
+    color: "#06b6d4"
+    code: "PRI"
+    category: "spectral"
+    config_file: "pri-sensor.yaml"
+    platforms:
+      - fixed
+    help_text: "Narrow-band sensors for measuring xanthophyll cycle activity and photosynthetic efficiency."
+
+  # ---------------------------------------------------------------------------
+  # HYPERSPECTRAL - Continuous spectral imaging
+  # ---------------------------------------------------------------------------
+  hyperspectral:
+    name: "Hyperspectral Sensor"
+    description: "Imaging spectrometer capturing hundreds of contiguous narrow spectral bands for detailed spectral analysis."
+    icon: "rainbow"
+    color: "#ec4899"
+    code: "HYP"
+    category: "spectral"
+    config_file: "hyperspectral.yaml"
+    platforms:
+      - fixed
+      - uav
+      - satellite
+    help_text: "Full-spectrum imaging sensors for detailed spectral characterization."
+
+  # ---------------------------------------------------------------------------
+  # THERMAL - Thermal infrared imaging
+  # ---------------------------------------------------------------------------
+  thermal:
+    name: "Thermal Camera"
+    description: "Infrared camera measuring surface temperature through thermal radiation detection."
+    icon: "temperature-high"
+    color: "#ef4444"
+    code: "TIR"
+    category: "thermal"
+    config_file: "thermal.yaml"
+    platforms:
+      - fixed
+      - uav
+      - satellite
+    help_text: "Thermal infrared sensors for measuring surface temperature and detecting heat signatures."
+
+  # ---------------------------------------------------------------------------
+  # LIDAR - Light Detection and Ranging
+  # ---------------------------------------------------------------------------
+  lidar:
+    name: "LiDAR"
+    description: "Light Detection and Ranging sensor for measuring distance and creating 3D point clouds of vegetation structure."
+    icon: "wave-square"
+    color: "#14b8a6"
+    code: "LID"
+    category: "structural"
+    config_file: "lidar.yaml"
+    platforms:
+      - uav
+      - satellite
+    help_text: "Laser-based sensors for measuring canopy height and 3D vegetation structure."
+
+  # ---------------------------------------------------------------------------
+  # RADAR - Radio Detection and Ranging
+  # ---------------------------------------------------------------------------
+  radar:
+    name: "Radar (SAR)"
+    description: "Synthetic Aperture Radar for all-weather observation, measuring surface roughness and vegetation moisture."
+    icon: "satellite-dish"
+    color: "#6366f1"
+    code: "SAR"
+    category: "microwave"
+    config_file: "radar.yaml"
+    platforms:
+      - satellite
+    help_text: "Microwave sensors for all-weather observation and vegetation water content estimation."
+
+# =============================================================================
+# CATEGORY DEFINITIONS
+# =============================================================================
+# Categories for grouping instrument types in the UI
+# =============================================================================
+
+categories:
+  imaging:
+    name: "Imaging"
+    description: "Cameras and visual imaging systems"
+    icon: "image"
+    color: "#3b82f6"
+
+  spectral:
+    name: "Spectral"
+    description: "Spectral reflectance and radiometric sensors"
+    icon: "rainbow"
+    color: "#8b5cf6"
+
+  radiation:
+    name: "Radiation"
+    description: "Solar and photosynthetic radiation sensors"
+    icon: "sun"
+    color: "#f59e0b"
+
+  thermal:
+    name: "Thermal"
+    description: "Thermal infrared sensors"
+    icon: "fire"
+    color: "#ef4444"
+
+  structural:
+    name: "Structural"
+    description: "3D structure and height measurement sensors"
+    icon: "cubes"
+    color: "#14b8a6"
+
+  microwave:
+    name: "Microwave"
+    description: "Microwave and radar sensors"
+    icon: "broadcast-tower"
+    color: "#6366f1"

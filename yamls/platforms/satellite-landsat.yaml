@@ -1,0 +1,330 @@
+# Landsat 8/9 OLI/TIRS Satellite Platform Configuration
+# SITES Spectral v8.0.0 - Satellite Platform
+# For vegetation, water, snow, and thermal monitoring
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "USGS/NASA Landsat 8 and 9 for land monitoring and change detection"
+
+platform:
+  id: "landsat"
+  name: "Landsat 8/9 OLI/TIRS"
+  operator: "USGS / NASA"
+  program: "Landsat"
+  type: "satellite"
+  constellation:
+    - name: "Landsat 8"
+      launched: "2013-02-11"
+      status: "Operational"
+    - name: "Landsat 9"
+      launched: "2021-09-27"
+      status: "Operational"
+  icon: "fa-satellite"
+  color: "#dc2626"
+
+# Orbital Characteristics
+orbit:
+  type: "sun_synchronous"
+  altitude_km: 705
+  inclination_deg: 98.2
+  repeat_cycle_days: 16  # Per satellite
+  combined_revisit_days: 8  # Both satellites
+  local_time_descending: "10:00"
+  scenes_per_day: 740
+  path_row_system: "WRS-2"
+
+# Imaging Characteristics
+imaging:
+  swath_width_km: 185
+  scene_size_km: [185, 180]
+  coverage: "Global land areas, 82°N to 82°S"
+  quantization_bits: 12
+
+# OLI - Operational Land Imager
+oli:
+  name: "Operational Land Imager"
+  type: "Pushbroom"
+  detector_elements: 6916  # Per band
+
+  spectral_bands:
+    B1:
+      name: "Coastal/Aerosol"
+      center_wavelength_nm: 443
+      bandwidth_nm: 16
+      resolution_m: 30
+      applications: ["Coastal zone", "Aerosol"]
+
+    B2:
+      name: "Blue"
+      center_wavelength_nm: 482
+      bandwidth_nm: 60
+      resolution_m: 30
+      applications: ["Bathymetry", "Water quality"]
+
+    B3:
+      name: "Green"
+      center_wavelength_nm: 561
+      bandwidth_nm: 57
+      resolution_m: 30
+      applications: ["Vegetation", "Peak reflectance"]
+
+    B4:
+      name: "Red"
+      center_wavelength_nm: 655
+      bandwidth_nm: 37
+      resolution_m: 30
+      applications: ["Vegetation", "Chlorophyll absorption"]
+
+    B5:
+      name: "NIR"
+      center_wavelength_nm: 865
+      bandwidth_nm: 28
+      resolution_m: 30
+      applications: ["Biomass", "Vegetation structure"]
+
+    B6:
+      name: "SWIR 1"
+      center_wavelength_nm: 1609
+      bandwidth_nm: 85
+      resolution_m: 30
+      applications: ["Moisture content", "Snow/ice"]
+
+    B7:
+      name: "SWIR 2"
+      center_wavelength_nm: 2201
+      bandwidth_nm: 187
+      resolution_m: 30
+      applications: ["Geology", "Vegetation moisture"]
+
+    B8:
+      name: "Panchromatic"
+      center_wavelength_nm: 590
+      bandwidth_nm: 172
+      resolution_m: 15
+      applications: ["Pan-sharpening", "Feature extraction"]
+
+    B9:
+      name: "Cirrus"
+      center_wavelength_nm: 1373
+      bandwidth_nm: 20
+      resolution_m: 30
+      applications: ["Cirrus cloud detection"]
+
+# TIRS - Thermal Infrared Sensor
+tirs:
+  name: "Thermal Infrared Sensor"
+  type: "Pushbroom"
+
+  spectral_bands:
+    B10:
+      name: "TIRS 1"
+      center_wavelength_um: 10.9
+      bandwidth_um: 0.6
+      resolution_m: 100  # Resampled to 30m in products
+      applications: ["Surface temperature", "ET"]
+
+    B11:
+      name: "TIRS 2"
+      center_wavelength_um: 12.0
+      bandwidth_um: 1.0
+      resolution_m: 100
+      applications: ["Surface temperature"]
+      note: "Landsat 9 improved calibration"
+
+# Vegetation Products
+vegetation_products:
+  ndvi:
+    name: "Normalized Difference Vegetation Index"
+    formula: "(B5 - B4) / (B5 + B4)"
+    bands: ["B5", "B4"]
+    range: [-1, 1]
+    threshold_vegetation: 0.2
+
+  evi:
+    name: "Enhanced Vegetation Index"
+    formula: "2.5 * ((B5 - B4) / (B5 + 6*B4 - 7.5*B2 + 1))"
+    bands: ["B5", "B4", "B2"]
+    range: [-1, 1]
+
+  savi:
+    name: "Soil Adjusted Vegetation Index"
+    formula: "((B5 - B4) / (B5 + B4 + 0.5)) * 1.5"
+    bands: ["B5", "B4"]
+    range: [-1, 1]
+    note: "Better for sparse vegetation"
+
+  msavi:
+    name: "Modified SAVI"
+    formula: "(2*B5 + 1 - sqrt((2*B5+1)^2 - 8*(B5-B4))) / 2"
+    bands: ["B5", "B4"]
+    range: [0, 1]
+
+  ndmi:
+    name: "Normalized Difference Moisture Index"
+    formula: "(B5 - B6) / (B5 + B6)"
+    bands: ["B5", "B6"]
+    range: [-1, 1]
+    description: "Vegetation water content"
+
+  nbr:
+    name: "Normalized Burn Ratio"
+    formula: "(B5 - B7) / (B5 + B7)"
+    bands: ["B5", "B7"]
+    range: [-1, 1]
+    description: "Fire severity mapping"
+
+# Water Products
+water_products:
+  ndwi:
+    name: "Normalized Difference Water Index"
+    formula: "(B3 - B5) / (B3 + B5)"
+    bands: ["B3", "B5"]
+    range: [-1, 1]
+    threshold_water: 0.0
+
+  mndwi:
+    name: "Modified NDWI"
+    formula: "(B3 - B6) / (B3 + B6)"
+    bands: ["B3", "B6"]
+    range: [-1, 1]
+    note: "Better water extraction"
+
+  turbidity:
+    name: "Turbidity"
+    algorithm: "Red band ratio"
+    bands: ["B4", "B3", "B2"]
+    units: "NTU"
+
+  chlorophyll_a:
+    name: "Chlorophyll-a"
+    algorithm: "Blue/Green ratio"
+    bands: ["B2", "B3"]
+    units: "mg/m3"
+    note: "For clear to moderately turbid waters"
+
+  cdom:
+    name: "Colored DOM"
+    bands: ["B1", "B2", "B3"]
+    note: "For Nordic humic waters"
+
+# Snow Products
+snow_products:
+  ndsi:
+    name: "Normalized Difference Snow Index"
+    formula: "(B3 - B6) / (B3 + B6)"
+    bands: ["B3", "B6"]
+    range: [-1, 1]
+    threshold_snow: 0.4
+
+  snow_cover:
+    name: "Fractional Snow Cover"
+    algorithm: "NDSI-based binary/fractional"
+    bands: ["B3", "B6", "B10"]
+    note: "Thermal band for cloud/snow discrimination"
+
+# Thermal Products
+thermal_products:
+  lst:
+    name: "Land Surface Temperature"
+    bands: ["B10"]
+    algorithm: "Single-channel or split-window"
+    units: "K"
+    accuracy_k: 1.5
+
+  et:
+    name: "Evapotranspiration"
+    product: "Landsat Provisional Actual ET"
+    algorithm: "METRIC/SEBAL based"
+    units: "mm/day"
+    note: "From USGS Collection 2"
+
+# Processing Levels - Collection 2
+processing_levels:
+  L1:
+    name: "Level-1 (Top of Atmosphere)"
+    types:
+      L1TP:
+        name: "Precision Terrain"
+        description: "Highest quality, suitable for time series"
+      L1GT:
+        name: "Systematic Terrain"
+        description: "Systematic geometric corrections"
+      L1GS:
+        name: "Systematic"
+        description: "Only systematic corrections"
+
+  L2:
+    name: "Level-2 (Surface Reflectance)"
+    processor: "LaSRC (Land Surface Reflectance Code)"
+    products:
+      SR:
+        name: "Surface Reflectance"
+        description: "Atmospherically corrected"
+      ST:
+        name: "Surface Temperature"
+        description: "Kelvin, single band"
+      QA:
+        name: "Quality Assessment"
+        description: "Cloud, shadow, water, snow masks"
+
+# Data Access
+data_access:
+  usgs_earthexplorer:
+    url: "https://earthexplorer.usgs.gov"
+    api: "M2M API"
+    free_access: true
+    registration: true
+
+  usgs_glovis:
+    url: "https://glovis.usgs.gov"
+    free_access: true
+
+  google_earth_engine:
+    collection_l8_sr: "LANDSAT/LC08/C02/T1_L2"
+    collection_l9_sr: "LANDSAT/LC09/C02/T1_L2"
+
+  planetary_computer:
+    collection: "landsat-c2-l2"
+    stac_api: true
+
+  aws_open_data:
+    bucket: "usgs-landsat"
+    format: "COG"
+
+# Nordic Applications
+nordic_applications:
+  vegetation_phenology:
+    description: "Long-term vegetation monitoring (since 1972)"
+    products: ["NDVI", "EVI", "NDMI"]
+    note: "Landsat archive enables 50+ year trends"
+
+  forest_change:
+    description: "Detect forest disturbance and recovery"
+    products: ["NDVI", "NBR", "NDMI"]
+    algorithms: ["LandTrendr", "CCDC"]
+
+  lake_monitoring:
+    description: "Water quality and extent"
+    products: ["NDWI", "Turbidity", "Chlorophyll-a"]
+    note: "30m resolution good for medium/large lakes"
+
+  snow_dynamics:
+    description: "Snow cover mapping"
+    products: ["NDSI", "Snow Cover"]
+    note: "Combine with thermal for cloud screening"
+
+  evapotranspiration:
+    description: "Water balance and ET estimation"
+    products: ["ET", "LST"]
+    note: "Thermal bands enable energy balance models"
+
+# Harmonization with Sentinel-2
+harmonization:
+  hls:
+    name: "Harmonized Landsat Sentinel-2"
+    description: "NASA product for combined time series"
+    resolution_m: 30
+    bands_common: ["Blue", "Green", "Red", "NIR", "SWIR1", "SWIR2"]
+    temporal_resolution_days: 2-3
+    url: "https://hls.gsfc.nasa.gov"

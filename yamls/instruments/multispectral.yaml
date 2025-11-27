@@ -1,0 +1,649 @@
+# =============================================================================
+# Multispectral Sensor Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Complete field definitions for multispectral sensor instruments.
+# These sensors capture discrete spectral bands for vegetation analysis.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  instrument_type: "multispectral"
+  version: "1.0.0"
+  description: "Configuration for multispectral imaging sensors"
+  code: "MS"
+
+# =============================================================================
+# SECTION 1: SENSOR SETTINGS
+# =============================================================================
+# Core sensor hardware specifications
+# =============================================================================
+
+sensor_settings:
+  _section_meta:
+    title: "Sensor Settings"
+    description: "Hardware specifications for the multispectral sensor"
+    icon: "layer-group"
+    order: 1
+
+  fields:
+    manufacturer:
+      label: "Manufacturer"
+      type: "select"
+      required: true
+      help_text: "Company that manufactured the sensor."
+      options:
+        skye:
+          label: "Skye Instruments"
+          description: "Skye Instruments Ltd"
+        ocean_insight:
+          label: "Ocean Insight"
+          description: "Ocean Insight (formerly Ocean Optics)"
+        micasense:
+          label: "MicaSense"
+          description: "MicaSense Inc."
+        parrot:
+          label: "Parrot Sequoia"
+          description: "Parrot SA"
+        sentera:
+          label: "Sentera"
+          description: "Sentera Inc."
+        tetracam:
+          label: "Tetracam"
+          description: "Tetracam Inc."
+        apogee:
+          label: "Apogee Instruments"
+          description: "Apogee Instruments Inc."
+        spectral_evolution:
+          label: "Spectral Evolution"
+          description: "Spectral Evolution Inc."
+        headwall:
+          label: "Headwall Photonics"
+          description: "Headwall Photonics Inc."
+        custom:
+          label: "Custom/Research"
+          description: "Custom or research-built sensor"
+        other:
+          label: "Other"
+          description: "Other manufacturer"
+
+    model:
+      label: "Sensor Model"
+      type: "text"
+      required: true
+      help_text: "Specific model name or number of the sensor."
+      validation:
+        max_length: 100
+
+    serial_number:
+      label: "Serial Number"
+      type: "text"
+      required: false
+      help_text: "Sensor serial number for inventory tracking."
+      validation:
+        max_length: 50
+
+    number_of_channels:
+      label: "Number of Spectral Channels"
+      type: "number"
+      required: true
+      help_text: "Total number of discrete spectral bands measured by the sensor."
+      validation:
+        min: 2
+        max: 100
+        step: 1
+      default: 4
+
+    sensor_type:
+      label: "Sensor Type"
+      type: "select"
+      required: false
+      help_text: "Architecture of the multispectral sensor."
+      options:
+        filter_array:
+          label: "Filter Array"
+          description: "Multiple filters over single sensor"
+        multi_camera:
+          label: "Multi-Camera"
+          description: "Multiple synchronized cameras"
+        filter_wheel:
+          label: "Filter Wheel"
+          description: "Rotating filter wheel"
+        pushbroom:
+          label: "Pushbroom"
+          description: "Line scanner imaging"
+        snapshot:
+          label: "Snapshot"
+          description: "Single-exposure multispectral capture"
+
+# =============================================================================
+# SECTION 2: SPECTRAL BANDS
+# =============================================================================
+# Wavelength configuration for each spectral channel
+# =============================================================================
+
+spectral_bands:
+  _section_meta:
+    title: "Spectral Bands"
+    description: "Wavelength specifications for each band"
+    icon: "rainbow"
+    order: 2
+
+  fields:
+    band_configuration:
+      label: "Band Configuration"
+      type: "text"
+      required: false
+      help_text: "Summary of band wavelengths (e.g., 'Blue 475nm, Green 560nm, Red 668nm, NIR 840nm')."
+      validation:
+        max_length: 500
+
+    blue_band_center_nm:
+      label: "Blue Band Center (nm)"
+      type: "number"
+      required: false
+      help_text: "Center wavelength of blue band in nanometers (typically 450-495 nm)."
+      validation:
+        min: 400
+        max: 520
+        step: 1
+
+    blue_band_width_nm:
+      label: "Blue Band Width (nm)"
+      type: "number"
+      required: false
+      help_text: "Full width at half maximum (FWHM) of blue band."
+      validation:
+        min: 5
+        max: 100
+        step: 1
+
+    green_band_center_nm:
+      label: "Green Band Center (nm)"
+      type: "number"
+      required: false
+      help_text: "Center wavelength of green band in nanometers (typically 520-565 nm)."
+      validation:
+        min: 490
+        max: 600
+        step: 1
+
+    green_band_width_nm:
+      label: "Green Band Width (nm)"
+      type: "number"
+      required: false
+      help_text: "Full width at half maximum (FWHM) of green band."
+      validation:
+        min: 5
+        max: 100
+        step: 1
+
+    red_band_center_nm:
+      label: "Red Band Center (nm)"
+      type: "number"
+      required: false
+      help_text: "Center wavelength of red band in nanometers (typically 620-680 nm)."
+      validation:
+        min: 580
+        max: 720
+        step: 1
+
+    red_band_width_nm:
+      label: "Red Band Width (nm)"
+      type: "number"
+      required: false
+      help_text: "Full width at half maximum (FWHM) of red band."
+      validation:
+        min: 5
+        max: 100
+        step: 1
+
+    red_edge_band_center_nm:
+      label: "Red Edge Band Center (nm)"
+      type: "number"
+      required: false
+      help_text: "Center wavelength of red edge band in nanometers (typically 700-740 nm)."
+      validation:
+        min: 680
+        max: 780
+        step: 1
+
+    red_edge_band_width_nm:
+      label: "Red Edge Band Width (nm)"
+      type: "number"
+      required: false
+      help_text: "Full width at half maximum (FWHM) of red edge band."
+      validation:
+        min: 5
+        max: 100
+        step: 1
+
+    nir_band_center_nm:
+      label: "NIR Band Center (nm)"
+      type: "number"
+      required: false
+      help_text: "Center wavelength of near-infrared band in nanometers (typically 750-900 nm)."
+      validation:
+        min: 720
+        max: 1000
+        step: 1
+
+    nir_band_width_nm:
+      label: "NIR Band Width (nm)"
+      type: "number"
+      required: false
+      help_text: "Full width at half maximum (FWHM) of NIR band."
+      validation:
+        min: 5
+        max: 200
+        step: 1
+
+# =============================================================================
+# SECTION 3: IMAGING SPECIFICATIONS
+# =============================================================================
+# Resolution and capture parameters
+# =============================================================================
+
+imaging:
+  _section_meta:
+    title: "Imaging Specifications"
+    description: "Resolution and image capture parameters"
+    icon: "image"
+    order: 3
+
+  fields:
+    resolution_width:
+      label: "Image Width (pixels)"
+      type: "number"
+      required: false
+      help_text: "Horizontal resolution per band in pixels."
+      validation:
+        min: 1
+        max: 20000
+        step: 1
+
+    resolution_height:
+      label: "Image Height (pixels)"
+      type: "number"
+      required: false
+      help_text: "Vertical resolution per band in pixels."
+      validation:
+        min: 1
+        max: 20000
+        step: 1
+
+    bit_depth:
+      label: "Bit Depth"
+      type: "select"
+      required: false
+      help_text: "Radiometric resolution (bits per pixel per band)."
+      default: "12bit"
+      options:
+        8bit:
+          label: "8-bit"
+          description: "256 levels (standard)"
+        10bit:
+          label: "10-bit"
+          description: "1024 levels"
+        12bit:
+          label: "12-bit"
+          description: "4096 levels (common for scientific)"
+        14bit:
+          label: "14-bit"
+          description: "16384 levels"
+        16bit:
+          label: "16-bit"
+          description: "65536 levels (high precision)"
+
+    field_of_view_degrees:
+      label: "Field of View (degrees)"
+      type: "number"
+      required: false
+      help_text: "Angular field of view in degrees."
+      validation:
+        min: 1
+        max: 180
+        step: 0.1
+
+    ground_sample_distance_cm:
+      label: "Ground Sample Distance (cm)"
+      type: "number"
+      required: false
+      help_text: "Spatial resolution at typical operating altitude in centimeters."
+      validation:
+        min: 0.1
+        max: 10000
+        step: 0.1
+
+# =============================================================================
+# SECTION 4: ORIENTATION AND VIEWING
+# =============================================================================
+# Physical positioning and viewing geometry
+# =============================================================================
+
+orientation:
+  _section_meta:
+    title: "Orientation & Viewing"
+    description: "Physical orientation and viewing geometry"
+    icon: "compass"
+    order: 4
+
+  fields:
+    viewing_direction:
+      label: "Viewing Direction"
+      type: "select"
+      required: true
+      help_text: "Primary direction the sensor is facing."
+      default: "nadir"
+      options:
+        nadir:
+          label: "Nadir (Down)"
+          description: "Pointing straight down"
+        zenith:
+          label: "Zenith (Up)"
+          description: "Pointing straight up (hemispherical)"
+        north:
+          label: "North"
+          description: "Horizontal, facing north"
+        south:
+          label: "South"
+          description: "Horizontal, facing south"
+        east:
+          label: "East"
+          description: "Horizontal, facing east"
+        west:
+          label: "West"
+          description: "Horizontal, facing west"
+        oblique:
+          label: "Oblique"
+          description: "Angled view"
+
+    azimuth_degrees:
+      label: "Azimuth (degrees)"
+      type: "number"
+      required: false
+      help_text: "Viewing azimuth in degrees from north (0-360). Only for horizontal/oblique orientations."
+      validation:
+        min: 0
+        max: 360
+        step: 0.1
+
+    tilt_angle_degrees:
+      label: "Tilt Angle (degrees)"
+      type: "number"
+      required: false
+      help_text: "Sensor tilt from horizontal. 0 = horizontal, -90 = nadir, 90 = zenith."
+      validation:
+        min: -90
+        max: 90
+        step: 0.1
+      default: -90
+
+    height_above_target_m:
+      label: "Height Above Target (m)"
+      type: "number"
+      required: false
+      help_text: "Height of sensor above the measurement target in meters."
+      validation:
+        min: 0
+        max: 1000
+        step: 0.1
+
+# =============================================================================
+# SECTION 5: DATA LOGGER CONFIGURATION
+# =============================================================================
+# Data acquisition system settings
+# =============================================================================
+
+datalogger:
+  _section_meta:
+    title: "Data Logger"
+    description: "Data acquisition system configuration"
+    icon: "database"
+    order: 5
+
+  fields:
+    datalogger_model:
+      label: "Data Logger Model"
+      type: "text"
+      required: false
+      help_text: "Model of the data logger used for data acquisition."
+      validation:
+        max_length: 100
+
+    datalogger_manufacturer:
+      label: "Data Logger Manufacturer"
+      type: "select"
+      required: false
+      help_text: "Manufacturer of the data logger."
+      options:
+        campbell:
+          label: "Campbell Scientific"
+          description: "Campbell Scientific Inc."
+        onset:
+          label: "Onset HOBO"
+          description: "Onset Computer Corporation"
+        licor:
+          label: "LI-COR"
+          description: "LI-COR Biosciences"
+        decagon:
+          label: "Decagon/METER"
+          description: "METER Group (formerly Decagon)"
+        internal:
+          label: "Internal/Integrated"
+          description: "Built-in data logging"
+        computer:
+          label: "Direct to Computer"
+          description: "Connected directly to PC/server"
+        other:
+          label: "Other"
+          description: "Other data logger"
+
+    logging_interval_seconds:
+      label: "Logging Interval (seconds)"
+      type: "number"
+      required: false
+      help_text: "Interval between measurements in seconds."
+      validation:
+        min: 1
+        max: 86400
+        step: 1
+      default: 60
+
+    averaging_period_minutes:
+      label: "Averaging Period (minutes)"
+      type: "number"
+      required: false
+      help_text: "Period over which measurements are averaged for output."
+      validation:
+        min: 1
+        max: 1440
+        step: 1
+      default: 30
+
+    output_format:
+      label: "Output Data Format"
+      type: "select"
+      required: false
+      help_text: "Format of recorded data files."
+      options:
+        csv:
+          label: "CSV"
+          description: "Comma-separated values"
+        toa5:
+          label: "TOA5"
+          description: "Campbell Scientific TOA5 format"
+        binary:
+          label: "Binary"
+          description: "Proprietary binary format"
+        netcdf:
+          label: "NetCDF"
+          description: "Network Common Data Form"
+        tiff:
+          label: "GeoTIFF"
+          description: "Georeferenced TIFF images"
+
+# =============================================================================
+# SECTION 6: CALIBRATION
+# =============================================================================
+# Radiometric and spectral calibration information
+# =============================================================================
+
+calibration:
+  _section_meta:
+    title: "Calibration"
+    description: "Radiometric and spectral calibration details"
+    icon: "balance-scale"
+    order: 6
+
+  fields:
+    calibration_date:
+      label: "Last Calibration Date"
+      type: "text"
+      required: false
+      help_text: "Date of most recent radiometric calibration (YYYY-MM-DD)."
+      validation:
+        pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        max_length: 10
+
+    calibration_interval_months:
+      label: "Calibration Interval (months)"
+      type: "number"
+      required: false
+      help_text: "Recommended interval between calibrations in months."
+      validation:
+        min: 1
+        max: 60
+        step: 1
+      default: 12
+
+    calibration_method:
+      label: "Calibration Method"
+      type: "select"
+      required: false
+      help_text: "Method used for radiometric calibration."
+      options:
+        factory:
+          label: "Factory Calibration"
+          description: "Calibrated by manufacturer"
+        integrating_sphere:
+          label: "Integrating Sphere"
+          description: "Laboratory calibration with sphere"
+        reference_panel:
+          label: "Reference Panel"
+          description: "Field calibration with reference target"
+        cross_calibration:
+          label: "Cross-Calibration"
+          description: "Calibrated against reference sensor"
+
+    reference_panel_type:
+      label: "Reference Panel Type"
+      type: "select"
+      required: false
+      help_text: "Type of reflectance reference panel used for calibration."
+      options:
+        spectralon:
+          label: "Spectralon"
+          description: "Labsphere Spectralon panel"
+        airgrid:
+          label: "AirGrid"
+          description: "MicaSense calibration panel"
+        grey_card:
+          label: "Grey Card"
+          description: "Photographic grey reference"
+        custom:
+          label: "Custom"
+          description: "Custom reference target"
+        none:
+          label: "None"
+          description: "No field reference used"
+
+    calibration_coefficients_location:
+      label: "Calibration Coefficients Location"
+      type: "text"
+      required: false
+      help_text: "File path or reference to calibration coefficient data."
+      validation:
+        max_length: 255
+
+# =============================================================================
+# SECTION 7: POWER AND CONNECTIVITY
+# =============================================================================
+# Power supply and data connection settings
+# =============================================================================
+
+connectivity:
+  _section_meta:
+    title: "Power & Connectivity"
+    description: "Power supply and data connection configuration"
+    icon: "plug"
+    order: 7
+
+  fields:
+    power_voltage:
+      label: "Operating Voltage (V)"
+      type: "number"
+      required: false
+      help_text: "Required operating voltage in volts."
+      validation:
+        min: 1
+        max: 48
+        step: 0.1
+      default: 12
+
+    power_consumption_watts:
+      label: "Power Consumption (W)"
+      type: "number"
+      required: false
+      help_text: "Typical power consumption in watts."
+      validation:
+        min: 0
+        max: 100
+        step: 0.1
+
+    communication_interface:
+      label: "Communication Interface"
+      type: "select"
+      required: false
+      help_text: "Primary data communication interface."
+      options:
+        sdi12:
+          label: "SDI-12"
+          description: "Serial Digital Interface at 1200 baud"
+        rs232:
+          label: "RS-232"
+          description: "Serial RS-232 interface"
+        rs485:
+          label: "RS-485"
+          description: "Serial RS-485 interface"
+        usb:
+          label: "USB"
+          description: "Universal Serial Bus"
+        ethernet:
+          label: "Ethernet"
+          description: "Network connection"
+        wifi:
+          label: "WiFi"
+          description: "Wireless network"
+        analog:
+          label: "Analog"
+          description: "Analog voltage output"
+
+    data_storage:
+      label: "Local Data Storage"
+      type: "select"
+      required: false
+      help_text: "Type of onboard data storage."
+      options:
+        none:
+          label: "None"
+          description: "No local storage"
+        sd_card:
+          label: "SD Card"
+          description: "Removable SD card"
+        internal:
+          label: "Internal Memory"
+          description: "Built-in storage"
+        ssd:
+          label: "SSD"
+          description: "Solid state drive"

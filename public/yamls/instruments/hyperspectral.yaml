@@ -1,0 +1,135 @@
+# Hyperspectral Sensor Configuration
+# SITES Spectral v8.0.0-alpha.2
+# Configuration-driven field definitions for Hyperspectral sensors
+
+metadata:
+  type: hyperspectral
+  version: "1.0.0"
+  icon: fa-rainbow
+  display_name: Hyperspectral Sensor
+  category: spectral
+  description: High spectral resolution sensor with continuous spectral coverage
+
+# Type detection patterns
+detection_patterns:
+  - hyperspectral
+  - hyp
+
+# Type-specific fields
+fields:
+  sensor_brand:
+    type: text
+    label: Sensor Brand
+    required: false
+    placeholder: e.g., Ocean Optics, ASD
+    max_length: 100
+
+  sensor_model:
+    type: text
+    label: Sensor Model
+    required: false
+    placeholder: e.g., USB4000, FieldSpec
+    max_length: 100
+
+  sensor_serial_number:
+    type: text
+    label: Sensor Serial Number
+    required: false
+    placeholder: Sensor serial number
+    max_length: 100
+
+  spectral_range_start_nm:
+    type: number
+    label: Spectral Range Start (nm)
+    required: false
+    default: 350
+    step: 1
+    min: 200
+    max: 2500
+    placeholder: e.g., 350
+
+  spectral_range_end_nm:
+    type: number
+    label: Spectral Range End (nm)
+    required: false
+    default: 1000
+    step: 1
+    min: 200
+    max: 2500
+    placeholder: e.g., 1000
+
+  spectral_resolution_nm:
+    type: number
+    label: Spectral Resolution (nm)
+    required: false
+    step: 0.1
+    min: 0.1
+    max: 50
+    placeholder: e.g., 1.5
+    help_text: Full width at half maximum (FWHM)
+
+  number_of_channels:
+    type: number
+    label: Number of Bands
+    required: false
+    min: 1
+    max: 2048
+    placeholder: e.g., 256, 512
+
+  orientation:
+    type: select
+    label: Orientation
+    required: false
+    options:
+      - value: uplooking
+        label: Uplooking
+      - value: downlooking
+        label: Downlooking
+      - value: nadir
+        label: Nadir
+    placeholder: Select orientation...
+
+  field_of_view_degrees:
+    type: number
+    label: Field of View (degrees)
+    required: false
+    step: 0.1
+    min: 0
+    max: 180
+    placeholder: e.g., 25
+
+  integration_time_ms:
+    type: number
+    label: Integration Time (ms)
+    required: false
+    step: 0.1
+    min: 0
+    placeholder: e.g., 10
+
+  datalogger_type:
+    type: text
+    label: Datalogger Type
+    required: false
+    placeholder: e.g., Campbell Scientific CR1000X
+    max_length: 100
+
+# Section definition
+section:
+  title: Hyperspectral Specifications
+  icon: fa-rainbow
+  collapsed: false
+
+# Validation rules
+validation:
+  spectral_range_start_nm:
+    min: 200
+    max: 2500
+  spectral_range_end_nm:
+    min: 200
+    max: 2500
+  spectral_resolution_nm:
+    min: 0.1
+    max: 50
+  number_of_channels:
+    min: 1
+    max: 2048

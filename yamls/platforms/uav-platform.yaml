@@ -1,0 +1,315 @@
+# =============================================================================
+# UAV Platform Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Field definitions for UAV (drone) platforms.
+# These platforms provide flexible spatial coverage through aerial surveys.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  platform_type: "uav"
+  version: "1.0.0"
+  description: "Configuration for unmanned aerial vehicle platforms"
+
+# =============================================================================
+# FIELD DEFINITIONS
+# =============================================================================
+
+fields:
+  # ---------------------------------------------------------------------------
+  # UAV IDENTIFICATION
+  # ---------------------------------------------------------------------------
+  uav_model:
+    label: "UAV Model"
+    type: "text"
+    required: true
+    help_text: "Model name/number of the UAV (e.g., 'Phantom 4 RTK', 'Matrice 300')."
+    validation:
+      max_length: 100
+
+  manufacturer:
+    label: "Manufacturer"
+    type: "select"
+    required: true
+    help_text: "Company that manufactured the UAV."
+    options:
+      dji:
+        label: "DJI"
+        description: "DJI Technology Co."
+      senseFly:
+        label: "senseFly"
+        description: "senseFly (AgEagle)"
+      parrot:
+        label: "Parrot"
+        description: "Parrot SA"
+      autel:
+        label: "Autel Robotics"
+        description: "Autel Robotics"
+      freefly:
+        label: "Freefly"
+        description: "Freefly Systems"
+      yuneec:
+        label: "Yuneec"
+        description: "Yuneec International"
+      custom:
+        label: "Custom Build"
+        description: "Custom-built or modified UAV"
+      other:
+        label: "Other"
+        description: "Other manufacturer not listed"
+
+  serial_number:
+    label: "Serial Number"
+    type: "text"
+    required: false
+    help_text: "UAV serial number for identification and tracking."
+    validation:
+      max_length: 50
+
+  # ---------------------------------------------------------------------------
+  # FLIGHT CAPABILITIES
+  # ---------------------------------------------------------------------------
+  max_flight_time_min:
+    label: "Maximum Flight Time (minutes)"
+    type: "number"
+    required: true
+    help_text: "Maximum flight duration on a single battery charge under normal conditions."
+    validation:
+      min: 1
+      max: 120
+      step: 1
+    default: 30
+
+  max_payload_kg:
+    label: "Maximum Payload (kg)"
+    type: "number"
+    required: true
+    help_text: "Maximum weight of sensors and equipment the UAV can carry."
+    validation:
+      min: 0
+      max: 50
+      step: 0.1
+    default: 1.0
+
+  max_altitude_m:
+    label: "Maximum Altitude (meters)"
+    type: "number"
+    required: false
+    help_text: "Maximum flight altitude above takeoff point (regulatory limits may apply)."
+    validation:
+      min: 0
+      max: 6000
+      step: 10
+    default: 120
+
+  max_speed_ms:
+    label: "Maximum Speed (m/s)"
+    type: "number"
+    required: false
+    help_text: "Maximum horizontal flight speed in meters per second."
+    validation:
+      min: 0
+      max: 50
+      step: 0.5
+
+  max_wind_speed_ms:
+    label: "Max Operating Wind Speed (m/s)"
+    type: "number"
+    required: false
+    help_text: "Maximum wind speed for safe flight operations."
+    validation:
+      min: 0
+      max: 30
+      step: 0.5
+    default: 10
+
+  # ---------------------------------------------------------------------------
+  # NAVIGATION AND POSITIONING
+  # ---------------------------------------------------------------------------
+  navigation_system:
+    label: "Navigation System"
+    type: "select"
+    required: true
+    help_text: "Primary navigation/positioning system used."
+    options:
+      gps:
+        label: "GPS"
+        description: "Standard GPS positioning"
+      gnss:
+        label: "Multi-GNSS"
+        description: "Multiple satellite systems (GPS, GLONASS, Galileo, BeiDou)"
+      rtk:
+        label: "RTK GPS"
+        description: "Real-Time Kinematic for centimeter accuracy"
+      ppk:
+        label: "PPK"
+        description: "Post-Processing Kinematic"
+      visual:
+        label: "Visual Navigation"
+        description: "Camera-based positioning"
+      manual:
+        label: "Manual Only"
+        description: "Manual pilot control without autonomous navigation"
+
+  rtk_capable:
+    label: "RTK Capable"
+    type: "select"
+    required: true
+    help_text: "Can the UAV use Real-Time Kinematic positioning for high accuracy?"
+    default: "no"
+    options:
+      yes:
+        label: "Yes"
+        description: "RTK positioning supported"
+      no:
+        label: "No"
+        description: "RTK not available"
+      with_addon:
+        label: "With Add-on"
+        description: "RTK possible with additional hardware"
+
+  ppk_capable:
+    label: "PPK Capable"
+    type: "select"
+    required: false
+    help_text: "Can flight data be post-processed for improved positioning?"
+    default: "no"
+    options:
+      yes:
+        label: "Yes"
+        description: "PPK workflow supported"
+      no:
+        label: "No"
+        description: "PPK not available"
+
+  # ---------------------------------------------------------------------------
+  # GIMBAL AND MOUNTING
+  # ---------------------------------------------------------------------------
+  gimbal_type:
+    label: "Gimbal Type"
+    type: "select"
+    required: false
+    help_text: "Type of camera/sensor stabilization system."
+    options:
+      3_axis:
+        label: "3-Axis Gimbal"
+        description: "Full stabilization (pitch, roll, yaw)"
+      2_axis:
+        label: "2-Axis Gimbal"
+        description: "Partial stabilization (pitch, roll)"
+      fixed:
+        label: "Fixed Mount"
+        description: "No stabilization"
+      custom:
+        label: "Custom"
+        description: "Custom or third-party gimbal system"
+
+  sensor_mounting:
+    label: "Sensor Mounting Position"
+    type: "select"
+    required: false
+    help_text: "Where sensors are mounted on the UAV."
+    options:
+      bottom:
+        label: "Bottom (Nadir)"
+        description: "Underneath the UAV, pointing down"
+      front:
+        label: "Front"
+        description: "Forward-facing position"
+      top:
+        label: "Top"
+        description: "On top of the UAV"
+      multi:
+        label: "Multiple Positions"
+        description: "Sensors in multiple locations"
+
+  # ---------------------------------------------------------------------------
+  # OPERATIONAL DETAILS
+  # ---------------------------------------------------------------------------
+  ip_rating:
+    label: "Weather Protection (IP Rating)"
+    type: "select"
+    required: false
+    help_text: "Ingress Protection rating for dust and water resistance."
+    options:
+      none:
+        label: "None"
+        description: "No weather protection rating"
+      ip43:
+        label: "IP43"
+        description: "Light rain protection"
+      ip45:
+        label: "IP45"
+        description: "Moderate rain protection"
+      ip54:
+        label: "IP54"
+        description: "Dust and splash resistant"
+      ip55:
+        label: "IP55"
+        description: "Dust and water jet resistant"
+
+  battery_type:
+    label: "Battery Type"
+    type: "text"
+    required: false
+    help_text: "Battery model or type used (e.g., 'TB60', 'Intelligent Flight Battery')."
+    validation:
+      max_length: 100
+
+  number_of_batteries:
+    label: "Number of Batteries Available"
+    type: "number"
+    required: false
+    help_text: "Total batteries available for field campaigns."
+    validation:
+      min: 1
+      max: 50
+      step: 1
+    default: 4
+
+  # ---------------------------------------------------------------------------
+  # REGULATORY AND SAFETY
+  # ---------------------------------------------------------------------------
+  registration_number:
+    label: "Registration Number"
+    type: "text"
+    required: false
+    help_text: "Official UAV registration number (if applicable)."
+    validation:
+      max_length: 50
+
+  insurance_valid:
+    label: "Insurance Valid"
+    type: "select"
+    required: false
+    help_text: "Is liability insurance current and valid?"
+    options:
+      yes:
+        label: "Yes"
+        description: "Insurance is current"
+      no:
+        label: "No"
+        description: "Insurance expired or not available"
+      unknown:
+        label: "Unknown"
+        description: "Insurance status unknown"
+
+  operator_certification:
+    label: "Operator Certification Required"
+    type: "select"
+    required: false
+    help_text: "Level of pilot certification required for operation."
+    options:
+      none:
+        label: "None"
+        description: "No special certification required"
+      basic:
+        label: "Basic"
+        description: "Basic remote pilot certificate"
+      advanced:
+        label: "Advanced"
+        description: "Advanced operations certificate"
+      waiver:
+        label: "Waiver Required"
+        description: "Special waiver or exemption needed"

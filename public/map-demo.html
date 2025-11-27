@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITES Spectral - Map System Demo</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="anonymous"/>
+
+    <!-- Leaflet MarkerCluster CSS (optional) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f3f4f6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .controls h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #111827;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            height: 600px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .info-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .info-panel h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .info-panel pre {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .leaflet-popup-content {
+            margin: 8px;
+        }
+
+        .map-popup {
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SITES Spectral - Map System v8.0</h1>
+        <p>Interactive demo of the modular map implementation with error handling and GeoJSON support</p>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <h2>Controls</h2>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="demo.addStations()">
+                    <i class="fas fa-broadcast-tower"></i> Add Stations
+                </button>
+                <button class="btn btn-primary" onclick="demo.addPlatforms()">
+                    <i class="fas fa-building"></i> Add Platforms
+                </button>
+                <button class="btn btn-primary" onclick="demo.addInstruments()">
+                    <i class="fas fa-camera"></i> Add Instruments
+                </button>
+                <button class="btn btn-primary" onclick="demo.addAOI()">
+                    <i class="fas fa-draw-polygon"></i> Add AOI
+                </button>
+                <button class="btn btn-primary" onclick="demo.addROIs()">
+                    <i class="fas fa-vector-square"></i> Add ROIs
+                </button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="demo.switchToSatellite()">
+                    <i class="fas fa-satellite"></i> Satellite View
+                </button>
+                <button class="btn btn-secondary" onclick="demo.switchToOSM()">
+                    <i class="fas fa-map"></i> OpenStreetMap
+                </button>
+                <button class="btn btn-secondary" onclick="demo.switchToTopo()">
+                    <i class="fas fa-mountain"></i> Topographic
+                </button>
+                <button class="btn btn-secondary" onclick="demo.fitToSweden()">
+                    <i class="fas fa-expand"></i> Fit to Sweden
+                </button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-danger" onclick="demo.clearMarkers()">
+                    <i class="fas fa-trash"></i> Clear Markers
+                </button>
+                <button class="btn btn-danger" onclick="demo.clearGeoJSON()">
+                    <i class="fas fa-trash"></i> Clear GeoJSON
+                </button>
+                <button class="btn btn-danger" onclick="demo.clearAll()">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="info-panel">
+            <h3>Map Status <span id="status" class="status status-success">Initialized</span></h3>
+            <pre id="info">Map initialized successfully.
+Center: [59.8586, 17.6389]
+Zoom: 6
+Layer: OpenStreetMap</pre>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="anonymous"></script>
+
+    <!-- Leaflet MarkerCluster JS (optional) -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <!-- Map System -->
+    <script src="/js/core/map-config.js"></script>
+    <script src="/js/map/tile-layers.js"></script>
+    <script src="/js/map/markers.js"></script>
+    <script src="/js/map/geojson-layer.js"></script>
+    <script src="/js/map/map-controller.js"></script>
+    <script src="/js/map/map-integration.js"></script>
+
+    <script>
+        // Demo application
+        const demo = {
+            controller: null,
+            map: null,
+
+            // Sample data
+            stations: [
+                { id: 1, acronym: 'SVB', display_name: 'Svartberget', description: 'Forest research station', latitude: 64.256, longitude: 19.775 },
+                { id: 2, acronym: 'ABI', display_name: 'Abisko', description: 'Alpine tundra research', latitude: 68.354, longitude: 18.816 },
+                { id: 3, acronym: 'LON', display_name: 'Lönnstorp', description: 'Agricultural research', latitude: 55.668, longitude: 13.108 },
+                { id: 4, acronym: 'GRI', display_name: 'Grimsö', description: 'Mixed forest research', latitude: 59.728, longitude: 15.467 },
+                { id: 5, acronym: 'ANS', display_name: 'Asa', description: 'Southern boreal forest', latitude: 57.167, longitude: 14.783 }
+            ],
+
+            platforms: [
+                { id: 'svb-for-pl01', normalized_name: 'SVB_FOR_PL01', display_name: 'Svartberget Forest Platform 01',
+                  ecosystem_code: 'FOR', latitude: 64.256, longitude: 19.775, instrument_count: 5 },
+                { id: 'abi-alp-pl01', normalized_name: 'ABI_ALP_PL01', display_name: 'Abisko Alpine Platform 01',
+                  ecosystem_code: 'ALP', latitude: 68.354, longitude: 18.816, instrument_count: 3 },
+                { id: 'lon-agr-pl01', normalized_name: 'LON_AGR_PL01', display_name: 'Lönnstorp Agriculture Platform 01',
+                  ecosystem_code: 'AGR', latitude: 55.668, longitude: 13.108, instrument_count: 4 }
+            ],
+
+            instruments: [
+                { id: 1, normalized_name: 'SVB_FOR_PL01_PHE01', instrument_type: 'phenocam', status: 'active', latitude: 64.256, longitude: 19.775 },
+                { id: 2, normalized_name: 'SVB_FOR_PL01_MS01', instrument_type: 'multispectral', status: 'active', latitude: 64.257, longitude: 19.776 },
+                { id: 3, normalized_name: 'ABI_ALP_PL01_PHE01', instrument_type: 'phenocam', status: 'active', latitude: 68.354, longitude: 18.816 },
+                { id: 4, normalized_name: 'LON_AGR_PL01_NDVI01', instrument_type: 'ndvi', status: 'active', latitude: 55.668, longitude: 13.108 },
+                { id: 5, normalized_name: 'LON_AGR_PL01_PRI01', instrument_type: 'pri', status: 'maintenance', latitude: 55.669, longitude: 13.109 }
+            ],
+
+            async init() {
+                try {
+                    // Create map controller
+                    this.controller = new MapController('map');
+
+                    // Initialize map
+                    this.map = await this.controller.initialize({
+                        center: [59.8586, 17.6389],
+                        zoom: 6,
+                        defaultLayer: 'osm'
+                    });
+
+                    // Setup event listeners
+                    this.controller.on('zoom', (data) => {
+                        this.updateInfo(`Zoom changed to: ${data.zoom}`);
+                    });
+
+                    this.controller.on('click', (data) => {
+                        console.log('Map clicked at:', data.latlng);
+                    });
+
+                    this.updateStatus('success', 'Initialized');
+                    this.updateInfo('Map initialized successfully.\nCenter: [59.8586, 17.6389]\nZoom: 6\nLayer: OpenStreetMap');
+
+                } catch (error) {
+                    console.error('Demo initialization error:', error);
+                    this.updateStatus('error', 'Failed');
+                    this.updateInfo(`Error: ${error.message}`);
+                }
+            },
+
+            addStations() {
+                this.controller.clearMarkers('station');
+                this.stations.forEach(station => {
+                    this.controller.addStationMarker(station.latitude, station.longitude, station);
+                });
+                this.controller.fitToMarkers('station');
+                this.updateStatus('success', 'Stations Added');
+                this.updateInfo(`Added ${this.stations.length} station markers with clustering`);
+            },
+
+            addPlatforms() {
+                this.controller.clearMarkers('platform');
+                this.controller.addPlatformMarkers(this.platforms, { cluster: false });
+                this.controller.fitToMarkers('platform');
+                this.updateStatus('success', 'Platforms Added');
+                this.updateInfo(`Added ${this.platforms.length} platform markers`);
+            },
+
+            addInstruments() {
+                this.controller.clearMarkers('instrument');
+                this.controller.addInstrumentMarkers(this.instruments, { cluster: false });
+                this.controller.fitToMarkers('instrument');
+                this.updateStatus('success', 'Instruments Added');
+                this.updateInfo(`Added ${this.instruments.length} instrument markers with type-specific icons`);
+            },
+
+            addAOI() {
+                // Svartberget AOI polygon
+                const aoiData = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [[
+                            [19.70, 64.20],
+                            [19.85, 64.20],
+                            [19.85, 64.30],
+                            [19.70, 64.30],
+                            [19.70, 64.20]
+                        ]]
+                    },
+                    properties: {
+                        name: 'Svartberget AOI',
+                        description: 'Area of Interest for Svartberget research station',
+                        area_km2: '~200'
+                    }
+                };
+
+                this.controller.addGeoJSONLayer(aoiData, {
+                    id: 'svb-aoi',
+                    styleType: 'aoi',
+                    highlightOnHover: true,
+                    showTooltip: true
+                });
+
+                this.controller.fitToBounds([[64.20, 19.70], [64.30, 19.85]]);
+                this.updateStatus('success', 'AOI Added');
+                this.updateInfo('Added Svartberget AOI polygon with hover highlighting');
+            },
+
+            addROIs() {
+                const rois = [
+                    {
+                        roi_name: 'ROI_01',
+                        polygon_points: JSON.stringify([[64.255, 19.770], [64.255, 19.780], [64.260, 19.785], [64.260, 19.765]]),
+                        color: '#059669',
+                        description: 'Forest canopy ROI'
+                    },
+                    {
+                        roi_name: 'ROI_02',
+                        polygon_points: JSON.stringify([[64.251, 19.772], [64.251, 19.778], [64.254, 19.778], [64.254, 19.772]]),
+                        color: '#f59e0b',
+                        description: 'Understory ROI'
+                    }
+                ];
+
+                this.controller.addROILayers(rois, {
+                    groupId: 'demo-rois',
+                    highlightOnHover: true,
+                    showTooltip: true
+                });
+
+                this.updateStatus('success', 'ROIs Added');
+                this.updateInfo(`Added ${rois.length} ROI polygons with custom colors`);
+            },
+
+            switchToSatellite() {
+                this.controller.switchBaseLayer('satellite');
+                this.updateStatus('success', 'Satellite View');
+                this.updateInfo('Switched to ESRI World Imagery (satellite view)');
+            },
+
+            switchToOSM() {
+                this.controller.switchBaseLayer('osm');
+                this.updateStatus('success', 'OSM View');
+                this.updateInfo('Switched to OpenStreetMap');
+            },
+
+            switchToTopo() {
+                this.controller.switchBaseLayer('topographic');
+                this.updateStatus('success', 'Topo View');
+                this.updateInfo('Switched to OpenTopoMap (topographic)');
+            },
+
+            fitToSweden() {
+                // Sweden bounds [south, west, north, east]
+                this.controller.fitToBounds([[55.36, 10.03], [69.07, 24.17]], { padding: [50, 50] });
+                this.updateStatus('success', 'Fit to Sweden');
+                this.updateInfo('Zoomed to show all of Sweden');
+            },
+
+            clearMarkers() {
+                this.controller.clearAllMarkers();
+                this.updateStatus('success', 'Markers Cleared');
+                this.updateInfo('All markers removed from map');
+            },
+
+            clearGeoJSON() {
+                this.controller.clearGeoJSONLayers();
+                this.updateStatus('success', 'GeoJSON Cleared');
+                this.updateInfo('All GeoJSON layers removed from map');
+            },
+
+            clearAll() {
+                this.controller.clearAllMarkers();
+                this.controller.clearGeoJSONLayers();
+                this.controller.centerOn(59.8586, 17.6389, 6);
+                this.updateStatus('success', 'Map Reset');
+                this.updateInfo('Map reset to initial state');
+            },
+
+            updateStatus(type, message) {
+                const statusEl = document.getElementById('status');
+                statusEl.className = `status status-${type}`;
+                statusEl.textContent = message;
+            },
+
+            updateInfo(message) {
+                const infoEl = document.getElementById('info');
+                const timestamp = new Date().toLocaleTimeString();
+                infoEl.textContent = `[${timestamp}] ${message}`;
+            }
+        };
+
+        // Initialize demo when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            demo.init();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+# =============================================================================
+# Feature Flags Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Feature toggles for enabling/disabling functionality in the application.
+# These flags allow gradual rollout of new features and environment-specific
+# configurations without code changes.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  version: "1.0.0"
+  description: "Application feature flags for enabling/disabling functionality"
+  last_updated: "2025-01-01"
+
+# =============================================================================
+# PLATFORM TYPE FEATURES
+# =============================================================================
+# Enable or disable support for different platform types
+# =============================================================================
+
+platform_types:
+  # Fixed platforms (towers, buildings) - core functionality
+  fixed_platforms:
+    enabled: true
+    description: "Support for fixed ground-based platforms like towers and buildings"
+    release_status: "stable"
+
+  # UAV/drone platforms - new feature
+  uav_support:
+    enabled: false
+    description: "Support for UAV (drone) platforms and flight mission management"
+    release_status: "planned"
+    notes: "Requires AOI drawing functionality to be enabled"
+    dependencies:
+      - aoi_drawing
+
+  # Satellite platforms - new feature
+  satellite_support:
+    enabled: false
+    description: "Support for satellite-based observation platforms and data products"
+    release_status: "planned"
+    notes: "Requires AOI and GeoJSON import functionality"
+    dependencies:
+      - aoi_drawing
+      - geojson_import
+
+# =============================================================================
+# SPATIAL FEATURES
+# =============================================================================
+# Geographic and mapping functionality
+# =============================================================================
+
+spatial:
+  # Interactive map for station visualization
+  map_view:
+    enabled: true
+    description: "Interactive map showing station locations"
+    release_status: "stable"
+
+  # AOI (Area of Interest) drawing tool
+  aoi_drawing:
+    enabled: false
+    description: "Interactive drawing tool for defining Areas of Interest on the map"
+    release_status: "planned"
+    notes: "Required for UAV mission planning and satellite footprints"
+
+  # GeoJSON file import
+  geojson_import:
+    enabled: false
+    description: "Import AOI boundaries from GeoJSON files"
+    release_status: "planned"
+    notes: "Allows users to upload pre-defined boundaries"
+
+  # GeoJSON export
+  geojson_export:
+    enabled: true
+    description: "Export station and ROI data as GeoJSON"
+    release_status: "stable"
+
+  # Spatial database queries
+  spatial_queries:
+    enabled: false
+    description: "Advanced spatial queries (within, intersects, buffer)"
+    release_status: "experimental"
+    notes: "Requires D1 spatial extension or external service"
+
+  # Station clustering on map
+  station_clustering:
+    enabled: true
+    description: "Group nearby stations into clusters at low zoom levels"
+    release_status: "stable"
+
+# =============================================================================
+# API FEATURES
+# =============================================================================
+# API versioning and capabilities
+# =============================================================================
+
+api:
+  # Current stable API version
+  v2_api:
+    enabled: true
+    description: "Version 2 API endpoints (current stable)"
+    release_status: "stable"
+
+  # Next generation API version
+  v3_api:
+    enabled: false
+    description: "Version 3 API with GraphQL and enhanced filtering"
+    release_status: "planned"
+    notes: "Will include breaking changes - gradual migration path required"
+
+  # API rate limiting
+  rate_limiting:
+    enabled: true
+    description: "Rate limiting for API endpoints"
+    release_status: "stable"
+    config:
+      requests_per_minute: 60
+      burst_limit: 10
+
+  # API documentation
+  swagger_docs:
+    enabled: true
+    description: "Interactive Swagger/OpenAPI documentation"
+    release_status: "stable"
+
+# =============================================================================
+# USER INTERFACE FEATURES
+# =============================================================================
+# UI/UX features and enhancements
+# =============================================================================
+
+ui:
+  # Dark mode theme
+  dark_mode:
+    enabled: true
+    description: "Dark mode color scheme option"
+    release_status: "stable"
+
+  # Multi-language support
+  i18n:
+    enabled: false
+    description: "Internationalization with multiple language support"
+    release_status: "planned"
+    notes: "Initial languages: English, Swedish"
+
+  # Instrument comparison view
+  instrument_comparison:
+    enabled: false
+    description: "Side-by-side comparison of instrument specifications"
+    release_status: "planned"
+
+  # Advanced search and filtering
+  advanced_search:
+    enabled: true
+    description: "Advanced search with filters for instruments and stations"
+    release_status: "stable"
+
+  # Bulk operations
+  bulk_operations:
+    enabled: false
+    description: "Bulk edit, delete, and export operations"
+    release_status: "planned"
+    notes: "Admin-only feature"
+
+  # Dashboard widgets
+  dashboard_widgets:
+    enabled: true
+    description: "Customizable dashboard with status widgets"
+    release_status: "stable"
+
+# =============================================================================
+# DATA MANAGEMENT FEATURES
+# =============================================================================
+# Data handling and processing capabilities
+# =============================================================================
+
+data:
+  # YAML configuration import
+  yaml_import:
+    enabled: true
+    description: "Import station/instrument configurations from YAML files"
+    release_status: "stable"
+
+  # YAML configuration export
+  yaml_export:
+    enabled: true
+    description: "Export station/instrument configurations to YAML files"
+    release_status: "stable"
+
+  # CSV data export
+  csv_export:
+    enabled: true
+    description: "Export data tables to CSV format"
+    release_status: "stable"
+
+  # JSON data export
+  json_export:
+    enabled: true
+    description: "Export data to JSON format"
+    release_status: "stable"
+
+  # Data versioning/history
+  version_history:
+    enabled: false
+    description: "Track changes and maintain version history of records"
+    release_status: "planned"
+    notes: "Enables audit trail and rollback capabilities"
+
+  # Batch import from spreadsheet
+  spreadsheet_import:
+    enabled: false
+    description: "Import data from Excel/CSV spreadsheets with mapping"
+    release_status: "planned"
+
+# =============================================================================
+# ROI (REGION OF INTEREST) FEATURES
+# =============================================================================
+# ROI management and analysis capabilities
+# =============================================================================
+
+roi:
+  # Basic ROI management
+  roi_management:
+    enabled: true
+    description: "Create, edit, and delete Regions of Interest"
+    release_status: "stable"
+
+  # ROI polygon drawing
+  roi_drawing:
+    enabled: true
+    description: "Interactive polygon drawing for ROI definition"
+    release_status: "stable"
+
+  # ROI YAML import
+  roi_yaml_import:
+    enabled: true
+    description: "Import ROI definitions from YAML files"
+    release_status: "stable"
+
+  # ROI time series visualization
+  roi_timeseries:
+    enabled: false
+    description: "View ROI statistics as time series plots"
+    release_status: "planned"
+    notes: "Requires integration with phenocams processing pipeline"
+
+  # Multi-ROI comparison
+  roi_comparison:
+    enabled: false
+    description: "Compare statistics across multiple ROIs"
+    release_status: "planned"
+
+# =============================================================================
+# INTEGRATION FEATURES
+# =============================================================================
+# External system integrations
+# =============================================================================
+
+integrations:
+  # Phenocams pipeline integration
+  phenocams_integration:
+    enabled: false
+    description: "Direct integration with phenocams processing pipeline"
+    release_status: "planned"
+    notes: "Allows triggering processing and viewing results"
+
+  # MCP (Model Context Protocol) integration
+  mcp_integration:
+    enabled: false
+    description: "Integration with SITES Spectral MCP server"
+    release_status: "planned"
+
+  # External data sources
+  external_data_sources:
+    enabled: false
+    description: "Connect to external data APIs (ICOS, PhenoCam Network)"
+    release_status: "planned"
+
+  # Webhook notifications
+  webhooks:
+    enabled: false
+    description: "Send webhook notifications on data changes"
+    release_status: "planned"
+
+# =============================================================================
+# ADMIN FEATURES
+# =============================================================================
+# Administrative and maintenance features
+# =============================================================================
+
+admin:
+  # User management
+  user_management:
+    enabled: true
+    description: "Create and manage user accounts"
+    release_status: "stable"
+
+  # Activity logging
+  activity_logging:
+    enabled: true
+    description: "Log user actions for audit trail"
+    release_status: "stable"
+
+  # Database backup
+  database_backup:
+    enabled: true
+    description: "Manual database backup functionality"
+    release_status: "stable"
+
+  # System health monitoring
+  health_monitoring:
+    enabled: true
+    description: "System health and status endpoints"
+    release_status: "stable"
+
+  # Advanced analytics
+  usage_analytics:
+    enabled: false
+    description: "Track and analyze application usage patterns"
+    release_status: "planned"

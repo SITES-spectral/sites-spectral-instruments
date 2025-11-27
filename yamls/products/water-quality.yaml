@@ -1,0 +1,323 @@
+# Water Quality Products Configuration
+# SITES Spectral v8.0.0 - Product Definitions
+# For satellite-based aquatic monitoring at SITES stations
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "Water quality products optimized for Nordic humic-rich waters"
+
+products:
+  # Chlorophyll-a Products
+  chlorophyll_a:
+    name: "Chlorophyll-a Concentration"
+    abbreviation: "Chl-a"
+    category: "primary_production"
+    units: "mg/m3"
+    range: [0, 100]
+
+    algorithms:
+      oc4me:
+        name: "OC4ME"
+        description: "Ocean Colour 4-band Maximum Ratio"
+        formula: "10^(a0 + a1*R + a2*R^2 + a3*R^3 + a4*R^4)"
+        coefficients:
+          a0: 0.3255
+          a1: -2.7677
+          a2: 2.4409
+          a3: -1.1288
+          a4: -0.4990
+        note: "Not suitable for Nordic humic waters"
+
+      c2rcc:
+        name: "C2RCC"
+        description: "Case-2 Regional Coast Colour"
+        neural_network: true
+        suitable_for: "Optically complex waters"
+        note: "Recommended for Nordic lakes"
+
+      acolite:
+        name: "ACOLITE"
+        description: "Atmospheric correction for OLI and MSI"
+        suitable_for: "Inland and coastal waters"
+
+    platforms:
+      sentinel2:
+        algorithm: "c2rcc"
+        bands: ["B02", "B03", "B04", "B05", "B06", "B07", "B08A"]
+      sentinel3_olci:
+        algorithm: "c2rcc"
+        bands: ["Oa03", "Oa04", "Oa05", "Oa06", "Oa07", "Oa08"]
+      landsat:
+        algorithm: "acolite"
+        bands: ["B2", "B3", "B4", "B5"]
+
+    nordic_notes: |
+      Nordic lakes are often humic-rich (high CDOM) which affects standard
+      chlorophyll algorithms. Use C2RCC or ACOLITE instead of OC4ME.
+
+  # CDOM Products
+  cdom:
+    name: "Colored Dissolved Organic Matter"
+    abbreviation: "CDOM"
+    synonyms: ["Gelbstoff", "Yellow substance"]
+    category: "organic_matter"
+    units: "1/m"  # Absorption coefficient at 443nm
+    wavelength_reference_nm: 443
+    range: [0, 10]
+
+    algorithms:
+      qaa:
+        name: "QAA"
+        description: "Quasi-Analytical Algorithm"
+
+      c2rcc:
+        name: "C2RCC"
+        description: "Neural network-based retrieval"
+        output: "adg_443"  # Absorption of detritus + gelbstoff at 443nm
+
+    platforms:
+      sentinel2:
+        algorithm: "c2rcc"
+        bands: ["B02", "B03", "B04"]
+      sentinel3_olci:
+        algorithm: "c2rcc"
+        bands: ["Oa02", "Oa03", "Oa04", "Oa05"]
+
+    nordic_notes: |
+      CDOM is very high in Nordic boreal lakes (brown water).
+      Typical values: 2-8 1/m vs <0.5 1/m for clear lakes.
+      Important for light attenuation and ecosystem modeling.
+
+  # Turbidity
+  turbidity:
+    name: "Turbidity"
+    abbreviation: "TUR"
+    category: "suspended_matter"
+    units: "NTU"  # Nephelometric Turbidity Units
+    alternative_units: "FNU"  # Formazin Nephelometric Units
+    range: [0, 100]
+
+    algorithms:
+      nechad:
+        name: "Nechad et al. (2010)"
+        description: "Single band algorithm"
+        formula: "A * Red / (1 - Red/C)"
+        bands: ["Red"]
+
+      dogliotti:
+        name: "Dogliotti et al. (2015)"
+        description: "Switching algorithm"
+        bands: ["Red", "NIR"]
+
+    platforms:
+      sentinel2:
+        algorithm: "dogliotti"
+        bands: ["B04", "B08"]
+      sentinel3_olci:
+        bands: ["Oa08", "Oa17"]
+
+    nordic_notes: |
+      Nordic lakes generally have low turbidity except during spring
+      meltwater and storm events. Monitor for sediment transport.
+
+  # Total Suspended Matter
+  tsm:
+    name: "Total Suspended Matter"
+    abbreviation: "TSM"
+    synonyms: ["SPM", "Suspended Particulate Matter"]
+    category: "suspended_matter"
+    units: "g/m3"
+    range: [0, 50]
+
+    algorithms:
+      nechad:
+        name: "Nechad et al."
+        bands: ["Red", "NIR"]
+      c2rcc:
+        name: "C2RCC TSM"
+        neural_network: true
+
+    platforms:
+      sentinel2:
+        algorithm: "c2rcc"
+        bands: ["B04", "B05", "B06"]
+      sentinel3_olci:
+        algorithm: "c2rcc"
+
+  # Secchi Disk Depth
+  secchi_depth:
+    name: "Secchi Disk Depth"
+    abbreviation: "ZSD"
+    category: "transparency"
+    units: "m"
+    range: [0, 20]
+
+    algorithms:
+      lee:
+        name: "Lee et al. (2015)"
+        description: "Semi-analytical approach"
+        formula: "1 / (2.5 * Kd490)"
+
+      empirical:
+        name: "Blue/Green ratio"
+        formula: "a * (B2/B3)^b"
+
+    platforms:
+      sentinel2:
+        bands: ["B02", "B03", "B04"]
+      landsat:
+        bands: ["B2", "B3", "B4"]
+
+    nordic_notes: |
+      Secchi depth in humic Nordic lakes: 1-4 m
+      Clear oligotrophic lakes: 5-15 m
+
+  # Phycocyanin (Cyanobacteria)
+  phycocyanin:
+    name: "Phycocyanin Index"
+    abbreviation: "PC"
+    category: "algae"
+    description: "Proxy for cyanobacteria concentration"
+    units: "Relative Index"
+    range: [0, 100]
+
+    algorithms:
+      simis:
+        name: "SIMIS"
+        description: "Sentinel-3 Inland water products"
+        bands: ["620", "665", "709"]
+        formula: "(R620 - R665) / (R620 + R665) * R709"
+
+      ci:
+        name: "Cyanobacteria Index"
+        bands: ["Oa06", "Oa07", "Oa08", "Oa11"]
+
+    platforms:
+      sentinel3_olci:
+        algorithm: "ci"
+        bands: ["Oa06", "Oa07", "Oa08", "Oa11"]
+      sentinel2:
+        bands: ["B04", "B05", "B06"]
+        note: "Limited spectral resolution for PC"
+
+    nordic_notes: |
+      Cyanobacteria blooms occur in Nordic lakes during warm summers.
+      Monitor for public health (toxins) and ecosystem changes.
+
+# Lake Products
+lake_products:
+  lake_surface_temperature:
+    name: "Lake Surface Water Temperature"
+    abbreviation: "LSWT"
+    category: "thermal"
+    units: "K"
+    range: [270, 310]
+    accuracy_k: 1.0
+
+    platforms:
+      landsat:
+        bands: ["B10"]
+        algorithm: "Single-channel"
+        resolution_m: 100
+      sentinel3_slstr:
+        bands: ["S8", "S9"]
+        algorithm: "Split-window"
+        resolution_m: 1000
+
+    applications:
+      - "Lake thermal dynamics"
+      - "Stratification monitoring"
+      - "Climate change indicators"
+
+  lake_ice_extent:
+    name: "Lake Ice Extent"
+    abbreviation: "LIE"
+    category: "ice"
+    units: "binary/fractional"
+
+    algorithms:
+      ndsi:
+        name: "NDSI-based"
+        formula: "(Green - SWIR) / (Green + SWIR)"
+        threshold: 0.4
+
+      thermal:
+        name: "Thermal check"
+        description: "Combine NDSI with thermal bands"
+
+    platforms:
+      sentinel2:
+        bands: ["B03", "B11"]
+      landsat:
+        bands: ["B3", "B6", "B10"]
+      sentinel3_slstr:
+        bands: ["S3", "S5", "S6", "S8"]
+
+    nordic_notes: |
+      Ice phenology is key climate indicator for Nordic lakes.
+      Track freeze-up date, ice-off date, ice duration.
+
+  macrophyte_coverage:
+    name: "Aquatic Macrophyte Coverage"
+    abbreviation: "MAC"
+    category: "vegetation"
+    units: "percent"
+    range: [0, 100]
+
+    algorithms:
+      fai:
+        name: "Floating Algae Index"
+        formula: "NIR - (Red + (SWIR - Red) * (lambda_NIR - lambda_Red) / (lambda_SWIR - lambda_Red))"
+
+      ndavi:
+        name: "Normalized Difference Aquatic Vegetation Index"
+        formula: "(NIR - Blue) / (NIR + Blue)"
+
+    platforms:
+      sentinel2:
+        bands: ["B02", "B04", "B08", "B11"]
+
+# Product Categories
+categories:
+  primary_production:
+    name: "Primary Production"
+    description: "Algal biomass indicators"
+    icon: "fa-seedling"
+    color: "#22c55e"
+
+  organic_matter:
+    name: "Organic Matter"
+    description: "Dissolved and particulate organics"
+    icon: "fa-tint"
+    color: "#a16207"
+
+  suspended_matter:
+    name: "Suspended Matter"
+    description: "Turbidity and particles"
+    icon: "fa-cloud"
+    color: "#64748b"
+
+  transparency:
+    name: "Transparency"
+    description: "Light penetration"
+    icon: "fa-sun"
+    color: "#0ea5e9"
+
+  algae:
+    name: "Algae & Cyanobacteria"
+    description: "Bloom detection"
+    icon: "fa-bacteria"
+    color: "#16a34a"
+
+  thermal:
+    name: "Thermal"
+    description: "Temperature products"
+    icon: "fa-temperature-high"
+    color: "#ef4444"
+
+  ice:
+    name: "Ice Products"
+    description: "Lake ice monitoring"
+    icon: "fa-snowflake"
+    color: "#06b6d4"

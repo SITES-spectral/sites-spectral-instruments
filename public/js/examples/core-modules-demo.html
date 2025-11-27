@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="api-base-url" content="">
+    <title>SITES Spectral - Core Modules Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 0;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button.secondary {
+            background: #95a5a6;
+        }
+        button.secondary:hover {
+            background: #7f8c8d;
+        }
+        .output {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .output pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .error-text {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-left: 155px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 SITES Spectral Core Modules Demo</h1>
+
+    <!-- Config Loader Demo -->
+    <div class="demo-section">
+        <h2>📦 ConfigLoader Demo</h2>
+        <p>Load YAML configurations from /yamls/ directory</p>
+        <button onclick="testConfigLoader()">Load Config</button>
+        <button onclick="testConfigPreload()">Preload Configs</button>
+        <button onclick="testConfigCache()">Check Cache</button>
+        <div id="config-output" class="output">
+            <pre>Click a button to test ConfigLoader...</pre>
+        </div>
+    </div>
+
+    <!-- State Management Demo -->
+    <div class="demo-section">
+        <h2>🔄 State Management Demo</h2>
+        <p>Global state with reactive updates</p>
+        <button onclick="testStateSet()">Set State</button>
+        <button onclick="testStateGet()">Get State</button>
+        <button onclick="testStateListener()">Add Listener</button>
+        <button onclick="testStateUpdate()">Update State</button>
+        <button class="secondary" onclick="testStateReset()">Reset State</button>
+        <div id="state-output" class="output">
+            <pre>Click a button to test AppState...</pre>
+        </div>
+    </div>
+
+    <!-- Validators Demo -->
+    <div class="demo-section">
+        <h2>✅ Validators Demo</h2>
+        <p>Test field validation</p>
+
+        <div class="form-group">
+            <label>Station Name:</label>
+            <input type="text" id="station-name" placeholder="Enter station name">
+            <button onclick="validateStationName()">Validate</button>
+            <div id="station-name-error" class="error-text"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Latitude:</label>
+            <input type="number" id="latitude" placeholder="64.256" step="0.000001">
+            <button onclick="validateLatitude()">Validate</button>
+            <div id="latitude-error" class="error-text"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Wavelength (nm):</label>
+            <input type="number" id="wavelength" placeholder="550" step="1">
+            <button onclick="validateWavelength()">Validate</button>
+            <div id="wavelength-error" class="error-text"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Resolution:</label>
+            <input type="text" id="resolution" placeholder="1920x1080">
+            <button onclick="validateResolution()">Validate</button>
+            <div id="resolution-error" class="error-text"></div>
+        </div>
+
+        <div id="validator-output" class="output">
+            <pre>Validation results will appear here...</pre>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Demo -->
+    <div class="demo-section">
+        <h2>🔔 Toast Notifications Demo</h2>
+        <p>User feedback notifications</p>
+        <button onclick="testToastSuccess()">Success Toast</button>
+        <button onclick="testToastError()">Error Toast</button>
+        <button onclick="testToastWarning()">Warning Toast</button>
+        <button onclick="testToastInfo()">Info Toast</button>
+        <button class="secondary" onclick="Toast.clearAll()">Clear All</button>
+    </div>
+
+    <!-- API Client Demo -->
+    <div class="demo-section">
+        <h2>🌐 API Client Demo</h2>
+        <p>HTTP client with authentication</p>
+        <button onclick="testAPIGet()">GET Request</button>
+        <button onclick="testAPIPost()">POST Request</button>
+        <button onclick="testAPIError()">Trigger Error</button>
+        <button onclick="testAPIAuth()">Set Auth Token</button>
+        <div id="api-output" class="output">
+            <pre>Click a button to test APIClient...</pre>
+        </div>
+    </div>
+
+    <!-- App Controller Demo -->
+    <div class="demo-section">
+        <h2>🚀 App Controller Demo</h2>
+        <p>Application initialization and lifecycle</p>
+        <button onclick="testAppStatus()">Check Status</button>
+        <button onclick="testAppUser()">Get User Info</button>
+        <button onclick="testAppConfig()">Load Config</button>
+        <div id="app-output" class="output">
+            <pre>Click a button to test SitesApp...</pre>
+        </div>
+    </div>
+
+    <!-- Load Core Modules -->
+    <script src="../core/error-messages.js"></script>
+    <script src="../core/state.js"></script>
+    <script src="../core/config-loader.js"></script>
+    <script src="../api/api-client.js"></script>
+    <script src="../utils/validators.js"></script>
+    <script src="../utils/toast.js"></script>
+    <script src="../core/app.js"></script>
+
+    <!-- Demo Scripts -->
+    <script>
+        // ConfigLoader Tests
+        async function testConfigLoader() {
+            const output = document.getElementById('config-output');
+            try {
+                output.innerHTML = '<pre>Loading configuration...</pre>';
+
+                // Try to load a config (may not exist yet)
+                const config = await ConfigLoader.get('instruments/phenocam');
+
+                output.innerHTML = '<pre>' + JSON.stringify(config, null, 2) + '</pre>';
+            } catch (error) {
+                output.innerHTML = '<pre style="color: #e74c3c;">Error: ' + error.message + '\n\n' +
+                    'This is expected if YAML configs are not created yet.\n' +
+                    'Next step: Create /yamls/ directory with config files.</pre>';
+            }
+        }
+
+        async function testConfigPreload() {
+            const output = document.getElementById('config-output');
+            try {
+                output.innerHTML = '<pre>Preloading configurations...</pre>';
+
+                await ConfigLoader.preload([
+                    'instruments/phenocam',
+                    'platforms/ecosystems'
+                ]);
+
+                output.innerHTML = '<pre>Loaded configs:\n' +
+                    ConfigLoader.getLoadedConfigs().join('\n') + '</pre>';
+            } catch (error) {
+                output.innerHTML = '<pre style="color: #e74c3c;">Error: ' + error.message + '</pre>';
+            }
+        }
+
+        function testConfigCache() {
+            const output = document.getElementById('config-output');
+            const loaded = ConfigLoader.getLoadedConfigs();
+            output.innerHTML = '<pre>Cached configurations (' + loaded.length + '):\n' +
+                loaded.join('\n') + '</pre>';
+        }
+
+        // State Tests
+        function testStateSet() {
+            const output = document.getElementById('state-output');
+            AppState.set('testValue', 'Hello SITES!');
+            AppState.set('timestamp', Date.now());
+            output.innerHTML = '<pre>State set:\n' +
+                'testValue = "Hello SITES!"\n' +
+                'timestamp = ' + AppState.get('timestamp') + '</pre>';
+        }
+
+        function testStateGet() {
+            const output = document.getElementById('state-output');
+            const value = AppState.get('testValue');
+            const timestamp = AppState.get('timestamp');
+            output.innerHTML = '<pre>State values:\n' +
+                'testValue = ' + JSON.stringify(value) + '\n' +
+                'timestamp = ' + timestamp + '\n\n' +
+                'Current user: ' + JSON.stringify(AppState.get('user'), null, 2) + '</pre>';
+        }
+
+        function testStateListener() {
+            const output = document.getElementById('state-output');
+
+            AppState.on('change:testValue', ({ value, oldValue }) => {
+                output.innerHTML = '<pre>State changed!\n' +
+                    'Old value: ' + JSON.stringify(oldValue) + '\n' +
+                    'New value: ' + JSON.stringify(value) + '</pre>';
+            });
+
+            output.innerHTML = '<pre>Listener added. Now use "Update State" to trigger it.</pre>';
+        }
+
+        function testStateUpdate() {
+            const output = document.getElementById('state-output');
+            const newValue = 'Updated at ' + new Date().toLocaleTimeString();
+            AppState.set('testValue', newValue);
+            output.innerHTML = '<pre>State updated to: ' + newValue + '</pre>';
+        }
+
+        function testStateReset() {
+            const output = document.getElementById('state-output');
+            AppState.reset();
+            output.innerHTML = '<pre>State reset to initial values.</pre>';
+        }
+
+        // Validator Tests
+        function validateStationName() {
+            const input = document.getElementById('station-name');
+            const error = document.getElementById('station-name-error');
+            const output = document.getElementById('validator-output');
+
+            const result = Validators.required(input.value, 'Station Name');
+
+            if (result.valid) {
+                error.textContent = '';
+                output.innerHTML = '<pre style="color: #27ae60;">✓ Valid station name</pre>';
+            } else {
+                error.textContent = result.error;
+                output.innerHTML = '<pre style="color: #e74c3c;">✗ ' + result.error + '</pre>';
+            }
+        }
+
+        function validateLatitude() {
+            const input = document.getElementById('latitude');
+            const error = document.getElementById('latitude-error');
+            const output = document.getElementById('validator-output');
+
+            const result = Validators.latitude(input.value);
+
+            if (result.valid) {
+                error.textContent = '';
+                output.innerHTML = '<pre style="color: #27ae60;">✓ Valid latitude</pre>';
+            } else {
+                error.textContent = result.error;
+                output.innerHTML = '<pre style="color: #e74c3c;">✗ ' + result.error + '</pre>';
+            }
+        }
+
+        function validateWavelength() {
+            const input = document.getElementById('wavelength');
+            const error = document.getElementById('wavelength-error');
+            const output = document.getElementById('validator-output');
+
+            const result = Validators.wavelength(input.value);
+
+            if (result.valid) {
+                error.textContent = '';
+                output.innerHTML = '<pre style="color: #27ae60;">✓ Valid wavelength</pre>';
+            } else {
+                error.textContent = result.error;
+                output.innerHTML = '<pre style="color: #e74c3c;">✗ ' + result.error + '</pre>';
+            }
+        }
+
+        function validateResolution() {
+            const input = document.getElementById('resolution');
+            const error = document.getElementById('resolution-error');
+            const output = document.getElementById('validator-output');
+
+            const result = Validators.resolution(input.value);
+
+            if (result.valid) {
+                error.textContent = '';
+                output.innerHTML = '<pre style="color: #27ae60;">✓ Valid resolution</pre>';
+            } else {
+                error.textContent = result.error;
+                output.innerHTML = '<pre style="color: #e74c3c;">✗ ' + result.error + '</pre>';
+            }
+        }
+
+        // Toast Tests
+        function testToastSuccess() {
+            Toast.success('Instrument saved successfully!', { title: 'Success' });
+        }
+
+        function testToastError() {
+            Toast.error('Failed to save instrument. Please try again.', { title: 'Error' });
+        }
+
+        function testToastWarning() {
+            Toast.warning('This action cannot be undone.', { title: 'Warning' });
+        }
+
+        function testToastInfo() {
+            Toast.info('Processing your request...', { title: 'Info', duration: 3000 });
+        }
+
+        // API Client Tests
+        async function testAPIGet() {
+            const output = document.getElementById('api-output');
+            try {
+                output.innerHTML = '<pre>Making GET request...</pre>';
+                const result = await APIClient.get('/api/stations');
+                output.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                output.innerHTML = '<pre style="color: #e74c3c;">Error: ' + error.message + '\n' +
+                    'Status: ' + error.status + '</pre>';
+            }
+        }
+
+        async function testAPIPost() {
+            const output = document.getElementById('api-output');
+            try {
+                output.innerHTML = '<pre>Making POST request...</pre>';
+                const result = await APIClient.post('/api/test', { test: 'data' });
+                output.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                output.innerHTML = '<pre style="color: #e74c3c;">Error: ' + error.message + '\n' +
+                    'Status: ' + error.status + '</pre>';
+            }
+        }
+
+        function testAPIError() {
+            const output = document.getElementById('api-output');
+            APIClient.get('/api/nonexistent').catch(error => {
+                output.innerHTML = '<pre style="color: #e74c3c;">Caught error:\n' +
+                    'Message: ' + error.message + '\n' +
+                    'Status: ' + error.status + '\n\n' +
+                    'Error handling is working correctly!</pre>';
+            });
+        }
+
+        function testAPIAuth() {
+            const output = document.getElementById('api-output');
+            const token = 'test-jwt-token-' + Date.now();
+            APIClient.setAuthToken(token);
+            output.innerHTML = '<pre>Auth token set:\n' + token + '\n\n' +
+                'Token is stored in localStorage and will be included in all requests.</pre>';
+        }
+
+        // App Tests
+        function testAppStatus() {
+            const output = document.getElementById('app-output');
+            output.innerHTML = '<pre>App Status:\n' +
+                'Initialized: ' + SitesApp.isInitialized() + '\n' +
+                'Authenticated: ' + SitesApp.isAuthenticated() + '\n' +
+                'Admin: ' + SitesApp.isAdmin() + '\n' +
+                'Can Edit: ' + SitesApp.canEdit() + '</pre>';
+        }
+
+        function testAppUser() {
+            const output = document.getElementById('app-output');
+            const user = SitesApp.getCurrentUser();
+            output.innerHTML = '<pre>Current User:\n' +
+                JSON.stringify(user, null, 2) + '</pre>';
+        }
+
+        async function testAppConfig() {
+            const output = document.getElementById('app-output');
+            try {
+                output.innerHTML = '<pre>Loading config via SitesApp...</pre>';
+                const config = await SitesApp.getConfig('instruments/phenocam');
+                output.innerHTML = '<pre>' + JSON.stringify(config, null, 2) + '</pre>';
+            } catch (error) {
+                output.innerHTML = '<pre style="color: #e74c3c;">Error: ' + error.message + '</pre>';
+            }
+        }
+
+        // Initialize
+        SitesApp.onInit(() => {
+            console.log('✅ SITES Spectral Core Modules Loaded');
+            Toast.success('Core modules loaded successfully!', { title: 'Demo Ready' });
+        });
+    </script>
+</body>
+</html>

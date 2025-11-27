@@ -1,0 +1,258 @@
+# =============================================================================
+# Fixed Platform Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Field definitions for fixed platforms (towers, buildings, permanent mounts).
+# These platforms are stationary and provide continuous long-term monitoring.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  platform_type: "fixed"
+  version: "1.0.0"
+  description: "Configuration for permanent ground-based platforms"
+
+# =============================================================================
+# FIELD DEFINITIONS
+# =============================================================================
+# Each field has the following properties:
+#   - label: Human-readable name shown in the UI
+#   - type: Field type (text, select, number)
+#   - required: Whether this field must be filled
+#   - default: Default value if not specified
+#   - help_text: Explanation shown to users
+#   - options: For select fields, the available choices
+#   - validation: Rules for validating input
+# =============================================================================
+
+fields:
+  # ---------------------------------------------------------------------------
+  # MOUNTING CONFIGURATION
+  # ---------------------------------------------------------------------------
+  mounting_type:
+    label: "Mounting Type"
+    type: "select"
+    required: true
+    help_text: "How the instruments are attached to the structure."
+    options:
+      boom:
+        label: "Boom Arm"
+        description: "Extended arm projecting from the main structure"
+      mast:
+        label: "Mast Mount"
+        description: "Vertical pole or mast attachment"
+      bracket:
+        label: "Wall Bracket"
+        description: "Attached directly to a wall or surface"
+      tripod:
+        label: "Tripod"
+        description: "Free-standing three-legged support"
+      rail:
+        label: "Rail System"
+        description: "Mounted on a rail for adjustable positioning"
+      custom:
+        label: "Custom Mount"
+        description: "Specialized or non-standard mounting solution"
+
+  # ---------------------------------------------------------------------------
+  # STRUCTURE INFORMATION
+  # ---------------------------------------------------------------------------
+  structure_type:
+    label: "Structure Type"
+    type: "select"
+    required: true
+    help_text: "The type of structure hosting the platform."
+    options:
+      flux_tower:
+        label: "Flux Tower"
+        description: "Eddy covariance tower for flux measurements"
+      meteorological_tower:
+        label: "Meteorological Tower"
+        description: "Weather monitoring tower"
+      observation_tower:
+        label: "Observation Tower"
+        description: "General purpose observation structure"
+      building:
+        label: "Building"
+        description: "Mounted on a building roof or wall"
+      pole:
+        label: "Pole"
+        description: "Simple pole or post installation"
+      scaffold:
+        label: "Scaffold"
+        description: "Temporary or semi-permanent scaffold structure"
+      other:
+        label: "Other"
+        description: "Other structure type not listed"
+
+  structure_name:
+    label: "Structure Name"
+    type: "text"
+    required: false
+    help_text: "Optional name or identifier for the structure (e.g., 'Tower A', 'Main Building')."
+    validation:
+      max_length: 100
+
+  # ---------------------------------------------------------------------------
+  # HEIGHT AND POSITION
+  # ---------------------------------------------------------------------------
+  platform_height_m:
+    label: "Platform Height (meters)"
+    type: "number"
+    required: true
+    help_text: "Height of the platform above ground level in meters."
+    validation:
+      min: 0
+      max: 500
+      step: 0.1
+    default: 2.0
+
+  structure_total_height_m:
+    label: "Total Structure Height (meters)"
+    type: "number"
+    required: false
+    help_text: "Total height of the supporting structure in meters."
+    validation:
+      min: 0
+      max: 500
+      step: 0.1
+
+  # ---------------------------------------------------------------------------
+  # FOUNDATION
+  # ---------------------------------------------------------------------------
+  foundation_type:
+    label: "Foundation Type"
+    type: "select"
+    required: false
+    help_text: "Type of foundation supporting the structure."
+    options:
+      concrete:
+        label: "Concrete"
+        description: "Poured concrete foundation"
+      guy_wires:
+        label: "Guy Wires"
+        description: "Supported by tensioned cables"
+      buried:
+        label: "Buried Post"
+        description: "Post buried directly in ground"
+      surface_mount:
+        label: "Surface Mount"
+        description: "Mounted on existing surface without foundation"
+      weighted:
+        label: "Weighted Base"
+        description: "Heavy base plate or weights for stability"
+      none:
+        label: "None/Attached"
+        description: "No separate foundation - attached to existing structure"
+
+  # ---------------------------------------------------------------------------
+  # ACCESS AND MAINTENANCE
+  # ---------------------------------------------------------------------------
+  access_method:
+    label: "Access Method"
+    type: "select"
+    required: false
+    help_text: "How maintenance personnel access the platform."
+    options:
+      ladder:
+        label: "Ladder"
+        description: "Fixed or portable ladder access"
+      stairs:
+        label: "Stairs"
+        description: "Permanent staircase"
+      lift:
+        label: "Lift/Elevator"
+        description: "Mechanical lift or elevator"
+      climbing_system:
+        label: "Climbing System"
+        description: "Safety climbing system with harness"
+      crane:
+        label: "Crane Required"
+        description: "Requires crane or lift equipment for access"
+      ground_level:
+        label: "Ground Level"
+        description: "Accessible from ground without climbing"
+
+  access_restrictions:
+    label: "Access Restrictions"
+    type: "text"
+    required: false
+    help_text: "Any special requirements or restrictions for accessing the platform."
+    validation:
+      max_length: 500
+
+  # ---------------------------------------------------------------------------
+  # ENVIRONMENTAL EXPOSURE
+  # ---------------------------------------------------------------------------
+  exposure:
+    label: "Environmental Exposure"
+    type: "select"
+    required: false
+    help_text: "Level of environmental protection at the platform location."
+    default: "exposed"
+    options:
+      exposed:
+        label: "Fully Exposed"
+        description: "No protection from weather elements"
+      partially_sheltered:
+        label: "Partially Sheltered"
+        description: "Some protection from certain weather conditions"
+      sheltered:
+        label: "Sheltered"
+        description: "Protected from most weather but open air"
+      enclosed:
+        label: "Enclosed"
+        description: "Inside enclosure or housing"
+
+  # ---------------------------------------------------------------------------
+  # POWER AND CONNECTIVITY
+  # ---------------------------------------------------------------------------
+  power_available:
+    label: "Power Available"
+    type: "select"
+    required: false
+    help_text: "Type of power supply available at the platform."
+    options:
+      mains:
+        label: "Mains Power"
+        description: "Connected to electrical grid"
+      solar:
+        label: "Solar"
+        description: "Solar panel power supply"
+      battery:
+        label: "Battery Only"
+        description: "Battery powered, requires manual replacement"
+      solar_battery:
+        label: "Solar + Battery"
+        description: "Solar panels with battery backup"
+      generator:
+        label: "Generator"
+        description: "Fuel-powered generator"
+      none:
+        label: "No Power"
+        description: "No electrical power available"
+
+  network_connectivity:
+    label: "Network Connectivity"
+    type: "select"
+    required: false
+    help_text: "Type of data connection available."
+    options:
+      ethernet:
+        label: "Ethernet/Fiber"
+        description: "Wired network connection"
+      wifi:
+        label: "WiFi"
+        description: "Wireless local network"
+      cellular:
+        label: "Cellular (4G/5G)"
+        description: "Mobile network data connection"
+      satellite:
+        label: "Satellite Link"
+        description: "Satellite internet connection"
+      manual:
+        label: "Manual Download"
+        description: "Data retrieved manually via SD card or USB"
+      none:
+        label: "No Connectivity"
+        description: "No network connection available"

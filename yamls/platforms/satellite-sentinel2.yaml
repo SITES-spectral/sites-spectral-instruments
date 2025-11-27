@@ -1,0 +1,296 @@
+# Sentinel-2 MSI Satellite Platform Configuration
+# SITES Spectral v8.0.0 - Satellite Platform
+# For vegetation, water quality, and snow monitoring at SITES stations
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "Copernicus Sentinel-2 Multi-Spectral Instrument for land monitoring"
+
+platform:
+  id: "sentinel2"
+  name: "Sentinel-2 MSI"
+  operator: "European Space Agency (ESA)"
+  program: "Copernicus"
+  type: "satellite"
+  constellation:
+    - "Sentinel-2A"  # Launched 2015-06-23
+    - "Sentinel-2B"  # Launched 2017-03-07
+  icon: "fa-satellite"
+  color: "#7c3aed"
+
+# Orbital Characteristics
+orbit:
+  type: "sun_synchronous"
+  altitude_km: 786
+  inclination_deg: 98.62
+  repeat_cycle_days: 10  # Per satellite
+  combined_revisit_days: 5  # Both satellites
+  local_time_descending: "10:30"
+  equator_crossing: "Descending node"
+
+# Imaging Characteristics
+imaging:
+  swath_width_km: 290
+  coverage: "Land and coastal areas, 56°S to 84°N"
+  data_rate_mbps: 1600
+  onboard_storage_gb: 2400
+
+# Spectral Bands - Complete MSI Configuration
+spectral_bands:
+  B01:
+    name: "Coastal Aerosol"
+    center_wavelength_nm: 443
+    bandwidth_nm: 21
+    resolution_m: 60
+    applications: ["Aerosol detection", "Coastal zone mapping"]
+
+  B02:
+    name: "Blue"
+    center_wavelength_nm: 490
+    bandwidth_nm: 66
+    resolution_m: 10
+    applications: ["Water quality", "Bathymetry", "Soil discrimination"]
+
+  B03:
+    name: "Green"
+    center_wavelength_nm: 560
+    bandwidth_nm: 36
+    resolution_m: 10
+    applications: ["Vegetation", "Peak chlorophyll reflectance"]
+
+  B04:
+    name: "Red"
+    center_wavelength_nm: 665
+    bandwidth_nm: 31
+    resolution_m: 10
+    applications: ["Chlorophyll absorption", "NDVI", "Vegetation mapping"]
+
+  B05:
+    name: "Red Edge 1"
+    center_wavelength_nm: 705
+    bandwidth_nm: 15
+    resolution_m: 20
+    applications: ["Vegetation stress", "Chlorophyll content"]
+
+  B06:
+    name: "Red Edge 2"
+    center_wavelength_nm: 740
+    bandwidth_nm: 15
+    resolution_m: 20
+    applications: ["LAI", "Chlorophyll fluorescence"]
+
+  B07:
+    name: "Red Edge 3"
+    center_wavelength_nm: 783
+    bandwidth_nm: 20
+    resolution_m: 20
+    applications: ["LAI", "Water vapor absorption edge"]
+
+  B08:
+    name: "NIR"
+    center_wavelength_nm: 842
+    bandwidth_nm: 106
+    resolution_m: 10
+    applications: ["NDVI", "LAI", "Biomass", "Forest mapping"]
+
+  B8A:
+    name: "NIR Narrow"
+    center_wavelength_nm: 865
+    bandwidth_nm: 21
+    resolution_m: 20
+    applications: ["Vegetation", "Water vapor estimation"]
+
+  B09:
+    name: "Water Vapor"
+    center_wavelength_nm: 945
+    bandwidth_nm: 20
+    resolution_m: 60
+    applications: ["Atmospheric correction", "Water vapor"]
+
+  B10:
+    name: "SWIR - Cirrus"
+    center_wavelength_nm: 1375
+    bandwidth_nm: 31
+    resolution_m: 60
+    applications: ["Cirrus cloud detection"]
+
+  B11:
+    name: "SWIR 1"
+    center_wavelength_nm: 1610
+    bandwidth_nm: 91
+    resolution_m: 20
+    applications: ["Snow/ice", "Vegetation moisture", "Soil"]
+
+  B12:
+    name: "SWIR 2"
+    center_wavelength_nm: 2190
+    bandwidth_nm: 175
+    resolution_m: 20
+    applications: ["Snow/ice", "Bare soil", "Burn severity"]
+
+# Vegetation Products
+vegetation_products:
+  ndvi:
+    name: "Normalized Difference Vegetation Index"
+    formula: "(B08 - B04) / (B08 + B04)"
+    bands: ["B08", "B04"]
+    range: [-1, 1]
+    threshold_vegetation: 0.2
+
+  evi:
+    name: "Enhanced Vegetation Index"
+    formula: "2.5 * ((B08 - B04) / (B08 + 6*B04 - 7.5*B02 + 1))"
+    bands: ["B08", "B04", "B02"]
+    range: [-1, 1]
+
+  ndre:
+    name: "Normalized Difference Red Edge"
+    formula: "(B08 - B05) / (B08 + B05)"
+    bands: ["B08", "B05"]
+    range: [-1, 1]
+
+  lai:
+    name: "Leaf Area Index"
+    product_id: "LAI_10m"
+    source: "Copernicus Land Service"
+    resolution_m: 10
+    units: "m2/m2"
+    range: [0, 8]
+
+  fapar:
+    name: "Fraction of Absorbed PAR"
+    product_id: "FAPAR_10m"
+    source: "Copernicus Land Service"
+    resolution_m: 10
+    units: "fraction"
+    range: [0, 1]
+
+  fcover:
+    name: "Fraction of Vegetation Cover"
+    product_id: "FCOVER_10m"
+    source: "Copernicus Land Service"
+    resolution_m: 10
+    units: "fraction"
+    range: [0, 1]
+
+# Snow Products
+snow_products:
+  ndsi:
+    name: "Normalized Difference Snow Index"
+    formula: "(B03 - B11) / (B03 + B11)"
+    bands: ["B03", "B11"]
+    range: [-1, 1]
+    threshold_snow: 0.4
+
+  snow_cover:
+    name: "Snow Cover"
+    product_id: "FSC"  # Fractional Snow Cover
+    source: "Copernicus Land Service"
+    resolution_m: 20
+    units: "percent"
+    range: [0, 100]
+
+  snow_state:
+    name: "Snow State (Wet/Dry)"
+    product_id: "SWS"
+    source: "Copernicus Land Service"
+    classes:
+      - "Snow-free"
+      - "Dry snow"
+      - "Wet snow"
+
+# Water Quality Products
+water_quality_products:
+  ndwi:
+    name: "Normalized Difference Water Index"
+    formula: "(B03 - B08) / (B03 + B08)"
+    bands: ["B03", "B08"]
+    range: [-1, 1]
+    threshold_water: 0.3
+
+  mndwi:
+    name: "Modified NDWI"
+    formula: "(B03 - B11) / (B03 + B11)"
+    bands: ["B03", "B11"]
+    range: [-1, 1]
+
+  turbidity:
+    name: "Water Turbidity"
+    algorithm: "ACOLITE"
+    bands: ["B04", "B03", "B02"]
+    units: "NTU"
+
+  chlorophyll_a:
+    name: "Chlorophyll-a Concentration"
+    algorithm: "C2RCC"  # Case-2 Regional Coast Colour
+    bands: ["B04", "B05", "B06"]
+    units: "mg/m3"
+    note: "Suitable for Nordic humic-rich waters"
+
+  cdom:
+    name: "Colored Dissolved Organic Matter"
+    algorithm: "ACOLITE"
+    bands: ["B02", "B03", "B04"]
+    units: "1/m"
+    note: "Important for Nordic brown waters"
+
+# Processing Levels
+processing_levels:
+  L1C:
+    name: "Top-of-Atmosphere Reflectance"
+    description: "Orthorectified TOA reflectance"
+    geometric_accuracy_m: 12.5
+
+  L2A:
+    name: "Bottom-of-Atmosphere Reflectance"
+    description: "Atmospherically corrected surface reflectance"
+    processor: "Sen2Cor"
+    includes:
+      - "Surface reflectance"
+      - "Scene classification"
+      - "Cloud/shadow masks"
+      - "Aerosol optical thickness"
+      - "Water vapor"
+
+# Data Access
+data_access:
+  copernicus_dataspace:
+    url: "https://dataspace.copernicus.eu"
+    api: "OData/OpenSearch"
+    free_access: true
+
+  scihub:
+    url: "https://scihub.copernicus.eu"
+    api: "OpenSearch"
+    free_access: true
+
+  google_earth_engine:
+    collection: "COPERNICUS/S2_SR"
+    bands_available: "All"
+
+  planetary_computer:
+    collection: "sentinel-2-l2a"
+    stac_api: true
+
+# Nordic-Specific Notes
+nordic_applications:
+  phenology:
+    description: "Monitor vegetation phenology at SITES stations"
+    products: ["NDVI", "LAI", "fAPAR"]
+    temporal_resolution: "5 days"
+
+  snow_monitoring:
+    description: "Track snow cover dynamics in Nordic ecosystems"
+    products: ["NDSI", "FSC", "SWS"]
+    season: "October - May"
+
+  lake_monitoring:
+    description: "Monitor lake water quality and ice phenology"
+    products: ["Chlorophyll-a", "Turbidity", "CDOM"]
+    note: "C2RCC algorithm recommended for humic-rich waters"
+
+  forest_monitoring:
+    description: "Forest structure and health monitoring"
+    products: ["NDVI", "LAI", "fCover"]
+    note: "Use red edge bands for boreal forest"

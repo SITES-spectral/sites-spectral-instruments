@@ -1,0 +1,661 @@
+# =============================================================================
+# Phenocam Instrument Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Complete field definitions for phenocam (digital camera) instruments.
+# Phenocams capture repeat photography for phenology monitoring.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  instrument_type: "phenocam"
+  version: "1.0.0"
+  description: "Configuration for digital phenology cameras"
+  code: "PHE"
+
+# =============================================================================
+# SECTION 1: CAMERA SETTINGS
+# =============================================================================
+# Core camera hardware and capture configuration
+# =============================================================================
+
+camera_settings:
+  _section_meta:
+    title: "Camera Settings"
+    description: "Hardware specifications and capture configuration"
+    icon: "camera"
+    order: 1
+
+  fields:
+    camera_brand:
+      label: "Camera Brand"
+      type: "select"
+      required: true
+      help_text: "Manufacturer of the camera."
+      options:
+        stardot:
+          label: "StarDot"
+          description: "StarDot Technologies network cameras"
+        axis:
+          label: "Axis"
+          description: "Axis Communications network cameras"
+        mobotix:
+          label: "Mobotix"
+          description: "Mobotix AG surveillance cameras"
+        canon:
+          label: "Canon"
+          description: "Canon Inc. digital cameras"
+        nikon:
+          label: "Nikon"
+          description: "Nikon Corporation digital cameras"
+        sony:
+          label: "Sony"
+          description: "Sony Corporation digital cameras"
+        gopro:
+          label: "GoPro"
+          description: "GoPro Inc. action cameras"
+        raspberry_pi:
+          label: "Raspberry Pi"
+          description: "Raspberry Pi camera modules"
+        flir:
+          label: "FLIR"
+          description: "FLIR Systems cameras"
+        other:
+          label: "Other"
+          description: "Other manufacturer not listed"
+
+    camera_model:
+      label: "Camera Model"
+      type: "text"
+      required: true
+      help_text: "Specific model name or number of the camera."
+      validation:
+        max_length: 100
+
+    serial_number:
+      label: "Serial Number"
+      type: "text"
+      required: false
+      help_text: "Camera serial number for inventory tracking."
+      validation:
+        max_length: 50
+
+    resolution_width:
+      label: "Image Width (pixels)"
+      type: "number"
+      required: true
+      help_text: "Horizontal resolution of captured images in pixels."
+      validation:
+        min: 320
+        max: 20000
+        step: 1
+      default: 2592
+
+    resolution_height:
+      label: "Image Height (pixels)"
+      type: "number"
+      required: true
+      help_text: "Vertical resolution of captured images in pixels."
+      validation:
+        min: 240
+        max: 20000
+        step: 1
+      default: 1944
+
+    megapixels:
+      label: "Megapixels"
+      type: "number"
+      required: false
+      help_text: "Camera sensor resolution in megapixels (calculated from width x height)."
+      validation:
+        min: 0.1
+        max: 200
+        step: 0.1
+
+    sensor_type:
+      label: "Sensor Type"
+      type: "select"
+      required: false
+      help_text: "Type of image sensor in the camera."
+      options:
+        cmos:
+          label: "CMOS"
+          description: "Complementary Metal-Oxide-Semiconductor sensor"
+        ccd:
+          label: "CCD"
+          description: "Charge-Coupled Device sensor"
+        unknown:
+          label: "Unknown"
+          description: "Sensor type not specified"
+
+    color_depth:
+      label: "Color Depth"
+      type: "select"
+      required: false
+      help_text: "Bit depth per color channel."
+      default: "8bit"
+      options:
+        8bit:
+          label: "8-bit"
+          description: "Standard 8 bits per channel (24-bit color)"
+        10bit:
+          label: "10-bit"
+          description: "Extended 10 bits per channel"
+        12bit:
+          label: "12-bit"
+          description: "High dynamic range 12 bits per channel"
+        14bit:
+          label: "14-bit"
+          description: "Professional 14 bits per channel"
+        16bit:
+          label: "16-bit"
+          description: "Maximum 16 bits per channel"
+
+# =============================================================================
+# SECTION 2: CAPTURE SETTINGS
+# =============================================================================
+# Image capture timing and quality settings
+# =============================================================================
+
+capture_settings:
+  _section_meta:
+    title: "Capture Settings"
+    description: "Image acquisition timing and quality"
+    icon: "clock"
+    order: 2
+
+  fields:
+    capture_interval_minutes:
+      label: "Capture Interval (minutes)"
+      type: "number"
+      required: true
+      help_text: "Time between consecutive image captures in minutes."
+      validation:
+        min: 1
+        max: 1440
+        step: 1
+      default: 30
+
+    daily_start_time:
+      label: "Daily Start Time"
+      type: "text"
+      required: false
+      help_text: "Time of first image capture each day (HH:MM format, 24-hour)."
+      validation:
+        pattern: "^[0-2][0-9]:[0-5][0-9]$"
+        max_length: 5
+      default: "06:00"
+
+    daily_end_time:
+      label: "Daily End Time"
+      type: "text"
+      required: false
+      help_text: "Time of last image capture each day (HH:MM format, 24-hour)."
+      validation:
+        pattern: "^[0-2][0-9]:[0-5][0-9]$"
+        max_length: 5
+      default: "20:00"
+
+    image_format:
+      label: "Image Format"
+      type: "select"
+      required: true
+      help_text: "File format for captured images."
+      default: "jpeg"
+      options:
+        jpeg:
+          label: "JPEG"
+          description: "Compressed format, smaller file size"
+        png:
+          label: "PNG"
+          description: "Lossless compression, larger files"
+        raw:
+          label: "RAW"
+          description: "Unprocessed sensor data"
+        tiff:
+          label: "TIFF"
+          description: "Uncompressed or lossless format"
+
+    jpeg_quality:
+      label: "JPEG Quality (%)"
+      type: "number"
+      required: false
+      help_text: "JPEG compression quality (higher = better quality, larger files)."
+      validation:
+        min: 1
+        max: 100
+        step: 1
+      default: 85
+
+    exposure_mode:
+      label: "Exposure Mode"
+      type: "select"
+      required: false
+      help_text: "How the camera determines exposure settings."
+      default: "auto"
+      options:
+        auto:
+          label: "Automatic"
+          description: "Camera automatically adjusts exposure"
+        manual:
+          label: "Manual"
+          description: "Fixed exposure settings"
+        aperture_priority:
+          label: "Aperture Priority"
+          description: "Fixed aperture, auto shutter speed"
+        shutter_priority:
+          label: "Shutter Priority"
+          description: "Fixed shutter speed, auto aperture"
+
+    white_balance:
+      label: "White Balance"
+      type: "select"
+      required: false
+      help_text: "Color temperature adjustment method."
+      default: "auto"
+      options:
+        auto:
+          label: "Auto"
+          description: "Automatic white balance adjustment"
+        daylight:
+          label: "Daylight"
+          description: "Optimized for sunlight (5200-6000K)"
+        cloudy:
+          label: "Cloudy"
+          description: "Optimized for overcast conditions (6000-7000K)"
+        fixed:
+          label: "Fixed"
+          description: "Fixed white balance setting"
+
+# =============================================================================
+# SECTION 3: POSITION AND ORIENTATION
+# =============================================================================
+# Physical positioning and viewing geometry
+# =============================================================================
+
+position:
+  _section_meta:
+    title: "Position & Orientation"
+    description: "Physical location and viewing geometry"
+    icon: "compass"
+    order: 3
+
+  fields:
+    viewing_direction:
+      label: "Viewing Direction"
+      type: "select"
+      required: true
+      help_text: "Cardinal direction the camera is facing."
+      options:
+        north:
+          label: "North"
+          description: "Camera facing north"
+        northeast:
+          label: "Northeast"
+          description: "Camera facing northeast"
+        east:
+          label: "East"
+          description: "Camera facing east"
+        southeast:
+          label: "Southeast"
+          description: "Camera facing southeast"
+        south:
+          label: "South"
+          description: "Camera facing south"
+        southwest:
+          label: "Southwest"
+          description: "Camera facing southwest"
+        west:
+          label: "West"
+          description: "Camera facing west"
+        northwest:
+          label: "Northwest"
+          description: "Camera facing northwest"
+        nadir:
+          label: "Nadir (Down)"
+          description: "Camera pointing straight down"
+        zenith:
+          label: "Zenith (Up)"
+          description: "Camera pointing straight up"
+
+    azimuth_degrees:
+      label: "Azimuth (degrees)"
+      type: "number"
+      required: false
+      help_text: "Precise viewing direction in degrees from north (0-360)."
+      validation:
+        min: 0
+        max: 360
+        step: 0.1
+
+    tilt_angle_degrees:
+      label: "Tilt Angle (degrees)"
+      type: "number"
+      required: false
+      help_text: "Camera tilt from horizontal. 0 = horizontal, -90 = nadir (down), 90 = zenith (up)."
+      validation:
+        min: -90
+        max: 90
+        step: 0.1
+      default: 0
+
+    height_above_ground_m:
+      label: "Height Above Ground (m)"
+      type: "number"
+      required: false
+      help_text: "Height of the camera above the local ground surface in meters."
+      validation:
+        min: 0
+        max: 500
+        step: 0.1
+
+    height_above_canopy_m:
+      label: "Height Above Canopy (m)"
+      type: "number"
+      required: false
+      help_text: "Height of the camera above the vegetation canopy in meters."
+      validation:
+        min: -100
+        max: 500
+        step: 0.1
+
+    field_of_view_horizontal:
+      label: "Horizontal Field of View (degrees)"
+      type: "number"
+      required: false
+      help_text: "Camera's horizontal angle of view in degrees."
+      validation:
+        min: 1
+        max: 360
+        step: 0.1
+
+    field_of_view_vertical:
+      label: "Vertical Field of View (degrees)"
+      type: "number"
+      required: false
+      help_text: "Camera's vertical angle of view in degrees."
+      validation:
+        min: 1
+        max: 180
+        step: 0.1
+
+# =============================================================================
+# SECTION 4: LENS CONFIGURATION
+# =============================================================================
+# Lens specifications and settings
+# =============================================================================
+
+lens:
+  _section_meta:
+    title: "Lens Configuration"
+    description: "Lens specifications and optical settings"
+    icon: "circle"
+    order: 4
+
+  fields:
+    lens_type:
+      label: "Lens Type"
+      type: "select"
+      required: false
+      help_text: "Type of lens installed on the camera."
+      options:
+        fixed:
+          label: "Fixed"
+          description: "Non-interchangeable built-in lens"
+        interchangeable:
+          label: "Interchangeable"
+          description: "Removable/swappable lens"
+        varifocal:
+          label: "Varifocal"
+          description: "Adjustable focal length lens"
+
+    focal_length_mm:
+      label: "Focal Length (mm)"
+      type: "number"
+      required: false
+      help_text: "Lens focal length in millimeters."
+      validation:
+        min: 1
+        max: 2000
+        step: 0.1
+
+    aperture:
+      label: "Aperture (f-stop)"
+      type: "number"
+      required: false
+      help_text: "Maximum aperture f-number (e.g., 2.8 for f/2.8)."
+      validation:
+        min: 0.5
+        max: 64
+        step: 0.1
+
+    focus_mode:
+      label: "Focus Mode"
+      type: "select"
+      required: false
+      help_text: "How the camera maintains focus."
+      default: "fixed_infinity"
+      options:
+        auto:
+          label: "Autofocus"
+          description: "Automatic focus adjustment"
+        fixed_infinity:
+          label: "Fixed at Infinity"
+          description: "Focused at far distance, no adjustment"
+        manual:
+          label: "Manual"
+          description: "Manually set focus distance"
+
+    ir_cut_filter:
+      label: "IR-Cut Filter"
+      type: "select"
+      required: false
+      help_text: "Infrared blocking filter status."
+      default: "installed"
+      options:
+        installed:
+          label: "Installed"
+          description: "IR filter blocks near-infrared light"
+        removed:
+          label: "Removed"
+          description: "No IR filter - sensitive to NIR"
+        switchable:
+          label: "Switchable"
+          description: "Filter can be toggled on/off"
+
+# =============================================================================
+# SECTION 5: HOUSING AND PROTECTION
+# =============================================================================
+# Physical enclosure and environmental protection
+# =============================================================================
+
+housing:
+  _section_meta:
+    title: "Housing & Protection"
+    description: "Enclosure and environmental protection"
+    icon: "box"
+    order: 5
+
+  fields:
+    housing_type:
+      label: "Housing Type"
+      type: "select"
+      required: false
+      help_text: "Type of protective enclosure for the camera."
+      options:
+        integrated:
+          label: "Integrated"
+          description: "Camera has built-in weatherproof housing"
+        external:
+          label: "External Housing"
+          description: "Camera in separate weatherproof enclosure"
+        indoor:
+          label: "Indoor Only"
+          description: "No weather protection, indoor use only"
+        custom:
+          label: "Custom"
+          description: "Custom-built protective enclosure"
+
+    ip_rating:
+      label: "IP Rating"
+      type: "select"
+      required: false
+      help_text: "Ingress Protection rating for dust and water."
+      options:
+        none:
+          label: "None"
+          description: "No IP rating"
+        ip54:
+          label: "IP54"
+          description: "Dust protected, splash resistant"
+        ip65:
+          label: "IP65"
+          description: "Dust tight, water jet resistant"
+        ip66:
+          label: "IP66"
+          description: "Dust tight, powerful water jet resistant"
+        ip67:
+          label: "IP67"
+          description: "Dust tight, immersion resistant"
+        ip68:
+          label: "IP68"
+          description: "Dust tight, continuous immersion"
+
+    temperature_range_min_c:
+      label: "Min Operating Temperature (C)"
+      type: "number"
+      required: false
+      help_text: "Minimum operating temperature in degrees Celsius."
+      validation:
+        min: -100
+        max: 50
+        step: 1
+      default: -30
+
+    temperature_range_max_c:
+      label: "Max Operating Temperature (C)"
+      type: "number"
+      required: false
+      help_text: "Maximum operating temperature in degrees Celsius."
+      validation:
+        min: -50
+        max: 100
+        step: 1
+      default: 50
+
+    heater_installed:
+      label: "Heater Installed"
+      type: "select"
+      required: false
+      help_text: "Is a heater installed to prevent frost/condensation?"
+      default: "no"
+      options:
+        yes:
+          label: "Yes"
+          description: "Heater is installed"
+        no:
+          label: "No"
+          description: "No heater present"
+
+    sunshield_installed:
+      label: "Sunshield Installed"
+      type: "select"
+      required: false
+      help_text: "Is a sunshield/visor installed to reduce glare and overheating?"
+      default: "no"
+      options:
+        yes:
+          label: "Yes"
+          description: "Sunshield is installed"
+        no:
+          label: "No"
+          description: "No sunshield present"
+
+# =============================================================================
+# SECTION 6: CONNECTIVITY AND POWER
+# =============================================================================
+# Network, data transfer, and power configuration
+# =============================================================================
+
+connectivity:
+  _section_meta:
+    title: "Connectivity & Power"
+    description: "Network, data transfer, and power settings"
+    icon: "plug"
+    order: 6
+
+  fields:
+    connection_type:
+      label: "Network Connection"
+      type: "select"
+      required: false
+      help_text: "How the camera connects to the network."
+      options:
+        ethernet:
+          label: "Ethernet"
+          description: "Wired network connection"
+        wifi:
+          label: "WiFi"
+          description: "Wireless network connection"
+        cellular:
+          label: "Cellular"
+          description: "Mobile network connection"
+        sd_card:
+          label: "SD Card Only"
+          description: "Local storage, manual retrieval"
+        usb:
+          label: "USB"
+          description: "USB connection to host computer"
+
+    poe_enabled:
+      label: "Power over Ethernet (PoE)"
+      type: "select"
+      required: false
+      help_text: "Does the camera receive power through the network cable?"
+      default: "no"
+      options:
+        yes:
+          label: "Yes"
+          description: "PoE powered"
+        no:
+          label: "No"
+          description: "Separate power supply"
+
+    power_consumption_watts:
+      label: "Power Consumption (W)"
+      type: "number"
+      required: false
+      help_text: "Typical power consumption in watts."
+      validation:
+        min: 0
+        max: 100
+        step: 0.1
+
+    local_storage:
+      label: "Local Storage"
+      type: "select"
+      required: false
+      help_text: "Type of local storage in the camera."
+      options:
+        none:
+          label: "None"
+          description: "No local storage"
+        sd_card:
+          label: "SD Card"
+          description: "SD or microSD card slot"
+        internal:
+          label: "Internal"
+          description: "Built-in storage"
+        nas:
+          label: "NAS"
+          description: "Network attached storage"
+
+    storage_capacity_gb:
+      label: "Storage Capacity (GB)"
+      type: "number"
+      required: false
+      help_text: "Total storage capacity in gigabytes."
+      validation:
+        min: 0
+        max: 10000
+        step: 1

@@ -1,16 +1,130 @@
 {
-  "version": "7.0.5",
+  "version": "8.0.0-beta.2",
   "buildDate": "2025-11-27",
-  "timestamp": 1764235521335,
+  "timestamp": 1764290000000,
+  "phase": "beta",
+  "phaseNumber": 2,
   "files": {
-    "/css/styles.css?v=7.0.5": "7.0.5",
-    "/js/utils.js?v=7.0.5": "7.0.5",
-    "/js/api.js?v=7.0.5": "7.0.5",
-    "/js/components.js?v=7.0.5": "7.0.5",
-    "/js/interactive-map.js?v=7.0.5": "7.0.5",
-    "/js/dashboard.js?v=7.0.5": "7.0.5",
-    "/js/station-dashboard.js?v=7.0.5": "7.0.5",
-    "/js/navigation.js?v=7.0.5": "7.0.5",
-    "/js/export.js?v=7.0.5": "7.0.5"
+    "/css/styles.css?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/core/config-loader.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/core/state.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/core/app.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/core/error-messages.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/core/map-config.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/api/api-client.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/map/tile-layers.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/map/markers.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/map/geojson-layer.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/map/map-controller.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/utils/validators.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/utils/toast.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/instrument-manager.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/phenocam/phenocam-modal.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/phenocam/phenocam-card.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/multispectral/ms-modal.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/multispectral/ms-card.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/par/par-modal.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/instruments/par/par-card.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/modals/sections/shared-sections.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/aoi/aoi-drawing-tools.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/aoi/aoi-modal.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/aoi/aoi-manager.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/utils.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/api.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/components.js?v=8.0.0-beta.2": "8.0.0-beta.2",
+    "/js/station-dashboard.js?v=8.0.0-beta.2": "8.0.0-beta.2"
+  },
+  "yamls": {
+    "platforms": {
+      "platform-types.yaml": "8.0.0-alpha.1",
+      "fixed-platform.yaml": "8.0.0-alpha.1",
+      "uav-dji-mavic3-ms.yaml": "8.0.0-beta.1",
+      "uav-dji-phantom4-ms.yaml": "8.0.0-beta.1",
+      "satellite-sentinel2.yaml": "8.0.0-beta.1",
+      "satellite-sentinel3.yaml": "8.0.0-beta.1",
+      "satellite-landsat.yaml": "8.0.0-beta.1"
+    },
+    "instruments": {
+      "phenocam.yaml": "8.0.0-alpha.2",
+      "multispectral.yaml": "8.0.0-alpha.2",
+      "par.yaml": "8.0.0-alpha.2",
+      "ndvi.yaml": "8.0.0-alpha.2",
+      "pri.yaml": "8.0.0-alpha.2",
+      "hyperspectral.yaml": "8.0.0-alpha.2"
+    },
+    "products": {
+      "vegetation-indices.yaml": "8.0.0-beta.1",
+      "water-quality.yaml": "8.0.0-beta.1",
+      "snow-products.yaml": "8.0.0-beta.1"
+    },
+    "aoi": {
+      "aoi-config.yaml": "8.0.0-beta.2"
+    },
+    "sections": {
+      "shared.yaml": "8.0.0-alpha.2"
+    }
+  },
+  "handlers": {
+    "aois.js": "8.0.0-beta.2"
+  },
+  "migrations": {
+    "0029_platform_types_and_aoi.sql": "8.0.0-beta.1"
+  },
+  "changelog": {
+    "8.0.0-beta.2": {
+      "date": "2025-11-27",
+      "phase": "Phase 4: AOI System",
+      "changes": [
+        "Created AOI drawing tools with polygon drawing and GeoJSON import",
+        "Created AOI modal for create/view/edit operations",
+        "Created AOI manager for state management and map display",
+        "Created AOI API handler with full CRUD operations",
+        "Added AOI configuration YAML with type definitions",
+        "Integrated AOI endpoints into API router",
+        "Added GeoJSON FeatureCollection export endpoint"
+      ]
+    },
+    "8.0.0-beta.1": {
+      "date": "2025-11-27",
+      "phase": "Phase 3: Platform Types & Database",
+      "changes": [
+        "Created UAV platform configurations (DJI Mavic 3 MS, DJI Phantom 4 MS)",
+        "Created satellite platform configurations (Sentinel-2, Sentinel-3, Landsat 8/9)",
+        "Created product configurations (vegetation indices, water quality, snow products)",
+        "Database migration 0029 for platform_types, areas_of_interest tables",
+        "Added uav_platforms and satellite_platforms extension tables",
+        "Added acquisition_campaigns and products tables",
+        "Created database views: v_platforms_with_type, v_aoi_summary, v_recent_campaigns"
+      ]
+    },
+    "8.0.0-alpha.2": {
+      "date": "2025-11-27",
+      "phase": "Phase 2: Modular Instruments",
+      "changes": [
+        "Created modular instrument type architecture with YAML-driven field definitions",
+        "Added instrument-manager.js as central orchestrator",
+        "Created phenocam modal and card modules",
+        "Created multispectral modal and card modules",
+        "Created PAR sensor modal and card modules",
+        "Added YAML configs for all 6 instrument types",
+        "Created shared modal sections module",
+        "Implemented consistent API pattern for all modal builders"
+      ]
+    },
+    "8.0.0-alpha.1": {
+      "date": "2025-11-27",
+      "phase": "Phase 1: Map Fix & Foundation",
+      "changes": [
+        "Created modular directory structure under public/js/",
+        "Fixed map tile loading with crossOrigin support",
+        "Added GeoJSON layer support for AOI rendering",
+        "Created YAML configuration system for platforms and instruments",
+        "Implemented config-loader for dynamic configuration",
+        "Created new spectral.html with modular architecture",
+        "Added platform type tabs (Fixed, UAV, Satellite)",
+        "Implemented reactive state management",
+        "Created comprehensive error handling system"
+      ]
+    }
   }
 }

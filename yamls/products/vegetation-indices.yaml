@@ -1,0 +1,305 @@
+# Vegetation Indices Configuration
+# SITES Spectral v8.0.0 - Product Definitions
+# For satellite and UAV-based vegetation monitoring
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "Standardized vegetation indices for SITES research stations"
+
+indices:
+  # Core Indices
+  ndvi:
+    name: "Normalized Difference Vegetation Index"
+    abbreviation: "NDVI"
+    category: "core"
+    formula: "(NIR - Red) / (NIR + Red)"
+    range: [-1, 1]
+    thresholds:
+      bare_soil: [-0.1, 0.1]
+      sparse_vegetation: [0.1, 0.3]
+      moderate_vegetation: [0.3, 0.5]
+      dense_vegetation: [0.5, 1.0]
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B04"]
+        formula: "(B08 - B04) / (B08 + B04)"
+      landsat:
+        bands: ["B5", "B4"]
+        formula: "(B5 - B4) / (B5 + B4)"
+      mavic3_ms:
+        bands: ["NIR", "Red"]
+        formula: "(NIR - Red) / (NIR + Red)"
+      phantom4_ms:
+        bands: ["B5", "B3"]
+        formula: "(B5 - B3) / (B5 + B3)"
+
+    applications:
+      - "Vegetation health monitoring"
+      - "Phenology tracking"
+      - "Crop yield estimation"
+      - "Drought assessment"
+
+    nordic_notes: "Standard index for boreal forest and agricultural monitoring"
+
+  evi:
+    name: "Enhanced Vegetation Index"
+    abbreviation: "EVI"
+    category: "core"
+    formula: "2.5 * ((NIR - Red) / (NIR + 6*Red - 7.5*Blue + 1))"
+    range: [-1, 1]
+    coefficients:
+      G: 2.5
+      C1: 6
+      C2: 7.5
+      L: 1
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B04", "B02"]
+        formula: "2.5 * ((B08 - B04) / (B08 + 6*B04 - 7.5*B02 + 1))"
+      landsat:
+        bands: ["B5", "B4", "B2"]
+        formula: "2.5 * ((B5 - B4) / (B5 + 6*B4 - 7.5*B2 + 1))"
+
+    applications:
+      - "Dense vegetation monitoring"
+      - "Reduced atmospheric sensitivity"
+      - "Forest biomass"
+
+  savi:
+    name: "Soil Adjusted Vegetation Index"
+    abbreviation: "SAVI"
+    category: "core"
+    formula: "((NIR - Red) / (NIR + Red + L)) * (1 + L)"
+    range: [-1, 1]
+    coefficients:
+      L: 0.5  # Soil brightness correction factor
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B04"]
+        formula: "((B08 - B04) / (B08 + B04 + 0.5)) * 1.5"
+      landsat:
+        bands: ["B5", "B4"]
+        formula: "((B5 - B4) / (B5 + B4 + 0.5)) * 1.5"
+
+    applications:
+      - "Sparse vegetation"
+      - "Agricultural areas"
+      - "Semi-arid regions"
+
+  # Red Edge Indices
+  ndre:
+    name: "Normalized Difference Red Edge"
+    abbreviation: "NDRE"
+    category: "red_edge"
+    formula: "(NIR - RedEdge) / (NIR + RedEdge)"
+    range: [-1, 1]
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B05"]
+        formula: "(B08 - B05) / (B08 + B05)"
+      mavic3_ms:
+        bands: ["NIR", "RedEdge"]
+        formula: "(NIR - RedEdge) / (NIR + RedEdge)"
+      phantom4_ms:
+        bands: ["B5", "B4"]
+        formula: "(B5 - B4) / (B5 + B4)"
+
+    applications:
+      - "Chlorophyll content"
+      - "Nitrogen status"
+      - "Plant stress detection"
+
+    nordic_notes: "Better than NDVI for boreal forests with high chlorophyll"
+
+  cire:
+    name: "Chlorophyll Index Red Edge"
+    abbreviation: "CI-RE"
+    category: "red_edge"
+    formula: "(NIR / RedEdge) - 1"
+    range: [0, 10]
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B05"]
+        formula: "(B08 / B05) - 1"
+      mavic3_ms:
+        bands: ["NIR", "RedEdge"]
+        formula: "(NIR / RedEdge) - 1"
+
+    applications:
+      - "Leaf chlorophyll concentration"
+      - "Nitrogen content estimation"
+
+  # Water-Related Indices
+  ndwi:
+    name: "Normalized Difference Water Index"
+    abbreviation: "NDWI"
+    category: "water"
+    formula: "(Green - NIR) / (Green + NIR)"
+    range: [-1, 1]
+    threshold_water: 0.0
+
+    platforms:
+      sentinel2:
+        bands: ["B03", "B08"]
+        formula: "(B03 - B08) / (B03 + B08)"
+      landsat:
+        bands: ["B3", "B5"]
+        formula: "(B3 - B5) / (B3 + B5)"
+
+    applications:
+      - "Water body detection"
+      - "Vegetation water content"
+      - "Wetland mapping"
+
+  ndmi:
+    name: "Normalized Difference Moisture Index"
+    abbreviation: "NDMI"
+    category: "water"
+    formula: "(NIR - SWIR1) / (NIR + SWIR1)"
+    range: [-1, 1]
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B11"]
+        formula: "(B08 - B11) / (B08 + B11)"
+      landsat:
+        bands: ["B5", "B6"]
+        formula: "(B5 - B6) / (B5 + B6)"
+
+    applications:
+      - "Vegetation moisture"
+      - "Drought monitoring"
+      - "Forest fire risk"
+
+  # Phenocam Comparison Index
+  gcc:
+    name: "Green Chromatic Coordinate"
+    abbreviation: "GCC"
+    category: "phenocam"
+    formula: "Green / (Red + Green + Blue)"
+    range: [0, 1]
+
+    platforms:
+      phenocam:
+        bands: ["R", "G", "B"]
+        formula: "G / (R + G + B)"
+      sentinel2:
+        bands: ["B04", "B03", "B02"]
+        formula: "B03 / (B04 + B03 + B02)"
+      landsat:
+        bands: ["B4", "B3", "B2"]
+        formula: "B3 / (B4 + B3 + B2)"
+      mavic3_ms:
+        bands: ["Red", "Green"]
+        note: "Blue not available, use RGB camera"
+
+    applications:
+      - "Phenology monitoring"
+      - "Cross-platform comparison"
+      - "Phenocam calibration"
+
+    nordic_notes: "Key index for comparing phenocam and satellite time series"
+
+  rcc:
+    name: "Red Chromatic Coordinate"
+    abbreviation: "RCC"
+    category: "phenocam"
+    formula: "Red / (Red + Green + Blue)"
+    range: [0, 1]
+
+    platforms:
+      phenocam:
+        bands: ["R", "G", "B"]
+        formula: "R / (R + G + B)"
+
+    applications:
+      - "Autumn senescence"
+      - "Anthocyanin detection"
+
+  # Stress and Photosynthesis Indices
+  pri:
+    name: "Photochemical Reflectance Index"
+    abbreviation: "PRI"
+    category: "stress"
+    formula: "(R531 - R570) / (R531 + R570)"
+    range: [-1, 1]
+    wavelengths:
+      band1_nm: 531
+      band2_nm: 570
+
+    platforms:
+      pri_sensor:
+        bands: ["Band1", "Band2"]
+        formula: "(Band1 - Band2) / (Band1 + Band2)"
+
+    applications:
+      - "Photosynthetic efficiency"
+      - "Light use efficiency"
+      - "Plant stress"
+
+    nordic_notes: "Available from PRI sensors at SITES stations"
+
+  # Burn and Disturbance
+  nbr:
+    name: "Normalized Burn Ratio"
+    abbreviation: "NBR"
+    category: "disturbance"
+    formula: "(NIR - SWIR2) / (NIR + SWIR2)"
+    range: [-1, 1]
+
+    platforms:
+      sentinel2:
+        bands: ["B08", "B12"]
+        formula: "(B08 - B12) / (B08 + B12)"
+      landsat:
+        bands: ["B5", "B7"]
+        formula: "(B5 - B7) / (B5 + B7)"
+
+    applications:
+      - "Fire severity"
+      - "Burn area mapping"
+      - "Post-fire recovery"
+
+# Index Categories for UI
+categories:
+  core:
+    name: "Core Vegetation Indices"
+    description: "Standard indices for vegetation monitoring"
+    icon: "fa-leaf"
+    color: "#22c55e"
+
+  red_edge:
+    name: "Red Edge Indices"
+    description: "Indices using red edge bands"
+    icon: "fa-chart-line"
+    color: "#8b5cf6"
+
+  water:
+    name: "Water-Related Indices"
+    description: "Moisture and water detection"
+    icon: "fa-water"
+    color: "#0ea5e9"
+
+  phenocam:
+    name: "Phenocam Indices"
+    description: "RGB-based indices for phenocam comparison"
+    icon: "fa-camera"
+    color: "#f59e0b"
+
+  stress:
+    name: "Stress Indices"
+    description: "Plant stress and photosynthesis"
+    icon: "fa-exclamation-triangle"
+    color: "#ef4444"
+
+  disturbance:
+    name: "Disturbance Indices"
+    description: "Fire, insect, wind damage"
+    icon: "fa-fire"
+    color: "#dc2626"

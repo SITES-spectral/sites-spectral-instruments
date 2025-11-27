@@ -1,0 +1,364 @@
+# =============================================================================
+# Application Configuration
+# SITES Spectral v8.0.0
+# =============================================================================
+# Core application settings including API configuration, map defaults,
+# pagination, and general application behavior.
+# =============================================================================
+
+# Metadata about this configuration
+_meta:
+  version: "1.0.0"
+  description: "Core application configuration settings"
+  last_updated: "2025-01-01"
+
+# =============================================================================
+# APPLICATION IDENTITY
+# =============================================================================
+# Basic application information
+# =============================================================================
+
+application:
+  name: "SITES Spectral Instruments"
+  short_name: "SITES Instruments"
+  description: "Instrument registry and management system for SITES Spectral research infrastructure"
+  version: "8.0.0"
+  organization: "Swedish Infrastructure for Ecosystem Science (SITES)"
+  support_email: "spectral@fieldsites.se"
+
+# =============================================================================
+# API CONFIGURATION
+# =============================================================================
+# API endpoints and request settings
+# =============================================================================
+
+api:
+  # Base path for all API endpoints
+  base_path: "/api"
+
+  # Current API version
+  version: "v2"
+
+  # Supported API versions (for backward compatibility)
+  supported_versions:
+    - "v1"
+    - "v2"
+
+  # Request timeout in milliseconds
+  timeout_ms: 30000
+
+  # Maximum request body size in bytes
+  max_body_size_bytes: 10485760  # 10 MB
+
+  # CORS settings
+  cors:
+    # Allowed origins (configure in environment for production)
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "PATCH"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+    max_age_seconds: 86400
+
+# =============================================================================
+# PAGINATION CONFIGURATION
+# =============================================================================
+# Default settings for paginated responses
+# =============================================================================
+
+pagination:
+  # Default number of items per page
+  default_limit: 25
+
+  # Maximum items per page (to prevent excessive queries)
+  max_limit: 100
+
+  # Default offset for pagination
+  default_offset: 0
+
+  # Style of pagination in responses
+  style: "offset"  # Options: "offset", "cursor"
+
+# =============================================================================
+# MAP CONFIGURATION
+# =============================================================================
+# Default settings for map display
+# =============================================================================
+
+map:
+  # Default map center coordinates (Sweden - SITES network center)
+  defaults:
+    center:
+      latitude: 63.0
+      longitude: 17.0
+    zoom: 5
+    min_zoom: 3
+    max_zoom: 18
+
+  # Available tile providers
+  tile_providers:
+    openstreetmap:
+      name: "OpenStreetMap"
+      url_template: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution: "OpenStreetMap contributors"
+      subdomains: "abc"
+      default: true
+
+    satellite:
+      name: "Satellite"
+      url_template: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      attribution: "Esri, Maxar, Earthstar Geographics"
+      subdomains: ""
+      default: false
+
+    terrain:
+      name: "Terrain"
+      url_template: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+      attribution: "OpenTopoMap contributors"
+      subdomains: "abc"
+      default: false
+
+    toner:
+      name: "Toner (High Contrast)"
+      url_template: "https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"
+      attribution: "Stamen Design"
+      subdomains: ""
+      default: false
+
+  # Map controls
+  controls:
+    zoom: true
+    scale: true
+    fullscreen: true
+    layer_switcher: true
+    search: true
+
+  # Marker clustering settings
+  clustering:
+    enabled: true
+    min_cluster_size: 2
+    max_cluster_radius: 80
+    spiderfy_on_max_zoom: true
+
+  # Station marker settings
+  markers:
+    default_color: "#3b82f6"
+    active_color: "#22c55e"
+    inactive_color: "#9ca3af"
+    selected_color: "#f59e0b"
+    radius: 8
+
+# =============================================================================
+# SEARCH CONFIGURATION
+# =============================================================================
+# Settings for search functionality
+# =============================================================================
+
+search:
+  # Minimum characters before search triggers
+  min_query_length: 2
+
+  # Debounce delay for search input (milliseconds)
+  debounce_ms: 300
+
+  # Maximum search results to return
+  max_results: 50
+
+  # Fields to search in (by entity type)
+  searchable_fields:
+    stations:
+      - "acronym"
+      - "display_name"
+      - "description"
+    platforms:
+      - "normalized_name"
+      - "display_name"
+      - "ecosystem_code"
+    instruments:
+      - "normalized_name"
+      - "instrument_type"
+      - "description"
+
+# =============================================================================
+# DATE AND TIME CONFIGURATION
+# =============================================================================
+# Timezone and date format settings
+# =============================================================================
+
+datetime:
+  # Default timezone for display (ISO timezone identifier)
+  default_timezone: "Europe/Stockholm"
+
+  # Date format for display (ISO 8601 style)
+  date_format: "YYYY-MM-DD"
+
+  # Datetime format for display
+  datetime_format: "YYYY-MM-DD HH:mm:ss"
+
+  # Time format for display (24-hour)
+  time_format: "HH:mm"
+
+# =============================================================================
+# EXPORT CONFIGURATION
+# =============================================================================
+# Settings for data export functionality
+# =============================================================================
+
+export:
+  # Available export formats
+  formats:
+    - name: "csv"
+      label: "CSV"
+      mime_type: "text/csv"
+      extension: ".csv"
+    - name: "tsv"
+      label: "TSV"
+      mime_type: "text/tab-separated-values"
+      extension: ".tsv"
+    - name: "json"
+      label: "JSON"
+      mime_type: "application/json"
+      extension: ".json"
+    - name: "yaml"
+      label: "YAML"
+      mime_type: "text/yaml"
+      extension: ".yaml"
+    - name: "geojson"
+      label: "GeoJSON"
+      mime_type: "application/geo+json"
+      extension: ".geojson"
+
+  # Default export format
+  default_format: "csv"
+
+  # Maximum rows in single export (to prevent memory issues)
+  max_rows: 10000
+
+  # Include metadata header in exports
+  include_metadata: true
+
+# =============================================================================
+# FILE UPLOAD CONFIGURATION
+# =============================================================================
+# Settings for file uploads (YAML imports, images, etc.)
+# =============================================================================
+
+uploads:
+  # Maximum file size in bytes
+  max_file_size_bytes: 5242880  # 5 MB
+
+  # Allowed file extensions by purpose
+  allowed_extensions:
+    yaml_import:
+      - ".yaml"
+      - ".yml"
+    geojson_import:
+      - ".geojson"
+      - ".json"
+    image_upload:
+      - ".jpg"
+      - ".jpeg"
+      - ".png"
+      - ".gif"
+
+  # MIME types validation
+  allowed_mime_types:
+    yaml_import:
+      - "text/yaml"
+      - "application/x-yaml"
+      - "text/plain"
+    geojson_import:
+      - "application/json"
+      - "application/geo+json"
+    image_upload:
+      - "image/jpeg"
+      - "image/png"
+      - "image/gif"
+
+# =============================================================================
+# SESSION CONFIGURATION
+# =============================================================================
+# User session and authentication settings
+# =============================================================================
+
+session:
+  # Session duration in seconds (24 hours)
+  duration_seconds: 86400
+
+  # Extend session on activity
+  extend_on_activity: true
+
+  # Maximum sessions per user
+  max_sessions_per_user: 5
+
+  # Session cookie settings
+  cookie:
+    name: "sites_session"
+    http_only: true
+    secure: true
+    same_site: "Lax"
+
+# =============================================================================
+# VALIDATION CONFIGURATION
+# =============================================================================
+# Input validation settings
+# =============================================================================
+
+validation:
+  # Station acronym format
+  station_acronym:
+    min_length: 2
+    max_length: 5
+    pattern: "^[A-Z]{2,5}$"
+    help_text: "2-5 uppercase letters"
+
+  # Platform name format
+  platform_name:
+    pattern: "^[A-Z]{2,5}_[A-Z]{2,4}_PL[0-9]{2}$"
+    help_text: "Format: STATION_ECO_PLNN (e.g., SVB_FOR_PL01)"
+
+  # Instrument name format
+  instrument_name:
+    pattern: "^[A-Z]{2,5}_[A-Z]{2,4}_PL[0-9]{2}_[A-Z]{2,4}[0-9]{2}$"
+    help_text: "Format: STATION_ECO_PLNN_TYPENN (e.g., SVB_FOR_PL01_PHE01)"
+
+  # ROI name format
+  roi_name:
+    pattern: "^ROI_[0-9]{2}$"
+    help_text: "Format: ROI_NN (e.g., ROI_01)"
+
+  # Coordinate validation
+  latitude:
+    min: -90
+    max: 90
+  longitude:
+    min: -180
+    max: 180
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+# Application logging settings
+# =============================================================================
+
+logging:
+  # Minimum log level (debug, info, warn, error)
+  level: "info"
+
+  # Include timestamps in logs
+  include_timestamp: true
+
+  # Include request IDs for tracing
+  include_request_id: true
+
+  # Log API requests
+  log_requests: true
+
+  # Log slow requests (milliseconds threshold)
+  slow_request_threshold_ms: 1000

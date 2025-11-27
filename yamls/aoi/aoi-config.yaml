@@ -1,0 +1,359 @@
+# AOI Configuration
+# SITES Spectral v8.0.0-beta.2 - Areas of Interest
+# For UAV flight areas, satellite coverage regions, and study sites
+
+_meta:
+  version: "1.0.0"
+  last_updated: "2025-11-27"
+  description: "Configuration for Areas of Interest (AOI) management"
+
+# Supported geometry types
+geometry_types:
+  polygon:
+    name: "Polygon"
+    icon: "fa-draw-polygon"
+    description: "Single polygon area"
+    geojson_type: "Polygon"
+    min_points: 3
+    max_points: 100
+    supports_holes: true
+
+  multipolygon:
+    name: "Multi-Polygon"
+    icon: "fa-object-group"
+    description: "Multiple polygon areas"
+    geojson_type: "MultiPolygon"
+    min_points: 3
+    max_points: 1000
+    supports_holes: true
+
+  point:
+    name: "Point"
+    icon: "fa-map-marker-alt"
+    description: "Single point location"
+    geojson_type: "Point"
+    min_points: 1
+    max_points: 1
+
+# AOI types by platform
+aoi_types:
+  flight_area:
+    name: "Flight Area"
+    description: "UAV flight operation zone"
+    icon: "fa-helicopter"
+    color: "#059669"
+    applicable_platforms: ["uav"]
+    required: true
+
+  coverage_area:
+    name: "Coverage Area"
+    description: "Satellite imagery coverage region"
+    icon: "fa-satellite"
+    color: "#7c3aed"
+    applicable_platforms: ["satellite"]
+    required: true
+
+  study_site:
+    name: "Study Site"
+    description: "Research study area"
+    icon: "fa-flask"
+    color: "#2563eb"
+    applicable_platforms: ["fixed", "uav", "satellite", "mobile"]
+    required: false
+
+  validation_site:
+    name: "Validation Site"
+    description: "Ground truth validation area"
+    icon: "fa-check-circle"
+    color: "#f59e0b"
+    applicable_platforms: ["fixed", "uav", "satellite"]
+    required: false
+
+  reference_area:
+    name: "Reference Area"
+    description: "Reference or control site"
+    icon: "fa-crosshairs"
+    color: "#6b7280"
+    applicable_platforms: ["fixed", "uav", "satellite"]
+    required: false
+
+# AOI purposes
+purposes:
+  mapping:
+    name: "Mapping"
+    description: "Spatial mapping and survey"
+    icon: "fa-map"
+
+  monitoring:
+    name: "Monitoring"
+    description: "Continuous monitoring"
+    icon: "fa-eye"
+
+  validation:
+    name: "Validation"
+    description: "Data validation and calibration"
+    icon: "fa-check-double"
+
+  reference:
+    name: "Reference"
+    description: "Reference or control"
+    icon: "fa-bookmark"
+
+  research:
+    name: "Research"
+    description: "Active research"
+    icon: "fa-microscope"
+
+# Data sources
+sources:
+  manual:
+    name: "Manual Drawing"
+    description: "Drawn on map interface"
+    icon: "fa-pencil-alt"
+
+  import:
+    name: "File Import"
+    description: "Imported from GeoJSON/Shapefile"
+    icon: "fa-file-import"
+    supported_formats: ["geojson", "json", "kml", "kmz"]
+
+  digitized:
+    name: "Digitized"
+    description: "Digitized from imagery"
+    icon: "fa-vector-square"
+
+  gps:
+    name: "GPS Recording"
+    description: "Recorded from GPS device"
+    icon: "fa-satellite-dish"
+
+# Status options
+statuses:
+  active:
+    name: "Active"
+    icon: "fa-check-circle"
+    color: "#059669"
+
+  inactive:
+    name: "Inactive"
+    icon: "fa-pause-circle"
+    color: "#6b7280"
+
+  archived:
+    name: "Archived"
+    icon: "fa-archive"
+    color: "#dc2626"
+
+# Form field definitions
+fields:
+  general:
+    - id: "name"
+      label: "AOI Name"
+      type: "text"
+      required: true
+      placeholder: "e.g., SVB Forest Flight Area 1"
+      validation:
+        min_length: 3
+        max_length: 100
+        pattern: "^[A-Za-z0-9 _-]+$"
+      help: "Descriptive name for this area of interest"
+
+    - id: "normalized_name"
+      label: "Normalized ID"
+      type: "text"
+      readonly: true
+      auto_generate: true
+      help: "Auto-generated from name (lowercase, underscores)"
+
+    - id: "description"
+      label: "Description"
+      type: "textarea"
+      required: false
+      placeholder: "Describe the purpose and characteristics of this AOI..."
+      rows: 3
+
+    - id: "aoi_type"
+      label: "AOI Type"
+      type: "select"
+      required: true
+      options_from: "aoi_types"
+      help: "Type of area based on intended use"
+
+    - id: "purpose"
+      label: "Purpose"
+      type: "select"
+      required: true
+      options_from: "purposes"
+      help: "Primary purpose of this AOI"
+
+    - id: "status"
+      label: "Status"
+      type: "select"
+      required: true
+      default: "active"
+      options_from: "statuses"
+
+  geometry:
+    - id: "geometry_type"
+      label: "Geometry Type"
+      type: "select"
+      required: true
+      default: "polygon"
+      options_from: "geometry_types"
+
+    - id: "geometry_json"
+      label: "GeoJSON Geometry"
+      type: "hidden"
+      required: true
+
+    - id: "centroid_lat"
+      label: "Centroid Latitude"
+      type: "number"
+      readonly: true
+      auto_calculate: true
+
+    - id: "centroid_lon"
+      label: "Centroid Longitude"
+      type: "number"
+      readonly: true
+      auto_calculate: true
+
+    - id: "area_m2"
+      label: "Area (m2)"
+      type: "number"
+      readonly: true
+      auto_calculate: true
+
+    - id: "perimeter_m"
+      label: "Perimeter (m)"
+      type: "number"
+      readonly: true
+      auto_calculate: true
+
+  classification:
+    - id: "ecosystem_code"
+      label: "Ecosystem"
+      type: "select"
+      required: false
+      options_from: "ecosystems"
+      help: "Primary ecosystem type within this AOI"
+
+    - id: "platform_id"
+      label: "Associated Platform"
+      type: "select"
+      required: false
+      options_from: "platforms"
+      help: "Optional link to specific platform"
+
+  source:
+    - id: "source"
+      label: "Data Source"
+      type: "select"
+      required: true
+      default: "manual"
+      options_from: "sources"
+
+    - id: "source_file"
+      label: "Source Filename"
+      type: "text"
+      required: false
+      readonly: true
+      show_if: "source != 'manual'"
+
+    - id: "source_crs"
+      label: "Original CRS"
+      type: "text"
+      required: false
+      default: "EPSG:4326"
+      help: "Coordinate reference system of original data"
+
+# Drawing tool configuration
+drawing_tools:
+  polygon:
+    enable: true
+    snap_to_grid: false
+    snap_tolerance: 5
+    show_area: true
+    show_perimeter: true
+    vertex_style:
+      radius: 6
+      color: "#059669"
+      fillColor: "#ffffff"
+      fillOpacity: 1
+      weight: 2
+    edge_style:
+      color: "#059669"
+      weight: 2
+      dashArray: "5, 5"
+    polygon_style:
+      color: "#059669"
+      weight: 2
+      fillColor: "#059669"
+      fillOpacity: 0.2
+
+  edit:
+    enable: true
+    allow_move: true
+    allow_resize: true
+    allow_rotate: false
+
+  delete:
+    enable: true
+    confirm: true
+
+# Import settings
+import_settings:
+  max_file_size_mb: 10
+  supported_formats:
+    - extension: ".geojson"
+      mime_type: "application/geo+json"
+      parser: "json"
+    - extension: ".json"
+      mime_type: "application/json"
+      parser: "json"
+    - extension: ".kml"
+      mime_type: "application/vnd.google-earth.kml+xml"
+      parser: "kml"
+  reproject_to: "EPSG:4326"
+  simplify_tolerance: 0.00001
+  validate_geometry: true
+
+# Map display settings
+map_display:
+  default_zoom: 14
+  min_zoom: 8
+  max_zoom: 18
+  styles:
+    default:
+      color: "#059669"
+      weight: 2
+      fillColor: "#059669"
+      fillOpacity: 0.15
+    selected:
+      color: "#2563eb"
+      weight: 3
+      fillColor: "#2563eb"
+      fillOpacity: 0.25
+    hover:
+      color: "#059669"
+      weight: 3
+      fillColor: "#059669"
+      fillOpacity: 0.3
+    flight_area:
+      color: "#059669"
+      weight: 2
+      fillColor: "#059669"
+      fillOpacity: 0.15
+      dashArray: null
+    coverage_area:
+      color: "#7c3aed"
+      weight: 2
+      fillColor: "#7c3aed"
+      fillOpacity: 0.10
+      dashArray: "10, 5"
+    study_site:
+      color: "#2563eb"
+      weight: 2
+      fillColor: "#2563eb"
+      fillOpacity: 0.20
+      dashArray: null

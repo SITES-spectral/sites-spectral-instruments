@@ -1,0 +1,141 @@
+# Multispectral Sensor Configuration
+# SITES Spectral v8.0.0-alpha.2
+# Configuration-driven field definitions for Multispectral sensors
+
+metadata:
+  type: multispectral
+  version: "1.0.0"
+  icon: fa-satellite
+  display_name: Multispectral Sensor
+  category: spectral
+  description: Multi-channel radiometer for spectral measurements
+
+# Type detection patterns
+detection_patterns:
+  - multispectral
+  - skye
+  - decagon
+  - apogee ms
+  - ms sensor
+
+# Type-specific fields
+fields:
+  sensor_brand:
+    type: text
+    label: Sensor Brand
+    required: false
+    placeholder: e.g., SKYE, Decagon, Apogee
+    max_length: 100
+
+  sensor_model:
+    type: text
+    label: Sensor Model
+    required: false
+    placeholder: e.g., SKR 1800, SKR110
+    max_length: 100
+
+  sensor_serial_number:
+    type: text
+    label: Sensor Serial Number
+    required: false
+    placeholder: Sensor serial number
+    max_length: 100
+
+  orientation:
+    type: select
+    label: Orientation
+    required: false
+    options:
+      - value: uplooking
+        label: Uplooking
+      - value: downlooking
+        label: Downlooking
+    placeholder: Select orientation...
+    help_text: Sensor pointing direction
+
+  number_of_channels:
+    type: number
+    label: Number of Channels
+    required: false
+    min: 1
+    max: 8
+    placeholder: e.g., 2, 4
+    help_text: Spectral bands/wavelengths (typically 2-8)
+
+  field_of_view_degrees:
+    type: number
+    label: Field of View (degrees)
+    required: false
+    step: 0.1
+    min: 0
+    max: 180
+    placeholder: e.g., 180
+
+  cable_length_m:
+    type: number
+    label: Cable Length (meters)
+    required: false
+    step: 0.1
+    min: 0
+    placeholder: e.g., 10.0
+
+  datalogger_type:
+    type: text
+    label: Datalogger Type
+    required: false
+    default: Campbell Scientific CR1000X
+    placeholder: e.g., Campbell Scientific CR1000X
+    max_length: 100
+
+  datalogger_program_normal:
+    type: text
+    label: Normal Datalogger Program
+    required: false
+    placeholder: Program name or file path
+    help_text: Program used for regular measurements
+    max_length: 200
+
+  datalogger_program_calibration:
+    type: text
+    label: Calibration Datalogger Program
+    required: false
+    placeholder: Program name or file path
+    help_text: Program used for calibration procedures
+    max_length: 200
+
+  end_date:
+    type: date
+    label: End Date
+    required: false
+    help_text: Date sensor was decommissioned (if applicable)
+
+  calibration_logs:
+    type: textarea
+    label: Calibration Logs
+    required: false
+    rows: 3
+    placeholder: Calibration history and notes...
+    help_text: Calibration history, coefficients, and procedures
+    full_width: true
+
+# Section definition
+section:
+  title: Sensor Specifications
+  icon: fa-satellite
+  collapsed: false
+  note: |
+    Channel Management: Individual spectral channels/bands can be configured
+    after saving. Use the channel manager to define wavelengths, calibration
+    coefficients, and processing parameters for each band.
+
+# Validation rules
+validation:
+  number_of_channels:
+    min: 1
+    max: 8
+  field_of_view_degrees:
+    min: 0
+    max: 180
+  cable_length_m:
+    min: 0
+    max: 1000
