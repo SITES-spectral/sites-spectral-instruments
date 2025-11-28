@@ -12,6 +12,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.5.1] - 2025-11-28
+
+### BUGFIX: Dashboard Summary Counts and Station Card Layout
+
+**Release Date**: 2025-11-28
+**Focus**: Fix admin dashboard display issues
+
+#### Fixes
+
+- **Dashboard Summary Counts**: Fixed `loadCounts()` function that was returning hardcoded 0 for platforms and instruments. Now correctly sums `platform_count` and `instrument_count` from all stations.
+
+- **Station Card Button Overlap**: Fixed admin edit/delete buttons overlapping with station acronym badges by adding proper right padding to `.station-card-header`.
+
+#### Files Modified
+
+- `dashboard.html` - Fixed `loadCounts()` and added `padding-right: 5rem` to station-card-header
+
+---
+
 ## [8.5.0] - 2025-11-28
 
 ### NEW: YAML-Based Configuration System
