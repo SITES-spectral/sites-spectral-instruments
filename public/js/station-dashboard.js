@@ -490,13 +490,21 @@ class SitesStationDashboard {
         this.loadAllInstrumentImages();
 
         // Update platform type tab counts
+        console.debug('[renderPlatforms] Checking for updatePlatformTypeCounts function:', typeof updatePlatformTypeCounts);
         if (typeof updatePlatformTypeCounts === 'function') {
+            console.debug('[renderPlatforms] Calling updatePlatformTypeCounts()');
             updatePlatformTypeCounts();
+        } else {
+            console.warn('[renderPlatforms] updatePlatformTypeCounts is NOT defined!');
         }
 
         // Apply initial filter (defaults to 'fixed')
+        console.debug('[renderPlatforms] Checking for filterPlatformsByType function:', typeof filterPlatformsByType, 'currentPlatformTypeFilter:', typeof currentPlatformTypeFilter !== 'undefined' ? currentPlatformTypeFilter : 'undefined');
         if (typeof filterPlatformsByType === 'function' && typeof currentPlatformTypeFilter !== 'undefined') {
+            console.debug('[renderPlatforms] Calling filterPlatformsByType with:', currentPlatformTypeFilter);
             filterPlatformsByType(currentPlatformTypeFilter);
+        } else {
+            console.warn('[renderPlatforms] filterPlatformsByType or currentPlatformTypeFilter NOT defined!');
         }
     }
 

@@ -12,6 +12,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.1] - 2025-11-28
+
+### Critical Fix: Platform Tab Counts & Instrument Tab Visibility
+
+**Release Date**: 2025-11-28
+**Focus**: Fix JavaScript timing issue and CSS visibility for tab counts
+
+#### Fixed
+
+**Platform Tab Counts Not Updating (Root Cause Found):**
+- Tab counts remained at "0" even after data loaded
+- Root cause: `updatePlatformTypeCounts()` and `filterPlatformsByType()` functions were defined at the END of the inline script (line 6129+), but called from `renderPlatforms()` BEFORE those lines were parsed
+- Fix: Moved function definitions to the BEGINNING of the inline script (after line 4203)
+- Functions are now available when `StationDashboard` is instantiated
+
+**Instrument Type Tab Count Visibility (CSS):**
+- Tab counts on instrument type tabs (Phenocams, MS Sensors) were nearly invisible (white on green)
+- Fix: Updated CSS to use gray background with dark text for inactive tabs, white background with green text for active tabs
+
+#### Technical Details
+
+The timing issue occurred because:
+1. `station-dashboard.js` loaded at line 4182
+2. `StationDashboard` instantiated at line 4241 (during DOMContentLoaded)
+3. Constructor calls `loadStationData()` → `renderPlatforms()` → tries to call `updatePlatformTypeCounts()`
+4. But `updatePlatformTypeCounts()` was defined at line 6129 - not yet parsed!
+
+Solution: Define the filtering functions immediately after variable declarations (line 4205) so they're available when needed.
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `public/station.html` | Moved `filterPlatformsByType()` and `updatePlatformTypeCounts()` to beginning of inline script |
+| `public/css/styles.css` | Fixed `.instrument-tab-btn .tab-count` visibility (already done in rc.5) |
+
+---
+
 ## [8.0.0-rc.5] - 2025-11-28
 
 ### Critical Bug Fixes: Platform Tabs, Ecosystems & Map Rendering
