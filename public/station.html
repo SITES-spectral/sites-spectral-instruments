@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.4">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.5">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.4">
+    <meta name="app-version" content="8.0.5">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.4"></script>
-    <script src="/js/api.js?v=8.0.4"></script>
-    <script src="/js/components.js?v=8.0.4"></script>
+    <script src="/js/utils.js?v=8.0.5"></script>
+    <script src="/js/api.js?v=8.0.5"></script>
+    <script src="/js/components.js?v=8.0.5"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.4"></script>
-    <script src="/js/station-dashboard.js?v=8.0.4"></script>
-    <script src="/js/navigation.js?v=8.0.4"></script>
-    <script src="/js/export.js?v=8.0.4"></script>
+    <script src="/js/interactive-map.js?v=8.0.5"></script>
+    <script src="/js/station-dashboard.js?v=8.0.5"></script>
+    <script src="/js/navigation.js?v=8.0.5"></script>
+    <script src="/js/export.js?v=8.0.5"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -8153,6 +8153,71 @@
                             <small>UAV naming uses drone model instead of ecosystem (e.g., SVB_M3M_UAV01)</small>
                         </div>
                     </div>
+                    <div id="satellite-fields-row" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-space-agency">Space Agency *</label>
+                                <select id="platform-space-agency" class="form-input" onchange="updatePlatformNormalizedName()">
+                                    <option value="ESA">ESA - European Space Agency</option>
+                                    <option value="NASA">NASA - National Aeronautics and Space Administration</option>
+                                    <option value="JAXA">JAXA - Japan Aerospace Exploration Agency</option>
+                                    <option value="NOAA">NOAA - National Oceanic and Atmospheric Administration</option>
+                                    <option value="USGS">USGS - United States Geological Survey</option>
+                                    <option value="CSA">CSA - Canadian Space Agency</option>
+                                    <option value="OTHER">OTHER - Other Agency</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform-satellite">Satellite *</label>
+                                <select id="platform-satellite" class="form-input" onchange="updateSatelliteSensorOptions(); updatePlatformNormalizedName()">
+                                    <optgroup label="Sentinel (ESA)">
+                                        <option value="S2A">S2A - Sentinel-2A</option>
+                                        <option value="S2B">S2B - Sentinel-2B</option>
+                                        <option value="S3A">S3A - Sentinel-3A</option>
+                                        <option value="S3B">S3B - Sentinel-3B</option>
+                                    </optgroup>
+                                    <optgroup label="Landsat (NASA/USGS)">
+                                        <option value="L8">L8 - Landsat 8</option>
+                                        <option value="L9">L9 - Landsat 9</option>
+                                    </optgroup>
+                                    <optgroup label="MODIS (NASA)">
+                                        <option value="TERRA">TERRA - Terra (EOS AM-1)</option>
+                                        <option value="AQUA">AQUA - Aqua (EOS PM-1)</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="OTHER">OTHER - Other Satellite</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-sensor">Sensor *</label>
+                                <select id="platform-sensor" class="form-input" onchange="updatePlatformNormalizedName()">
+                                    <optgroup label="Sentinel-2">
+                                        <option value="MSI">MSI - MultiSpectral Instrument</option>
+                                    </optgroup>
+                                    <optgroup label="Sentinel-3">
+                                        <option value="OLCI">OLCI - Ocean and Land Colour Instrument</option>
+                                        <option value="SLSTR">SLSTR - Sea and Land Surface Temperature Radiometer</option>
+                                    </optgroup>
+                                    <optgroup label="Landsat">
+                                        <option value="OLI">OLI - Operational Land Imager</option>
+                                        <option value="TIRS">TIRS - Thermal Infrared Sensor</option>
+                                    </optgroup>
+                                    <optgroup label="MODIS">
+                                        <option value="MODIS">MODIS - Moderate Resolution Imaging Spectroradiometer</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="OTHER">OTHER - Other Sensor</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <small class="form-text" style="margin-top: -10px; margin-bottom: 15px; display: block;">
+                            Satellite naming: {STATION}_{AGENCY}_{SATELLITE}_{SENSOR} (e.g., SVB_ESA_S2A_MSI)
+                        </small>
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="platform-status">Status</label>
@@ -8249,15 +8314,56 @@
         function onPlatformTypeChange() {
             const platformType = document.getElementById('platform-type')?.value || 'fixed';
             const droneModelRow = document.getElementById('drone-model-row');
-            const ecosystemRow = document.getElementById('platform-ecosystem-code')?.closest('.form-group');
+            const satelliteFieldsRow = document.getElementById('satellite-fields-row');
+            const locationCodeGroup = document.getElementById('platform-location-code')?.closest('.form-group');
 
             // Show/hide drone model dropdown based on platform type
             if (droneModelRow) {
                 droneModelRow.style.display = platformType === 'uav' ? '' : 'none';
             }
 
+            // Show/hide satellite fields based on platform type
+            if (satelliteFieldsRow) {
+                satelliteFieldsRow.style.display = platformType === 'satellite' ? '' : 'none';
+            }
+
+            // Hide location code for satellites (it's auto-generated from agency/satellite/sensor)
+            if (locationCodeGroup) {
+                locationCodeGroup.style.display = platformType === 'satellite' ? 'none' : '';
+            }
+
             // Update the normalized name
             updatePlatformNormalizedName();
+        }
+
+        function updateSatelliteSensorOptions() {
+            // Auto-select appropriate sensor based on satellite
+            const satellite = document.getElementById('platform-satellite')?.value;
+            const sensorSelect = document.getElementById('platform-sensor');
+            const agencySelect = document.getElementById('platform-space-agency');
+
+            if (!sensorSelect || !satellite) return;
+
+            // Auto-select agency based on satellite
+            if (agencySelect) {
+                if (['S2A', 'S2B', 'S3A', 'S3B'].includes(satellite)) {
+                    agencySelect.value = 'ESA';
+                } else if (['L8', 'L9', 'TERRA', 'AQUA'].includes(satellite)) {
+                    agencySelect.value = 'NASA';
+                }
+            }
+
+            // Auto-select default sensor based on satellite
+            const sensorDefaults = {
+                'S2A': 'MSI', 'S2B': 'MSI',
+                'S3A': 'OLCI', 'S3B': 'OLCI',
+                'L8': 'OLI', 'L9': 'OLI',
+                'TERRA': 'MODIS', 'AQUA': 'MODIS'
+            };
+
+            if (sensorDefaults[satellite]) {
+                sensorSelect.value = sensorDefaults[satellite];
+            }
         }
 
         function updatePlatformNormalizedName() {
@@ -8267,42 +8373,49 @@
             const droneModel = document.getElementById('platform-drone-model')?.value || 'M3M';
             const locationCode = document.getElementById('platform-location-code')?.value || '';
 
-            if (locationCode) {
-                let normalizedName;
+            // Satellite fields
+            const spaceAgency = document.getElementById('platform-space-agency')?.value || 'ESA';
+            const satellite = document.getElementById('platform-satellite')?.value || 'S2A';
+            const sensor = document.getElementById('platform-sensor')?.value || 'MSI';
 
-                // Different naming patterns based on platform type
-                // Fixed:     SVB_FOR_PL01       (station_ecosystem_location)
-                // UAV:       SVB_M3M_UAV01      (station_dronemodel_UAV##) - uses drone model, not ecosystem
-                // Satellite: SVB_SAT_PL01       (station_SAT_location)
-                // Mobile:    SVB_FOR_MOB01      (station_ecosystem_MOB##)
+            let normalizedName = '';
 
-                if (platformType === 'uav') {
-                    // UAV platforms use drone model (M3M, P4M) instead of ecosystem
+            // Different naming patterns based on platform type
+            // Fixed:     SVB_FOR_PL01              (station_ecosystem_location)
+            // UAV:       SVB_M3M_UAV01             (station_dronemodel_location) - uses drone model
+            // Satellite: SVB_ESA_S2A_MSI           (station_agency_satellite_sensor) - no location code
+            // Mobile:    SVB_FOR_MOB01             (station_ecosystem_location)
+
+            if (platformType === 'satellite') {
+                // Satellite platforms use: station_agency_satellite_sensor
+                normalizedName = `${stationAcronym}_${spaceAgency}_${satellite}_${sensor}`;
+            } else if (platformType === 'uav') {
+                // UAV platforms use drone model (M3M, P4M) instead of ecosystem
+                if (locationCode) {
                     normalizedName = `${stationAcronym}_${droneModel}_${locationCode}`;
-                } else if (platformType === 'satellite') {
-                    // Satellite platforms use SAT instead of ecosystem
-                    normalizedName = `${stationAcronym}_SAT_${locationCode}`;
-                } else {
-                    // Fixed and Mobile use ecosystem code
+                }
+            } else {
+                // Fixed and Mobile use ecosystem code
+                if (locationCode) {
                     normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
                 }
+            }
 
-                const normalizedInput = document.getElementById('platform-normalized-name');
-                if (normalizedInput) {
-                    normalizedInput.value = normalizedName;
-                }
+            const normalizedInput = document.getElementById('platform-normalized-name');
+            if (normalizedInput && normalizedName) {
+                normalizedInput.value = normalizedName;
+            }
 
-                // Update location code placeholder based on platform type
-                const locationInput = document.getElementById('platform-location-code');
-                if (locationInput) {
-                    const placeholders = {
-                        fixed: 'e.g., PL01, BL01',
-                        uav: 'e.g., UAV01, UAV02',
-                        satellite: 'e.g., PL01, S2A',
-                        mobile: 'e.g., MOB01, MOB02'
-                    };
-                    locationInput.placeholder = placeholders[platformType] || 'e.g., PL01';
-                }
+            // Update location code placeholder based on platform type
+            const locationInput = document.getElementById('platform-location-code');
+            if (locationInput) {
+                const placeholders = {
+                    fixed: 'e.g., PL01, BL01',
+                    uav: 'e.g., UAV01, UAV02',
+                    satellite: 'Auto-generated',
+                    mobile: 'e.g., MOB01, MOB02'
+                };
+                locationInput.placeholder = placeholders[platformType] || 'e.g., PL01';
             }
         }
 
@@ -8314,12 +8427,22 @@
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
                 saveBtn.disabled = true;
 
+                const platformType = document.getElementById('platform-type').value;
+
+                // For satellite platforms, generate location_code from satellite info
+                let locationCode = document.getElementById('platform-location-code').value.trim().toUpperCase();
+                if (platformType === 'satellite') {
+                    const satellite = document.getElementById('platform-satellite').value;
+                    const sensor = document.getElementById('platform-sensor').value;
+                    locationCode = `${satellite}_${sensor}`;
+                }
+
                 const platformData = {
                     station_id: parseInt(document.getElementById('platform-station-id').value),
                     display_name: document.getElementById('platform-display-name').value.trim(),
-                    location_code: document.getElementById('platform-location-code').value.trim().toUpperCase(),
+                    location_code: locationCode,
                     ecosystem_code: document.getElementById('platform-ecosystem-code').value,
-                    platform_type: document.getElementById('platform-type').value,
+                    platform_type: platformType,
                     normalized_name: document.getElementById('platform-normalized-name').value.trim(),
                     status: document.getElementById('platform-status').value,
                     mounting_structure: document.getElementById('platform-mounting-structure').value || null,
@@ -8330,9 +8453,12 @@
                     description: document.getElementById('platform-description').value.trim()
                 };
 
-                // Validation
-                if (!platformData.display_name || !platformData.location_code || !platformData.normalized_name) {
-                    throw new Error('Display name, location code, and normalized name are required');
+                // Validation - location_code not required for satellites (auto-generated)
+                if (!platformData.display_name || !platformData.normalized_name) {
+                    throw new Error('Display name and normalized name are required');
+                }
+                if (platformType !== 'satellite' && !platformData.location_code) {
+                    throw new Error('Location code is required for non-satellite platforms');
                 }
 
                 const token = localStorage.getItem('sites_spectral_token');

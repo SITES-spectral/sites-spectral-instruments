@@ -12,6 +12,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.5] - 2025-11-28
+
+### Feature: Satellite Platform Naming Convention
+
+**Release Date**: 2025-11-28
+**Focus**: Proper satellite platform naming using Agency, Satellite, and Sensor
+
+#### Added
+
+**Satellite-Specific Dropdowns:**
+- **Space Agency** dropdown: ESA, NASA, JAXA, NOAA, USGS, CSA
+- **Satellite** dropdown: S2A, S2B, S3A, S3B, L8, L9, TERRA, AQUA
+- **Sensor** dropdown: MSI, OLCI, SLSTR, OLI, TIRS, MODIS
+
+**Correct Satellite Naming Convention:**
+- Pattern: `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}`
+- Examples: `SVB_ESA_S2A_MSI`, `ANS_NASA_L8_OLI`, `LON_ESA_S3A_OLCI`
+- Satellite platforms don't require Location Code (auto-derived from satellite info)
+
+**Auto-Selection Logic:**
+- Selecting satellite auto-selects appropriate agency (Sentinel → ESA, Landsat → NASA)
+- Selecting satellite auto-selects default sensor (S2A/S2B → MSI, L8/L9 → OLI)
+
+#### Changed
+
+**Updated Platform Type Patterns:**
+| Type | Pattern | Example |
+|------|---------|---------|
+| Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` |
+| UAV | `{STATION}_{DRONE}_UAV##` | `SVB_M3M_UAV01` |
+| Satellite | `{STATION}_{AGENCY}_{SAT}_{SENSOR}` | `SVB_ESA_S2A_MSI` |
+| Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` |
+
+**Form Behavior:**
+- Location Code field hidden for Satellite platforms
+- Satellite fields (Agency, Satellite, Sensor) shown only for Satellite platform type
+- Validation updated to not require location code for satellites
+
+#### Documentation
+
+**Comprehensive Obsidian-Style Documentation:**
+- Updated `docs/PLATFORM_TYPE_UPDATE_GUIDE.md` with callout blocks
+- Complete reference tables for agencies, satellites, and sensors
+- Examples for all platform types with instrument naming
+- Quick reference card for naming conventions
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `public/station.html` | Added satellite dropdowns, `updateSatelliteSensorOptions()`, updated naming logic |
+| `docs/PLATFORM_TYPE_UPDATE_GUIDE.md` | Complete rewrite with Obsidian callouts, satellite/UAV naming sections |
+
+---
+
 ## [8.0.4] - 2025-11-28
 
 ### Feature: UAV Drone Model Selection & Correct Naming Convention
