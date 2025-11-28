@@ -160,7 +160,7 @@
                     <span class="badge badge-secondary">${roiCount} ROI${roiCount !== 1 ? 's' : ''}</span>
                 </td>
                 <td>
-                    <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument(${instrument.id})"
+                    <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument('${instrument.id}')"
                             aria-label="Edit instrument">
                         <i class="fas fa-edit" aria-hidden="true"></i>
                     </button>
@@ -278,15 +278,15 @@
         _renderActions(instrument) {
             return `
             <div class="instrument-card-actions">
-                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument(${instrument.id})"
+                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument('${instrument.id}')"
                         aria-label="Edit instrument" title="Edit">
                     <i class="fas fa-edit" aria-hidden="true"></i>
                 </button>
-                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); manageROIs(${instrument.id})"
+                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); manageROIs('${instrument.id}')"
                         aria-label="Manage ROIs" title="ROIs">
                     <i class="fas fa-vector-square" aria-hidden="true"></i>
                 </button>
-                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); viewImages(${instrument.id})"
+                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); viewImages('${instrument.id}')"
                         aria-label="View images" title="Images">
                     <i class="fas fa-images" aria-hidden="true"></i>
                 </button>

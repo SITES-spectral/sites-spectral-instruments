@@ -1012,7 +1012,7 @@
                     <span class="count" id="count-fixed">0</span>
                 </button>
                 <button class="platform-tab" data-type="uav">
-                    <i class="fas fa-helicopter"></i>
+                    <i class="fas fa-crosshairs"></i>
                     UAV
                     <span class="count" id="count-uav">0</span>
                 </button>
@@ -1417,7 +1417,7 @@
                 const platformType = platform.platform_type || 'fixed';
                 const typeIcons = {
                     fixed: 'fa-tower-observation',
-                    uav: 'fa-helicopter',
+                    uav: 'fa-crosshairs',
                     satellite: 'fa-satellite'
                 };
 
@@ -1484,7 +1484,7 @@
                 const statusClass = status === 'active' ? 'active' : (status === 'maintenance' ? 'maintenance' : 'inactive');
 
                 return `
-                    <div class="instrument-item" data-instrument-id="${instrument.id}" onclick="window.openInstrumentModal && window.openInstrumentModal(${instrument.id})">
+                    <div class="instrument-item" data-instrument-id="${instrument.id}" onclick="window.openInstrumentModal && window.openInstrumentModal('${instrument.id}')">
                         <div class="instrument-info">
                             <div class="instrument-icon ${type}">
                                 <i class="fas ${typeIcons[type] || 'fa-microchip'}"></i>

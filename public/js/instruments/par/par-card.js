@@ -161,7 +161,7 @@
                 <td>${spectralRange} nm</td>
                 <td>${ORIENTATION_LABELS[instrument.orientation] || '-'}</td>
                 <td>
-                    <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument(${instrument.id})"
+                    <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument('${instrument.id}')"
                             aria-label="Edit instrument">
                         <i class="fas fa-edit" aria-hidden="true"></i>
                     </button>
@@ -251,11 +251,11 @@
         _renderActions(instrument) {
             return `
             <div class="instrument-card-actions">
-                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument(${instrument.id})"
+                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); editInstrument('${instrument.id}')"
                         aria-label="Edit instrument" title="Edit">
                     <i class="fas fa-edit" aria-hidden="true"></i>
                 </button>
-                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); viewCalibration(${instrument.id})"
+                <button class="btn btn-icon btn-sm" onclick="event.stopPropagation(); viewCalibration('${instrument.id}')"
                         aria-label="View calibration" title="Calibration">
                     <i class="fas fa-chart-line" aria-hidden="true"></i>
                 </button>

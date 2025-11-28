@@ -59,7 +59,7 @@ class PlatformTypeCard {
             },
             uav: {
                 label: 'UAV Platforms',
-                icon: 'fa-helicopter',
+                icon: 'fa-crosshairs',
                 color: '#059669',
                 gradient: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
             },
@@ -248,7 +248,7 @@ class PlatformTypeCard {
         return `
             <div class="platform-item"
                  data-platform-id="${platform.id}"
-                 onclick="PlatformTypeCard.handlePlatformClick(${platform.id})">
+                 onclick="PlatformTypeCard.handlePlatformClick('${platform.id}')">
                 <div class="platform-item-info">
                     <span class="platform-item-name">${platform.display_name || platform.normalized_name}</span>
                     <span class="platform-item-ecosystem">${platform.ecosystem_code || 'N/A'}</span>

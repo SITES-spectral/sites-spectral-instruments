@@ -4,19 +4,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 8.0.0-rc.3 - V3 API Test Suite Complete (2025-11-28)
+## Current Version: 8.4.0 - Multi-Platform Observation Network (2025-11-28)
 
-**✅ STATUS: RELEASE CANDIDATE - V3 API 100% TEST COVERAGE**
+**✅ STATUS: PRODUCTION-READY - MULTI-PLATFORM SUPPORT**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-28
-**🧪 Test Results:** 100/100 V3 API tests passing
 
 ---
 
 ## Quick Reference
 
-### Supported Instrument Types (v6.5.0)
+### Supported Platform Types (v8.4.0)
+
+| Type | Code | Icon | Status | Description |
+|------|------|------|--------|-------------|
+| Fixed | `fixed` | `fa-tower-observation` | Active | Towers, masts, permanent installations |
+| UAV | `uav` | `fa-crosshairs` | Active | Drones with auto-instrument creation |
+| Satellite | `satellite` | `fa-satellite` | Active | Earth observation platforms |
+| Mobile | `mobile` | `fa-truck` | Coming Soon | Portable sensors, temporal deployments |
+| USV | `usv` | `fa-ship` | Coming Soon | Surface vehicles for aquatic surveys |
+| UUV | `uuv` | `fa-water` | Coming Soon | Underwater vehicles |
+
+### UAV Auto-Instrument Creation (v8.3.0+)
+
+When creating UAV platforms, instruments are auto-created with known specifications:
+
+| Vendor | Models | Type |
+|--------|--------|------|
+| DJI | M3M, P4M, M30T, M300, M350 | Multispectral/RGB/Thermal |
+| MicaSense | RedEdge-MX, Altum-PT | Multispectral |
+| Parrot | Sequoia+ | Multispectral |
+| Headwall | Nano-Hyperspec | Hyperspectral |
+
+### Future Platform Types
+
+See `docs/FUTURE_PLATFORM_TYPES.md` for detailed specifications:
+- **Mobile**: Portable NDVI, LAI, hyperspectral, LiDAR with temporal deployment tracking
+- **USV**: Autonomous boats for lake/coastal surveys
+- **UUV**: ROVs/AUVs for underwater surveys
+
+### Supported Instrument Types
 
 | Type | Icon | Modal Builder | Key Fields |
 |------|------|---------------|------------|
@@ -247,6 +275,7 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 | `CHANGELOG.md` | Version history and release notes |
 | `CLAUDE_LEGACY.md` | Historical documentation (pre-v6.x) |
 | `docs/STATION_USER_GUIDE.md` | End-user guide |
+| `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
 | `docs/roi/ROI_README.md` | ROI system documentation |
 | `docs/deprecated/` | Archived documentation |
 
@@ -258,8 +287,9 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 8.0.0-rc.3 |
+| Current Version | 8.4.0 |
 | Last Deployed | 2025-11-28 |
-| Status | Release Candidate - V3 API 100% Test Coverage |
+| Status | Production-Ready - Multi-Platform Observation Network |
 | Environment | Cloudflare Workers + D1 Database |
-| Test Coverage | 100/100 V3 API integration tests passing |
+| Active Platform Types | Fixed, UAV, Satellite |
+| Coming Soon | Mobile, USV, UUV |

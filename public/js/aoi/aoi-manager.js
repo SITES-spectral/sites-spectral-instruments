@@ -267,11 +267,11 @@ class AOIManager {
                     ${aoi.description ? `<p style="margin: 8px 0 4px 0; font-style: italic;">${aoi.description}</p>` : ''}
                 </div>
                 <div style="margin-top: 10px; display: flex; gap: 8px;">
-                    <button onclick="window.aoiManager.viewAOI(${aoi.id})"
+                    <button onclick="window.aoiManager.viewAOI('${aoi.id}')"
                             style="padding: 4px 10px; font-size: 11px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer;">
                         View Details
                     </button>
-                    <button onclick="window.aoiManager.editAOI(${aoi.id})"
+                    <button onclick="window.aoiManager.editAOI('${aoi.id}')"
                             style="padding: 4px 10px; font-size: 11px; background: white; color: #374151; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">
                         Edit
                     </button>

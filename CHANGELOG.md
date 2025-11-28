@@ -12,6 +12,449 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.4.0] - 2025-11-28
+
+### NEW: Platform Type Documentation & Future Platform Roadmap
+
+**Release Date**: 2025-11-28
+**Focus**: Comprehensive documentation for all platform types and future roadmap
+
+#### Documentation Added
+
+- **`docs/FUTURE_PLATFORM_TYPES.md`**: Complete specification for future platform types
+  - Mobile Platform specifications (portable sensors, temporal deployments)
+  - USV (Unmanned Surface Vehicle) specifications
+  - UUV (Unmanned Underwater Vehicle) specifications
+  - Naming conventions and schema requirements for each type
+
+#### Platform Type Status Summary
+
+| Type | Code | Status | Description |
+|------|------|--------|-------------|
+| Fixed | `fixed` | Active | Towers, masts, permanent installations |
+| UAV | `uav` | Active | Drones with auto-instrument creation |
+| Satellite | `satellite` | Active | Earth observation platforms |
+| Mobile | `mobile` | Coming Soon | Portable sensors with temporal deployments |
+| USV | `usv` | Coming Soon | Surface vehicles for aquatic measurements |
+| UUV | `uuv` | Coming Soon | Underwater vehicles for subsurface surveys |
+
+#### Future Mobile Platform Features (Documented)
+
+When enabled, Mobile platforms will support:
+- **Carrier types**: person, vehicle, rover, bicycle, tripod
+- **Temporal deployments**: sensors at fixed locations for short periods
+- **Location history**: track deployment locations over time
+- **Campaign support**: field campaign measurement tracking
+
+#### Supported Portable Instruments (Future)
+
+- Portable NDVI sensors
+- Portable LAI (Leaf Area Index) meters
+- Hemispherical/fisheye cameras
+- Portable hyperspectral sensors
+- Portable LiDAR
+- Handheld spectrometers
+
+---
+
+## [8.3.2] - 2025-11-28
+
+### CHANGE: Mobile Platform Disabled
+
+**Release Date**: 2025-11-28
+**Focus**: Disable Mobile platform type pending specification development
+
+#### Changes
+
+- Mobile platform type now shows "Coming Soon" label
+- Platform type selector card grayed out with tooltip
+- Dropdown option disabled
+- Preserves type in system for future activation
+
+#### Rationale
+
+Mobile platforms require specifications for:
+- Various portable instrument types (NDVI, LAI, hyperspectral, LiDAR)
+- Carrier type definitions (person, vehicle, rover, tripod)
+- Temporal deployment tracking (sensors at locations for days/weeks/months)
+
+---
+
+## [8.3.1] - 2025-11-28
+
+### CHANGE: USV and UUV Platforms Disabled
+
+**Release Date**: 2025-11-28
+**Focus**: Disable USV/UUV platform types (no platforms currently in operation)
+
+#### Changes
+
+- USV (Unmanned Surface Vehicle) shows "Coming Soon" label
+- UUV (Unmanned Underwater Vehicle) shows "Coming Soon" label
+- Platform type selector cards grayed out with disabled class
+- Dropdown options disabled
+- Types preserved in database for future activation
+
+#### CSS Added
+
+```css
+.platform-type-card.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+}
+```
+
+---
+
+## [8.3.0] - 2025-11-28
+
+### NEW: UAV Instrument Auto-Population
+
+**Release Date**: 2025-11-28
+**Focus**: Automatically create instruments with known specs when UAV platform is created
+
+#### UAV Sensor Specifications Database
+
+Built-in specifications for common drone sensors:
+
+| Vendor | Model | Type | Bands |
+|--------|-------|------|-------|
+| DJI | M3M (Mavic 3 Multispectral) | Multispectral | G, R, RE, NIR + RGB |
+| DJI | P4M (Phantom 4 Multispectral) | Multispectral | B, G, R, RE, NIR + RGB |
+| DJI | M30T (Matrice 30T) | RGB + Thermal | Wide, Zoom, Thermal |
+| DJI | M300/M350 RTK | Payload | Configurable |
+| MicaSense | RedEdge-MX | Multispectral | B, G, R, RE, NIR |
+| MicaSense | Altum-PT | MS + Thermal | B, G, R, RE, NIR + LWIR |
+| Parrot | Sequoia+ | Multispectral | G, R, RE, NIR + RGB |
+| Headwall | Nano-Hyperspec | Hyperspectral | 270 bands (400-1000nm) |
+
+#### Auto-Creation Flow
+
+1. User selects UAV platform type → chooses vendor/model
+2. Platform created successfully
+3. System auto-creates instrument with:
+   - Correct normalized name (e.g., `SVB_DJI_M3M_UAV01_MS01`)
+   - Manufacturer and model details
+   - Number of channels
+   - Resolution specs
+   - All spectral channels with wavelengths and bandwidths
+
+#### Technical Implementation
+
+- `UAV_SENSOR_SPECS` object with vendor/model specifications
+- `createUAVInstrument()` function for instrument creation
+- `createUAVInstrumentChannels()` function for channel creation
+- Integrated into `saveNewPlatform()` for UAV platforms
+
+---
+
+## [8.2.3] - 2025-11-28
+
+### FIX: Platform Type-Specific Form Sections
+
+**Release Date**: 2025-11-28
+**Focus**: Hide irrelevant form sections based on platform type
+
+#### Section Visibility by Platform Type
+
+| Section | Fixed | UAV | Satellite | Mobile | USV | UUV |
+|---------|-------|-----|-----------|--------|-----|-----|
+| Technical Specs (mounting, height) | Show | Hide | Hide | Hide | Hide | Hide |
+| Base Location (lat/lon) | Show | Hide | Hide | Show | Show | Show |
+| Ecosystem Code | Show | Hide | Hide | Show | Show | Show |
+
+#### Logic
+
+- **Fixed platforms**: Show all sections (mounting structure, height, location)
+- **UAV**: Hide fixed specs and location (fly missions, no fixed location)
+- **Satellite**: Hide fixed specs and location (orbit, no ground location)
+- **Mobile/USV/UUV**: Hide fixed specs, show base/harbor location
+
+---
+
+## [8.2.2] - 2025-11-28
+
+### CHANGE: UAV Icon Updated
+
+**Release Date**: 2025-11-28
+**Focus**: Better icon representation for UAV/Drone platforms
+
+#### Icon Change
+
+- Changed UAV icon from `fa-helicopter` to `fa-crosshairs`
+- `fa-crosshairs` better represents aerial survey/imaging capabilities
+- More accurate for quadcopter drones (not helicopters)
+- Updated across all files and database
+
+#### Files Updated
+
+- station.html (3 occurrences)
+- platform-modals.js
+- spectral.html (2 occurrences)
+- platform-type-card.js
+- Database platform_types table
+
+---
+
+## [8.2.1] - 2025-11-28
+
+### NEW: Two-Step Platform Creation Flow
+
+**Release Date**: 2025-11-28
+**Focus**: Improved UX with platform type selector modal
+
+#### Platform Type Selector
+
+- New visual grid modal showing all 6 platform types
+- Each type displayed with icon, description, and naming hint
+- Clicking a type opens the appropriate creation form with relevant fields
+- Pre-selects platform type and shows only relevant fields
+- Modal title updates based on selected platform type
+
+#### User Experience Improvements
+
+- Clear visual distinction between platform types
+- Type-specific icons and color coding
+- Naming convention examples shown for each type
+- Responsive grid layout (3 columns → 2 → 1)
+
+#### CSS Additions
+
+- `.platform-type-grid` - Responsive grid layout
+- `.platform-type-card` - Clickable type cards with hover effects
+- `.platform-type-icon` - Color-coded icons for each type
+- `.platform-type-info` - Type descriptions and naming hints
+
+---
+
+## [8.2.0] - 2025-11-28
+
+### NEW: Comprehensive Platform Type Support
+
+**Release Date**: 2025-11-28
+**Focus**: Full platform type support with type-specific forms, modals, and naming conventions
+
+#### New Platform Types
+
+**USV - Unmanned Surface Vehicles:**
+- Autonomous boats and surface drones for water surveys
+- Supports phenocam, multispectral, hyperspectral, sonar, water quality, weather sensors
+- Hull type options: monohull, catamaran, trimaran
+- Naming convention: `{STATION}_{ECO}_USV##` (e.g., ANS_LAK_USV01)
+
+**UUV - Unmanned Underwater Vehicles:**
+- ROVs and AUVs for underwater surveys and monitoring
+- Supports camera, sonar, multibeam, water quality, fluorometer sensors
+- UUV types: ROV (tethered), AUV (autonomous), Hybrid
+- Depth rating configuration
+- Naming convention: `{STATION}_{ECO}_UUV##` (e.g., ANS_LAK_UUV01)
+
+#### Enhanced Mobile Platform Support
+
+**Carrier Types:**
+- VEH - Vehicle (truck, car, ATV)
+- BOT - Boat (kayak, motorboat)
+- ROV - Rover (ground robot)
+- BPK - Backpack (walking)
+- BIC - Bicycle
+- OTH - Other
+
+**Updated Naming:**
+- Mobile naming: `{STATION}_{ECO}_{CARRIER}_MOB##` (e.g., SVB_FOR_BPK_MOB01)
+
+#### Database Migrations
+
+- `0032_mobile_platforms_extension.sql` - Mobile platform extension table with carrier types
+- `0033_usv_uuv_platforms.sql` - USV and UUV platform types and extension tables
+
+#### UI Improvements
+
+- Platform creation form now shows type-specific fields
+- Dynamic field visibility based on platform type selection
+- Updated naming convention hints for all platform types
+- New platform-modals.js module for type-specific detail views
+
+#### Files Modified
+
+- `station.html` - Added USV/UUV/Mobile form fields and updated naming logic
+- `platform-modals.js` - New module with modal builders for all 6 platform types
+- Version manifest updated to include platform-modals.js
+
+---
+
+## [8.1.3] - 2025-11-28
+
+### FIX: Comprehensive onclick Handler Quoting Audit
+
+**Release Date**: 2025-11-28
+**Focus**: Fix ALL remaining unquoted onclick handlers across entire codebase
+
+#### Additional Files Fixed
+
+**ms-channel-manager.js (2 fixes):**
+- Line 161: `MSChannelManager.editChannelUI()`
+- Line 164: `MSChannelManager.deleteChannelUI()`
+
+**spectral.html (1 fix):**
+- Line 1487: `openInstrumentModal()`
+
+**ms-sensor-modal.js (1 fix):**
+- Line 209: `MSSensorModal.applyChannelConfig()`
+
+**aoi-manager.js (2 fixes):**
+- Line 270: `aoiManager.viewAOI()`
+- Line 274: `aoiManager.editAOI()`
+
+**platform-type-card.js (1 fix):**
+- Line 251: `PlatformTypeCard.handlePlatformClick()`
+
+#### Verification
+
+Comprehensive grep audit confirmed no remaining unquoted onclick handlers in live code files.
+
+---
+
+## [8.1.2] - 2025-11-28
+
+### FIX: Instrument Card Edit Buttons Not Working
+
+**Release Date**: 2025-11-28
+**Focus**: Fix unquoted onclick handlers in all instrument card files
+
+#### Root Cause
+
+Same quoting issue as v8.0.7 - template variables in onclick handlers were not properly quoted:
+```javascript
+// BROKEN: onclick="editInstrument(${instrument.id})"
+// FIXED:  onclick="editInstrument('${instrument.id}')"
+```
+
+#### Files Fixed
+
+**phenocam-card.js (3 fixes):**
+- Line 163: `editInstrument()` table row button
+- Line 281: `editInstrument()` action button
+- Line 285: `manageROIs()` action button
+- Line 289: `viewImages()` action button
+
+**ms-card.js (4 fixes):**
+- Line 164: `editInstrument()` table row button
+- Line 256: `editInstrument()` action button
+- Line 260: `manageChannels()` action button
+- Line 264: `viewCalibration()` action button
+
+**par-card.js (3 fixes):**
+- Line 164: `editInstrument()` table row button
+- Line 254: `editInstrument()` action button
+- Line 258: `viewCalibration()` action button
+
+#### Impact
+
+- **Before**: Clicking edit/manage buttons on instrument cards caused JavaScript errors
+- **After**: All instrument card buttons work correctly across all instrument types
+
+---
+
+## [8.1.1] - 2025-11-28
+
+### FIX: UAV Platform Creation Form - Incorrect Fields Displayed
+
+**Release Date**: 2025-11-28
+**Focus**: Fix UAV/Satellite platform creation showing incorrect fields and naming
+
+#### Issues Fixed
+
+1. **Ecosystem Code visible for UAV/Satellite platforms**: The ecosystem dropdown was shown for UAV and Satellite platforms even though they don't use ecosystem codes in their naming convention
+
+2. **Location Code field mislabeled for UAV platforms**: The field was labeled "Location Code" with placeholder "e.g., PL01" which is confusing for UAV platforms that use "UAV01, UAV02" pattern
+
+#### Changes
+
+**station.html - Form Structure:**
+- Added `id="ecosystem-code-group"` to ecosystem code form group for dynamic visibility control
+- Added `id="location-code-group"`, `id="location-code-label"`, `id="location-code-help"` for dynamic label/help updates
+
+**station.html - `onPlatformTypeChange()` Function:**
+- Hide ecosystem code dropdown for UAV and Satellite platforms
+- Dynamically update location code field label, placeholder, and help text:
+
+| Platform Type | Label | Placeholder | Help Text |
+|---------------|-------|-------------|-----------|
+| Fixed | Location Code * | e.g., PL01, BL01 | Unique code within station |
+| UAV | UAV Number * | e.g., UAV01, UAV02 | Sequential UAV identifier |
+| Mobile | Mobile Unit Code * | e.g., MOB01, MOB02 | Mobile platform identifier |
+| Satellite | (Hidden) | Auto-generated | Auto-generated from satellite selection |
+
+#### Naming Convention Reference
+
+| Platform Type | Pattern | Example |
+|---------------|---------|---------|
+| Fixed | `{STATION}_{ECO}_{LOC}` | SVB_FOR_PL01 |
+| UAV | `{STATION}_{VENDOR}_{MODEL}_{UAV##}` | SVB_DJI_M3M_UAV01 |
+| Satellite | `{STATION}_{AGENCY}_{SAT}_{SENSOR}` | SVB_ESA_S2A_MSI |
+| Mobile | `{STATION}_{ECO}_{MOB##}` | SVB_FOR_MOB01 |
+
+---
+
+## [8.1.0] - 2025-11-28
+
+### FIX: Station Modal CSS Missing - Admin Buttons Non-Functional
+
+**Release Date**: 2025-11-28
+**Focus**: Fix admin control buttons (Add Station, Delete Station) and platform creation button not working
+
+#### Root Cause
+
+The CSS file was missing rules for `.station-modal` class. While `.platform-modal` and `.instrument-modal` had styling, the station modals did not:
+
+```css
+/* MISSING - station-modal was not included! */
+.platform-modal,
+.instrument-modal {
+    display: none;
+    /* ... */
+}
+
+.platform-modal.show,
+.instrument-modal.show {
+    display: flex;
+    /* ... */
+}
+```
+
+Additionally, the modals had inline `style="display: none;"` which would override CSS class styles without `!important`.
+
+#### Fixed
+
+**styles.css (lines 1341-1361):**
+- Added `.station-modal` to base modal styles
+- Added `.station-modal.show` to show state styles
+- Added `!important` to `display: flex` to override inline styles
+
+```css
+.platform-modal,
+.instrument-modal,
+.station-modal {
+    display: none;
+    /* ... */
+}
+
+.platform-modal.show,
+.instrument-modal.show,
+.station-modal.show {
+    display: flex !important;
+    /* ... */
+}
+```
+
+#### Impact
+
+- **Before**: Clicking Add Station, Delete Station, or Add Platform buttons did nothing (modal invisible)
+- **After**: All admin modals properly display when buttons are clicked
+
+---
+
 ## [8.0.9] - 2025-11-28
 
 ### FIX: Add Platform Button Not Working

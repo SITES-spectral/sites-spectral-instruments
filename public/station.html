@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.9">
+    <link rel="stylesheet" href="/css/styles.css?v=8.3.2">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.9">
+    <meta name="app-version" content="8.3.2">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -2782,7 +2782,7 @@
                     <span class="tab-count" id="tab-count-fixed">0</span>
                 </button>
                 <button class="platform-type-tab" data-type="uav" onclick="filterPlatformsByType('uav')">
-                    <i class="fas fa-helicopter"></i>
+                    <i class="fas fa-crosshairs"></i>
                     <span class="tab-label">UAV</span>
                     <span class="tab-count" id="tab-count-uav">0</span>
                 </button>
@@ -2918,11 +2918,87 @@
         </div>
     </div>
 
+    <!-- Platform Type Selector Modal (Step 1) -->
+    <div id="platform-type-selector-modal" class="platform-modal" style="display: none;">
+        <div class="modal-content-large" style="max-width: 800px;">
+            <div class="modal-header-large">
+                <h3><i class="fas fa-th-large"></i> Select Platform Type</h3>
+                <button class="modal-close-large" onclick="closePlatformTypeSelector()">&times;</button>
+            </div>
+            <div class="modal-body-large">
+                <p style="margin-bottom: 20px; color: #666;">Choose the type of platform you want to create. Each type has specific fields and naming conventions.</p>
+                <div class="platform-type-grid">
+                    <div class="platform-type-card" onclick="selectPlatformType('fixed')" data-type="fixed">
+                        <div class="platform-type-icon" style="background: #2563eb;">
+                            <i class="fas fa-tower-observation"></i>
+                        </div>
+                        <div class="platform-type-info">
+                            <h4>Fixed Platform</h4>
+                            <p>Towers, masts, and permanent installations</p>
+                            <small class="naming-hint">SVB_FOR_PL01</small>
+                        </div>
+                    </div>
+                    <div class="platform-type-card" onclick="selectPlatformType('uav')" data-type="uav">
+                        <div class="platform-type-icon" style="background: #059669;">
+                            <i class="fas fa-crosshairs"></i>
+                        </div>
+                        <div class="platform-type-info">
+                            <h4>UAV / Drone</h4>
+                            <p>Unmanned aerial vehicles for surveys</p>
+                            <small class="naming-hint">SVB_DJI_M3M_UAV01</small>
+                        </div>
+                    </div>
+                    <div class="platform-type-card" onclick="selectPlatformType('satellite')" data-type="satellite">
+                        <div class="platform-type-icon" style="background: #7c3aed;">
+                            <i class="fas fa-satellite"></i>
+                        </div>
+                        <div class="platform-type-info">
+                            <h4>Satellite</h4>
+                            <p>Earth observation satellite platforms</p>
+                            <small class="naming-hint">SVB_ESA_S2A_MSI</small>
+                        </div>
+                    </div>
+                    <!-- Mobile, USV and UUV disabled - specifications not yet defined -->
+                    <div class="platform-type-card disabled" data-type="mobile" title="Coming soon - portable instrument specifications being defined">
+                        <div class="platform-type-icon" style="background: #9ca3af;">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="platform-type-info">
+                            <h4>Mobile Platform <span style="font-size: 0.7rem; color: #9ca3af;">(Coming Soon)</span></h4>
+                            <p style="color: #9ca3af;">Portable NDVI, LAI, hyperspectral, LiDAR</p>
+                            <small class="naming-hint" style="opacity: 0.5;">SVB_FOR_BPK_MOB01</small>
+                        </div>
+                    </div>
+                    <div class="platform-type-card disabled" data-type="usv" title="Coming soon - no USV platforms currently in operation">
+                        <div class="platform-type-icon" style="background: #9ca3af;">
+                            <i class="fas fa-ship"></i>
+                        </div>
+                        <div class="platform-type-info">
+                            <h4>USV - Surface Vehicle <span style="font-size: 0.7rem; color: #9ca3af;">(Coming Soon)</span></h4>
+                            <p style="color: #9ca3af;">Autonomous boats and surface drones</p>
+                            <small class="naming-hint" style="opacity: 0.5;">ANS_LAK_USV01</small>
+                        </div>
+                    </div>
+                    <div class="platform-type-card disabled" data-type="uuv" title="Coming soon - no UUV platforms currently in operation">
+                        <div class="platform-type-icon" style="background: #9ca3af;">
+                            <i class="fas fa-water"></i>
+                        </div>
+                        <div class="platform-type-info">
+                            <h4>UUV - Underwater <span style="font-size: 0.7rem; color: #9ca3af;">(Coming Soon)</span></h4>
+                            <p style="color: #9ca3af;">ROVs and AUVs for underwater surveys</p>
+                            <small class="naming-hint" style="opacity: 0.5;">ANS_LAK_UUV01</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Create Platform Modal (Admin & Station Users) -->
     <div id="create-platform-modal" class="platform-modal" style="display: none;">
         <div class="modal-content-large">
             <div class="modal-header-large">
-                <h3><i class="fas fa-tower-broadcast"></i> Create New Platform</h3>
+                <h3 id="create-platform-modal-title"><i class="fas fa-tower-broadcast"></i> Create New Platform</h3>
                 <button class="modal-close-large" onclick="closeCreatePlatformModal()">&times;</button>
             </div>
             <div class="modal-body-large">
@@ -4166,9 +4242,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.9"></script>
-    <script src="/js/api.js?v=8.0.9"></script>
-    <script src="/js/components.js?v=8.0.9"></script>
+    <script src="/js/utils.js?v=8.3.2"></script>
+    <script src="/js/api.js?v=8.3.2"></script>
+    <script src="/js/components.js?v=8.3.2"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4254,11 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.9"></script>
-    <script src="/js/station-dashboard.js?v=8.0.9"></script>
-    <script src="/js/navigation.js?v=8.0.9"></script>
-    <script src="/js/export.js?v=8.0.9"></script>
+    <script src="/js/interactive-map.js?v=8.3.2"></script>
+    <script src="/js/station-dashboard.js?v=8.3.2"></script>
+    <script src="/js/navigation.js?v=8.3.2"></script>
+    <script src="/js/export.js?v=8.3.2"></script>
+    <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -8079,10 +8156,261 @@
             openCreatePlatformForm(data.id);
         }
 
-        // Global function to open and populate the create platform form
+        // ============================================================
+        // UAV SENSOR SPECIFICATIONS DATABASE
+        // Known multispectral camera specs for auto-population
+        // ============================================================
+        const UAV_SENSOR_SPECS = {
+            'DJI': {
+                'M3M': {
+                    name: 'DJI Mavic 3 Multispectral Camera',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'DJI',
+                    model: 'Mavic 3M Multispectral',
+                    number_of_channels: 5,
+                    resolution: '5MP per MS band, 20MP RGB',
+                    channels: [
+                        { name: 'Green', central_wavelength: 560, bandwidth: 32, units: 'nm' },
+                        { name: 'Red', central_wavelength: 650, bandwidth: 32, units: 'nm' },
+                        { name: 'Red Edge', central_wavelength: 730, bandwidth: 32, units: 'nm' },
+                        { name: 'NIR', central_wavelength: 860, bandwidth: 52, units: 'nm' },
+                        { name: 'RGB', central_wavelength: 550, bandwidth: 300, units: 'nm' }
+                    ],
+                    description: 'Integrated 4-band multispectral + RGB camera system with RTK positioning'
+                },
+                'P4M': {
+                    name: 'DJI Phantom 4 Multispectral Camera',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'DJI',
+                    model: 'Phantom 4 Multispectral',
+                    number_of_channels: 6,
+                    resolution: '2MP per band',
+                    channels: [
+                        { name: 'Blue', central_wavelength: 450, bandwidth: 32, units: 'nm' },
+                        { name: 'Green', central_wavelength: 560, bandwidth: 32, units: 'nm' },
+                        { name: 'Red', central_wavelength: 650, bandwidth: 32, units: 'nm' },
+                        { name: 'Red Edge', central_wavelength: 730, bandwidth: 32, units: 'nm' },
+                        { name: 'NIR', central_wavelength: 840, bandwidth: 52, units: 'nm' },
+                        { name: 'RGB', central_wavelength: 550, bandwidth: 300, units: 'nm' }
+                    ],
+                    description: 'Integrated 5-band multispectral + RGB camera with sunlight sensor'
+                },
+                'M30T': {
+                    name: 'DJI Matrice 30T Camera System',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'DJI',
+                    model: 'Matrice 30T',
+                    number_of_channels: 3,
+                    resolution: '48MP Wide, 12MP Zoom, 640x512 Thermal',
+                    channels: [
+                        { name: 'Wide RGB', central_wavelength: 550, bandwidth: 300, units: 'nm' },
+                        { name: 'Zoom RGB', central_wavelength: 550, bandwidth: 300, units: 'nm' },
+                        { name: 'Thermal IR', central_wavelength: 10500, bandwidth: 5000, units: 'nm' }
+                    ],
+                    description: 'Enterprise drone with wide, zoom, and thermal cameras'
+                },
+                'M300': {
+                    name: 'DJI Matrice 300 RTK (Payload Dependent)',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'DJI',
+                    model: 'Matrice 300 RTK',
+                    number_of_channels: 1,
+                    resolution: 'Depends on payload',
+                    channels: [
+                        { name: 'Payload', central_wavelength: 550, bandwidth: 300, units: 'nm' }
+                    ],
+                    description: 'Enterprise platform - payload sensors added separately'
+                },
+                'M350': {
+                    name: 'DJI Matrice 350 RTK (Payload Dependent)',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'DJI',
+                    model: 'Matrice 350 RTK',
+                    number_of_channels: 1,
+                    resolution: 'Depends on payload',
+                    channels: [
+                        { name: 'Payload', central_wavelength: 550, bandwidth: 300, units: 'nm' }
+                    ],
+                    description: 'Enterprise platform - payload sensors added separately'
+                }
+            },
+            'MICASENSE': {
+                'REDEDGE': {
+                    name: 'MicaSense RedEdge-MX',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'MicaSense',
+                    model: 'RedEdge-MX',
+                    number_of_channels: 5,
+                    resolution: '1.2MP per band (1280x960)',
+                    channels: [
+                        { name: 'Blue', central_wavelength: 475, bandwidth: 32, units: 'nm' },
+                        { name: 'Green', central_wavelength: 560, bandwidth: 27, units: 'nm' },
+                        { name: 'Red', central_wavelength: 668, bandwidth: 14, units: 'nm' },
+                        { name: 'Red Edge', central_wavelength: 717, bandwidth: 12, units: 'nm' },
+                        { name: 'NIR', central_wavelength: 842, bandwidth: 57, units: 'nm' }
+                    ],
+                    description: 'Professional 5-band multispectral sensor with DLS2 light sensor'
+                },
+                'ALTUM': {
+                    name: 'MicaSense Altum-PT',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'MicaSense',
+                    model: 'Altum-PT',
+                    number_of_channels: 6,
+                    resolution: '3.2MP MS, 12MP Panchro, 320x256 Thermal',
+                    channels: [
+                        { name: 'Blue', central_wavelength: 475, bandwidth: 32, units: 'nm' },
+                        { name: 'Green', central_wavelength: 560, bandwidth: 27, units: 'nm' },
+                        { name: 'Red', central_wavelength: 668, bandwidth: 14, units: 'nm' },
+                        { name: 'Red Edge', central_wavelength: 717, bandwidth: 12, units: 'nm' },
+                        { name: 'NIR', central_wavelength: 842, bandwidth: 57, units: 'nm' },
+                        { name: 'LWIR Thermal', central_wavelength: 11000, bandwidth: 6000, units: 'nm' }
+                    ],
+                    description: 'Multispectral + panchromatic + thermal radiometric sensor'
+                }
+            },
+            'PARROT': {
+                'SEQUOIA': {
+                    name: 'Parrot Sequoia+',
+                    instrument_type: 'multispectral',
+                    manufacturer: 'Parrot',
+                    model: 'Sequoia+',
+                    number_of_channels: 5,
+                    resolution: '1.2MP per band',
+                    channels: [
+                        { name: 'Green', central_wavelength: 550, bandwidth: 40, units: 'nm' },
+                        { name: 'Red', central_wavelength: 660, bandwidth: 40, units: 'nm' },
+                        { name: 'Red Edge', central_wavelength: 735, bandwidth: 10, units: 'nm' },
+                        { name: 'NIR', central_wavelength: 790, bandwidth: 40, units: 'nm' },
+                        { name: 'RGB', central_wavelength: 550, bandwidth: 300, units: 'nm' }
+                    ],
+                    description: 'Compact 4-band multispectral + RGB with sunshine sensor'
+                }
+            },
+            'HEADWALL': {
+                'NANO': {
+                    name: 'Headwall Nano-Hyperspec',
+                    instrument_type: 'hyperspectral',
+                    manufacturer: 'Headwall',
+                    model: 'Nano-Hyperspec',
+                    number_of_channels: 270,
+                    resolution: '640 spatial pixels',
+                    spectral_range_start: 400,
+                    spectral_range_end: 1000,
+                    spectral_resolution: 2.2,
+                    channels: [],
+                    description: 'VNIR hyperspectral imager (400-1000nm, 270 bands)'
+                }
+            }
+        };
+
+        // Function to create UAV instrument from specs
+        async function createUAVInstrument(platformId, platformNormalizedName, vendor, model) {
+            const vendorSpecs = UAV_SENSOR_SPECS[vendor];
+            if (!vendorSpecs || !vendorSpecs[model]) {
+                console.log('No default sensor specs for', vendor, model);
+                return null;
+            }
+
+            const specs = vendorSpecs[model];
+            const token = localStorage.getItem('sites_spectral_token');
+
+            // Generate instrument normalized name
+            const instrumentType = specs.instrument_type === 'hyperspectral' ? 'HYP' : 'MS';
+            const instrumentNormalizedName = `${platformNormalizedName}_${instrumentType}01`;
+
+            const instrumentData = {
+                platform_id: platformId,
+                normalized_name: instrumentNormalizedName,
+                display_name: specs.name,
+                instrument_type: specs.instrument_type,
+                manufacturer: specs.manufacturer,
+                model: specs.model,
+                status: 'Active',
+                number_of_channels: specs.number_of_channels,
+                resolution: specs.resolution,
+                description: specs.description
+            };
+
+            // Add hyperspectral-specific fields
+            if (specs.spectral_range_start) {
+                instrumentData.spectral_range_start_nm = specs.spectral_range_start;
+                instrumentData.spectral_range_end_nm = specs.spectral_range_end;
+                instrumentData.spectral_resolution_nm = specs.spectral_resolution;
+            }
+
+            try {
+                const response = await fetch('/api/admin/instruments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(instrumentData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    console.error('Failed to create UAV instrument:', result.error);
+                    return null;
+                }
+
+                console.log('✅ Auto-created UAV instrument:', result);
+
+                // If instrument has channels, create them too
+                if (specs.channels && specs.channels.length > 0 && result.id) {
+                    await createUAVInstrumentChannels(result.id, specs.channels);
+                }
+
+                return result;
+            } catch (error) {
+                console.error('Error creating UAV instrument:', error);
+                return null;
+            }
+        }
+
+        // Function to create channels for UAV instrument
+        async function createUAVInstrumentChannels(instrumentId, channels) {
+            const token = localStorage.getItem('sites_spectral_token');
+
+            for (let i = 0; i < channels.length; i++) {
+                const channel = channels[i];
+                const channelData = {
+                    instrument_id: instrumentId,
+                    channel_number: i + 1,
+                    channel_name: channel.name,
+                    central_wavelength: channel.central_wavelength,
+                    bandwidth: channel.bandwidth,
+                    wavelength_units: channel.units || 'nm'
+                };
+
+                try {
+                    await fetch('/api/admin/instrument-channels', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(channelData)
+                    });
+                } catch (error) {
+                    console.error('Error creating channel:', error);
+                }
+            }
+            console.log('✅ Created', channels.length, 'channels for instrument', instrumentId);
+        }
+
+        // Global function - now redirects to platform type selector
         // Called by sitesStationDashboard.showCreatePlatformModal()
         window.openCreatePlatformForm = function(stationId) {
-            console.log('🔵 openCreatePlatformForm called with stationId:', stationId);
+            console.log('🔵 openCreatePlatformForm redirecting to type selector, stationId:', stationId);
+            openPlatformTypeSelector(stationId);
+        }
+
+        // Open creation form with a specific platform type pre-selected
+        function openCreatePlatformFormWithType(stationId, platformType) {
+            console.log('🔵 openCreatePlatformFormWithType called with stationId:', stationId, 'type:', platformType);
             console.log('🔵 currentUser:', currentUser);
             console.log('🔵 currentUser?.role:', currentUser?.role);
 
@@ -8094,6 +8422,21 @@
             }
 
             console.log('✅ Permission check passed for', currentUser.role, 'user, generating form...');
+
+            // Update modal title based on platform type
+            const titleConfig = {
+                fixed: { icon: 'fa-tower-observation', label: 'Fixed Platform' },
+                uav: { icon: 'fa-crosshairs', label: 'UAV / Drone' },
+                satellite: { icon: 'fa-satellite', label: 'Satellite Platform' },
+                mobile: { icon: 'fa-truck', label: 'Mobile Platform' },
+                usv: { icon: 'fa-ship', label: 'USV Platform' },
+                uuv: { icon: 'fa-water', label: 'UUV Platform' }
+            };
+            const config = titleConfig[platformType] || titleConfig.fixed;
+            const modalTitle = document.getElementById('create-platform-modal-title');
+            if (modalTitle) {
+                modalTitle.innerHTML = `<i class="fas ${config.icon}"></i> Create ${config.label}`;
+            }
             const form = document.getElementById('create-platform-form');
             console.log('🔵 Form element:', form);
             form.innerHTML = `
@@ -8107,16 +8450,16 @@
                                    oninput="updatePlatformNormalizedName()">
                             <small>Descriptive name for the platform</small>
                         </div>
-                        <div class="form-group">
-                            <label for="platform-location-code">Location Code *</label>
+                        <div class="form-group" id="location-code-group">
+                            <label for="platform-location-code" id="location-code-label">Location Code *</label>
                             <input type="text" id="platform-location-code" class="form-input" required
                                    placeholder="e.g., PL01" style="text-transform: uppercase;"
                                    oninput="updatePlatformNormalizedName()">
-                            <small>Unique code within station (e.g., PL01, BL01)</small>
+                            <small id="location-code-help">Unique code within station (e.g., PL01, BL01)</small>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
+                        <div class="form-group" id="ecosystem-code-group">
                             <label for="platform-ecosystem-code">Ecosystem Code</label>
                             <select id="platform-ecosystem-code" class="form-input" onchange="updatePlatformNormalizedName()">
                                 <option value="FOR">FOR - Forest</option>
@@ -8136,7 +8479,9 @@
                                 <option value="fixed">Fixed Tower/Mast</option>
                                 <option value="uav">UAV / Drone</option>
                                 <option value="satellite">Satellite</option>
-                                <option value="mobile">Mobile Platform</option>
+                                <option value="mobile" disabled>Mobile Platform (Coming Soon)</option>
+                                <option value="usv" disabled>USV - Surface Vehicle (Coming Soon)</option>
+                                <option value="uuv" disabled>UUV - Underwater Vehicle (Coming Soon)</option>
                             </select>
                             <small>Determines how the platform is categorized in the dashboard</small>
                         </div>
@@ -8243,6 +8588,78 @@
                             Satellite naming: {STATION}_{AGENCY}_{SATELLITE}_{SENSOR} (e.g., SVB_ESA_S2A_MSI)
                         </small>
                     </div>
+                    <div id="mobile-fields-row" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-carrier-type">Carrier Type *</label>
+                                <select id="platform-carrier-type" class="form-input" onchange="updatePlatformNormalizedName()">
+                                    <option value="VEH">Vehicle (truck, car, ATV)</option>
+                                    <option value="BOT">Boat (kayak, motorboat)</option>
+                                    <option value="ROV">Rover (ground robot)</option>
+                                    <option value="BPK">Backpack (walking)</option>
+                                    <option value="BIC">Bicycle</option>
+                                    <option value="OTH">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform-carrier-model">Carrier Model</label>
+                                <input type="text" id="platform-carrier-model" class="form-input"
+                                       placeholder="e.g., Toyota Hilux, Polaris Ranger">
+                            </div>
+                        </div>
+                        <small class="form-text" style="margin-top: -10px; margin-bottom: 15px; display: block;">
+                            Mobile naming: {STATION}_{ECO}_{CARRIER}_MOB## (e.g., SVB_FOR_BPK_MOB01)
+                        </small>
+                    </div>
+                    <div id="usv-fields-row" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-usv-model">USV Model</label>
+                                <input type="text" id="platform-usv-model" class="form-input"
+                                       placeholder="e.g., SeaTrac SP-48, WaveGlider">
+                            </div>
+                            <div class="form-group">
+                                <label for="platform-usv-hull">Hull Type</label>
+                                <select id="platform-usv-hull" class="form-input">
+                                    <option value="">Select hull type</option>
+                                    <option value="monohull">Monohull</option>
+                                    <option value="catamaran">Catamaran</option>
+                                    <option value="trimaran">Trimaran</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <small class="form-text" style="margin-top: -10px; margin-bottom: 15px; display: block;">
+                            USV naming: {STATION}_{ECO}_USV## (e.g., ANS_LAK_USV01)
+                        </small>
+                    </div>
+                    <div id="uuv-fields-row" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-uuv-type">UUV Type *</label>
+                                <select id="platform-uuv-type" class="form-input">
+                                    <option value="rov">ROV (Remotely Operated Vehicle)</option>
+                                    <option value="auv">AUV (Autonomous Underwater Vehicle)</option>
+                                    <option value="hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform-uuv-model">UUV Model</label>
+                                <input type="text" id="platform-uuv-model" class="form-input"
+                                       placeholder="e.g., BlueROV2, Iver3">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-uuv-depth">Max Depth (m)</label>
+                                <input type="number" id="platform-uuv-depth" class="form-input" step="1"
+                                       placeholder="Maximum operating depth">
+                            </div>
+                        </div>
+                        <small class="form-text" style="margin-top: -10px; margin-bottom: 15px; display: block;">
+                            UUV naming: {STATION}_{ECO}_UUV## (e.g., ANS_LAK_UUV01)
+                        </small>
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="platform-status">Status</label>
@@ -8264,7 +8681,7 @@
                     </div>
                 </div>
 
-                <div class="form-section">
+                <div class="form-section" id="fixed-specs-section">
                     <h4><i class="fas fa-cogs"></i> Technical Specifications</h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -8289,8 +8706,8 @@
                     </div>
                 </div>
 
-                <div class="form-section">
-                    <h4><i class="fas fa-map-marker-alt"></i> Location</h4>
+                <div class="form-section" id="location-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Base Location</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="platform-latitude">Latitude</label>
@@ -8331,6 +8748,15 @@
                 </div>
             `;
 
+            // Pre-select the platform type
+            const platformTypeSelect = document.getElementById('platform-type');
+            if (platformTypeSelect) {
+                platformTypeSelect.value = platformType;
+            }
+
+            // Apply type-specific field visibility
+            onPlatformTypeChange();
+
             // Initialize normalized name
             updatePlatformNormalizedName();
             document.getElementById('create-platform-modal').classList.add('show');
@@ -8340,21 +8766,85 @@
             const platformType = document.getElementById('platform-type')?.value || 'fixed';
             const uavFieldsRow = document.getElementById('uav-fields-row');
             const satelliteFieldsRow = document.getElementById('satellite-fields-row');
-            const locationCodeGroup = document.getElementById('platform-location-code')?.closest('.form-group');
+            const mobileFieldsRow = document.getElementById('mobile-fields-row');
+            const usvFieldsRow = document.getElementById('usv-fields-row');
+            const uuvFieldsRow = document.getElementById('uuv-fields-row');
+            const ecosystemCodeGroup = document.getElementById('ecosystem-code-group');
+            const locationCodeGroup = document.getElementById('location-code-group');
+            const locationCodeLabel = document.getElementById('location-code-label');
+            const locationCodeHelp = document.getElementById('location-code-help');
+            const locationCodeInput = document.getElementById('platform-location-code');
+            const fixedSpecsSection = document.getElementById('fixed-specs-section');
+            const locationSection = document.getElementById('location-section');
 
-            // Show/hide UAV fields based on platform type
-            if (uavFieldsRow) {
-                uavFieldsRow.style.display = platformType === 'uav' ? '' : 'none';
+            // Show/hide type-specific field rows
+            if (uavFieldsRow) uavFieldsRow.style.display = platformType === 'uav' ? '' : 'none';
+            if (satelliteFieldsRow) satelliteFieldsRow.style.display = platformType === 'satellite' ? '' : 'none';
+            if (mobileFieldsRow) mobileFieldsRow.style.display = platformType === 'mobile' ? '' : 'none';
+            if (usvFieldsRow) usvFieldsRow.style.display = platformType === 'usv' ? '' : 'none';
+            if (uuvFieldsRow) uuvFieldsRow.style.display = platformType === 'uuv' ? '' : 'none';
+
+            // Fixed specs (mounting structure, height) only for Fixed platforms
+            if (fixedSpecsSection) {
+                fixedSpecsSection.style.display = platformType === 'fixed' ? '' : 'none';
             }
 
-            // Show/hide satellite fields based on platform type
-            if (satelliteFieldsRow) {
-                satelliteFieldsRow.style.display = platformType === 'satellite' ? '' : 'none';
+            // Location section: show for Fixed, Mobile, USV, UUV (base location)
+            // Hide for UAV (fly missions) and Satellite (orbit)
+            if (locationSection) {
+                const showLocation = !['uav', 'satellite'].includes(platformType);
+                locationSection.style.display = showLocation ? '' : 'none';
+            }
+
+            // Hide ecosystem code for UAV and Satellite (they don't use ecosystem in naming)
+            if (ecosystemCodeGroup) {
+                ecosystemCodeGroup.style.display = (platformType === 'uav' || platformType === 'satellite') ? 'none' : '';
             }
 
             // Hide location code for satellites (it's auto-generated from agency/satellite/sensor)
             if (locationCodeGroup) {
                 locationCodeGroup.style.display = platformType === 'satellite' ? 'none' : '';
+            }
+
+            // Update location code label, placeholder, and help text based on platform type
+            if (locationCodeLabel && locationCodeHelp && locationCodeInput) {
+                const fieldConfig = {
+                    fixed: {
+                        label: 'Location Code *',
+                        placeholder: 'e.g., PL01, BL01',
+                        help: 'Unique code within station (e.g., PL01 for Platform 01, BL01 for Block 01)'
+                    },
+                    uav: {
+                        label: 'UAV Number *',
+                        placeholder: 'e.g., UAV01, UAV02',
+                        help: 'Sequential UAV identifier (UAV01, UAV02, etc.)'
+                    },
+                    mobile: {
+                        label: 'Mobile Unit Code *',
+                        placeholder: 'e.g., MOB01, MOB02',
+                        help: 'Mobile platform identifier (MOB01, MOB02, etc.)'
+                    },
+                    satellite: {
+                        label: 'Location Code',
+                        placeholder: 'Auto-generated',
+                        help: 'Auto-generated from satellite and sensor selection'
+                    },
+                    usv: {
+                        label: 'USV Number *',
+                        placeholder: 'e.g., USV01, USV02',
+                        help: 'Sequential USV identifier (USV01, USV02, etc.)'
+                    },
+                    uuv: {
+                        label: 'UUV Number *',
+                        placeholder: 'e.g., UUV01, UUV02',
+                        help: 'Sequential UUV identifier (UUV01, UUV02, etc.)'
+                    }
+                };
+
+                const config = fieldConfig[platformType] || fieldConfig.fixed;
+                locationCodeLabel.textContent = config.label;
+                locationCodeInput.placeholder = config.placeholder;
+                locationCodeHelp.textContent = config.help;
             }
 
             // Update the normalized name
@@ -8485,13 +8975,18 @@
             const satellite = document.getElementById('platform-satellite')?.value || 'S2A';
             const sensor = document.getElementById('platform-sensor')?.value || 'MSI';
 
+            // Mobile fields
+            const carrierType = document.getElementById('platform-carrier-type')?.value || 'VEH';
+
             let normalizedName = '';
 
             // Different naming patterns based on platform type
-            // Fixed:     SVB_FOR_PL01                  (station_ecosystem_location)
-            // UAV:       SVB_DJI_M3M_UAV01             (station_vendor_model_location) - uses vendor + model
-            // Satellite: SVB_ESA_S2A_MSI              (station_agency_satellite_sensor) - no location code
-            // Mobile:    SVB_FOR_MOB01                (station_ecosystem_location)
+            // Fixed:     SVB_FOR_PL01                       (station_ecosystem_location)
+            // UAV:       SVB_DJI_M3M_UAV01                  (station_vendor_model_location)
+            // Satellite: SVB_ESA_S2A_MSI                    (station_agency_satellite_sensor)
+            // Mobile:    SVB_FOR_BPK_MOB01                  (station_ecosystem_carrier_location)
+            // USV:       ANS_LAK_USV01                      (station_ecosystem_location)
+            // UUV:       ANS_LAK_UUV01                      (station_ecosystem_location)
 
             if (platformType === 'satellite') {
                 // Satellite platforms use: station_agency_satellite_sensor
@@ -8501,8 +8996,13 @@
                 if (locationCode) {
                     normalizedName = `${stationAcronym}_${droneVendor}_${droneModel}_${locationCode}`;
                 }
+            } else if (platformType === 'mobile') {
+                // Mobile platforms use: station_ecosystem_carrier_location
+                if (locationCode) {
+                    normalizedName = `${stationAcronym}_${ecosystemCode}_${carrierType}_${locationCode}`;
+                }
             } else {
-                // Fixed and Mobile use ecosystem code
+                // Fixed, USV, UUV use: station_ecosystem_location
                 if (locationCode) {
                     normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
                 }
@@ -8512,18 +9012,7 @@
             if (normalizedInput && normalizedName) {
                 normalizedInput.value = normalizedName;
             }
-
-            // Update location code placeholder based on platform type
-            const locationInput = document.getElementById('platform-location-code');
-            if (locationInput) {
-                const placeholders = {
-                    fixed: 'e.g., PL01, BL01',
-                    uav: 'e.g., UAV01, UAV02',
-                    satellite: 'Auto-generated',
-                    mobile: 'e.g., MOB01, MOB02'
-                };
-                locationInput.placeholder = placeholders[platformType] || 'e.g., PL01';
-            }
+            // Note: Placeholder/label updates are handled by onPlatformTypeChange()
         }
 
         async function saveNewPlatform() {
@@ -8603,7 +9092,31 @@
                     throw new Error(result.error || 'Failed to create platform');
                 }
 
-                showNotification(`Platform "${platformData.display_name}" created successfully!`, 'success');
+                // For UAV platforms, auto-create the default instrument based on drone model
+                if (platformType === 'uav' && result.id) {
+                    const vendor = document.getElementById('platform-drone-vendor')?.value;
+                    const model = document.getElementById('platform-drone-model')?.value;
+
+                    if (vendor && model) {
+                        const instrument = await createUAVInstrument(
+                            result.id,
+                            platformData.normalized_name,
+                            vendor,
+                            model
+                        );
+
+                        if (instrument) {
+                            showNotification(`Platform "${platformData.display_name}" created with ${instrument.display_name}!`, 'success');
+                        } else {
+                            showNotification(`Platform "${platformData.display_name}" created! Add instruments manually.`, 'success');
+                        }
+                    } else {
+                        showNotification(`Platform "${platformData.display_name}" created successfully!`, 'success');
+                    }
+                } else {
+                    showNotification(`Platform "${platformData.display_name}" created successfully!`, 'success');
+                }
+
                 closeCreatePlatformModal();
 
                 // Refresh the display
@@ -8620,6 +9133,39 @@
 
         function closeCreatePlatformModal() {
             document.getElementById('create-platform-modal').classList.remove('show');
+        }
+
+        // Platform Type Selector Functions (Two-Step Flow)
+        let selectedPlatformType = 'fixed';
+        let currentStationIdForPlatform = null;
+
+        function openPlatformTypeSelector(stationId) {
+            console.log('🔵 openPlatformTypeSelector called with stationId:', stationId);
+
+            // Allow both admin and station users to create platforms
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'station')) {
+                console.error('❌ Permission check failed - user role:', currentUser?.role);
+                showNotification('Platform creation requires admin or station user privileges', 'error');
+                return;
+            }
+
+            currentStationIdForPlatform = stationId;
+            document.getElementById('platform-type-selector-modal').classList.add('show');
+        }
+
+        function closePlatformTypeSelector() {
+            document.getElementById('platform-type-selector-modal').classList.remove('show');
+        }
+
+        function selectPlatformType(platformType) {
+            console.log('🔵 selectPlatformType called with type:', platformType);
+            selectedPlatformType = platformType;
+
+            // Close type selector
+            closePlatformTypeSelector();
+
+            // Open the creation form with the selected type
+            openCreatePlatformFormWithType(currentStationIdForPlatform, platformType);
         }
 
         // Platform Deletion Functions (Admin Only)

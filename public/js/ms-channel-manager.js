@@ -158,10 +158,10 @@ const MSChannelManager = (() => {
                     <td>${channel.bandwidth_nm}</td>
                     ${editable ? `
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="MSChannelManager.editChannelUI(${index})">
+                            <button class="btn btn-sm btn-warning" onclick="MSChannelManager.editChannelUI('${index}')">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="MSChannelManager.deleteChannelUI(${index})">
+                            <button class="btn btn-sm btn-danger" onclick="MSChannelManager.deleteChannelUI('${index}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>

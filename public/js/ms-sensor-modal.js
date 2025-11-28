@@ -206,7 +206,7 @@ const MSSensorModal = (() => {
         configs.forEach((config, index) => {
             html += `
                 <button type="button" class="btn btn-sm btn-outline-primary mr-2 mb-2"
-                        onclick="MSSensorModal.applyChannelConfig(${index})">
+                        onclick="MSSensorModal.applyChannelConfig('${index}')">
                     ${config.length}-channel (${config.join(', ')}nm)
                 </button>
             `;

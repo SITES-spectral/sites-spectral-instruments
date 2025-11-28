@@ -1339,7 +1339,8 @@ body {
 
 /* Platform Details Modal */
 .platform-modal,
-.instrument-modal {
+.instrument-modal,
+.station-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -1352,8 +1353,9 @@ body {
 }
 
 .platform-modal.show,
-.instrument-modal.show {
-    display: flex;
+.instrument-modal.show,
+.station-modal.show {
+    display: flex !important;
     align-items: center;
     justify-content: center;
 }
@@ -1490,6 +1492,120 @@ body {
     .detail-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+}
+
+/* Platform Type Selector Grid */
+.platform-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 10px 0;
+}
+
+.platform-type-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.platform-type-card:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.platform-type-card:active {
+    transform: translateY(0);
+}
+
+.platform-type-card.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.platform-type-card.disabled:hover {
+    border-color: var(--border-color);
+    background: var(--bg-secondary);
+    transform: none;
+    box-shadow: none;
+}
+
+.platform-type-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.platform-type-icon i {
+    font-size: 24px;
+    color: white;
+}
+
+.platform-type-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.platform-type-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.platform-type-info p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.platform-type-info .naming-hint {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--text-muted);
+    background: var(--bg-primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+@media (max-width: 900px) {
+    .platform-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .platform-type-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .platform-type-card {
+        padding: 12px;
+    }
+
+    .platform-type-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .platform-type-icon i {
+        font-size: 20px;
     }
 }
 
