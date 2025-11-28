@@ -1,8 +1,7 @@
 {
   "version": "8.0.0-rc.4",
   "buildDate": "2025-11-28",
-  "timestamp": 1764318500000,
-  "phase": "Phase 7 - Production Features (Foundation)",
+  "timestamp": 1764322930014,
   "files": {
     "/css/styles.css?v=8.0.0-rc.4": "8.0.0-rc.4",
     "/js/utils.js?v=8.0.0-rc.4": "8.0.0-rc.4",
@@ -12,15 +11,6 @@
     "/js/dashboard.js?v=8.0.0-rc.4": "8.0.0-rc.4",
     "/js/station-dashboard.js?v=8.0.0-rc.4": "8.0.0-rc.4",
     "/js/navigation.js?v=8.0.0-rc.4": "8.0.0-rc.4",
-    "/js/export.js?v=8.0.0-rc.4": "8.0.0-rc.4",
-    "/js/core/config-loader.js?v=8.0.0-rc.4": "8.0.0-rc.4",
-    "/js/core/dashboard-state.js?v=8.0.0-rc.4": "8.0.0-rc.4",
-    "/js/components/platform-type-card.js?v=8.0.0-rc.4": "8.0.0-rc.4"
-  },
-  "newFeatures": {
-    "maintenance_history": "Database table for instrument maintenance tracking",
-    "calibration_logs": "Database table for spectral calibration records",
-    "yaml_configs": "Configuration-driven architecture",
-    "reactive_dashboard": "State management with subscriptions"
+    "/js/export.js?v=8.0.0-rc.4": "8.0.0-rc.4"
   }
 }

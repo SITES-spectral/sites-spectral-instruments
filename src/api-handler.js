@@ -20,6 +20,8 @@ import { handleAnalytics } from './handlers/analytics.js';
 import { handleChannels } from './handlers/channels.js';
 import { handleSensorModels } from './handlers/sensor-models.js';
 import { handleDocumentation } from './handlers/documentation.js';
+import { handleMaintenance } from './handlers/maintenance.js';
+import { handleCalibration } from './handlers/calibration.js';
 import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
@@ -126,6 +128,12 @@ export async function handleApiRequest(request, env, ctx) {
       case 'documentation':
         return await handleDocumentation(method, pathSegments, request, env);
 
+      case 'maintenance':
+        return await handleMaintenance(method, pathSegments, request, env);
+
+      case 'calibration':
+        return await handleCalibration(method, pathSegments, request, env);
+
       case 'values':
         // Special endpoint for dropdown/multiselect values
         if (pathSegments[1] === 'research-programs') {
@@ -164,11 +172,11 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '8.0.0-rc.2',
+      version: '8.0.0-rc.4',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'modular',
       apiVersions: ['v1', 'v2', 'v3'],
-      features: ['aoi-support', 'uav-platforms', 'satellite-platforms']
+      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs']
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -178,12 +186,12 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '8.0.0-rc.2',
+      version: '8.0.0-rc.4',
       error: error.message,
       database: 'disconnected',
       architecture: 'modular',
       apiVersions: ['v1', 'v2', 'v3'],
-      features: ['aoi-support', 'uav-platforms', 'satellite-platforms']
+      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs']
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
