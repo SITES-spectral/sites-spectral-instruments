@@ -51,6 +51,23 @@ export async function handleProductsV3(method, params, request, env, url) {
   }
 
   try {
+    // Handle special endpoints
+    if (params.listTypes) {
+      return await getProductTypesV3(user, env);
+    }
+
+    if (params.stats) {
+      return await getProductStatsV3(user, request, env, url);
+    }
+
+    if (params.timeline) {
+      return await getProductsTimelineV3(user, request, env, url);
+    }
+
+    if (params.archive && params.id) {
+      return await archiveProductV3(params.id, user, request, env);
+    }
+
     // Handle spatial queries
     if (params.spatialQuery) {
       return await handleProductSpatialQuery(params.spatialQuery, user, request, env, url);
@@ -856,7 +873,25 @@ async function updateProductV3(id, user, request, env) {
     return createErrorResponse('Failed to update product', 500);
   }
 
-  return createSuccessResponse({
+  // Fetch and return the updated product
+  const updated = await executeQueryFirst(env, `
+    SELECT p.id, p.station_id, p.platform_id, p.campaign_id, p.aoi_id,
+           p.product_type, p.product_name, p.description,
+           p.source_platform_type, p.source_date, p.source_datetime,
+           p.bbox_json, p.center_lat, p.center_lon, p.resolution_m, p.crs,
+           p.file_path, p.file_format, p.file_size_bytes,
+           p.min_value, p.max_value, p.mean_value, p.std_value, p.nodata_percent,
+           p.quality_flag, p.cloud_cover_pct,
+           p.processing_level, p.algorithm_version,
+           p.status, p.metadata_json,
+           p.created_at,
+           s.acronym as station_acronym, s.display_name as station_name
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `, [id], 'updateProductV3-fetch');
+
+  return createSuccessResponse(updated || {
     success: true,
     message: 'Product updated successfully',
     id: parseInt(id, 10)
@@ -908,5 +943,240 @@ async function deleteProductV3(id, user, env) {
     success: true,
     message: 'Product deleted successfully',
     id: parseInt(id, 10)
+  });
+}
+
+/**
+ * Get list of available product types
+ */
+async function getProductTypesV3(user, env) {
+  const query = `
+    SELECT DISTINCT product_type, COUNT(*) as count
+    FROM products
+    WHERE status = 'available'
+    GROUP BY product_type
+    ORDER BY count DESC
+  `;
+
+  const result = await executeQuery(env, query, [], 'getProductTypesV3');
+  const usedTypes = result?.results || [];
+
+  // Return both the complete list and types with products
+  return createSuccessResponse(
+    PRODUCT_TYPES.map(type => {
+      const used = usedTypes.find(u => u.product_type === type);
+      return {
+        type,
+        count: used?.count || 0,
+        hasProducts: !!used
+      };
+    })
+  );
+}
+
+/**
+ * Get product statistics
+ */
+async function getProductStatsV3(user, request, env, url) {
+  const stationParam = url.searchParams.get('station');
+
+  let whereConditions = [];
+  let params = [];
+
+  if (stationParam) {
+    whereConditions.push('(s.acronym = ? OR s.normalized_name = ?)');
+    params.push(stationParam, stationParam);
+  }
+
+  if (user.role === 'station' && user.station_normalized_name) {
+    whereConditions.push('s.normalized_name = ?');
+    params.push(user.station_normalized_name);
+  }
+
+  const whereClause = whereConditions.length > 0
+    ? 'WHERE ' + whereConditions.join(' AND ')
+    : '';
+
+  // Total products
+  const totalQuery = `
+    SELECT COUNT(*) as total_products
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+  `;
+  const totalResult = await executeQueryFirst(env, totalQuery, params, 'getProductStatsV3-total');
+
+  // By type
+  const typeQuery = `
+    SELECT product_type, COUNT(*) as count
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+    GROUP BY product_type
+    ORDER BY count DESC
+  `;
+  const typeResult = await executeQuery(env, typeQuery, params, 'getProductStatsV3-byType');
+
+  // By platform type
+  const platformQuery = `
+    SELECT source_platform_type, COUNT(*) as count
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+    GROUP BY source_platform_type
+    ORDER BY count DESC
+  `;
+  const platformResult = await executeQuery(env, platformQuery, params, 'getProductStatsV3-byPlatform');
+
+  // By quality flag
+  const qualityQuery = `
+    SELECT quality_flag, COUNT(*) as count
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+    GROUP BY quality_flag
+    ORDER BY count DESC
+  `;
+  const qualityResult = await executeQuery(env, qualityQuery, params, 'getProductStatsV3-byQuality');
+
+  // By processing level
+  const levelQuery = `
+    SELECT processing_level, COUNT(*) as count
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+    GROUP BY processing_level
+    ORDER BY count DESC
+  `;
+  const levelResult = await executeQuery(env, levelQuery, params, 'getProductStatsV3-byLevel');
+
+  return createSuccessResponse({
+    total_products: totalResult?.total_products || 0,
+    by_type: typeResult?.results || [],
+    by_platform_type: platformResult?.results || [],
+    by_quality: qualityResult?.results || [],
+    by_processing_level: levelResult?.results || [],
+    filters: {
+      station: stationParam
+    }
+  });
+}
+
+/**
+ * Get products in timeline format
+ */
+async function getProductsTimelineV3(user, request, env, url) {
+  const stationParam = url.searchParams.get('station');
+  const typeParam = url.searchParams.get('type');
+  const year = url.searchParams.get('year') || new Date().getFullYear().toString();
+
+  let whereConditions = [`strftime('%Y', p.source_date) = ?`];
+  let params = [year];
+
+  if (stationParam) {
+    whereConditions.push('(s.acronym = ? OR s.normalized_name = ?)');
+    params.push(stationParam, stationParam);
+  }
+
+  if (typeParam) {
+    whereConditions.push('p.product_type = ?');
+    params.push(typeParam);
+  }
+
+  if (user.role === 'station' && user.station_normalized_name) {
+    whereConditions.push('s.normalized_name = ?');
+    params.push(user.station_normalized_name);
+  }
+
+  const whereClause = 'WHERE ' + whereConditions.join(' AND ');
+
+  // Get products grouped by month
+  const monthlyQuery = `
+    SELECT
+      strftime('%Y-%m', p.source_date) as month,
+      COUNT(*) as count,
+      GROUP_CONCAT(DISTINCT p.product_type) as types
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+    GROUP BY month
+    ORDER BY month
+  `;
+
+  const monthlyResult = await executeQuery(env, monthlyQuery, params, 'getProductsTimelineV3-monthly');
+
+  // Get recent products list
+  const recentQuery = `
+    SELECT p.id, p.product_type, p.product_name, p.source_date,
+           p.quality_flag, s.acronym as station_acronym
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    ${whereClause}
+    ORDER BY p.source_date DESC
+    LIMIT 20
+  `;
+
+  const recentResult = await executeQuery(env, recentQuery, params, 'getProductsTimelineV3-recent');
+
+  return createSuccessResponse({
+    year: parseInt(year, 10),
+    timeline: monthlyResult?.results || [],
+    recent_products: recentResult?.results || [],
+    filters: {
+      station: stationParam,
+      type: typeParam
+    }
+  });
+}
+
+/**
+ * Archive a product
+ */
+async function archiveProductV3(id, user, request, env) {
+  const permission = checkUserPermissions(user, 'platforms', 'write');
+  if (!permission.allowed) {
+    return createForbiddenResponse();
+  }
+
+  // Verify product exists
+  const existing = await executeQueryFirst(env, `
+    SELECT p.id, p.product_name, p.status, s.normalized_name as station_normalized_name
+    FROM products p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `, [id], 'archiveProductV3-check');
+
+  if (!existing) {
+    return createNotFoundResponse();
+  }
+
+  if (user.role === 'station' && user.station_normalized_name !== existing.station_normalized_name) {
+    return createForbiddenResponse();
+  }
+
+  // Update status to archived
+  const result = await executeQueryRun(env,
+    `UPDATE products SET status = 'archived' WHERE id = ?`,
+    [id], 'archiveProductV3');
+
+  if (!result || result.changes === 0) {
+    return createErrorResponse('Failed to archive product', 500);
+  }
+
+  // Log activity
+  try {
+    await executeQueryRun(env, `
+      INSERT INTO activity_log (user_id, username, action, entity_type, entity_id, entity_name, created_at)
+      VALUES (?, ?, 'archive', 'product', ?, ?, ?)
+    `, [user.id, user.username, id, existing.product_name, new Date().toISOString()], 'archiveProductV3-log');
+  } catch (e) {
+    console.warn('Failed to log product archive:', e);
+  }
+
+  return createSuccessResponse({
+    success: true,
+    message: 'Product archived successfully',
+    id: parseInt(id, 10),
+    status: 'archived'
   });
 }

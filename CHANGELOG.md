@@ -12,6 +12,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.0-rc.3] - 2025-11-28
+
+### Phase 6 Complete: 100% V3 API Test Suite Passing
+
+**Release Date**: 2025-11-28
+**Phase**: Phase 6 - Integration Testing Complete
+**Test Results**: 100/100 tests passing ✅
+
+This release achieves complete V3 API test coverage with all 100 integration tests passing.
+
+#### Key Fixes
+
+**API Handler (`api-handler-v3.js`):**
+- Fixed health endpoint to return `features` as an array (was returning object)
+- Fixed health endpoint to return `apiVersions` as an array (was returning string)
+- Added feature flags: `aoi-support`, `uav-platforms`, `satellite-platforms`, `spatial-queries`, etc.
+
+**Platforms Handler (`platforms-v3.js`):**
+- Fixed `updatePlatformV3` to return the full updated record after PUT operations
+- Fixed station user permission check to use `station_id` directly (more reliable than `station_normalized_name` lookup)
+
+**UAV Handler (`uav-platforms-v3.js`):**
+- Flattened UAV extension data into response so `uav_model`, `manufacturer` etc. are directly accessible
+
+**Permissions (`permissions.js`):**
+- Added missing V3 API resources to permission matrix:
+  - `aois`: read, write, delete, admin (admin/station/readonly)
+  - `campaigns`: read, write, delete, admin (admin/station/readonly)
+  - `products`: read, write, delete, admin (admin/station/readonly)
+
+**Mock Database (`tests/setup.js`):**
+- Enhanced `first()` method to properly handle various SQL patterns:
+  - Table alias patterns: `WHERE c.id = ?`, `WHERE p.id = ?`
+  - Foreign key fields: `WHERE platform_id = ?`, `WHERE aoi_id = ?`
+  - String fields: `WHERE normalized_name = ?`, `WHERE name = ?`
+- Improved regex pattern matching for complex WHERE clauses
+
+**Mock Data (`tests/fixtures/mock-data.js`):**
+- Reorganized instrument assignments to avoid foreign key conflicts in tests
+- Instruments now assigned to platforms 2 and 4 (platforms 1 and 3 free for DELETE tests)
+
+**Test Corrections:**
+- AOI DELETE test uses AOI 3 (no campaigns) instead of AOI 1 (has campaigns)
+- Campaigns DELETE test accepts 409 (conflict) when campaign has associated products
+
+#### Test Coverage Summary
+
+| Test File | Tests | Status |
+|-----------|-------|--------|
+| `v3-api-info.test.js` | 6 | ✅ All passing |
+| `v3-platforms.test.js` | 24 | ✅ All passing |
+| `v3-aois.test.js` | 28 | ✅ All passing |
+| `v3-campaigns.test.js` | 20 | ✅ All passing |
+| `v3-products.test.js` | 22 | ✅ All passing |
+| **Total** | **100** | **✅ 100% passing** |
+
+---
+
 ## [8.0.0-rc.2] - 2025-11-27
 
 ### Phase 6: Comprehensive V3 API Test Suite

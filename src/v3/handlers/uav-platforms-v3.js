@@ -127,10 +127,10 @@ async function getUAVPlatformById(platformId, user, env) {
     WHERE platform_id = ?
   `, [platformId], 'getUAVPlatformExtension');
 
-  // Merge extension data
+  // Merge extension data - flatten UAV properties for easier access
   const result = {
     ...platform,
-    uav_details: uavExtension || null,
+    ...(uavExtension || {}),
     has_uav_extension: !!uavExtension
   };
 

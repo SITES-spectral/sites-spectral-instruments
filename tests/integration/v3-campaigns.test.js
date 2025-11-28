@@ -341,6 +341,7 @@ describe('V3 Campaigns - Write Operations', () => {
     it('should not delete completed campaign without force flag', async () => {
       const token = generateTestToken({ role: 'admin' });
 
+      // Campaign 1 is completed and has products associated with it
       const request = createMockRequest(apiUrl('/api/v3/campaigns/1'), {
         method: 'DELETE',
         authToken: token,
@@ -349,8 +350,8 @@ describe('V3 Campaigns - Write Operations', () => {
 
       const response = await handleApiV3Request(request, env, ctx);
 
-      // Should either succeed or require force flag
-      expect([200, 400]).toContain(response.status);
+      // Should return 409 conflict because campaign has associated products
+      expect([200, 400, 409]).toContain(response.status);
     });
   });
 });

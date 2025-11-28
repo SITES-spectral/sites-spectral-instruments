@@ -40,6 +40,19 @@ export async function handleCampaignsV3(method, params, request, env, url) {
   }
 
   try {
+    // Handle special endpoints
+    if (params.upcoming) {
+      return await getUpcomingCampaignsV3(user, request, env, url);
+    }
+
+    if (params.calendar) {
+      return await getCampaignsCalendarV3(user, request, env, url);
+    }
+
+    if (params.complete && params.id && method === 'PUT') {
+      return await completeCampaignV3(params.id, user, request, env);
+    }
+
     // Handle filtered queries
     if (params.status) {
       return await getCampaignsByStatusV3(params.status, user, request, env, url);
@@ -587,7 +600,28 @@ async function updateCampaignV3(id, user, request, env) {
     console.warn('Failed to log campaign update:', e);
   }
 
-  return createSuccessResponse({
+  // Fetch and return the updated campaign
+  const updated = await executeQueryFirst(env, `
+    SELECT c.id, c.station_id, c.platform_id, c.aoi_id,
+           c.campaign_name, c.campaign_type, c.description,
+           c.planned_start_datetime, c.planned_end_datetime,
+           c.actual_start_datetime, c.actual_end_datetime,
+           c.status,
+           c.flight_altitude_m, c.flight_speed_ms,
+           c.overlap_frontal_pct, c.overlap_side_pct, c.gsd_cm,
+           c.weather_conditions, c.wind_speed_ms, c.cloud_cover_pct,
+           c.images_collected, c.data_size_gb,
+           c.quality_score, c.quality_notes,
+           c.processing_status, c.products_generated,
+           c.metadata_json,
+           c.created_at, c.updated_at,
+           s.acronym as station_acronym, s.display_name as station_name
+    FROM acquisition_campaigns c
+    JOIN stations s ON c.station_id = s.id
+    WHERE c.id = ?
+  `, [id], 'updateCampaignV3-fetch');
+
+  return createSuccessResponse(updated || {
     success: true,
     message: 'Campaign updated successfully',
     id: parseInt(id, 10)
@@ -734,5 +768,267 @@ async function deleteCampaignV3(id, user, env) {
     success: true,
     message: 'Campaign deleted successfully',
     id: parseInt(id, 10)
+  });
+}
+
+/**
+ * Get upcoming campaigns
+ */
+async function getUpcomingCampaignsV3(user, request, env, url) {
+  const pagination = parsePaginationParams(url);
+  const stationParam = url.searchParams.get('station');
+
+  let whereConditions = [
+    `(c.status IN ('planned', 'in_progress'))`,
+    `c.planned_start_datetime >= datetime('now')`
+  ];
+  let params = [];
+
+  if (stationParam) {
+    whereConditions.push('(s.acronym = ? OR s.normalized_name = ?)');
+    params.push(stationParam, stationParam);
+  }
+
+  if (user.role === 'station' && user.station_normalized_name) {
+    whereConditions.push('s.normalized_name = ?');
+    params.push(user.station_normalized_name);
+  }
+
+  const whereClause = 'WHERE ' + whereConditions.join(' AND ');
+
+  // Count
+  const countQuery = `
+    SELECT COUNT(*) as total
+    FROM acquisition_campaigns c
+    JOIN stations s ON c.station_id = s.id
+    ${whereClause}
+  `;
+  const countResult = await executeQueryFirst(env, countQuery, params, 'getUpcomingCampaignsCount');
+
+  // Main query
+  const query = `
+    SELECT c.id, c.campaign_name, c.campaign_type, c.status,
+           c.planned_start_datetime, c.planned_end_datetime,
+           c.flight_altitude_m, c.gsd_cm,
+           s.acronym as station_acronym, s.display_name as station_name,
+           p.display_name as platform_name, p.platform_type,
+           a.name as aoi_name
+    FROM acquisition_campaigns c
+    JOIN stations s ON c.station_id = s.id
+    JOIN platforms p ON c.platform_id = p.id
+    LEFT JOIN areas_of_interest a ON c.aoi_id = a.id
+    ${whereClause}
+    ORDER BY c.planned_start_datetime ASC
+    LIMIT ? OFFSET ?
+  `;
+
+  const queryParams = [...params, pagination.limit, pagination.offset];
+  const result = await executeQuery(env, query, queryParams, 'getUpcomingCampaignsV3');
+
+  const baseUrl = url.origin + url.pathname;
+  return createSuccessResponse(createPaginatedResponse(
+    result?.results || [],
+    countResult?.total || 0,
+    pagination,
+    baseUrl
+  ));
+}
+
+/**
+ * Get campaigns in calendar format
+ */
+async function getCampaignsCalendarV3(user, request, env, url) {
+  const year = parseInt(url.searchParams.get('year') || new Date().getFullYear(), 10);
+  const month = parseInt(url.searchParams.get('month') || new Date().getMonth() + 1, 10);
+  const stationParam = url.searchParams.get('station');
+
+  // Calculate date range for the month
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
+  let whereConditions = [
+    `(
+      (c.planned_start_datetime >= ? AND c.planned_start_datetime <= ?) OR
+      (c.planned_end_datetime >= ? AND c.planned_end_datetime <= ?) OR
+      (c.planned_start_datetime <= ? AND c.planned_end_datetime >= ?)
+    )`
+  ];
+  let params = [startDate, endDate, startDate, endDate, startDate, endDate];
+
+  if (stationParam) {
+    whereConditions.push('(s.acronym = ? OR s.normalized_name = ?)');
+    params.push(stationParam, stationParam);
+  }
+
+  if (user.role === 'station' && user.station_normalized_name) {
+    whereConditions.push('s.normalized_name = ?');
+    params.push(user.station_normalized_name);
+  }
+
+  const whereClause = 'WHERE ' + whereConditions.join(' AND ');
+
+  const query = `
+    SELECT c.id, c.campaign_name, c.campaign_type, c.status,
+           c.planned_start_datetime, c.planned_end_datetime,
+           c.actual_start_datetime, c.actual_end_datetime,
+           s.acronym as station_acronym,
+           p.display_name as platform_name, p.platform_type,
+           a.name as aoi_name
+    FROM acquisition_campaigns c
+    JOIN stations s ON c.station_id = s.id
+    JOIN platforms p ON c.platform_id = p.id
+    LEFT JOIN areas_of_interest a ON c.aoi_id = a.id
+    ${whereClause}
+    ORDER BY c.planned_start_datetime ASC
+  `;
+
+  const result = await executeQuery(env, query, params, 'getCampaignsCalendarV3');
+  const campaigns = result?.results || [];
+
+  // Group by day
+  const calendarData = {};
+  campaigns.forEach(campaign => {
+    if (campaign.planned_start_datetime) {
+      const date = campaign.planned_start_datetime.substring(0, 10);
+      if (!calendarData[date]) {
+        calendarData[date] = [];
+      }
+      calendarData[date].push({
+        id: campaign.id,
+        name: campaign.campaign_name,
+        type: campaign.campaign_type,
+        status: campaign.status,
+        start: campaign.planned_start_datetime,
+        end: campaign.planned_end_datetime,
+        station: campaign.station_acronym,
+        platform: campaign.platform_name,
+        platform_type: campaign.platform_type,
+        aoi: campaign.aoi_name
+      });
+    }
+  });
+
+  return createSuccessResponse({
+    year,
+    month,
+    startDate,
+    endDate,
+    totalCampaigns: campaigns.length,
+    calendar: calendarData,
+    campaigns // Also include flat list
+  });
+}
+
+/**
+ * Complete a campaign with results
+ */
+async function completeCampaignV3(id, user, request, env) {
+  const permission = checkUserPermissions(user, 'platforms', 'write');
+  if (!permission.allowed) {
+    return createForbiddenResponse();
+  }
+
+  const completionData = await request.json();
+
+  // Verify campaign exists
+  const existing = await executeQueryFirst(env, `
+    SELECT c.id, c.campaign_name, c.status, s.normalized_name as station_normalized_name
+    FROM acquisition_campaigns c
+    JOIN stations s ON c.station_id = s.id
+    WHERE c.id = ?
+  `, [id], 'completeCampaignV3-check');
+
+  if (!existing) {
+    return createNotFoundResponse();
+  }
+
+  if (user.role === 'station' && user.station_normalized_name !== existing.station_normalized_name) {
+    return createForbiddenResponse();
+  }
+
+  // Build update with completion data
+  const updates = ['status = ?', 'updated_at = ?'];
+  const values = ['completed', new Date().toISOString()];
+
+  // Set actual end datetime if provided or use now
+  if (completionData.actual_end_datetime) {
+    updates.push('actual_end_datetime = ?');
+    values.push(completionData.actual_end_datetime);
+  } else {
+    updates.push('actual_end_datetime = ?');
+    values.push(new Date().toISOString());
+  }
+
+  // Optional completion fields
+  if (completionData.images_collected !== undefined) {
+    updates.push('images_collected = ?');
+    values.push(parseInt(completionData.images_collected, 10));
+  }
+
+  if (completionData.data_size_gb !== undefined) {
+    updates.push('data_size_gb = ?');
+    values.push(parseFloat(completionData.data_size_gb));
+  }
+
+  if (completionData.quality_score !== undefined) {
+    updates.push('quality_score = ?');
+    values.push(parseInt(completionData.quality_score, 10));
+  }
+
+  if (completionData.quality_notes !== undefined) {
+    updates.push('quality_notes = ?');
+    values.push(completionData.quality_notes);
+  }
+
+  if (completionData.weather_conditions !== undefined) {
+    updates.push('weather_conditions = ?');
+    values.push(completionData.weather_conditions);
+  }
+
+  if (completionData.cloud_cover_pct !== undefined) {
+    updates.push('cloud_cover_pct = ?');
+    values.push(parseInt(completionData.cloud_cover_pct, 10));
+  }
+
+  if (completionData.products_generated !== undefined) {
+    const productsJson = typeof completionData.products_generated === 'string'
+      ? completionData.products_generated
+      : JSON.stringify(completionData.products_generated);
+    updates.push('products_generated = ?');
+    values.push(productsJson);
+  }
+
+  // Set processing status to completed if not specified
+  updates.push('processing_status = ?');
+  values.push(completionData.processing_status || 'completed');
+
+  values.push(id);
+
+  const updateQuery = `UPDATE acquisition_campaigns SET ${updates.join(', ')} WHERE id = ?`;
+  const result = await executeQueryRun(env, updateQuery, values, 'completeCampaignV3');
+
+  if (!result || result.changes === 0) {
+    return createErrorResponse('Failed to complete campaign', 500);
+  }
+
+  // Log activity
+  try {
+    await executeQueryRun(env, `
+      INSERT INTO activity_log (user_id, username, action, entity_type, entity_id, entity_name, created_at)
+      VALUES (?, ?, 'complete', 'campaign', ?, ?, ?)
+    `, [user.id, user.username, id, existing.campaign_name, new Date().toISOString()], 'completeCampaignV3-log');
+  } catch (e) {
+    console.warn('Failed to log campaign completion:', e);
+  }
+
+  return createSuccessResponse({
+    success: true,
+    message: 'Campaign completed successfully',
+    id: parseInt(id, 10),
+    status: 'completed',
+    images_collected: completionData.images_collected,
+    data_size_gb: completionData.data_size_gb,
+    quality_score: completionData.quality_score
   });
 }

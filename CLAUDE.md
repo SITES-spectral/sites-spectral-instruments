@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 6.5.0 - Complete Sensor Type Modals (2025-11-26)
+## Current Version: 8.0.0-rc.3 - V3 API Test Suite Complete (2025-11-28)
 
-**✅ STATUS: PRODUCTION-READY - ALL INSTRUMENT TYPES SUPPORTED**
+**✅ STATUS: RELEASE CANDIDATE - V3 API 100% TEST COVERAGE**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-11-26
+**📅 Last Updated:** 2025-11-28
+**🧪 Test Results:** 100/100 V3 API tests passing
 
 ---
 
@@ -257,7 +258,8 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 6.5.0 |
-| Last Deployed | 2025-11-26 |
-| Status | Fully Operational |
+| Current Version | 8.0.0-rc.3 |
+| Last Deployed | 2025-11-28 |
+| Status | Release Candidate - V3 API 100% Test Coverage |
 | Environment | Cloudflare Workers + D1 Database |
+| Test Coverage | 100/100 V3 API integration tests passing |

@@ -31,7 +31,8 @@ export function createMockRequest(url, options = {}) {
     requestHeaders.set('Authorization', `Bearer ${authToken}`);
   }
 
-  if (body && !requestHeaders.has('Content-Type')) {
+  // Always set Content-Type for write operations (API validation requires it)
+  if (['POST', 'PUT', 'PATCH'].includes(method) && !requestHeaders.has('Content-Type')) {
     requestHeaders.set('Content-Type', 'application/json');
   }
 

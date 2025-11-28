@@ -298,12 +298,13 @@ async function createPlatformV3(user, request, env) {
     return createValidationErrorResponse(errors);
   }
 
-  // For station users, verify access
+  // For station users, verify access - they can only create platforms for their own station
   if (user.role === 'station') {
-    const stationQuery = 'SELECT id, normalized_name FROM stations WHERE normalized_name = ?';
-    const userStation = await executeQueryFirst(env, stationQuery, [user.station_normalized_name], 'createPlatformV3-stationCheck');
+    // Compare station_id directly (more reliable than normalized_name lookup)
+    const targetStationId = parseInt(platformData.station_id, 10);
+    const userStationId = parseInt(user.station_id, 10);
 
-    if (!userStation || userStation.id !== parseInt(platformData.station_id, 10)) {
+    if (!userStationId || userStationId !== targetStationId) {
       return createForbiddenResponse();
     }
   }
@@ -456,7 +457,20 @@ async function updatePlatformV3(id, user, request, env) {
     return createErrorResponse('Failed to update platform', 500);
   }
 
-  return createSuccessResponse({
+  // Fetch and return the updated platform
+  const updated = await executeQueryFirst(env, `
+    SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
+           p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+           p.deployment_date, p.description, p.operation_programs,
+           p.platform_type, p.platform_type_id, p.ecosystem_code,
+           p.created_at, p.updated_at,
+           s.acronym as station_acronym, s.display_name as station_name
+    FROM platforms p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `, [id], 'updatePlatformV3-fetch');
+
+  return createSuccessResponse(updated || {
     success: true,
     message: 'Platform updated successfully',
     id: parseInt(id, 10)

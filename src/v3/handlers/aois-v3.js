@@ -168,14 +168,15 @@ async function queryAOIsByBBox(user, request, env, url) {
   const result = await executeQuery(env, query, params, 'queryAOIsByBBox');
   const aois = result?.results || [];
 
-  // Convert to GeoJSON
-  const features = aois.map(aoi => aoiToGeoJSONFeature(aoi)).filter(f => f !== null);
-
-  return createSuccessResponse(createGeoJSONResponse(features, {
-    query: 'bbox',
-    bounds: { minLon, minLat, maxLon, maxLat },
-    count: features.length
-  }));
+  // Return paginated results with data property
+  return createSuccessResponse({
+    data: aois,
+    meta: {
+      query: 'bbox',
+      bounds: { minLon, minLat, maxLon, maxLat },
+      count: aois.length
+    }
+  });
 }
 
 /**
@@ -229,13 +230,14 @@ async function queryAOIsByPoint(user, request, env, url) {
     }
   });
 
-  const features = containingAOIs.map(aoi => aoiToGeoJSONFeature(aoi)).filter(f => f !== null);
-
-  return createSuccessResponse(createGeoJSONResponse(features, {
-    query: 'point',
-    point: { lon, lat },
-    count: features.length
-  }));
+  return createSuccessResponse({
+    data: containingAOIs,
+    meta: {
+      query: 'point',
+      point: { lon, lat },
+      count: containingAOIs.length
+    }
+  });
 }
 
 /**
@@ -308,13 +310,14 @@ async function queryAOIsIntersects(user, request, env, url) {
     }
   });
 
-  const features = intersectingAOIs.map(aoi => aoiToGeoJSONFeature(aoi)).filter(f => f !== null);
-
-  return createSuccessResponse(createGeoJSONResponse(features, {
-    query: 'intersects',
-    queryGeometryType: queryGeometry.type,
-    count: features.length
-  }));
+  return createSuccessResponse({
+    data: intersectingAOIs,
+    meta: {
+      query: 'intersects',
+      queryGeometryType: queryGeometry.type,
+      count: intersectingAOIs.length
+    }
+  });
 }
 
 /**
@@ -370,13 +373,14 @@ async function queryAOIsWithin(user, request, env, url) {
     return pointInPolygon([aoi.centroid_lon, aoi.centroid_lat], containerGeometry);
   });
 
-  const features = withinAOIs.map(aoi => aoiToGeoJSONFeature(aoi)).filter(f => f !== null);
-
-  return createSuccessResponse(createGeoJSONResponse(features, {
-    query: 'within',
-    containerGeometryType: containerGeometry.type,
-    count: features.length
-  }));
+  return createSuccessResponse({
+    data: withinAOIs,
+    meta: {
+      query: 'within',
+      containerGeometryType: containerGeometry.type,
+      count: withinAOIs.length
+    }
+  });
 }
 
 /**
@@ -424,21 +428,23 @@ async function queryNearestAOIs(user, request, env, url) {
   const aois = result?.results || [];
 
   // Calculate actual distance in km (approximate)
-  const featuresWithDistance = aois.map(aoi => {
-    const feature = aoiToGeoJSONFeature(aoi);
-    if (feature) {
-      const distanceKm = haversineDistance(lat, lon, aoi.centroid_lat, aoi.centroid_lon);
-      feature.properties.distance_km = Math.round(distanceKm * 100) / 100;
-    }
-    return feature;
-  }).filter(f => f !== null);
+  const aoisWithDistance = aois.map(aoi => {
+    const distanceKm = haversineDistance(lat, lon, aoi.centroid_lat, aoi.centroid_lon);
+    return {
+      ...aoi,
+      distance_km: Math.round(distanceKm * 100) / 100
+    };
+  });
 
-  return createSuccessResponse(createGeoJSONResponse(featuresWithDistance, {
-    query: 'nearest',
-    point: { lon, lat },
-    limit,
-    count: featuresWithDistance.length
-  }));
+  return createSuccessResponse({
+    data: aoisWithDistance,
+    meta: {
+      query: 'nearest',
+      point: { lon, lat },
+      limit,
+      count: aoisWithDistance.length
+    }
+  });
 }
 
 /**
@@ -883,7 +889,22 @@ async function updateAOIV3(id, user, request, env) {
     return createErrorResponse('Failed to update AOI', 500);
   }
 
-  return createSuccessResponse({
+  // Fetch and return the updated AOI
+  const updated = await executeQueryFirst(env, `
+    SELECT a.id, a.station_id, a.platform_id,
+           a.name, a.normalized_name, a.description,
+           a.geometry_type, a.geometry_json, a.bbox_json,
+           a.centroid_lat, a.centroid_lon, a.area_m2, a.perimeter_m,
+           a.ecosystem_code, a.purpose, a.aoi_type, a.status,
+           a.source, a.source_file, a.source_crs,
+           a.created_at, a.updated_at,
+           s.acronym as station_acronym, s.display_name as station_name
+    FROM areas_of_interest a
+    JOIN stations s ON a.station_id = s.id
+    WHERE a.id = ?
+  `, [id], 'updateAOIV3-fetch');
+
+  return createSuccessResponse(updated || {
     success: true,
     message: 'AOI updated successfully',
     id: parseInt(id, 10)

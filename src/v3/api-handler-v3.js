@@ -335,9 +335,12 @@ async function routeAOIsV3(method, pathSegments, request, env, url) {
  * - GET    /api/v3/campaigns/:id/products      - Get products from campaign
  * - GET    /api/v3/campaigns/status/:status    - Get campaigns by status
  * - GET    /api/v3/campaigns/station/:id       - Get campaigns for station
+ * - GET    /api/v3/campaigns/upcoming          - Get upcoming campaigns
+ * - GET    /api/v3/campaigns/calendar          - Get campaigns in calendar format
  * - POST   /api/v3/campaigns                   - Create campaign
  * - PUT    /api/v3/campaigns/:id               - Update campaign
  * - PUT    /api/v3/campaigns/:id/status        - Update campaign status
+ * - PUT    /api/v3/campaigns/:id/complete      - Complete a campaign
  * - DELETE /api/v3/campaigns/:id               - Delete campaign
  */
 async function routeCampaignsV3(method, pathSegments, request, env, url) {
@@ -347,6 +350,16 @@ async function routeCampaignsV3(method, pathSegments, request, env, url) {
   // Handle /campaigns/status/:status - Filter by status
   if (resourceId === 'status' && subResource) {
     return await handleCampaignsV3(method, { status: subResource }, request, env, url);
+  }
+
+  // Handle /campaigns/upcoming - Upcoming campaigns
+  if (resourceId === 'upcoming') {
+    return await handleCampaignsV3(method, { upcoming: true }, request, env, url);
+  }
+
+  // Handle /campaigns/calendar - Calendar format
+  if (resourceId === 'calendar') {
+    return await handleCampaignsV3(method, { calendar: true }, request, env, url);
   }
 
   // Handle /campaigns/station/:stationId - Filter by station
@@ -367,6 +380,11 @@ async function routeCampaignsV3(method, pathSegments, request, env, url) {
   // Handle /campaigns/:id/status - Update status only
   if (resourceId && subResource === 'status' && method === 'PUT') {
     return await handleCampaignsV3(method, { id: resourceId, updateStatus: true }, request, env, url);
+  }
+
+  // Handle /campaigns/:id/complete - Complete campaign
+  if (resourceId && subResource === 'complete' && method === 'PUT') {
+    return await handleCampaignsV3(method, { id: resourceId, complete: true }, request, env, url);
   }
 
   // Standard campaign CRUD
@@ -390,6 +408,21 @@ async function routeCampaignsV3(method, pathSegments, request, env, url) {
 async function routeProductsV3(method, pathSegments, request, env, url) {
   const resourceId = pathSegments[1];
   const subResource = pathSegments[2];
+
+  // Handle /products/types - List available product types
+  if (resourceId === 'types') {
+    return await handleProductsV3(method, { listTypes: true }, request, env, url);
+  }
+
+  // Handle /products/stats - Product statistics
+  if (resourceId === 'stats') {
+    return await handleProductsV3(method, { stats: true }, request, env, url);
+  }
+
+  // Handle /products/timeline - Timeline format
+  if (resourceId === 'timeline') {
+    return await handleProductsV3(method, { timeline: true }, request, env, url);
+  }
 
   // Handle /products/type/:productType - Filter by type
   if (resourceId === 'type' && subResource) {
@@ -416,6 +449,11 @@ async function routeProductsV3(method, pathSegments, request, env, url) {
     return await handleProductsV3(method, { date: subResource }, request, env, url);
   }
 
+  // Handle /products/:id/archive - Archive product
+  if (resourceId && subResource === 'archive' && method === 'PUT') {
+    return await handleProductsV3(method, { id: resourceId, archive: true }, request, env, url);
+  }
+
   // Standard product CRUD
   return await handleProductsV3(method, { id: resourceId }, request, env, url);
 }
@@ -437,13 +475,24 @@ async function handleHealthV3(env) {
       env.DB.prepare('SELECT COUNT(*) as count FROM products').first()
     ]);
 
+    // Build features array from config
+    const featuresArray = [
+      'aoi-support',
+      'uav-platforms',
+      'satellite-platforms',
+      'spatial-queries',
+      'geojson-export',
+      'campaign-management',
+      'product-catalog'
+    ];
+
     return createSuccessResponse({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       version: '8.0.0',
-      apiVersion: 'v3',
+      apiVersions: ['v3'],
       database: dbTest ? 'connected' : 'disconnected',
-      features: V3_CONFIG.features,
+      features: featuresArray,
       stats: {
         platformTypes: platformTypes?.count || 0,
         areasOfInterest: aois?.count || 0,

@@ -68,6 +68,9 @@ export function checkUserPermissions(user, resource, action) {
       platforms: ['read', 'write', 'delete', 'admin'],
       instruments: ['read', 'write', 'delete', 'admin'],
       rois: ['read', 'write', 'delete', 'admin'],
+      aois: ['read', 'write', 'delete', 'admin'],
+      campaigns: ['read', 'write', 'delete', 'admin'],
+      products: ['read', 'write', 'delete', 'admin'],
       export: ['read']
     },
     station: {
@@ -75,6 +78,9 @@ export function checkUserPermissions(user, resource, action) {
       platforms: ['read', 'write'],
       instruments: ['read', 'write'],
       rois: ['read', 'write'],
+      aois: ['read', 'write'],
+      campaigns: ['read', 'write'],
+      products: ['read', 'write'],
       export: ['read']
     },
     readonly: {
@@ -82,6 +88,9 @@ export function checkUserPermissions(user, resource, action) {
       platforms: ['read'],
       instruments: ['read'],
       rois: ['read'],
+      aois: ['read'],
+      campaigns: ['read'],
+      products: ['read'],
       export: ['read']
     }
   };

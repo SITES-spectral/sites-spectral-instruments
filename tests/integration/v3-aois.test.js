@@ -224,7 +224,8 @@ describe('V3 AOIs - Basic CRUD Operations', () => {
     it('should delete an existing AOI', async () => {
       const token = generateTestToken({ role: 'admin' });
 
-      const request = createMockRequest(apiUrl('/api/v3/aois/1'), {
+      // Use AOI 3 which has no campaigns referencing it (AOI 1 has campaigns)
+      const request = createMockRequest(apiUrl('/api/v3/aois/3'), {
         method: 'DELETE',
         authToken: token,
       });
