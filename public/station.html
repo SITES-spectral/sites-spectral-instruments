@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.2">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.3">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.2">
+    <meta name="app-version" content="8.0.3">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.2"></script>
-    <script src="/js/api.js?v=8.0.2"></script>
-    <script src="/js/components.js?v=8.0.2"></script>
+    <script src="/js/utils.js?v=8.0.3"></script>
+    <script src="/js/api.js?v=8.0.3"></script>
+    <script src="/js/components.js?v=8.0.3"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.2"></script>
-    <script src="/js/station-dashboard.js?v=8.0.2"></script>
-    <script src="/js/navigation.js?v=8.0.2"></script>
-    <script src="/js/export.js?v=8.0.2"></script>
+    <script src="/js/interactive-map.js?v=8.0.3"></script>
+    <script src="/js/station-dashboard.js?v=8.0.3"></script>
+    <script src="/js/navigation.js?v=8.0.3"></script>
+    <script src="/js/export.js?v=8.0.3"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -8130,6 +8130,18 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label for="platform-type">Platform Type</label>
+                            <select id="platform-type" class="form-input" onchange="updatePlatformNormalizedName()">
+                                <option value="fixed">Fixed Tower/Mast</option>
+                                <option value="uav">UAV / Drone</option>
+                                <option value="satellite">Satellite</option>
+                                <option value="mobile">Mobile Platform</option>
+                            </select>
+                            <small>Determines how the platform is categorized in the dashboard</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="platform-status">Status</label>
                             <select id="platform-status" class="form-input">
                                 <option value="Active">Active</option>
@@ -8224,13 +8236,40 @@
         function updatePlatformNormalizedName() {
             const stationAcronym = stationData?.acronym || 'STA';
             const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
+            const platformType = document.getElementById('platform-type')?.value || 'fixed';
             const locationCode = document.getElementById('platform-location-code')?.value || '';
 
             if (locationCode) {
-                const normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
+                let normalizedName;
+
+                // Different naming patterns based on platform type
+                // Fixed:     SVB_FOR_PL01     (station_ecosystem_location)
+                // UAV:       SVB_FOR_UAV01    (station_ecosystem_UAV##)
+                // Satellite: SVB_SAT_PL01     (station_SAT_location)
+                // Mobile:    SVB_FOR_MOB01    (station_ecosystem_MOB##)
+
+                if (platformType === 'satellite') {
+                    // Satellite platforms use SAT instead of ecosystem
+                    normalizedName = `${stationAcronym}_SAT_${locationCode}`;
+                } else {
+                    normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
+                }
+
                 const normalizedInput = document.getElementById('platform-normalized-name');
                 if (normalizedInput) {
                     normalizedInput.value = normalizedName;
+                }
+
+                // Update location code placeholder based on platform type
+                const locationInput = document.getElementById('platform-location-code');
+                if (locationInput) {
+                    const placeholders = {
+                        fixed: 'e.g., PL01, BL01',
+                        uav: 'e.g., UAV01, UAV02',
+                        satellite: 'e.g., PL01, S2A',
+                        mobile: 'e.g., MOB01, MOB02'
+                    };
+                    locationInput.placeholder = placeholders[platformType] || 'e.g., PL01';
                 }
             }
         }
@@ -8248,6 +8287,7 @@
                     display_name: document.getElementById('platform-display-name').value.trim(),
                     location_code: document.getElementById('platform-location-code').value.trim().toUpperCase(),
                     ecosystem_code: document.getElementById('platform-ecosystem-code').value,
+                    platform_type: document.getElementById('platform-type').value,
                     normalized_name: document.getElementById('platform-normalized-name').value.trim(),
                     status: document.getElementById('platform-status').value,
                     mounting_structure: document.getElementById('platform-mounting-structure').value || null,

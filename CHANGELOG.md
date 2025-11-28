@@ -12,6 +12,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.3] - 2025-11-28
+
+### Feature: Platform Type Selection in Admin Dashboard
+
+**Release Date**: 2025-11-28
+**Focus**: Enable creation of UAV, Satellite, and Mobile platforms via Admin UI
+
+#### Added
+
+**Platform Type Dropdown in Create Platform Form:**
+- New "Platform Type" dropdown with options: Fixed Tower/Mast, UAV/Drone, Satellite, Mobile Platform
+- Platform type is now saved to database when creating new platforms
+- Location code placeholder updates based on selected platform type
+
+**Smart Normalized Name Generation:**
+- Fixed platforms: `{STATION}_{ECO}_PL##` (e.g., SVB_FOR_PL01)
+- UAV platforms: `{STATION}_{ECO}_UAV##` (e.g., SVB_FOR_UAV01)
+- Satellite platforms: `{STATION}_SAT_PL##` (e.g., SVB_SAT_PL01) - uses SAT instead of ecosystem
+- Mobile platforms: `{STATION}_{ECO}_MOB##` (e.g., SVB_FOR_MOB01)
+
+**Enhanced Documentation:**
+- Updated `PLATFORM_TYPE_UPDATE_GUIDE.md` with comprehensive naming conventions
+- Added instrument naming patterns (PHE, MS, PAR, NDVI, PRI, HYP)
+- Added complete examples for each platform type with instruments
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `public/station.html` | Added platform_type dropdown, updated saveNewPlatform(), enhanced updatePlatformNormalizedName() |
+| `docs/PLATFORM_TYPE_UPDATE_GUIDE.md` | Added Admin Dashboard instructions, instrument naming conventions |
+
+---
+
 ## [8.0.2] - 2025-11-28
 
 ### DEFINITIVE FIX: Platform Tab Counts & Filtering

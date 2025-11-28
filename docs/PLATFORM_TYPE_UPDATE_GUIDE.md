@@ -65,7 +65,34 @@ WHERE normalized_name IN ('SVB_SAT_PL01', 'ANS_SAT_PL01');
 
 ---
 
-## Method 2: Update via API (Admin Only)
+## Method 2: Create via Admin Dashboard (Recommended)
+
+As of v8.0.3, the Admin Dashboard fully supports creating platforms of any type:
+
+1. **Log in** as admin at https://sites.jobelab.com
+2. **Navigate** to the station dashboard (e.g., `/station?station=SVB`)
+3. **Click** the "+ Platform" button
+4. **Fill in** the form:
+   - **Display Name**: Descriptive name (e.g., "Forest UAV Platform 01")
+   - **Location Code**: Unique code (e.g., "UAV01", "SAT01", "MOB01")
+   - **Ecosystem Code**: Select from dropdown (FOR, AGR, MIR, etc.)
+   - **Platform Type**: Select from dropdown:
+     - Fixed Tower/Mast (default)
+     - UAV / Drone
+     - Satellite
+     - Mobile Platform
+   - **Normalized Name**: Auto-generated based on your selections
+5. **Click** "Create Platform"
+
+The normalized name updates automatically based on platform type:
+- Fixed: `SVB_FOR_PL01`
+- UAV: `SVB_FOR_UAV01`
+- Satellite: `SVB_SAT_PL01` (uses SAT instead of ecosystem)
+- Mobile: `SVB_FOR_MOB01`
+
+---
+
+## Method 3: Update via API (Admin Only)
 
 ### Using curl
 
@@ -186,14 +213,65 @@ The station dashboard shows tabs based on available platforms:
 
 ## Naming Conventions
 
+### Platform Naming
+
 Recommended naming patterns for different platform types:
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` |
-| UAV | `{STATION}_{ECO}_UAV##` | `SVB_FOR_UAV01` |
-| Satellite | `{STATION}_SAT_PL##` | `SVB_SAT_PL01` |
-| Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` |
+| Type | Pattern | Example | Description |
+|------|---------|---------|-------------|
+| Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` | Fixed observation tower/mast |
+| UAV | `{STATION}_{ECO}_UAV##` | `SVB_FOR_UAV01` | Drone/UAV platform |
+| Satellite | `{STATION}_SAT_PL##` | `SVB_SAT_PL01` | Satellite-based platform |
+| Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` | Mobile/portable platform |
+
+**Components:**
+- `{STATION}` - Station acronym (SVB, ANS, LON, etc.)
+- `{ECO}` - Ecosystem code (FOR, AGR, MIR, LAK, WET, GRA, etc.)
+- `##` - Sequential number (01, 02, 03...)
+
+### Instrument Naming
+
+Instruments follow the pattern: `{PLATFORM}_{TYPE}##`
+
+| Instrument Type | Code | Example | Description |
+|-----------------|------|---------|-------------|
+| Phenocam | PHE | `SVB_FOR_PL01_PHE01` | Digital phenocam |
+| Multispectral | MS | `SVB_FOR_PL01_MS01` | Multispectral sensor |
+| PAR Sensor | PAR | `SVB_FOR_PL01_PAR01` | Photosynthetically Active Radiation |
+| NDVI Sensor | NDVI | `SVB_FOR_PL01_NDVI01` | NDVI sensor |
+| PRI Sensor | PRI | `SVB_FOR_PL01_PRI01` | Photochemical Reflectance Index |
+| Hyperspectral | HYP | `SVB_FOR_PL01_HYP01` | Hyperspectral sensor |
+
+### Complete Examples
+
+#### Fixed Tower with Phenocams and MS Sensors
+```
+Platform:   SVB_FOR_PL01          (Svartberget Forest Platform 01)
+├── Phenocam:  SVB_FOR_PL01_PHE01  (Phenocam facing canopy)
+├── Phenocam:  SVB_FOR_PL01_PHE02  (Phenocam facing understory)
+└── MS Sensor: SVB_FOR_PL01_MS01   (Multispectral sensor)
+```
+
+#### UAV Platform with Hyperspectral
+```
+Platform:   SVB_FOR_UAV01         (Svartberget Forest UAV 01)
+├── Phenocam:      SVB_FOR_UAV01_PHE01  (Nadir camera)
+└── Hyperspectral: SVB_FOR_UAV01_HYP01  (Hyperspectral imager)
+```
+
+#### Satellite Platform
+```
+Platform:   SVB_SAT_PL01          (Svartberget Satellite Platform 01)
+├── NDVI Sensor: SVB_SAT_PL01_NDVI01  (Sentinel-2 NDVI)
+└── MS Sensor:   SVB_SAT_PL01_MS01    (Sentinel-2 MSI)
+```
+
+#### Mobile Platform
+```
+Platform:   ANS_AGR_MOB01         (Abisko Agriculture Mobile 01)
+├── Phenocam:  ANS_AGR_MOB01_PHE01  (Handheld phenocam)
+└── PAR Sensor: ANS_AGR_MOB01_PAR01  (Portable PAR sensor)
+```
 
 ---
 
