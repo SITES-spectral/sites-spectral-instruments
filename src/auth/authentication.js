@@ -1,6 +1,7 @@
 // Authentication Module
-// JWT authentication, user verification, session management
+// JWT authentication with HMAC-SHA256 signing, user verification, session management
 
+import { SignJWT, jwtVerify } from 'jose';
 import { createErrorResponse, createUnauthorizedResponse } from '../utils/responses.js';
 import { logSecurityEvent } from '../utils/logging.js';
 
@@ -154,7 +155,7 @@ export async function authenticateUser(username, password, env) {
 }
 
 /**
- * Generate JWT token for authenticated user
+ * Generate JWT token for authenticated user using HMAC-SHA256 signing
  * @param {Object} user - Authenticated user object
  * @param {Object} env - Environment variables and bindings
  * @returns {string} JWT token
@@ -168,20 +169,27 @@ export async function generateToken(user, env) {
       throw new Error('JWT secret not available');
     }
 
-    // Simple token for now - will upgrade to proper JWT later
-    const tokenData = {
+    // Create secret key for HMAC-SHA256
+    const secret = new TextEncoder().encode(credentials.jwt_secret);
+
+    // Build JWT with proper signing using jose library
+    const jwt = await new SignJWT({
       username: user.username,
       role: user.role,
       station_acronym: user.station_acronym,
       station_normalized_name: user.station_normalized_name,
       station_id: user.station_id,
       edit_privileges: user.edit_privileges,
-      permissions: user.permissions,
-      issued_at: Date.now(),
-      expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-    };
+      permissions: user.permissions
+    })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setExpirationTime('24h')
+      .setIssuer('sites-spectral')
+      .setSubject(user.username)
+      .sign(secret);
 
-    return btoa(JSON.stringify(tokenData));
+    return jwt;
   } catch (error) {
     console.error('Token generation error:', error);
     throw error;
@@ -190,6 +198,7 @@ export async function generateToken(user, env) {
 
 /**
  * Extract and validate user from request authorization header
+ * Uses proper JWT verification with HMAC-SHA256
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Object|null} User object or null if invalid
@@ -208,24 +217,45 @@ export async function getUserFromRequest(request, env) {
       return null;
     }
 
-    const tokenData = JSON.parse(atob(token));
+    // Load JWT secret for verification
+    const credentials = await loadCredentials(env);
+    if (!credentials?.jwt_secret) {
+      console.error('JWT secret not found for verification');
+      return null;
+    }
+
+    const secret = new TextEncoder().encode(credentials.jwt_secret);
+
+    // Verify JWT signature and expiration
+    const { payload } = await jwtVerify(token, secret, {
+      issuer: 'sites-spectral'
+    });
 
     // Check required fields
-    if (!tokenData.username || !tokenData.role) {
+    if (!payload.username || !payload.role) {
       console.warn('Invalid token: missing required fields');
       return null;
     }
 
-    // Check token expiration
-    if (tokenData.expires_at && Date.now() > tokenData.expires_at) {
-      console.warn(`Token expired for user: ${tokenData.username}`);
-      return null;
-    }
-
-    console.log(`Valid token for user: ${tokenData.username}, role: ${tokenData.role}`);
-    return tokenData;
+    console.log(`Valid token for user: ${payload.username}, role: ${payload.role}`);
+    return {
+      username: payload.username,
+      role: payload.role,
+      station_acronym: payload.station_acronym,
+      station_normalized_name: payload.station_normalized_name,
+      station_id: payload.station_id,
+      edit_privileges: payload.edit_privileges,
+      permissions: payload.permissions
+    };
   } catch (error) {
-    console.error('Token validation error:', error);
+    // Handle specific JWT errors
+    if (error.code === 'ERR_JWT_EXPIRED') {
+      console.warn('Token expired');
+    } else if (error.code === 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED') {
+      console.warn('Invalid token signature - possible tampering attempt');
+    } else {
+      console.error('Token validation error:', error);
+    }
     return null;
   }
 }

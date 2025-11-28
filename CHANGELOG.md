@@ -12,6 +12,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.5.4] - 2025-11-28
+
+### SECURITY: JWT HMAC-SHA256 Signing and Authentication Fixes
+
+**Release Date**: 2025-11-28
+**Focus**: Critical security improvements for authentication system
+
+#### Security Fixes
+
+- **JWT HMAC-SHA256 Signing**: Replaced insecure base64 token encoding with proper JWT signing:
+  - Implemented `SignJWT` from `jose` library for token generation
+  - Added `jwtVerify` for cryptographic signature verification
+  - Tokens are now tamper-proof with HMAC-SHA256 algorithm
+  - Added proper JWT claims: issuer, subject, issuedAt, expirationTime
+
+- **AOI Authentication Bypass**: Fixed hardcoded admin role in AOI special routes:
+  - `getAOIsGeoJSON()` now requires proper authentication
+  - `getAOIsByPlatformType()` now requires proper authentication
+  - Returns 401 Unauthorized if no valid token present
+
+#### Technical Details
+
+- Uses `jose` library (already in dependencies) for JWT operations
+- Secret key derived from `JWT_SECRET` environment variable
+- Tokens expire after 24 hours with proper cryptographic verification
+- Invalid/expired tokens are properly rejected with specific error messages
+
+#### Files Modified
+
+- `src/auth/authentication.js` - Complete JWT rewrite with HMAC-SHA256
+- `src/api-handler.js` - Added proper auth checks for AOI routes
+
+---
+
 ## [8.5.3] - 2025-11-28
 
 ### AUDIT FIXES: UX Critical Issues and Error Handling

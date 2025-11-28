@@ -3,7 +3,7 @@
 // Now includes versioned API (v2) with pagination support
 // Added AOI (Areas of Interest) support for UAV/Satellite platforms
 
-import { handleAuth } from './auth/authentication.js';
+import { handleAuth, getUserFromRequest } from './auth/authentication.js';
 import { handleStations } from './handlers/stations.js';
 import { handlePlatforms } from './handlers/platforms.js';
 import { handleInstruments } from './handlers/instruments.js';
@@ -26,7 +26,8 @@ import { logApiRequest } from './utils/logging.js';
 import {
   createErrorResponse,
   createNotFoundResponse,
-  createInternalServerErrorResponse
+  createInternalServerErrorResponse,
+  createUnauthorizedResponse
 } from './utils/responses.js';
 
 // V2 API Handler with pagination
@@ -89,12 +90,20 @@ export async function handleApiRequest(request, env, ctx) {
         return await handleROIs(method, id, request, env);
 
       case 'aois':
-        // Special sub-routes for AOIs
+        // Special sub-routes for AOIs - require authentication
         if (pathSegments[1] === 'geojson' && pathSegments[2]) {
-          return await getAOIsGeoJSON(pathSegments[2], { role: 'admin' }, env);
+          const user = await getUserFromRequest(request, env);
+          if (!user) {
+            return createUnauthorizedResponse();
+          }
+          return await getAOIsGeoJSON(pathSegments[2], user, env);
         }
         if (pathSegments[1] === 'by-platform-type' && pathSegments[2]) {
-          return await getAOIsByPlatformType(pathSegments[2], { role: 'admin' }, env);
+          const user = await getUserFromRequest(request, env);
+          if (!user) {
+            return createUnauthorizedResponse();
+          }
+          return await getAOIsByPlatformType(pathSegments[2], user, env);
         }
         return await handleAOIs(method, id, request, env);
 
