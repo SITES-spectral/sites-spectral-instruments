@@ -1,0 +1,491 @@
+# =============================================================================
+# Modal Configuration
+# SITES Spectral v8.0.0 - Phase 7
+# =============================================================================
+# Configuration for modal dialogs including maintenance and calibration modals.
+# Defines structure, validation rules, and behavior.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Modal dialog configuration and form definitions"
+  last_updated: "2025-11-28"
+
+# =============================================================================
+# GLOBAL MODAL SETTINGS
+# =============================================================================
+
+global:
+  # Animation settings
+  animation:
+    open: "slide_in"
+    close: "fade_out"
+    duration_ms: 200
+
+  # Backdrop settings
+  backdrop:
+    color: "rgba(0, 0, 0, 0.5)"
+    blur: "4px"
+    close_on_click: true
+
+  # Size presets
+  sizes:
+    small:
+      width: "400px"
+      max_height: "60vh"
+    medium:
+      width: "600px"
+      max_height: "80vh"
+    large:
+      width: "800px"
+      max_height: "90vh"
+    full:
+      width: "95vw"
+      max_height: "95vh"
+
+  # Z-index layers
+  z_index:
+    backdrop: 1000
+    modal: 1001
+    nested: 1002
+
+# =============================================================================
+# MAINTENANCE MODAL
+# =============================================================================
+
+maintenance_modal:
+  id: "maintenance-modal"
+  title: "Maintenance Record"
+  icon: "fa-wrench"
+  size: "large"
+
+  # Form sections
+  sections:
+    - id: "basic_info"
+      title: "Basic Information"
+      icon: "fa-info-circle"
+      collapsible: false
+      fields:
+        - id: "maintenance_date"
+          type: "datetime"
+          label: "Maintenance Date"
+          required: true
+          default: "now"
+
+        - id: "maintenance_type"
+          type: "select"
+          label: "Maintenance Type"
+          required: true
+          options_from: "yamls/maintenance/maintenance-types.yaml#types"
+          display_field: "label"
+          value_field: "code"
+
+        - id: "description"
+          type: "textarea"
+          label: "Description"
+          required: true
+          placeholder: "Describe the maintenance work performed..."
+          rows: 3
+
+    - id: "status_priority"
+      title: "Status & Priority"
+      icon: "fa-flag"
+      collapsible: true
+      fields:
+        - id: "status"
+          type: "select"
+          label: "Status"
+          required: true
+          default: "completed"
+          options_from: "yamls/maintenance/maintenance-types.yaml#statuses"
+
+        - id: "priority"
+          type: "select"
+          label: "Priority"
+          required: false
+          default: "normal"
+          options_from: "yamls/maintenance/maintenance-types.yaml#priorities"
+
+    - id: "problem_tracking"
+      title: "Problem Tracking"
+      icon: "fa-bug"
+      collapsible: true
+      show_when:
+        field: "maintenance_type"
+        in: ["repair", "inspection"]
+      fields:
+        - id: "recurrent_problem"
+          type: "checkbox"
+          label: "This is a recurrent problem"
+          default: false
+
+        - id: "problem_category"
+          type: "select"
+          label: "Problem Category"
+          required: false
+          options_from: "yamls/maintenance/maintenance-types.yaml#problem_categories"
+          show_when:
+            field: "recurrent_problem"
+            equals: true
+
+        - id: "problem_severity"
+          type: "select"
+          label: "Severity"
+          required: false
+          options_from: "yamls/maintenance/maintenance-types.yaml#severity_levels"
+
+        - id: "root_cause"
+          type: "textarea"
+          label: "Root Cause Analysis"
+          required: false
+          placeholder: "What caused this issue?"
+          rows: 2
+
+    - id: "work_details"
+      title: "Work Details"
+      icon: "fa-clipboard"
+      collapsible: true
+      fields:
+        - id: "technician"
+          type: "text"
+          label: "Technician"
+          required: false
+          placeholder: "Name of person who performed the work"
+
+        - id: "duration_minutes"
+          type: "number"
+          label: "Duration (minutes)"
+          required: false
+          min: 0
+          max: 1440
+          step: 5
+
+        - id: "tags"
+          type: "tags"
+          label: "Tags"
+          required: false
+          suggestions_from: "yamls/maintenance/maintenance-types.yaml#common_tags"
+          allow_custom: true
+
+    - id: "parts_materials"
+      title: "Parts & Materials"
+      icon: "fa-box"
+      collapsible: true
+      fields:
+        - id: "parts_replaced"
+          type: "json_array"
+          label: "Parts Replaced"
+          required: false
+          item_schema:
+            name:
+              type: "text"
+              label: "Part Name"
+            serial:
+              type: "text"
+              label: "Serial Number"
+            cost:
+              type: "number"
+              label: "Cost"
+              step: 0.01
+
+        - id: "total_cost"
+          type: "number"
+          label: "Total Cost"
+          required: false
+          step: 0.01
+          prefix: "$"
+
+    - id: "scheduling"
+      title: "Scheduling"
+      icon: "fa-calendar"
+      collapsible: true
+      fields:
+        - id: "next_maintenance_date"
+          type: "date"
+          label: "Next Maintenance Date"
+          required: false
+          min: "today"
+
+    - id: "notes"
+      title: "Additional Notes"
+      icon: "fa-sticky-note"
+      collapsible: true
+      fields:
+        - id: "notes"
+          type: "textarea"
+          label: "Notes"
+          required: false
+          placeholder: "Any additional observations or notes..."
+          rows: 4
+
+# =============================================================================
+# CALIBRATION MODAL
+# =============================================================================
+
+calibration_modal:
+  id: "calibration-modal"
+  title: "Calibration Log"
+  icon: "fa-sliders"
+  size: "large"
+
+  sections:
+    - id: "calibration_info"
+      title: "Calibration Information"
+      icon: "fa-info-circle"
+      collapsible: false
+      fields:
+        - id: "calibration_date"
+          type: "datetime"
+          label: "Calibration Date"
+          required: true
+          default: "now"
+
+        - id: "calibration_type"
+          type: "select"
+          label: "Calibration Type"
+          required: true
+          options_from: "yamls/maintenance/calibration-types.yaml#types"
+
+        - id: "calibration_method"
+          type: "select"
+          label: "Calibration Method"
+          required: false
+          options_from: "yamls/maintenance/calibration-types.yaml#methods"
+
+    - id: "scheduling"
+      title: "Scheduling"
+      icon: "fa-calendar"
+      collapsible: true
+      fields:
+        - id: "frequency"
+          type: "select"
+          label: "Calibration Frequency"
+          required: false
+          options_from: "yamls/maintenance/calibration-types.yaml#frequencies"
+
+        - id: "next_calibration_date"
+          type: "date"
+          label: "Next Calibration Date"
+          required: false
+          auto_calculate: true
+          calculate_from: "frequency"
+
+        - id: "duration_minutes"
+          type: "number"
+          label: "Duration (minutes)"
+          required: false
+          min: 0
+          max: 480
+          step: 5
+
+    - id: "reflectance_panel"
+      title: "Reflectance Panel"
+      icon: "fa-square"
+      collapsible: true
+      fields:
+        - id: "reflectance_panel_used"
+          type: "select"
+          label: "Panel Used"
+          required: false
+          options_from: "yamls/maintenance/calibration-types.yaml#reflectance_panels"
+
+        - id: "panel_serial_number"
+          type: "text"
+          label: "Panel Serial Number"
+          required: false
+
+        - id: "panel_condition"
+          type: "select"
+          label: "Panel Condition"
+          required: false
+          options:
+            - value: "excellent"
+              label: "Excellent"
+            - value: "good"
+              label: "Good"
+            - value: "fair"
+              label: "Fair"
+            - value: "poor"
+              label: "Poor - Needs Replacement"
+
+    - id: "technician_info"
+      title: "Technician"
+      icon: "fa-user"
+      collapsible: true
+      fields:
+        - id: "technician"
+          type: "text"
+          label: "Technician Name"
+          required: false
+
+    - id: "ambient_conditions"
+      title: "Ambient Conditions"
+      icon: "fa-cloud-sun"
+      collapsible: true
+      fields:
+        - id: "temperature_c"
+          type: "number"
+          label: "Temperature (°C)"
+          required: false
+          min: -40
+          max: 60
+          step: 0.1
+
+        - id: "humidity_pct"
+          type: "number"
+          label: "Relative Humidity (%)"
+          required: false
+          min: 0
+          max: 100
+          step: 1
+
+        - id: "cloud_cover"
+          type: "select"
+          label: "Cloud Cover"
+          required: false
+          options:
+            - value: "clear"
+              label: "Clear"
+            - value: "mostly_clear"
+              label: "Mostly Clear"
+            - value: "partly_cloudy"
+              label: "Partly Cloudy"
+            - value: "mostly_cloudy"
+              label: "Mostly Cloudy"
+            - value: "overcast"
+              label: "Overcast"
+
+        - id: "wind_speed_ms"
+          type: "number"
+          label: "Wind Speed (m/s)"
+          required: false
+          min: 0
+          max: 50
+          step: 0.1
+
+    - id: "sensor_state"
+      title: "Sensor State"
+      icon: "fa-eye"
+      collapsible: true
+      fields:
+        - id: "physical_aspect_before"
+          type: "textarea"
+          label: "Physical State Before"
+          required: false
+          placeholder: "Describe sensor condition before calibration..."
+          rows: 2
+
+        - id: "sensor_cleanliness_before"
+          type: "select"
+          label: "Cleanliness Before"
+          required: false
+          options_from: "yamls/maintenance/calibration-types.yaml#cleanliness_states"
+
+        - id: "cleaning_performed"
+          type: "checkbox"
+          label: "Cleaning Performed"
+          default: false
+
+        - id: "cleaning_method"
+          type: "select"
+          label: "Cleaning Method"
+          required: false
+          options_from: "yamls/maintenance/calibration-types.yaml#cleaning_methods"
+          show_when:
+            field: "cleaning_performed"
+            equals: true
+
+        - id: "physical_aspect_after"
+          type: "textarea"
+          label: "Physical State After"
+          required: false
+          placeholder: "Describe sensor condition after calibration..."
+          rows: 2
+
+        - id: "sensor_cleanliness_after"
+          type: "select"
+          label: "Cleanliness After"
+          required: false
+          options_from: "yamls/maintenance/calibration-types.yaml#cleanliness_states"
+
+    - id: "quality_assessment"
+      title: "Quality Assessment"
+      icon: "fa-chart-line"
+      collapsible: true
+      fields:
+        - id: "quality_passed"
+          type: "checkbox"
+          label: "Quality Check Passed"
+          default: true
+
+        - id: "quality_score"
+          type: "number"
+          label: "Quality Score (0-100)"
+          required: false
+          min: 0
+          max: 100
+          step: 0.1
+
+        - id: "deviation_from_reference"
+          type: "number"
+          label: "Deviation from Reference (%)"
+          required: false
+          min: 0
+          max: 100
+          step: 0.1
+
+        - id: "quality_notes"
+          type: "textarea"
+          label: "Quality Notes"
+          required: false
+          rows: 2
+
+    - id: "notes"
+      title: "Additional Notes"
+      icon: "fa-sticky-note"
+      collapsible: true
+      fields:
+        - id: "notes"
+          type: "textarea"
+          label: "Notes"
+          required: false
+          placeholder: "Any additional observations..."
+          rows: 4
+
+# =============================================================================
+# DELETE CONFIRMATION MODAL
+# =============================================================================
+
+delete_confirmation_modal:
+  id: "delete-confirmation-modal"
+  title: "Confirm Deletion"
+  icon: "fa-exclamation-triangle"
+  size: "small"
+  danger: true
+
+  content:
+    warning_icon: "fa-exclamation-triangle"
+    warning_color: "#dc2626"
+    message_template: "Are you sure you want to delete {entity_type} '{entity_name}'?"
+    confirmation_text: "This action cannot be undone."
+
+  # Type-to-confirm for dangerous deletions
+  type_confirm:
+    enabled: true
+    prompt: "Type the name to confirm:"
+    placeholder: "Enter name exactly"
+
+  # Show dependency warnings
+  dependency_check:
+    enabled: true
+    show_dependencies: true
+    block_if_has_dependencies: true
+
+  buttons:
+    cancel:
+      label: "Cancel"
+      style: "secondary"
+    confirm:
+      label: "Delete"
+      style: "danger"
+      icon: "fa-trash"

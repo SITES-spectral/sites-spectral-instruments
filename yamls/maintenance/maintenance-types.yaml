@@ -1,0 +1,334 @@
+# =============================================================================
+# Maintenance Types Configuration
+# SITES Spectral v8.0.0 - Phase 7
+# =============================================================================
+# Defines all maintenance type classifications, problem categories,
+# severity levels, and status workflows.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Maintenance type definitions and classifications"
+  last_updated: "2025-11-28"
+
+# =============================================================================
+# MAINTENANCE TYPES
+# =============================================================================
+# Types of maintenance activities that can be performed on instruments
+# =============================================================================
+
+types:
+  routine:
+    code: "routine"
+    label: "Routine Maintenance"
+    icon: "fa-calendar-check"
+    color: "#059669"
+    description: "Scheduled preventive maintenance to ensure optimal performance"
+    examples:
+      - "Monthly inspection"
+      - "Quarterly servicing"
+      - "Annual checkup"
+    typical_duration_minutes: 30
+    recommended_frequency_days: 90
+
+  cleaning:
+    code: "cleaning"
+    label: "Cleaning"
+    icon: "fa-broom"
+    color: "#0891b2"
+    description: "Cleaning of lens, sensor, housing, or other equipment components"
+    examples:
+      - "Lens cleaning"
+      - "Sensor dusting"
+      - "Housing wash"
+      - "Filter replacement"
+    typical_duration_minutes: 20
+    recommended_frequency_days: 30
+
+  calibration:
+    code: "calibration"
+    label: "Calibration"
+    icon: "fa-sliders"
+    color: "#7c3aed"
+    description: "Sensor or instrument calibration for accurate measurements"
+    examples:
+      - "White balance calibration"
+      - "Spectral calibration"
+      - "Geometric calibration"
+    typical_duration_minutes: 45
+    recommended_frequency_days: 30
+    links_to_calibration_log: true
+
+  repair:
+    code: "repair"
+    label: "Repair"
+    icon: "fa-wrench"
+    color: "#dc2626"
+    description: "Fix broken or malfunctioning equipment"
+    examples:
+      - "Cable replacement"
+      - "Motor repair"
+      - "Connector fix"
+      - "Circuit board replacement"
+    typical_duration_minutes: 120
+    recommended_frequency_days: null
+
+  upgrade:
+    code: "upgrade"
+    label: "Upgrade"
+    icon: "fa-arrow-up"
+    color: "#2563eb"
+    description: "Hardware or firmware upgrade to improve capabilities"
+    examples:
+      - "Firmware update"
+      - "Memory upgrade"
+      - "Lens upgrade"
+      - "Software update"
+    typical_duration_minutes: 60
+    recommended_frequency_days: 365
+
+  inspection:
+    code: "inspection"
+    label: "Inspection"
+    icon: "fa-search"
+    color: "#f59e0b"
+    description: "Visual or functional inspection without modification"
+    examples:
+      - "Visual check"
+      - "Functionality test"
+      - "Performance assessment"
+      - "Damage assessment"
+    typical_duration_minutes: 15
+    recommended_frequency_days: 30
+
+# =============================================================================
+# PROBLEM CATEGORIES
+# =============================================================================
+# Classification of problems encountered during maintenance
+# =============================================================================
+
+problem_categories:
+  hardware:
+    code: "hardware"
+    label: "Hardware Issue"
+    icon: "fa-microchip"
+    color: "#ef4444"
+    description: "Physical component failures or damage"
+    examples:
+      - "Broken lens"
+      - "Damaged housing"
+      - "Loose connector"
+      - "Worn motor"
+      - "Cracked seal"
+
+  software:
+    code: "software"
+    label: "Software/Firmware"
+    icon: "fa-code"
+    color: "#8b5cf6"
+    description: "Software bugs, configuration errors, or firmware issues"
+    examples:
+      - "Firmware bug"
+      - "Configuration error"
+      - "Memory full"
+      - "Corrupted settings"
+      - "Communication timeout"
+
+  environmental:
+    code: "environmental"
+    label: "Environmental"
+    icon: "fa-cloud-sun"
+    color: "#06b6d4"
+    description: "Issues caused by environmental factors"
+    examples:
+      - "Condensation"
+      - "Frost damage"
+      - "Wildlife interference"
+      - "Vegetation overgrowth"
+      - "UV degradation"
+
+  connectivity:
+    code: "connectivity"
+    label: "Connectivity"
+    icon: "fa-wifi"
+    color: "#f97316"
+    description: "Network, data transmission, or communication problems"
+    examples:
+      - "Network failure"
+      - "Data transmission error"
+      - "Antenna damage"
+      - "Signal interference"
+      - "Protocol mismatch"
+
+  power:
+    code: "power"
+    label: "Power System"
+    icon: "fa-bolt"
+    color: "#eab308"
+    description: "Power supply, battery, or electrical issues"
+    examples:
+      - "Battery failure"
+      - "Solar panel issue"
+      - "Voltage fluctuation"
+      - "Fuse blown"
+      - "Cable corrosion"
+
+# =============================================================================
+# SEVERITY LEVELS
+# =============================================================================
+# Problem severity classification for prioritization
+# =============================================================================
+
+severity_levels:
+  minor:
+    code: "minor"
+    label: "Minor"
+    icon: "fa-circle-info"
+    color: "#22c55e"
+    description: "Low impact, does not affect core functionality"
+    priority_weight: 1
+    max_resolution_days: 30
+
+  moderate:
+    code: "moderate"
+    label: "Moderate"
+    icon: "fa-triangle-exclamation"
+    color: "#f59e0b"
+    description: "Some impact on data quality or functionality"
+    priority_weight: 2
+    max_resolution_days: 14
+
+  major:
+    code: "major"
+    label: "Major"
+    icon: "fa-exclamation-circle"
+    color: "#f97316"
+    description: "Significant impact, may cause data gaps"
+    priority_weight: 3
+    max_resolution_days: 7
+
+  critical:
+    code: "critical"
+    label: "Critical"
+    icon: "fa-circle-xmark"
+    color: "#dc2626"
+    description: "Instrument non-functional, immediate attention required"
+    priority_weight: 4
+    max_resolution_days: 1
+
+# =============================================================================
+# STATUS WORKFLOW
+# =============================================================================
+# Maintenance record status states and transitions
+# =============================================================================
+
+statuses:
+  scheduled:
+    code: "scheduled"
+    label: "Scheduled"
+    icon: "fa-clock"
+    color: "#6366f1"
+    description: "Maintenance planned for future date"
+    allowed_transitions:
+      - "in_progress"
+      - "cancelled"
+      - "deferred"
+
+  in_progress:
+    code: "in_progress"
+    label: "In Progress"
+    icon: "fa-spinner"
+    color: "#f59e0b"
+    description: "Maintenance currently being performed"
+    allowed_transitions:
+      - "completed"
+      - "deferred"
+
+  completed:
+    code: "completed"
+    label: "Completed"
+    icon: "fa-check-circle"
+    color: "#22c55e"
+    description: "Maintenance successfully finished"
+    allowed_transitions: []
+    final: true
+
+  cancelled:
+    code: "cancelled"
+    label: "Cancelled"
+    icon: "fa-ban"
+    color: "#6b7280"
+    description: "Maintenance cancelled (no longer needed)"
+    allowed_transitions: []
+    final: true
+
+  deferred:
+    code: "deferred"
+    label: "Deferred"
+    icon: "fa-forward"
+    color: "#8b5cf6"
+    description: "Postponed to a later date"
+    allowed_transitions:
+      - "scheduled"
+      - "cancelled"
+
+# =============================================================================
+# PRIORITY LEVELS
+# =============================================================================
+# Task priority for scheduling and resource allocation
+# =============================================================================
+
+priorities:
+  low:
+    code: "low"
+    label: "Low"
+    icon: "fa-arrow-down"
+    color: "#22c55e"
+    weight: 1
+    description: "Can be performed when convenient"
+
+  normal:
+    code: "normal"
+    label: "Normal"
+    icon: "fa-minus"
+    color: "#3b82f6"
+    weight: 2
+    description: "Standard priority, schedule as planned"
+
+  high:
+    code: "high"
+    label: "High"
+    icon: "fa-arrow-up"
+    color: "#f59e0b"
+    weight: 3
+    description: "Should be addressed soon"
+
+  critical:
+    code: "critical"
+    label: "Critical"
+    icon: "fa-exclamation"
+    color: "#dc2626"
+    weight: 4
+    description: "Requires immediate attention"
+
+# =============================================================================
+# TAGS (Predefined)
+# =============================================================================
+# Common tags for categorizing maintenance activities
+# =============================================================================
+
+common_tags:
+  - "lens"
+  - "sensor"
+  - "housing"
+  - "cable"
+  - "power"
+  - "network"
+  - "firmware"
+  - "software"
+  - "weather"
+  - "wildlife"
+  - "vegetation"
+  - "preventive"
+  - "corrective"
+  - "emergency"

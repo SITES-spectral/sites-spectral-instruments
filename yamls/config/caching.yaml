@@ -1,0 +1,263 @@
+# =============================================================================
+# Caching Configuration
+# SITES Spectral v8.0.0 - Phase 7
+# =============================================================================
+# Cloudflare KV caching strategy configuration for API responses.
+# Defines TTLs, cache keys, and invalidation patterns.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Caching strategy configuration for API endpoints"
+  last_updated: "2025-11-28"
+
+# =============================================================================
+# GLOBAL SETTINGS
+# =============================================================================
+
+global:
+  # Enable/disable caching globally
+  enabled: true
+
+  # Default TTL in seconds if not specified per-resource
+  default_ttl_seconds: 300
+
+  # Cache key prefix to avoid collisions
+  key_prefix: "sites_spectral"
+
+  # Stale-while-revalidate header value (seconds)
+  stale_while_revalidate: 60
+
+  # Maximum cache size per key (bytes) - prevents large responses from caching
+  max_cache_size_bytes: 1048576  # 1MB
+
+# =============================================================================
+# CACHE TARGETS
+# =============================================================================
+# Resources that should be cached with their specific TTLs
+# =============================================================================
+
+targets:
+  # Reference data (rarely changes)
+  reference_data:
+    ecosystems:
+      ttl_seconds: 3600  # 1 hour
+      key_pattern: "ecosystems:list"
+      invalidate_on: []  # Never invalidated, very stable
+
+    status_codes:
+      ttl_seconds: 3600
+      key_pattern: "status:list"
+      invalidate_on: []
+
+    platform_types:
+      ttl_seconds: 3600
+      key_pattern: "platform_types:list"
+      invalidate_on:
+        - "platform_types:update"
+
+    instrument_types:
+      ttl_seconds: 3600
+      key_pattern: "instrument_types:list"
+      invalidate_on: []
+
+  # Station data
+  stations:
+    list:
+      ttl_seconds: 300  # 5 minutes
+      key_pattern: "stations:list"
+      invalidate_on:
+        - "stations:create"
+        - "stations:update"
+        - "stations:delete"
+
+    detail:
+      ttl_seconds: 300
+      key_pattern: "stations:{acronym}"
+      invalidate_on:
+        - "stations:update:{id}"
+        - "stations:delete:{id}"
+
+    summary:
+      ttl_seconds: 300
+      key_pattern: "stations:{acronym}:summary"
+      invalidate_on:
+        - "stations:update:{id}"
+        - "platforms:create"
+        - "platforms:update"
+        - "platforms:delete"
+        - "instruments:create"
+        - "instruments:update"
+        - "instruments:delete"
+
+  # Platform data
+  platforms:
+    list_by_station:
+      ttl_seconds: 120  # 2 minutes
+      key_pattern: "platforms:station:{stationId}"
+      invalidate_on:
+        - "platforms:create"
+        - "platforms:update:{id}"
+        - "platforms:delete:{id}"
+
+    detail:
+      ttl_seconds: 120
+      key_pattern: "platforms:{id}"
+      invalidate_on:
+        - "platforms:update:{id}"
+        - "platforms:delete:{id}"
+
+  # Instrument data
+  instruments:
+    list_by_platform:
+      ttl_seconds: 120
+      key_pattern: "instruments:platform:{platformId}"
+      invalidate_on:
+        - "instruments:create"
+        - "instruments:update:{id}"
+        - "instruments:delete:{id}"
+
+    detail:
+      ttl_seconds: 120
+      key_pattern: "instruments:{id}"
+      invalidate_on:
+        - "instruments:update:{id}"
+        - "instruments:delete:{id}"
+
+  # ROI data
+  rois:
+    list_by_instrument:
+      ttl_seconds: 300  # 5 minutes (ROIs change less frequently)
+      key_pattern: "rois:instrument:{instrumentId}"
+      invalidate_on:
+        - "rois:create"
+        - "rois:update:{id}"
+        - "rois:delete:{id}"
+
+  # Maintenance data (shorter TTL as it changes more frequently)
+  maintenance:
+    list_by_instrument:
+      ttl_seconds: 60  # 1 minute
+      key_pattern: "maintenance:instrument:{instrumentId}"
+      invalidate_on:
+        - "maintenance:create"
+        - "maintenance:update:{id}"
+        - "maintenance:delete:{id}"
+
+    upcoming:
+      ttl_seconds: 60
+      key_pattern: "maintenance:upcoming"
+      invalidate_on:
+        - "maintenance:create"
+        - "maintenance:update"
+
+  # Calibration data
+  calibration:
+    list_by_instrument:
+      ttl_seconds: 60
+      key_pattern: "calibration:instrument:{instrumentId}"
+      invalidate_on:
+        - "calibration:create"
+        - "calibration:update:{id}"
+        - "calibration:delete:{id}"
+
+    due:
+      ttl_seconds: 300
+      key_pattern: "calibration:due"
+      invalidate_on:
+        - "calibration:create"
+        - "calibration:update"
+
+# =============================================================================
+# CACHE HEADERS
+# =============================================================================
+# HTTP cache headers for different resource types
+# =============================================================================
+
+headers:
+  # Reference data - allow browser caching
+  reference:
+    cache_control: "public, max-age=3600"
+    vary: "Accept"
+
+  # Dynamic data - short browser cache with revalidation
+  dynamic:
+    cache_control: "public, max-age=60, stale-while-revalidate=300"
+    vary: "Accept, Authorization"
+
+  # User-specific data - no caching
+  private:
+    cache_control: "private, no-cache, no-store"
+    vary: "Authorization"
+
+  # Mutation responses - no caching
+  mutation:
+    cache_control: "no-store"
+
+# =============================================================================
+# INVALIDATION PATTERNS
+# =============================================================================
+# Patterns for cache invalidation based on operations
+# =============================================================================
+
+invalidation:
+  # When a station is updated
+  on_station_update:
+    patterns:
+      - "stations:list"
+      - "stations:{acronym}"
+      - "stations:{acronym}:summary"
+
+  # When a platform is created/updated/deleted
+  on_platform_change:
+    patterns:
+      - "platforms:station:{stationId}"
+      - "platforms:{id}"
+      - "stations:{acronym}:summary"
+
+  # When an instrument is created/updated/deleted
+  on_instrument_change:
+    patterns:
+      - "instruments:platform:{platformId}"
+      - "instruments:{id}"
+      - "stations:{acronym}:summary"
+
+  # When maintenance record changes
+  on_maintenance_change:
+    patterns:
+      - "maintenance:instrument:{instrumentId}"
+      - "maintenance:upcoming"
+
+  # When calibration record changes
+  on_calibration_change:
+    patterns:
+      - "calibration:instrument:{instrumentId}"
+      - "calibration:due"
+
+# =============================================================================
+# BYPASS CONDITIONS
+# =============================================================================
+# Conditions when cache should be bypassed
+# =============================================================================
+
+bypass:
+  # Always bypass cache for these conditions
+  conditions:
+    - header: "Cache-Control"
+      value: "no-cache"
+    - query_param: "nocache"
+      value: "true"
+    - query_param: "_"
+      exists: true  # Cache buster timestamp
+
+  # Methods that should never be cached
+  methods:
+    - "POST"
+    - "PUT"
+    - "PATCH"
+    - "DELETE"
+
+  # Paths that should never be cached
+  paths:
+    - "/api/auth/*"
+    - "/api/*/export/*"

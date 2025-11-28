@@ -1,0 +1,284 @@
+# =============================================================================
+# Rate Limiting Configuration
+# SITES Spectral v8.0.0 - Phase 7
+# =============================================================================
+# Defines rate limiting policies for different user roles and endpoints.
+# Uses Cloudflare Durable Objects for distributed rate limiting.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Rate limiting configuration for API protection"
+  last_updated: "2025-11-28"
+
+# =============================================================================
+# GLOBAL SETTINGS
+# =============================================================================
+
+global:
+  # Enable/disable rate limiting globally
+  enabled: true
+
+  # Algorithm to use: "sliding_window", "fixed_window", "token_bucket"
+  algorithm: "sliding_window"
+
+  # Include rate limit headers in responses
+  include_headers: true
+
+  # Header names for rate limit information
+  headers:
+    remaining: "X-RateLimit-Remaining"
+    limit: "X-RateLimit-Limit"
+    reset: "X-RateLimit-Reset"
+    retry_after: "Retry-After"
+
+# =============================================================================
+# RATE LIMITS BY ROLE
+# =============================================================================
+# Different limits for different user types
+# =============================================================================
+
+limits_by_role:
+  # Anonymous/unauthenticated users
+  anonymous:
+    requests_per_window: 100
+    window_seconds: 60
+    burst_allowance: 20
+    description: "Unauthenticated API access"
+    response_on_limit:
+      status: 429
+      message: "Rate limit exceeded. Please authenticate for higher limits."
+
+  # Authenticated regular users (readonly role)
+  readonly:
+    requests_per_window: 500
+    window_seconds: 60
+    burst_allowance: 50
+    description: "Authenticated read-only users"
+    response_on_limit:
+      status: 429
+      message: "Rate limit exceeded. Please wait before making more requests."
+
+  # Station users (can edit their station data)
+  station:
+    requests_per_window: 1000
+    window_seconds: 60
+    burst_allowance: 100
+    description: "Station managers with edit permissions"
+    response_on_limit:
+      status: 429
+      message: "Rate limit exceeded. Contact support if you need higher limits."
+
+  # Admin users (full access)
+  admin:
+    requests_per_window: 5000
+    window_seconds: 60
+    burst_allowance: 500
+    description: "System administrators"
+    response_on_limit:
+      status: 429
+      message: "Admin rate limit exceeded. Please reduce request frequency."
+
+  # Service accounts (API integrations)
+  service:
+    requests_per_window: 10000
+    window_seconds: 60
+    burst_allowance: 1000
+    description: "Automated service integrations"
+    response_on_limit:
+      status: 429
+      message: "Service rate limit exceeded."
+
+# =============================================================================
+# ENDPOINT-SPECIFIC LIMITS
+# =============================================================================
+# Override default limits for specific endpoints
+# =============================================================================
+
+endpoint_overrides:
+  # Authentication endpoints - stricter limits to prevent brute force
+  auth:
+    login:
+      path: "/api/auth/login"
+      method: "POST"
+      requests_per_window: 10
+      window_seconds: 60
+      burst_allowance: 3
+      applies_to: ["anonymous"]
+      lockout:
+        enabled: true
+        threshold: 5
+        duration_seconds: 300
+      description: "Login attempts - strict to prevent brute force"
+
+    password_reset:
+      path: "/api/auth/reset-password"
+      method: "POST"
+      requests_per_window: 3
+      window_seconds: 3600
+      burst_allowance: 1
+      applies_to: ["anonymous"]
+      description: "Password reset requests"
+
+  # Export endpoints - resource intensive
+  export:
+    data_export:
+      path: "/api/*/export/*"
+      method: "GET"
+      requests_per_window: 10
+      window_seconds: 60
+      burst_allowance: 2
+      applies_to: ["station", "admin"]
+      description: "Data export - limited due to resource intensity"
+
+  # Search endpoints - can be expensive
+  search:
+    global_search:
+      path: "/api/search"
+      method: "GET"
+      requests_per_window: 30
+      window_seconds: 60
+      burst_allowance: 10
+      applies_to: ["anonymous", "readonly", "station"]
+      description: "Global search queries"
+
+  # Write operations - moderate limits
+  mutations:
+    create:
+      path: "/api/v3/*/create"
+      method: "POST"
+      requests_per_window: 50
+      window_seconds: 60
+      burst_allowance: 10
+      applies_to: ["station", "admin"]
+      description: "Create operations"
+
+    update:
+      path: "/api/v3/*"
+      method: "PUT"
+      requests_per_window: 100
+      window_seconds: 60
+      burst_allowance: 20
+      applies_to: ["station", "admin"]
+      description: "Update operations"
+
+    delete:
+      path: "/api/v3/*"
+      method: "DELETE"
+      requests_per_window: 20
+      window_seconds: 60
+      burst_allowance: 5
+      applies_to: ["admin"]
+      description: "Delete operations - admin only"
+
+  # Health check - exempt from most limits
+  health:
+    path: "/api/health"
+    method: "GET"
+    requests_per_window: 1000
+    window_seconds: 60
+    burst_allowance: 100
+    applies_to: ["anonymous", "readonly", "station", "admin", "service"]
+    description: "Health check endpoint"
+
+# =============================================================================
+# IP-BASED LIMITS
+# =============================================================================
+# Additional limits based on IP address regardless of authentication
+# =============================================================================
+
+ip_limits:
+  # Global per-IP limit (backstop for all requests)
+  global:
+    requests_per_window: 1000
+    window_seconds: 60
+    description: "Per-IP global limit"
+
+  # Suspicious activity detection
+  suspicious_activity:
+    error_threshold: 50  # Errors in window before flagging
+    window_seconds: 300
+    action: "temporary_block"
+    block_duration_seconds: 600
+    description: "Block IPs with excessive errors"
+
+# =============================================================================
+# WHITELIST / BLACKLIST
+# =============================================================================
+# IP addresses to always allow or block
+# =============================================================================
+
+access_lists:
+  # Whitelisted IPs - bypass rate limiting
+  whitelist:
+    enabled: true
+    ips: []  # Configure in environment/secrets
+    description: "IPs that bypass rate limiting"
+
+  # Blacklisted IPs - always block
+  blacklist:
+    enabled: true
+    ips: []  # Configure in environment/secrets
+    description: "IPs that are always blocked"
+
+  # Known good bot user agents (higher limits)
+  good_bots:
+    enabled: true
+    user_agents:
+      - "Googlebot"
+      - "Bingbot"
+    multiplier: 2.0
+    description: "Search engine bots with higher limits"
+
+# =============================================================================
+# RESPONSE CONFIGURATION
+# =============================================================================
+# How to respond when rate limit is exceeded
+# =============================================================================
+
+responses:
+  # Standard rate limit exceeded response
+  rate_limited:
+    status_code: 429
+    content_type: "application/json"
+    body:
+      success: false
+      error: "Rate limit exceeded"
+      message: "Too many requests. Please slow down."
+      retry_after: "{retry_seconds}"
+
+  # Blocked IP response
+  blocked:
+    status_code: 403
+    content_type: "application/json"
+    body:
+      success: false
+      error: "Access denied"
+      message: "Your IP has been temporarily blocked due to suspicious activity."
+
+# =============================================================================
+# MONITORING AND LOGGING
+# =============================================================================
+# Rate limit event logging configuration
+# =============================================================================
+
+monitoring:
+  # Log rate limit events
+  log_events: true
+
+  # Log level for rate limit events
+  log_level: "warn"
+
+  # Events to log
+  events:
+    - "rate_limit_exceeded"
+    - "ip_blocked"
+    - "suspicious_activity_detected"
+    - "burst_allowance_used"
+
+  # Metrics to track
+  metrics:
+    - "requests_per_minute_by_role"
+    - "rate_limit_hits_by_endpoint"
+    - "blocked_ips_count"
+    - "average_requests_per_user"

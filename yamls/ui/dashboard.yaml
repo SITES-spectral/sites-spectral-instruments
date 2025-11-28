@@ -1,0 +1,398 @@
+# =============================================================================
+# Dashboard UI Configuration
+# SITES Spectral v8.0.0 - Phase 7
+# =============================================================================
+# Configuration for the reactive card-based dashboard UI.
+# Defines layout, components, and behavior settings.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Dashboard UI configuration and component settings"
+  last_updated: "2025-11-28"
+
+# =============================================================================
+# LAYOUT CONFIGURATION
+# =============================================================================
+
+layout:
+  # Dashboard grid configuration
+  grid:
+    columns:
+      desktop: 4
+      tablet: 2
+      mobile: 1
+    gap: "1.5rem"
+    max_width: "1400px"
+
+  # Section order on dashboard
+  sections:
+    - id: "station_header"
+      component: "StationHeader"
+      collapsible: false
+
+    - id: "platform_types"
+      component: "PlatformTypesGrid"
+      collapsible: false
+
+    - id: "map_section"
+      component: "InteractiveMap"
+      collapsible: true
+      default_collapsed: false
+
+    - id: "activity_feed"
+      component: "ActivityFeed"
+      collapsible: true
+      default_collapsed: true
+
+# =============================================================================
+# PLATFORM TYPE CARDS
+# =============================================================================
+# Styling and configuration for platform type cards
+# =============================================================================
+
+platform_type_cards:
+  fixed:
+    code: "fixed"
+    label: "Fixed Platforms"
+    short_label: "Fixed"
+    icon: "fa-tower-observation"
+    color: "#2563eb"
+    gradient: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
+    description: "Permanent installations on towers, buildings, or poles"
+    default_expanded: true
+    sort_order: 1
+
+  uav:
+    code: "uav"
+    label: "UAV Platforms"
+    short_label: "UAV"
+    icon: "fa-helicopter"
+    color: "#059669"
+    gradient: "linear-gradient(135deg, #059669 0%, #047857 100%)"
+    description: "Unmanned Aerial Vehicles for mapping missions"
+    default_expanded: false
+    sort_order: 2
+
+  satellite:
+    code: "satellite"
+    label: "Satellite Platforms"
+    short_label: "Satellite"
+    icon: "fa-satellite"
+    color: "#7c3aed"
+    gradient: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
+    description: "Earth observation satellite data sources"
+    default_expanded: false
+    sort_order: 3
+
+  mobile:
+    code: "mobile"
+    label: "Mobile Platforms"
+    short_label: "Mobile"
+    icon: "fa-truck"
+    color: "#f59e0b"
+    gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+    description: "Vehicle-mounted or portable instruments"
+    default_expanded: false
+    sort_order: 4
+
+# =============================================================================
+# INSTRUMENT TYPE ICONS
+# =============================================================================
+# Visual representation for each instrument type
+# =============================================================================
+
+instrument_types:
+  phenocam:
+    code: "phenocam"
+    label: "Phenocam"
+    icon: "fa-camera"
+    color: "#2563eb"
+    background: "#dbeafe"
+    sort_order: 1
+
+  multispectral:
+    code: "multispectral"
+    label: "Multispectral"
+    icon: "fa-satellite-dish"
+    color: "#7c3aed"
+    background: "#ede9fe"
+    sort_order: 2
+
+  par:
+    code: "par"
+    label: "PAR Sensor"
+    icon: "fa-sun"
+    color: "#f59e0b"
+    background: "#fef3c7"
+    sort_order: 3
+
+  ndvi:
+    code: "ndvi"
+    label: "NDVI Sensor"
+    icon: "fa-leaf"
+    color: "#059669"
+    background: "#d1fae5"
+    sort_order: 4
+
+  pri:
+    code: "pri"
+    label: "PRI Sensor"
+    icon: "fa-microscope"
+    color: "#ec4899"
+    background: "#fce7f3"
+    sort_order: 5
+
+  hyperspectral:
+    code: "hyperspectral"
+    label: "Hyperspectral"
+    icon: "fa-rainbow"
+    color: "#6366f1"
+    background: "#e0e7ff"
+    sort_order: 6
+
+  thermal:
+    code: "thermal"
+    label: "Thermal"
+    icon: "fa-temperature-high"
+    color: "#ef4444"
+    background: "#fee2e2"
+    sort_order: 7
+
+  lidar:
+    code: "lidar"
+    label: "LiDAR"
+    icon: "fa-bullseye"
+    color: "#14b8a6"
+    background: "#ccfbf1"
+    sort_order: 8
+
+# =============================================================================
+# STATUS INDICATORS
+# =============================================================================
+# Visual status badges for instruments and platforms
+# =============================================================================
+
+status_indicators:
+  active:
+    code: "active"
+    label: "Active"
+    icon: "fa-check-circle"
+    color: "#22c55e"
+    background: "#dcfce7"
+    dot_animation: "pulse"
+
+  inactive:
+    code: "inactive"
+    label: "Inactive"
+    icon: "fa-pause-circle"
+    color: "#6b7280"
+    background: "#f3f4f6"
+    dot_animation: null
+
+  maintenance:
+    code: "maintenance"
+    label: "Maintenance"
+    icon: "fa-wrench"
+    color: "#f59e0b"
+    background: "#fef3c7"
+    dot_animation: "blink"
+
+  decommissioned:
+    code: "decommissioned"
+    label: "Decommissioned"
+    icon: "fa-times-circle"
+    color: "#dc2626"
+    background: "#fee2e2"
+    dot_animation: null
+
+  testing:
+    code: "testing"
+    label: "Testing"
+    icon: "fa-flask"
+    color: "#8b5cf6"
+    background: "#ede9fe"
+    dot_animation: "blink"
+
+  planned:
+    code: "planned"
+    label: "Planned"
+    icon: "fa-clock"
+    color: "#3b82f6"
+    background: "#dbeafe"
+    dot_animation: null
+
+# =============================================================================
+# CARD COMPONENTS
+# =============================================================================
+# Configuration for individual card components
+# =============================================================================
+
+components:
+  # Platform Type Card
+  platform_type_card:
+    min_width: "280px"
+    max_width: "1fr"
+    border_radius: "12px"
+    shadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+    hover_shadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+    transition: "all 0.2s ease"
+    header_padding: "1.25rem"
+    content_padding: "1rem"
+
+  # Platform Item (within type card)
+  platform_item:
+    padding: "0.75rem 1rem"
+    border_radius: "8px"
+    hover_background: "#f8fafc"
+    show_instrument_dots: true
+    max_instrument_dots: 6
+
+  # Instrument Mini Card
+  instrument_mini_card:
+    width: "120px"
+    height: "100px"
+    padding: "0.75rem"
+    border_radius: "8px"
+    icon_size: "40px"
+    show_status_dot: true
+    truncate_name_length: 20
+
+  # Summary Badge
+  summary_badge:
+    padding: "0.375rem 0.75rem"
+    border_radius: "6px"
+    font_size: "0.8125rem"
+    icon_size: "0.875rem"
+
+# =============================================================================
+# INTERACTIONS
+# =============================================================================
+# User interaction configuration
+# =============================================================================
+
+interactions:
+  # Card click behavior
+  card_click:
+    platform_type_card: "toggle_expand"
+    platform_item: "navigate_to_platform"
+    instrument_mini_card: "open_modal"
+
+  # Expand/collapse behavior
+  expand_collapse:
+    animation_duration_ms: 200
+    remember_state: true
+    storage_key: "dashboard_expanded_cards"
+
+  # Delete confirmation
+  delete_confirmation:
+    require_type_confirm: true
+    show_dependency_warning: true
+    admin_only: true
+    animation: "shake"
+
+  # Drag and drop (future feature)
+  drag_drop:
+    enabled: false
+    reorder_platforms: false
+    reorder_instruments: false
+
+# =============================================================================
+# REFRESH BEHAVIOR
+# =============================================================================
+# Auto-refresh and data update settings
+# =============================================================================
+
+refresh:
+  # Auto-refresh interval (0 = disabled)
+  auto_refresh_seconds: 0
+
+  # Show refresh button
+  show_refresh_button: true
+
+  # Show last updated timestamp
+  show_last_updated: true
+
+  # Refresh indicator
+  refresh_indicator:
+    type: "spinner"
+    position: "header"
+
+# =============================================================================
+# ANIMATIONS
+# =============================================================================
+# Animation definitions used in the dashboard
+# =============================================================================
+
+animations:
+  pulse:
+    keyframes: |
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    duration: "2s"
+    timing: "ease-in-out"
+    iteration: "infinite"
+
+  blink:
+    keyframes: |
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    duration: "1s"
+    timing: "ease-in-out"
+    iteration: "infinite"
+
+  shake:
+    keyframes: |
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    duration: "0.3s"
+    timing: "ease-in-out"
+    iteration: "1"
+
+  slide_in:
+    keyframes: |
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    duration: "0.2s"
+    timing: "ease-out"
+    iteration: "1"
+
+  fade_in:
+    keyframes: |
+      from { opacity: 0; }
+      to { opacity: 1; }
+    duration: "0.15s"
+    timing: "ease-out"
+    iteration: "1"
+
+# =============================================================================
+# ACCESSIBILITY
+# =============================================================================
+# Accessibility settings for the dashboard
+# =============================================================================
+
+accessibility:
+  # Keyboard navigation
+  keyboard_navigation: true
+
+  # Focus indicators
+  focus_ring:
+    color: "#2563eb"
+    width: "2px"
+    offset: "2px"
+
+  # Reduced motion support
+  respect_reduced_motion: true
+
+  # ARIA labels
+  aria_labels:
+    platform_type_card: "Platform type: {type}"
+    platform_item: "Platform: {name}"
+    instrument_card: "Instrument: {name}, Status: {status}"
+    expand_button: "Expand {type} platforms"
+    collapse_button: "Collapse {type} platforms"
+    delete_button: "Delete {name}"
+
+  # Color contrast
+  high_contrast_mode: false

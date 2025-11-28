@@ -1,0 +1,453 @@
+# =============================================================================
+# Calibration Types Configuration
+# SITES Spectral v8.0.0 - Phase 7
+# =============================================================================
+# Defines calibration types, methods, frequencies, and quality metrics
+# for multispectral and other calibratable instruments.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Calibration type definitions for spectral instruments"
+  last_updated: "2025-11-28"
+
+# =============================================================================
+# CALIBRATION TYPES
+# =============================================================================
+# Different types of calibration procedures
+# =============================================================================
+
+types:
+  dirty:
+    code: "dirty"
+    label: "Dirty Calibration"
+    icon: "fa-cloud"
+    color: "#f59e0b"
+    description: "Calibration before cleaning to capture sensor drift and contamination effects"
+    requires_cleaning: false
+    typical_duration_minutes: 15
+    purpose: "Baseline measurement of current sensor state"
+    output_metrics:
+      - "drift_coefficient"
+      - "contamination_level"
+
+  clean:
+    code: "clean"
+    label: "Clean Calibration"
+    icon: "fa-sparkles"
+    color: "#059669"
+    description: "Calibration after thorough cleaning for optimal accuracy"
+    requires_cleaning: true
+    typical_duration_minutes: 25
+    purpose: "Establish clean sensor baseline"
+    output_metrics:
+      - "reflectance_coefficient"
+      - "signal_to_noise"
+
+  full:
+    code: "full"
+    label: "Full Calibration"
+    icon: "fa-certificate"
+    color: "#2563eb"
+    description: "Complete calibration with all reference targets and full quality assessment"
+    requires_cleaning: true
+    typical_duration_minutes: 45
+    purpose: "Comprehensive sensor characterization"
+    output_metrics:
+      - "reflectance_coefficient"
+      - "wavelength_accuracy"
+      - "linearity"
+      - "signal_to_noise"
+
+  dark_current:
+    code: "dark_current"
+    label: "Dark Current"
+    icon: "fa-moon"
+    color: "#6366f1"
+    description: "Sensor dark current measurement with blocked light path"
+    requires_cleaning: false
+    typical_duration_minutes: 10
+    purpose: "Characterize sensor noise floor"
+    output_metrics:
+      - "dark_current_mean"
+      - "dark_current_std"
+      - "temperature_coefficient"
+
+  flat_field:
+    code: "flat_field"
+    label: "Flat Field"
+    icon: "fa-square"
+    color: "#8b5cf6"
+    description: "Flat field correction measurement using uniform illumination"
+    requires_cleaning: true
+    typical_duration_minutes: 20
+    purpose: "Correct spatial non-uniformity"
+    output_metrics:
+      - "uniformity_coefficient"
+      - "vignetting_map"
+
+  wavelength:
+    code: "wavelength"
+    label: "Wavelength Calibration"
+    icon: "fa-wave-square"
+    color: "#ec4899"
+    description: "Spectral wavelength verification and adjustment"
+    requires_cleaning: false
+    typical_duration_minutes: 30
+    purpose: "Verify spectral accuracy"
+    output_metrics:
+      - "wavelength_offset"
+      - "fwhm"
+      - "spectral_response"
+
+# =============================================================================
+# CALIBRATION METHODS
+# =============================================================================
+# Methods/techniques used for calibration
+# =============================================================================
+
+methods:
+  reflectance_panel:
+    code: "reflectance_panel"
+    label: "Reflectance Panel"
+    icon: "fa-square-full"
+    description: "Calibration using certified reflectance reference panel"
+    required_equipment:
+      - "reflectance_panel"
+    suitable_for:
+      - "multispectral"
+      - "hyperspectral"
+      - "ndvi"
+      - "pri"
+
+  integrating_sphere:
+    code: "integrating_sphere"
+    label: "Integrating Sphere"
+    icon: "fa-circle"
+    description: "Calibration using integrating sphere for uniform illumination"
+    required_equipment:
+      - "integrating_sphere"
+      - "calibrated_lamp"
+    suitable_for:
+      - "hyperspectral"
+      - "multispectral"
+
+  cross_calibration:
+    code: "cross_calibration"
+    label: "Cross Calibration"
+    icon: "fa-arrows-rotate"
+    description: "Calibration by comparison with reference instrument"
+    required_equipment:
+      - "reference_instrument"
+    suitable_for:
+      - "par"
+      - "ndvi"
+      - "pri"
+
+  lamp_reference:
+    code: "lamp_reference"
+    label: "Lamp Reference"
+    icon: "fa-lightbulb"
+    description: "Calibration using calibrated reference lamp"
+    required_equipment:
+      - "calibrated_lamp"
+      - "power_supply"
+    suitable_for:
+      - "hyperspectral"
+      - "multispectral"
+
+# =============================================================================
+# CALIBRATION FREQUENCIES
+# =============================================================================
+# Recommended calibration intervals by sensor type and use case
+# =============================================================================
+
+frequencies:
+  daily:
+    code: "daily"
+    label: "Daily"
+    interval_days: 1
+    icon: "fa-calendar-day"
+    recommended_for:
+      - "research_grade"
+      - "high_precision"
+      - "real_time_monitoring"
+    description: "For instruments requiring highest accuracy"
+
+  weekly:
+    code: "weekly"
+    label: "Weekly"
+    interval_days: 7
+    icon: "fa-calendar-week"
+    recommended_for:
+      - "operational"
+      - "monitoring"
+    description: "Standard operational calibration"
+
+  biweekly:
+    code: "biweekly"
+    label: "Bi-Weekly"
+    interval_days: 14
+    icon: "fa-calendar"
+    recommended_for:
+      - "standard"
+    description: "For stable instruments in moderate environments"
+
+  monthly:
+    code: "monthly"
+    label: "Monthly"
+    interval_days: 30
+    icon: "fa-calendar-alt"
+    recommended_for:
+      - "standard"
+      - "reference"
+    description: "For stable fixed installations"
+
+  seasonal:
+    code: "seasonal"
+    label: "Seasonal"
+    interval_days: 90
+    icon: "fa-cloud-sun"
+    recommended_for:
+      - "fixed_installation"
+      - "phenocam"
+    description: "Aligned with seasonal changes"
+
+  annual:
+    code: "annual"
+    label: "Annual"
+    interval_days: 365
+    icon: "fa-calendar-year"
+    recommended_for:
+      - "stable_environment"
+      - "low_drift"
+    description: "For very stable instruments"
+
+# =============================================================================
+# REFLECTANCE PANELS
+# =============================================================================
+# Common reflectance reference panels and their specifications
+# =============================================================================
+
+reflectance_panels:
+  spectralon_99:
+    code: "spectralon_99"
+    label: "Spectralon 99%"
+    manufacturer: "Labsphere"
+    reflectance_nominal: 0.99
+    wavelength_range_nm: [250, 2500]
+    description: "High reflectance diffuse standard"
+    calibration_interval_months: 12
+
+  spectralon_50:
+    code: "spectralon_50"
+    label: "Spectralon 50%"
+    manufacturer: "Labsphere"
+    reflectance_nominal: 0.50
+    wavelength_range_nm: [250, 2500]
+    description: "Medium reflectance diffuse standard"
+    calibration_interval_months: 12
+
+  gray_18:
+    code: "gray_18"
+    label: "Gray 18%"
+    manufacturer: "Various"
+    reflectance_nominal: 0.18
+    wavelength_range_nm: [400, 700]
+    description: "Standard photographic gray card"
+    calibration_interval_months: 6
+
+  white_reference:
+    code: "white_reference"
+    label: "White Reference"
+    manufacturer: "Various"
+    reflectance_nominal: 0.95
+    wavelength_range_nm: [350, 1000]
+    description: "General purpose white reference"
+    calibration_interval_months: 12
+
+  black_reference:
+    code: "black_reference"
+    label: "Black Reference"
+    manufacturer: "Various"
+    reflectance_nominal: 0.02
+    wavelength_range_nm: [350, 1000]
+    description: "Dark reference for stray light check"
+    calibration_interval_months: 24
+
+# =============================================================================
+# SENSOR CLEANLINESS STATES
+# =============================================================================
+# Classification of sensor physical condition
+# =============================================================================
+
+cleanliness_states:
+  clean:
+    code: "clean"
+    label: "Clean"
+    icon: "fa-check-circle"
+    color: "#22c55e"
+    description: "No visible contamination, optimal condition"
+
+  dusty:
+    code: "dusty"
+    label: "Dusty"
+    icon: "fa-dust"
+    color: "#f59e0b"
+    description: "Light dust accumulation, minor impact"
+
+  dirty:
+    code: "dirty"
+    label: "Dirty"
+    icon: "fa-smog"
+    color: "#f97316"
+    description: "Significant contamination, cleaning recommended"
+
+  contaminated:
+    code: "contaminated"
+    label: "Contaminated"
+    icon: "fa-biohazard"
+    color: "#dc2626"
+    description: "Severe contamination, immediate cleaning required"
+
+# =============================================================================
+# CLEANING METHODS
+# =============================================================================
+# Methods for sensor cleaning
+# =============================================================================
+
+cleaning_methods:
+  dry_wipe:
+    code: "dry_wipe"
+    label: "Dry Wipe"
+    icon: "fa-hand-paper"
+    description: "Gentle dry wiping with microfiber cloth"
+    suitable_for:
+      - "light_dust"
+      - "fingerprints"
+    materials:
+      - "microfiber_cloth"
+
+  compressed_air:
+    code: "compressed_air"
+    label: "Compressed Air"
+    icon: "fa-wind"
+    description: "Blowing with filtered compressed air"
+    suitable_for:
+      - "loose_particles"
+      - "dust"
+    materials:
+      - "compressed_air_can"
+      - "air_blower"
+
+  wet_clean:
+    code: "wet_clean"
+    label: "Wet Cleaning"
+    icon: "fa-droplet"
+    description: "Cleaning with appropriate solution"
+    suitable_for:
+      - "sticky_residue"
+      - "organic_matter"
+    materials:
+      - "cleaning_solution"
+      - "lens_tissue"
+      - "cotton_swabs"
+
+  ultrasonic:
+    code: "ultrasonic"
+    label: "Ultrasonic Cleaning"
+    icon: "fa-wave-square"
+    description: "Ultrasonic bath cleaning for detachable components"
+    suitable_for:
+      - "heavy_contamination"
+      - "filters"
+    materials:
+      - "ultrasonic_cleaner"
+      - "cleaning_solution"
+
+# =============================================================================
+# QUALITY THRESHOLDS
+# =============================================================================
+# Quality metrics and pass/fail thresholds
+# =============================================================================
+
+quality_thresholds:
+  quality_score:
+    excellent:
+      min: 95
+      max: 100
+      color: "#22c55e"
+    good:
+      min: 85
+      max: 94
+      color: "#84cc16"
+    acceptable:
+      min: 70
+      max: 84
+      color: "#f59e0b"
+    poor:
+      min: 0
+      max: 69
+      color: "#dc2626"
+
+  deviation_from_reference:
+    excellent:
+      max_percent: 1
+    good:
+      max_percent: 3
+    acceptable:
+      max_percent: 5
+    fail:
+      max_percent: 10
+
+  signal_to_noise:
+    excellent:
+      min_db: 40
+    good:
+      min_db: 30
+    acceptable:
+      min_db: 20
+    poor:
+      min_db: 10
+
+# =============================================================================
+# AMBIENT CONDITIONS
+# =============================================================================
+# Ideal conditions for calibration
+# =============================================================================
+
+ideal_conditions:
+  temperature_c:
+    min: 15
+    max: 25
+    optimal: 20
+    label: "Temperature"
+    unit: "°C"
+
+  humidity_pct:
+    min: 30
+    max: 60
+    optimal: 45
+    label: "Relative Humidity"
+    unit: "%"
+
+  cloud_cover:
+    preferred:
+      - "clear"
+      - "mostly_clear"
+    acceptable:
+      - "partly_cloudy"
+    avoid:
+      - "overcast"
+      - "rain"
+
+  wind_speed_ms:
+    max: 5
+    label: "Wind Speed"
+    unit: "m/s"
+
+  solar_elevation_deg:
+    min: 30
+    max: 60
+    label: "Solar Elevation"
+    unit: "degrees"

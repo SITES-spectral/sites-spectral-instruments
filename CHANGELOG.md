@@ -8,7 +8,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v8.0.0 Roadmap)
-- **Phase 7**: Production hardening and performance optimization
+- **Phase 7 Continued**: API handlers, UI components, and deployment
+
+---
+
+## [8.0.0-rc.4] - 2025-11-28
+
+### Phase 7 Foundation: Maintenance, Calibration & Configuration Architecture
+
+**Release Date**: 2025-11-28
+**Phase**: Phase 7 - Production Features (Foundation)
+
+This release establishes the foundation for Phase 7 with configuration-driven architecture,
+database schema for maintenance/calibration tracking, and modular UI component structure.
+
+#### Architecture Changes
+
+**Configuration-Driven Design:**
+All hardcoded values moved to YAML configuration files for maintainability and flexibility.
+
+| Config File | Purpose |
+|------------|---------|
+| `yamls/maintenance/maintenance-types.yaml` | Maintenance type definitions, problem categories, severity levels |
+| `yamls/maintenance/calibration-types.yaml` | Calibration types, methods, frequencies, quality thresholds |
+| `yamls/config/caching.yaml` | Cloudflare KV caching strategy configuration |
+| `yamls/config/rate-limiting.yaml` | Rate limiting policies by role and endpoint |
+| `yamls/ui/dashboard.yaml` | Dashboard layout, platform type cards, instrument icons |
+| `yamls/ui/modals.yaml` | Modal form definitions for maintenance and calibration |
+
+#### Database Migration (0030)
+
+**New Tables:**
+- `maintenance_history` - Comprehensive instrument maintenance tracking (25+ fields)
+- `calibration_logs` - Spectral instrument calibration records (30+ fields)
+- `error_log` - Application error tracking for monitoring
+
+**New Views:**
+- `v_upcoming_maintenance` - Scheduled maintenance dashboard
+- `v_recurrent_problems` - Problem pattern analysis
+- `v_maintenance_stats` - Station-level maintenance statistics
+- `v_latest_calibration` - Most recent calibration per instrument
+- `v_calibration_due` - Instruments needing calibration
+- `v_calibration_quality_trends` - Quality metrics over time
+
+**New Indexes:** 22 indexes for optimized queries
+
+#### Modular UI Components
+
+**New JavaScript Architecture:**
+- `public/js/core/config-loader.js` - YAML configuration loader with caching
+- `public/js/core/dashboard-state.js` - Reactive state management with subscriptions
+- `public/js/components/platform-type-card.js` - Platform type card component
+
+**Component Features:**
+- Subscription-based state updates
+- Batch update support for performance
+- Configuration-driven rendering
+- Admin-only delete operations
+
+#### Phase 7 Plan Document
+
+Created comprehensive planning document: `docs/PHASE_7_PLAN.md`
+- Database schema designs
+- API endpoint specifications
+- UI component hierarchy
+- Implementation phases (5-week timeline)
+- Testing strategy
 
 ---
 
