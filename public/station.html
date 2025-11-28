@@ -212,6 +212,191 @@
             border-bottom: none;
         }
 
+        /* Enhanced Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-item.compact {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: none;
+        }
+
+        .stat-item.compact .stat-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item.compact .stat-info {
+            align-items: center;
+        }
+
+        .stat-item.compact .stat-number {
+            font-size: 1.5rem;
+        }
+
+        .stat-item.compact .stat-label {
+            font-size: 0.75rem;
+        }
+
+        /* Info Section Styles */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label i {
+            color: #059669;
+            width: 16px;
+        }
+
+        .info-value {
+            color: #1f2937;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+
+            .stat-item.compact {
+                padding: 0.5rem;
+            }
+
+            .stat-item.compact .stat-number {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Platform Type Tabs */
+        .platform-type-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .platform-type-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .platform-type-tab:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .platform-type-tab.active {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .platform-type-tab.active .tab-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .platform-type-tab i {
+            font-size: 1rem;
+        }
+
+        .tab-count {
+            background: #e5e7eb;
+            color: #6b7280;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .platform-type-tab[data-type="fixed"] { --tab-color: #2563eb; }
+        .platform-type-tab[data-type="uav"] { --tab-color: #059669; }
+        .platform-type-tab[data-type="satellite"] { --tab-color: #7c3aed; }
+        .platform-type-tab[data-type="mobile"] { --tab-color: #f59e0b; }
+
+        .platform-type-tab[data-type]:not(.active):hover {
+            border-color: var(--tab-color);
+            color: var(--tab-color);
+        }
+
+        /* Hide empty platform type tabs */
+        .platform-type-tab.hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .platform-type-tabs {
+                gap: 0.25rem;
+                padding: 0.25rem;
+            }
+
+            .platform-type-tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .platform-type-tab .tab-label {
+                display: none;
+            }
+
+            .platform-type-tab i {
+                margin: 0;
+            }
+        }
+
         .stat-icon {
             width: 48px;
             height: 48px;
@@ -2509,31 +2694,50 @@
                         <h3><i class="fas fa-chart-bar"></i> Station Overview</h3>
                     </div>
                     <div class="card-content">
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-building"></i>
+                        <!-- Main Stats Row -->
+                        <div class="stats-grid">
+                            <div class="stat-item compact">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tower-observation"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="platforms-count">0</span>
+                                    <span class="stat-label">Platforms</span>
+                                </div>
                             </div>
-                            <div class="stat-info">
-                                <span class="stat-number" id="platforms-count">0</span>
-                                <span class="stat-label">Platforms</span>
+                            <div class="stat-item compact">
+                                <div class="stat-icon">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="instruments-count">0</span>
+                                    <span class="stat-label">Instruments</span>
+                                </div>
+                            </div>
+                            <div class="stat-item compact">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="active-instruments-count">0</span>
+                                    <span class="stat-label">Active</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-camera"></i>
+
+                        <!-- Location Info -->
+                        <div class="info-section">
+                            <div class="info-row">
+                                <span class="info-label"><i class="fas fa-map-marker-alt"></i> Location</span>
+                                <span class="info-value" id="coordinates">Loading...</span>
                             </div>
-                            <div class="stat-info">
-                                <span class="stat-number" id="instruments-count">0</span>
-                                <span class="stat-label">Instruments</span>
+                            <div class="info-row">
+                                <span class="info-label"><i class="fas fa-layer-group"></i> Platform Types</span>
+                                <span class="info-value" id="platform-types-breakdown">Loading...</span>
                             </div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div class="stat-info">
-                                <span class="stat-number" id="coordinates">-</span>
-                                <span class="stat-label">Coordinates</span>
+                            <div class="info-row">
+                                <span class="info-label"><i class="fas fa-leaf"></i> Ecosystems</span>
+                                <span class="info-value" id="ecosystems-breakdown">Loading...</span>
                             </div>
                         </div>
                     </div>
@@ -2557,16 +2761,48 @@
                 <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-tower-observation"></i> Platforms & Instruments
                 </h2>
-                <div id="admin-platform-controls" style="display: none;">
-                    <button onclick="handleCreatePlatformClick()" class="btn btn-success" title="Create New Platform">
-                        <i class="fas fa-plus"></i> <i class="fas fa-tower-broadcast"></i> Platform
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div id="admin-platform-controls" style="display: none;">
+                        <button onclick="handleCreatePlatformClick()" class="btn btn-success" title="Create New Platform">
+                            <i class="fas fa-plus"></i> <i class="fas fa-tower-broadcast"></i> Platform
+                        </button>
+                    </div>
+                    <button id="export-csv-btn" class="export-btn" onclick="exportStationData()" style="display: none;">
+                        <i class="fas fa-download"></i>
+                        Export CSV
                     </button>
                 </div>
-                <button id="export-csv-btn" class="export-btn" onclick="exportStationData()" style="display: none;">
-                    <i class="fas fa-download"></i>
-                    Export CSV
+            </div>
+
+            <!-- Platform Type Tabs -->
+            <div class="platform-type-tabs" id="platform-type-tabs">
+                <button class="platform-type-tab active" data-type="all" onclick="filterPlatformsByType('all')">
+                    <i class="fas fa-th-large"></i>
+                    <span class="tab-label">All</span>
+                    <span class="tab-count" id="tab-count-all">0</span>
+                </button>
+                <button class="platform-type-tab" data-type="fixed" onclick="filterPlatformsByType('fixed')">
+                    <i class="fas fa-tower-observation"></i>
+                    <span class="tab-label">Fixed</span>
+                    <span class="tab-count" id="tab-count-fixed">0</span>
+                </button>
+                <button class="platform-type-tab" data-type="uav" onclick="filterPlatformsByType('uav')">
+                    <i class="fas fa-helicopter"></i>
+                    <span class="tab-label">UAV</span>
+                    <span class="tab-count" id="tab-count-uav">0</span>
+                </button>
+                <button class="platform-type-tab" data-type="satellite" onclick="filterPlatformsByType('satellite')">
+                    <i class="fas fa-satellite"></i>
+                    <span class="tab-label">Satellite</span>
+                    <span class="tab-count" id="tab-count-satellite">0</span>
+                </button>
+                <button class="platform-type-tab" data-type="mobile" onclick="filterPlatformsByType('mobile')">
+                    <i class="fas fa-truck"></i>
+                    <span class="tab-label">Mobile</span>
+                    <span class="tab-count" id="tab-count-mobile">0</span>
                 </button>
             </div>
+
             <div id="platforms-grid" class="platforms-grid">
                 <!-- Platform cards will be dynamically generated here -->
                 <div class="loading-card">
@@ -5839,6 +6075,94 @@
                 closeDeleteConfirmationModal();
             }
         });
+
+        // ========================================
+        // Platform Type Filtering
+        // ========================================
+        let currentPlatformTypeFilter = 'all';
+
+        function filterPlatformsByType(type) {
+            currentPlatformTypeFilter = type;
+
+            // Update active tab
+            document.querySelectorAll('.platform-type-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+
+            // Filter platform cards
+            const platformCards = document.querySelectorAll('.platform-card');
+            platformCards.forEach(card => {
+                const platformType = card.dataset.platformType || 'fixed';
+                if (type === 'all' || platformType === type) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Show empty state message if no platforms visible
+            const visibleCards = document.querySelectorAll('.platform-card[style=""], .platform-card:not([style])');
+            const platformsGrid = document.getElementById('platforms-grid');
+            const emptyMessage = platformsGrid.querySelector('.empty-filter-message');
+
+            if (visibleCards.length === 0 && platformCards.length > 0) {
+                if (!emptyMessage) {
+                    const typeLabels = { all: 'any', fixed: 'Fixed', uav: 'UAV', satellite: 'Satellite', mobile: 'Mobile' };
+                    const msg = document.createElement('div');
+                    msg.className = 'empty-filter-message';
+                    msg.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <i class="fas fa-filter" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No ${typeLabels[type]} platforms found</p>
+                            <button onclick="filterPlatformsByType('all')" class="btn btn-outline" style="margin-top: 1rem;">
+                                Show All Platforms
+                            </button>
+                        </div>
+                    `;
+                    platformsGrid.appendChild(msg);
+                }
+            } else if (emptyMessage) {
+                emptyMessage.remove();
+            }
+        }
+
+        function updatePlatformTypeCounts() {
+            if (!window.sitesStationDashboard || !window.sitesStationDashboard.platforms) return;
+
+            const platforms = window.sitesStationDashboard.platforms;
+            const counts = {
+                all: platforms.length,
+                fixed: 0,
+                uav: 0,
+                satellite: 0,
+                mobile: 0
+            };
+
+            platforms.forEach(p => {
+                const type = (p.platform_type || 'fixed').toLowerCase();
+                if (counts[type] !== undefined) {
+                    counts[type]++;
+                }
+            });
+
+            // Update tab counts
+            Object.entries(counts).forEach(([type, count]) => {
+                const countEl = document.getElementById(`tab-count-${type}`);
+                if (countEl) {
+                    countEl.textContent = count;
+                }
+
+                // Hide tabs with zero count (except 'all' and current filter)
+                const tab = document.querySelector(`.platform-type-tab[data-type="${type}"]`);
+                if (tab && type !== 'all') {
+                    if (count === 0 && currentPlatformTypeFilter !== type) {
+                        tab.classList.add('hidden');
+                    } else {
+                        tab.classList.remove('hidden');
+                    }
+                }
+            });
+        }
 
         // Export functionality
         async function exportStationData() {

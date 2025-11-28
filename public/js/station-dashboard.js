@@ -347,6 +347,7 @@ class SitesStationDashboard {
 
         const platformCountEl = document.getElementById('platforms-count');
         const instrumentCountEl = document.getElementById('instruments-count');
+        const coordinatesEl = document.getElementById('coordinates');
 
         if (platformCountEl) {
             platformCountEl.textContent = platformCount;
@@ -354,6 +355,60 @@ class SitesStationDashboard {
 
         if (instrumentCountEl) {
             instrumentCountEl.textContent = instrumentCount;
+        }
+
+        // Update coordinates in the dashboard card
+        if (coordinatesEl && this.stationData) {
+            const coords = this.formatCoordinates();
+            coordinatesEl.textContent = coords !== 'No coordinates' ? coords : '-';
+        }
+
+        // Update additional statistics if elements exist
+        this.updateExtendedStats();
+    }
+
+    updateExtendedStats() {
+        // Count active/inactive instruments
+        const activeInstruments = this.instruments.filter(i => i.status === 'active' || i.status === 'Active').length;
+        const inactiveInstruments = this.instruments.length - activeInstruments;
+
+        // Count by platform type
+        const platformTypes = {};
+        this.platforms.forEach(p => {
+            const type = p.platform_type || 'fixed';
+            platformTypes[type] = (platformTypes[type] || 0) + 1;
+        });
+
+        // Count by ecosystem
+        const ecosystems = {};
+        this.platforms.forEach(p => {
+            const eco = p.ecosystem_code || 'unknown';
+            ecosystems[eco] = (ecosystems[eco] || 0) + 1;
+        });
+
+        // Update active count if element exists
+        const activeCountEl = document.getElementById('active-instruments-count');
+        if (activeCountEl) {
+            activeCountEl.textContent = activeInstruments;
+        }
+
+        // Update platform type breakdown if element exists
+        const platformTypesEl = document.getElementById('platform-types-breakdown');
+        if (platformTypesEl) {
+            const typeLabels = { fixed: 'Fixed', uav: 'UAV', satellite: 'Satellite', mobile: 'Mobile' };
+            const breakdown = Object.entries(platformTypes)
+                .map(([type, count]) => `${typeLabels[type] || type}: ${count}`)
+                .join(', ');
+            platformTypesEl.textContent = breakdown || 'None';
+        }
+
+        // Update ecosystem breakdown if element exists
+        const ecosystemsEl = document.getElementById('ecosystems-breakdown');
+        if (ecosystemsEl) {
+            const ecoBreakdown = Object.entries(ecosystems)
+                .map(([eco, count]) => `${eco}: ${count}`)
+                .join(', ');
+            ecosystemsEl.textContent = ecoBreakdown || 'None';
         }
     }
 
@@ -423,6 +478,11 @@ class SitesStationDashboard {
 
         // Load images asynchronously after rendering
         this.loadAllInstrumentImages();
+
+        // Update platform type tab counts
+        if (typeof updatePlatformTypeCounts === 'function') {
+            updatePlatformTypeCounts();
+        }
     }
 
     async loadAllInstrumentImages() {
@@ -442,7 +502,7 @@ class SitesStationDashboard {
             (platform.latitude && platform.longitude ? `${platform.latitude.toFixed(4)}, ${platform.longitude.toFixed(4)}` : 'No location');
 
         return `
-            <div class="platform-card" data-platform-id="${platform.id}">
+            <div class="platform-card" data-platform-id="${platform.id}" data-platform-type="${(platform.platform_type || 'fixed').toLowerCase()}">
                 <div class="platform-header">
                     <h4>${this.escapeHtml(platform.display_name)}</h4>
                     <div class="platform-normalized-name">
