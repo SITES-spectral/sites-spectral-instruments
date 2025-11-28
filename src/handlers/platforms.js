@@ -72,6 +72,7 @@ async function getPlatformById(id, user, env) {
   let query = `
     SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
            p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+           p.platform_type, p.ecosystem_code,
            p.deployment_date, p.description, p.operation_programs,
            p.created_at, p.updated_at,
            s.acronym as station_acronym, s.display_name as station_name,
@@ -118,6 +119,7 @@ async function getPlatformsList(user, request, env) {
   let query = `
     SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
            p.latitude, p.longitude, p.platform_height_m, p.status, p.mounting_structure,
+           p.platform_type, p.ecosystem_code,
            p.deployment_date, p.description, p.operation_programs,
            p.created_at, p.updated_at,
            s.acronym as station_acronym, s.display_name as station_name,

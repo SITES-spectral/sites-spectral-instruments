@@ -12,6 +12,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.0-rc.5] - 2025-11-28
+
+### Critical Bug Fixes: Platform Tabs, Ecosystems & Map Rendering
+
+**Release Date**: 2025-11-28
+**Focus**: Fix 3 critical UI bugs reported in station dashboard
+
+#### Fixed
+
+**Platform Type Tabs (Bug #1):**
+- Tabs were showing "0" counts for all platform types despite platforms being visible
+- Root cause: `platform_type` field was missing from API SELECT query
+- Fix: Added `platform_type` to both `getPlatformById` and `getPlatformsList` queries
+
+**Ecosystems Display (Bug #2):**
+- Station Overview showed "unknown: 7" instead of actual ecosystem codes (MIR, FOR, AGR, etc.)
+- Root cause: `ecosystem_code` column didn't exist in platforms table
+- Fix: Created migration 0031 to add and populate ecosystem_code from normalized_name patterns
+
+**Leaflet Map Rendering (Bug #3):**
+- Map displayed grey area with only partial tiles visible
+- Root cause: Map was initialized while container was hidden (display:none)
+- Fix: Reordered initialization to call `showSuccessState()` before `setupMap()` and added `invalidateSize()` call
+
+#### Changed
+
+**Platform Type Tabs Reordering:**
+- Moved "All" tab to end of the tab list (user request)
+- Tab order is now: Fixed, UAV, Satellite, Mobile, All
+- Default filter changed from "all" to "fixed"
+
+#### Added
+
+**Migration 0031 - Platform Ecosystem Code:**
+- Added `ecosystem_code` TEXT column to platforms table
+- Auto-populated from normalized_name patterns (e.g., SVB_MIR_PL01 → MIR)
+- Created index for ecosystem queries
+
+**API Response Enhancements:**
+- Platforms API now returns `platform_type` and `ecosystem_code` fields
+- Enables proper tab filtering and ecosystem display
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `src/handlers/platforms.js` | Added platform_type, ecosystem_code to SELECT queries |
+| `public/js/station-dashboard.js` | Fixed map init timing, added initial filter application |
+| `public/station.html` | Reordered tabs, changed default filter to 'fixed' |
+| `migrations/0031_platform_ecosystem_code.sql` | New migration for ecosystem_code |
+
+---
+
 ## [8.0.0-rc.4] - 2025-11-28
 
 ### Phase 7 Foundation: Maintenance, Calibration & Configuration Architecture

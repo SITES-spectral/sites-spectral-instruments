@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.0-rc.4">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.0-rc.5">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.0-rc.4">
+    <meta name="app-version" content="8.0.0-rc.5">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -2776,12 +2776,7 @@
 
             <!-- Platform Type Tabs -->
             <div class="platform-type-tabs" id="platform-type-tabs">
-                <button class="platform-type-tab active" data-type="all" onclick="filterPlatformsByType('all')">
-                    <i class="fas fa-th-large"></i>
-                    <span class="tab-label">All</span>
-                    <span class="tab-count" id="tab-count-all">0</span>
-                </button>
-                <button class="platform-type-tab" data-type="fixed" onclick="filterPlatformsByType('fixed')">
+                <button class="platform-type-tab active" data-type="fixed" onclick="filterPlatformsByType('fixed')">
                     <i class="fas fa-tower-observation"></i>
                     <span class="tab-label">Fixed</span>
                     <span class="tab-count" id="tab-count-fixed">0</span>
@@ -2800,6 +2795,11 @@
                     <i class="fas fa-truck"></i>
                     <span class="tab-label">Mobile</span>
                     <span class="tab-count" id="tab-count-mobile">0</span>
+                </button>
+                <button class="platform-type-tab" data-type="all" onclick="filterPlatformsByType('all')">
+                    <i class="fas fa-th-large"></i>
+                    <span class="tab-label">All</span>
+                    <span class="tab-count" id="tab-count-all">0</span>
                 </button>
             </div>
 
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.0-rc.4"></script>
-    <script src="/js/api.js?v=8.0.0-rc.4"></script>
-    <script src="/js/components.js?v=8.0.0-rc.4"></script>
+    <script src="/js/utils.js?v=8.0.0-rc.5"></script>
+    <script src="/js/api.js?v=8.0.0-rc.5"></script>
+    <script src="/js/components.js?v=8.0.0-rc.5"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.0-rc.4"></script>
-    <script src="/js/station-dashboard.js?v=8.0.0-rc.4"></script>
-    <script src="/js/navigation.js?v=8.0.0-rc.4"></script>
-    <script src="/js/export.js?v=8.0.0-rc.4"></script>
+    <script src="/js/interactive-map.js?v=8.0.0-rc.5"></script>
+    <script src="/js/station-dashboard.js?v=8.0.0-rc.5"></script>
+    <script src="/js/navigation.js?v=8.0.0-rc.5"></script>
+    <script src="/js/export.js?v=8.0.0-rc.5"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -6079,7 +6079,7 @@
         // ========================================
         // Platform Type Filtering
         // ========================================
-        let currentPlatformTypeFilter = 'all';
+        let currentPlatformTypeFilter = 'fixed';
 
         function filterPlatformsByType(type) {
             currentPlatformTypeFilter = type;

@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "8.0.0-rc.4",
+  "version": "8.0.0-rc.5",
   "description": "SITES Spectral Multi-Platform Observation Network v8.0.0 - V3 API with Domain-Based Routing and Spatial Queries",
   "main": "src/worker.js",
   "scripts": {

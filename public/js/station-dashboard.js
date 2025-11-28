@@ -42,11 +42,21 @@ class SitesStationDashboard {
             if (this.stationAcronym) {
                 await this.loadStationData();
                 await this.loadImageManifest();
-                this.setupMap();
                 this.setupEventListeners();
 
-                // Show successful state
+                // Show successful state BEFORE map initialization
+                // This ensures the map container has dimensions
                 this.showSuccessState();
+
+                // Initialize map AFTER container is visible
+                this.setupMap();
+
+                // Force map to recalculate size after a short delay
+                if (window.sitesMap && this.stationMap) {
+                    setTimeout(() => {
+                        window.sitesMap.invalidateSize('station-map');
+                    }, 100);
+                }
             } else {
                 this.redirectToAppropriateLocation();
             }
@@ -482,6 +492,11 @@ class SitesStationDashboard {
         // Update platform type tab counts
         if (typeof updatePlatformTypeCounts === 'function') {
             updatePlatformTypeCounts();
+        }
+
+        // Apply initial filter (defaults to 'fixed')
+        if (typeof filterPlatformsByType === 'function' && typeof currentPlatformTypeFilter !== 'undefined') {
+            filterPlatformsByType(currentPlatformTypeFilter);
         }
     }
 
