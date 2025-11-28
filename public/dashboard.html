@@ -1789,6 +1789,21 @@
 
             } catch (error) {
                 console.error('Failed to load users:', error);
+                // Hide loading state on error
+                document.getElementById('users-loading').style.display = 'none';
+                // Show error state
+                const grid = document.getElementById('users-list');
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #ef4444;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>Failed to load users</h3>
+                        <p>${error.message}</p>
+                        <button onclick="window.usersLoaded = false; loadUsers();" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+                grid.style.display = 'grid';
                 showNotification('Failed to load users: ' + error.message, 'error');
             }
         }
@@ -2004,6 +2019,21 @@
 
             } catch (error) {
                 console.error('Failed to load analytics:', error);
+                // Hide loading state on error
+                document.getElementById('analytics-loading').style.display = 'none';
+                // Show error state in analytics content
+                const content = document.getElementById('analytics-content');
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 4rem; color: #ef4444;">
+                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3>Failed to load analytics</h3>
+                        <p>${error.message}</p>
+                        <button onclick="window.analyticsLoaded = false; loadAnalytics();" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+                content.style.display = 'block';
                 showNotification('Failed to load analytics: ' + error.message, 'error');
             }
         }

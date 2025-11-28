@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.5.2">
+    <link rel="stylesheet" href="/css/styles.css?v=8.5.3">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.5.2">
+    <meta name="app-version" content="8.5.3">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4242,12 +4242,12 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.5.2"></script>
+    <script src="/js/utils.js?v=8.5.3"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
-    <script src="/js/api.js?v=8.5.2"></script>
-    <script src="/js/components.js?v=8.5.2"></script>
+    <script src="/js/api.js?v=8.5.3"></script>
+    <script src="/js/components.js?v=8.5.3"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4257,10 +4257,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.5.2"></script>
-    <script src="/js/station-dashboard.js?v=8.5.2"></script>
-    <script src="/js/navigation.js?v=8.5.2"></script>
-    <script src="/js/export.js?v=8.5.2"></script>
+    <script src="/js/interactive-map.js?v=8.5.3"></script>
+    <script src="/js/station-dashboard.js?v=8.5.3"></script>
+    <script src="/js/navigation.js?v=8.5.3"></script>
+    <script src="/js/export.js?v=8.5.3"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -5033,7 +5033,9 @@
 
         function closeFullImageModal() {
             const modal = document.getElementById('full-image-modal');
-            modal.classList.remove('show');
+            if (modal) {
+                modal.classList.remove('show');
+            }
             document.body.style.overflow = ''; // Restore scrolling
         }
 
@@ -5454,7 +5456,8 @@
         }
 
         function closeROIModal() {
-            document.getElementById('roi-modal').classList.remove('show');
+            const modal = document.getElementById('roi-modal');
+            if (modal) modal.classList.remove('show');
         }
 
         async function editROI(roiId) {
@@ -5711,7 +5714,8 @@
         }
 
         function closeROIEditModal() {
-            document.getElementById('edit-roi-modal').classList.remove('show');
+            const modal = document.getElementById('edit-roi-modal');
+            if (modal) modal.classList.remove('show');
         }
 
         async function deleteROI(roiId) {
@@ -6981,11 +6985,13 @@
         }
 
         function closePlatformEditModal() {
-            document.getElementById('platform-edit-modal').classList.remove('show');
+            const modal = document.getElementById('platform-edit-modal');
+            if (modal) modal.classList.remove('show');
         }
 
         function closeInstrumentEditModal() {
-            document.getElementById('instrument-edit-modal').classList.remove('show');
+            const modal = document.getElementById('instrument-edit-modal');
+            if (modal) modal.classList.remove('show');
         }
 
         // Helper functions to refresh detail modals after successful edits

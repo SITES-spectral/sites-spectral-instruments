@@ -12,6 +12,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.5.3] - 2025-11-28
+
+### AUDIT FIXES: UX Critical Issues and Error Handling
+
+**Release Date**: 2025-11-28
+**Focus**: Comprehensive audit fixes for stability and error handling
+
+#### UX Fixes
+
+- **Modal Close Null Checks**: Added null checks to all modal close functions to prevent runtime errors:
+  - `closeFullImageModal()` - null check added
+  - `closeROIModal()` - null check added
+  - `closeROIEditModal()` - null check added
+  - `closePlatformEditModal()` - null check added
+  - `closeInstrumentEditModal()` - null check added
+
+- **Dashboard Loading State Error Handling**: Fixed infinite spinner on API errors:
+  - `loadUsers()` - now hides loading state and shows retry button on error
+  - `loadAnalytics()` - now hides loading state and shows retry button on error
+
+#### Files Modified
+
+- `station.html` - Added null checks to 5 modal close functions
+- `dashboard.html` - Fixed error handling in loadUsers() and loadAnalytics()
+
+---
+
 ## [8.5.2] - 2025-11-28
 
 ### BUGFIX: Station Card Stats Label Truncation
