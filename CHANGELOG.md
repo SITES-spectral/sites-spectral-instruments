@@ -12,6 +12,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.8] - 2025-11-28
+
+### FIX: JavaScript Syntax Error Blocking Script Execution
+
+**Release Date**: 2025-11-28
+**Focus**: Fix `const instrumentId` redeclaration causing script failure
+
+#### Root Cause
+
+A `const` variable was declared twice in the same function scope, causing a JavaScript syntax error:
+```
+Uncaught SyntaxError: redeclaration of const instrumentId
+Previously declared at line 5579, column 23
+```
+
+This error blocked ALL subsequent JavaScript from executing, including the `addInstrument` function, causing the "Add Instrument" button to fail.
+
+#### Fixed
+
+**station.html line 5617:**
+- Removed duplicate `const instrumentId` declaration in `saveROIChanges()` function
+- Variable was already declared at line 5579, reused instead of redeclaring
+
+#### Impact
+
+- **Before**: Script crashed on load, `addInstrument` function never defined, buttons non-functional
+- **After**: Script loads completely, all functions available, buttons work correctly
+
+---
+
 ## [8.0.7] - 2025-11-28
 
 ### CRITICAL FIX: 20 Broken Button Handlers Across Application
