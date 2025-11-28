@@ -1,6 +1,104 @@
 // SITES Spectral Instruments - Station Dashboard Module
 // Station-specific management functionality
 
+// ========================================
+// Platform Type Filtering - GLOBAL FUNCTIONS
+// MUST be defined BEFORE SitesStationDashboard class instantiation
+// These are called by renderPlatforms() immediately when data loads
+// ========================================
+
+let currentPlatformTypeFilter = 'fixed';
+
+function filterPlatformsByType(type) {
+    currentPlatformTypeFilter = type;
+
+    // Update active tab
+    document.querySelectorAll('.platform-type-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.type === type);
+    });
+
+    // Filter platform cards
+    const platformCards = document.querySelectorAll('.platform-card');
+    let visibleCount = 0;
+    platformCards.forEach(card => {
+        const platformType = card.dataset.platformType || 'fixed';
+        if (type === 'all' || platformType === type) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Show empty message if no platforms visible
+    const platformsGrid = document.getElementById('platforms-grid');
+    let emptyMessage = platformsGrid?.querySelector('.no-platforms-filtered');
+
+    if (visibleCount === 0 && platformsGrid) {
+        if (!emptyMessage) {
+            emptyMessage = document.createElement('div');
+            emptyMessage.className = 'no-platforms-filtered';
+            emptyMessage.innerHTML = `
+                <i class="fas fa-filter"></i>
+                <p>No ${type} platforms at this station</p>
+            `;
+            platformsGrid.appendChild(emptyMessage);
+        }
+    } else if (emptyMessage) {
+        emptyMessage.remove();
+    }
+}
+
+function updatePlatformTypeCounts() {
+    if (!window.sitesStationDashboard) {
+        console.warn('[updatePlatformTypeCounts] window.sitesStationDashboard not available');
+        return;
+    }
+    if (!window.sitesStationDashboard.platforms) {
+        console.warn('[updatePlatformTypeCounts] platforms not available');
+        return;
+    }
+
+    const platforms = window.sitesStationDashboard.platforms;
+
+    const counts = {
+        all: platforms.length,
+        fixed: 0,
+        uav: 0,
+        satellite: 0,
+        mobile: 0
+    };
+
+    platforms.forEach(p => {
+        const type = (p.platform_type || 'fixed').toLowerCase();
+        if (counts[type] !== undefined) {
+            counts[type]++;
+        }
+    });
+
+    // Update tab counts
+    Object.entries(counts).forEach(([type, count]) => {
+        const countEl = document.getElementById(`tab-count-${type}`);
+        if (countEl) {
+            countEl.textContent = count;
+        }
+
+        // Hide tabs with zero count (except 'all' and current filter)
+        const tab = document.querySelector(`.platform-type-tab[data-type="${type}"]`);
+        if (tab && type !== 'all') {
+            if (count === 0 && currentPlatformTypeFilter !== type) {
+                tab.classList.add('hidden');
+            } else {
+                tab.classList.remove('hidden');
+            }
+        }
+    });
+}
+
+// ========================================
+// End of Global Platform Filtering Functions
+// ========================================
+
 class SitesStationDashboard {
     constructor() {
         this.currentUser = null;
@@ -455,17 +553,13 @@ class SitesStationDashboard {
     }
 
     renderPlatforms() {
-        console.debug(`renderPlatforms() called with ${this.platforms.length} platforms:`, this.platforms);
-
         const platformsContainer = document.getElementById('platforms-grid');
         if (!platformsContainer) {
             console.error('platforms-grid container not found!');
             return;
         }
-        console.debug('Found platforms-grid container:', platformsContainer);
 
         if (this.platforms.length === 0) {
-            console.debug('No platforms to render, showing empty state');
             platformsContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-building fa-3x"></i>
@@ -481,31 +575,17 @@ class SitesStationDashboard {
             return;
         }
 
-        console.debug(`Rendering ${this.platforms.length} platform cards...`);
-
         const platformCards = this.platforms.map(platform => this.createPlatformCard(platform)).join('');
         platformsContainer.innerHTML = platformCards;
 
         // Load images asynchronously after rendering
         this.loadAllInstrumentImages();
 
-        // Update platform type tab counts
-        console.debug('[renderPlatforms] Checking for updatePlatformTypeCounts function:', typeof updatePlatformTypeCounts);
-        if (typeof updatePlatformTypeCounts === 'function') {
-            console.debug('[renderPlatforms] Calling updatePlatformTypeCounts()');
-            updatePlatformTypeCounts();
-        } else {
-            console.warn('[renderPlatforms] updatePlatformTypeCounts is NOT defined!');
-        }
+        // Update platform type tab counts (function defined at top of this file)
+        updatePlatformTypeCounts();
 
-        // Apply initial filter (defaults to 'fixed')
-        console.debug('[renderPlatforms] Checking for filterPlatformsByType function:', typeof filterPlatformsByType, 'currentPlatformTypeFilter:', typeof currentPlatformTypeFilter !== 'undefined' ? currentPlatformTypeFilter : 'undefined');
-        if (typeof filterPlatformsByType === 'function' && typeof currentPlatformTypeFilter !== 'undefined') {
-            console.debug('[renderPlatforms] Calling filterPlatformsByType with:', currentPlatformTypeFilter);
-            filterPlatformsByType(currentPlatformTypeFilter);
-        } else {
-            console.warn('[renderPlatforms] filterPlatformsByType or currentPlatformTypeFilter NOT defined!');
-        }
+        // Apply initial filter (defaults to 'fixed', function defined at top of this file)
+        filterPlatformsByType(currentPlatformTypeFilter);
     }
 
     async loadAllInstrumentImages() {

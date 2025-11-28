@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.1">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.2">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.1">
+    <meta name="app-version" content="8.0.2">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.1"></script>
-    <script src="/js/api.js?v=8.0.1"></script>
-    <script src="/js/components.js?v=8.0.1"></script>
+    <script src="/js/utils.js?v=8.0.2"></script>
+    <script src="/js/api.js?v=8.0.2"></script>
+    <script src="/js/components.js?v=8.0.2"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.1"></script>
-    <script src="/js/station-dashboard.js?v=8.0.1"></script>
-    <script src="/js/navigation.js?v=8.0.1"></script>
-    <script src="/js/export.js?v=8.0.1"></script>
+    <script src="/js/interactive-map.js?v=8.0.2"></script>
+    <script src="/js/station-dashboard.js?v=8.0.2"></script>
+    <script src="/js/navigation.js?v=8.0.2"></script>
+    <script src="/js/export.js?v=8.0.2"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -4202,102 +4202,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const stationAcronym = urlParams.get('station');
 
-        // ========================================
-        // Platform Type Filtering (MUST be defined early, before StationDashboard loads)
-        // ========================================
-        let currentPlatformTypeFilter = 'fixed';
-
-        function filterPlatformsByType(type) {
-            currentPlatformTypeFilter = type;
-
-            // Update active tab
-            document.querySelectorAll('.platform-type-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.type === type);
-            });
-
-            // Filter platform cards
-            const platformCards = document.querySelectorAll('.platform-card');
-            let visibleCount = 0;
-            platformCards.forEach(card => {
-                const platformType = card.dataset.platformType || 'fixed';
-                if (type === 'all' || platformType === type) {
-                    card.style.display = '';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            // Show empty message if no platforms visible
-            const platformsGrid = document.getElementById('platforms-grid');
-            let emptyMessage = platformsGrid?.querySelector('.no-platforms-filtered');
-
-            if (visibleCount === 0 && platformsGrid) {
-                if (!emptyMessage) {
-                    emptyMessage = document.createElement('div');
-                    emptyMessage.className = 'no-platforms-filtered';
-                    emptyMessage.innerHTML = `
-                        <i class="fas fa-filter"></i>
-                        <p>No ${type} platforms at this station</p>
-                    `;
-                    platformsGrid.appendChild(emptyMessage);
-                }
-            } else if (emptyMessage) {
-                emptyMessage.remove();
-            }
-        }
-
-        function updatePlatformTypeCounts() {
-            console.debug('[updatePlatformTypeCounts] Called');
-
-            if (!window.sitesStationDashboard) {
-                console.warn('[updatePlatformTypeCounts] window.sitesStationDashboard not available');
-                return;
-            }
-            if (!window.sitesStationDashboard.platforms) {
-                console.warn('[updatePlatformTypeCounts] platforms not available');
-                return;
-            }
-
-            const platforms = window.sitesStationDashboard.platforms;
-            console.debug('[updatePlatformTypeCounts] Platforms count:', platforms.length);
-
-            const counts = {
-                all: platforms.length,
-                fixed: 0,
-                uav: 0,
-                satellite: 0,
-                mobile: 0
-            };
-
-            platforms.forEach(p => {
-                const type = (p.platform_type || 'fixed').toLowerCase();
-                if (counts[type] !== undefined) {
-                    counts[type]++;
-                }
-            });
-
-            console.debug('[updatePlatformTypeCounts] Final counts:', counts);
-
-            // Update tab counts
-            Object.entries(counts).forEach(([type, count]) => {
-                const countEl = document.getElementById(`tab-count-${type}`);
-                if (countEl) {
-                    countEl.textContent = count;
-                }
-
-                // Hide tabs with zero count (except 'all' and current filter)
-                const tab = document.querySelector(`.platform-type-tab[data-type="${type}"]`);
-                if (tab && type !== 'all') {
-                    if (count === 0 && currentPlatformTypeFilter !== type) {
-                        tab.classList.add('hidden');
-                    } else {
-                        tab.classList.remove('hidden');
-                    }
-                }
-            });
-            console.debug('[updatePlatformTypeCounts] Completed');
-        }
+        // NOTE: Platform Type Filtering functions (filterPlatformsByType, updatePlatformTypeCounts)
+        // are now defined in station-dashboard.js at the TOP of the file to ensure they're
+        // available before the SitesStationDashboard class is instantiated.
 
         // Ensure all modules are loaded before initializing station dashboard
         function ensureModulesLoaded() {
