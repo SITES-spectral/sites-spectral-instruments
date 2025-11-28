@@ -390,10 +390,7 @@ END;
 -- ============================================================================
 -- PART 6: MIGRATION METADATA
 -- ============================================================================
-
-INSERT INTO migration_metadata (migration_number, description, fields_added, performance_impact, backward_compatible)
-VALUES ('0030', 'Maintenance History & Calibration Logs - Phase 7 Production Features',
-        60, 'Low - new tables with optimized indexes', true);
+-- Migration record will be automatically added by wrangler d1 migrations
 
 -- ============================================================================
 -- MIGRATION SUMMARY
