@@ -67,28 +67,29 @@ WHERE normalized_name IN ('SVB_SAT_PL01', 'ANS_SAT_PL01');
 
 ## Method 2: Create via Admin Dashboard (Recommended)
 
-As of v8.0.3, the Admin Dashboard fully supports creating platforms of any type:
+As of v8.0.4, the Admin Dashboard fully supports creating platforms of any type:
 
 1. **Log in** as admin at https://sites.jobelab.com
 2. **Navigate** to the station dashboard (e.g., `/station?station=SVB`)
 3. **Click** the "+ Platform" button
 4. **Fill in** the form:
-   - **Display Name**: Descriptive name (e.g., "Forest UAV Platform 01")
+   - **Display Name**: Descriptive name (e.g., "Mavic 3M UAV 01")
    - **Location Code**: Unique code (e.g., "UAV01", "SAT01", "MOB01")
-   - **Ecosystem Code**: Select from dropdown (FOR, AGR, MIR, etc.)
+   - **Ecosystem Code**: Select from dropdown (FOR, AGR, MIR, etc.) - *not used for UAV*
    - **Platform Type**: Select from dropdown:
      - Fixed Tower/Mast (default)
-     - UAV / Drone
+     - UAV / Drone (shows Drone Model dropdown)
      - Satellite
      - Mobile Platform
+   - **Drone Model** (UAV only): Select drone model (M3M, P4M, M30T, M300)
    - **Normalized Name**: Auto-generated based on your selections
 5. **Click** "Create Platform"
 
 The normalized name updates automatically based on platform type:
-- Fixed: `SVB_FOR_PL01`
-- UAV: `SVB_FOR_UAV01`
-- Satellite: `SVB_SAT_PL01` (uses SAT instead of ecosystem)
-- Mobile: `SVB_FOR_MOB01`
+- Fixed: `SVB_FOR_PL01` (station + ecosystem + location)
+- UAV: `SVB_M3M_UAV01` (station + drone model + location) - **uses drone model, not ecosystem**
+- Satellite: `SVB_SAT_PL01` (station + SAT + location)
+- Mobile: `SVB_FOR_MOB01` (station + ecosystem + location)
 
 ---
 
@@ -220,14 +221,25 @@ Recommended naming patterns for different platform types:
 | Type | Pattern | Example | Description |
 |------|---------|---------|-------------|
 | Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` | Fixed observation tower/mast |
-| UAV | `{STATION}_{ECO}_UAV##` | `SVB_FOR_UAV01` | Drone/UAV platform |
+| UAV | `{STATION}_{DRONE}_UAV##` | `SVB_M3M_UAV01` | Drone/UAV platform (uses drone model, not ecosystem) |
 | Satellite | `{STATION}_SAT_PL##` | `SVB_SAT_PL01` | Satellite-based platform |
 | Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` | Mobile/portable platform |
 
 **Components:**
 - `{STATION}` - Station acronym (SVB, ANS, LON, etc.)
 - `{ECO}` - Ecosystem code (FOR, AGR, MIR, LAK, WET, GRA, etc.)
+- `{DRONE}` - Drone model code (M3M, P4M, M30T, M300, etc.)
 - `##` - Sequential number (01, 02, 03...)
+
+### Supported Drone Models
+
+| Code | Model | Description |
+|------|-------|-------------|
+| M3M | DJI Mavic 3 Multispectral | Compact multispectral drone |
+| P4M | DJI Phantom 4 Multispectral | Legacy multispectral drone |
+| M30T | DJI Matrice 30T | Thermal imaging drone |
+| M300 | DJI Matrice 300 RTK | Heavy-lift RTK drone |
+| OTHER | Other | Custom or other drone models |
 
 ### Instrument Naming
 
@@ -252,11 +264,18 @@ Platform:   SVB_FOR_PL01          (Svartberget Forest Platform 01)
 └── MS Sensor: SVB_FOR_PL01_MS01   (Multispectral sensor)
 ```
 
-#### UAV Platform with Hyperspectral
+#### UAV Platform with Multispectral (DJI Mavic 3M)
 ```
-Platform:   SVB_FOR_UAV01         (Svartberget Forest UAV 01)
-├── Phenocam:      SVB_FOR_UAV01_PHE01  (Nadir camera)
-└── Hyperspectral: SVB_FOR_UAV01_HYP01  (Hyperspectral imager)
+Platform:   SVB_M3M_UAV01         (Svartberget Mavic 3M UAV 01)
+├── Phenocam:      SVB_M3M_UAV01_PHE01  (RGB camera)
+└── MS Sensor:     SVB_M3M_UAV01_MS01   (4-band multispectral)
+```
+
+#### UAV Platform with Hyperspectral (DJI Phantom 4M)
+```
+Platform:   ANS_P4M_UAV01         (Abisko Phantom 4M UAV 01)
+├── Phenocam:      ANS_P4M_UAV01_PHE01  (Nadir RGB camera)
+└── Hyperspectral: ANS_P4M_UAV01_HYP01  (Hyperspectral imager)
 ```
 
 #### Satellite Platform

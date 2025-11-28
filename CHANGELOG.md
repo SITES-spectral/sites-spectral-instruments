@@ -12,6 +12,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.4] - 2025-11-28
+
+### Feature: UAV Drone Model Selection & Correct Naming Convention
+
+**Release Date**: 2025-11-28
+**Focus**: Proper UAV platform naming using drone model instead of ecosystem code
+
+#### Added
+
+**Drone Model Dropdown for UAV Platforms:**
+- New "Drone Model" dropdown appears when UAV platform type is selected
+- Supported models: M3M (Mavic 3 Multispectral), P4M (Phantom 4 Multispectral), M30T, M300, OTHER
+- Drone model replaces ecosystem code in UAV platform naming
+
+**Correct UAV Naming Convention:**
+- UAV platforms now use: `{STATION}_{DRONE}_UAV##`
+- Examples: `SVB_M3M_UAV01`, `ANS_P4M_UAV01`, `LON_M3M_UAV02`
+- Ecosystem code doesn't apply to drones since they fly over multiple ecosystems
+
+#### Changed
+
+**Updated Naming Patterns:**
+| Type | Pattern | Example |
+|------|---------|---------|
+| Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` |
+| UAV | `{STATION}_{DRONE}_UAV##` | `SVB_M3M_UAV01` |
+| Satellite | `{STATION}_SAT_PL##` | `SVB_SAT_PL01` |
+| Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` |
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `public/station.html` | Added drone model dropdown, `onPlatformTypeChange()` function, updated naming logic |
+| `docs/PLATFORM_TYPE_UPDATE_GUIDE.md` | Updated UAV naming examples, added drone models table |
+
+---
+
 ## [8.0.3] - 2025-11-28
 
 ### Feature: Platform Type Selection in Admin Dashboard
@@ -28,7 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Smart Normalized Name Generation:**
 - Fixed platforms: `{STATION}_{ECO}_PL##` (e.g., SVB_FOR_PL01)
-- UAV platforms: `{STATION}_{ECO}_UAV##` (e.g., SVB_FOR_UAV01)
 - Satellite platforms: `{STATION}_SAT_PL##` (e.g., SVB_SAT_PL01) - uses SAT instead of ecosystem
 - Mobile platforms: `{STATION}_{ECO}_MOB##` (e.g., SVB_FOR_MOB01)
 
@@ -36,13 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `PLATFORM_TYPE_UPDATE_GUIDE.md` with comprehensive naming conventions
 - Added instrument naming patterns (PHE, MS, PAR, NDVI, PRI, HYP)
 - Added complete examples for each platform type with instruments
-
-#### Files Modified
-
-| File | Changes |
-|------|---------|
-| `public/station.html` | Added platform_type dropdown, updated saveNewPlatform(), enhanced updatePlatformNormalizedName() |
-| `docs/PLATFORM_TYPE_UPDATE_GUIDE.md` | Added Admin Dashboard instructions, instrument naming conventions |
 
 ---
 

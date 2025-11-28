@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.3">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.4">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.3">
+    <meta name="app-version" content="8.0.4">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.3"></script>
-    <script src="/js/api.js?v=8.0.3"></script>
-    <script src="/js/components.js?v=8.0.3"></script>
+    <script src="/js/utils.js?v=8.0.4"></script>
+    <script src="/js/api.js?v=8.0.4"></script>
+    <script src="/js/components.js?v=8.0.4"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.3"></script>
-    <script src="/js/station-dashboard.js?v=8.0.3"></script>
-    <script src="/js/navigation.js?v=8.0.3"></script>
-    <script src="/js/export.js?v=8.0.3"></script>
+    <script src="/js/interactive-map.js?v=8.0.4"></script>
+    <script src="/js/station-dashboard.js?v=8.0.4"></script>
+    <script src="/js/navigation.js?v=8.0.4"></script>
+    <script src="/js/export.js?v=8.0.4"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -8131,13 +8131,26 @@
                         </div>
                         <div class="form-group">
                             <label for="platform-type">Platform Type</label>
-                            <select id="platform-type" class="form-input" onchange="updatePlatformNormalizedName()">
+                            <select id="platform-type" class="form-input" onchange="onPlatformTypeChange()">
                                 <option value="fixed">Fixed Tower/Mast</option>
                                 <option value="uav">UAV / Drone</option>
                                 <option value="satellite">Satellite</option>
                                 <option value="mobile">Mobile Platform</option>
                             </select>
                             <small>Determines how the platform is categorized in the dashboard</small>
+                        </div>
+                    </div>
+                    <div class="form-row" id="drone-model-row" style="display: none;">
+                        <div class="form-group">
+                            <label for="platform-drone-model">Drone Model *</label>
+                            <select id="platform-drone-model" class="form-input" onchange="updatePlatformNormalizedName()">
+                                <option value="M3M">M3M - DJI Mavic 3 Multispectral</option>
+                                <option value="P4M">P4M - DJI Phantom 4 Multispectral</option>
+                                <option value="M30T">M30T - DJI Matrice 30T</option>
+                                <option value="M300">M300 - DJI Matrice 300 RTK</option>
+                                <option value="OTHER">OTHER - Other Drone Model</option>
+                            </select>
+                            <small>UAV naming uses drone model instead of ecosystem (e.g., SVB_M3M_UAV01)</small>
                         </div>
                     </div>
                     <div class="form-row">
@@ -8233,25 +8246,44 @@
             document.getElementById('create-platform-modal').classList.add('show');
         }
 
+        function onPlatformTypeChange() {
+            const platformType = document.getElementById('platform-type')?.value || 'fixed';
+            const droneModelRow = document.getElementById('drone-model-row');
+            const ecosystemRow = document.getElementById('platform-ecosystem-code')?.closest('.form-group');
+
+            // Show/hide drone model dropdown based on platform type
+            if (droneModelRow) {
+                droneModelRow.style.display = platformType === 'uav' ? '' : 'none';
+            }
+
+            // Update the normalized name
+            updatePlatformNormalizedName();
+        }
+
         function updatePlatformNormalizedName() {
             const stationAcronym = stationData?.acronym || 'STA';
             const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
             const platformType = document.getElementById('platform-type')?.value || 'fixed';
+            const droneModel = document.getElementById('platform-drone-model')?.value || 'M3M';
             const locationCode = document.getElementById('platform-location-code')?.value || '';
 
             if (locationCode) {
                 let normalizedName;
 
                 // Different naming patterns based on platform type
-                // Fixed:     SVB_FOR_PL01     (station_ecosystem_location)
-                // UAV:       SVB_FOR_UAV01    (station_ecosystem_UAV##)
-                // Satellite: SVB_SAT_PL01     (station_SAT_location)
-                // Mobile:    SVB_FOR_MOB01    (station_ecosystem_MOB##)
+                // Fixed:     SVB_FOR_PL01       (station_ecosystem_location)
+                // UAV:       SVB_M3M_UAV01      (station_dronemodel_UAV##) - uses drone model, not ecosystem
+                // Satellite: SVB_SAT_PL01       (station_SAT_location)
+                // Mobile:    SVB_FOR_MOB01      (station_ecosystem_MOB##)
 
-                if (platformType === 'satellite') {
+                if (platformType === 'uav') {
+                    // UAV platforms use drone model (M3M, P4M) instead of ecosystem
+                    normalizedName = `${stationAcronym}_${droneModel}_${locationCode}`;
+                } else if (platformType === 'satellite') {
                     // Satellite platforms use SAT instead of ecosystem
                     normalizedName = `${stationAcronym}_SAT_${locationCode}`;
                 } else {
+                    // Fixed and Mobile use ecosystem code
                     normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
                 }
 
