@@ -12,6 +12,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.5.2] - 2025-11-28
+
+### BUGFIX: Station Card Stats Label Truncation
+
+**Release Date**: 2025-11-28
+**Focus**: Fix station card UI layout issues
+
+#### Fixes
+
+- **Stats Label Truncation**: Fixed "Instruments" label being cut off in station cards by:
+  - Reduced label font size from 0.8rem to 0.65rem
+  - Changed from `justify-content: space-between` to `space-around`
+  - Added `flex: 1` and `min-width: 0` to allow proper flex shrinking
+  - Added `white-space: nowrap` to prevent unwanted wrapping
+
+#### Files Modified
+
+- `dashboard.html` - Updated `.station-stats`, `.station-stat`, `.station-stat-value`, `.station-stat-label` CSS
+
+---
+
 ## [8.5.1] - 2025-11-28
 
 ### BUGFIX: Dashboard Summary Counts and Station Card Layout
