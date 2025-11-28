@@ -12,6 +12,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.7] - 2025-11-28
+
+### CRITICAL FIX: 20 Broken Button Handlers Across Application
+
+**Release Date**: 2025-11-28
+**Focus**: Fix JavaScript syntax errors in onclick handlers causing button failures
+
+#### Root Cause
+
+Template variables in onclick handlers were not properly quoted, causing JavaScript syntax errors:
+```javascript
+// BROKEN: onclick="function(${id})" → JavaScript sees "function(5)" as undefined variable
+// FIXED:  onclick="function('${id}')" → JavaScript sees "function('5')" as valid string
+```
+
+#### Fixed - station-dashboard.js (4 instances)
+
+| Line | Function | Issue |
+|------|----------|-------|
+| 646 | `showCreateInstrumentModal()` | Add Instrument button on platform cards |
+| 820 | `editPlatform()` | Edit Platform button in modal header |
+| 908 | `showCreateInstrumentModal()` | Add Instrument button in platform modal |
+| 924 | `showCreateInstrumentModal()` | Add First Instrument button (empty state) |
+
+#### Fixed - station.html (16 instances)
+
+| Line | Function | Issue |
+|------|----------|-------|
+| 4493 | `showInstrumentDetails()` | Instrument card click handler |
+| 4513 | `deleteInstrument()` | Delete Instrument button |
+| 4851 | `showFullImage()` | Full image viewer trigger |
+| 5204 | `showROIDetails()` | ROI card click handler |
+| 5264 | `editROI()` | Edit ROI button |
+| 5267 | `deleteROI()` | Delete ROI button (modal header) |
+| 5360 | `deleteROI()` | Delete ROI button (modal footer) |
+| 5513 | `saveROIChanges()` | Save ROI changes button |
+| 5701 | `editPlatform()` | Edit Platform button |
+| 5841 | `editInstrument()` | Edit Instrument button |
+| 5844 | `deleteInstrument()` | Delete Instrument button (modal) |
+| 5995 | `addROI()` | Add ROI button |
+| 7108 | `saveNewInstrument()` | Create Instrument submit button |
+| 7254 | `confirmDeleteInstrument()` | Confirm delete instrument button |
+| 7376 | `saveNewROI()` | Create ROI submit button |
+| 7494 | `confirmDeleteROI()` | Confirm delete ROI button |
+
+#### Impact
+
+- **Before**: Users could not add, edit, or delete instruments/ROIs/platforms
+- **After**: All CRUD operations now functional across the entire application
+
+---
+
 ## [8.0.6] - 2025-11-28
 
 ### Feature: UAV Vendor Selection & Complete Naming Convention

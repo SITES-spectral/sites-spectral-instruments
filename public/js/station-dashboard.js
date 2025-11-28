@@ -643,7 +643,7 @@ class SitesStationDashboard {
                     </button>
 
                     ${this.canEdit ? `
-                        <button class="btn btn-success btn-sm" onclick="sitesStationDashboard.showCreateInstrumentModal(${platform.id})" title="Add New Instrument to this Platform">
+                        <button class="btn btn-success btn-sm" onclick="sitesStationDashboard.showCreateInstrumentModal('${platform.id}')" title="Add New Instrument to this Platform">
                             <i class="fas fa-plus"></i> <i class="fas fa-camera"></i> Instrument
                         </button>
                     ` : ''}
@@ -817,7 +817,7 @@ class SitesStationDashboard {
             <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
             <div class="modal-header-actions">
                 ${canEdit ? `
-                    <button class="modal-edit-btn" onclick="sitesStationDashboard.editPlatform(${platform.id})" title="Edit Platform">
+                    <button class="modal-edit-btn" onclick="sitesStationDashboard.editPlatform('${platform.id}')" title="Edit Platform">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                     <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Click to modify platform details</small>
@@ -905,7 +905,7 @@ class SitesStationDashboard {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h4><i class="fas fa-camera"></i> Instruments (${platformInstruments.length})</h4>
                     ${canEdit ? `
-                        <button class="btn btn-success btn-sm" onclick="sitesStationDashboard.showCreateInstrumentModal(${platformId})" title="Add New Instrument to this Platform">
+                        <button class="btn btn-success btn-sm" onclick="sitesStationDashboard.showCreateInstrumentModal('${platformId}')" title="Add New Instrument to this Platform">
                             <i class="fas fa-plus"></i> Add Instrument
                         </button>
                     ` : ''}
@@ -921,7 +921,7 @@ class SitesStationDashboard {
                         <span style="color: #6b7280; font-size: 0.95rem;">No instruments configured for this platform</span>
                         ${canEdit ? `
                             <p style="margin-top: 1rem;">
-                                <button class="btn btn-primary" onclick="sitesStationDashboard.showCreateInstrumentModal(${platformId})">
+                                <button class="btn btn-primary" onclick="sitesStationDashboard.showCreateInstrumentModal('${platformId}')">
                                     <i class="fas fa-plus-circle"></i> Add Your First Instrument
                                 </button>
                             </p>

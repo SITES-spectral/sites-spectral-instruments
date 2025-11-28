@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.6">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.7">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.6">
+    <meta name="app-version" content="8.0.7">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.6"></script>
-    <script src="/js/api.js?v=8.0.6"></script>
-    <script src="/js/components.js?v=8.0.6"></script>
+    <script src="/js/utils.js?v=8.0.7"></script>
+    <script src="/js/api.js?v=8.0.7"></script>
+    <script src="/js/components.js?v=8.0.7"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.6"></script>
-    <script src="/js/station-dashboard.js?v=8.0.6"></script>
-    <script src="/js/navigation.js?v=8.0.6"></script>
-    <script src="/js/export.js?v=8.0.6"></script>
+    <script src="/js/interactive-map.js?v=8.0.7"></script>
+    <script src="/js/station-dashboard.js?v=8.0.7"></script>
+    <script src="/js/navigation.js?v=8.0.7"></script>
+    <script src="/js/export.js?v=8.0.7"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -4490,7 +4490,7 @@
                 </div>` : '';
 
             return `
-                <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;" onclick="showInstrumentDetails(${instrument.id})">
+                <div class="instrument-card" data-instrument-id="${instrument.id}" style="position: relative;" onclick="showInstrumentDetails('${instrument.id}')">
                     ${recentlyUpdatedBadge}
                     <div class="instrument-title" style="padding: 8px 12px; background: rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.1); font-weight: 600; font-size: 0.85em; color: #333; text-align: center; position: relative;">
                         ${instrument.normalized_name || 'No ID'}
@@ -4510,7 +4510,7 @@
                     </div>
                     ${canEdit ? `
                         <div style="padding: 8px; border-top: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02);">
-                            <button class="explicit-delete-btn" onclick="event.stopPropagation(); deleteInstrument(${instrument.id})" style="width: 100%; padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 0.85em; cursor: pointer; transition: background 0.2s;">
+                            <button class="explicit-delete-btn" onclick="event.stopPropagation(); deleteInstrument('${instrument.id}')" style="width: 100%; padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 0.85em; cursor: pointer; transition: background 0.2s;">
                                 <i class="fas fa-exclamation-triangle" style="margin-right: 6px;"></i> Delete Instrument
                             </button>
                         </div>
@@ -4848,7 +4848,7 @@
                             alt="Latest phenocam image"
                             class="instrument-thumbnail"
                             onerror="this.parentElement.innerHTML='<div class=\\'instrument-thumbnail-placeholder\\'><i class=\\'fas fa-camera\\'></i><span>Image unavailable</span></div>'"
-                            onclick="event.stopPropagation(); showFullImage(${instrumentId}, '${imageData.image_url}', '${imageData.instrument_name}')"
+                            onclick="event.stopPropagation(); showFullImage('${instrumentId}', '${imageData.image_url}', '${imageData.instrument_name}')"
                             title="Click to view full-size image"
                             style="cursor: pointer;"
                         />
@@ -5201,7 +5201,7 @@
                 (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name));
 
             return `
-                <div class="roi-card" onclick="showROIDetails(${roi.id})" data-roi-id="${roi.id}" style="position: relative;">
+                <div class="roi-card" onclick="showROIDetails('${roi.id}')" data-roi-id="${roi.id}" style="position: relative;">
                     <div class="roi-card-header">
                         <div class="roi-name">${roi.roi_name}</div>
                         <div class="roi-color-indicator" style="background-color: ${colorDisplay}"></div>
@@ -5261,10 +5261,10 @@
                 <h3><i class="fas fa-crop-alt"></i> ROI Details</h3>
                 <div class="modal-header-actions">
                     ${canEdit ? `
-                        <button class="modal-edit-btn" onclick="editROI(${roi.id})" title="Edit ROI">
+                        <button class="modal-edit-btn" onclick="editROI('${roi.id}')" title="Edit ROI">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="modal-delete-btn" onclick="deleteROI(${roi.id})" title="Delete ROI">
+                        <button class="modal-delete-btn" onclick="deleteROI('${roi.id}')" title="Delete ROI">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                         <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Edit or delete this ROI</small>
@@ -5357,7 +5357,7 @@
                 ${currentUser && ((currentUser.role === 'admin') ||
                     (currentUser.role === 'station' && currentUser.station_normalized_name === stationData.normalized_name)) ? `
                     <div style="padding: 16px; border-top: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); margin-top: 16px;">
-                        <button onclick="deleteROI(${roi.id})" style="width: 100%; padding: 10px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                        <button onclick="deleteROI('${roi.id}')" style="width: 100%; padding: 10px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
                             <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> Delete ROI
                         </button>
                     </div>
@@ -5510,7 +5510,7 @@
                         <button type="button" class="btn btn-secondary" onclick="closeROIEditModal()">
                             <i class="fas fa-times"></i> Cancel
                         </button>
-                        <button type="button" class="btn btn-success" onclick="saveROIChanges(${roi.id})">
+                        <button type="button" class="btn btn-success" onclick="saveROIChanges('${roi.id}')">
                             <i class="fas fa-save"></i> Save Changes
                         </button>
                     </div>
@@ -5698,7 +5698,7 @@
                 <h3><i class="fas fa-tower-observation"></i> Platform Details</h3>
                 <div class="modal-header-actions">
                     ${canEdit ? `
-                        <button class="modal-edit-btn" onclick="editPlatform(${platform.id})" title="Edit Platform">
+                        <button class="modal-edit-btn" onclick="editPlatform('${platform.id}')" title="Edit Platform">
                             <i class="fas fa-edit"></i> Edit
                         </button>
                         <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Click to modify platform details</small>
@@ -5838,10 +5838,10 @@
                 <h3><i class="fas ${typeInfo.icon}" style="color: ${typeInfo.color};"></i> ${instrumentType} Details</h3>
                 <div class="modal-header-actions">
                     ${canEdit ? `
-                        <button class="modal-edit-btn" onclick="editInstrument(${instrument.id})" title="Edit Instrument">
+                        <button class="modal-edit-btn" onclick="editInstrument('${instrument.id}')" title="Edit Instrument">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="modal-delete-btn" onclick="deleteInstrument(${instrument.id})" title="Delete Instrument">
+                        <button class="modal-delete-btn" onclick="deleteInstrument('${instrument.id}')" title="Delete Instrument">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                         <small style="margin-left: 8px; opacity: 0.7; font-size: 0.75em;">Edit or delete this instrument</small>
@@ -5992,7 +5992,7 @@
                     <h4>
                         <i class="fas fa-crop-alt"></i> Regions of Interest (ROIs)
                         ${canEdit ? `
-                            <button class="add-roi-btn" onclick="addROI(${instrument.id})" title="Add new Region of Interest (ROI) to this instrument. ROIs are used to define specific areas for vegetation analysis in phenocam images.">
+                            <button class="add-roi-btn" onclick="addROI('${instrument.id}')" title="Add new Region of Interest (ROI) to this instrument. ROIs are used to define specific areas for vegetation analysis in phenocam images.">
                                 <i class="fas fa-plus"></i>
                             </button>
                         ` : ''}
@@ -7105,7 +7105,7 @@
 
                     <div class="form-actions">
                         <button type="button" class="cancel-btn" onclick="closeCreateInstrumentModal()">Cancel</button>
-                        <button type="button" class="save-btn" onclick="saveNewInstrument(${platformId})">
+                        <button type="button" class="save-btn" onclick="saveNewInstrument('${platformId}')">
                             <i class="fas fa-plus"></i> Create Instrument
                         </button>
                     </div>
@@ -7251,7 +7251,7 @@
 
                     <div class="form-actions" style="margin-top: 2rem;">
                         <button type="button" class="cancel-btn" onclick="closeDeleteConfirmationModal()">Cancel</button>
-                        <button type="button" class="delete-btn" onclick="confirmDeleteInstrument(${instrumentId})">
+                        <button type="button" class="delete-btn" onclick="confirmDeleteInstrument('${instrumentId}')">
                             <i class="fas fa-trash"></i> Delete Permanently
                         </button>
                     </div>
@@ -7373,7 +7373,7 @@
 
                     <div class="form-actions">
                         <button type="button" class="cancel-btn" onclick="closeCreateROIModal()">Cancel</button>
-                        <button type="button" class="save-btn" onclick="saveNewROI(${instrumentId})">
+                        <button type="button" class="save-btn" onclick="saveNewROI('${instrumentId}')">
                             <i class="fas fa-plus"></i> Create ROI
                         </button>
                     </div>
@@ -7491,7 +7491,7 @@
 
                     <div class="form-actions" style="margin-top: 2rem;">
                         <button type="button" class="cancel-btn" onclick="closeDeleteConfirmationModal()">Cancel</button>
-                        <button type="button" class="delete-btn" onclick="confirmDeleteROI(${roiId})">
+                        <button type="button" class="delete-btn" onclick="confirmDeleteROI('${roiId}')">
                             <i class="fas fa-trash"></i> Delete Permanently
                         </button>
                     </div>
