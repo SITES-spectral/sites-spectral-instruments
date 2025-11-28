@@ -12,6 +12,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.6] - 2025-11-28
+
+### Feature: UAV Vendor Selection & Complete Naming Convention
+
+**Release Date**: 2025-11-28
+**Focus**: Proper UAV platform naming using Vendor + Model for consistent equipment identification
+
+#### Added
+
+**Drone Vendor Dropdown:**
+- New "Drone Vendor" dropdown for UAV platforms
+- Supported vendors: DJI, Parrot, Autel, SwellPro, senseFly, MicaSense, Headwall
+
+**Vendor-Specific Drone Models:**
+- **DJI**: M3M, P4M, M30T, M300, M350
+- **SwellPro**: SD4 (SplashDrone 4), SD3, SPRY, FD1
+- **Parrot**: ANAFI, SEQUOIA
+- **Autel**: EVO2, EVO2E
+- **senseFly**: EBEEX, EBEEAG, EBEEGEO
+- **MicaSense**: REDEDGE, ALTUM
+- **Headwall**: NANO, MICRO
+
+**Dynamic Model Selection:**
+- Selecting vendor auto-updates available drone models
+- Models organized by optgroups for easy selection
+
+#### Changed
+
+**Updated UAV Naming Convention:**
+| Old Pattern | New Pattern |
+|-------------|-------------|
+| `{STATION}_{MODEL}_UAV##` | `{STATION}_{VENDOR}_{MODEL}_UAV##` |
+| `SVB_M3M_UAV01` | `SVB_DJI_M3M_UAV01` |
+
+**Platform Naming Patterns (v8.0.6):**
+| Type | Pattern | Example |
+|------|---------|---------|
+| Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` |
+| UAV | `{STATION}_{VENDOR}_{MODEL}_UAV##` | `SVB_DJI_M3M_UAV01` |
+| Satellite | `{STATION}_{AGENCY}_{SAT}_{SENSOR}` | `SVB_ESA_S2A_MSI` |
+| Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` |
+
+#### Documentation
+
+**Updated PLATFORM_TYPE_UPDATE_GUIDE.md:**
+- Complete UAV vendor reference tables
+- Vendor-specific model tables with sensors and use cases
+- Updated examples with vendor naming
+- SwellPro waterproof drone examples
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `public/station.html` | Added vendor dropdown, `updateDroneModelOptions()` function, updated naming |
+| `docs/PLATFORM_TYPE_UPDATE_GUIDE.md` | Complete vendor documentation, model tables |
+
+---
+
 ## [8.0.5] - 2025-11-28
 
 ### Feature: Satellite Platform Naming Convention

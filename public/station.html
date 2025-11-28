@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.5">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.6">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.5">
+    <meta name="app-version" content="8.0.6">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.5"></script>
-    <script src="/js/api.js?v=8.0.5"></script>
-    <script src="/js/components.js?v=8.0.5"></script>
+    <script src="/js/utils.js?v=8.0.6"></script>
+    <script src="/js/api.js?v=8.0.6"></script>
+    <script src="/js/components.js?v=8.0.6"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.5"></script>
-    <script src="/js/station-dashboard.js?v=8.0.5"></script>
-    <script src="/js/navigation.js?v=8.0.5"></script>
-    <script src="/js/export.js?v=8.0.5"></script>
+    <script src="/js/interactive-map.js?v=8.0.6"></script>
+    <script src="/js/station-dashboard.js?v=8.0.6"></script>
+    <script src="/js/navigation.js?v=8.0.6"></script>
+    <script src="/js/export.js?v=8.0.6"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -8140,18 +8140,42 @@
                             <small>Determines how the platform is categorized in the dashboard</small>
                         </div>
                     </div>
-                    <div class="form-row" id="drone-model-row" style="display: none;">
-                        <div class="form-group">
-                            <label for="platform-drone-model">Drone Model *</label>
-                            <select id="platform-drone-model" class="form-input" onchange="updatePlatformNormalizedName()">
-                                <option value="M3M">M3M - DJI Mavic 3 Multispectral</option>
-                                <option value="P4M">P4M - DJI Phantom 4 Multispectral</option>
-                                <option value="M30T">M30T - DJI Matrice 30T</option>
-                                <option value="M300">M300 - DJI Matrice 300 RTK</option>
-                                <option value="OTHER">OTHER - Other Drone Model</option>
-                            </select>
-                            <small>UAV naming uses drone model instead of ecosystem (e.g., SVB_M3M_UAV01)</small>
+                    <div id="uav-fields-row" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="platform-drone-vendor">Drone Vendor *</label>
+                                <select id="platform-drone-vendor" class="form-input" onchange="updateDroneModelOptions(); updatePlatformNormalizedName()">
+                                    <option value="DJI">DJI - Da-Jiang Innovations</option>
+                                    <option value="PARROT">PARROT - Parrot SA</option>
+                                    <option value="AUTEL">AUTEL - Autel Robotics</option>
+                                    <option value="SWELLPRO">SWELLPRO - SwellPro (Waterproof)</option>
+                                    <option value="SENSEFLY">SENSEFLY - senseFly / AgEagle</option>
+                                    <option value="MICASENSE">MICASENSE - MicaSense</option>
+                                    <option value="HEADWALL">HEADWALL - Headwall Photonics</option>
+                                    <option value="OTHER">OTHER - Other Vendor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform-drone-model">Drone Model *</label>
+                                <select id="platform-drone-model" class="form-input" onchange="updatePlatformNormalizedName()">
+                                    <optgroup label="DJI Multispectral">
+                                        <option value="M3M">M3M - Mavic 3 Multispectral</option>
+                                        <option value="P4M">P4M - Phantom 4 Multispectral</option>
+                                    </optgroup>
+                                    <optgroup label="DJI Enterprise">
+                                        <option value="M30T">M30T - Matrice 30T</option>
+                                        <option value="M300">M300 - Matrice 300 RTK</option>
+                                        <option value="M350">M350 - Matrice 350 RTK</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="OTHER">OTHER - Other Model</option>
+                                    </optgroup>
+                                </select>
+                            </div>
                         </div>
+                        <small class="form-text" style="margin-top: -10px; margin-bottom: 15px; display: block;">
+                            UAV naming: {STATION}_{VENDOR}_{MODEL}_UAV## (e.g., SVB_DJI_M3M_UAV01)
+                        </small>
                     </div>
                     <div id="satellite-fields-row" style="display: none;">
                         <div class="form-row">
@@ -8313,13 +8337,13 @@
 
         function onPlatformTypeChange() {
             const platformType = document.getElementById('platform-type')?.value || 'fixed';
-            const droneModelRow = document.getElementById('drone-model-row');
+            const uavFieldsRow = document.getElementById('uav-fields-row');
             const satelliteFieldsRow = document.getElementById('satellite-fields-row');
             const locationCodeGroup = document.getElementById('platform-location-code')?.closest('.form-group');
 
-            // Show/hide drone model dropdown based on platform type
-            if (droneModelRow) {
-                droneModelRow.style.display = platformType === 'uav' ? '' : 'none';
+            // Show/hide UAV fields based on platform type
+            if (uavFieldsRow) {
+                uavFieldsRow.style.display = platformType === 'uav' ? '' : 'none';
             }
 
             // Show/hide satellite fields based on platform type
@@ -8334,6 +8358,87 @@
 
             // Update the normalized name
             updatePlatformNormalizedName();
+        }
+
+        function updateDroneModelOptions() {
+            const vendor = document.getElementById('platform-drone-vendor')?.value || 'DJI';
+            const modelSelect = document.getElementById('platform-drone-model');
+            if (!modelSelect) return;
+
+            // Define models per vendor
+            const vendorModels = {
+                'DJI': [
+                    { group: 'Multispectral', models: [
+                        { value: 'M3M', label: 'M3M - Mavic 3 Multispectral' },
+                        { value: 'P4M', label: 'P4M - Phantom 4 Multispectral' }
+                    ]},
+                    { group: 'Enterprise', models: [
+                        { value: 'M30T', label: 'M30T - Matrice 30T' },
+                        { value: 'M300', label: 'M300 - Matrice 300 RTK' },
+                        { value: 'M350', label: 'M350 - Matrice 350 RTK' }
+                    ]}
+                ],
+                'PARROT': [
+                    { group: 'Multispectral', models: [
+                        { value: 'ANAFI', label: 'ANAFI - Anafi Thermal/USA' },
+                        { value: 'SEQUOIA', label: 'SEQUOIA - Sequoia+ Multispectral' }
+                    ]}
+                ],
+                'AUTEL': [
+                    { group: 'EVO Series', models: [
+                        { value: 'EVO2', label: 'EVO2 - EVO II Pro/Dual' },
+                        { value: 'EVO2E', label: 'EVO2E - EVO II Enterprise' }
+                    ]}
+                ],
+                'SWELLPRO': [
+                    { group: 'Waterproof Drones', models: [
+                        { value: 'SD4', label: 'SD4 - SplashDrone 4' },
+                        { value: 'SD3', label: 'SD3 - SplashDrone 3+' },
+                        { value: 'SPRY', label: 'SPRY - Spry+ Sports Drone' },
+                        { value: 'FD1', label: 'FD1 - FishingDrone FD1' }
+                    ]}
+                ],
+                'SENSEFLY': [
+                    { group: 'Fixed-Wing', models: [
+                        { value: 'EBEEX', label: 'EBEEX - eBee X' },
+                        { value: 'EBEEAG', label: 'EBEEAG - eBee AG' },
+                        { value: 'EBEEGEO', label: 'EBEEGEO - eBee Geo' }
+                    ]}
+                ],
+                'MICASENSE': [
+                    { group: 'Sensors (Payload)', models: [
+                        { value: 'REDEDGE', label: 'REDEDGE - RedEdge-MX/P' },
+                        { value: 'ALTUM', label: 'ALTUM - Altum-PT' }
+                    ]}
+                ],
+                'HEADWALL': [
+                    { group: 'Hyperspectral', models: [
+                        { value: 'NANO', label: 'NANO - Nano-Hyperspec' },
+                        { value: 'MICRO', label: 'MICRO - Micro-Hyperspec' }
+                    ]}
+                ],
+                'OTHER': [
+                    { group: 'Custom', models: [
+                        { value: 'OTHER', label: 'OTHER - Other Model' }
+                    ]}
+                ]
+            };
+
+            const models = vendorModels[vendor] || vendorModels['OTHER'];
+
+            // Clear and rebuild options
+            modelSelect.innerHTML = '';
+            models.forEach(group => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = group.group;
+                group.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.value;
+                    option.textContent = model.label;
+                    optgroup.appendChild(option);
+                });
+                modelSelect.appendChild(optgroup);
+            });
         }
 
         function updateSatelliteSensorOptions() {
@@ -8370,6 +8475,7 @@
             const stationAcronym = stationData?.acronym || 'STA';
             const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
             const platformType = document.getElementById('platform-type')?.value || 'fixed';
+            const droneVendor = document.getElementById('platform-drone-vendor')?.value || 'DJI';
             const droneModel = document.getElementById('platform-drone-model')?.value || 'M3M';
             const locationCode = document.getElementById('platform-location-code')?.value || '';
 
@@ -8381,18 +8487,18 @@
             let normalizedName = '';
 
             // Different naming patterns based on platform type
-            // Fixed:     SVB_FOR_PL01              (station_ecosystem_location)
-            // UAV:       SVB_M3M_UAV01             (station_dronemodel_location) - uses drone model
-            // Satellite: SVB_ESA_S2A_MSI           (station_agency_satellite_sensor) - no location code
-            // Mobile:    SVB_FOR_MOB01             (station_ecosystem_location)
+            // Fixed:     SVB_FOR_PL01                  (station_ecosystem_location)
+            // UAV:       SVB_DJI_M3M_UAV01             (station_vendor_model_location) - uses vendor + model
+            // Satellite: SVB_ESA_S2A_MSI              (station_agency_satellite_sensor) - no location code
+            // Mobile:    SVB_FOR_MOB01                (station_ecosystem_location)
 
             if (platformType === 'satellite') {
                 // Satellite platforms use: station_agency_satellite_sensor
                 normalizedName = `${stationAcronym}_${spaceAgency}_${satellite}_${sensor}`;
             } else if (platformType === 'uav') {
-                // UAV platforms use drone model (M3M, P4M) instead of ecosystem
+                // UAV platforms use: station_vendor_model_location
                 if (locationCode) {
-                    normalizedName = `${stationAcronym}_${droneModel}_${locationCode}`;
+                    normalizedName = `${stationAcronym}_${droneVendor}_${droneModel}_${locationCode}`;
                 }
             } else {
                 // Fixed and Mobile use ecosystem code

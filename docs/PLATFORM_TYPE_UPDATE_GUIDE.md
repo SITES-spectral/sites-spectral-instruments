@@ -85,15 +85,16 @@ WHERE normalized_name IN ('SVB_SAT_PL01', 'ANS_SAT_PL01');
 ### Creating a UAV Platform
 
 1. **Select** Platform Type: `UAV / Drone`
-2. **New dropdown appears**: Drone Model
-3. **Select** Drone Model: `M3M - DJI Mavic 3 Multispectral`
-4. **Fill in**:
-   - Display Name: "Mavic 3M UAV 01"
+2. **New dropdowns appear**: Drone Vendor, Drone Model
+3. **Select** Drone Vendor: `DJI - Da-Jiang Innovations`
+4. **Select** Drone Model: `M3M - Mavic 3 Multispectral`
+5. **Fill in**:
+   - Display Name: "DJI Mavic 3M UAV 01"
    - Location Code: "UAV01"
-5. **Normalized Name** auto-generates: `SVB_M3M_UAV01`
+6. **Normalized Name** auto-generates: `SVB_DJI_M3M_UAV01`
 
-> [!tip] UAV platforms use drone model, not ecosystem
-> Drones fly over multiple ecosystems, so the drone model is more meaningful.
+> [!tip] UAV platforms use vendor + model, not ecosystem
+> Drones fly over multiple ecosystems, so the vendor and model are more meaningful for identification and data provenance.
 
 ### Creating a Satellite Platform
 
@@ -114,7 +115,7 @@ WHERE normalized_name IN ('SVB_SAT_PL01', 'ANS_SAT_PL01');
 | Type | Required Fields | Auto-Generated Name |
 |------|-----------------|---------------------|
 | Fixed | Ecosystem, Location | `SVB_FOR_PL01` |
-| UAV | Drone Model, Location | `SVB_M3M_UAV01` |
+| UAV | Vendor, Drone Model, Location | `SVB_DJI_M3M_UAV01` |
 | Satellite | Agency, Satellite, Sensor | `SVB_ESA_S2A_MSI` |
 | Mobile | Ecosystem, Location | `SVB_FOR_MOB01` |
 
@@ -252,14 +253,15 @@ Recommended naming patterns for different platform types:
 | Type | Pattern | Example | Description |
 |------|---------|---------|-------------|
 | Fixed | `{STATION}_{ECO}_PL##` | `SVB_FOR_PL01` | Fixed observation tower/mast |
-| UAV | `{STATION}_{DRONE}_UAV##` | `SVB_M3M_UAV01` | Drone/UAV platform |
+| UAV | `{STATION}_{VENDOR}_{MODEL}_UAV##` | `SVB_DJI_M3M_UAV01` | Drone/UAV platform |
 | Satellite | `{STATION}_{AGENCY}_{SAT}_{SENSOR}` | `SVB_ESA_S2A_MSI` | Satellite-based platform |
 | Mobile | `{STATION}_{ECO}_MOB##` | `SVB_FOR_MOB01` | Mobile/portable platform |
 
 **Components:**
 - `{STATION}` - Station acronym (SVB, ANS, LON, etc.)
 - `{ECO}` - Ecosystem code (FOR, AGR, MIR, LAK, WET, GRA, etc.)
-- `{DRONE}` - Drone model code (M3M, P4M, M30T, M300, etc.)
+- `{VENDOR}` - Drone vendor code (DJI, PARROT, AUTEL, SWELLPRO, etc.)
+- `{MODEL}` - Drone model code (M3M, P4M, SD4, ANAFI, etc.)
 - `{AGENCY}` - Space agency abbreviation (ESA, NASA, JAXA, etc.)
 - `{SAT}` - Satellite abbreviation (S2A, S2B, L8, L9, etc.)
 - `{SENSOR}` - Sensor abbreviation (MSI, OLI, OLCI, MODIS, etc.)
@@ -270,30 +272,66 @@ Recommended naming patterns for different platform types:
 ## UAV Platform Naming
 
 > [!tip] UAV Naming Convention
-> UAV platforms use **drone model** instead of ecosystem code because drones fly over multiple ecosystems during missions.
+> UAV platforms use **vendor + model** instead of ecosystem code because drones fly over multiple ecosystems during missions. This provides clear identification of the equipment used.
 
 ### Pattern
 ```
-{STATION}_{DRONE_MODEL}_UAV##
+{STATION}_{VENDOR}_{MODEL}_UAV##
 ```
 
-### Supported Drone Models
+### Supported UAV Vendors
 
+| Code | Vendor | Specialty |
+|------|--------|-----------|
+| **DJI** | Da-Jiang Innovations | Consumer & Enterprise drones |
+| **PARROT** | Parrot SA | Multispectral, thermal |
+| **AUTEL** | Autel Robotics | EVO series enterprise |
+| **SWELLPRO** | SwellPro Technology | Waterproof marine drones |
+| **SENSEFLY** | senseFly / AgEagle | Fixed-wing mapping |
+| **MICASENSE** | MicaSense | Multispectral sensors |
+| **HEADWALL** | Headwall Photonics | Hyperspectral imaging |
+
+### Supported Drone Models by Vendor
+
+#### DJI Models
 | Code | Model | Sensors | Use Case |
 |------|-------|---------|----------|
-| **M3M** | DJI Mavic 3 Multispectral | RGB + 4-band MS | Compact field surveys |
-| **P4M** | DJI Phantom 4 Multispectral | RGB + 5-band MS | Legacy multispectral |
-| **M30T** | DJI Matrice 30T | Wide + Zoom + Thermal | Inspection, thermal |
-| **M300** | DJI Matrice 300 RTK | Customizable payloads | Heavy-lift, RTK precision |
-| **OTHER** | Other Drone Model | Variable | Custom configurations |
+| **M3M** | Mavic 3 Multispectral | RGB + 4-band MS | Compact field surveys |
+| **P4M** | Phantom 4 Multispectral | RGB + 5-band MS | Legacy multispectral |
+| **M30T** | Matrice 30T | Wide + Zoom + Thermal | Inspection, thermal |
+| **M300** | Matrice 300 RTK | Customizable payloads | Heavy-lift, RTK precision |
+| **M350** | Matrice 350 RTK | Next-gen enterprise | Heavy payload, long flight |
+
+#### SwellPro Models (Waterproof)
+| Code | Model | Sensors | Use Case |
+|------|-------|---------|----------|
+| **SD4** | SplashDrone 4 | RGB + Payload | Marine surveys, fishing |
+| **SD3** | SplashDrone 3+ | RGB camera | Waterproof operations |
+| **SPRY** | Spry+ Sports Drone | RGB camera | Aquatic sports, research |
+| **FD1** | FishingDrone FD1 | Bait release | Aquaculture |
+
+#### Parrot Models
+| Code | Model | Sensors | Use Case |
+|------|-------|---------|----------|
+| **ANAFI** | Anafi Thermal/USA | RGB + Thermal | Thermal imaging |
+| **SEQUOIA** | Sequoia+ Multispectral | 4-band MS + RGB | Precision agriculture |
+
+#### senseFly Models (Fixed-Wing)
+| Code | Model | Sensors | Use Case |
+|------|-------|---------|----------|
+| **EBEEX** | eBee X | Various payloads | Large area mapping |
+| **EBEEAG** | eBee AG | Multispectral | Agriculture |
+| **EBEEGEO** | eBee Geo | RGB | Survey, mapping |
 
 ### UAV Platform Examples
 
 ```
-SVB_M3M_UAV01    → Svartberget, Mavic 3M, UAV Unit 01
-ANS_P4M_UAV01    → Abisko, Phantom 4M, UAV Unit 01
-LON_M3M_UAV02    → Lonnstorp, Mavic 3M, UAV Unit 02
-GRI_M300_UAV01   → Grimsö, Matrice 300, UAV Unit 01
+SVB_DJI_M3M_UAV01       → Svartberget, DJI Mavic 3M, UAV Unit 01
+ANS_DJI_P4M_UAV01       → Abisko, DJI Phantom 4M, UAV Unit 01
+LON_DJI_M3M_UAV02       → Lonnstorp, DJI Mavic 3M, UAV Unit 02
+GRI_DJI_M300_UAV01      → Grimsö, DJI Matrice 300, UAV Unit 01
+SVB_SWELLPRO_SD4_UAV01  → Svartberget, SwellPro SplashDrone 4, UAV Unit 01
+ANS_PARROT_SEQUOIA_UAV01 → Abisko, Parrot Sequoia, UAV Unit 01
 ```
 
 ### UAV Instrument Naming
@@ -301,9 +339,10 @@ GRI_M300_UAV01   → Grimsö, Matrice 300, UAV Unit 01
 Instruments on UAV platforms follow: `{PLATFORM}_{TYPE}##`
 
 ```
-SVB_M3M_UAV01_PHE01   → RGB Camera on Mavic 3M
-SVB_M3M_UAV01_MS01    → Multispectral sensor on Mavic 3M
-ANS_P4M_UAV01_HYP01   → Hyperspectral payload on Phantom 4M
+SVB_DJI_M3M_UAV01_PHE01   → RGB Camera on DJI Mavic 3M
+SVB_DJI_M3M_UAV01_MS01    → Multispectral sensor on DJI Mavic 3M
+ANS_DJI_P4M_UAV01_HYP01   → Hyperspectral payload on DJI Phantom 4M
+SVB_SWELLPRO_SD4_UAV01_PHE01 → RGB Camera on SwellPro SplashDrone 4
 ```
 
 ---
@@ -386,7 +425,7 @@ ANS_NASA_L8_OLI_SR01     → Surface Reflectance from Landsat 8 OLI
 > | Type | Pattern | Example |
 > |------|---------|---------|
 > | **Fixed** | `STA_ECO_PL##` | `SVB_FOR_PL01` |
-> | **UAV** | `STA_DRONE_UAV##` | `SVB_M3M_UAV01` |
+> | **UAV** | `STA_VENDOR_MODEL_UAV##` | `SVB_DJI_M3M_UAV01` |
 > | **Satellite** | `STA_AGENCY_SAT_SENSOR` | `SVB_ESA_S2A_MSI` |
 > | **Mobile** | `STA_ECO_MOB##` | `SVB_FOR_MOB01` |
 
@@ -415,16 +454,23 @@ Platform:   SVB_FOR_PL01          (Svartberget Forest Platform 01)
 
 #### UAV Platform with Multispectral (DJI Mavic 3M)
 ```
-Platform:   SVB_M3M_UAV01         (Svartberget Mavic 3M UAV 01)
-├── Phenocam:      SVB_M3M_UAV01_PHE01  (RGB camera)
-└── MS Sensor:     SVB_M3M_UAV01_MS01   (4-band multispectral)
+Platform:   SVB_DJI_M3M_UAV01         (Svartberget DJI Mavic 3M UAV 01)
+├── Phenocam:      SVB_DJI_M3M_UAV01_PHE01  (RGB camera)
+└── MS Sensor:     SVB_DJI_M3M_UAV01_MS01   (4-band multispectral)
 ```
 
 #### UAV Platform with Hyperspectral (DJI Phantom 4M)
 ```
-Platform:   ANS_P4M_UAV01         (Abisko Phantom 4M UAV 01)
-├── Phenocam:      ANS_P4M_UAV01_PHE01  (Nadir RGB camera)
-└── Hyperspectral: ANS_P4M_UAV01_HYP01  (Hyperspectral imager)
+Platform:   ANS_DJI_P4M_UAV01         (Abisko DJI Phantom 4M UAV 01)
+├── Phenocam:      ANS_DJI_P4M_UAV01_PHE01  (Nadir RGB camera)
+└── Hyperspectral: ANS_DJI_P4M_UAV01_HYP01  (Hyperspectral imager)
+```
+
+#### UAV Platform - Waterproof (SwellPro SplashDrone 4)
+```
+Platform:   SVB_SWELLPRO_SD4_UAV01        (Svartberget SwellPro SplashDrone 4 UAV 01)
+├── Phenocam:      SVB_SWELLPRO_SD4_UAV01_PHE01  (Waterproof RGB camera)
+└── MS Sensor:     SVB_SWELLPRO_SD4_UAV01_MS01   (Multispectral payload)
 ```
 
 #### Satellite Platform (Sentinel-2A)
