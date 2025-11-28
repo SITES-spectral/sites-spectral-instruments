@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 8.4.0 - Multi-Platform Observation Network (2025-11-28)
+## Current Version: 8.5.0 - YAML Configuration System (2025-11-28)
 
-**✅ STATUS: PRODUCTION-READY - MULTI-PLATFORM SUPPORT**
+**✅ STATUS: PRODUCTION-READY - CENTRALIZED CONFIGURATION**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-28
@@ -281,15 +281,38 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 
 ---
 
+## YAML Configuration System (v8.5.0)
+
+All hardcoded configurations have been moved to YAML files:
+
+| Config File | Purpose |
+|-------------|---------|
+| `yamls/ui/platform-types.yaml` | Platform icons, colors, gradients |
+| `yamls/ui/instrument-types.yaml` | Instrument icons, colors, patterns |
+| `yamls/ui/status-indicators.yaml` | Status codes with styling |
+| `yamls/ui/sensor-orientations.yaml` | Sensor orientations |
+| `yamls/sensors/uav-sensors.yaml` | UAV sensor specifications |
+| `yamls/core/ecosystems.yaml` | Ecosystem codes |
+| `yamls/core/validation-rules.yaml` | Validation constraints |
+
+Access via `window.SitesConfig`:
+```javascript
+SitesConfig.getPlatformType('uav')
+SitesConfig.getStatusColor('Active')
+SitesConfig.detectInstrumentCategory('Phenocam')
+```
+
+---
+
 ## Production Information
 
 | Property | Value |
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 8.4.0 |
+| Current Version | 8.5.0 |
 | Last Deployed | 2025-11-28 |
-| Status | Production-Ready - Multi-Platform Observation Network |
+| Status | Production-Ready - YAML Configuration System |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |

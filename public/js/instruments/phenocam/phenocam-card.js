@@ -16,26 +16,46 @@
     'use strict';
 
     // =========================================================================
-    // CONSTANTS
+    // CONSTANTS (with ConfigService fallbacks)
     // =========================================================================
 
-    const STATUS_COLORS = {
-        'Active': '#22c55e',
-        'Inactive': '#94a3b8',
-        'Testing': '#f59e0b',
-        'Maintenance': '#ef4444',
-        'Decommissioned': '#64748b',
-        'Planned': '#3b82f6'
-    };
+    /**
+     * Get status color from ConfigService or fallback
+     */
+    function getStatusColor(status) {
+        if (window.SitesConfig && window.SitesConfig.isLoaded()) {
+            return window.SitesConfig.getStatusColor(status);
+        }
+        // Fallback
+        const colors = {
+            'Active': '#22c55e',
+            'Inactive': '#94a3b8',
+            'Testing': '#f59e0b',
+            'Maintenance': '#ef4444',
+            'Decommissioned': '#64748b',
+            'Planned': '#3b82f6'
+        };
+        return colors[status] || '#94a3b8';
+    }
 
-    const STATUS_ICONS = {
-        'Active': 'fa-check-circle',
-        'Inactive': 'fa-pause-circle',
-        'Testing': 'fa-flask',
-        'Maintenance': 'fa-tools',
-        'Decommissioned': 'fa-archive',
-        'Planned': 'fa-calendar'
-    };
+    /**
+     * Get status icon from ConfigService or fallback
+     */
+    function getStatusIcon(status) {
+        if (window.SitesConfig && window.SitesConfig.isLoaded()) {
+            return window.SitesConfig.getStatusIcon(status);
+        }
+        // Fallback
+        const icons = {
+            'Active': 'fa-check-circle',
+            'Inactive': 'fa-pause-circle',
+            'Testing': 'fa-flask',
+            'Maintenance': 'fa-tools',
+            'Decommissioned': 'fa-archive',
+            'Planned': 'fa-calendar'
+        };
+        return icons[status] || 'fa-question-circle';
+    }
 
     // =========================================================================
     // PHENOCAM CARD CLASS
@@ -69,8 +89,8 @@
             } = options;
 
             const status = instrument.status || 'Unknown';
-            const statusColor = STATUS_COLORS[status] || '#94a3b8';
-            const statusIcon = STATUS_ICONS[status] || 'fa-question-circle';
+            const statusColor = getStatusColor(status);
+            const statusIcon = getStatusIcon(status);
 
             const roiCount = instrument.roi_count || 0;
             const hasImage = instrument.preview_image_url || instrument.latest_image_url;

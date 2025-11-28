@@ -47,9 +47,18 @@ class PlatformTypeCard {
     }
 
     /**
-     * Get default config if YAML loading fails
+     * Get default config - tries ConfigService first, then falls back to hardcoded defaults
      */
     _getDefaultConfig() {
+        // Try ConfigService first (YAML-based)
+        if (window.SitesConfig && window.SitesConfig.isLoaded()) {
+            const config = window.SitesConfig.getPlatformType(this.type);
+            if (config) {
+                return config;
+            }
+        }
+
+        // Fallback to hardcoded defaults
         const defaults = {
             fixed: {
                 label: 'Fixed Platforms',
@@ -154,9 +163,17 @@ class PlatformTypeCard {
 
     /**
      * Get instrument category from type string
+     * Uses ConfigService for pattern matching, falls back to hardcoded logic
      */
     _getInstrumentCategory(type) {
         if (!type) return 'other';
+
+        // Try ConfigService first (YAML-based patterns)
+        if (window.SitesConfig && window.SitesConfig.isLoaded()) {
+            return window.SitesConfig.detectInstrumentCategory(type);
+        }
+
+        // Fallback to hardcoded logic
         const t = type.toLowerCase();
 
         if (t.includes('phenocam')) return 'phenocam';
@@ -199,8 +216,22 @@ class PlatformTypeCard {
 
     /**
      * Get config for instrument type
+     * Uses ConfigService for YAML-based config, falls back to hardcoded defaults
      */
     _getInstrumentTypeConfig(type) {
+        // Try ConfigService first (YAML-based)
+        if (window.SitesConfig && window.SitesConfig.isLoaded()) {
+            const config = window.SitesConfig.getInstrumentType(type);
+            if (config) {
+                return {
+                    icon: config.icon,
+                    color: config.color,
+                    background: config.background
+                };
+            }
+        }
+
+        // Fallback to hardcoded defaults
         const configs = {
             phenocam: { icon: 'fa-camera', color: '#2563eb', background: '#dbeafe' },
             multispectral: { icon: 'fa-satellite-dish', color: '#7c3aed', background: '#ede9fe' },

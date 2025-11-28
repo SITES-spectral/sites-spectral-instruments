@@ -1,0 +1,127 @@
+# Instrument Types Configuration
+# SITES Spectral v8.4.0
+# Defines instrument types with icons, colors, and display properties
+
+metadata:
+  version: "1.0.0"
+  description: Instrument type definitions for dashboard UI
+
+instrument_types:
+  phenocam:
+    code: PHE
+    label: Phenocam
+    plural: Phenocams
+    description: Digital camera for vegetation phenology monitoring
+    icon: fa-camera
+    color: "#2563eb"
+    background: "#dbeafe"
+    category: imaging
+    patterns:
+      - phenocam
+      - phe
+      - camera
+
+  multispectral:
+    code: MS
+    label: Multispectral
+    plural: Multispectral Sensors
+    description: Multi-band spectral sensors
+    icon: fa-satellite-dish
+    color: "#7c3aed"
+    background: "#ede9fe"
+    category: spectral
+    patterns:
+      - multispectral
+      - skye
+      - decagon
+      - apogee
+      - ms
+
+  par:
+    code: PAR
+    label: PAR Sensor
+    plural: PAR Sensors
+    description: Photosynthetically Active Radiation sensor
+    icon: fa-sun
+    color: "#f59e0b"
+    background: "#fef3c7"
+    category: radiation
+    patterns:
+      - par
+      - photosynthetically
+
+  ndvi:
+    code: NDVI
+    label: NDVI Sensor
+    plural: NDVI Sensors
+    description: Normalized Difference Vegetation Index sensor
+    icon: fa-leaf
+    color: "#059669"
+    background: "#d1fae5"
+    category: vegetation
+    patterns:
+      - ndvi
+
+  pri:
+    code: PRI
+    label: PRI Sensor
+    plural: PRI Sensors
+    description: Photochemical Reflectance Index sensor
+    icon: fa-microscope
+    color: "#ec4899"
+    background: "#fce7f3"
+    category: vegetation
+    patterns:
+      - pri
+
+  hyperspectral:
+    code: HYP
+    label: Hyperspectral
+    plural: Hyperspectral Sensors
+    description: Imaging spectrometer with many narrow bands
+    icon: fa-rainbow
+    color: "#6366f1"
+    background: "#e0e7ff"
+    category: spectral
+    patterns:
+      - hyperspectral
+      - hyp
+      - imaging spectrometer
+
+  thermal:
+    code: THR
+    label: Thermal
+    plural: Thermal Sensors
+    description: Infrared thermal imaging sensor
+    icon: fa-temperature-high
+    color: "#ef4444"
+    background: "#fee2e2"
+    category: thermal
+    patterns:
+      - thermal
+      - infrared
+      - lwir
+
+  lidar:
+    code: LID
+    label: LiDAR
+    plural: LiDAR Sensors
+    description: Light Detection and Ranging sensor
+    icon: fa-broadcast-tower
+    color: "#14b8a6"
+    background: "#ccfbf1"
+    category: ranging
+    patterns:
+      - lidar
+      - laser
+
+  other:
+    code: OTH
+    label: Other
+    plural: Other Instruments
+    description: Other instrument types
+    icon: fa-cube
+    color: "#6b7280"
+    background: "#f3f4f6"
+    category: other
+    patterns: []

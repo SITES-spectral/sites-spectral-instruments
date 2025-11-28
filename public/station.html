@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.3.2">
+    <link rel="stylesheet" href="/css/styles.css?v=8.4.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.3.2">
+    <meta name="app-version" content="8.4.0">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4242,9 +4242,12 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.3.2"></script>
-    <script src="/js/api.js?v=8.3.2"></script>
-    <script src="/js/components.js?v=8.3.2"></script>
+    <script src="/js/utils.js?v=8.5.0"></script>
+    <!-- Configuration System (v8.5.0) -->
+    <script src="/js/core/config-loader.js?v=8.5.0"></script>
+    <script src="/js/core/config-service.js?v=8.5.0"></script>
+    <script src="/js/api.js?v=8.5.0"></script>
+    <script src="/js/components.js?v=8.4.0"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4254,10 +4257,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.3.2"></script>
-    <script src="/js/station-dashboard.js?v=8.3.2"></script>
-    <script src="/js/navigation.js?v=8.3.2"></script>
-    <script src="/js/export.js?v=8.3.2"></script>
+    <script src="/js/interactive-map.js?v=8.4.0"></script>
+    <script src="/js/station-dashboard.js?v=8.4.0"></script>
+    <script src="/js/navigation.js?v=8.4.0"></script>
+    <script src="/js/export.js?v=8.4.0"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -4309,7 +4312,15 @@
         // Initialize after all modules are ready
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                console.log('DOM loaded, waiting for modules...');
+                console.log('DOM loaded, initializing configuration service...');
+
+                // Initialize ConfigService first (loads YAML configurations)
+                if (window.SitesConfig) {
+                    await window.SitesConfig.init();
+                    console.log('✅ ConfigService initialized');
+                }
+
+                console.log('Waiting for modules...');
 
                 // Wait for all modules to be loaded
                 await ensureModulesLoaded();
@@ -8305,14 +8316,26 @@
         };
 
         // Function to create UAV instrument from specs
+        // Uses ConfigService for YAML-based sensor specs, falls back to hardcoded UAV_SENSOR_SPECS
         async function createUAVInstrument(platformId, platformNormalizedName, vendor, model) {
-            const vendorSpecs = UAV_SENSOR_SPECS[vendor];
-            if (!vendorSpecs || !vendorSpecs[model]) {
+            // Try ConfigService first (YAML-based)
+            let specs = null;
+            if (window.SitesConfig && window.SitesConfig.isLoaded()) {
+                specs = window.SitesConfig.getUAVSensorSpecs(vendor, model);
+            }
+
+            // Fall back to hardcoded specs if ConfigService not available
+            if (!specs) {
+                const vendorSpecs = UAV_SENSOR_SPECS[vendor];
+                if (vendorSpecs && vendorSpecs[model]) {
+                    specs = vendorSpecs[model];
+                }
+            }
+
+            if (!specs) {
                 console.log('No default sensor specs for', vendor, model);
                 return null;
             }
-
-            const specs = vendorSpecs[model];
             const token = localStorage.getItem('sites_spectral_token');
 
             // Generate instrument normalized name

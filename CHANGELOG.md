@@ -12,6 +12,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.5.0] - 2025-11-28
+
+### NEW: YAML-Based Configuration System
+
+**Release Date**: 2025-11-28
+**Focus**: Centralized configuration management via YAML files
+
+#### Configuration Files Created
+
+| File | Purpose |
+|------|---------|
+| `yamls/ui/platform-types.yaml` | Platform type definitions (icons, colors, gradients) |
+| `yamls/ui/instrument-types.yaml` | Instrument type definitions (icons, colors, patterns) |
+| `yamls/ui/status-indicators.yaml` | Status codes with colors, icons, categories |
+| `yamls/ui/sensor-orientations.yaml` | Sensor orientations and viewing directions |
+| `yamls/sensors/uav-sensors.yaml` | UAV sensor specifications (DJI, MicaSense, Parrot, Headwall) |
+| `yamls/core/ecosystems.yaml` | Ecosystem codes with categories |
+| `yamls/core/validation-rules.yaml` | Input validation constraints |
+
+#### ConfigService Implementation
+
+New `ConfigService` class (`js/core/config-service.js`) provides:
+
+- **Centralized Access**: Single service for all configurations
+- **Typed Accessors**: Methods like `getPlatformType()`, `getStatusColor()`, `detectInstrumentCategory()`
+- **Fallback Support**: Graceful degradation to hardcoded defaults if YAML loading fails
+- **Preloading**: All configs loaded on app initialization
+
+#### Benefits
+
+- **Single Source of Truth**: Configuration changes in YAML propagate to all components
+- **No Code Changes**: Modify icons, colors, validation rules without touching JS
+- **Extensibility**: Add new platform types, instrument types, or ecosystems via YAML
+- **Maintainability**: Clear separation of configuration from business logic
+
+#### Files Updated
+
+- `station.html` - Loads ConfigService, initializes before app
+- `platform-type-card.js` - Uses ConfigService for platform/instrument types
+- `phenocam-card.js` - Uses ConfigService for status colors/icons
+- `station.html` - UAV instrument creation uses ConfigService
+
+#### Usage Example
+
+```javascript
+// Get platform type configuration
+const uavConfig = SitesConfig.getPlatformType('uav');
+console.log(uavConfig.icon);  // 'fa-crosshairs'
+
+// Detect instrument category
+const category = SitesConfig.detectInstrumentCategory('Phenocam');
+console.log(category);  // 'phenocam'
+
+// Get status color
+const color = SitesConfig.getStatusColor('Active');
+console.log(color);  // '#22c55e'
+```
+
+---
+
 ## [8.4.0] - 2025-11-28
 
 ### NEW: Platform Type Documentation & Future Platform Roadmap

@@ -1,0 +1,163 @@
+# Ecosystem Codes Configuration
+# SITES Spectral v8.4.0
+# Defines ecosystem types with codes, descriptions, and categories
+
+metadata:
+  version: "1.0.0"
+  description: Ecosystem classification system for SITES stations
+
+ecosystems:
+  FOR:
+    code: FOR
+    label: Forest
+    description: General forest ecosystem
+    category: forest
+    color: "#166534"
+    icon: fa-tree
+
+  ALP:
+    code: ALP
+    label: Alpine Forest
+    description: High-altitude alpine forest ecosystem
+    category: forest
+    color: "#065f46"
+    icon: fa-mountain
+
+  CON:
+    code: CON
+    label: Coniferous Forest
+    description: Coniferous (needle-leaved) forest ecosystem
+    category: forest
+    color: "#14532d"
+    icon: fa-tree
+
+  DEC:
+    code: DEC
+    label: Deciduous Forest
+    description: Deciduous (broad-leaved) forest ecosystem
+    category: forest
+    color: "#15803d"
+    icon: fa-leaf
+
+  AGR:
+    code: AGR
+    label: Arable Land
+    description: Agricultural cropland ecosystem
+    category: agricultural
+    color: "#a16207"
+    icon: fa-wheat-awn
+
+  GRA:
+    code: GRA
+    label: Grassland
+    description: Natural or semi-natural grassland ecosystem
+    category: grassland
+    color: "#65a30d"
+    icon: fa-seedling
+
+  LAK:
+    code: LAK
+    label: Lake
+    description: Freshwater lake ecosystem
+    category: aquatic
+    color: "#0369a1"
+    icon: fa-water
+
+  WET:
+    code: WET
+    label: Wetland
+    description: General wetland ecosystem
+    category: wetland
+    color: "#0891b2"
+    icon: fa-droplet
+
+  MIR:
+    code: MIR
+    label: Mires
+    description: Mire and bog ecosystem
+    category: wetland
+    color: "#7c2d12"
+    icon: fa-cloud-rain
+
+  MAR:
+    code: MAR
+    label: Marshland
+    description: Marsh ecosystem
+    category: wetland
+    color: "#115e59"
+    icon: fa-water
+
+  PEA:
+    code: PEA
+    label: Peatland
+    description: Peatland ecosystem
+    category: wetland
+    color: "#78350f"
+    icon: fa-layer-group
+
+  HEA:
+    code: HEA
+    label: Heathland
+    description: Heathland ecosystem
+    category: other
+    color: "#7e22ce"
+    icon: fa-wind
+
+  GEN:
+    code: GEN
+    label: General
+    description: General or unspecified ecosystem
+    category: other
+    color: "#64748b"
+    icon: fa-globe
+
+# Category definitions
+categories:
+  forest:
+    label: Forest Ecosystems
+    description: Forested areas including various forest types
+    color: "#166534"
+    ecosystems:
+      - FOR
+      - ALP
+      - CON
+      - DEC
+
+  agricultural:
+    label: Agricultural Ecosystems
+    description: Managed agricultural lands
+    color: "#a16207"
+    ecosystems:
+      - AGR
+
+  grassland:
+    label: Grassland Ecosystems
+    description: Natural and semi-natural grasslands
+    color: "#65a30d"
+    ecosystems:
+      - GRA
+
+  aquatic:
+    label: Aquatic Ecosystems
+    description: Freshwater lakes and water bodies
+    color: "#0369a1"
+    ecosystems:
+      - LAK
+
+  wetland:
+    label: Wetland Ecosystems
+    description: Various wetland types including mires and marshes
+    color: "#0891b2"
+    ecosystems:
+      - WET
+      - MIR
+      - MAR
+      - PEA
+
+  other:
+    label: Other Ecosystems
+    description: Heathland and unspecified ecosystems
+    color: "#64748b"
+    ecosystems:
+      - HEA
+      - GEN

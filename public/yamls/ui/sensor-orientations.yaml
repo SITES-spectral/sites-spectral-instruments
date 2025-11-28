@@ -1,0 +1,110 @@
+# Sensor Orientations Configuration
+# SITES Spectral v8.4.0
+# Defines sensor orientation options with icons and labels
+
+metadata:
+  version: "1.0.0"
+  description: Sensor orientation definitions for spectral instruments
+
+orientations:
+  uplooking:
+    code: uplooking
+    label: Uplooking
+    description: Sensor pointing upward toward the sky
+    icon: fa-arrow-up
+    par_label: Incoming PAR
+    ms_label: Incoming Irradiance
+    ndvi_label: Reference (Sky)
+    color: "#0ea5e9"
+
+  downlooking:
+    code: downlooking
+    label: Downlooking
+    description: Sensor pointing downward toward the surface
+    icon: fa-arrow-down
+    par_label: Reflected PAR
+    ms_label: Reflected Radiance
+    ndvi_label: Target (Vegetation)
+    color: "#22c55e"
+
+  horizontal:
+    code: horizontal
+    label: Horizontal
+    description: Sensor pointing horizontally
+    icon: fa-arrows-alt-h
+    par_label: Horizontal PAR
+    ms_label: Horizontal View
+    ndvi_label: Horizontal
+    color: "#f59e0b"
+
+  hemispherical:
+    code: hemispherical
+    label: Hemispherical
+    description: Hemispherical field of view (180 degrees)
+    icon: fa-circle
+    par_label: Hemispherical PAR
+    ms_label: Hemispherical View
+    ndvi_label: Hemispherical
+    color: "#7c3aed"
+
+# Viewing direction options (for phenocams)
+viewing_directions:
+  north:
+    code: N
+    label: North
+    degrees: 0
+    icon: fa-arrow-up
+
+  northeast:
+    code: NE
+    label: Northeast
+    degrees: 45
+    icon: fa-arrow-up
+
+  east:
+    code: E
+    label: East
+    degrees: 90
+    icon: fa-arrow-right
+
+  southeast:
+    code: SE
+    label: Southeast
+    degrees: 135
+    icon: fa-arrow-down
+
+  south:
+    code: S
+    label: South
+    degrees: 180
+    icon: fa-arrow-down
+
+  southwest:
+    code: SW
+    label: Southwest
+    degrees: 225
+    icon: fa-arrow-down
+
+  west:
+    code: W
+    label: West
+    degrees: 270
+    icon: fa-arrow-left
+
+  northwest:
+    code: NW
+    label: Northwest
+    degrees: 315
+    icon: fa-arrow-up
+
+  zenith:
+    code: Z
+    label: Zenith (Up)
+    degrees: null
+    icon: fa-dot-circle
+
+  nadir:
+    code: NAD
+    label: Nadir (Down)
+    degrees: null
+    icon: fa-bullseye

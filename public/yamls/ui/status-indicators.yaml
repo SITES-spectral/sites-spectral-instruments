@@ -1,0 +1,150 @@
+# Status Indicators Configuration
+# SITES Spectral v8.4.0
+# Defines status codes with colors, icons, and categories
+
+metadata:
+  version: "1.0.0"
+  description: Status indicator definitions for UI elements
+
+statuses:
+  active:
+    code: Active
+    label: Active
+    description: Currently operational and collecting data
+    icon: fa-check-circle
+    color: "#22c55e"
+    background: "#dcfce7"
+    category: operational
+    order: 1
+
+  inactive:
+    code: Inactive
+    label: Inactive
+    description: Temporarily not operational
+    icon: fa-pause-circle
+    color: "#94a3b8"
+    background: "#f1f5f9"
+    category: operational
+    order: 2
+
+  testing:
+    code: Testing
+    label: Testing
+    description: Under testing or calibration
+    icon: fa-flask
+    color: "#f59e0b"
+    background: "#fef3c7"
+    category: development
+    order: 3
+
+  planned:
+    code: Planned
+    label: Planned
+    description: Scheduled for future deployment
+    icon: fa-calendar
+    color: "#3b82f6"
+    background: "#dbeafe"
+    category: development
+    order: 4
+
+  under_construction:
+    code: Under Construction
+    label: Under Construction
+    description: Currently being built or installed
+    icon: fa-hard-hat
+    color: "#f97316"
+    background: "#ffedd5"
+    category: development
+    order: 5
+
+  pending_activation:
+    code: Pending Activation
+    label: Pending Activation
+    description: Installed but awaiting activation
+    icon: fa-hourglass-half
+    color: "#8b5cf6"
+    background: "#ede9fe"
+    category: development
+    order: 6
+
+  maintenance:
+    code: Maintenance
+    label: Maintenance
+    description: Currently under maintenance
+    icon: fa-tools
+    color: "#ef4444"
+    background: "#fee2e2"
+    category: temporary
+    order: 7
+
+  upgrading:
+    code: Upgrading
+    label: Upgrading
+    description: Being upgraded or modified
+    icon: fa-arrow-up
+    color: "#06b6d4"
+    background: "#cffafe"
+    category: temporary
+    order: 8
+
+  dormant:
+    code: Dormant
+    label: Dormant
+    description: Temporarily suspended operations
+    icon: fa-moon
+    color: "#78716c"
+    background: "#f5f5f4"
+    category: temporary
+    order: 9
+
+  decommissioned:
+    code: Decommissioned
+    label: Decommissioned
+    description: Permanently taken out of service
+    icon: fa-archive
+    color: "#64748b"
+    background: "#e2e8f0"
+    category: retired
+    order: 10
+
+  dismantled:
+    code: Dismantled
+    label: Dismantled
+    description: Physically removed from site
+    icon: fa-trash-alt
+    color: "#475569"
+    background: "#cbd5e1"
+    category: retired
+    order: 11
+
+  scheduled_decommission:
+    code: Scheduled for Decommission
+    label: Scheduled for Decommission
+    description: Planned to be decommissioned
+    icon: fa-calendar-times
+    color: "#71717a"
+    background: "#e4e4e7"
+    category: retired
+    order: 12
+
+# Category definitions
+categories:
+  operational:
+    label: Operational
+    description: Normal operational states
+    color: "#22c55e"
+
+  development:
+    label: Development
+    description: Planning and construction states
+    color: "#3b82f6"
+
+  temporary:
+    label: Temporary
+    description: Temporary non-operational states
+    color: "#f59e0b"
+
+  retired:
+    label: Retired
+    description: End of life states
+    color: "#64748b"

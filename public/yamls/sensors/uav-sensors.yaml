@@ -1,0 +1,285 @@
+# UAV Sensor Specifications
+# SITES Spectral v8.4.0
+# Pre-defined specifications for common UAV multispectral and hyperspectral sensors
+
+metadata:
+  version: "1.0.0"
+  description: UAV sensor specifications for auto-instrument creation
+
+vendors:
+  DJI:
+    name: DJI
+    website: https://www.dji.com
+    models:
+      M3M:
+        name: DJI Mavic 3 Multispectral Camera
+        instrument_type: multispectral
+        manufacturer: DJI
+        model: Mavic 3M Multispectral
+        number_of_channels: 5
+        resolution: 5MP per MS band, 20MP RGB
+        description: Integrated 4-band multispectral + RGB camera system with RTK positioning
+        channels:
+          - name: Green
+            central_wavelength: 560
+            bandwidth: 32
+            units: nm
+          - name: Red
+            central_wavelength: 650
+            bandwidth: 32
+            units: nm
+          - name: Red Edge
+            central_wavelength: 730
+            bandwidth: 32
+            units: nm
+          - name: NIR
+            central_wavelength: 860
+            bandwidth: 52
+            units: nm
+          - name: RGB
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+
+      P4M:
+        name: DJI Phantom 4 Multispectral Camera
+        instrument_type: multispectral
+        manufacturer: DJI
+        model: Phantom 4 Multispectral
+        number_of_channels: 6
+        resolution: 2MP per band
+        description: Integrated 5-band multispectral + RGB camera with sunlight sensor
+        channels:
+          - name: Blue
+            central_wavelength: 450
+            bandwidth: 32
+            units: nm
+          - name: Green
+            central_wavelength: 560
+            bandwidth: 32
+            units: nm
+          - name: Red
+            central_wavelength: 650
+            bandwidth: 32
+            units: nm
+          - name: Red Edge
+            central_wavelength: 730
+            bandwidth: 32
+            units: nm
+          - name: NIR
+            central_wavelength: 840
+            bandwidth: 52
+            units: nm
+          - name: RGB
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+
+      M30T:
+        name: DJI Matrice 30T Camera System
+        instrument_type: multispectral
+        manufacturer: DJI
+        model: Matrice 30T
+        number_of_channels: 3
+        resolution: 48MP Wide, 12MP Zoom, 640x512 Thermal
+        description: Enterprise drone with wide, zoom, and thermal cameras
+        channels:
+          - name: Wide RGB
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+          - name: Zoom RGB
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+          - name: Thermal IR
+            central_wavelength: 10500
+            bandwidth: 5000
+            units: nm
+
+      M300:
+        name: DJI Matrice 300 RTK (Payload Dependent)
+        instrument_type: multispectral
+        manufacturer: DJI
+        model: Matrice 300 RTK
+        number_of_channels: 1
+        resolution: Depends on payload
+        description: Enterprise platform - payload sensors added separately
+        channels:
+          - name: Payload
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+
+      M350:
+        name: DJI Matrice 350 RTK (Payload Dependent)
+        instrument_type: multispectral
+        manufacturer: DJI
+        model: Matrice 350 RTK
+        number_of_channels: 1
+        resolution: Depends on payload
+        description: Enterprise platform - payload sensors added separately
+        channels:
+          - name: Payload
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+
+  MICASENSE:
+    name: MicaSense
+    website: https://www.micasense.com
+    models:
+      REDEDGE:
+        name: MicaSense RedEdge-MX
+        instrument_type: multispectral
+        manufacturer: MicaSense
+        model: RedEdge-MX
+        number_of_channels: 5
+        resolution: 1.2MP per band (1280x960)
+        description: Professional 5-band multispectral sensor with DLS2 light sensor
+        channels:
+          - name: Blue
+            central_wavelength: 475
+            bandwidth: 32
+            units: nm
+          - name: Green
+            central_wavelength: 560
+            bandwidth: 27
+            units: nm
+          - name: Red
+            central_wavelength: 668
+            bandwidth: 14
+            units: nm
+          - name: Red Edge
+            central_wavelength: 717
+            bandwidth: 12
+            units: nm
+          - name: NIR
+            central_wavelength: 842
+            bandwidth: 57
+            units: nm
+
+      ALTUM:
+        name: MicaSense Altum-PT
+        instrument_type: multispectral
+        manufacturer: MicaSense
+        model: Altum-PT
+        number_of_channels: 6
+        resolution: 3.2MP MS, 12MP Panchro, 320x256 Thermal
+        description: Multispectral + panchromatic + thermal radiometric sensor
+        channels:
+          - name: Blue
+            central_wavelength: 475
+            bandwidth: 32
+            units: nm
+          - name: Green
+            central_wavelength: 560
+            bandwidth: 27
+            units: nm
+          - name: Red
+            central_wavelength: 668
+            bandwidth: 14
+            units: nm
+          - name: Red Edge
+            central_wavelength: 717
+            bandwidth: 12
+            units: nm
+          - name: NIR
+            central_wavelength: 842
+            bandwidth: 57
+            units: nm
+          - name: LWIR Thermal
+            central_wavelength: 11000
+            bandwidth: 6000
+            units: nm
+
+  PARROT:
+    name: Parrot
+    website: https://www.parrot.com
+    models:
+      SEQUOIA:
+        name: Parrot Sequoia+
+        instrument_type: multispectral
+        manufacturer: Parrot
+        model: Sequoia+
+        number_of_channels: 5
+        resolution: 1.2MP per band
+        description: Compact 4-band multispectral + RGB with sunshine sensor
+        channels:
+          - name: Green
+            central_wavelength: 550
+            bandwidth: 40
+            units: nm
+          - name: Red
+            central_wavelength: 660
+            bandwidth: 40
+            units: nm
+          - name: Red Edge
+            central_wavelength: 735
+            bandwidth: 10
+            units: nm
+          - name: NIR
+            central_wavelength: 790
+            bandwidth: 40
+            units: nm
+          - name: RGB
+            central_wavelength: 550
+            bandwidth: 300
+            units: nm
+
+  HEADWALL:
+    name: Headwall Photonics
+    website: https://www.headwallphotonics.com
+    models:
+      NANO:
+        name: Headwall Nano-Hyperspec
+        instrument_type: hyperspectral
+        manufacturer: Headwall
+        model: Nano-Hyperspec
+        number_of_channels: 270
+        resolution: 640 spatial pixels
+        spectral_range_start: 400
+        spectral_range_end: 1000
+        spectral_resolution: 2.2
+        description: VNIR hyperspectral imager (400-1000nm, 270 bands)
+        channels: []
+
+# Vendor dropdown options for platform creation form
+vendor_options:
+  - value: DJI
+    label: DJI
+    models:
+      - value: M3M
+        label: Mavic 3 Multispectral (M3M)
+      - value: P4M
+        label: Phantom 4 Multispectral (P4M)
+      - value: M30T
+        label: Matrice 30T
+      - value: M300
+        label: Matrice 300 RTK
+      - value: M350
+        label: Matrice 350 RTK
+
+  - value: MICASENSE
+    label: MicaSense
+    models:
+      - value: REDEDGE
+        label: RedEdge-MX
+      - value: ALTUM
+        label: Altum-PT
+
+  - value: PARROT
+    label: Parrot
+    models:
+      - value: SEQUOIA
+        label: Sequoia+
+
+  - value: HEADWALL
+    label: Headwall Photonics
+    models:
+      - value: NANO
+        label: Nano-Hyperspec
+
+  - value: OTHER
+    label: Other / Custom
+    models: []
