@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.0.8">
+    <link rel="stylesheet" href="/css/styles.css?v=8.0.9">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.0.8">
+    <meta name="app-version" content="8.0.9">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4166,9 +4166,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.0.8"></script>
-    <script src="/js/api.js?v=8.0.8"></script>
-    <script src="/js/components.js?v=8.0.8"></script>
+    <script src="/js/utils.js?v=8.0.9"></script>
+    <script src="/js/api.js?v=8.0.9"></script>
+    <script src="/js/components.js?v=8.0.9"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4178,10 +4178,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.0.8"></script>
-    <script src="/js/station-dashboard.js?v=8.0.8"></script>
-    <script src="/js/navigation.js?v=8.0.8"></script>
-    <script src="/js/export.js?v=8.0.8"></script>
+    <script src="/js/interactive-map.js?v=8.0.9"></script>
+    <script src="/js/station-dashboard.js?v=8.0.9"></script>
+    <script src="/js/navigation.js?v=8.0.9"></script>
+    <script src="/js/export.js?v=8.0.9"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
 
@@ -8076,11 +8076,13 @@
             }
 
             console.log('✅ Creating platform for station ID:', data.id);
-            showCreatePlatformModal(data.id);
+            openCreatePlatformForm(data.id);
         }
 
-        function showCreatePlatformModal(stationId) {
-            console.log('🔵 INLINE showCreatePlatformModal called with stationId:', stationId);
+        // Global function to open and populate the create platform form
+        // Called by sitesStationDashboard.showCreatePlatformModal()
+        window.openCreatePlatformForm = function(stationId) {
+            console.log('🔵 openCreatePlatformForm called with stationId:', stationId);
             console.log('🔵 currentUser:', currentUser);
             console.log('🔵 currentUser?.role:', currentUser?.role);
 

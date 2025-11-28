@@ -12,6 +12,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.0.9] - 2025-11-28
+
+### FIX: Add Platform Button Not Working
+
+**Release Date**: 2025-11-28
+**Focus**: Fix platform creation modal not populating form
+
+#### Root Cause
+
+Two functions with similar purposes existed:
+1. **Class method** (`station-dashboard.js`): Just showed empty modal
+2. **Inline function** (`station.html`): Actually populated the form HTML
+
+The button called the class method, which showed an empty modal without form fields.
+
+#### Fixed
+
+- Renamed inline function to `window.openCreatePlatformForm()`
+- Updated class method to call the global function
+- Form now properly populates with all platform fields (display name, location code, ecosystem, platform type, etc.)
+
+---
+
 ## [8.0.8] - 2025-11-28
 
 ### FIX: JavaScript Syntax Error Blocking Script Execution

@@ -685,15 +685,19 @@ class SitesStationDashboard {
 
     // Platform management
     showCreatePlatformModal() {
-        if (this.currentUser?.role !== 'admin') {
-            showNotification('Admin privileges required', 'error');
+        // Allow both admin and station users to create platforms
+        if (!this.currentUser || (this.currentUser.role !== 'admin' && this.currentUser.role !== 'station')) {
+            showNotification('Platform creation requires admin or station user privileges', 'error');
             return;
         }
 
-        const modal = document.getElementById('create-platform-modal');
-        if (modal) {
-            showModal('create-platform-modal');
-            this.resetCreatePlatformForm();
+        // Call the global openCreatePlatformForm function from station.html
+        // which populates the form with all fields
+        if (typeof window.openCreatePlatformForm === 'function') {
+            window.openCreatePlatformForm(this.stationData?.id);
+        } else {
+            console.error('openCreatePlatformForm function not found in global scope');
+            showNotification('Error: Platform creation form not available', 'error');
         }
     }
 
