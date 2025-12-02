@@ -1029,8 +1029,8 @@
                             <span>${platform.normalized_name || 'N/A'}</span>
                         </div>
                         <div class="platform-meta">
-                            ${ecosystemBadgeHTML}
                             ${platformTypeBadgeHTML}
+                            ${ecosystemBadgeHTML}
                         </div>
                     </div>
 
