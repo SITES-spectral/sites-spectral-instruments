@@ -14,6 +14,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.13] - 2025-12-02
+
+### 🔧 Permission Check Fix for Global Functions
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **Permission Denied on Platform/Instrument Actions**: Admin and station users got "requires privileges" error
+  - Root cause: Global functions used `currentUser` variable which wasn't synced from dashboard
+  - Fix: All permission checks now use `window.sitesStationDashboard?.currentUser || currentUser`
+  - This gets user from dashboard instance first, falls back to global variable
+
+#### Functions Updated
+
+- `openPlatformTypeSelector()` - Platform type selection modal
+- `openCreatePlatformFormWithType()` - Platform creation form
+- `openEditPlatformForm()` - Platform editing form
+- `openEditInstrumentForm()` - Instrument editing form
+
+#### Technical Details
+
+- Dashboard instance (`window.sitesStationDashboard`) holds authoritative user state
+- Global `currentUser` variable may not be synced due to initialization timing
+- All permission checks now follow pattern: `const user = window.sitesStationDashboard?.currentUser || currentUser`
+
+---
+
 ## [9.0.12] - 2025-12-02
 
 ### 🔧 Platform Creation Button Visibility Fix
