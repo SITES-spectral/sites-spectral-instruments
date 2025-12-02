@@ -827,23 +827,42 @@
                 activeCountEl.textContent = activeInstruments;
             }
 
-            // Update platform type breakdown
+            // Update platform type breakdown with badges
             const platformTypesEl = document.getElementById('platform-types-breakdown');
             if (platformTypesEl) {
-                const typeLabels = { fixed: 'Fixed', uav: 'UAV', satellite: 'Satellite', mobile: 'Mobile' };
-                const breakdown = Object.entries(platformTypes)
-                    .map(([type, count]) => `${typeLabels[type] || type}: ${count}`)
-                    .join(', ');
-                platformTypesEl.textContent = breakdown || 'None';
+                const typeConfig = {
+                    fixed: { label: 'Fixed', icon: 'fa-tower-observation', color: '#3b82f6' },
+                    uav: { label: 'UAV', icon: 'fa-drone', color: '#10b981' },
+                    satellite: { label: 'Satellite', icon: 'fa-satellite', color: '#8b5cf6' },
+                    mobile: { label: 'Mobile', icon: 'fa-truck', color: '#f59e0b' }
+                };
+
+                const badges = Object.entries(platformTypes).map(([type, count]) => {
+                    const config = typeConfig[type] || { label: type, icon: 'fa-cube', color: '#6b7280' };
+                    return `<span class="summary-badge" style="background: ${config.color}20; color: ${config.color}; border: 1px solid ${config.color}40;">
+                        <i class="fas ${config.icon}"></i> ${config.label} <strong>${count}</strong>
+                    </span>`;
+                }).join('');
+
+                platformTypesEl.innerHTML = badges || '<span class="text-muted">None</span>';
             }
 
-            // Update ecosystem breakdown
+            // Update ecosystem breakdown with badges
             const ecosystemsEl = document.getElementById('ecosystems-breakdown');
             if (ecosystemsEl) {
-                const ecoBreakdown = Object.entries(ecosystems)
-                    .map(([eco, count]) => `${eco}: ${count}`)
-                    .join(', ');
-                ecosystemsEl.textContent = ecoBreakdown || 'None';
+                const ecoConfig = global.SitesConfig?.getEcosystems?.() || {};
+
+                const badges = Object.entries(ecosystems).map(([eco, count]) => {
+                    const config = ecoConfig[eco] || {};
+                    const label = config.label || eco;
+                    const icon = config.icon || 'fa-globe';
+                    const color = config.color || '#6b7280';
+                    return `<span class="summary-badge" style="background: ${color}20; color: ${color}; border: 1px solid ${color}40;">
+                        <i class="fas ${icon}"></i> ${label} <strong>${count}</strong>
+                    </span>`;
+                }).join('');
+
+                ecosystemsEl.innerHTML = badges || '<span class="text-muted">None</span>';
             }
         }
 
