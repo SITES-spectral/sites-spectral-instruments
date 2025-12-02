@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.8">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.9">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.8">
+    <meta name="app-version" content="9.0.9">
     <meta name="build-date" content="2025-12-02">
 
     <style>
@@ -130,20 +130,52 @@
 
         .loading-state {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
-            color: #6b7280;
+            padding: 4rem 2rem;
+            color: #4b5563;
+            min-height: 300px;
+        }
+
+        .loading-state .spinner-container {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1.5rem;
         }
 
         .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid #e5e7eb;
+            width: 64px;
+            height: 64px;
+            border: 4px solid #e5e7eb;
             border-radius: 50%;
             border-top-color: #059669;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 1rem;
+            border-right-color: #059669;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-state .loading-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #059669;
+            font-size: 1.5rem;
+        }
+
+        .loading-state p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0;
+            color: #374151;
+        }
+
+        .loading-state .loading-sub {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            font-weight: 400;
         }
 
         @keyframes spin {
@@ -2648,8 +2680,12 @@
     <main class="main-content">
         <div class="welcome-section">
             <div class="loading-state" id="loading-state">
-                <div class="spinner"></div>
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                    <i class="fas fa-leaf loading-icon"></i>
+                </div>
                 <p>Loading station data...</p>
+                <span class="loading-sub">Please wait while we prepare your dashboard</span>
             </div>
             <div id="welcome-content" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
@@ -4242,14 +4278,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.8"></script>
+    <script src="/js/utils.js?v=9.0.9"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=9.0.8"></script>
-    <script src="/js/components.js?v=9.0.8"></script>
+    <script src="/js/api.js?v=9.0.9"></script>
+    <script src="/js/components.js?v=9.0.9"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4259,10 +4295,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=9.0.8"></script>
-    <script src="/js/station-dashboard.js?v=9.0.8"></script>
-    <script src="/js/navigation.js?v=9.0.8"></script>
-    <script src="/js/export.js?v=9.0.8"></script>
+    <script src="/js/interactive-map.js?v=9.0.9"></script>
+    <script src="/js/station-dashboard.js?v=9.0.9"></script>
+    <script src="/js/navigation.js?v=9.0.9"></script>
+    <script src="/js/export.js?v=9.0.9"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>

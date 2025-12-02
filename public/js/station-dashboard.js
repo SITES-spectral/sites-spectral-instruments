@@ -247,8 +247,46 @@
          * @private
          */
         async _ensureConfigLoaded() {
-            if (global.SitesConfig && !global.SitesConfig.isLoaded()) {
-                await global.SitesConfig.init();
+            this._updateLoadingMessage('Loading configuration...');
+
+            // Wait for SitesConfig to be available (max 3 seconds)
+            const maxWait = 3000;
+            const startTime = Date.now();
+
+            while (!global.SitesConfig && (Date.now() - startTime) < maxWait) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            if (global.SitesConfig) {
+                if (!global.SitesConfig.isLoaded()) {
+                    try {
+                        await global.SitesConfig.init();
+                        logger.log('ConfigService initialized successfully');
+                    } catch (error) {
+                        logger.warn('ConfigService initialization failed, using defaults:', error);
+                    }
+                } else {
+                    logger.log('ConfigService already loaded');
+                }
+            } else {
+                logger.warn('SitesConfig not available, using built-in defaults');
+            }
+
+            this._updateLoadingMessage('Loading station data...');
+        }
+
+        /**
+         * Update loading message
+         * @private
+         * @param {string} message - Loading message to display
+         */
+        _updateLoadingMessage(message) {
+            const loadingEl = document.getElementById('loading-state');
+            if (loadingEl) {
+                const pEl = loadingEl.querySelector('p');
+                if (pEl) {
+                    pEl.textContent = message;
+                }
             }
         }
 

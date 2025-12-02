@@ -14,6 +14,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.9] - 2025-12-02
+
+### 🎯 Enhanced Loading UX & Reliable Instrument Categorization
+
+**Release Date**: 2025-12-02
+
+#### Added
+
+- **Enhanced Loading Animation**: Improved loading state with visual spinner
+  - Larger, more visible spinner with SITES Spectral leaf icon
+  - Progressive loading messages ("Loading configuration...", "Loading station data...")
+  - Informative subtitle text for better user feedback
+
+- **Robust Config Loading**: `_ensureConfigLoaded` now more reliable
+  - Waits up to 3 seconds for SitesConfig to become available
+  - Gracefully falls back to built-in defaults if config unavailable
+  - Shows progress messages during initialization
+
+#### Fixed
+
+- **Instrument Categorization**: Now uses direct pattern matching as PRIMARY method
+  - Previously depended on ConfigService which had timing issues
+  - Pattern matching runs synchronously without async dependencies
+  - ConfigService used as secondary fallback for unknown types
+  - Patterns for: phenocam, multispectral, par, ndvi, pri, hyperspectral, thermal, lidar
+
+#### Technical Details
+
+- `_groupInstrumentsByType`: Primary pattern matching, ConfigService secondary
+- `_updateLoadingMessage`: New helper for dynamic loading state updates
+- Station dashboard loading: Configuration → Authentication → Station data flow
+
+---
+
 ## [9.0.8] - 2025-12-02
 
 ### 🔧 Instrument Category Detection Fix
