@@ -5,7 +5,7 @@
  * Preloads common configurations and provides typed accessors.
  *
  * @module core/config-service
- * @version 8.5.0
+ * @version 9.0.0
  */
 
 (function(global) {
@@ -27,13 +27,23 @@
 
             /** Configuration file paths */
             this.CONFIG_PATHS = {
+                // UI Configurations
                 platformTypes: 'ui/platform-types',
                 instrumentTypes: 'ui/instrument-types',
                 statusIndicators: 'ui/status-indicators',
                 sensorOrientations: 'ui/sensor-orientations',
-                uavSensors: 'sensors/uav-sensors',
+                pagination: 'ui/pagination',
+                // Core Configurations
                 ecosystems: 'core/ecosystems',
-                validationRules: 'core/validation-rules'
+                validationRules: 'core/validation-rules',
+                // Sensor Configurations
+                uavSensors: 'sensors/uav-sensors',
+                // API Configurations
+                apiVersions: 'api/api-versions',
+                // Campaign Configurations
+                campaignTypes: 'campaigns/campaign-types',
+                // Product Configurations
+                productTypes: 'products/product-types'
             };
         }
 
@@ -416,6 +426,353 @@
          */
         getGeographicValidation() {
             return this.configs.validationRules?.geographic || {};
+        }
+
+        // ==========================================
+        // API Version Accessors
+        // ==========================================
+
+        /**
+         * Get all API versions configuration
+         * @returns {Object}
+         */
+        getAPIVersions() {
+            return this.configs.apiVersions?.api_versions || {};
+        }
+
+        /**
+         * Get current API version configuration
+         * @returns {Object}
+         */
+        getAPIVersion() {
+            const versions = this.getAPIVersions();
+            // Find the version marked as current or default
+            for (const [key, config] of Object.entries(versions)) {
+                if (config.status === 'current' || config.is_default) {
+                    return { version: key, ...config };
+                }
+            }
+            // Fallback to v3 if no current version found
+            return versions.v3 ? { version: 'v3', ...versions.v3 } : null;
+        }
+
+        /**
+         * Get specific API version by key
+         * @param {string} version - Version key (e.g., 'v1', 'v2', 'v3')
+         * @returns {Object|null}
+         */
+        getAPIVersionByKey(version) {
+            return this.getAPIVersions()[version] || null;
+        }
+
+        /**
+         * Get API version selection configuration
+         * @returns {Object}
+         */
+        getAPIVersionSelection() {
+            return this.configs.apiVersions?.version_selection || {};
+        }
+
+        /**
+         * Get default API version string
+         * @returns {string}
+         */
+        getDefaultAPIVersion() {
+            return this.configs.apiVersions?.version_selection?.default_version || 'v3';
+        }
+
+        /**
+         * Get API feature availability by version
+         * @returns {Object}
+         */
+        getAPIFeatures() {
+            return this.configs.apiVersions?.features || {};
+        }
+
+        // ==========================================
+        // Campaign Type Accessors
+        // ==========================================
+
+        /**
+         * Get all campaign types
+         * @returns {Object}
+         */
+        getCampaignTypes() {
+            return this.configs.campaignTypes?.campaign_types || {};
+        }
+
+        /**
+         * Get campaign type by code
+         * @param {string} code - Campaign type code (e.g., 'field_survey', 'uav_flight')
+         * @returns {Object|null}
+         */
+        getCampaignType(code) {
+            return this.getCampaignTypes()[code] || null;
+        }
+
+        /**
+         * Get campaign type icon
+         * @param {string} code - Campaign type code
+         * @returns {string}
+         */
+        getCampaignTypeIcon(code) {
+            return this.getCampaignType(code)?.icon || 'fa-clipboard';
+        }
+
+        /**
+         * Get campaign type color
+         * @param {string} code - Campaign type code
+         * @returns {string}
+         */
+        getCampaignTypeColor(code) {
+            return this.getCampaignType(code)?.color || '#6b7280';
+        }
+
+        /**
+         * Get all campaign status definitions
+         * @returns {Object}
+         */
+        getCampaignStatuses() {
+            return this.configs.campaignTypes?.campaign_status || {};
+        }
+
+        /**
+         * Get campaign status by code
+         * @param {string} code - Campaign status code (e.g., 'planning', 'in_progress')
+         * @returns {Object|null}
+         */
+        getCampaignStatus(code) {
+            return this.getCampaignStatuses()[code] || null;
+        }
+
+        /**
+         * Get campaign status color
+         * @param {string} code - Campaign status code
+         * @returns {string}
+         */
+        getCampaignStatusColor(code) {
+            return this.getCampaignStatus(code)?.color || '#6b7280';
+        }
+
+        /**
+         * Get campaign status icon
+         * @param {string} code - Campaign status code
+         * @returns {string}
+         */
+        getCampaignStatusIcon(code) {
+            return this.getCampaignStatus(code)?.icon || 'fa-question-circle';
+        }
+
+        /**
+         * Get campaign priorities
+         * @returns {Object}
+         */
+        getCampaignPriorities() {
+            return this.configs.campaignTypes?.campaign_priorities || {};
+        }
+
+        /**
+         * Get campaign UI configuration
+         * @returns {Object}
+         */
+        getCampaignUIConfig() {
+            return this.configs.campaignTypes?.ui_config || {};
+        }
+
+        /**
+         * Get campaign validation rules
+         * @returns {Object}
+         */
+        getCampaignValidation() {
+            return this.configs.campaignTypes?.validation || {};
+        }
+
+        // ==========================================
+        // Product Type Accessors
+        // ==========================================
+
+        /**
+         * Get all product types
+         * @returns {Object}
+         */
+        getProductTypes() {
+            return this.configs.productTypes?.product_types || {};
+        }
+
+        /**
+         * Get product type by code
+         * @param {string} code - Product type code (e.g., 'orthomosaic', 'ndvi_map')
+         * @returns {Object|null}
+         */
+        getProductType(code) {
+            return this.getProductTypes()[code] || null;
+        }
+
+        /**
+         * Get product type icon
+         * @param {string} code - Product type code
+         * @returns {string}
+         */
+        getProductTypeIcon(code) {
+            return this.getProductType(code)?.icon || 'fa-file';
+        }
+
+        /**
+         * Get product type color
+         * @param {string} code - Product type code
+         * @returns {string}
+         */
+        getProductTypeColor(code) {
+            return this.getProductType(code)?.color || '#6b7280';
+        }
+
+        /**
+         * Get product types by category
+         * @param {string} category - Category name (e.g., 'imagery', 'vegetation_index')
+         * @returns {Array}
+         */
+        getProductTypesByCategory(category) {
+            const types = this.getProductTypes();
+            const results = [];
+            for (const [key, config] of Object.entries(types)) {
+                if (config.category === category) {
+                    results.push({ key, ...config });
+                }
+            }
+            return results;
+        }
+
+        /**
+         * Get all processing level definitions
+         * @returns {Object}
+         */
+        getProcessingLevels() {
+            return this.configs.productTypes?.processing_levels || {};
+        }
+
+        /**
+         * Get processing level by code
+         * @param {string} code - Processing level code (e.g., 'raw', 'processed', 'validated')
+         * @returns {Object|null}
+         */
+        getProcessingLevel(code) {
+            return this.getProcessingLevels()[code] || null;
+        }
+
+        /**
+         * Get all file format definitions
+         * @returns {Object}
+         */
+        getFileFormats() {
+            return this.configs.productTypes?.file_formats || {};
+        }
+
+        /**
+         * Get file format by key
+         * @param {string} key - File format key (e.g., 'geotiff', 'cog', 'las')
+         * @returns {Object|null}
+         */
+        getFileFormat(key) {
+            return this.getFileFormats()[key] || null;
+        }
+
+        /**
+         * Get product categories
+         * @returns {Object}
+         */
+        getProductCategories() {
+            return this.configs.productTypes?.categories || {};
+        }
+
+        /**
+         * Get quality control configuration
+         * @returns {Object}
+         */
+        getProductQualityControl() {
+            return this.configs.productTypes?.quality_control || {};
+        }
+
+        // ==========================================
+        // Pagination Accessors
+        // ==========================================
+
+        /**
+         * Get pagination configuration
+         * @returns {Object}
+         */
+        getPaginationConfig() {
+            return this.configs.pagination || {};
+        }
+
+        /**
+         * Get default pagination settings
+         * @returns {Object}
+         */
+        getPaginationDefaults() {
+            return this.configs.pagination?.defaults || {};
+        }
+
+        /**
+         * Get view-specific pagination settings
+         * @param {string} viewName - View name (e.g., 'instruments', 'campaigns', 'products')
+         * @returns {Object}
+         */
+        getViewPagination(viewName) {
+            const viewConfig = this.configs.pagination?.views?.[viewName];
+            if (viewConfig) {
+                // Merge with defaults
+                return { ...this.getPaginationDefaults(), ...viewConfig };
+            }
+            return this.getPaginationDefaults();
+        }
+
+        /**
+         * Get pagination style configuration
+         * @param {string} styleName - Style name (e.g., 'numbered', 'load_more', 'infinite_scroll')
+         * @returns {Object|null}
+         */
+        getPaginationStyle(styleName) {
+            return this.configs.pagination?.pagination_styles?.[styleName] || null;
+        }
+
+        /**
+         * Get API pagination configuration
+         * @returns {Object}
+         */
+        getAPIPaginationConfig() {
+            return this.configs.pagination?.api || {};
+        }
+
+        /**
+         * Get pagination UI components configuration
+         * @returns {Object}
+         */
+        getPaginationUIComponents() {
+            return this.configs.pagination?.ui_components || {};
+        }
+
+        /**
+         * Get pagination performance settings
+         * @returns {Object}
+         */
+        getPaginationPerformance() {
+            return this.configs.pagination?.performance || {};
+        }
+
+        /**
+         * Get pagination accessibility settings
+         * @returns {Object}
+         */
+        getPaginationAccessibility() {
+            return this.configs.pagination?.accessibility || {};
+        }
+
+        /**
+         * Get pagination mobile settings
+         * @returns {Object}
+         */
+        getPaginationMobile() {
+            return this.configs.pagination?.mobile || {};
         }
 
         // ==========================================

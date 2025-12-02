@@ -1,0 +1,481 @@
+# =============================================================================
+# Campaign Types Configuration
+# SITES Spectral v9.0.0
+# =============================================================================
+# Defines campaign types for organizing field work, UAV missions, satellite
+# acquisitions, and mobile surveys. Campaigns group related data collection
+# activities and link to products.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Campaign types and workflow configurations"
+  last_updated: "2025-12-02"
+
+# =============================================================================
+# CAMPAIGN TYPE DEFINITIONS
+# =============================================================================
+# Each campaign type represents a different data collection methodology
+
+campaign_types:
+  # ---------------------------------------------------------------------------
+  # FIELD SURVEY - Ground-based data collection
+  # ---------------------------------------------------------------------------
+  field_survey:
+    name: "Field Survey"
+    description: "Ground-based field measurements and observations, including manual data collection and handheld instrument readings."
+    icon: "fa-clipboard-list"
+    color: "#2563eb"
+    gradient: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
+    code: "FS"
+
+    # Typical duration for this campaign type
+    typical_duration:
+      min_days: 1
+      max_days: 14
+      default_days: 3
+
+    # Required and optional fields
+    required_fields:
+      - "campaign_name"
+      - "start_date"
+      - "station_id"
+      - "campaign_lead"
+
+    optional_fields:
+      - "end_date"
+      - "team_members"
+      - "objectives"
+      - "weather_conditions"
+      - "equipment_list"
+
+    # Supported instruments for this campaign type
+    supported_instruments:
+      - "handheld_gps"
+      - "spectroradiometer"
+      - "lai_meter"
+      - "soil_sampler"
+      - "weather_station"
+
+    # Expected product types
+    expected_products:
+      - "field_notes"
+      - "sample_data"
+      - "ground_truth"
+      - "calibration_targets"
+      - "photos"
+
+    workflow:
+      planning: "Define objectives and sampling design"
+      preparation: "Prepare equipment and safety protocols"
+      execution: "Conduct field measurements"
+      post_processing: "Data entry and quality control"
+      reporting: "Generate field report"
+
+    help_text: "Use for ground-based campaigns including vegetation sampling, soil measurements, and calibration target deployment."
+
+  # ---------------------------------------------------------------------------
+  # UAV FLIGHT - Drone-based data acquisition
+  # ---------------------------------------------------------------------------
+  uav_flight:
+    name: "UAV Flight Mission"
+    description: "Unmanned Aerial Vehicle flight mission for mapping and remote sensing data acquisition."
+    icon: "fa-helicopter"
+    color: "#059669"
+    gradient: "linear-gradient(135deg, #059669 0%, #047857 100%)"
+    code: "UAV"
+
+    typical_duration:
+      min_hours: 0.5
+      max_hours: 8
+      default_hours: 2
+
+    required_fields:
+      - "campaign_name"
+      - "flight_date"
+      - "station_id"
+      - "platform_id"
+      - "pilot"
+      - "aoi_coverage"
+
+    optional_fields:
+      - "flight_altitude_m"
+      - "ground_speed_ms"
+      - "overlap_percent"
+      - "weather_conditions"
+      - "battery_count"
+      - "flight_plan_file"
+
+    supported_instruments:
+      - "rgb_camera"
+      - "multispectral"
+      - "hyperspectral"
+      - "thermal"
+      - "lidar"
+
+    expected_products:
+      - "orthomosaic"
+      - "ndvi_map"
+      - "point_cloud"
+      - "thermal_map"
+      - "dem"
+      - "dsm"
+
+    workflow:
+      planning: "Flight plan creation and regulatory approval"
+      preparation: "Pre-flight checks and calibration"
+      execution: "Autonomous or manual flight operation"
+      post_processing: "Photogrammetry and data processing"
+      reporting: "Flight report and deliverables"
+
+    flight_regulations:
+      max_altitude_m: 120
+      requires_clearance: true
+      vlos_required: true
+      weather_restrictions:
+        max_wind_speed_ms: 12
+        min_visibility_m: 5000
+        no_precipitation: true
+
+    help_text: "Use for drone mapping missions. Ensure compliance with aviation regulations and safety protocols."
+
+  # ---------------------------------------------------------------------------
+  # SATELLITE ACQUISITION - Space-based data download
+  # ---------------------------------------------------------------------------
+  satellite_acquisition:
+    name: "Satellite Data Acquisition"
+    description: "Download and processing of satellite imagery from Earth observation platforms."
+    icon: "fa-satellite"
+    color: "#7c3aed"
+    gradient: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
+    code: "SAT"
+
+    typical_duration:
+      acquisition_date: "single"
+      processing_days: 7
+
+    required_fields:
+      - "campaign_name"
+      - "acquisition_date"
+      - "station_id"
+      - "satellite_platform"
+      - "aoi_coverage"
+
+    optional_fields:
+      - "cloud_cover_percent"
+      - "scene_id"
+      - "processing_level"
+      - "atmospheric_correction"
+      - "data_source_url"
+
+    supported_platforms:
+      sentinel2:
+        name: "Sentinel-2"
+        provider: "ESA/Copernicus"
+        revisit_days: 5
+        spatial_resolution_m: 10
+        spectral_bands: 13
+
+      landsat8:
+        name: "Landsat 8"
+        provider: "NASA/USGS"
+        revisit_days: 16
+        spatial_resolution_m: 30
+        spectral_bands: 11
+
+      landsat9:
+        name: "Landsat 9"
+        provider: "NASA/USGS"
+        revisit_days: 16
+        spatial_resolution_m: 30
+        spectral_bands: 11
+
+      planet:
+        name: "Planet Labs"
+        provider: "Planet Labs"
+        revisit_days: 1
+        spatial_resolution_m: 3
+        spectral_bands: 8
+
+    expected_products:
+      - "reflectance"
+      - "ndvi_map"
+      - "evi_map"
+      - "surface_temperature"
+      - "cloud_mask"
+
+    workflow:
+      planning: "Define AOI and date range"
+      acquisition: "Search and download imagery"
+      preprocessing: "Atmospheric correction and masking"
+      processing: "Index calculation and analysis"
+      reporting: "Generate analysis report"
+
+    data_quality:
+      max_cloud_cover_percent: 20
+      min_scene_coverage_percent: 80
+      preferred_sun_elevation_deg: 30
+
+    help_text: "Use for satellite data campaigns. Ensure appropriate temporal coverage and quality filters."
+
+  # ---------------------------------------------------------------------------
+  # MOBILE SURVEY - Vehicle-based transect measurements
+  # ---------------------------------------------------------------------------
+  mobile_survey:
+    name: "Mobile Survey"
+    description: "Vehicle-mounted or portable instrument surveys along transects or at multiple locations."
+    icon: "fa-truck"
+    color: "#f59e0b"
+    gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+    code: "MOB"
+
+    typical_duration:
+      min_hours: 2
+      max_hours: 48
+      default_hours: 8
+
+    required_fields:
+      - "campaign_name"
+      - "start_date"
+      - "station_id"
+      - "transect_route"
+      - "survey_lead"
+
+    optional_fields:
+      - "end_date"
+      - "vehicle_info"
+      - "num_stops"
+      - "weather_conditions"
+      - "gps_track"
+
+    supported_instruments:
+      - "mobile_spectrometer"
+      - "mobile_lidar"
+      - "gps_logger"
+      - "mobile_camera"
+      - "environmental_sensors"
+
+    expected_products:
+      - "transect_data"
+      - "point_measurements"
+      - "gps_tracks"
+      - "photos"
+      - "continuous_profiles"
+
+    workflow:
+      planning: "Define transect routes and sampling points"
+      preparation: "Mount equipment and calibrate sensors"
+      execution: "Drive transect and collect data"
+      post_processing: "Georeference and quality control"
+      reporting: "Generate transect analysis report"
+
+    help_text: "Use for mobile platform surveys including road transects and multi-site visits."
+
+# =============================================================================
+# CAMPAIGN STATUS DEFINITIONS
+# =============================================================================
+# Lifecycle status for campaign management
+
+campaign_status:
+  planning:
+    code: "planning"
+    label: "Planning"
+    description: "Campaign is being designed and scheduled"
+    icon: "fa-clipboard"
+    color: "#6b7280"
+    background: "#f3f4f6"
+    actions:
+      - "Edit details"
+      - "Add team members"
+      - "Set schedule"
+      - "Move to scheduled"
+
+  scheduled:
+    code: "scheduled"
+    label: "Scheduled"
+    description: "Campaign is approved and scheduled for execution"
+    icon: "fa-calendar-check"
+    color: "#3b82f6"
+    background: "#dbeafe"
+    actions:
+      - "Start campaign"
+      - "Postpone"
+      - "Cancel"
+
+  in_progress:
+    code: "in_progress"
+    label: "In Progress"
+    description: "Campaign is currently being executed"
+    icon: "fa-spinner"
+    color: "#f59e0b"
+    background: "#fef3c7"
+    dot_animation: "pulse"
+    actions:
+      - "Update status"
+      - "Add field notes"
+      - "Upload data"
+      - "Mark complete"
+
+  completed:
+    code: "completed"
+    label: "Completed"
+    description: "Campaign execution is finished, data being processed"
+    icon: "fa-check-circle"
+    color: "#22c55e"
+    background: "#dcfce7"
+    actions:
+      - "Review data"
+      - "Generate report"
+      - "Archive campaign"
+
+  cancelled:
+    code: "cancelled"
+    label: "Cancelled"
+    description: "Campaign was cancelled before completion"
+    icon: "fa-times-circle"
+    color: "#dc2626"
+    background: "#fee2e2"
+    actions:
+      - "View details"
+      - "Reschedule"
+
+  archived:
+    code: "archived"
+    label: "Archived"
+    description: "Campaign is completed and archived"
+    icon: "fa-archive"
+    color: "#6b7280"
+    background: "#f3f4f6"
+    actions:
+      - "View report"
+      - "Restore"
+
+# =============================================================================
+# CAMPAIGN PRIORITIES
+# =============================================================================
+# Priority levels for campaign scheduling
+
+campaign_priorities:
+  low:
+    code: "low"
+    label: "Low Priority"
+    color: "#6b7280"
+    icon: "fa-arrow-down"
+    description: "Routine monitoring, flexible timing"
+
+  normal:
+    code: "normal"
+    label: "Normal Priority"
+    color: "#3b82f6"
+    icon: "fa-minus"
+    description: "Standard scheduled campaign"
+
+  high:
+    code: "high"
+    label: "High Priority"
+    color: "#f59e0b"
+    icon: "fa-arrow-up"
+    description: "Important campaign, preferred scheduling"
+
+  urgent:
+    code: "urgent"
+    label: "Urgent"
+    color: "#dc2626"
+    icon: "fa-exclamation-triangle"
+    description: "Time-sensitive, immediate attention required"
+
+# =============================================================================
+# UI CONFIGURATION
+# =============================================================================
+# Display settings for campaign interface
+
+ui_config:
+  # Campaign card display
+  card_display:
+    show_status_badge: true
+    show_priority_indicator: true
+    show_team_members: true
+    show_product_count: true
+    max_description_length: 150
+
+  # Campaign list filters
+  filters:
+    by_type: true
+    by_status: true
+    by_station: true
+    by_date_range: true
+    by_team_member: true
+
+  # Campaign timeline view
+  timeline:
+    enabled: true
+    group_by: "month"
+    show_overlapping: true
+    color_by: "type"
+
+  # Campaign calendar view
+  calendar:
+    enabled: true
+    default_view: "month"
+    show_status_colors: true
+    allow_drag_drop: false
+
+# =============================================================================
+# WORKFLOW AUTOMATION
+# =============================================================================
+# Automated actions and notifications
+
+automation:
+  # Status transitions
+  auto_transitions:
+    scheduled_to_in_progress:
+      enabled: false
+      trigger: "start_date_reached"
+
+    in_progress_to_completed:
+      enabled: false
+      requires_manual: true
+
+  # Notifications
+  notifications:
+    campaign_scheduled:
+      enabled: true
+      recipients: ["campaign_lead", "team_members"]
+      timing: "immediate"
+
+    campaign_starting_soon:
+      enabled: true
+      recipients: ["campaign_lead", "team_members"]
+      timing: "1_day_before"
+
+    campaign_overdue:
+      enabled: true
+      recipients: ["campaign_lead", "station_manager"]
+      timing: "1_day_after_end_date"
+
+# =============================================================================
+# DATA VALIDATION
+# =============================================================================
+# Validation rules for campaign data
+
+validation:
+  campaign_name:
+    min_length: 5
+    max_length: 100
+    pattern: "^[A-Za-z0-9\\s\\-_]+$"
+
+  date_ranges:
+    start_date_required: true
+    end_date_optional: true
+    end_after_start: true
+    max_duration_days: 365
+
+  team:
+    min_team_members: 1
+    max_team_members: 20
+    require_campaign_lead: true
+
+  aoi:
+    required_for_types: ["uav_flight", "satellite_acquisition"]
+    max_area_km2: 1000
+    min_area_km2: 0.01

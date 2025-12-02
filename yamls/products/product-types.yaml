@@ -1,0 +1,711 @@
+# =============================================================================
+# Product Types Configuration
+# SITES Spectral v9.0.0
+# =============================================================================
+# Defines product types for data deliverables generated from campaigns.
+# Products represent processed outputs like orthomosaics, vegetation index
+# maps, point clouds, and analysis results.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Product types and processing level configurations"
+  last_updated: "2025-12-02"
+
+# =============================================================================
+# PRODUCT TYPE DEFINITIONS
+# =============================================================================
+# Each product type represents a specific data deliverable
+
+product_types:
+  # ---------------------------------------------------------------------------
+  # ORTHOMOSAIC - Georeferenced image mosaic
+  # ---------------------------------------------------------------------------
+  orthomosaic:
+    name: "Orthomosaic"
+    description: "Geometrically corrected and georeferenced aerial imagery mosaic with uniform scale."
+    icon: "fa-image"
+    color: "#2563eb"
+    background: "#dbeafe"
+    code: "ORTHO"
+    category: "imagery"
+
+    # Supported file formats
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "JPEG2000"
+        - "PNG"
+
+    # Typical file characteristics
+    characteristics:
+      spatial_unit: "meters"
+      typical_resolution_range: [0.01, 0.5]
+      coordinate_systems:
+        - "EPSG:3006"  # SWEREF99 TM
+        - "EPSG:4326"  # WGS84
+        - "EPSG:32633" # UTM Zone 33N
+        - "EPSG:32634" # UTM Zone 34N
+
+    # Processing requirements
+    processing:
+      requires_gcps: true
+      requires_camera_calibration: true
+      typical_processing_time_hours: 2
+
+    # Quality metrics
+    quality_metrics:
+      - "spatial_resolution_m"
+      - "geometric_accuracy_m"
+      - "color_balance_score"
+      - "coverage_percent"
+
+    # Source campaigns
+    source_campaigns:
+      - "uav_flight"
+      - "satellite_acquisition"
+
+    help_text: "High-resolution georeferenced image suitable for mapping and feature extraction."
+
+  # ---------------------------------------------------------------------------
+  # NDVI MAP - Normalized Difference Vegetation Index
+  # ---------------------------------------------------------------------------
+  ndvi_map:
+    name: "NDVI Map"
+    description: "Normalized Difference Vegetation Index map showing vegetation health and vigor."
+    icon: "fa-leaf"
+    color: "#22c55e"
+    background: "#d1fae5"
+    code: "NDVI"
+    category: "vegetation_index"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "NetCDF"
+
+    characteristics:
+      spatial_unit: "meters"
+      value_range: [-1.0, 1.0]
+      data_type: "float32"
+      no_data_value: -9999
+      color_ramp: "RdYlGn"
+
+    processing:
+      requires_atmospheric_correction: true
+      requires_radiometric_calibration: true
+      typical_processing_time_hours: 0.5
+
+    quality_metrics:
+      - "valid_pixel_percent"
+      - "cloud_mask_quality"
+      - "ndvi_mean"
+      - "ndvi_std"
+
+    source_campaigns:
+      - "uav_flight"
+      - "satellite_acquisition"
+
+    thresholds:
+      bare_soil: [-0.1, 0.1]
+      sparse_vegetation: [0.1, 0.3]
+      moderate_vegetation: [0.3, 0.5]
+      dense_vegetation: [0.5, 1.0]
+
+    help_text: "Standard vegetation index for monitoring plant health and phenology."
+
+  # ---------------------------------------------------------------------------
+  # POINT CLOUD - 3D point data
+  # ---------------------------------------------------------------------------
+  point_cloud:
+    name: "Point Cloud"
+    description: "Three-dimensional point cloud representing surface structure and elevation."
+    icon: "fa-cubes"
+    color: "#8b5cf6"
+    background: "#ede9fe"
+    code: "PC"
+    category: "3d_data"
+
+    file_formats:
+      primary: "LAS"
+      alternatives:
+        - "LAZ"
+        - "PLY"
+        - "E57"
+        - "XYZ"
+
+    characteristics:
+      spatial_unit: "meters"
+      point_density_unit: "points_per_m2"
+      typical_density_range: [10, 1000]
+      coordinate_systems:
+        - "EPSG:3006"
+        - "EPSG:4326"
+
+    processing:
+      requires_alignment: true
+      requires_filtering: true
+      typical_processing_time_hours: 4
+
+    quality_metrics:
+      - "point_density_per_m2"
+      - "registration_error_m"
+      - "coverage_percent"
+      - "noise_level"
+
+    source_campaigns:
+      - "uav_flight"
+      - "field_survey"
+
+    classifications:
+      ground: 2
+      low_vegetation: 3
+      medium_vegetation: 4
+      high_vegetation: 5
+      building: 6
+      water: 9
+
+    help_text: "3D representation for structure analysis, height modeling, and volume calculations."
+
+  # ---------------------------------------------------------------------------
+  # THERMAL MAP - Surface temperature
+  # ---------------------------------------------------------------------------
+  thermal_map:
+    name: "Thermal Map"
+    description: "Surface temperature map derived from thermal infrared imagery."
+    icon: "fa-temperature-high"
+    color: "#ef4444"
+    background: "#fee2e2"
+    code: "THERM"
+    category: "thermal"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "NetCDF"
+
+    characteristics:
+      spatial_unit: "meters"
+      temperature_unit: "celsius"
+      typical_range: [-20, 50]
+      data_type: "float32"
+      color_ramp: "turbo"
+
+    processing:
+      requires_emissivity_correction: true
+      requires_atmospheric_correction: true
+      typical_processing_time_hours: 1
+
+    quality_metrics:
+      - "temperature_accuracy_c"
+      - "spatial_resolution_m"
+      - "coverage_percent"
+
+    source_campaigns:
+      - "uav_flight"
+      - "satellite_acquisition"
+
+    applications:
+      - "water_stress_detection"
+      - "evapotranspiration"
+      - "building_inspection"
+      - "fire_monitoring"
+
+    help_text: "Surface temperature for monitoring plant stress and energy balance."
+
+  # ---------------------------------------------------------------------------
+  # DEM - Digital Elevation Model
+  # ---------------------------------------------------------------------------
+  dem:
+    name: "Digital Elevation Model"
+    description: "Bare-earth elevation model representing terrain surface without vegetation or structures."
+    icon: "fa-mountain"
+    color: "#78716c"
+    background: "#f5f5f4"
+    code: "DEM"
+    category: "elevation"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "NetCDF"
+        - "ASCII Grid"
+
+    characteristics:
+      spatial_unit: "meters"
+      elevation_unit: "meters"
+      data_type: "float32"
+      no_data_value: -9999
+
+    processing:
+      requires_ground_classification: true
+      requires_interpolation: true
+      typical_processing_time_hours: 3
+
+    quality_metrics:
+      - "vertical_accuracy_m"
+      - "horizontal_resolution_m"
+      - "coverage_percent"
+      - "void_count"
+
+    source_campaigns:
+      - "uav_flight"
+
+    derivatives:
+      - "slope"
+      - "aspect"
+      - "hillshade"
+      - "contours"
+
+    help_text: "Bare-earth terrain model for hydrological and geomorphological analysis."
+
+  # ---------------------------------------------------------------------------
+  # DSM - Digital Surface Model
+  # ---------------------------------------------------------------------------
+  dsm:
+    name: "Digital Surface Model"
+    description: "Surface elevation model including vegetation, buildings, and all above-ground features."
+    icon: "fa-layer-group"
+    color: "#06b6d4"
+    background: "#cffafe"
+    code: "DSM"
+    category: "elevation"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "NetCDF"
+
+    characteristics:
+      spatial_unit: "meters"
+      elevation_unit: "meters"
+      data_type: "float32"
+      no_data_value: -9999
+
+    processing:
+      requires_dense_matching: true
+      requires_filtering: true
+      typical_processing_time_hours: 2
+
+    quality_metrics:
+      - "vertical_accuracy_m"
+      - "horizontal_resolution_m"
+      - "coverage_percent"
+
+    source_campaigns:
+      - "uav_flight"
+
+    derivatives:
+      - "canopy_height_model"
+      - "building_heights"
+      - "3d_mesh"
+
+    help_text: "Surface model including all features, useful for canopy height and 3D modeling."
+
+  # ---------------------------------------------------------------------------
+  # REFLECTANCE - Calibrated surface reflectance
+  # ---------------------------------------------------------------------------
+  reflectance:
+    name: "Surface Reflectance"
+    description: "Atmospherically corrected surface reflectance imagery in multiple spectral bands."
+    icon: "fa-adjust"
+    color: "#7c3aed"
+    background: "#ede9fe"
+    code: "REFL"
+    category: "spectral"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "NetCDF"
+        - "ENVI"
+
+    characteristics:
+      spatial_unit: "meters"
+      value_range: [0.0, 1.0]
+      data_type: "float32"
+      scale_factor: 0.0001
+
+    processing:
+      requires_atmospheric_correction: true
+      requires_radiometric_calibration: true
+      requires_geometric_correction: true
+      typical_processing_time_hours: 1
+
+    quality_metrics:
+      - "calibration_accuracy"
+      - "atmospheric_correction_quality"
+      - "cloud_mask_quality"
+      - "valid_pixel_percent"
+
+    source_campaigns:
+      - "uav_flight"
+      - "satellite_acquisition"
+
+    spectral_bands:
+      visible:
+        - "Blue"
+        - "Green"
+        - "Red"
+      near_infrared:
+        - "NIR"
+        - "Red Edge"
+      shortwave_infrared:
+        - "SWIR1"
+        - "SWIR2"
+
+    help_text: "Calibrated reflectance suitable for quantitative spectral analysis and index calculation."
+
+  # ---------------------------------------------------------------------------
+  # EVI MAP - Enhanced Vegetation Index
+  # ---------------------------------------------------------------------------
+  evi_map:
+    name: "EVI Map"
+    description: "Enhanced Vegetation Index map with improved sensitivity in high biomass regions."
+    icon: "fa-seedling"
+    color: "#059669"
+    background: "#d1fae5"
+    code: "EVI"
+    category: "vegetation_index"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "NetCDF"
+
+    characteristics:
+      spatial_unit: "meters"
+      value_range: [-1.0, 1.0]
+      data_type: "float32"
+      color_ramp: "RdYlGn"
+
+    processing:
+      requires_atmospheric_correction: true
+      requires_three_bands: ["Blue", "Red", "NIR"]
+      typical_processing_time_hours: 0.5
+
+    quality_metrics:
+      - "valid_pixel_percent"
+      - "evi_mean"
+      - "evi_std"
+
+    source_campaigns:
+      - "satellite_acquisition"
+
+    help_text: "Improved vegetation index for dense canopies and atmospheric conditions."
+
+  # ---------------------------------------------------------------------------
+  # CLASSIFICATION MAP - Land cover classification
+  # ---------------------------------------------------------------------------
+  classification_map:
+    name: "Land Cover Classification"
+    description: "Thematic land cover map with classified vegetation types and land use categories."
+    icon: "fa-map"
+    color: "#f59e0b"
+    background: "#fef3c7"
+    code: "CLASS"
+    category: "thematic"
+
+    file_formats:
+      primary: "GeoTIFF"
+      alternatives:
+        - "COG"
+        - "Shapefile"
+        - "GeoJSON"
+
+    characteristics:
+      spatial_unit: "meters"
+      data_type: "uint8"
+      no_data_value: 255
+
+    processing:
+      requires_training_data: true
+      requires_classification_algorithm: true
+      typical_processing_time_hours: 6
+
+    quality_metrics:
+      - "overall_accuracy"
+      - "kappa_coefficient"
+      - "class_accuracy"
+
+    source_campaigns:
+      - "uav_flight"
+      - "satellite_acquisition"
+
+    classification_scheme:
+      water: 1
+      bare_soil: 2
+      grass: 3
+      shrubs: 4
+      deciduous_forest: 5
+      coniferous_forest: 6
+      mixed_forest: 7
+      buildings: 8
+      roads: 9
+
+    help_text: "Classified land cover for habitat mapping and change detection."
+
+# =============================================================================
+# PROCESSING LEVEL DEFINITIONS
+# =============================================================================
+# Data processing levels following standard nomenclature
+
+processing_levels:
+  raw:
+    code: "L0"
+    name: "Raw Data"
+    description: "Unprocessed sensor data with full resolution"
+    icon: "fa-database"
+    color: "#6b7280"
+    typical_uses:
+      - "Archive"
+      - "Reprocessing"
+      - "Custom workflows"
+
+  processed:
+    code: "L1"
+    name: "Processed Data"
+    description: "Geometrically and radiometrically corrected"
+    icon: "fa-cogs"
+    color: "#3b82f6"
+    typical_uses:
+      - "Visual analysis"
+      - "Feature extraction"
+      - "Basic measurements"
+
+  validated:
+    code: "L2"
+    name: "Validated Data"
+    description: "Quality controlled and validated against ground truth"
+    icon: "fa-check-double"
+    color: "#22c55e"
+    typical_uses:
+      - "Quantitative analysis"
+      - "Scientific research"
+      - "Model input"
+
+  published:
+    code: "L3"
+    name: "Published Data"
+    description: "Final product ready for distribution and publication"
+    icon: "fa-globe"
+    color: "#7c3aed"
+    typical_uses:
+      - "Public release"
+      - "Data portal"
+      - "Scientific publication"
+
+# =============================================================================
+# FILE FORMAT SPECIFICATIONS
+# =============================================================================
+# Detailed specifications for supported file formats
+
+file_formats:
+  geotiff:
+    extension: ".tif"
+    mime_type: "image/tiff"
+    name: "GeoTIFF"
+    description: "Georeferenced TIFF with embedded metadata"
+    supports_compression: true
+    supports_tiling: true
+    supports_overviews: true
+    max_size_gb: 4
+    recommended_for:
+      - "orthomosaic"
+      - "ndvi_map"
+      - "thermal_map"
+      - "dem"
+      - "dsm"
+
+  cog:
+    extension: ".tif"
+    mime_type: "image/tiff"
+    name: "Cloud Optimized GeoTIFF"
+    description: "Web-optimized GeoTIFF with HTTP range request support"
+    supports_compression: true
+    supports_tiling: true
+    supports_overviews: true
+    cloud_optimized: true
+    recommended_for:
+      - "orthomosaic"
+      - "ndvi_map"
+      - "all_rasters"
+
+  las:
+    extension: ".las"
+    mime_type: "application/octet-stream"
+    name: "LAS Point Cloud"
+    description: "ASPRS LAS format for LiDAR point clouds"
+    supports_compression: false
+    version: "1.4"
+    recommended_for:
+      - "point_cloud"
+
+  laz:
+    extension: ".laz"
+    mime_type: "application/octet-stream"
+    name: "LAZ Compressed Point Cloud"
+    description: "Compressed LAS format"
+    supports_compression: true
+    compression_ratio: 10
+    recommended_for:
+      - "point_cloud"
+
+  netcdf:
+    extension: ".nc"
+    mime_type: "application/netcdf"
+    name: "NetCDF"
+    description: "Network Common Data Form for array-oriented data"
+    supports_compression: true
+    supports_metadata: true
+    recommended_for:
+      - "time_series"
+      - "multidimensional_data"
+
+  jpeg:
+    extension: ".jpg"
+    mime_type: "image/jpeg"
+    name: "JPEG"
+    description: "Compressed RGB image"
+    lossy_compression: true
+    max_quality: 100
+    recommended_for:
+      - "preview_images"
+      - "quicklooks"
+
+  png:
+    extension: ".png"
+    mime_type: "image/png"
+    name: "PNG"
+    description: "Lossless compressed image"
+    lossless_compression: true
+    supports_transparency: true
+    recommended_for:
+      - "figures"
+      - "screenshots"
+      - "logos"
+
+# =============================================================================
+# PRODUCT CATEGORIES
+# =============================================================================
+# Grouping categories for UI organization
+
+categories:
+  imagery:
+    name: "Imagery Products"
+    description: "Georeferenced image mosaics and photographs"
+    icon: "fa-images"
+    color: "#2563eb"
+
+  vegetation_index:
+    name: "Vegetation Indices"
+    description: "Derived vegetation health and vigor indicators"
+    icon: "fa-leaf"
+    color: "#22c55e"
+
+  3d_data:
+    name: "3D Data Products"
+    description: "Point clouds and 3D models"
+    icon: "fa-cube"
+    color: "#8b5cf6"
+
+  thermal:
+    name: "Thermal Products"
+    description: "Surface temperature and thermal imagery"
+    icon: "fa-fire"
+    color: "#ef4444"
+
+  elevation:
+    name: "Elevation Models"
+    description: "Digital elevation and surface models"
+    icon: "fa-mountain"
+    color: "#78716c"
+
+  spectral:
+    name: "Spectral Products"
+    description: "Calibrated reflectance and spectral data"
+    icon: "fa-rainbow"
+    color: "#7c3aed"
+
+  thematic:
+    name: "Thematic Maps"
+    description: "Classification and interpretation products"
+    icon: "fa-map-marked"
+    color: "#f59e0b"
+
+# =============================================================================
+# QUALITY CONTROL
+# =============================================================================
+# Quality assurance and validation settings
+
+quality_control:
+  # Required metadata fields
+  required_metadata:
+    - "creation_date"
+    - "processing_level"
+    - "coordinate_system"
+    - "spatial_resolution"
+    - "source_campaign_id"
+
+  # Automated checks
+  automated_checks:
+    file_integrity:
+      enabled: true
+      check_checksums: true
+      check_file_size: true
+
+    spatial_validity:
+      enabled: true
+      check_bounds: true
+      check_projection: true
+      check_no_data: true
+
+    metadata_completeness:
+      enabled: true
+      required_fields_percent: 90
+
+  # Manual review requirements
+  manual_review:
+    required_for_levels: ["validated", "published"]
+    review_checklist:
+      - "Visual inspection complete"
+      - "Geometric accuracy verified"
+      - "Radiometric quality checked"
+      - "Metadata validated"
+      - "Documentation complete"
+
+# =============================================================================
+# STORAGE AND ACCESS
+# =============================================================================
+# Configuration for product storage and access
+
+storage:
+  # Storage locations
+  storage_tiers:
+    hot:
+      name: "Hot Storage"
+      description: "Fast access for recent products"
+      retention_days: 90
+      cost_per_gb_month: 0.023
+
+    cold:
+      name: "Cold Storage"
+      description: "Archive for older products"
+      retention_days: 3650
+      cost_per_gb_month: 0.004
+
+  # File organization
+  directory_structure: "{station}/{year}/{campaign}/{product_type}/{processing_level}"
+
+  # Access control
+  access_control:
+    public_access: false
+    requires_authentication: true
+    role_based_access: true

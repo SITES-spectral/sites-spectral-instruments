@@ -1,10 +1,22 @@
-// SITES Spectral API Handler v8.5.7
-// Modular architecture with clean separation of concerns
-// Now includes versioned API (v2) with pagination support
-// Added AOI (Areas of Interest) support for UAV/Satellite platforms
-// SECURITY: Added CSRF protection and input sanitization
+// SITES Spectral API Handler v9.0.0
+// V3 API as default - Domain-based routing, spatial queries, campaigns, products
+// Legacy V1 handlers maintained for backward compatibility (deprecated)
+// SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
 
 import { handleAuth, getUserFromRequest } from './auth/authentication.js';
+import { logApiRequest } from './utils/logging.js';
+import { csrfProtect, createCSRFErrorResponse } from './utils/csrf.js';
+import {
+  createErrorResponse,
+  createNotFoundResponse,
+  createInternalServerErrorResponse,
+  createUnauthorizedResponse
+} from './utils/responses.js';
+
+// V3 API Handler - PRIMARY (default)
+import { handleApiV3Request } from './v3/api-handler-v3.js';
+
+// Legacy V1 handlers (deprecated - will be removed in v10.0.0)
 import { handleStations } from './handlers/stations.js';
 import { handlePlatforms } from './handlers/platforms.js';
 import { handleInstruments } from './handlers/instruments.js';
@@ -23,20 +35,6 @@ import { handleSensorModels } from './handlers/sensor-models.js';
 import { handleDocumentation } from './handlers/documentation.js';
 import { handleMaintenance } from './handlers/maintenance.js';
 import { handleCalibration } from './handlers/calibration.js';
-import { logApiRequest } from './utils/logging.js';
-import { csrfProtect, createCSRFErrorResponse } from './utils/csrf.js';
-import {
-  createErrorResponse,
-  createNotFoundResponse,
-  createInternalServerErrorResponse,
-  createUnauthorizedResponse
-} from './utils/responses.js';
-
-// V2 API Handler with pagination
-import { handleApiV2Request } from './v2/api-handler-v2.js';
-
-// V3 API Handler with domain-based routing, spatial queries, campaigns, products
-import { handleApiV3Request } from './v3/api-handler-v3.js';
 
 /**
  * Main API request handler with modular routing
@@ -67,14 +65,15 @@ export async function handleApiRequest(request, env, ctx) {
     }
   }
 
-  // Route to V3 API if requested (domain-based routing)
+  // V3 API is the default - route explicitly versioned requests
   if (pathSegments[0] === 'v3') {
     return await handleApiV3Request(request, env, ctx);
   }
 
-  // Route to V2 API if requested
-  if (pathSegments[0] === 'v2') {
-    return await handleApiV2Request(request, env, ctx);
+  // Legacy V1 routes (deprecated) - keep for backward compatibility
+  // These will be removed in v10.0.0
+  if (pathSegments[0] === 'v1') {
+    pathSegments.shift(); // Remove 'v1' prefix and continue to legacy handlers
   }
 
   const id = pathSegments[1];
@@ -194,11 +193,25 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '8.5.7',
+      version: '9.0.0',
       database: dbTest ? 'connected' : 'disconnected',
-      architecture: 'modular',
-      apiVersions: ['v1', 'v2', 'v3'],
-      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs', 'csrf-protection', 'input-sanitization']
+      architecture: 'v3-api',
+      apiVersions: ['v3', 'v1-legacy'],
+      defaultApiVersion: 'v3',
+      features: [
+        'v3-api-default',
+        'campaigns',
+        'products',
+        'spatial-queries',
+        'pagination',
+        'aoi-support',
+        'uav-platforms',
+        'satellite-platforms',
+        'mobile-platforms',
+        'csrf-protection',
+        'input-sanitization',
+        'jwt-hmac-sha256'
+      ]
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -208,12 +221,12 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '8.5.7',
+      version: '9.0.0',
       error: error.message,
       database: 'disconnected',
-      architecture: 'modular',
-      apiVersions: ['v1', 'v2', 'v3'],
-      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs', 'csrf-protection', 'input-sanitization']
+      architecture: 'v3-api',
+      apiVersions: ['v3', 'v1-legacy'],
+      defaultApiVersion: 'v3'
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }

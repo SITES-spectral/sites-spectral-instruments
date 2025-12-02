@@ -1,0 +1,455 @@
+# =============================================================================
+# Pagination Configuration
+# SITES Spectral v9.0.0
+# =============================================================================
+# Configuration for pagination controls, page sizes, and navigation behavior
+# across all list views and data tables.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "Pagination settings for lists, tables, and API responses"
+  last_updated: "2025-12-02"
+
+# =============================================================================
+# DEFAULT PAGINATION SETTINGS
+# =============================================================================
+# Base configuration applied to all paginated views
+
+defaults:
+  # Default number of items per page
+  page_size: 25
+
+  # Available page size options for user selection
+  page_size_options:
+    - 10
+    - 25
+    - 50
+    - 100
+
+  # Maximum allowed page size (prevents excessive data requests)
+  max_page_size: 100
+
+  # Pagination style
+  pagination_style: "numbered"  # Options: numbered, load_more, infinite_scroll
+
+  # Show total count of items
+  show_total_count: true
+
+  # Show current range (e.g., "1-25 of 234")
+  show_current_range: true
+
+  # Show page navigation controls
+  show_page_navigation: true
+
+  # Show items per page selector
+  show_page_size_selector: true
+
+  # Show "Jump to page" input
+  show_page_jump: false
+
+  # Show first/last page buttons
+  show_first_last_buttons: true
+
+  # Number of page buttons to display
+  page_button_count: 5
+
+  # Behavior when no results
+  empty_state:
+    show_message: true
+    message: "No items found"
+    show_create_button: false
+
+# =============================================================================
+# VIEW-SPECIFIC PAGINATION
+# =============================================================================
+# Custom pagination settings for specific views
+
+views:
+  # Station dashboard - Platform lists
+  station_platforms:
+    page_size: 50
+    page_size_options: [25, 50, 100]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_page_navigation: true
+
+  # Instrument lists
+  instruments:
+    page_size: 25
+    page_size_options: [10, 25, 50, 100]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_page_navigation: true
+    group_by_type: true
+
+  # ROI lists
+  rois:
+    page_size: 50
+    page_size_options: [25, 50, 100]
+    pagination_style: "numbered"
+    show_total_count: true
+
+  # Campaign lists
+  campaigns:
+    page_size: 25
+    page_size_options: [10, 25, 50, 100]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_filters: true
+    filters:
+      - "status"
+      - "type"
+      - "date_range"
+
+  # Product lists
+  products:
+    page_size: 25
+    page_size_options: [10, 25, 50, 100]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_filters: true
+    filters:
+      - "type"
+      - "processing_level"
+      - "date_range"
+
+  # Activity log
+  activity_log:
+    page_size: 50
+    page_size_options: [25, 50, 100, 200]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_date_range_filter: true
+
+  # Search results
+  search_results:
+    page_size: 25
+    page_size_options: [10, 25, 50, 100]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_relevance_score: true
+
+  # Data export preview
+  export_preview:
+    page_size: 100
+    page_size_options: [50, 100, 250, 500]
+    pagination_style: "numbered"
+    show_total_count: true
+    show_warning_large_dataset: true
+    large_dataset_threshold: 1000
+
+# =============================================================================
+# PAGINATION STYLES
+# =============================================================================
+# Detailed configuration for each pagination style
+
+pagination_styles:
+  # Traditional numbered pagination
+  numbered:
+    name: "Numbered Pagination"
+    description: "Classic page numbers with prev/next buttons"
+    components:
+      show_prev_next: true
+      show_first_last: true
+      show_page_numbers: true
+      show_ellipsis: true
+      button_style: "outlined"
+      active_button_style: "solid"
+
+    behavior:
+      scroll_to_top: true
+      preserve_filters: true
+      update_url: true
+
+    example: "< 1 2 3 ... 10 >"
+
+  # Load more button
+  load_more:
+    name: "Load More"
+    description: "Append next page to current view"
+    components:
+      show_load_button: true
+      show_total_count: true
+      show_loaded_count: true
+      button_text: "Load More"
+      loading_text: "Loading..."
+
+    behavior:
+      scroll_to_new_content: false
+      preserve_scroll_position: true
+      update_url: false
+
+    example: "[Load More] (25 of 234 shown)"
+
+  # Infinite scroll
+  infinite_scroll:
+    name: "Infinite Scroll"
+    description: "Automatically load more as user scrolls"
+    components:
+      show_loading_indicator: true
+      show_end_message: true
+      trigger_threshold_px: 200
+
+    behavior:
+      auto_load: true
+      debounce_ms: 100
+      max_auto_loads: 10
+      update_url: false
+
+    example: "Automatically loads on scroll"
+
+# =============================================================================
+# API PAGINATION
+# =============================================================================
+# Pagination settings for API responses
+
+api:
+  # Default API pagination
+  defaults:
+    page_size: 25
+    max_page_size: 100
+    pagination_type: "cursor"  # Options: offset, cursor
+
+  # Offset-based pagination (v1, v2)
+  offset_based:
+    enabled: true
+    query_params:
+      page: "page"
+      page_size: "page_size"
+      offset: "offset"
+      limit: "limit"
+
+    response_format:
+      data_key: "data"
+      pagination_key: "pagination"
+      total_key: "total"
+      page_key: "page"
+      page_size_key: "page_size"
+      total_pages_key: "total_pages"
+
+    example_request: "/api/v2/instruments?page=2&page_size=25"
+    example_response: |
+      {
+        "data": [...],
+        "pagination": {
+          "page": 2,
+          "page_size": 25,
+          "total": 234,
+          "total_pages": 10
+        }
+      }
+
+  # Cursor-based pagination (v3)
+  cursor_based:
+    enabled: true
+    query_params:
+      cursor: "cursor"
+      limit: "limit"
+
+    response_format:
+      data_key: "data"
+      pagination_key: "pagination"
+      next_cursor_key: "next_cursor"
+      prev_cursor_key: "prev_cursor"
+      has_more_key: "has_more"
+
+    cursor_encoding: "base64"
+    cursor_ttl_hours: 24
+
+    example_request: "/api/v3/instruments?cursor=eyJpZCI6MTIzfQ&limit=25"
+    example_response: |
+      {
+        "data": [...],
+        "pagination": {
+          "next_cursor": "eyJpZCI6MTQ4fQ",
+          "prev_cursor": "eyJpZCI6OTh9",
+          "has_more": true
+        }
+      }
+
+  # GraphQL pagination
+  graphql:
+    enabled: false
+    relay_style: true
+    connection_type: "InstrumentConnection"
+    edge_type: "InstrumentEdge"
+    page_info_type: "PageInfo"
+
+# =============================================================================
+# UI COMPONENTS
+# =============================================================================
+# Styling and behavior for pagination UI elements
+
+ui_components:
+  # Pagination container
+  container:
+    position: "bottom"  # Options: top, bottom, both
+    alignment: "center"  # Options: left, center, right
+    margin: "1.5rem 0"
+    padding: "1rem"
+
+  # Page buttons
+  page_buttons:
+    size: "medium"  # Options: small, medium, large
+    shape: "rounded"  # Options: square, rounded, circle
+    spacing: "0.25rem"
+    min_width: "40px"
+    height: "40px"
+
+  # Navigation buttons (prev/next)
+  nav_buttons:
+    show_icons: true
+    show_text: true
+    prev_icon: "fa-chevron-left"
+    next_icon: "fa-chevron-right"
+    first_icon: "fa-angle-double-left"
+    last_icon: "fa-angle-double-right"
+    disabled_opacity: 0.4
+
+  # Page size selector
+  page_size_selector:
+    position: "left"  # Options: left, right
+    label: "Items per page:"
+    style: "dropdown"  # Options: dropdown, buttons
+    width: "120px"
+
+  # Item counter
+  item_counter:
+    position: "left"  # Options: left, center, right
+    format: "{start}-{end} of {total}"
+    show_when_single_page: true
+
+  # Loading indicator
+  loading_indicator:
+    type: "spinner"  # Options: spinner, skeleton, bar
+    color: "#2563eb"
+    size: "24px"
+    message: "Loading..."
+
+# =============================================================================
+# PERFORMANCE OPTIMIZATION
+# =============================================================================
+# Settings to optimize pagination performance
+
+performance:
+  # Prefetching
+  prefetch:
+    enabled: true
+    prefetch_next_page: true
+    prefetch_prev_page: false
+    prefetch_on_hover: true
+    hover_delay_ms: 500
+
+  # Caching
+  caching:
+    enabled: true
+    cache_pages: true
+    cache_duration_minutes: 5
+    max_cached_pages: 10
+
+  # Virtual scrolling (for large datasets)
+  virtual_scrolling:
+    enabled: false
+    item_height_px: 60
+    buffer_size: 5
+    overscan_count: 3
+
+  # Debouncing
+  debouncing:
+    page_size_change_ms: 300
+    search_input_ms: 500
+
+# =============================================================================
+# ACCESSIBILITY
+# =============================================================================
+# Accessibility features for pagination controls
+
+accessibility:
+  # ARIA labels
+  aria_labels:
+    pagination_nav: "Pagination navigation"
+    page_button: "Page {page}"
+    current_page: "Current page, page {page}"
+    prev_button: "Previous page"
+    next_button: "Next page"
+    first_button: "First page"
+    last_button: "Last page"
+    page_size_selector: "Items per page"
+
+  # Keyboard navigation
+  keyboard_navigation:
+    enabled: true
+    shortcuts:
+      next_page: "ArrowRight"
+      prev_page: "ArrowLeft"
+      first_page: "Home"
+      last_page: "End"
+
+  # Focus management
+  focus_management:
+    focus_first_item_on_page_change: true
+    show_focus_indicators: true
+    focus_ring_color: "#2563eb"
+
+  # Screen reader support
+  screen_reader:
+    announce_page_changes: true
+    live_region_politeness: "polite"
+    include_loading_announcements: true
+
+# =============================================================================
+# MOBILE RESPONSIVENESS
+# =============================================================================
+# Pagination behavior on mobile devices
+
+mobile:
+  # Breakpoints
+  breakpoints:
+    mobile: "640px"
+    tablet: "768px"
+    desktop: "1024px"
+
+  # Mobile-specific settings
+  mobile_settings:
+    page_button_count: 3
+    hide_first_last_buttons: true
+    hide_page_size_selector: false
+    compact_layout: true
+    button_size: "small"
+
+  # Touch gestures
+  touch_gestures:
+    enabled: true
+    swipe_to_navigate: true
+    swipe_threshold_px: 50
+
+# =============================================================================
+# ANALYTICS
+# =============================================================================
+# Tracking pagination usage patterns
+
+analytics:
+  # Event tracking
+  track_events:
+    enabled: true
+    events:
+      - "page_change"
+      - "page_size_change"
+      - "pagination_style_preference"
+
+  # Performance metrics
+  track_performance:
+    enabled: true
+    metrics:
+      - "page_load_time"
+      - "time_to_interactive"
+      - "cache_hit_rate"
+
+  # User behavior
+  track_behavior:
+    enabled: true
+    metrics:
+      - "average_page_views_per_session"
+      - "preferred_page_size"
+      - "navigation_pattern"

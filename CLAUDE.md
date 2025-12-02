@@ -4,13 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 8.5.7 - Security Hardening & Input Sanitization (2025-11-28)
+## Current Version: 9.0.0 - V3 API Default with Modern Frontend (2025-12-02)
 
-**✅ STATUS: PRODUCTION-READY - SECURITY HARDENED**
+**✅ STATUS: PRODUCTION-READY - V3 API**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-11-28
-**🔒 Security Features:** CSRF Protection, Input Sanitization, XSS Prevention
+**📅 Last Updated:** 2025-12-02
+**🚀 API Version:** V3 (default) | V1 (legacy/deprecated)
+**🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
+
+### What's New in v9.0.0
+
+- **V3 API Default**: All `/api/` endpoints now use V3 routing with pagination
+- **Campaign Management**: Full CRUD for acquisition campaigns
+- **Product Catalog**: Browse and filter data products
+- **Modern Frontend**: New components with YAML-driven configuration
+- **Legacy API Deprecated**: V1 available at `/api/v1/` (removal in v10.0.0)
 
 ---
 

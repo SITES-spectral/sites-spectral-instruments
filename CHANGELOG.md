@@ -7,8 +7,134 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Next Steps (v8.0.0 Roadmap)
-- **Phase 7 Continued**: API handlers, UI components, and deployment
+### Next Steps (v9.x Roadmap)
+- **Mobile Platform Support**: Complete mobile platform type implementation
+- **USV/UUV Platforms**: Underwater and surface vehicle support
+- **Advanced Spatial Queries**: Enhanced GIS capabilities
+
+---
+
+## [9.0.0] - 2025-12-02
+
+### 🚀 MAJOR RELEASE: V3 API Default with Modern Frontend
+
+**Release Date**: 2025-12-02
+**Breaking Change**: V3 API is now the default. V1 API moved to legacy (deprecated).
+
+#### V3 API as Default
+
+- **Default API Version**: All `/api/` endpoints now use V3 routing
+- **Legacy Support**: V1 API available at `/api/v1/` (deprecated, removal in v10.0.0)
+- **V2 API Removed**: V2 handlers moved to `src/legacy/v2/`
+
+#### New V3 API Features
+
+- **Pagination**: All list endpoints support `?page=&limit=` with meta/links response
+- **Platform Type Filtering**: `GET /api/v3/platforms/type/{type}` (fixed, uav, satellite, mobile)
+- **Campaign Management**: Full CRUD at `/api/v3/campaigns`
+- **Product Catalog**: Product browsing at `/api/v3/products`
+- **Spatial Queries**: `GET /api/v3/aois/spatial/bbox`, `/spatial/near`
+- **GeoJSON Support**: `GET /api/v3/aois/geojson`, `GET /api/v3/aois/{id}/geojson`
+
+#### New Frontend Components
+
+- **API Client** (`public/js/api.js`):
+  - Complete V3 API client with pagination support
+  - V3Response wrapper class for standardized response handling
+  - Platform, Campaign, Product, and AOI methods
+  - Spatial query builders
+
+- **Platform Type Filter** (`public/js/platforms/platform-type-filter.js`):
+  - Tab-based filter for platform types
+  - Dynamic icons and colors from YAML config
+  - Count badges per platform type
+
+- **Pagination Controls** (`public/js/ui/pagination-controls.js`):
+  - Reusable pagination component
+  - Page navigation with keyboard support
+  - Page size selector
+  - Responsive design
+
+- **Campaign Manager** (`public/js/campaigns/campaign-manager.js`):
+  - Campaign CRUD operations
+  - Status-based filtering
+  - Create/Edit modals
+  - Calendar integration ready
+
+- **Product Browser** (`public/js/products/product-browser.js`):
+  - Grid/List view toggle
+  - Type and processing level filters
+  - Product detail modal
+  - Download functionality
+
+- **Station Dashboard** (`public/js/station-dashboard.js`):
+  - Complete rewrite using V3 API
+  - Integrated platform type filtering
+  - Campaign and product panels
+  - Pagination for all lists
+
+#### New YAML Configurations
+
+- `yamls/api/api-versions.yaml` - API version management
+- `yamls/campaigns/campaign-types.yaml` - Campaign types and statuses
+- `yamls/products/product-types.yaml` - Product types and processing levels
+- `yamls/ui/pagination.yaml` - Pagination settings per view
+
+#### Config Service Updates
+
+New methods in `public/js/core/config-service.js`:
+- `getAPIVersion()`, `getAPIVersions()`
+- `getCampaignTypes()`, `getCampaignType(code)`, `getCampaignStatuses()`
+- `getProductTypes()`, `getProductType(code)`, `getProcessingLevels()`
+- `getPaginationConfig()`, `getViewPagination(viewName)`
+
+#### Architecture Changes
+
+- **Frontend**: V1 API client moved to `public/js/legacy/`
+- **Backend**: V2 handlers moved to `src/legacy/v2/`
+- **Backend**: V1 handlers backed up to `src/legacy/v1/`
+- **Clean Structure**: New component directories (campaigns, products, platforms, spatial, ui)
+
+#### Files Created (17 new files)
+
+**Frontend Components:**
+- `public/js/api.js` (V3 API client - renamed from api-v3.js)
+- `public/js/platforms/platform-type-filter.js`
+- `public/js/ui/pagination-controls.js`
+- `public/js/campaigns/campaign-manager.js`
+- `public/js/products/product-browser.js`
+- `public/js/station-dashboard.js` (V3 rewrite)
+
+**YAML Configurations:**
+- `yamls/api/api-versions.yaml`
+- `yamls/campaigns/campaign-types.yaml`
+- `yamls/products/product-types.yaml`
+- `yamls/ui/pagination.yaml`
+
+**Legacy (moved):**
+- `public/js/legacy/api-v1.js`
+- `public/js/legacy/station-dashboard-v1.js`
+- `src/legacy/v1/handlers/` (all V1 handlers)
+- `src/legacy/v2/` (all V2 handlers)
+
+#### Migration Guide
+
+**For Frontend Developers:**
+```javascript
+// Old V1 API
+const response = await sitesAPI.getStations();
+
+// New V3 API
+const response = await sitesAPIv3.getStations();
+console.log(response.data);         // Array of stations
+console.log(response.meta.total);   // Total count
+console.log(response.hasNextPage()); // Pagination helper
+```
+
+**For API Consumers:**
+- Default endpoints now return V3 response format
+- Use `/api/v1/` prefix for legacy V1 format (deprecated)
+- V3 responses include `data`, `meta`, and `links` fields
 
 ---
 

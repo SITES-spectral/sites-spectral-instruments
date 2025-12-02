@@ -1,123 +1,351 @@
-// SITES Spectral Instruments - API Communication Module
-// Centralized API communication with authentication and error handling
+/**
+ * SITES Spectral Instruments - V3 API Client
+ *
+ * Extends the existing SitesSpectralAPI pattern to support V3 endpoints
+ * with pagination, platform extensions, AOI spatial queries, campaigns, and products.
+ *
+ * @module api-v3
+ * @version 9.0.0
+ * @requires api.js (SitesSpectralAPI base class)
+ * @requires core/debug.js (Debug utilities)
+ * @requires core/config-service.js (SitesConfig)
+ */
 
-class SitesSpectralAPI {
-    constructor() {
-        this.baseUrl = '';
-        this.tokenKey = 'sites_spectral_token';
-        this.userKey = 'sites_spectral_user';
-        this.defaultHeaders = {
-            'Content-Type': 'application/json'
-        };
-    }
+(function(global) {
+    'use strict';
 
-    // Get stored authentication token
-    getToken() {
-        return localStorage.getItem(this.tokenKey);
-    }
+    // Get debug logger
+    const logger = global.Debug?.withCategory('API-V3') || {
+        log: () => {},
+        info: () => {},
+        warn: console.warn.bind(console),
+        error: console.error.bind(console)
+    };
 
-    // Get stored user data - SECURITY FIX: wrap JSON.parse in try-catch
-    getUser() {
-        try {
-            const userData = localStorage.getItem(this.userKey);
-            return userData ? JSON.parse(userData) : null;
-        } catch (e) {
-            // If JSON is malformed, clear corrupted data and return null
-            console.error('Corrupted user data in localStorage, clearing');
-            localStorage.removeItem(this.userKey);
-            return null;
+    /**
+     * V3 API Response wrapper
+     * Handles the standardized V3 response format with data, meta, and links
+     */
+    class V3Response {
+        /**
+         * @param {Object} rawResponse - Raw API response
+         * @param {Array|Object} rawResponse.data - Response data
+         * @param {Object} [rawResponse.meta] - Pagination metadata
+         * @param {Object} [rawResponse.links] - HATEOAS links
+         */
+        constructor(rawResponse) {
+            this.data = rawResponse.data || rawResponse;
+            this.meta = rawResponse.meta || null;
+            this.links = rawResponse.links || null;
+            this._raw = rawResponse;
+        }
+
+        /**
+         * Check if response has pagination info
+         * @returns {boolean}
+         */
+        hasPagination() {
+            return this.meta !== null && typeof this.meta.page !== 'undefined';
+        }
+
+        /**
+         * Check if there are more pages
+         * @returns {boolean}
+         */
+        hasNextPage() {
+            if (!this.hasPagination()) return false;
+            return this.meta.page < this.meta.totalPages;
+        }
+
+        /**
+         * Check if there is a previous page
+         * @returns {boolean}
+         */
+        hasPrevPage() {
+            if (!this.hasPagination()) return false;
+            return this.meta.page > 1;
+        }
+
+        /**
+         * Get total count of items
+         * @returns {number}
+         */
+        getTotalCount() {
+            return this.meta?.total || (Array.isArray(this.data) ? this.data.length : 1);
+        }
+
+        /**
+         * Get current page number
+         * @returns {number}
+         */
+        getCurrentPage() {
+            return this.meta?.page || 1;
+        }
+
+        /**
+         * Get total pages
+         * @returns {number}
+         */
+        getTotalPages() {
+            return this.meta?.totalPages || 1;
+        }
+
+        /**
+         * Get page size
+         * @returns {number}
+         */
+        getPageSize() {
+            return this.meta?.limit || (Array.isArray(this.data) ? this.data.length : 1);
+        }
+
+        /**
+         * Get next page URL if available
+         * @returns {string|null}
+         */
+        getNextPageUrl() {
+            return this.links?.next || null;
+        }
+
+        /**
+         * Get previous page URL if available
+         * @returns {string|null}
+         */
+        getPrevPageUrl() {
+            return this.links?.prev || null;
+        }
+
+        /**
+         * Get raw response
+         * @returns {Object}
+         */
+        getRaw() {
+            return this._raw;
         }
     }
 
-    // Set authentication token
-    setToken(token) {
-        localStorage.setItem(this.tokenKey, token);
-    }
+    /**
+     * V3 API Client for SITES Spectral
+     * Extends SitesSpectralAPI functionality with V3 specific features
+     */
+    class SitesSpectralAPIv3 {
+        constructor() {
+            /** @private */
+            this._baseAPI = global.sitesAPI;
 
-    // Set user data
-    setUser(user) {
-        localStorage.setItem(this.userKey, JSON.stringify(user));
-    }
+            /** V3 API base path */
+            this.v3BasePath = '/api/v3';
 
-    // Clear authentication data
-    clearAuth() {
-        localStorage.removeItem(this.tokenKey);
-        localStorage.removeItem(this.userKey);
-    }
+            /** Default pagination settings from config or sensible defaults */
+            this.defaultPageSize = 20;
+            this.maxPageSize = 100;
 
-    // Check if user is authenticated
-    isAuthenticated() {
-        return !!this.getToken();
-    }
-
-    // Check if user has admin role
-    isAdmin() {
-        const user = this.getUser();
-        return user && user.role === 'admin';
-    }
-
-    // Check if user has station role
-    isStationUser() {
-        const user = this.getUser();
-        return user && user.role === 'station';
-    }
-
-    // Get authenticated headers
-    getAuthHeaders() {
-        const token = this.getToken();
-        const headers = { ...this.defaultHeaders };
-
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+            /** Default timeout for V3 requests (ms) */
+            this.defaultTimeout = 15000;
         }
 
-        return headers;
-    }
+        // ==========================================
+        // Configuration Integration
+        // ==========================================
 
-    // Handle API errors with enhanced error messages
-    async handleApiError(response, error = null) {
-        if (response && response.status === 401) {
-            console.warn('Authentication expired, redirecting to login');
-            this.clearAuth();
-            window.location.href = '/';
-            return;
-        }
-
-        if (error) {
-            console.error('API Network Error:', error);
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                throw new Error('Network connection failed. Please check your internet connection and try again.');
+        /**
+         * Get configuration value with fallback
+         * @private
+         * @param {Function} configGetter - Config getter function
+         * @param {*} fallback - Fallback value
+         * @returns {*}
+         */
+        _getConfig(configGetter, fallback) {
+            try {
+                const config = global.SitesConfig;
+                if (config && config.isLoaded() && typeof configGetter === 'function') {
+                    const value = configGetter(config);
+                    return value !== undefined && value !== null ? value : fallback;
+                }
+            } catch (e) {
+                logger.warn('Failed to get config value:', e);
             }
-            if (error.name === 'AbortError') {
-                throw new Error('Request timed out. Please try again.');
-            }
-            throw new Error(error.message || 'Network error occurred. Please try again.');
+            return fallback;
         }
 
-        if (!response.ok) {
+        /**
+         * Get valid platform types from config
+         * @returns {Array<string>}
+         */
+        getValidPlatformTypes() {
+            return this._getConfig(
+                (config) => Object.keys(config.getActivePlatformTypes()),
+                ['fixed', 'uav', 'satellite']
+            );
+        }
+
+        /**
+         * Get valid status codes from config
+         * @returns {Array<string>}
+         */
+        getValidStatuses() {
+            return this._getConfig(
+                (config) => config.getValidStatusCodes(),
+                ['Active', 'Inactive', 'Maintenance', 'Decommissioned']
+            );
+        }
+
+        // ==========================================
+        // Core Request Methods
+        // ==========================================
+
+        /**
+         * Get authentication headers from base API
+         * @returns {Object}
+         */
+        getAuthHeaders() {
+            if (!this._baseAPI) {
+                logger.error('Base API not available');
+                return { 'Content-Type': 'application/json' };
+            }
+            return this._baseAPI.getAuthHeaders();
+        }
+
+        /**
+         * Check if user is authenticated
+         * @returns {boolean}
+         */
+        isAuthenticated() {
+            return this._baseAPI?.isAuthenticated() || false;
+        }
+
+        /**
+         * Build query string from parameters object
+         * @private
+         * @param {Object} params - Query parameters
+         * @returns {string}
+         */
+        _buildQueryString(params) {
+            if (!params || Object.keys(params).length === 0) {
+                return '';
+            }
+
+            const queryParts = [];
+            for (const [key, value] of Object.entries(params)) {
+                if (value !== undefined && value !== null && value !== '') {
+                    if (Array.isArray(value)) {
+                        // Handle array parameters (e.g., types[]=a&types[]=b)
+                        value.forEach(v => {
+                            queryParts.push(`${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`);
+                        });
+                    } else {
+                        queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+                    }
+                }
+            }
+
+            return queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+        }
+
+        /**
+         * Make V3 API request with authentication
+         * @private
+         * @param {string} endpoint - API endpoint (without /api/v3 prefix)
+         * @param {Object} [options={}] - Fetch options
+         * @param {boolean} [requireAuth=true] - Whether authentication is required
+         * @returns {Promise<V3Response>}
+         */
+        async _fetchV3(endpoint, options = {}, requireAuth = true) {
+            const url = `${this.v3BasePath}${endpoint}`;
+            const timeout = options.timeout || this.defaultTimeout;
+
+            // Create abort controller for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+            const headers = requireAuth ? this.getAuthHeaders() : { 'Content-Type': 'application/json' };
+
+            const config = {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    ...headers,
+                    ...(options.headers || {})
+                }
+            };
+
+            try {
+                logger.log(`V3 Request: ${config.method || 'GET'} ${url}`);
+
+                const response = await fetch(url, config);
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    await this._handleV3Error(response);
+                }
+
+                const data = await response.json();
+                logger.log(`V3 Response: ${response.status}`, data);
+
+                return new V3Response(data);
+            } catch (error) {
+                clearTimeout(timeoutId);
+
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timed out. Please try again.');
+                }
+
+                logger.error(`V3 Request failed for ${url}:`, error);
+                throw error;
+            }
+        }
+
+        /**
+         * Handle V3 API errors
+         * @private
+         * @param {Response} response - Fetch response
+         */
+        async _handleV3Error(response) {
+            // Handle 401 by redirecting to login
+            if (response.status === 401) {
+                logger.warn('V3 API: Authentication expired');
+                if (this._baseAPI) {
+                    this._baseAPI.clearAuth();
+                }
+                global.location.href = '/';
+                return;
+            }
+
             let errorMessage = `API Error: ${response.status} ${response.statusText}`;
 
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.error || errorData.message || errorMessage;
+
+                // Include validation errors if present
+                if (errorData.errors && Array.isArray(errorData.errors)) {
+                    errorMessage += ': ' + errorData.errors.join(', ');
+                }
             } catch (parseError) {
-                // If we can't parse the error response, use the status text
-                console.warn('Could not parse error response:', parseError);
+                logger.warn('Could not parse V3 error response:', parseError);
             }
 
-            // Provide user-friendly error messages for common status codes
+            // Provide user-friendly error messages
             switch (response.status) {
+                case 400:
+                    errorMessage = errorMessage || 'Invalid request. Please check your input.';
+                    break;
                 case 403:
                     errorMessage = 'Access denied. You do not have permission to perform this action.';
                     break;
                 case 404:
                     errorMessage = 'Resource not found. The requested data may have been deleted.';
                     break;
+                case 409:
+                    errorMessage = errorMessage || 'Conflict. The resource may already exist.';
+                    break;
                 case 422:
-                    errorMessage = errorMessage || 'Invalid data provided. Please check your input and try again.';
+                    errorMessage = errorMessage || 'Invalid data provided. Please check your input.';
+                    break;
+                case 429:
+                    errorMessage = 'Too many requests. Please wait a moment and try again.';
                     break;
                 case 500:
-                    errorMessage = 'Server error occurred. Please try again in a few moments.';
+                    errorMessage = 'Server error occurred. Please try again later.';
                     break;
                 case 503:
                     errorMessage = 'Service temporarily unavailable. Please try again later.';
@@ -126,293 +354,548 @@ class SitesSpectralAPI {
 
             throw new Error(errorMessage);
         }
-    }
 
-    // Make authenticated API request with timeout and retry logic
-    async fetchWithAuth(endpoint, options = {}) {
-        const url = `${this.baseUrl}${endpoint}`;
-        const timeout = options.timeout || 10000; // 10 second default timeout
+        // ==========================================
+        // Platform Methods
+        // ==========================================
 
-        // Create abort controller for timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        const config = {
-            ...options,
-            signal: controller.signal,
-            headers: {
-                ...this.getAuthHeaders(),
-                ...(options.headers || {})
-            }
-        };
-
-        try {
-            console.debug(`API Request: ${config.method || 'GET'} ${url}`);
-            const response = await fetch(url, config);
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                await this.handleApiError(response);
+        /**
+         * Get platforms filtered by type
+         * @param {string} type - Platform type (fixed, uav, satellite, mobile, usv, uuv)
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getPlatformsByType(type, page = 1, limit = null) {
+            const validTypes = this.getValidPlatformTypes();
+            if (!validTypes.includes(type)) {
+                logger.warn(`Platform type '${type}' may not be valid. Valid types: ${validTypes.join(', ')}`);
             }
 
-            console.debug(`API Response: ${response.status} ${response.statusText}`);
-            return response;
-        } catch (error) {
-            clearTimeout(timeoutId);
-            console.error(`API Request failed for ${url}:`, error);
-            await this.handleApiError(null, error);
-        }
-    }
+            const params = {
+                type: type,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
 
-    // Authentication methods
-    async login(username, password) {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: this.defaultHeaders,
-            body: JSON.stringify({ username, password })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Login failed');
+            return this._fetchV3(`/platforms${this._buildQueryString(params)}`);
         }
 
-        const data = await response.json();
-        this.setToken(data.token);
-        this.setUser(data.user);
+        /**
+         * Get platforms with advanced filtering
+         * @param {Object} filters - Filter parameters
+         * @param {string} [filters.type] - Platform type
+         * @param {string} [filters.station] - Station acronym
+         * @param {string} [filters.ecosystem] - Ecosystem code
+         * @param {string} [filters.status] - Status filter
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getPlatforms(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
 
-        return data;
-    }
-
-    async verifyToken() {
-        if (!this.isAuthenticated()) {
-            throw new Error('No authentication token');
+            return this._fetchV3(`/platforms${this._buildQueryString(params)}`);
         }
 
-        const response = await this.fetchWithAuth('/api/auth/verify');
-        const data = await response.json();
-
-        if (data.user) {
-            this.setUser(data.user);
+        /**
+         * Get single platform by ID
+         * @param {number|string} id - Platform ID
+         * @returns {Promise<V3Response>}
+         */
+        async getPlatform(id) {
+            return this._fetchV3(`/platforms/${encodeURIComponent(id)}`);
         }
 
-        return data;
-    }
-
-    async logout() {
-        this.clearAuth();
-        window.location.href = '/';
-    }
-
-    // Station methods with enhanced error handling
-    async getStations() {
-        try {
-            const response = await this.fetchWithAuth('/api/stations');
-            const data = await response.json();
-            console.debug('Loaded stations:', data);
-            return data;
-        } catch (error) {
-            console.error('Failed to load stations:', error);
-            throw new Error(`Failed to load stations: ${error.message}`);
+        /**
+         * Get UAV extension data for a platform
+         * @param {number|string} platformId - Platform ID
+         * @returns {Promise<V3Response>}
+         */
+        async getPlatformUAVExtension(platformId) {
+            return this._fetchV3(`/platforms/${encodeURIComponent(platformId)}/uav`);
         }
-    }
 
-    async getStation(id) {
-        const response = await this.fetchWithAuth(`/api/stations/${id}`);
-        return response.json();
-    }
-
-    async createStation(stationData) {
-        const response = await this.fetchWithAuth('/api/stations', {
-            method: 'POST',
-            body: JSON.stringify(stationData)
-        });
-        return response.json();
-    }
-
-    async updateStation(id, stationData) {
-        const response = await this.fetchWithAuth(`/api/stations/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(stationData)
-        });
-        return response.json();
-    }
-
-    async deleteStation(id) {
-        const response = await this.fetchWithAuth(`/api/stations/${id}`, {
-            method: 'DELETE'
-        });
-        return response.json();
-    }
-
-    // Platform methods with enhanced error handling
-    async getPlatforms(stationAcronym = null) {
-        try {
-            const url = stationAcronym ? `/api/platforms?station=${stationAcronym}` : '/api/platforms';
-            console.debug(`Loading platforms${stationAcronym ? ` for station ${stationAcronym}` : ''}`);
-            const response = await this.fetchWithAuth(url);
-            const data = await response.json();
-            console.debug(`Loaded ${Array.isArray(data.platforms) ? data.platforms.length : Array.isArray(data) ? data.length : 0} platforms`);
-            return data;
-        } catch (error) {
-            console.error(`Failed to load platforms${stationAcronym ? ` for station ${stationAcronym}` : ''}:`, error);
-            throw new Error(`Failed to load platforms: ${error.message}`);
+        /**
+         * Get satellite extension data for a platform
+         * @param {number|string} platformId - Platform ID
+         * @returns {Promise<V3Response>}
+         */
+        async getPlatformSatelliteExtension(platformId) {
+            return this._fetchV3(`/platforms/${encodeURIComponent(platformId)}/satellite`);
         }
-    }
 
-    async getPlatform(id) {
-        const response = await this.fetchWithAuth(`/api/platforms/${id}`);
-        return response.json();
-    }
+        /**
+         * Get mobile extension data for a platform
+         * @param {number|string} platformId - Platform ID
+         * @returns {Promise<V3Response>}
+         */
+        async getPlatformMobileExtension(platformId) {
+            return this._fetchV3(`/platforms/${encodeURIComponent(platformId)}/mobile`);
+        }
 
-    async createPlatform(platformData) {
-        try {
-            console.debug('Creating platform:', platformData);
-            const response = await this.fetchWithAuth('/api/platforms', {
-                method: 'POST',
-                body: JSON.stringify(platformData)
+        /**
+         * Create or update UAV extension for a platform
+         * @param {number|string} platformId - Platform ID
+         * @param {Object} extensionData - UAV extension data
+         * @returns {Promise<V3Response>}
+         */
+        async savePlatformUAVExtension(platformId, extensionData) {
+            return this._fetchV3(`/platforms/${encodeURIComponent(platformId)}/uav`, {
+                method: 'PUT',
+                body: JSON.stringify(extensionData)
             });
-            const data = await response.json();
-            console.debug('Platform created successfully:', data);
-            return data;
-        } catch (error) {
-            console.error('Failed to create platform:', error);
-            throw new Error(`Failed to create platform: ${error.message}`);
         }
-    }
 
-    async updatePlatform(id, platformData) {
-        const response = await this.fetchWithAuth(`/api/platforms/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(platformData)
-        });
-        return response.json();
-    }
+        /**
+         * Create or update satellite extension for a platform
+         * @param {number|string} platformId - Platform ID
+         * @param {Object} extensionData - Satellite extension data
+         * @returns {Promise<V3Response>}
+         */
+        async savePlatformSatelliteExtension(platformId, extensionData) {
+            return this._fetchV3(`/platforms/${encodeURIComponent(platformId)}/satellite`, {
+                method: 'PUT',
+                body: JSON.stringify(extensionData)
+            });
+        }
 
-    async deletePlatform(id) {
-        try {
-            console.debug(`Deleting platform ${id}`);
-            const response = await this.fetchWithAuth(`/api/platforms/${id}`, {
+        // ==========================================
+        // AOI (Area of Interest) Spatial Methods
+        // ==========================================
+
+        /**
+         * Get AOIs within a bounding box
+         * @param {Object} bounds - Bounding box coordinates
+         * @param {number} bounds.minLat - Minimum latitude
+         * @param {number} bounds.maxLat - Maximum latitude
+         * @param {number} bounds.minLon - Minimum longitude
+         * @param {number} bounds.maxLon - Maximum longitude
+         * @param {Object} [options={}] - Additional options
+         * @param {number} [options.page=1] - Page number
+         * @param {number} [options.limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getAOIsSpatialBbox(bounds, options = {}) {
+            if (!bounds || typeof bounds.minLat !== 'number' || typeof bounds.maxLat !== 'number' ||
+                typeof bounds.minLon !== 'number' || typeof bounds.maxLon !== 'number') {
+                throw new Error('Invalid bounding box. Required: minLat, maxLat, minLon, maxLon');
+            }
+
+            const params = {
+                minLat: bounds.minLat,
+                maxLat: bounds.maxLat,
+                minLon: bounds.minLon,
+                maxLon: bounds.maxLon,
+                page: options.page || 1,
+                limit: options.limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/aois/spatial/bbox${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get AOIs near a point
+         * @param {number} lat - Latitude
+         * @param {number} lon - Longitude
+         * @param {number} [radius=1000] - Search radius in meters
+         * @param {Object} [options={}] - Additional options
+         * @returns {Promise<V3Response>}
+         */
+        async getAOIsSpatialNear(lat, lon, radius = 1000, options = {}) {
+            const params = {
+                lat: lat,
+                lon: lon,
+                radius: radius,
+                page: options.page || 1,
+                limit: options.limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/aois/spatial/near${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get AOIs as GeoJSON for a station
+         * @param {string|number} stationId - Station ID or acronym
+         * @param {Object} [options={}] - Additional options
+         * @param {string} [options.instrumentId] - Filter by instrument ID
+         * @param {boolean} [options.includeMetadata=true] - Include metadata in properties
+         * @returns {Promise<V3Response>}
+         */
+        async getAOIsGeoJSON(stationId, options = {}) {
+            const params = {};
+            if (options.instrumentId) {
+                params.instrumentId = options.instrumentId;
+            }
+            if (typeof options.includeMetadata !== 'undefined') {
+                params.includeMetadata = options.includeMetadata;
+            }
+
+            return this._fetchV3(`/stations/${encodeURIComponent(stationId)}/aois/geojson${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get all ROIs/AOIs for a station with pagination
+         * @param {string|number} stationId - Station ID or acronym
+         * @param {Object} [options={}] - Options
+         * @param {number} [options.page=1] - Page number
+         * @param {number} [options.limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getStationAOIs(stationId, options = {}) {
+            const params = {
+                page: options.page || 1,
+                limit: options.limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/stations/${encodeURIComponent(stationId)}/aois${this._buildQueryString(params)}`);
+        }
+
+        // ==========================================
+        // Campaign Methods
+        // ==========================================
+
+        /**
+         * Get campaigns with optional filtering
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {string} [filters.station] - Station acronym
+         * @param {string} [filters.status] - Campaign status
+         * @param {string} [filters.startDate] - Start date filter (ISO format)
+         * @param {string} [filters.endDate] - End date filter (ISO format)
+         * @param {string} [filters.type] - Campaign type
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getCampaigns(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/campaigns${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get single campaign by ID
+         * @param {number|string} id - Campaign ID
+         * @returns {Promise<V3Response>}
+         */
+        async getCampaign(id) {
+            return this._fetchV3(`/campaigns/${encodeURIComponent(id)}`);
+        }
+
+        /**
+         * Create a new campaign
+         * @param {Object} campaignData - Campaign data
+         * @param {string} campaignData.name - Campaign name
+         * @param {string} [campaignData.description] - Campaign description
+         * @param {string} campaignData.startDate - Start date (ISO format)
+         * @param {string} [campaignData.endDate] - End date (ISO format)
+         * @param {string} [campaignData.stationId] - Associated station ID
+         * @param {string} [campaignData.type] - Campaign type
+         * @param {Object} [campaignData.metadata] - Additional metadata
+         * @returns {Promise<V3Response>}
+         */
+        async createCampaign(campaignData) {
+            if (!campaignData.name) {
+                throw new Error('Campaign name is required');
+            }
+            if (!campaignData.startDate) {
+                throw new Error('Campaign start date is required');
+            }
+
+            return this._fetchV3('/campaigns', {
+                method: 'POST',
+                body: JSON.stringify(campaignData)
+            });
+        }
+
+        /**
+         * Update an existing campaign
+         * @param {number|string} id - Campaign ID
+         * @param {Object} campaignData - Updated campaign data
+         * @returns {Promise<V3Response>}
+         */
+        async updateCampaign(id, campaignData) {
+            return this._fetchV3(`/campaigns/${encodeURIComponent(id)}`, {
+                method: 'PUT',
+                body: JSON.stringify(campaignData)
+            });
+        }
+
+        /**
+         * Delete a campaign
+         * @param {number|string} id - Campaign ID
+         * @returns {Promise<V3Response>}
+         */
+        async deleteCampaign(id) {
+            return this._fetchV3(`/campaigns/${encodeURIComponent(id)}`, {
                 method: 'DELETE'
             });
-            const data = await response.json();
-            console.debug('Platform deleted successfully');
-            return data;
-        } catch (error) {
-            console.error(`Failed to delete platform ${id}:`, error);
-            throw new Error(`Failed to delete platform: ${error.message}`);
+        }
+
+        /**
+         * Get campaigns for a specific station
+         * @param {string} stationAcronym - Station acronym
+         * @param {Object} [options={}] - Additional options
+         * @param {number} [options.page=1] - Page number
+         * @param {number} [options.limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getStationCampaigns(stationAcronym, options = {}) {
+            return this.getCampaigns({ station: stationAcronym }, options.page || 1, options.limit);
+        }
+
+        // ==========================================
+        // Product Methods
+        // ==========================================
+
+        /**
+         * Get products with optional filtering
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {string} [filters.station] - Station acronym
+         * @param {string} [filters.instrument] - Instrument ID
+         * @param {string} [filters.type] - Product type (e.g., 'L1', 'L2', 'L3')
+         * @param {string} [filters.status] - Product status
+         * @param {string} [filters.startDate] - Start date filter (ISO format)
+         * @param {string} [filters.endDate] - End date filter (ISO format)
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getProducts(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/products${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get single product by ID
+         * @param {number|string} id - Product ID
+         * @returns {Promise<V3Response>}
+         */
+        async getProduct(id) {
+            return this._fetchV3(`/products/${encodeURIComponent(id)}`);
+        }
+
+        /**
+         * Get products timeline/summary
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {string} [filters.station] - Station acronym
+         * @param {string} [filters.instrument] - Instrument ID
+         * @param {string} [filters.type] - Product type
+         * @param {string} [filters.startDate] - Start date (ISO format)
+         * @param {string} [filters.endDate] - End date (ISO format)
+         * @param {string} [filters.groupBy] - Group by (day, week, month, year)
+         * @returns {Promise<V3Response>}
+         */
+        async getProductsTimeline(filters = {}) {
+            const params = { ...filters };
+
+            return this._fetchV3(`/products/timeline${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get product statistics
+         * @param {Object} [filters={}] - Filter parameters
+         * @returns {Promise<V3Response>}
+         */
+        async getProductsStats(filters = {}) {
+            return this._fetchV3(`/products/stats${this._buildQueryString(filters)}`);
+        }
+
+        /**
+         * Get products for a specific station
+         * @param {string} stationAcronym - Station acronym
+         * @param {Object} [options={}] - Additional options
+         * @param {number} [options.page=1] - Page number
+         * @param {number} [options.limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getStationProducts(stationAcronym, options = {}) {
+            return this.getProducts({ station: stationAcronym }, options.page || 1, options.limit);
+        }
+
+        // ==========================================
+        // Instrument Methods (V3 Enhanced)
+        // ==========================================
+
+        /**
+         * Get instruments with V3 pagination
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {string} [filters.station] - Station acronym
+         * @param {string} [filters.platform] - Platform ID
+         * @param {string} [filters.type] - Instrument type
+         * @param {string} [filters.status] - Status filter
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getInstruments(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/instruments${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get single instrument by ID
+         * @param {number|string} id - Instrument ID
+         * @returns {Promise<V3Response>}
+         */
+        async getInstrument(id) {
+            return this._fetchV3(`/instruments/${encodeURIComponent(id)}`);
+        }
+
+        // ==========================================
+        // Station Methods (V3 Enhanced)
+        // ==========================================
+
+        /**
+         * Get stations with V3 pagination
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getStations(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
+
+            return this._fetchV3(`/stations${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get single station by ID or acronym
+         * @param {string|number} id - Station ID or acronym
+         * @returns {Promise<V3Response>}
+         */
+        async getStation(id) {
+            return this._fetchV3(`/stations/${encodeURIComponent(id)}`);
+        }
+
+        /**
+         * Get station summary with counts
+         * @param {string|number} id - Station ID or acronym
+         * @returns {Promise<V3Response>}
+         */
+        async getStationSummary(id) {
+            return this._fetchV3(`/stations/${encodeURIComponent(id)}/summary`);
+        }
+
+        // ==========================================
+        // Public Endpoints (No Auth Required)
+        // ==========================================
+
+        /**
+         * Get public station list (no authentication required)
+         * @returns {Promise<V3Response>}
+         */
+        async getPublicStations() {
+            return this._fetchV3('/public/stations', {}, false);
+        }
+
+        /**
+         * Get public station info (no authentication required)
+         * @param {string} acronym - Station acronym
+         * @returns {Promise<V3Response>}
+         */
+        async getPublicStation(acronym) {
+            return this._fetchV3(`/public/stations/${encodeURIComponent(acronym)}`, {}, false);
+        }
+
+        /**
+         * Health check endpoint (no authentication required)
+         * @returns {Promise<V3Response>}
+         */
+        async checkHealth() {
+            return this._fetchV3('/health', {}, false);
+        }
+
+        // ==========================================
+        // Pagination Helpers
+        // ==========================================
+
+        /**
+         * Fetch all pages of a paginated endpoint
+         * @param {Function} fetchFn - Fetch function that accepts (filters, page, limit)
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number} [limit] - Items per page
+         * @param {number} [maxPages=100] - Maximum pages to fetch (safety limit)
+         * @returns {Promise<Array>} - All items from all pages
+         */
+        async fetchAllPages(fetchFn, filters = {}, limit = null, maxPages = 100) {
+            const allItems = [];
+            let page = 1;
+            let hasMore = true;
+
+            while (hasMore && page <= maxPages) {
+                const response = await fetchFn.call(this, filters, page, limit);
+
+                if (Array.isArray(response.data)) {
+                    allItems.push(...response.data);
+                }
+
+                hasMore = response.hasNextPage();
+                page++;
+            }
+
+            if (page > maxPages) {
+                logger.warn(`Reached maximum page limit (${maxPages}). Some results may be missing.`);
+            }
+
+            return allItems;
+        }
+
+        /**
+         * Create a paginated iterator for lazy loading
+         * @param {Function} fetchFn - Fetch function that accepts (filters, page, limit)
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number} [limit] - Items per page
+         * @returns {AsyncGenerator<V3Response>}
+         */
+        async *paginatedIterator(fetchFn, filters = {}, limit = null) {
+            let page = 1;
+            let hasMore = true;
+
+            while (hasMore) {
+                const response = await fetchFn.call(this, filters, page, limit);
+                yield response;
+
+                hasMore = response.hasNextPage();
+                page++;
+            }
         }
     }
 
-    // Instrument methods with enhanced error handling
-    async getInstruments(stationAcronym = null) {
-        try {
-            const url = stationAcronym ? `/api/instruments?station=${stationAcronym}` : '/api/instruments';
-            console.debug(`Loading instruments${stationAcronym ? ` for station ${stationAcronym}` : ''}`);
-            const response = await this.fetchWithAuth(url);
-            const data = await response.json();
-            console.debug(`Loaded ${Array.isArray(data.instruments) ? data.instruments.length : Array.isArray(data) ? data.length : 0} instruments`);
-            return data;
-        } catch (error) {
-            console.error(`Failed to load instruments${stationAcronym ? ` for station ${stationAcronym}` : ''}:`, error);
-            throw new Error(`Failed to load instruments: ${error.message}`);
-        }
-    }
+    // Create singleton instance
+    const apiV3 = new SitesSpectralAPIv3();
 
-    async getInstrument(id) {
-        const response = await this.fetchWithAuth(`/api/instruments/${id}`);
-        return response.json();
-    }
+    // Export V3Response class for external use
+    global.V3Response = V3Response;
 
-    async createInstrument(instrumentData) {
-        const response = await this.fetchWithAuth('/api/instruments', {
-            method: 'POST',
-            body: JSON.stringify(instrumentData)
-        });
-        return response.json();
-    }
+    // Export main API instance
+    global.sitesAPIv3 = apiV3;
 
-    async updateInstrument(id, instrumentData) {
-        const response = await this.fetchWithAuth(`/api/instruments/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(instrumentData)
-        });
-        return response.json();
-    }
+    // Also export class for extensibility
+    global.SitesSpectralAPIv3 = SitesSpectralAPIv3;
 
-    async deleteInstrument(id) {
-        const response = await this.fetchWithAuth(`/api/instruments/${id}`, {
-            method: 'DELETE'
-        });
-        return response.json();
-    }
+    logger.log('SITES Spectral API V3 client initialized');
 
-    // ROI methods
-    async getROIs(instrumentId = null) {
-        const url = instrumentId ? `/api/rois?instrument_id=${instrumentId}` : '/api/rois';
-        const response = await this.fetchWithAuth(url);
-        return response.json();
-    }
-
-    async getROI(id) {
-        const response = await this.fetchWithAuth(`/api/rois/${id}`);
-        return response.json();
-    }
-
-    async createROI(roiData) {
-        const response = await this.fetchWithAuth('/api/rois', {
-            method: 'POST',
-            body: JSON.stringify(roiData)
-        });
-        return response.json();
-    }
-
-    async updateROI(id, roiData) {
-        const response = await this.fetchWithAuth(`/api/rois/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(roiData)
-        });
-        return response.json();
-    }
-
-    async deleteROI(id) {
-        const response = await this.fetchWithAuth(`/api/rois/${id}`, {
-            method: 'DELETE'
-        });
-        return response.json();
-    }
-
-    // Health check
-    async checkHealth() {
-        const response = await fetch('/api/health');
-        return response.json();
-    }
-}
-
-// Global instance
-window.sitesAPI = new SitesSpectralAPI();
-
-// Backward compatibility functions for existing code
-function fetchWithAuth(endpoint, options = {}) {
-    return window.sitesAPI.fetchWithAuth(endpoint, options);
-}
-
-function getAuthHeaders() {
-    return window.sitesAPI.getAuthHeaders();
-}
-
-function isAuthenticated() {
-    return window.sitesAPI.isAuthenticated();
-}
-
-function getStoredToken() {
-    return window.sitesAPI.getToken();
-}
-
-function getStoredUser() {
-    return window.sitesAPI.getUser();
-}
-
-function clearAuthData() {
-    return window.sitesAPI.clearAuth();
-}
+})(typeof window !== 'undefined' ? window : global);

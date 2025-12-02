@@ -1,0 +1,329 @@
+# =============================================================================
+# API Versions Configuration
+# SITES Spectral v9.0.0
+# =============================================================================
+# Configuration for API versioning, migration paths, and feature availability
+# across different API versions.
+# =============================================================================
+
+_meta:
+  version: "1.0.0"
+  description: "API version configuration and migration settings"
+  last_updated: "2025-12-02"
+
+# =============================================================================
+# API VERSION DEFINITIONS
+# =============================================================================
+# Each version defines supported features, deprecation status, and endpoints
+
+api_versions:
+  # ---------------------------------------------------------------------------
+  # API V1 - Legacy Version (Deprecated)
+  # ---------------------------------------------------------------------------
+  v1:
+    version: "1.0.0"
+    status: "deprecated"
+    description: "Original API version - basic CRUD operations"
+    release_date: "2024-01-01"
+    deprecation_date: "2025-06-01"
+    end_of_life_date: "2026-01-01"
+
+    features:
+      stations: true
+      platforms: true
+      instruments: true
+      rois: false
+      campaigns: false
+      products: false
+      pagination: false
+      filtering: "basic"
+      sorting: false
+
+    endpoints:
+      prefix: "/api/v1"
+      authentication: "basic"
+      rate_limiting: false
+
+    migration_guide: "https://docs.sites.jobelab.com/api/v1-to-v2"
+    support_contact: "sites-support@jobelab.com"
+
+  # ---------------------------------------------------------------------------
+  # API V2 - Enhanced Version
+  # ---------------------------------------------------------------------------
+  v2:
+    version: "2.0.0"
+    status: "stable"
+    description: "Enhanced API with ROI support and advanced filtering"
+    release_date: "2025-01-01"
+
+    features:
+      stations: true
+      platforms: true
+      instruments: true
+      rois: true
+      campaigns: false
+      products: false
+      pagination: true
+      filtering: "advanced"
+      sorting: true
+
+    endpoints:
+      prefix: "/api/v2"
+      authentication: "jwt"
+      rate_limiting: true
+      rate_limits:
+        per_minute: 60
+        per_hour: 1000
+
+    improvements:
+      - "Added ROI management endpoints"
+      - "Advanced filtering with multiple parameters"
+      - "Pagination support for large datasets"
+      - "Sorting by multiple fields"
+      - "JWT authentication"
+      - "Rate limiting protection"
+
+    breaking_changes:
+      - "Authentication changed from basic to JWT"
+      - "Response format includes metadata wrapper"
+      - "Error responses use standard error codes"
+
+  # ---------------------------------------------------------------------------
+  # API V3 - Campaign and Product Management (Current/Default)
+  # ---------------------------------------------------------------------------
+  v3:
+    version: "3.0.0"
+    status: "current"
+    description: "Full-featured API with campaigns, products, and advanced data management"
+    release_date: "2025-12-02"
+    is_default: true
+
+    features:
+      stations: true
+      platforms: true
+      instruments: true
+      rois: true
+      campaigns: true
+      products: true
+      pagination: true
+      filtering: "advanced"
+      sorting: true
+      search: true
+      bulk_operations: true
+      webhooks: false
+
+    endpoints:
+      prefix: "/api/v3"
+      authentication: "jwt"
+      rate_limiting: true
+      rate_limits:
+        per_minute: 120
+        per_hour: 5000
+        burst: 200
+
+    improvements:
+      - "Campaign management for field surveys and UAV missions"
+      - "Product tracking for data deliverables"
+      - "Full-text search across entities"
+      - "Bulk create/update/delete operations"
+      - "Enhanced pagination with cursor support"
+      - "Expanded filtering with logical operators"
+      - "Webhook support (coming soon)"
+      - "GraphQL endpoint (coming soon)"
+
+    breaking_changes:
+      - "Platform responses include campaign associations"
+      - "Instrument responses include product linkages"
+      - "Pagination uses cursor-based system"
+      - "Filtering syntax uses JSON query format"
+
+# =============================================================================
+# VERSION SELECTION
+# =============================================================================
+# Configuration for how API versions are selected and negotiated
+
+version_selection:
+  # Default version when none specified
+  default_version: "v3"
+
+  # Version selection methods
+  methods:
+    # Via URL path: /api/v3/stations
+    url_path:
+      enabled: true
+      pattern: "/api/{version}/"
+
+    # Via Accept header: Accept: application/vnd.sites.v3+json
+    accept_header:
+      enabled: true
+      pattern: "application/vnd.sites.{version}+json"
+
+    # Via custom header: X-API-Version: v3
+    custom_header:
+      enabled: true
+      header_name: "X-API-Version"
+
+  # Priority order (highest to lowest)
+  priority:
+    - "url_path"
+    - "custom_header"
+    - "accept_header"
+    - "default_version"
+
+# =============================================================================
+# MIGRATION SETTINGS
+# =============================================================================
+# Configuration for handling version migrations and compatibility
+
+migration:
+  # Allow automatic version negotiation
+  auto_negotiate: true
+
+  # Return version info in response headers
+  version_headers:
+    enabled: true
+    current_version: "X-API-Version"
+    latest_version: "X-API-Latest-Version"
+    deprecated_warning: "X-API-Deprecated"
+    sunset_date: "X-API-Sunset-Date"
+
+  # Version compatibility matrix
+  compatibility:
+    v1_to_v2:
+      automatic: false
+      requires_update: true
+      adapter_available: true
+
+    v2_to_v3:
+      automatic: true
+      requires_update: false
+      adapter_available: true
+
+  # Deprecation warnings
+  deprecation_warnings:
+    enabled: true
+    warn_months_before: 6
+    include_migration_link: true
+
+  # Support policies
+  support:
+    stable_versions_maintained: 2
+    deprecated_support_months: 12
+    security_patches_after_eol: 6
+
+# =============================================================================
+# RESPONSE FORMAT
+# =============================================================================
+# Standard response structures across API versions
+
+response_format:
+  v1:
+    structure: "direct"
+    example: |
+      {
+        "id": 1,
+        "name": "Station Name"
+      }
+
+  v2:
+    structure: "wrapped"
+    example: |
+      {
+        "data": {
+          "id": 1,
+          "name": "Station Name"
+        },
+        "meta": {
+          "version": "v2",
+          "timestamp": "2025-12-02T10:00:00Z"
+        }
+      }
+
+  v3:
+    structure: "wrapped_extended"
+    example: |
+      {
+        "data": {
+          "id": 1,
+          "name": "Station Name",
+          "relationships": {
+            "platforms": "/api/v3/stations/1/platforms"
+          }
+        },
+        "meta": {
+          "version": "v3",
+          "timestamp": "2025-12-02T10:00:00Z",
+          "request_id": "req_abc123"
+        },
+        "links": {
+          "self": "/api/v3/stations/1"
+        }
+      }
+
+# =============================================================================
+# FEATURE FLAGS
+# =============================================================================
+# Features available in different API versions
+
+features:
+  pagination:
+    v1: false
+    v2: "offset-based"
+    v3: "cursor-based"
+
+  filtering:
+    v1: "none"
+    v2: "simple"
+    v3: "advanced-json"
+
+  sorting:
+    v1: false
+    v2: "single-field"
+    v3: "multi-field"
+
+  search:
+    v1: false
+    v2: false
+    v3: "full-text"
+
+  bulk_operations:
+    v1: false
+    v2: false
+    v3: true
+
+  campaigns:
+    v1: false
+    v2: false
+    v3: true
+
+  products:
+    v1: false
+    v2: false
+    v3: true
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+# Links to version-specific documentation
+
+documentation:
+  base_url: "https://docs.sites.jobelab.com/api"
+
+  versions:
+    v1:
+      docs_url: "https://docs.sites.jobelab.com/api/v1"
+      changelog_url: "https://docs.sites.jobelab.com/api/v1/changelog"
+      migration_guide: "https://docs.sites.jobelab.com/api/v1-to-v2"
+
+    v2:
+      docs_url: "https://docs.sites.jobelab.com/api/v2"
+      changelog_url: "https://docs.sites.jobelab.com/api/v2/changelog"
+      migration_guide: "https://docs.sites.jobelab.com/api/v2-to-v3"
+      openapi_spec: "https://docs.sites.jobelab.com/api/v2/openapi.yaml"
+
+    v3:
+      docs_url: "https://docs.sites.jobelab.com/api/v3"
+      changelog_url: "https://docs.sites.jobelab.com/api/v3/changelog"
+      openapi_spec: "https://docs.sites.jobelab.com/api/v3/openapi.yaml"
+      graphql_schema: "https://docs.sites.jobelab.com/api/v3/schema.graphql"
+      interactive_docs: "https://api.sites.jobelab.com/docs"
