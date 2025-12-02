@@ -922,6 +922,36 @@
             const typeConfig = global.SitesConfig?.getPlatformType(platformType) || {};
             const typeIcon = typeConfig.icon || 'fa-cube';
             const typeColor = typeConfig.color || '#6b7280';
+            const typeGradient = typeConfig.gradient || `linear-gradient(135deg, ${typeColor} 0%, ${typeColor} 100%)`;
+
+            // Get ecosystem config from YAML
+            let ecosystemBadgeHTML = '';
+            if (platform.ecosystem_code) {
+                const ecoConfig = global.SitesConfig?.getEcosystem?.(platform.ecosystem_code) || {};
+                const ecoLabel = ecoConfig.label || platform.ecosystem_code;
+                const ecoIcon = ecoConfig.icon || 'fa-globe';
+                const ecoColor = ecoConfig.color || '#6b7280';
+                // Darken color for gradient end
+                const ecoColorDark = this._darkenColor(ecoColor, 15);
+
+                ecosystemBadgeHTML = `
+                    <span class="ecosystem-badge" style="--eco-color: ${ecoColor}; --eco-color-dark: ${ecoColorDark}; background: linear-gradient(135deg, ${ecoColor} 0%, ${ecoColorDark} 100%);">
+                        <i class="fas ${ecoIcon}"></i>
+                        ${escapeHtml(ecoLabel)}
+                    </span>
+                `;
+            }
+
+            // Create platform type badge with icon
+            const platformTypeBadgeHTML = `
+                <span class="platform-type-badge" style="background-color: ${typeColor}20; color: ${typeColor}; border-color: ${typeColor}40;">
+                    <i class="fas ${typeIcon}"></i>
+                    ${platformType.toUpperCase()}
+                </span>
+            `;
+
+            // Create instrument type dots
+            const instrumentTypeDots = this._createInstrumentTypeDots(instruments);
 
             const locationDisplay = platform.normalized_name ||
                 (platform.latitude && platform.longitude
@@ -930,20 +960,20 @@
 
             return `
                 <div class="platform-card" data-platform-id="${platform.id}" data-platform-type="${platformType}">
-                    <div class="platform-header">
-                        <div class="platform-type-indicator" style="background-color: ${typeColor};">
-                            <i class="fas ${typeIcon}"></i>
+                    <div class="platform-header" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); --primary-color: ${typeColor};">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                            <div class="platform-type-indicator" style="background: ${typeGradient};">
+                                <i class="fas ${typeIcon}"></i>
+                            </div>
+                            <h4 style="margin: 0; flex: 1;">${escapeHtml(platform.display_name)}</h4>
                         </div>
-                        <h4>${escapeHtml(platform.display_name)}</h4>
                         <div class="platform-normalized-name">
-                            <span style="font-size: 0.75em; color: #6b7280; font-weight: 500;">platform:</span>
-                            <span style="color: #059669; font-family: 'Courier New', monospace; font-weight: 600;">${platform.normalized_name || 'N/A'}</span>
+                            <span>platform:</span>
+                            <span>${platform.normalized_name || 'N/A'}</span>
                         </div>
                         <div class="platform-meta">
-                            ${platform.ecosystem_code ? `<span class="ecosystem-badge">${platform.ecosystem_code}</span>` : ''}
-                            <span class="platform-type-badge" style="background-color: ${typeColor}20; color: ${typeColor};">
-                                ${platformType.toUpperCase()}
-                            </span>
+                            ${ecosystemBadgeHTML}
+                            ${platformTypeBadgeHTML}
                         </div>
                     </div>
 
@@ -955,14 +985,17 @@
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-camera"></i>
-                                <span>${instrumentCount} instruments</span>
+                                <div class="instrument-count-display">
+                                    <span>${instrumentCount} instrument${instrumentCount !== 1 ? 's' : ''}</span>
+                                    ${instrumentTypeDots}
+                                </div>
                             </div>
                         </div>
 
                         ${instrumentCount > 0 ? this._createInstrumentTabsHTML(instruments, platform.id) : `
                             <div class="no-instruments">
-                                <i class="fas fa-camera" style="opacity: 0.3;"></i>
-                                <span style="opacity: 0.6;">No instruments configured</span>
+                                <i class="fas fa-camera"></i>
+                                <span>No instruments configured</span>
                             </div>
                         `}
                     </div>
@@ -989,6 +1022,78 @@
                     </div>
                 </div>
             `;
+        }
+
+        /**
+         * Create instrument type indicator dots
+         * @private
+         * @param {Array} instruments - Instruments array
+         * @returns {string} HTML string with colored dots
+         */
+        _createInstrumentTypeDots(instruments) {
+            if (!Array.isArray(instruments) || instruments.length === 0) {
+                return '';
+            }
+
+            // Count instruments by category
+            const categoryCounts = {};
+            instruments.forEach(inst => {
+                if (!inst?.instrument_type) return;
+
+                let category = 'other';
+                if (global.SitesConfig) {
+                    category = global.SitesConfig.detectInstrumentCategory(inst.instrument_type);
+                } else {
+                    const type = inst.instrument_type.toLowerCase();
+                    if (type.includes('phenocam')) category = 'phenocam';
+                    else if (type.includes('multispectral')) category = 'multispectral';
+                    else if (type.includes('par')) category = 'par';
+                    else if (type.includes('ndvi')) category = 'ndvi';
+                    else if (type.includes('pri')) category = 'pri';
+                    else if (type.includes('hyperspectral')) category = 'hyperspectral';
+                    else if (type.includes('thermal')) category = 'thermal';
+                    else if (type.includes('lidar')) category = 'lidar';
+                }
+
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+
+            // Create dots (max 5 types shown)
+            const dots = Object.entries(categoryCounts)
+                .slice(0, 5)
+                .map(([category, count]) => {
+                    const title = `${count} ${category} instrument${count !== 1 ? 's' : ''}`;
+                    return `<span class="instrument-type-dot" data-type="${category}" title="${title}"></span>`;
+                })
+                .join('');
+
+            return dots ? `<div class="instrument-type-dots">${dots}</div>` : '';
+        }
+
+        /**
+         * Darken a hex color by a percentage
+         * @private
+         * @param {string} color - Hex color (e.g., '#2563eb')
+         * @param {number} percent - Percentage to darken (0-100)
+         * @returns {string} Darkened hex color
+         */
+        _darkenColor(color, percent) {
+            // Remove # if present
+            let hex = color.replace('#', '');
+
+            // Convert to RGB
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+
+            // Darken
+            r = Math.max(0, Math.floor(r * (1 - percent / 100)));
+            g = Math.max(0, Math.floor(g * (1 - percent / 100)));
+            b = Math.max(0, Math.floor(b * (1 - percent / 100)));
+
+            // Convert back to hex
+            const toHex = (n) => n.toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
         }
 
         /**

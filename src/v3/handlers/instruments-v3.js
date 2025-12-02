@@ -191,9 +191,9 @@ async function getInstrumentsListV3(user, env, url) {
   const dataParams = [...params, pagination.limit, pagination.offset];
   const results = await executeQuery(env, selectQuery, dataParams, 'getInstrumentsListV3');
 
-  // Build response
+  // Build response - extract .results from D1 response object
   const response = createPaginatedResponse(
-    results || [],
+    results?.results || [],
     totalCount,
     pagination,
     '/api/v3/instruments'
@@ -243,7 +243,7 @@ async function getInstrumentROIsV3(instrumentId, user, env, url) {
     'countInstrumentROIsV3'
   );
 
-  // Get paginated ROIs
+  // Get paginated ROIs - extract .results from D1 response
   const rois = await executeQuery(
     env,
     `SELECT * FROM instrument_rois WHERE instrument_id = ? ORDER BY roi_name ASC LIMIT ? OFFSET ?`,
@@ -252,7 +252,7 @@ async function getInstrumentROIsV3(instrumentId, user, env, url) {
   );
 
   const response = createPaginatedResponse(
-    rois || [],
+    rois?.results || [],
     countResult?.count || 0,
     pagination,
     `/api/v3/instruments/${instrumentId}/rois`

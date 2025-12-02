@@ -1110,12 +1110,312 @@ body {
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
+/* ============================================
+   PLATFORM CARD IMPROVEMENTS - v9.1.0
+   ============================================ */
+
+/* Platform Header - Modern Gradient Design */
 .platform-header {
     margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
 }
 
+.platform-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+    opacity: 0.6;
+}
+
+.platform-header h4 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Platform Type Indicator - Icon Circle */
+.platform-type-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--info-color) 100%);
+    color: white;
+    font-size: 1.125rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.platform-type-indicator i {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Platform Normalized Name Display */
+.platform-normalized-name {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--success-color);
+}
+
+.platform-normalized-name span:first-child {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.platform-normalized-name span:last-child {
+    color: #059669;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Platform Meta - Badge Container */
+.platform-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* Ecosystem Badge - Full Name with Icon */
+.ecosystem-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--eco-color, #059669) 0%, var(--eco-color-dark, #047857) 100%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ecosystem-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.ecosystem-badge i {
+    font-size: 0.75rem;
+    opacity: 0.95;
+}
+
+/* Platform Type Badge - Modern Pill Design */
+.platform-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    transition: all 0.2s ease;
+}
+
+.platform-type-badge:hover {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.platform-type-badge i {
+    font-size: 0.75rem;
+}
+
+/* Platform Body - Improved Layout */
+.platform-body {
+    padding: 0.75rem 0;
+}
+
+.platform-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.75rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.info-item i {
+    width: 16px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.info-item span {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Instrument Count Display with Type Indicators */
+.instrument-count-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.instrument-type-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.instrument-type-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.instrument-type-dot:hover {
+    transform: scale(1.3);
+}
+
+/* Instrument type colors */
+.instrument-type-dot[data-type="phenocam"] {
+    background: #2563eb;
+}
+
+.instrument-type-dot[data-type="multispectral"] {
+    background: #7c3aed;
+}
+
+.instrument-type-dot[data-type="par"] {
+    background: #f59e0b;
+}
+
+.instrument-type-dot[data-type="ndvi"] {
+    background: #059669;
+}
+
+.instrument-type-dot[data-type="pri"] {
+    background: #ec4899;
+}
+
+.instrument-type-dot[data-type="hyperspectral"] {
+    background: #6366f1;
+}
+
+.instrument-type-dot[data-type="thermal"] {
+    background: #ef4444;
+}
+
+.instrument-type-dot[data-type="lidar"] {
+    background: #14b8a6;
+}
+
+.instrument-type-dot[data-type="other"] {
+    background: #6b7280;
+}
+
+/* No Instruments State - Improved */
+.no-instruments {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted);
+}
+
+.no-instruments i {
+    font-size: 2rem;
+    opacity: 0.3;
+    color: var(--text-muted);
+}
+
+.no-instruments span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+/* Platform Actions - Improved Button Layout */
+.platform-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.platform-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+}
+
+/* Responsive adjustments for platform cards */
+@media (max-width: 768px) {
+    .platform-header h4 {
+        font-size: 1rem;
+    }
+
+    .platform-type-indicator {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .platform-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .platform-actions {
+        flex-direction: column;
+    }
+
+    .platform-actions .btn {
+        width: 100%;
+    }
+}
+
+/* Legacy styles for compatibility */
 .platform-title {
     font-size: 1.1rem;
     font-weight: 600;
@@ -1124,15 +1424,6 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.platform-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
 }
 
 .platform-structure {

@@ -14,6 +14,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.7] - 2025-12-02
+
+### 🎨 UI/UX Improvements: Platform Cards & Instrument Display
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **V3 Instruments API**: Fixed empty array response bug
+  - Root cause: D1 response object not properly unwrapped (missing `.results`)
+  - Instruments now correctly display in platform cards
+  - Also fixed in ROI list endpoints
+
+#### Added
+
+- **Ecosystem Badges**: Full ecosystem names with icons and colors
+  - "FOR" → "🌲 Forest" with green badge
+  - "MIR" → "💧 Mires" with blue badge
+  - "AGR" → "🌾 Arable Land" with amber badge
+  - All 12 ecosystem types supported
+
+- **Platform Type Badges**: Modern badges with icons
+  - Fixed platforms: tower icon with blue badge
+  - UAV platforms: crosshairs icon with purple badge
+  - Satellite platforms: satellite icon with cyan badge
+  - Mobile platforms: truck icon with green badge
+
+- **Instrument Type Indicators**: Colored dots showing instrument distribution
+  - Visual dots per instrument type (Phenocam, Multispectral, PAR, etc.)
+  - Tooltips showing count per type
+  - Max 5 dots with hover effects
+
+- **Improved Card Header Design**: Modern gradient header
+  - Gradient background replacing flat blue
+  - Subtle top accent bar
+  - Circular icon badge with drop shadow
+  - Better visual hierarchy
+
+#### Changed
+
+- **Platform Card Styling**: Complete visual refresh
+  - New `.ecosystem-badge` component with pill design
+  - New `.platform-type-badge` component
+  - New `.instrument-type-dots` container
+  - Improved empty state styling
+  - Responsive design for mobile
+
+---
+
 ## [9.0.6] - 2025-12-02
 
 ### 🔧 HOTFIX: Dashboard Instrument Display & Type Coercion Fixes
