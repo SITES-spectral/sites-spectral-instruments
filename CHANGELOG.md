@@ -14,6 +14,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.14] - 2025-12-02
+
+### 🔧 Platform Normalized Name Fix
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **UAV Platform Normalized Name**: Was showing "STA_DJI_M3M_UAV01" instead of "ANS_DJI_M3M_UAV01"
+  - Root cause: `updatePlatformNormalizedName()` used global `stationData` which wasn't synced
+  - Fix: Now uses `window.sitesStationDashboard?.stationData || stationData`
+  - Correctly generates station acronym from dashboard instance
+
+#### Technical Details
+
+- Same pattern applied as permission checks: dashboard instance as primary source
+- Affects all platform types: Fixed, UAV, Satellite, Mobile, USV, UUV
+
+---
+
 ## [9.0.13] - 2025-12-02
 
 ### 🔧 Permission Check Fix for Global Functions
