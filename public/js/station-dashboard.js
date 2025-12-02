@@ -2387,19 +2387,8 @@
          * @private
          */
         _showUserControls() {
-            const adminStationControls = document.getElementById('admin-station-controls');
             const adminPlatformControls = document.getElementById('admin-platform-controls');
             const exportBtn = document.getElementById('export-csv-btn');
-
-            // Admin-only station controls (create/delete station)
-            if (adminStationControls) {
-                if (this.currentUser?.role === 'admin' && this.stationData?.id) {
-                    adminStationControls.style.display = 'block';
-                    logger.log('Admin station controls shown');
-                } else {
-                    adminStationControls.style.display = 'none';
-                }
-            }
 
             // Platform controls for admin OR station users
             if (adminPlatformControls) {

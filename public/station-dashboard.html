@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.15">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.16">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.15">
+    <meta name="app-version" content="9.0.16">
     <meta name="build-date" content="2025-12-02">
 
     <style>
@@ -2732,17 +2732,7 @@
                             <div id="station-coordinates" style="display: none;"></div>
                         </div>
                     </div>
-                    <div id="admin-station-controls" style="display: none;">
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button onclick="showCreateStationModal()" class="btn btn-success" title="Create New Station">
-                                <i class="fas fa-plus"></i> <i class="fas fa-broadcast-tower"></i>
-                            </button>
-                            <button onclick="showDeleteStationModal(stationData.id, stationData.display_name)" class="btn btn-danger" title="Delete This Station">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                        <small style="display: block; color: #666; margin-top: 4px; text-align: right;">Admin Controls</small>
-                    </div>
+                    <!-- Admin station controls removed - station management done from main dashboard -->
                 </div>
             </div>
             <div id="error-state" class="error-state" style="display: none;">
@@ -4309,14 +4299,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.15"></script>
+    <script src="/js/utils.js?v=9.0.16"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=9.0.15"></script>
-    <script src="/js/components.js?v=9.0.15"></script>
+    <script src="/js/api.js?v=9.0.16"></script>
+    <script src="/js/components.js?v=9.0.16"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4326,10 +4316,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=9.0.15"></script>
-    <script src="/js/station-dashboard.js?v=9.0.15"></script>
-    <script src="/js/navigation.js?v=9.0.15"></script>
-    <script src="/js/export.js?v=9.0.15"></script>
+    <script src="/js/interactive-map.js?v=9.0.16"></script>
+    <script src="/js/station-dashboard.js?v=9.0.16"></script>
+    <script src="/js/navigation.js?v=9.0.16"></script>
+    <script src="/js/export.js?v=9.0.16"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -4472,17 +4462,8 @@
                 document.getElementById('station-name').textContent = stationData.display_name;
                 document.title = `${stationData.display_name} - SITES Spectral`;
 
-                // Show admin station controls if user is admin AND stationData is loaded
-                if (currentUser && currentUser.role === 'admin' && stationData && stationData.id) {
-                    document.getElementById('admin-station-controls').style.display = 'block';
-                } else if (currentUser && currentUser.role === 'admin') {
-                    showNotification('Station data not fully loaded. Please refresh the page.', 'warning');
-                }
-
-                // Show platform controls if user can edit (admin OR station user) AND stationData is loaded
-                if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'station') && stationData && stationData.id) {
-                    document.getElementById('admin-platform-controls').style.display = 'block';
-                }
+                // Platform controls are now handled by SitesStationDashboard._showUserControls()
+                // No duplicate logic needed here
 
                 // Set station description if available
                 const descriptionElement = document.getElementById('station-description');

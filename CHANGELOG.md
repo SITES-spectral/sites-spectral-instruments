@@ -14,6 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.16] - 2025-12-02
+
+### 🧹 Simplified Admin Controls - Remove Duplicate UI
+
+**Release Date**: 2025-12-02
+
+#### Removed
+
+- **admin-station-controls**: Removed duplicate station controls from header
+  - Station creation/deletion is done from main dashboard, not individual station pages
+  - Eliminates confusing duplicate "admin controls" section
+
+#### Changed
+
+- **Single source of truth**: Platform controls now only managed by `SitesStationDashboard._showUserControls()`
+- **Removed duplicate logic** in `showStationData()` function
+- **Cleaner UI**: Only platform controls shown in Platforms section
+
+#### Technical Details
+
+- Removed `admin-station-controls` div from station-dashboard.html
+- Simplified `_showUserControls()` to only handle platform controls and export button
+- Removed redundant permission checks in HTML script
+
+---
+
 ## [9.0.15] - 2025-12-02
 
 ### 🔒 Station Acronym Validation - No Fallback Allowed
