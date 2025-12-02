@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.10">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.11">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.10">
+    <meta name="app-version" content="9.0.11">
     <meta name="build-date" content="2025-12-02">
 
     <style>
@@ -4309,14 +4309,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.10"></script>
+    <script src="/js/utils.js?v=9.0.11"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=9.0.10"></script>
-    <script src="/js/components.js?v=9.0.10"></script>
+    <script src="/js/api.js?v=9.0.11"></script>
+    <script src="/js/components.js?v=9.0.11"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4326,10 +4326,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=9.0.10"></script>
-    <script src="/js/station-dashboard.js?v=9.0.10"></script>
-    <script src="/js/navigation.js?v=9.0.10"></script>
-    <script src="/js/export.js?v=9.0.10"></script>
+    <script src="/js/interactive-map.js?v=9.0.11"></script>
+    <script src="/js/station-dashboard.js?v=9.0.11"></script>
+    <script src="/js/navigation.js?v=9.0.11"></script>
+    <script src="/js/export.js?v=9.0.11"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -8592,6 +8592,824 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // =====================================================================
+        // INSTRUMENT EDIT FORM - Full CRUD Implementation
+        // =====================================================================
+
+        // Detect instrument category from type string
+        function detectInstrumentCategory(instrumentType) {
+            if (!instrumentType) return 'other';
+            const type = instrumentType.toLowerCase();
+
+            if (type.includes('phenocam') || type.includes('camera')) return 'phenocam';
+            if (type.includes('multispectral') || type.includes('skye') || type.includes('decagon') ||
+                type.includes('apogee ms') || type === 'ms') return 'multispectral';
+            if (type.includes('par') || type.includes('photosynthetically')) return 'par';
+            if (type.includes('ndvi')) return 'ndvi';
+            if (type.includes('pri') || type.includes('photochemical')) return 'pri';
+            if (type.includes('hyperspectral')) return 'hyperspectral';
+            if (type.includes('lidar') || type.includes('laser')) return 'lidar';
+            if (type.includes('thermal')) return 'thermal';
+
+            return 'other';
+        }
+
+        // Get icon and color for instrument category
+        function getInstrumentCategoryConfig(category) {
+            const configs = {
+                phenocam: { icon: 'fa-camera', color: '#059669', label: 'Phenocam' },
+                multispectral: { icon: 'fa-satellite-dish', color: '#7c3aed', label: 'Multispectral Sensor' },
+                par: { icon: 'fa-sun', color: '#f59e0b', label: 'PAR Sensor' },
+                ndvi: { icon: 'fa-leaf', color: '#10b981', label: 'NDVI Sensor' },
+                pri: { icon: 'fa-microscope', color: '#3b82f6', label: 'PRI Sensor' },
+                hyperspectral: { icon: 'fa-rainbow', color: '#ec4899', label: 'Hyperspectral Sensor' },
+                lidar: { icon: 'fa-crosshairs', color: '#ef4444', label: 'LiDAR Sensor' },
+                thermal: { icon: 'fa-temperature-high', color: '#f97316', label: 'Thermal Sensor' },
+                other: { icon: 'fa-microchip', color: '#6b7280', label: 'Instrument' }
+            };
+            return configs[category] || configs.other;
+        }
+
+        // Global function for editing instruments
+        window.openEditInstrumentForm = function(instrument) {
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'station')) {
+                showNotification('Instrument editing requires admin or station user privileges', 'error');
+                return;
+            }
+
+            const category = detectInstrumentCategory(instrument.instrument_type);
+            const config = getInstrumentCategoryConfig(category);
+
+            const modal = document.getElementById('instrument-edit-modal');
+            const formContainer = document.getElementById('instrument-edit-form');
+
+            if (!modal || !formContainer) {
+                console.error('Instrument edit modal not found');
+                return;
+            }
+
+            // Store instrument ID for save operation
+            modal.dataset.instrumentId = instrument.id;
+
+            // Update modal header
+            const modalHeader = modal.querySelector('.modal-header-large h3');
+            if (modalHeader) {
+                modalHeader.innerHTML = `<i class="fas ${config.icon}" style="color: ${config.color}"></i> Edit ${config.label}`;
+            }
+
+            // Build type-specific section based on category
+            let typeSpecificSection = '';
+
+            if (category === 'phenocam') {
+                typeSpecificSection = buildPhenocamSection(instrument);
+            } else if (category === 'multispectral') {
+                typeSpecificSection = buildMultispectralSection(instrument);
+            } else if (category === 'par') {
+                typeSpecificSection = buildPARSection(instrument);
+            } else if (category === 'ndvi') {
+                typeSpecificSection = buildNDVISection(instrument);
+            } else if (category === 'pri') {
+                typeSpecificSection = buildPRISection(instrument);
+            } else if (category === 'hyperspectral') {
+                typeSpecificSection = buildHyperspectralSection(instrument);
+            } else {
+                typeSpecificSection = buildGenericSensorSection(instrument);
+            }
+
+            // Build the complete edit form
+            formContainer.innerHTML = `
+                <form id="edit-instrument-form" class="modal-form">
+                    <!-- Section 1: General Information -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> General Information</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-display-name">Display Name *</label>
+                                <input type="text" id="edit-inst-display-name" class="form-input" required
+                                       value="${escapeHtml(instrument.display_name || '')}"
+                                       placeholder="e.g., Platform Phenocam 01">
+                                <small>Descriptive name for the instrument</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-normalized-name">Normalized ID</label>
+                                <input type="text" id="edit-inst-normalized-name" class="form-input" readonly
+                                       value="${escapeHtml(instrument.normalized_name || '')}"
+                                       style="background: #f3f4f6; cursor: not-allowed;">
+                                <small>System identifier (cannot be changed)</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-type">Instrument Type</label>
+                                <select id="edit-inst-type" class="form-input">
+                                    <optgroup label="Phenocam">
+                                        <option value="Phenocam" ${instrument.instrument_type === 'Phenocam' ? 'selected' : ''}>Phenocam</option>
+                                    </optgroup>
+                                    <optgroup label="Multispectral Sensors">
+                                        <option value="SKYE MultiSpectral Sensor (Uplooking)" ${instrument.instrument_type === 'SKYE MultiSpectral Sensor (Uplooking)' ? 'selected' : ''}>SKYE MultiSpectral (Uplooking)</option>
+                                        <option value="SKYE MultiSpectral Sensor (Downlooking)" ${instrument.instrument_type === 'SKYE MultiSpectral Sensor (Downlooking)' ? 'selected' : ''}>SKYE MultiSpectral (Downlooking)</option>
+                                        <option value="Decagon Sensor (Uplooking)" ${instrument.instrument_type === 'Decagon Sensor (Uplooking)' ? 'selected' : ''}>Decagon (Uplooking)</option>
+                                        <option value="Decagon Sensor (Downlooking)" ${instrument.instrument_type === 'Decagon Sensor (Downlooking)' ? 'selected' : ''}>Decagon (Downlooking)</option>
+                                        <option value="Apogee MS" ${instrument.instrument_type === 'Apogee MS' ? 'selected' : ''}>Apogee MS</option>
+                                    </optgroup>
+                                    <optgroup label="Vegetation Indices">
+                                        <option value="NDVI Sensor" ${instrument.instrument_type === 'NDVI Sensor' ? 'selected' : ''}>NDVI Sensor</option>
+                                        <option value="PRI Sensor (2-band ~530nm/~570nm)" ${instrument.instrument_type === 'PRI Sensor (2-band ~530nm/~570nm)' ? 'selected' : ''}>PRI Sensor</option>
+                                    </optgroup>
+                                    <optgroup label="Radiation Sensors">
+                                        <option value="PAR Sensor" ${instrument.instrument_type === 'PAR Sensor' ? 'selected' : ''}>PAR Sensor</option>
+                                    </optgroup>
+                                    <optgroup label="Advanced Sensors">
+                                        <option value="Hyperspectral Sensor" ${instrument.instrument_type === 'Hyperspectral Sensor' ? 'selected' : ''}>Hyperspectral Sensor</option>
+                                        <option value="LiDAR Sensor" ${instrument.instrument_type === 'LiDAR Sensor' ? 'selected' : ''}>LiDAR Sensor</option>
+                                        <option value="Thermal Sensor" ${instrument.instrument_type === 'Thermal Sensor' ? 'selected' : ''}>Thermal Sensor</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-status">Status</label>
+                                <select id="edit-inst-status" class="form-input">
+                                    <option value="Active" ${instrument.status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Operational" ${instrument.status === 'Operational' ? 'selected' : ''}>Operational</option>
+                                    <option value="Inactive" ${instrument.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Maintenance" ${instrument.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                    <option value="Decommissioned" ${instrument.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-ecosystem">Ecosystem Code</label>
+                                <select id="edit-inst-ecosystem" class="form-input">
+                                    <option value="">-- Inherit from Platform --</option>
+                                    <option value="FOR" ${instrument.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
+                                    <option value="AGR" ${instrument.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Agricultural</option>
+                                    <option value="MIR" ${instrument.ecosystem_code === 'MIR' ? 'selected' : ''}>MIR - Mires</option>
+                                    <option value="LAK" ${instrument.ecosystem_code === 'LAK' ? 'selected' : ''}>LAK - Lake</option>
+                                    <option value="WET" ${instrument.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
+                                    <option value="GRA" ${instrument.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                    <option value="HEA" ${instrument.ecosystem_code === 'HEA' ? 'selected' : ''}>HEA - Heathland</option>
+                                    <option value="ALP" ${instrument.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine</option>
+                                    <option value="GEN" ${instrument.ecosystem_code === 'GEN' ? 'selected' : ''}>GEN - General</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-legacy-acronym">Legacy Acronym</label>
+                                <input type="text" id="edit-inst-legacy-acronym" class="form-input"
+                                       value="${escapeHtml(instrument.legacy_acronym || '')}"
+                                       placeholder="e.g., PHE01">
+                                <small>Legacy system identifier</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Type-Specific Specifications -->
+                    ${typeSpecificSection}
+
+                    <!-- Section 3: Position & Orientation -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-map-marker-alt"></i> Position & Orientation</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-latitude">Latitude</label>
+                                <input type="number" id="edit-inst-latitude" class="form-input" step="0.000001"
+                                       value="${instrument.latitude || ''}"
+                                       placeholder="e.g., 68.3456">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-longitude">Longitude</label>
+                                <input type="number" id="edit-inst-longitude" class="form-input" step="0.000001"
+                                       value="${instrument.longitude || ''}"
+                                       placeholder="e.g., 18.7892">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-height">Height (m)</label>
+                                <input type="number" id="edit-inst-height" class="form-input" step="0.1"
+                                       value="${instrument.instrument_height_m || ''}"
+                                       placeholder="e.g., 2.5">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-viewing-direction">Viewing Direction</label>
+                                <select id="edit-inst-viewing-direction" class="form-input">
+                                    <option value="">-- Select --</option>
+                                    <option value="N" ${instrument.viewing_direction === 'N' ? 'selected' : ''}>North</option>
+                                    <option value="NE" ${instrument.viewing_direction === 'NE' ? 'selected' : ''}>North-East</option>
+                                    <option value="E" ${instrument.viewing_direction === 'E' ? 'selected' : ''}>East</option>
+                                    <option value="SE" ${instrument.viewing_direction === 'SE' ? 'selected' : ''}>South-East</option>
+                                    <option value="S" ${instrument.viewing_direction === 'S' ? 'selected' : ''}>South</option>
+                                    <option value="SW" ${instrument.viewing_direction === 'SW' ? 'selected' : ''}>South-West</option>
+                                    <option value="W" ${instrument.viewing_direction === 'W' ? 'selected' : ''}>West</option>
+                                    <option value="NW" ${instrument.viewing_direction === 'NW' ? 'selected' : ''}>North-West</option>
+                                    <option value="Zenith" ${instrument.viewing_direction === 'Zenith' ? 'selected' : ''}>Zenith (Up)</option>
+                                    <option value="Nadir" ${instrument.viewing_direction === 'Nadir' ? 'selected' : ''}>Nadir (Down)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-azimuth">Azimuth (°)</label>
+                                <input type="number" id="edit-inst-azimuth" class="form-input" step="0.1" min="0" max="360"
+                                       value="${instrument.azimuth_degrees || ''}"
+                                       placeholder="0-360">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-nadir">Degrees from Nadir</label>
+                                <input type="number" id="edit-inst-nadir" class="form-input" step="0.1" min="0" max="90"
+                                       value="${instrument.degrees_from_nadir || ''}"
+                                       placeholder="0-90">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Timeline & Deployment -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-calendar-alt"></i> Timeline & Deployment</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-deployment-date">Deployment Date</label>
+                                <input type="date" id="edit-inst-deployment-date" class="form-input"
+                                       value="${instrument.deployment_date || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-calibration-date">Last Calibration</label>
+                                <input type="date" id="edit-inst-calibration-date" class="form-input"
+                                       value="${instrument.calibration_date || ''}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-first-year">First Measurement Year</label>
+                                <input type="number" id="edit-inst-first-year" class="form-input" min="1990" max="2100"
+                                       value="${instrument.first_measurement_year || ''}"
+                                       placeholder="e.g., 2015">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-last-year">Last Measurement Year</label>
+                                <input type="number" id="edit-inst-last-year" class="form-input" min="1990" max="2100"
+                                       value="${instrument.last_measurement_year || ''}"
+                                       placeholder="e.g., 2025 (or leave empty if active)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: System Configuration -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-cogs"></i> System Configuration</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-power-source">Power Source</label>
+                                <select id="edit-inst-power-source" class="form-input">
+                                    <option value="">-- Select --</option>
+                                    <option value="Mains" ${instrument.power_source === 'Mains' ? 'selected' : ''}>Mains Power</option>
+                                    <option value="Solar" ${instrument.power_source === 'Solar' ? 'selected' : ''}>Solar Panel</option>
+                                    <option value="Battery" ${instrument.power_source === 'Battery' ? 'selected' : ''}>Battery</option>
+                                    <option value="PoE" ${instrument.power_source === 'PoE' ? 'selected' : ''}>Power over Ethernet</option>
+                                    <option value="Hybrid" ${instrument.power_source === 'Hybrid' ? 'selected' : ''}>Hybrid</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-data-transmission">Data Transmission</label>
+                                <select id="edit-inst-data-transmission" class="form-input">
+                                    <option value="">-- Select --</option>
+                                    <option value="Ethernet" ${instrument.data_transmission === 'Ethernet' ? 'selected' : ''}>Ethernet</option>
+                                    <option value="WiFi" ${instrument.data_transmission === 'WiFi' ? 'selected' : ''}>WiFi</option>
+                                    <option value="Cellular" ${instrument.data_transmission === 'Cellular' ? 'selected' : ''}>Cellular (4G/5G)</option>
+                                    <option value="LoRa" ${instrument.data_transmission === 'LoRa' ? 'selected' : ''}>LoRa</option>
+                                    <option value="Satellite" ${instrument.data_transmission === 'Satellite' ? 'selected' : ''}>Satellite</option>
+                                    <option value="Manual" ${instrument.data_transmission === 'Manual' ? 'selected' : ''}>Manual Download</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-inst-warranty">Warranty Expires</label>
+                                <input type="date" id="edit-inst-warranty" class="form-input"
+                                       value="${instrument.manufacturer_warranty_expires || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-inst-quality-score">Quality Score</label>
+                                <input type="number" id="edit-inst-quality-score" class="form-input" min="0" max="100" step="1"
+                                       value="${instrument.image_quality_score || ''}"
+                                       placeholder="0-100">
+                                <small>Overall data quality rating</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Documentation -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-file-alt"></i> Documentation</h4>
+                        <div class="form-group">
+                            <label for="edit-inst-description">Description</label>
+                            <textarea id="edit-inst-description" class="form-input" rows="2"
+                                      placeholder="General description...">${escapeHtml(instrument.description || '')}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-installation-notes">Installation Notes</label>
+                            <textarea id="edit-inst-installation-notes" class="form-input" rows="2"
+                                      placeholder="Installation details...">${escapeHtml(instrument.installation_notes || '')}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-maintenance-notes">Maintenance Notes</label>
+                            <textarea id="edit-inst-maintenance-notes" class="form-input" rows="2"
+                                      placeholder="Maintenance history...">${escapeHtml(instrument.maintenance_notes || '')}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            // Add form submit handler
+            const form = document.getElementById('edit-instrument-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveInstrumentEdits(instrument.id);
+            });
+
+            modal.classList.add('show');
+        }
+
+        // Build Phenocam-specific section
+        function buildPhenocamSection(instrument) {
+            const brands = ['Mobotix', 'Axis', 'Canon', 'Nikon', 'Sony', 'Other'];
+            const resolutions = [
+                { value: '4096x3072', label: '4096x3072 (12MP)' },
+                { value: '3264x2448', label: '3264x2448 (8MP)' },
+                { value: '2592x1944', label: '2592x1944 (5MP)' },
+                { value: '2048x1536', label: '2048x1536 (3MP)' },
+                { value: '1920x1080', label: '1920x1080 (2MP/FHD)' }
+            ];
+
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-camera"></i> Camera Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-camera-brand">Camera Brand</label>
+                            <select id="edit-inst-camera-brand" class="form-input">
+                                <option value="">-- Select --</option>
+                                ${brands.map(b => `<option value="${b}" ${instrument.camera_brand === b ? 'selected' : ''}>${b}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-camera-model">Camera Model</label>
+                            <input type="text" id="edit-inst-camera-model" class="form-input"
+                                   value="${escapeHtml(instrument.camera_model || '')}"
+                                   placeholder="e.g., M16B, P1437-E">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-camera-serial">Serial Number</label>
+                            <input type="text" id="edit-inst-camera-serial" class="form-input"
+                                   value="${escapeHtml(instrument.camera_serial_number || '')}"
+                                   placeholder="Camera serial number">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-camera-resolution">Resolution</label>
+                            <select id="edit-inst-camera-resolution" class="form-input">
+                                <option value="">-- Select --</option>
+                                ${resolutions.map(r => `<option value="${r.value}" ${instrument.camera_resolution === r.value ? 'selected' : ''}>${r.label}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-camera-lens">Lens</label>
+                            <input type="text" id="edit-inst-camera-lens" class="form-input"
+                                   value="${escapeHtml(instrument.camera_lens || '')}"
+                                   placeholder="e.g., 18-55mm f/3.5-5.6">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-camera-focal-length">Focal Length (mm)</label>
+                            <input type="number" id="edit-inst-camera-focal-length" class="form-input" step="0.1"
+                                   value="${instrument.camera_focal_length_mm || ''}"
+                                   placeholder="e.g., 50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-camera-aperture">Aperture</label>
+                            <select id="edit-inst-camera-aperture" class="form-input">
+                                <option value="">-- Select --</option>
+                                <option value="f/1.4" ${instrument.camera_aperture === 'f/1.4' ? 'selected' : ''}>f/1.4</option>
+                                <option value="f/1.8" ${instrument.camera_aperture === 'f/1.8' ? 'selected' : ''}>f/1.8</option>
+                                <option value="f/2.0" ${instrument.camera_aperture === 'f/2.0' ? 'selected' : ''}>f/2.0</option>
+                                <option value="f/2.8" ${instrument.camera_aperture === 'f/2.8' ? 'selected' : ''}>f/2.8</option>
+                                <option value="f/4.0" ${instrument.camera_aperture === 'f/4.0' ? 'selected' : ''}>f/4.0</option>
+                                <option value="Auto" ${instrument.camera_aperture === 'Auto' ? 'selected' : ''}>Auto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-camera-iso">ISO</label>
+                            <select id="edit-inst-camera-iso" class="form-input">
+                                <option value="">-- Select --</option>
+                                <option value="100" ${instrument.camera_iso === '100' ? 'selected' : ''}>100</option>
+                                <option value="200" ${instrument.camera_iso === '200' ? 'selected' : ''}>200</option>
+                                <option value="400" ${instrument.camera_iso === '400' ? 'selected' : ''}>400</option>
+                                <option value="800" ${instrument.camera_iso === '800' ? 'selected' : ''}>800</option>
+                                <option value="Auto" ${instrument.camera_iso === 'Auto' ? 'selected' : ''}>Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-inst-archive-path">Image Archive Path</label>
+                        <input type="text" id="edit-inst-archive-path" class="form-input"
+                               value="${escapeHtml(instrument.image_archive_path || '')}"
+                               placeholder="/path/to/image/archive">
+                        <small>Server path for raw image storage</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build Multispectral-specific section
+        function buildMultispectralSection(instrument) {
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-satellite-dish"></i> Sensor Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-brand">Sensor Brand</label>
+                            <input type="text" id="edit-inst-sensor-brand" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_brand || '')}"
+                                   placeholder="e.g., SKYE, Decagon, Apogee">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-model">Sensor Model</label>
+                            <input type="text" id="edit-inst-sensor-model" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_model || '')}"
+                                   placeholder="e.g., SKR 1800">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-serial">Serial Number</label>
+                            <input type="text" id="edit-inst-sensor-serial" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_serial_number || '')}"
+                                   placeholder="Sensor serial number">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-orientation">Orientation</label>
+                            <select id="edit-inst-orientation" class="form-input">
+                                <option value="">-- Select --</option>
+                                <option value="uplooking" ${instrument.orientation === 'uplooking' ? 'selected' : ''}>Uplooking</option>
+                                <option value="downlooking" ${instrument.orientation === 'downlooking' ? 'selected' : ''}>Downlooking</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-num-channels">Number of Channels</label>
+                            <input type="number" id="edit-inst-num-channels" class="form-input" min="1" max="8"
+                                   value="${instrument.number_of_channels || ''}"
+                                   placeholder="e.g., 4">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-fov">Field of View (°)</label>
+                            <input type="number" id="edit-inst-fov" class="form-input" step="0.1" min="0" max="180"
+                                   value="${instrument.field_of_view_degrees || ''}"
+                                   placeholder="e.g., 180">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-datalogger">Datalogger Type</label>
+                            <input type="text" id="edit-inst-datalogger" class="form-input"
+                                   value="${escapeHtml(instrument.datalogger_type || 'Campbell Scientific CR1000X')}"
+                                   placeholder="e.g., Campbell Scientific CR1000X">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-cable-length">Cable Length (m)</label>
+                            <input type="number" id="edit-inst-cable-length" class="form-input" step="0.1"
+                                   value="${instrument.cable_length_m || ''}"
+                                   placeholder="e.g., 10.0">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build PAR-specific section
+        function buildPARSection(instrument) {
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-sun"></i> PAR Sensor Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-brand">Sensor Brand</label>
+                            <input type="text" id="edit-inst-sensor-brand" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_brand || '')}"
+                                   placeholder="e.g., LI-COR, Apogee">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-model">Sensor Model</label>
+                            <input type="text" id="edit-inst-sensor-model" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_model || '')}"
+                                   placeholder="e.g., LI-190R">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-spectral-range">Spectral Range</label>
+                            <input type="text" id="edit-inst-spectral-range" class="form-input"
+                                   value="${escapeHtml(instrument.spectral_range || '')}"
+                                   placeholder="e.g., 400-700 nm">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-calibration-coeff">Calibration Coefficient</label>
+                            <input type="text" id="edit-inst-calibration-coeff" class="form-input"
+                                   value="${escapeHtml(instrument.calibration_coefficient || '')}"
+                                   placeholder="e.g., 6.87 µmol/s/m²/mV">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build NDVI-specific section
+        function buildNDVISection(instrument) {
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-leaf"></i> NDVI Sensor Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-brand">Sensor Brand</label>
+                            <input type="text" id="edit-inst-sensor-brand" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_brand || '')}"
+                                   placeholder="e.g., Apogee, Decagon">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-model">Sensor Model</label>
+                            <input type="text" id="edit-inst-sensor-model" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_model || '')}"
+                                   placeholder="e.g., SRS-NDVI">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-red-wavelength">Red Wavelength (nm)</label>
+                            <input type="number" id="edit-inst-red-wavelength" class="form-input" step="1"
+                                   value="${instrument.red_wavelength_nm || ''}"
+                                   placeholder="e.g., 650">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-nir-wavelength">NIR Wavelength (nm)</label>
+                            <input type="number" id="edit-inst-nir-wavelength" class="form-input" step="1"
+                                   value="${instrument.nir_wavelength_nm || ''}"
+                                   placeholder="e.g., 810">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build PRI-specific section
+        function buildPRISection(instrument) {
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-microscope"></i> PRI Sensor Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-brand">Sensor Brand</label>
+                            <input type="text" id="edit-inst-sensor-brand" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_brand || '')}"
+                                   placeholder="e.g., SKYE">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-model">Sensor Model</label>
+                            <input type="text" id="edit-inst-sensor-model" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_model || '')}"
+                                   placeholder="e.g., SKR 1850">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-band1-wavelength">Band 1 Wavelength (nm)</label>
+                            <input type="number" id="edit-inst-band1-wavelength" class="form-input" step="1"
+                                   value="${instrument.band1_wavelength_nm || ''}"
+                                   placeholder="e.g., 531">
+                            <small>Typically ~531 nm</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-band2-wavelength">Band 2 Wavelength (nm)</label>
+                            <input type="number" id="edit-inst-band2-wavelength" class="form-input" step="1"
+                                   value="${instrument.band2_wavelength_nm || ''}"
+                                   placeholder="e.g., 570">
+                            <small>Typically ~570 nm</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build Hyperspectral-specific section
+        function buildHyperspectralSection(instrument) {
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-rainbow"></i> Hyperspectral Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-brand">Sensor Brand</label>
+                            <input type="text" id="edit-inst-sensor-brand" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_brand || '')}"
+                                   placeholder="e.g., Headwall, Specim">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-model">Sensor Model</label>
+                            <input type="text" id="edit-inst-sensor-model" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_model || '')}"
+                                   placeholder="e.g., Nano-Hyperspec">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-spectral-start">Spectral Range Start (nm)</label>
+                            <input type="number" id="edit-inst-spectral-start" class="form-input" step="1"
+                                   value="${instrument.spectral_range_start_nm || ''}"
+                                   placeholder="e.g., 400">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-spectral-end">Spectral Range End (nm)</label>
+                            <input type="number" id="edit-inst-spectral-end" class="form-input" step="1"
+                                   value="${instrument.spectral_range_end_nm || ''}"
+                                   placeholder="e.g., 1000">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-spectral-resolution">Spectral Resolution (nm)</label>
+                            <input type="number" id="edit-inst-spectral-resolution" class="form-input" step="0.1"
+                                   value="${instrument.spectral_resolution_nm || ''}"
+                                   placeholder="e.g., 2.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-num-bands">Number of Bands</label>
+                            <input type="number" id="edit-inst-num-bands" class="form-input" step="1"
+                                   value="${instrument.number_of_bands || ''}"
+                                   placeholder="e.g., 270">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Build generic sensor section for other types
+        function buildGenericSensorSection(instrument) {
+            return `
+                <div class="form-section">
+                    <h4><i class="fas fa-microchip"></i> Sensor Specifications</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-brand">Sensor Brand</label>
+                            <input type="text" id="edit-inst-sensor-brand" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_brand || '')}"
+                                   placeholder="Manufacturer name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-model">Sensor Model</label>
+                            <input type="text" id="edit-inst-sensor-model" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_model || '')}"
+                                   placeholder="Model number">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-inst-sensor-serial">Serial Number</label>
+                            <input type="text" id="edit-inst-sensor-serial" class="form-input"
+                                   value="${escapeHtml(instrument.sensor_serial_number || '')}"
+                                   placeholder="Sensor serial number">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Save instrument edits
+        async function saveInstrumentEdits(instrumentId) {
+            const submitBtn = document.querySelector('#edit-instrument-form button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                // Collect form data
+                const updateData = {
+                    display_name: document.getElementById('edit-inst-display-name')?.value.trim() || null,
+                    instrument_type: document.getElementById('edit-inst-type')?.value || null,
+                    status: document.getElementById('edit-inst-status')?.value || null,
+                    ecosystem_code: document.getElementById('edit-inst-ecosystem')?.value || null,
+                    legacy_acronym: document.getElementById('edit-inst-legacy-acronym')?.value.trim() || null,
+
+                    // Position
+                    latitude: parseFloat(document.getElementById('edit-inst-latitude')?.value) || null,
+                    longitude: parseFloat(document.getElementById('edit-inst-longitude')?.value) || null,
+                    instrument_height_m: parseFloat(document.getElementById('edit-inst-height')?.value) || null,
+                    viewing_direction: document.getElementById('edit-inst-viewing-direction')?.value || null,
+                    azimuth_degrees: parseFloat(document.getElementById('edit-inst-azimuth')?.value) || null,
+                    degrees_from_nadir: parseFloat(document.getElementById('edit-inst-nadir')?.value) || null,
+
+                    // Timeline
+                    deployment_date: document.getElementById('edit-inst-deployment-date')?.value || null,
+                    calibration_date: document.getElementById('edit-inst-calibration-date')?.value || null,
+                    first_measurement_year: parseInt(document.getElementById('edit-inst-first-year')?.value) || null,
+                    last_measurement_year: parseInt(document.getElementById('edit-inst-last-year')?.value) || null,
+
+                    // System Config
+                    power_source: document.getElementById('edit-inst-power-source')?.value || null,
+                    data_transmission: document.getElementById('edit-inst-data-transmission')?.value || null,
+                    manufacturer_warranty_expires: document.getElementById('edit-inst-warranty')?.value || null,
+                    image_quality_score: parseInt(document.getElementById('edit-inst-quality-score')?.value) || null,
+
+                    // Documentation
+                    description: document.getElementById('edit-inst-description')?.value.trim() || null,
+                    installation_notes: document.getElementById('edit-inst-installation-notes')?.value.trim() || null,
+                    maintenance_notes: document.getElementById('edit-inst-maintenance-notes')?.value.trim() || null,
+
+                    // Type-specific fields (Phenocam)
+                    camera_brand: document.getElementById('edit-inst-camera-brand')?.value || null,
+                    camera_model: document.getElementById('edit-inst-camera-model')?.value.trim() || null,
+                    camera_serial_number: document.getElementById('edit-inst-camera-serial')?.value.trim() || null,
+                    camera_resolution: document.getElementById('edit-inst-camera-resolution')?.value || null,
+                    camera_lens: document.getElementById('edit-inst-camera-lens')?.value.trim() || null,
+                    camera_focal_length_mm: parseFloat(document.getElementById('edit-inst-camera-focal-length')?.value) || null,
+                    camera_aperture: document.getElementById('edit-inst-camera-aperture')?.value || null,
+                    camera_iso: document.getElementById('edit-inst-camera-iso')?.value || null,
+                    image_archive_path: document.getElementById('edit-inst-archive-path')?.value.trim() || null,
+
+                    // Type-specific fields (Multispectral)
+                    sensor_brand: document.getElementById('edit-inst-sensor-brand')?.value.trim() || null,
+                    sensor_model: document.getElementById('edit-inst-sensor-model')?.value.trim() || null,
+                    sensor_serial_number: document.getElementById('edit-inst-sensor-serial')?.value.trim() || null,
+                    orientation: document.getElementById('edit-inst-orientation')?.value || null,
+                    number_of_channels: parseInt(document.getElementById('edit-inst-num-channels')?.value) || null,
+                    field_of_view_degrees: parseFloat(document.getElementById('edit-inst-fov')?.value) || null,
+                    datalogger_type: document.getElementById('edit-inst-datalogger')?.value.trim() || null,
+                    cable_length_m: parseFloat(document.getElementById('edit-inst-cable-length')?.value) || null,
+
+                    // Type-specific fields (PAR)
+                    spectral_range: document.getElementById('edit-inst-spectral-range')?.value.trim() || null,
+                    calibration_coefficient: document.getElementById('edit-inst-calibration-coeff')?.value.trim() || null,
+
+                    // Type-specific fields (NDVI)
+                    red_wavelength_nm: parseInt(document.getElementById('edit-inst-red-wavelength')?.value) || null,
+                    nir_wavelength_nm: parseInt(document.getElementById('edit-inst-nir-wavelength')?.value) || null,
+
+                    // Type-specific fields (PRI)
+                    band1_wavelength_nm: parseInt(document.getElementById('edit-inst-band1-wavelength')?.value) || null,
+                    band2_wavelength_nm: parseInt(document.getElementById('edit-inst-band2-wavelength')?.value) || null,
+
+                    // Type-specific fields (Hyperspectral)
+                    spectral_range_start_nm: parseInt(document.getElementById('edit-inst-spectral-start')?.value) || null,
+                    spectral_range_end_nm: parseInt(document.getElementById('edit-inst-spectral-end')?.value) || null,
+                    spectral_resolution_nm: parseFloat(document.getElementById('edit-inst-spectral-resolution')?.value) || null,
+                    number_of_bands: parseInt(document.getElementById('edit-inst-num-bands')?.value) || null
+                };
+
+                // Remove null values to only update provided fields
+                Object.keys(updateData).forEach(key => {
+                    if (updateData[key] === null) delete updateData[key];
+                });
+
+                const response = await fetch(`/api/instruments/${instrumentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('sites_spectral_token')}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showNotification('Instrument updated successfully!', 'success');
+                    closeInstrumentEditModal();
+
+                    // Reload platforms and instruments
+                    if (window.sitesStationDashboard) {
+                        await window.sitesStationDashboard._loadPlatformsAndInstruments();
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to update instrument');
+                }
+            } catch (error) {
+                console.error('Error saving instrument:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         }
 
         // Open creation form with a specific platform type pre-selected

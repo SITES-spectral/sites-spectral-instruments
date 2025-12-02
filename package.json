@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.10",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.10 - Type Icons & Sorting",
+  "version": "9.0.11",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.11 - Full Edit Modals",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

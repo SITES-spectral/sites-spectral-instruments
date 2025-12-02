@@ -14,6 +14,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.11] - 2025-12-02
+
+### 🔧 Full Edit Modals for Platforms & Instruments
+
+**Release Date**: 2025-12-02
+
+#### Added
+
+- **Full Edit Platform Modal**: Complete CRUD form implementation
+  - Basic Information section (Display Name, Normalized ID, Platform Type, Ecosystem)
+  - Location section (Latitude, Longitude, Height)
+  - Description section with text area
+  - Form validation and API integration
+  - `openEditPlatformForm()` global function for modal rendering
+  - `savePlatformEdits()` function with proper error handling
+
+- **Full Edit Instrument Modal**: Comprehensive type-specific edit forms
+  - General Information section (Display Name, Normalized ID, Type, Status, Ecosystem)
+  - **Type-Specific Sections**:
+    - Phenocam: Camera brand, model, serial, resolution, lens, aperture, ISO, archive path
+    - Multispectral: Sensor brand, model, orientation, channels, FOV, datalogger, cable length
+    - PAR Sensor: Spectral range, calibration coefficient
+    - NDVI Sensor: Red wavelength, NIR wavelength
+    - PRI Sensor: Band 1 & Band 2 wavelengths
+    - Hyperspectral: Spectral range start/end, resolution, number of bands
+    - Generic: Brand, model, serial number for unrecognized types
+  - Position & Orientation section (Lat/Lon, height, viewing direction, azimuth, nadir)
+  - Timeline & Deployment section (deployment date, calibration date, measurement years)
+  - System Configuration section (power source, data transmission, warranty, quality score)
+  - Documentation section (description, installation notes, maintenance notes)
+
+- **Instrument Category Detection**: `detectInstrumentCategory()` function for type routing
+  - Pattern-based detection for phenocam, multispectral, PAR, NDVI, PRI, hyperspectral, LiDAR, thermal
+
+- **Category-Specific Icons**: `getInstrumentCategoryConfig()` returns icon, color, and label per type
+
+#### Technical Details
+
+- `window.openEditInstrumentForm()`: Global function for instrument edit modal
+- `saveInstrumentEdits()`: Collects all form fields and sends PUT request to API
+- Type-specific section builders: `buildPhenocamSection()`, `buildMultispectralSection()`, etc.
+- All forms include proper HTML escaping via `escapeHtml()` helper
+- Form submit handler with loading state and error handling
+
+#### Fixed
+
+- **Placeholder-only Edit Modals**: Previously showed only placeholder text, now full forms
+- **LiDAR Icon**: Changed from `fa-broadcast-tower` to `fa-crosshairs` per user request
+
+---
+
 ## [9.0.10] - 2025-12-02
 
 ### 🎨 Instrument Type Icons & Status-Based Sorting

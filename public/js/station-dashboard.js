@@ -2211,28 +2211,13 @@
          * @param {Object} instrument - Instrument data
          */
         _showEditInstrumentModal(instrument) {
-            const modal = document.getElementById('instrument-edit-modal');
-            const formContainer = document.getElementById('instrument-edit-form');
-
-            if (!modal || !formContainer) {
-                logger.error('Instrument edit modal elements not found');
-                return;
+            // Use global function from station-dashboard.html
+            if (typeof global.openEditInstrumentForm === 'function') {
+                global.openEditInstrumentForm(instrument);
+            } else {
+                logger.error('openEditInstrumentForm function not found');
+                this._showNotification('Instrument edit form not available', 'error');
             }
-
-            // Populate form (simplified - full implementation in station.html)
-            formContainer.innerHTML = `
-                <form id="edit-instrument-form" class="modal-form">
-                    <p>Edit form for ${escapeHtml(instrument.display_name)}</p>
-                    <p><em>Full form implementation in station.html</em></p>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeInstrumentEditModal()">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                    </div>
-                </form>
-            `;
-
-            modal.classList.add('show');
         }
 
         /**
