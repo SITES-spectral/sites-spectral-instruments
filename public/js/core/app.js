@@ -194,6 +194,26 @@
                     const parent = img.parentElement;
                     if (parent) {
                         parent.classList.add('no-image');
+
+                        // Check for type-based fallback icon data
+                        const typeIcon = img.dataset.typeIcon;
+                        const typeColor = img.dataset.typeColor;
+
+                        if (typeIcon && typeColor) {
+                            // Replace image container with type-based icon
+                            parent.style.background = `linear-gradient(135deg, ${typeColor}15 0%, ${typeColor}25 100%)`;
+                            parent.style.border = `1px solid ${typeColor}40`;
+                            parent.style.display = 'flex';
+                            parent.style.alignItems = 'center';
+                            parent.style.justifyContent = 'center';
+
+                            // Create icon element
+                            const iconEl = document.createElement('i');
+                            iconEl.className = `fas ${typeIcon}`;
+                            iconEl.style.fontSize = '18px';
+                            iconEl.style.color = typeColor;
+                            parent.appendChild(iconEl);
+                        }
                     }
                     img.style.display = 'none';
                     event.preventDefault();

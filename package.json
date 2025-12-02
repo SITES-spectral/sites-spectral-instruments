@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.9",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.9 - Enhanced Loading UX",
+  "version": "9.0.10",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.10 - Type Icons & Sorting",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

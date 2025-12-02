@@ -1218,6 +1218,26 @@
                 }
             });
 
+            // Sort instruments within each category: Active first, then by status
+            const statusOrder = {
+                'Active': 0,
+                'Operational': 1,
+                'Maintenance': 2,
+                'Pending Installation': 3,
+                'Inactive': 4,
+                'Decommissioned': 5
+            };
+
+            Object.values(categories).forEach(cat => {
+                cat.instruments.sort((a, b) => {
+                    const orderA = statusOrder[a.status] ?? 10;
+                    const orderB = statusOrder[b.status] ?? 10;
+                    if (orderA !== orderB) return orderA - orderB;
+                    // Secondary sort by name
+                    return (a.display_name || '').localeCompare(b.display_name || '');
+                });
+            });
+
             // Filter out empty categories
             return Object.fromEntries(
                 Object.entries(categories).filter(([_, cat]) => cat.instruments.length > 0)
@@ -1311,13 +1331,18 @@
             const statusIcon = statusConfig.icon || 'fa-question-circle';
             const statusColor = statusConfig.color || '#6b7280';
 
+            // Get instrument type icon and color for fallback
+            const typeIcon = this._getInstrumentTypeIcon(instrument.instrument_type);
+            const typeColor = this._getInstrumentTypeColor(instrument.instrument_type);
+
             const thumbnailHTML = imageUrl ? `
                 <div style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; flex-shrink: 0; background: #f3f4f6;">
-                    <img src="${imageUrl}" alt="" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" data-fallback="true">
+                    <img src="${imageUrl}" alt="" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy"
+                         data-fallback="true" data-type-icon="${typeIcon}" data-type-color="${typeColor}">
                 </div>
             ` : `
-                <div class="phenocam-placeholder-icon" style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d1d5db;">
-                    <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="width: 28px; height: auto; opacity: 0.7;">
+                <div class="instrument-type-placeholder" style="width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg, ${typeColor}15 0%, ${typeColor}25 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid ${typeColor}40;">
+                    <i class="fas ${typeIcon}" style="font-size: 18px; color: ${typeColor};"></i>
                 </div>
             `;
 
@@ -1374,6 +1399,72 @@
             }
 
             return `/assets/instruments/${instrument.normalized_name}.jpg`;
+        }
+
+        /**
+         * Get instrument type icon based on type
+         * @private
+         * @param {string} instrumentType - Instrument type
+         * @returns {string} Font Awesome icon class
+         */
+        _getInstrumentTypeIcon(instrumentType) {
+            if (!instrumentType) return 'fa-cube';
+
+            const type = instrumentType.toLowerCase();
+
+            // Pattern-based icon matching
+            if (type.includes('phenocam') || type === 'phe') {
+                return 'fa-camera';
+            } else if (type.includes('multispectral') || type.includes('ms sensor') || type.includes('skye')) {
+                return 'fa-satellite-dish';
+            } else if (type.includes('par sensor') || type.includes('par') || type.includes('licor')) {
+                return 'fa-sun';
+            } else if (type.includes('ndvi')) {
+                return 'fa-leaf';
+            } else if (type.includes('pri sensor') || type.includes('pri')) {
+                return 'fa-microscope';
+            } else if (type.includes('hyperspectral')) {
+                return 'fa-rainbow';
+            } else if (type.includes('thermal') || type.includes('infrared')) {
+                return 'fa-temperature-high';
+            } else if (type.includes('lidar') || type.includes('laser')) {
+                return 'fa-broadcast-tower';
+            }
+
+            return 'fa-cube';
+        }
+
+        /**
+         * Get instrument type color based on type
+         * @private
+         * @param {string} instrumentType - Instrument type
+         * @returns {string} Hex color code
+         */
+        _getInstrumentTypeColor(instrumentType) {
+            if (!instrumentType) return '#6b7280';
+
+            const type = instrumentType.toLowerCase();
+
+            // Pattern-based color matching
+            if (type.includes('phenocam') || type === 'phe') {
+                return '#2563eb';  // Blue
+            } else if (type.includes('multispectral') || type.includes('ms sensor') || type.includes('skye')) {
+                return '#7c3aed';  // Purple
+            } else if (type.includes('par sensor') || type.includes('par') || type.includes('licor')) {
+                return '#f59e0b';  // Amber
+            } else if (type.includes('ndvi')) {
+                return '#059669';  // Green
+            } else if (type.includes('pri sensor') || type.includes('pri')) {
+                return '#ec4899';  // Pink
+            } else if (type.includes('hyperspectral')) {
+                return '#6366f1';  // Indigo
+            } else if (type.includes('thermal') || type.includes('infrared')) {
+                return '#ef4444';  // Red
+            } else if (type.includes('lidar') || type.includes('laser')) {
+                return '#14b8a6';  // Teal
+            }
+
+            return '#6b7280';  // Gray default
         }
 
         /**
@@ -1916,15 +2007,18 @@
          */
         _createInstrumentModalRowHTML(instrument, canEdit) {
             const imageUrl = this._getInstrumentImageUrl(instrument);
+            const typeIcon = this._getInstrumentTypeIcon(instrument.instrument_type);
+            const typeColor = this._getInstrumentTypeColor(instrument.instrument_type);
 
             return `
                 <div class="instrument-modal-row">
                     <div class="instrument-thumbnail">
                         ${imageUrl ? `
-                            <img src="${imageUrl}" alt="${escapeHtml(instrument.display_name)}" data-fallback="true">
+                            <img src="${imageUrl}" alt="${escapeHtml(instrument.display_name)}" data-fallback="true"
+                                 data-type-icon="${typeIcon}" data-type-color="${typeColor}">
                         ` : `
-                            <div class="instrument-placeholder">
-                                <i class="fas fa-camera"></i>
+                            <div class="instrument-placeholder" style="background: linear-gradient(135deg, ${typeColor}15 0%, ${typeColor}25 100%); border: 1px solid ${typeColor}40;">
+                                <i class="fas ${typeIcon}" style="color: ${typeColor};"></i>
                             </div>
                         `}
                     </div>

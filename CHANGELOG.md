@@ -14,6 +14,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.10] - 2025-12-02
+
+### 🎨 Instrument Type Icons & Status-Based Sorting
+
+**Release Date**: 2025-12-02
+
+#### Added
+
+- **Type-Based Fallback Icons**: When instrument images unavailable, show type-specific icons
+  - Phenocam: Camera icon (blue)
+  - Multispectral: Satellite dish icon (purple)
+  - PAR Sensor: Sun icon (amber)
+  - NDVI: Leaf icon (green)
+  - PRI: Microscope icon (pink)
+  - Hyperspectral: Rainbow icon (indigo)
+  - Thermal: Temperature icon (red)
+  - LiDAR: Broadcast tower icon (teal)
+
+- **Image Error Fallback**: Enhanced image error handler to show type icons when images fail to load
+  - Uses data attributes to preserve type info
+  - Dynamically creates fallback icon on error
+
+- **Status-Based Sorting**: Instruments now sorted by status within each category
+  - Active instruments shown first
+  - Order: Active → Operational → Maintenance → Pending Installation → Inactive → Decommissioned
+  - Secondary sort by display name alphabetically
+
+#### Technical Details
+
+- `_getInstrumentTypeIcon()`: Returns Font Awesome icon class for instrument type
+- `_getInstrumentTypeColor()`: Returns hex color for instrument type
+- Enhanced `_groupInstrumentsByType()` with status-based sorting
+- Updated app.js error handler for type-based image fallbacks
+
+---
+
 ## [9.0.9] - 2025-12-02
 
 ### 🎯 Enhanced Loading UX & Reliable Instrument Categorization
