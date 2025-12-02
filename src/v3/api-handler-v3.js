@@ -19,6 +19,8 @@ import { handleCampaignsV3 } from './handlers/campaigns-v3.js';
 import { handleProductsV3 } from './handlers/products-v3.js';
 import { handleUAVPlatformsV3 } from './handlers/uav-platforms-v3.js';
 import { handleSatellitePlatformsV3 } from './handlers/satellite-platforms-v3.js';
+import { handleStationsV3 } from './handlers/stations-v3.js';
+import { handleInstrumentsV3 } from './handlers/instruments-v3.js';
 
 /**
  * V3 API Configuration
@@ -204,6 +206,14 @@ export async function handleApiV3Request(request, env, ctx) {
       // Product catalog
       case 'products':
         return await routeProductsV3(method, pathSegments, request, env, url);
+
+      // Stations (V3 with pagination)
+      case 'stations':
+        return await handleStationsV3(request, env, ctx, pathSegments.slice(1));
+
+      // Instruments (V3 with pagination)
+      case 'instruments':
+        return await handleInstrumentsV3(request, env, ctx, pathSegments.slice(1));
 
       // Health check
       case 'health':

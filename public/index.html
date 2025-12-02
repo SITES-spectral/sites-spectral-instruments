@@ -18,10 +18,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.0">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.6">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.0">
+    <meta name="app-version" content="9.0.6">
     <meta name="build-date" content="2025-12-02">
 
     <style>
@@ -213,7 +213,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.0"></script>
+    <script src="/js/utils.js?v=9.0.6"></script>
     <script>
         class LoginManager {
             constructor() {
@@ -326,16 +326,16 @@
                 let targetUrl = '/';
 
                 if (user.role === 'admin') {
-                    targetUrl = redirect || '/dashboard.html';
+                    targetUrl = redirect || '/sites-dashboard.html';
                 } else if (user.role === 'station' && user.station_acronym) {
-                    // Always use station.html for station users with their station
-                    targetUrl = redirect || `/station.html?station=${user.station_acronym}`;
+                    // Always use station-dashboard.html for station users with their station
+                    targetUrl = redirect || `/station-dashboard.html?station=${user.station_acronym}`;
                 } else if (user.role === 'readonly') {
-                    // Readonly users go to dashboard to see all stations
-                    targetUrl = redirect || '/dashboard.html';
+                    // Readonly users go to sites dashboard to see all stations
+                    targetUrl = redirect || '/sites-dashboard.html';
                 } else {
-                    // Fallback to dashboard for any other case
-                    targetUrl = redirect || '/dashboard.html';
+                    // Fallback to sites dashboard for any other case
+                    targetUrl = redirect || '/sites-dashboard.html';
                 }
 
                 window.location.href = targetUrl;

@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.0",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.0 - V3 API Default with Campaigns, Products, and Modern Frontend",
+  "version": "9.0.6",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.6 - V3 Dashboard Fixes",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

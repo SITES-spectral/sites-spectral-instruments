@@ -570,24 +570,26 @@
          * @private
          */
         _setupPlatformTypeFilter() {
+            // Try new PlatformTypeFilter component first
             const filterContainer = document.getElementById('platform-type-filter');
-            if (!filterContainer) {
-                logger.warn('Platform type filter container not found');
-                return;
+            if (filterContainer && global.PlatformTypeFilter) {
+                // Create PlatformTypeFilter component
+                this.platformTypeFilter = new global.PlatformTypeFilter('platform-type-filter', {
+                    showAllOption: true,
+                    initialType: 'all',
+                    showCounts: true,
+                    onTypeChange: (type, prevType) => {
+                        logger.log(`Platform type changed: ${prevType} -> ${type}`);
+                        this.currentPlatformType = type;
+                        this.platformPage = 1; // Reset to first page
+                        this._loadPlatformsAndInstruments();
+                    }
+                });
+            } else {
+                // Fall back to legacy tabs structure
+                logger.log('Using legacy platform type tabs');
+                this._useLegacyTabs = true;
             }
-
-            // Create PlatformTypeFilter component
-            this.platformTypeFilter = new global.PlatformTypeFilter('platform-type-filter', {
-                showAllOption: true,
-                initialType: 'all',
-                showCounts: true,
-                onTypeChange: (type, prevType) => {
-                    logger.log(`Platform type changed: ${prevType} -> ${type}`);
-                    this.currentPlatformType = type;
-                    this.platformPage = 1; // Reset to first page
-                    this._loadPlatformsAndInstruments();
-                }
-            });
 
             // Set up platform pagination
             const paginationContainer = document.getElementById('platform-pagination');
@@ -812,8 +814,6 @@
          * @private
          */
         _updatePlatformTypeCounts() {
-            if (!this.platformTypeFilter) return;
-
             const counts = {
                 fixed: 0,
                 uav: 0,
@@ -828,7 +828,29 @@
                 }
             });
 
-            this.platformTypeFilter.updateCounts(counts);
+            // Update PlatformTypeFilter component if available
+            if (this.platformTypeFilter) {
+                this.platformTypeFilter.updateCounts(counts);
+                return;
+            }
+
+            // Update legacy tabs if using that structure
+            if (this._useLegacyTabs) {
+                const total = counts.fixed + counts.uav + counts.satellite + counts.mobile;
+
+                // Update individual tab counts
+                const fixedCount = document.getElementById('tab-count-fixed');
+                const uavCount = document.getElementById('tab-count-uav');
+                const satelliteCount = document.getElementById('tab-count-satellite');
+                const mobileCount = document.getElementById('tab-count-mobile');
+                const allCount = document.getElementById('tab-count-all');
+
+                if (fixedCount) fixedCount.textContent = counts.fixed;
+                if (uavCount) uavCount.textContent = counts.uav;
+                if (satelliteCount) satelliteCount.textContent = counts.satellite;
+                if (mobileCount) mobileCount.textContent = counts.mobile;
+                if (allCount) allCount.textContent = total;
+            }
         }
 
         // ========================================
@@ -891,7 +913,8 @@
          * @returns {string} HTML string
          */
         _createPlatformCardHTML(platform) {
-            const instruments = this.instruments.filter(inst => inst.platform_id === platform.id);
+            // Use == to allow type coercion (platform_id may be string or number)
+            const instruments = this.instruments.filter(inst => inst.platform_id == platform.id);
             const instrumentCount = instruments.length;
             const platformType = (platform.platform_type || 'fixed').toLowerCase();
 
@@ -1509,7 +1532,8 @@
                 return;
             }
 
-            const platform = this.platforms.find(p => p.id === platformId);
+            // Use == for type coercion
+            const platform = this.platforms.find(p => p.id == platformId);
             if (platform) {
                 this._showEditPlatformModal(platform);
             }
@@ -1648,7 +1672,8 @@
          * @returns {string} HTML string
          */
         _renderInstrumentsSection(platformId, canEdit) {
-            const platformInstruments = this.instruments.filter(inst => inst.platform_id === platformId);
+            // Use == to allow type coercion (platform_id may be string or number)
+            const platformInstruments = this.instruments.filter(inst => inst.platform_id == platformId);
 
             return `
                 <div class="detail-section" style="grid-column: 1 / -1;">
@@ -2244,6 +2269,36 @@
             global.sitesAPI?.clearAuth();
             global.location.href = '/';
         }
+    };
+
+    /**
+     * Filter platforms by type (for legacy tab onclick handlers)
+     * @global
+     * @param {string} type - Platform type (fixed, uav, satellite, mobile, all)
+     */
+    global.filterPlatformsByType = function(type) {
+        if (!global.sitesStationDashboard) {
+            logger.warn('Station dashboard not initialized');
+            return;
+        }
+
+        logger.log(`Filtering platforms by type: ${type}`);
+
+        // Update active tab styling
+        const tabs = document.querySelectorAll('.platform-type-tab');
+        tabs.forEach(tab => {
+            if (tab.dataset.type === type) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+
+        // Update dashboard state and reload
+        const dashboard = global.sitesStationDashboard;
+        dashboard.currentPlatformType = type;
+        dashboard.platformPage = 1;
+        dashboard._loadPlatformsAndInstruments();
     };
 
     logger.log('SITES Spectral Station Dashboard V3 initialized');

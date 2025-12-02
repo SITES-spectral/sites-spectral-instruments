@@ -598,7 +598,8 @@ class SitesStationDashboard {
     }
 
     createPlatformCard(platform) {
-        const instruments = this.instruments.filter(inst => inst.platform_id === platform.id);
+        // Use == to allow type coercion (platform_id may be string or number)
+        const instruments = this.instruments.filter(inst => inst.platform_id == platform.id);
         const instrumentCount = instruments.length;
 
         const locationDisplay = platform.normalized_name ||
@@ -901,8 +902,8 @@ class SitesStationDashboard {
     }
 
     renderInstrumentsSection(platformId, canEdit) {
-        // Get instruments for this platform
-        const platformInstruments = this.instruments.filter(inst => inst.platform_id === platformId);
+        // Get instruments for this platform - use == for type coercion
+        const platformInstruments = this.instruments.filter(inst => inst.platform_id == platformId);
 
         return `
             <div class="detail-section" style="grid-column: 1 / -1;">
@@ -2344,7 +2345,8 @@ class SitesStationDashboard {
             return;
         }
 
-        const platform = this.platforms.find(p => p.id === platformId);
+        // Use == for type coercion
+        const platform = this.platforms.find(p => p.id == platformId);
         if (platform) {
             this.showEditPlatformModal(platform);
         }

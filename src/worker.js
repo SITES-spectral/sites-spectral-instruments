@@ -52,9 +52,10 @@ async function handleStaticAssets(request, env, corsHeaders) {
   // Default to index.html for SPA routing
   const assetPaths = [
     '/stations.html',
-    '/instruments.html', 
+    '/instruments.html',
     '/export.html',
-    '/station.html',
+    '/station-dashboard.html',
+    '/sites-dashboard.html',
     '/instrument.html'
   ];
   

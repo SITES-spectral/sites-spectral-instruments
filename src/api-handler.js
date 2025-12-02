@@ -1,4 +1,4 @@
-// SITES Spectral API Handler v9.0.0
+// SITES Spectral API Handler v9.0.2
 // V3 API as default - Domain-based routing, spatial queries, campaigns, products
 // Legacy V1 handlers maintained for backward compatibility (deprecated)
 // SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
@@ -193,7 +193,7 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '9.0.0',
+      version: '9.0.6',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'v3-api',
       apiVersions: ['v3', 'v1-legacy'],
@@ -221,7 +221,7 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '9.0.0',
+      version: '9.0.6',
       error: error.message,
       database: 'disconnected',
       architecture: 'v3-api',

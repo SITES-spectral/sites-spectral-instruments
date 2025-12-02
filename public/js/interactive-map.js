@@ -368,7 +368,7 @@ class SitesInteractiveMap {
     // Navigation helper
     navigateToStation(stationAcronym) {
         if (stationAcronym) {
-            window.location.href = `/station.html?station=${stationAcronym}`;
+            window.location.href = `/station-dashboard.html?station=${stationAcronym}`;
         }
     }
 

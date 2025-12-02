@@ -107,7 +107,8 @@ class SitesExport {
 
     async getStationDetails(stationId) {
         const stations = await window.sitesAPI.getStations();
-        return stations.find(s => s.id === stationId);
+        // Use == for type coercion
+        return stations.find(s => s.id == stationId);
     }
 
     async getStationInstruments(stationId) {

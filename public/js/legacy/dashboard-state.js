@@ -194,8 +194,9 @@ class DashboardState {
         for (const [type, platforms] of Object.entries(this._state.platformsByType)) {
             result[type] = platforms.map(platform => ({
                 ...platform,
+                // Use == to allow type coercion (platform_id may be string or number)
                 instruments: this._state.instruments.filter(
-                    i => i.platform_id === platform.id
+                    i => i.platform_id == platform.id
                 )
             }));
         }

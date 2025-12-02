@@ -24,11 +24,9 @@ class BuildManager {
         this.htmlFiles = [
             'public/index.html',
             'public/login.html',
-            'public/station.html',
-            'public/export.html',
-            'public/station/dashboard.html',
-            'public/admin/dashboard.html',
-            'public/docs/index.html'
+            'public/station-dashboard.html',
+            'public/sites-dashboard.html',
+            'public/spectral.html'
         ];
         
         this.jsFiles = [

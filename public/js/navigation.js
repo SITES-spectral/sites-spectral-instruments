@@ -23,9 +23,9 @@ class SitesNavigation {
             this.currentPage = 'home';
         } else if (path.includes('login.html')) {
             this.currentPage = 'login';
-        } else if (path.includes('dashboard.html')) {
+        } else if (path.includes('sites-dashboard.html')) {
             this.currentPage = 'dashboard';
-        } else if (path.includes('station.html')) {
+        } else if (path.includes('station-dashboard.html')) {
             this.currentPage = 'station';
             // Extract station acronym from URL
             const urlParams = new URLSearchParams(search);
@@ -79,8 +79,8 @@ class SitesNavigation {
         if (href === currentPath + currentSearch) return true;
 
         // Handle page matches
-        if (href.includes('dashboard.html') && this.currentPage === 'dashboard') return true;
-        if (href.includes('station.html') && this.currentPage === 'station') return true;
+        if (href.includes('sites-dashboard.html') && this.currentPage === 'dashboard') return true;
+        if (href.includes('station-dashboard.html') && this.currentPage === 'station') return true;
         if (href === '/' && this.currentPage === 'home') return true;
 
         return false;
@@ -141,18 +141,18 @@ class SitesNavigation {
                 break;
 
             case 'dashboard':
-                breadcrumbs.push({ text: 'Dashboard', url: '/dashboard.html' });
+                breadcrumbs.push({ text: 'Dashboard', url: '/sites-dashboard.html' });
                 break;
 
             case 'station':
-                breadcrumbs.push({ text: 'Dashboard', url: '/dashboard.html' });
+                breadcrumbs.push({ text: 'Dashboard', url: '/sites-dashboard.html' });
                 if (this.currentStationAcronym) {
                     breadcrumbs.push({
                         text: this.currentStationAcronym,
-                        url: `/station.html?station=${this.currentStationAcronym}`
+                        url: `/station-dashboard.html?station=${this.currentStationAcronym}`
                     });
                 } else {
-                    breadcrumbs.push({ text: 'Station', url: '/station.html' });
+                    breadcrumbs.push({ text: 'Station', url: '/station-dashboard.html' });
                 }
                 break;
         }

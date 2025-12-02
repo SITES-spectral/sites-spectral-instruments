@@ -14,6 +14,138 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.6] - 2025-12-02
+
+### 🔧 HOTFIX: Dashboard Instrument Display & Type Coercion Fixes
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **Instrument Display Issue**: Fixed instruments not showing in platform cards
+  - Root cause: Type mismatch between string and number IDs in JavaScript comparisons
+  - Changed `===` to `==` for ID comparisons to allow type coercion
+  - Affects: platform_id, station_id, instrument_id, roi_id comparisons
+
+- **Platform Type Filter**: Added support for legacy tab structure
+  - Added `filterPlatformsByType()` global function for legacy onclick handlers
+  - Fallback to legacy `platform-type-tabs` when `platform-type-filter` container missing
+  - Tab counts now update correctly for Fixed, UAV, Satellite, Mobile platforms
+
+#### Changed
+
+- **Files Updated with Type Coercion Fixes**:
+  - `public/js/station-dashboard.js` - Platform and instrument filtering
+  - `public/js/components/platform-type-card.js` - Platform selection
+  - `public/js/legacy/dashboard-state.js` - State management
+  - `public/js/legacy/station-dashboard-v1.js` - Legacy dashboard
+  - `public/js/export.js` - Station export
+  - `public/station-dashboard.html` - ROI duplicate check
+
+---
+
+## [9.0.5] - 2025-12-02
+
+### 🔧 HOTFIX: V3 Instruments API Handler
+
+**Release Date**: 2025-12-02
+
+#### Added
+
+- **V3 Instruments Handler**: New `/api/v3/instruments` endpoints with pagination support
+  - `GET /api/v3/instruments` - List all instruments with pagination and filters
+  - `GET /api/v3/instruments?station=ANS` - Filter by station
+  - `GET /api/v3/instruments?platform=123` - Filter by platform
+  - `GET /api/v3/instruments?type=Phenocam` - Filter by type
+  - `GET /api/v3/instruments/:id` - Get instrument by ID
+  - `GET /api/v3/instruments/:id/rois` - Get instrument ROIs with pagination
+
+---
+
+## [9.0.4] - 2025-12-02
+
+### 🔧 HOTFIX: V3 Stations API Handler
+
+**Release Date**: 2025-12-02
+
+#### Added
+
+- **V3 Stations Handler**: New `/api/v3/stations` endpoints with pagination support
+  - `GET /api/v3/stations` - List all stations with pagination
+  - `GET /api/v3/stations/:id` - Get station by ID or acronym
+  - `GET /api/v3/stations/:id/summary` - Get station with counts (platforms, instruments, ROIs)
+  - `GET /api/v3/stations/:id/platforms` - Get station platforms with pagination
+  - `GET /api/v3/stations/:id/aois` - Get station AOIs/ROIs with pagination
+
+#### Fixed
+
+- **Station Dashboard Loading**: Fixed 404 error when station-dashboard.js called V3 stations API
+
+---
+
+## [9.0.3] - 2025-12-02
+
+### 🔧 HOTFIX: API Module Loading Fix
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **API Module Loading**: Added missing legacy API (api-v1.js) as base dependency
+  - Both dashboards now load `js/legacy/api-v1.js` before `js/api.js` (V3)
+  - V3 API extends V1 base - both are required for full functionality
+  - Fixes "API module not loaded" error on admin dashboard
+
+---
+
+## [9.0.2] - 2025-12-02
+
+### 🔧 HOTFIX: Dashboard Renames and Auth Flow Fix
+
+**Release Date**: 2025-12-02
+
+#### Changed
+
+- **Dashboard Renames**: Renamed dashboard files for better clarity and debugging:
+  - `dashboard.html` → `sites-dashboard.html` (Admin dashboard)
+  - `station.html` → `station-dashboard.html` (Station dashboard)
+
+- **Updated All References**: Updated all login redirects, navigation links, and internal references to use new file names
+
+#### Fixed
+
+- **Auth Flow**: Combined with v9.0.1 auth fix to ensure complete authentication flow works with new dashboard paths
+
+---
+
+## [9.0.1] - 2025-12-02
+
+### 🔧 HOTFIX: Authentication Flow Fix for V3 API
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **Auth Verify Response**: Fixed critical bug where `/api/auth/verify` endpoint returned `success: true` but frontend expected `valid: true`
+  - Station users were being redirected back to login page after successful authentication
+  - Admin users could not access dashboard due to token verification mismatch
+  - Now returns both `success` and `valid` fields for frontend compatibility
+
+- **Token Verification Response**: Enhanced response to include all user fields:
+  - Added `station_id` for station users
+  - Added `edit_privileges` and `permissions` fields
+  - Ensures consistent user data across all authenticated sessions
+
+- **Dashboard Version**: Updated dashboard.html to use correct v9.0.1 version references
+
+#### Technical Details
+
+- **File Modified**: `src/auth/authentication.js` - Auth verify endpoint now returns `valid: true` alongside `success: true`
+- **File Modified**: `public/dashboard.html` - Updated CSS and meta version tags
+- **Root Cause**: Frontend login.html and index.html checked for `data.valid` but backend only returned `data.success`
+
+---
+
 ## [9.0.0] - 2025-12-02
 
 ### 🚀 MAJOR RELEASE: V3 API Default with Modern Frontend

@@ -258,7 +258,8 @@ class PlatformTypeCard {
         }
 
         const items = platforms.map(platform => {
-            const platformInstruments = instruments.filter(i => i.platform_id === platform.id);
+            // Use == to allow type coercion (platform_id may be string or number)
+            const platformInstruments = instruments.filter(i => i.platform_id == platform.id);
             return this._renderPlatformItem(platform, platformInstruments, canEdit, isAdmin);
         }).join('');
 
@@ -334,7 +335,8 @@ class PlatformTypeCard {
             ...state.platformsByType.mobile
         ];
 
-        const platform = allPlatforms.find(p => p.id === platformId);
+        // Use == for type coercion
+        const platform = allPlatforms.find(p => p.id == platformId);
         if (platform) {
             window.DashboardState.selectPlatform(platform);
             // Navigate or open modal

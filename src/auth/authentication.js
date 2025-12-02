@@ -73,11 +73,15 @@ export async function handleAuth(method, pathSegments, request, env) {
 
         return new Response(JSON.stringify({
           success: true,
+          valid: true,  // Added for frontend compatibility
           user: {
             username: user.username,
             role: user.role,
             station_acronym: user.station_acronym,
-            station_normalized_name: user.station_normalized_name
+            station_normalized_name: user.station_normalized_name,
+            station_id: user.station_id,
+            edit_privileges: user.edit_privileges,
+            permissions: user.permissions
           }
         }), {
           status: 200,
