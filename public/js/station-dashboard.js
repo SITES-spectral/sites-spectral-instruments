@@ -1166,7 +1166,7 @@
                     pri: { label: 'PRI Sensors', icon: 'fa-microscope', color: '#ec4899', instruments: [] },
                     hyperspectral: { label: 'Hyperspectral', icon: 'fa-rainbow', color: '#6366f1', instruments: [] },
                     thermal: { label: 'Thermal', icon: 'fa-temperature-high', color: '#ef4444', instruments: [] },
-                    lidar: { label: 'LiDAR', icon: 'fa-broadcast-tower', color: '#14b8a6', instruments: [] },
+                    lidar: { label: 'LiDAR', icon: 'fa-crosshairs', color: '#14b8a6', instruments: [] },
                     other: { label: 'Other', icon: 'fa-cube', color: '#6b7280', instruments: [] }
                 });
             }
@@ -1428,7 +1428,7 @@
             } else if (type.includes('thermal') || type.includes('infrared')) {
                 return 'fa-temperature-high';
             } else if (type.includes('lidar') || type.includes('laser')) {
-                return 'fa-broadcast-tower';
+                return 'fa-crosshairs';
             }
 
             return 'fa-cube';
