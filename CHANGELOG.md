@@ -14,6 +14,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.15] - 2025-12-02
+
+### 🔒 Station Acronym Validation - No Fallback Allowed
+
+**Release Date**: 2025-12-02
+
+#### Changed
+
+- **Strict Station Acronym Requirement**: Platform creation now requires valid station acronym
+  - Removed 'STA' fallback - platforms cannot be created with generic fallback
+  - Shows error message if station data not available: "Error: Station data not loaded"
+  - Prevents creation of invalid platforms/instruments with incorrect naming
+
+#### Technical Details
+
+- `updatePlatformNormalizedName()` now returns early if `stationAcronym` is falsy
+- Sets placeholder text to indicate error condition
+- Ensures data integrity by blocking invalid platform creation
+
+---
+
 ## [9.0.14] - 2025-12-02
 
 ### 🔧 Platform Normalized Name Fix
