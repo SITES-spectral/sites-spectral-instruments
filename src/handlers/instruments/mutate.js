@@ -11,6 +11,16 @@ import {
 } from '../../utils/responses.js';
 import { validateCameraSpecifications } from '../../utils/camera-validation.js';
 import {
+  sanitizeRequestBody,
+  sanitizeString,
+  sanitizeCoordinate,
+  sanitizeFloat,
+  sanitizeInteger,
+  sanitizeEnum,
+  sanitizeDate,
+  INSTRUMENT_SCHEMA
+} from '../../utils/validation.js';
+import {
   getInstrumentTypeCode,
   extractBrandAcronym,
   getNextInstrumentNumber,
@@ -31,7 +41,47 @@ export async function createInstrument(user, request, env) {
     return createForbiddenResponse();
   }
 
-  const instrumentData = await request.json();
+  // SECURITY: Parse and sanitize request body
+  let rawData;
+  try {
+    rawData = await request.json();
+  } catch (e) {
+    return createErrorResponse('Invalid JSON in request body', 400);
+  }
+
+  // Sanitize core fields using schema
+  const instrumentData = sanitizeRequestBody(rawData, INSTRUMENT_SCHEMA);
+
+  // Preserve additional fields that aren't in the core schema but need sanitization
+  const additionalFields = [
+    'camera_brand', 'camera_model', 'camera_resolution', 'camera_serial_number',
+    'camera_aperture', 'camera_exposure_time', 'camera_lens', 'camera_white_balance',
+    'sensor_brand', 'sensor_model', 'number_of_channels', 'epsg_code',
+    'image_archive_path', 'calibration_notes', 'power_source', 'data_transmission'
+  ];
+
+  additionalFields.forEach(field => {
+    if (rawData[field] !== undefined) {
+      instrumentData[field] = sanitizeString(rawData[field], { maxLength: 500 });
+    }
+  });
+
+  // Preserve numeric fields with proper sanitization
+  if (rawData.camera_focal_length_mm !== undefined) {
+    instrumentData.camera_focal_length_mm = sanitizeFloat(rawData.camera_focal_length_mm, { min: 0, max: 2000 });
+  }
+  if (rawData.camera_iso !== undefined) {
+    instrumentData.camera_iso = sanitizeInteger(rawData.camera_iso, { min: 0, max: 1000000 });
+  }
+  if (rawData.camera_mega_pixels !== undefined) {
+    instrumentData.camera_mega_pixels = sanitizeFloat(rawData.camera_mega_pixels, { min: 0, max: 500 });
+  }
+  if (rawData.first_measurement_year !== undefined) {
+    instrumentData.first_measurement_year = sanitizeInteger(rawData.first_measurement_year, { min: 1900, max: 2100 });
+  }
+  if (rawData.last_measurement_year !== undefined) {
+    instrumentData.last_measurement_year = sanitizeInteger(rawData.last_measurement_year, { min: 1900, max: 2100 });
+  }
 
   // Required fields validation
   const requiredFields = ['display_name', 'platform_id', 'instrument_type'];
@@ -206,7 +256,51 @@ export async function updateInstrument(id, user, request, env) {
     return createForbiddenResponse();
   }
 
-  const instrumentData = await request.json();
+  // SECURITY: Parse request body with error handling
+  let rawData;
+  try {
+    rawData = await request.json();
+  } catch (e) {
+    return createErrorResponse('Invalid JSON in request body', 400);
+  }
+
+  // Sanitize core fields using schema
+  const instrumentData = sanitizeRequestBody(rawData, INSTRUMENT_SCHEMA);
+
+  // Preserve additional camera fields that aren't in the core schema
+  const additionalFields = [
+    'camera_brand', 'camera_model', 'camera_resolution', 'camera_serial_number',
+    'camera_aperture', 'camera_exposure_time', 'camera_lens', 'camera_white_balance',
+    'sensor_brand', 'sensor_model', 'number_of_channels', 'epsg_code',
+    'image_archive_path', 'calibration_notes', 'power_source', 'data_transmission'
+  ];
+
+  additionalFields.forEach(field => {
+    if (rawData[field] !== undefined) {
+      instrumentData[field] = sanitizeString(rawData[field], { maxLength: 500 });
+    }
+  });
+
+  // Preserve numeric fields with proper sanitization
+  if (rawData.camera_focal_length_mm !== undefined) {
+    instrumentData.camera_focal_length_mm = sanitizeFloat(rawData.camera_focal_length_mm, { min: 0, max: 2000 });
+  }
+  if (rawData.camera_iso !== undefined) {
+    instrumentData.camera_iso = sanitizeInteger(rawData.camera_iso, { min: 0, max: 1000000 });
+  }
+  if (rawData.camera_mega_pixels !== undefined) {
+    instrumentData.camera_mega_pixels = sanitizeFloat(rawData.camera_mega_pixels, { min: 0, max: 500 });
+  }
+  if (rawData.first_measurement_year !== undefined) {
+    instrumentData.first_measurement_year = sanitizeInteger(rawData.first_measurement_year, { min: 1900, max: 2100 });
+  }
+  if (rawData.last_measurement_year !== undefined) {
+    instrumentData.last_measurement_year = sanitizeInteger(rawData.last_measurement_year, { min: 1900, max: 2100 });
+  }
+  // Boolean field
+  if (rawData.image_processing_enabled !== undefined) {
+    instrumentData.image_processing_enabled = rawData.image_processing_enabled === true || rawData.image_processing_enabled === 'true';
+  }
 
   // First verify instrument exists and get its station
   const checkQuery = `

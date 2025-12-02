@@ -419,10 +419,10 @@ class SitesStationDashboard {
             stationDescEl.style.display = 'block';
         }
 
-        // Update optional metadata
+        // Update optional metadata - SECURITY: escape dynamic content
         const organizationEl = document.getElementById('station-organization');
         if (organizationEl && this.stationData.organization) {
-            organizationEl.innerHTML = `<strong>Organization:</strong> ${this.stationData.organization}`;
+            organizationEl.innerHTML = `<strong>Organization:</strong> ${this.escapeHtml(this.stationData.organization)}`;
             organizationEl.style.display = 'block';
         }
 
@@ -430,7 +430,7 @@ class SitesStationDashboard {
         if (coordinatesEl) {
             const coords = this.formatCoordinates();
             if (coords !== 'No coordinates') {
-                coordinatesEl.innerHTML = `<strong>Coordinates:</strong> ${coords}`;
+                coordinatesEl.innerHTML = `<strong>Coordinates:</strong> ${this.escapeHtml(coords)}`;
                 coordinatesEl.style.display = 'block';
             }
         }

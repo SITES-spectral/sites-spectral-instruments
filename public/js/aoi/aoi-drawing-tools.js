@@ -1,6 +1,11 @@
 // SITES Spectral - AOI Drawing Tools
 // Interactive polygon drawing for Areas of Interest
-// Version: 8.0.0-beta.2
+// Version: 8.5.7
+//
+// SECURITY NOTE: This module uses innerHTML for UI templates. This is safe because:
+// 1. All HTML is static/hardcoded - no user data is interpolated
+// 2. Dynamic content (measurements, coordinates) uses textContent, not innerHTML
+// 3. User-uploaded GeoJSON is parsed and validated, never rendered as HTML
 
 /**
  * AOI Drawing Tools Manager

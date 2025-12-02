@@ -92,15 +92,44 @@ class SitesNavigation {
 
         const breadcrumbs = this.getBreadcrumbs();
 
-        breadcrumbContainer.innerHTML = breadcrumbs.map((crumb, index) => {
+        // SECURITY FIX: Use DOM methods instead of innerHTML to prevent XSS
+        breadcrumbContainer.innerHTML = '';
+
+        breadcrumbs.forEach((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
 
             if (isLast) {
-                return `<span class="breadcrumb-current">${crumb.text}</span>`;
+                const span = document.createElement('span');
+                span.className = 'breadcrumb-current';
+                span.textContent = crumb.text; // Safe - uses textContent
+                breadcrumbContainer.appendChild(span);
             } else {
-                return `<a href="${crumb.url}" class="breadcrumb-link">${crumb.text}</a>`;
+                const link = document.createElement('a');
+                link.href = this._sanitizeUrl(crumb.url);
+                link.className = 'breadcrumb-link';
+                link.textContent = crumb.text; // Safe - uses textContent
+                breadcrumbContainer.appendChild(link);
+
+                // Add separator
+                const separator = document.createElement('i');
+                separator.className = 'fas fa-chevron-right breadcrumb-separator';
+                separator.setAttribute('aria-hidden', 'true');
+                breadcrumbContainer.appendChild(document.createTextNode(' '));
+                breadcrumbContainer.appendChild(separator);
+                breadcrumbContainer.appendChild(document.createTextNode(' '));
             }
-        }).join(' <i class="fas fa-chevron-right breadcrumb-separator"></i> ');
+        });
+    }
+
+    // SECURITY: Sanitize URLs to prevent javascript: protocol injection
+    _sanitizeUrl(url) {
+        if (!url) return '/';
+        // Only allow relative URLs or http/https protocols
+        if (url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        // Block javascript:, data:, and other dangerous protocols
+        return '/';
     }
 
     getBreadcrumbs() {

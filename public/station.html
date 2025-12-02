@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=8.5.4">
+    <link rel="stylesheet" href="/css/styles.css?v=8.5.7">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="8.5.4">
+    <meta name="app-version" content="8.5.7">
     <meta name="build-date" content="2025-11-28">
 
     <style>
@@ -4242,12 +4242,12 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=8.5.4"></script>
+    <script src="/js/utils.js?v=8.5.7"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
-    <script src="/js/api.js?v=8.5.4"></script>
-    <script src="/js/components.js?v=8.5.4"></script>
+    <script src="/js/api.js?v=8.5.7"></script>
+    <script src="/js/components.js?v=8.5.7"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4257,10 +4257,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=8.5.4"></script>
-    <script src="/js/station-dashboard.js?v=8.5.4"></script>
-    <script src="/js/navigation.js?v=8.5.4"></script>
-    <script src="/js/export.js?v=8.5.4"></script>
+    <script src="/js/interactive-map.js?v=8.5.7"></script>
+    <script src="/js/station-dashboard.js?v=8.5.7"></script>
+    <script src="/js/navigation.js?v=8.5.7"></script>
+    <script src="/js/export.js?v=8.5.7"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -4290,16 +4290,8 @@
         function ensureModulesLoaded() {
             return new Promise((resolve) => {
                 const checkModules = () => {
-                    console.log('Checking modules:', {
-                        sitesAPI: !!window.sitesAPI,
-                        SitesStationDashboard: !!window.SitesStationDashboard,
-                        sitesMap: !!window.sitesMap,
-                        isAuthenticatedFunction: !!(window.sitesAPI && typeof window.sitesAPI.isAuthenticated === 'function')
-                    });
-
                     if (window.sitesAPI && window.SitesStationDashboard &&
                         typeof window.sitesAPI.isAuthenticated === 'function') {
-                        console.log('All required modules loaded successfully');
                         resolve();
                     } else {
                         setTimeout(checkModules, 50);
@@ -4312,27 +4304,19 @@
         // Initialize after all modules are ready
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                console.log('DOM loaded, initializing configuration service...');
-
                 // Initialize ConfigService first (loads YAML configurations)
                 if (window.SitesConfig) {
                     await window.SitesConfig.init();
-                    console.log('✅ ConfigService initialized');
                 }
-
-                console.log('Waiting for modules...');
 
                 // Wait for all modules to be loaded
                 await ensureModulesLoaded();
-                console.log('All modules loaded, checking station dashboard...');
 
                 // The SitesStationDashboard instance should already be created
                 // by station-dashboard.js, just ensure it's working
                 if (!window.sitesStationDashboard) {
                     console.warn('SitesStationDashboard not found, creating fallback instance');
                     window.sitesStationDashboard = new SitesStationDashboard();
-                } else {
-                    console.log('SitesStationDashboard found and ready');
                 }
 
                 // Wait for SitesStationDashboard to load its data, then sync with global variables
@@ -4340,14 +4324,9 @@
                     // Station data already loaded, sync immediately
                     stationData = window.sitesStationDashboard.stationData;
                     currentUser = window.sitesStationDashboard.currentUser;
-                    console.log('Synced station data from SitesStationDashboard:', stationData);
-
-                    // Update the UI immediately
-                    console.log('Calling showStationData to update UI...');
                     await showStationData();
                 } else {
                     // Wait for station data to be loaded
-                    console.log('Waiting for SitesStationDashboard to load station data...');
                     let maxWait = 100; // 5 seconds max wait
                     while (maxWait > 0 && (!window.sitesStationDashboard?.stationData)) {
                         await new Promise(resolve => setTimeout(resolve, 50));
@@ -4357,24 +4336,12 @@
                     if (window.sitesStationDashboard?.stationData) {
                         stationData = window.sitesStationDashboard.stationData;
                         currentUser = window.sitesStationDashboard.currentUser;
-                        console.log('Successfully synced station data after waiting:', stationData);
-
-                        // Verify sync actually worked
-                        console.log('🔍 Sync verification:', {
-                            stationDataExists: !!stationData,
-                            hasId: !!stationData?.id,
-                            stationId: stationData?.id,
-                            stationAcronym: stationData?.acronym,
-                            currentUserRole: currentUser?.role,
-                            isAdmin: currentUser?.role === 'admin'
-                        });
                     } else {
                         throw new Error('SitesStationDashboard failed to load station data within timeout');
                     }
 
                     // Now that we have synced station data, update the UI
                     if (stationData) {
-                        console.log('Calling showStationData to update UI...');
                         await showStationData();
                     } else {
                         throw new Error('No station data available after sync');
@@ -4387,17 +4354,14 @@
         });
 
         async function loadStationData() {
-            console.log('Loading station data for:', stationAcronym);
             try {
                 // Get auth token
                 const token = localStorage.getItem('sites_spectral_token');
                 if (!token) {
-                    console.error('No auth token found');
                     window.location.href = '/';
                     return;
                 }
 
-                console.log('Making API call to /api/stations/' + stationAcronym);
                 // Load station data from API
                 const response = await fetch(`/api/stations/${stationAcronym}`, {
                     method: 'GET',
@@ -4406,27 +4370,20 @@
                     }
                 });
 
-                console.log('API response status:', response.status);
-
                 if (response.ok) {
                     const station = await response.json();
-                    console.log('Station data received:', station);
                     stationData = station;
                     await showStationData();
                 } else if (response.status === 401) {
-                    console.error('Token expired or invalid');
                     // Token expired, redirect to login
                     localStorage.removeItem('sites_spectral_token');
                     localStorage.removeItem('sites_spectral_user');
                     window.location.href = '/';
                 } else if (response.status === 404) {
-                    console.error('Station not found');
                     showError('Station not found');
                 } else if (response.status === 403) {
-                    console.error('Access denied to station');
                     showError('Access denied to this station');
                 } else {
-                    console.error('Failed to load station data, status:', response.status);
                     showError('Failed to load station data');
                 }
 
@@ -4437,7 +4394,6 @@
         }
 
         async function showStationData() {
-            console.log('Showing station data for:', stationData);
             try {
                 document.getElementById('loading-state').style.display = 'none';
                 document.getElementById('error-state').style.display = 'none';
@@ -4450,16 +4406,13 @@
                 // Show admin station controls if user is admin AND stationData is loaded
                 if (currentUser && currentUser.role === 'admin' && stationData && stationData.id) {
                     document.getElementById('admin-station-controls').style.display = 'block';
-                    console.log('✅ Admin station controls shown with station ID:', stationData.id);
                 } else if (currentUser && currentUser.role === 'admin') {
-                    console.error('❌ Admin user detected but stationData not loaded:', stationData);
                     showNotification('Station data not fully loaded. Please refresh the page.', 'warning');
                 }
 
                 // Show platform controls if user can edit (admin OR station user) AND stationData is loaded
                 if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'station') && stationData && stationData.id) {
                     document.getElementById('admin-platform-controls').style.display = 'block';
-                    console.log('✅ Platform controls shown for', currentUser.role, 'user with station ID:', stationData.id);
                 }
 
                 // Set station description if available
@@ -4475,13 +4428,8 @@
                 document.getElementById('export-csv-btn').style.display = 'flex';
 
                 // Update dashboard - map will be initialized by SitesStationDashboard
-                console.log('Updating dashboard...');
                 await updateDashboard();
-
-                // Load platforms and instruments using modular dashboard
-                console.log('Loading platforms and instruments...');
                 // The station dashboard will handle map initialization automatically
-                console.log('Station data display complete');
             } catch (error) {
                 console.error('Error in showStationData:', error);
                 showError('Error displaying station data: ' + error.message);
@@ -4511,17 +4459,7 @@
             // NOTE: Platform and instrument counts are now managed by SitesStationDashboard class
             // This function is deprecated but kept for backwards compatibility
             // The SitesStationDashboard.updateCounts() is the single source of truth for counts
-
-            console.debug('fetchDashboardData() called - counts managed by SitesStationDashboard class');
-
-            // No longer fetches or updates counts - handled by SitesStationDashboard
-            // If you need to access platforms/instruments, use:
-            //   window.sitesStationDashboard.platforms
-            //   window.sitesStationDashboard.instruments
         }
-
-
-
 
         function showError(message) {
             document.getElementById('loading-state').style.display = 'none';
@@ -4531,11 +4469,9 @@
         }
 
         function logout() {
-            console.log('Logout button clicked');
             try {
                 localStorage.removeItem('sites_spectral_token');
                 localStorage.removeItem('sites_spectral_user');
-                console.log('Cleared localStorage, redirecting to login');
                 window.location.href = '/';
             } catch (error) {
                 console.error('Error during logout:', error);
@@ -5907,14 +5843,6 @@
         }
 
         function populateInstrumentModal(instrument) {
-            console.log('📋 populateInstrumentModal called with:', {
-                id: instrument.id,
-                display_name: instrument.display_name,
-                instrument_type: instrument.instrument_type,
-                deployment_date: instrument.deployment_date,
-                calibration_date: instrument.calibration_date
-            });
-
             const detailsContainer = document.getElementById('instrument-details');
             const instrumentType = instrument.instrument_type || 'Unknown';
             const typeInfo = getInstrumentTypeIcon(instrumentType);
@@ -6332,12 +6260,6 @@
             const editForm = document.getElementById('platform-edit-form');
             const isAdmin = currentUser.role === 'admin';
 
-            console.log('showPlatformEditModal called with platform:', platform);
-            console.log('Platform critical fields:', {
-                deployment_date: platform.deployment_date,
-                description: platform.description
-            });
-
             // Build comprehensive edit form based on user permissions
             editForm.innerHTML = `
                 ${!isAdmin ? '<div class="form-readonly-notice"><i class="fas fa-info-circle"></i> Some fields are read-only based on your permissions</div>' : ''}
@@ -6497,26 +6419,39 @@
         /**
          * Main router: Shows appropriate modal based on instrument type
          * This function determines which type-specific renderer to call
+         * @param {Object|number|string} instrumentOrId - Instrument object or ID
          */
-        function showInstrumentEditModal(instrument) {
+        async function showInstrumentEditModal(instrumentOrId) {
+            let instrument = instrumentOrId;
+
+            // SECURITY FIX: Accept instrument ID and fetch data to prevent XSS
+            // If we received an ID instead of object, fetch the instrument data
+            if (typeof instrumentOrId === 'number' || typeof instrumentOrId === 'string') {
+                try {
+                    const instrumentId = parseInt(instrumentOrId, 10);
+                    if (isNaN(instrumentId)) {
+                        console.error('Invalid instrument ID:', instrumentOrId);
+                        showNotification('Invalid instrument ID', 'error');
+                        return;
+                    }
+                    // Fetch instrument data from API
+                    instrument = await window.sitesAPI.getInstrument(instrumentId);
+                    if (!instrument) {
+                        showNotification('Instrument not found', 'error');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch instrument:', error);
+                    showNotification('Failed to load instrument data', 'error');
+                    return;
+                }
+            }
+
             const editForm = document.getElementById('instrument-edit-form');
             const isAdmin = currentUser.role === 'admin';
 
             // Determine instrument category for routing
             const instrumentCategory = getInstrumentCategory(instrument.instrument_type);
-            console.log('Instrument category:', instrumentCategory, 'Type:', instrument.instrument_type);
-
-            // FIX #1: Add debugging and data validation
-            console.log('showInstrumentEditModal called with instrument:', instrument);
-            console.log('Instrument critical fields:', {
-                deployment_date: instrument.deployment_date,
-                camera_serial_number: instrument.camera_serial_number,
-                instrument_height_m: instrument.instrument_height_m,
-                degrees_from_nadir: instrument.degrees_from_nadir,
-                description: instrument.description,
-                installation_notes: instrument.installation_notes,
-                maintenance_notes: instrument.maintenance_notes
-            });
 
             if (!instrument || !instrument.id) {
                 console.error('Invalid instrument data provided to showInstrumentEditModal');
@@ -6533,25 +6468,19 @@
             // Route to appropriate type-specific renderer (SEPARATION OF CONCERNS)
             let modalHTML;
             if (instrumentCategory === 'phenocam') {
-                console.log('📷 Rendering PHENOCAM modal');
                 modalHTML = renderPhenocamEditForm(instrument, isAdmin);
             } else if (instrumentCategory === 'multispectral') {
-                console.log('📡 Rendering MS SENSOR modal');
                 modalHTML = renderMSSensorEditForm(instrument, isAdmin);
             } else if (instrumentCategory === 'par') {
-                console.log('☀️ Rendering PAR SENSOR modal');
                 modalHTML = renderPARSensorEditForm(instrument, isAdmin);
             } else if (instrumentCategory === 'ndvi') {
-                console.log('🌿 Rendering NDVI SENSOR modal');
                 modalHTML = renderNDVISensorEditForm(instrument, isAdmin);
             } else if (instrumentCategory === 'pri') {
-                console.log('🔬 Rendering PRI SENSOR modal');
                 modalHTML = renderPRISensorEditForm(instrument, isAdmin);
             } else if (instrumentCategory === 'hyperspectral') {
-                console.log('🌈 Rendering HYPERSPECTRAL modal');
                 modalHTML = renderHyperspectralEditForm(instrument, isAdmin);
             } else {
-                console.warn('⚠️ Unsupported instrument type:', instrument.instrument_type);
+                console.warn('Unsupported instrument type:', instrument.instrument_type);
                 showNotification(`Instrument type "${instrument.instrument_type}" is not yet supported for editing`, 'warning');
                 return;
             }
@@ -6621,8 +6550,6 @@
             if (populationErrors.length > 0) {
                 console.error('Form population validation failed:', populationErrors);
                 showNotification(`Form population issue detected: ${populationErrors[0]}`, 'warning');
-            } else {
-                console.log('Form population validation passed');
             }
         }
 
@@ -6784,12 +6711,6 @@
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('Saving platform data:', platformData);
-                console.log('Critical fields being saved:', {
-                    deployment_date: platformData.deployment_date,
-                    description: platformData.description
-                });
-
                 const response = await fetch(`/api/platforms/${platformId}`, {
                     method: 'PUT',
                     headers: {
@@ -6920,14 +6841,6 @@
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('🔵 Saving instrument data (46 fields):', instrumentData);
-                console.log('🔵 Critical fields being saved:', {
-                    deployment_date: instrumentData.deployment_date,
-                    calibration_date: instrumentData.calibration_date,
-                    display_name: instrumentData.display_name,
-                    legacy_acronym: instrumentData.legacy_acronym
-                });
-
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
                     method: 'PUT',
                     headers: {
@@ -6955,7 +6868,6 @@
 
                 // Reopen the instrument detail modal with fresh data
                 // This ensures users see their changes immediately
-                console.log('🔄 Fetching fresh instrument data for ID:', instrumentId);
                 const refreshResponse = await fetch(`/api/instruments/${instrumentId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -6964,19 +6876,11 @@
 
                 if (refreshResponse.ok) {
                     const updatedInstrument = await refreshResponse.json();
-                    console.log('✅ Received fresh instrument data:', {
-                        id: updatedInstrument.id,
-                        display_name: updatedInstrument.display_name,
-                        legacy_acronym: updatedInstrument.legacy_acronym,
-                        deployment_date: updatedInstrument.deployment_date,
-                        calibration_date: updatedInstrument.calibration_date
-                    });
                     currentOpenInstrumentId = instrumentId; // Set state variable
                     populateInstrumentModal(updatedInstrument);
                     document.getElementById('instrument-modal').classList.add('show');
-                    console.log('✅ Instrument modal reopened with fresh data');
                 } else {
-                    console.error('❌ Failed to fetch fresh instrument data:', refreshResponse.status);
+                    console.error('Failed to fetch fresh instrument data:', refreshResponse.status);
                 }
             } catch (error) {
                 console.error('Error saving instrument:', error);
@@ -7280,15 +7184,8 @@
                     body: JSON.stringify(instrumentData)
                 });
 
-                console.log('📤 Instrument creation request:', {
-                    url: '/api/instruments',
-                    method: 'POST',
-                    data: instrumentData
-                });
-
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('✅ Instrument created successfully:', result);
                     showNotification(`Instrument ${result.normalized_name} created successfully!`);
                     closeCreateInstrumentModal();
 
@@ -8154,22 +8051,12 @@
             // Use dashboard instance as source of truth, fallback to global variable
             const data = window.sitesStationDashboard?.stationData || stationData;
 
-            console.log('🔵 Platform creation requested. Station data:', {
-                dashboardData: window.sitesStationDashboard?.stationData,
-                globalData: stationData,
-                using: data,
-                hasId: !!data?.id
-            });
-
             if (!data || !data.id) {
-                console.error('❌ Station data not loaded. Dashboard:',
-                    window.sitesStationDashboard?.stationData,
-                    'Global:', stationData);
+                console.error('Station data not loaded');
                 showNotification('Station data not available. Please refresh the page.', 'error');
                 return;
             }
 
-            console.log('✅ Creating platform for station ID:', data.id);
             openCreatePlatformForm(data.id);
         }
 
@@ -8339,7 +8226,6 @@
             }
 
             if (!specs) {
-                console.log('No default sensor specs for', vendor, model);
                 return null;
             }
             const token = localStorage.getItem('sites_spectral_token');
@@ -8385,8 +8271,6 @@
                     return null;
                 }
 
-                console.log('✅ Auto-created UAV instrument:', result);
-
                 // If instrument has channels, create them too
                 if (specs.channels && specs.channels.length > 0 && result.id) {
                     await createUAVInstrumentChannels(result.id, specs.channels);
@@ -8427,30 +8311,22 @@
                     console.error('Error creating channel:', error);
                 }
             }
-            console.log('✅ Created', channels.length, 'channels for instrument', instrumentId);
         }
 
         // Global function - now redirects to platform type selector
         // Called by sitesStationDashboard.showCreatePlatformModal()
         window.openCreatePlatformForm = function(stationId) {
-            console.log('🔵 openCreatePlatformForm redirecting to type selector, stationId:', stationId);
             openPlatformTypeSelector(stationId);
         }
 
         // Open creation form with a specific platform type pre-selected
         function openCreatePlatformFormWithType(stationId, platformType) {
-            console.log('🔵 openCreatePlatformFormWithType called with stationId:', stationId, 'type:', platformType);
-            console.log('🔵 currentUser:', currentUser);
-            console.log('🔵 currentUser?.role:', currentUser?.role);
-
             // Allow both admin and station users to create platforms
             if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'station')) {
-                console.error('❌ Permission check failed - user role:', currentUser?.role);
+                console.error('Permission check failed - user role:', currentUser?.role);
                 showNotification('Platform creation requires admin or station user privileges', 'error');
                 return;
             }
-
-            console.log('✅ Permission check passed for', currentUser.role, 'user, generating form...');
 
             // Update modal title based on platform type
             const titleConfig = {
@@ -8467,7 +8343,6 @@
                 modalTitle.innerHTML = `<i class="fas ${config.icon}"></i> Create ${config.label}`;
             }
             const form = document.getElementById('create-platform-form');
-            console.log('🔵 Form element:', form);
             form.innerHTML = `
                 <div class="form-section">
                     <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
@@ -9169,11 +9044,9 @@
         let currentStationIdForPlatform = null;
 
         function openPlatformTypeSelector(stationId) {
-            console.log('🔵 openPlatformTypeSelector called with stationId:', stationId);
-
             // Allow both admin and station users to create platforms
             if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'station')) {
-                console.error('❌ Permission check failed - user role:', currentUser?.role);
+                console.error('Permission check failed - user role:', currentUser?.role);
                 showNotification('Platform creation requires admin or station user privileges', 'error');
                 return;
             }
@@ -9187,7 +9060,6 @@
         }
 
         function selectPlatformType(platformType) {
-            console.log('🔵 selectPlatformType called with type:', platformType);
             selectedPlatformType = platformType;
 
             // Close type selector

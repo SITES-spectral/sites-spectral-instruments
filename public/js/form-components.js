@@ -152,12 +152,7 @@ class FormValidator {
       return false;
     }
 
-    // Info: Coordinates will be rounded to 6 decimals server-side
-    const decimals = (value.split('.')[1] || '').length;
-    if (decimals > 0) {
-      console.log(`${fieldName}: ${decimals} decimals provided, will be rounded to 6 decimals`);
-    }
-
+    // Note: Coordinates with >6 decimals will be rounded server-side
     this.markValid(fieldId);
     return true;
   }

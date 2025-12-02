@@ -48,8 +48,7 @@
             this.loadPromise = this._loadAllConfigs();
             await this.loadPromise;
             this.loaded = true;
-
-            console.log('✅ ConfigService: All configurations loaded');
+            // ConfigService initialized - debug logging removed for production
         }
 
         /**

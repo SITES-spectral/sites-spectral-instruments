@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 8.5.0 - YAML Configuration System (2025-11-28)
+## Current Version: 8.5.7 - Security Hardening & Input Sanitization (2025-11-28)
 
-**✅ STATUS: PRODUCTION-READY - CENTRALIZED CONFIGURATION**
+**✅ STATUS: PRODUCTION-READY - SECURITY HARDENED**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
 **📅 Last Updated:** 2025-11-28
+**🔒 Security Features:** CSRF Protection, Input Sanitization, XSS Prevention
 
 ---
 
@@ -123,19 +124,43 @@ public/
 ├── station.html            # Main application (instrument modals here)
 ├── css/styles.css          # Application styles
 └── js/
+    ├── api.js                  # API communication with auth
+    ├── navigation.js           # Breadcrumbs with URL sanitization
     ├── station-dashboard.js    # Dashboard logic
-    └── instrument-modals.js    # Modal utilities
+    ├── core/
+    │   ├── app.js              # App initialization, image error handler
+    │   ├── config-service.js   # YAML configuration loader
+    │   ├── debug.js            # Environment-aware debug utilities (v8.5.6)
+    │   └── rate-limit.js       # Debounce/throttle/submission guard (v8.5.6)
+    ├── instruments/
+    │   ├── phenocam/
+    │   │   └── phenocam-card.js  # XSS-safe card rendering
+    │   └── ms/
+    │       └── ms-card.js        # Multispectral card rendering
+    └── aoi/
+        └── aoi-drawing-tools.js  # AOI polygon drawing
 
 src/
 ├── worker.js               # Cloudflare Worker entry
-├── auth.js                 # JWT authentication
-├── api-handler.js          # API routing
+├── auth.js                 # JWT HMAC-SHA256 authentication (v8.5.4)
+├── api-handler.js          # API routing with CSRF protection (v8.5.7)
+├── utils/
+│   ├── validation.js       # Input sanitization framework (v8.5.7)
+│   ├── csrf.js             # CSRF protection middleware (v8.5.7)
+│   ├── responses.js        # Standardized API responses
+│   ├── database.js         # D1 database utilities
+│   ├── logging.js          # Request logging
+│   └── rate-limiting.js    # Server-side rate limiting
 └── handlers/
     ├── stations.js         # Station CRUD
-    ├── platforms.js        # Platform CRUD
-    ├── instruments.js      # Instrument CRUD
-    ├── rois.js            # ROI management
-    └── export.js          # Data export
+    ├── platforms.js        # Platform CRUD with sanitization
+    ├── instruments/
+    │   ├── index.js        # Instrument router
+    │   ├── get.js          # Read operations
+    │   ├── mutate.js       # Create/Update with sanitization
+    │   └── utils.js        # Instrument utilities
+    ├── rois.js             # ROI management with sanitization
+    └── export.js           # Data export
 
 docs/
 ├── STATION_USER_GUIDE.md   # End-user documentation
@@ -231,24 +256,151 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 
 ---
 
-## Security & Best Practices
+## Security Architecture (v8.5.3-8.5.7)
 
-### Authentication
-- JWT-based authentication with session management
-- Role-based access control (RBAC)
-- All API endpoints require authentication
-- Activity logging for audit trail
+### Authentication & Authorization
+- **JWT with HMAC-SHA256**: Secure token signing (v8.5.4)
+- **Role-based access control (RBAC)**: admin, station, readonly roles
+- **Session management**: Token expiration and refresh
+- **Activity logging**: Full audit trail for all operations
+
+### CSRF Protection (v8.5.7)
+Located in `src/utils/csrf.js`:
+```javascript
+import { csrfProtect, createCSRFErrorResponse } from './utils/csrf.js';
+
+// Validates Origin/Referer headers for state-changing requests
+const csrfResult = csrfProtect(request);
+if (!csrfResult.isValid) {
+    return createCSRFErrorResponse(csrfResult.error);
+}
+```
+
+**Features:**
+- Origin/Referer header validation
+- Whitelist of allowed origins (production + development)
+- Form submission content-type detection
+- Automatic bypass for auth/health endpoints
+
+### Input Sanitization Framework (v8.5.7)
+Located in `src/utils/validation.js`:
+
+| Function | Purpose | Example |
+|----------|---------|---------|
+| `sanitizeString()` | Remove control chars, trim, max length | `sanitizeString(input, { maxLength: 200 })` |
+| `sanitizeInteger()` | Validate and bound integers | `sanitizeInteger(value, { min: 1, max: 100 })` |
+| `sanitizeFloat()` | Validate floats with precision | `sanitizeFloat(value, { decimals: 6 })` |
+| `sanitizeCoordinate()` | Lat/lon with 6 decimal precision | `sanitizeCoordinate(lat, 'latitude')` |
+| `sanitizeIdentifier()` | Alphanumeric + underscores | `sanitizeIdentifier(name)` |
+| `sanitizeAcronym()` | Uppercase 2-10 chars | `sanitizeAcronym('SVB')` |
+| `sanitizeJSON()` | Safe JSON parsing | `sanitizeJSON(pointsData)` |
+| `sanitizeEnum()` | Whitelist validation | `sanitizeEnum(status, ['Active', 'Inactive'])` |
+| `sanitizeDate()` | ISO date format | `sanitizeDate('2025-01-15')` |
+| `sanitizeURL()` | Protocol-restricted URLs | `sanitizeURL(websiteUrl)` |
+
+**Schema-based Sanitization:**
+```javascript
+import { sanitizeRequestBody, PLATFORM_SCHEMA } from './utils/validation.js';
+
+// Sanitize entire request body using predefined schema
+const sanitizedData = sanitizeRequestBody(rawData, PLATFORM_SCHEMA);
+```
+
+**Pre-defined Schemas:**
+- `STATION_SCHEMA` - Station fields
+- `PLATFORM_SCHEMA` - Platform fields
+- `INSTRUMENT_SCHEMA` - Instrument fields
+- `ROI_SCHEMA` - ROI fields
+
+### XSS Prevention (v8.5.5-8.5.6)
+
+**Event Delegation Pattern:**
+```javascript
+// BAD: Inline onerror handler (XSS vulnerable)
+<img onerror="this.parentElement.classList.add('no-image')">
+
+// GOOD: Data attribute + event delegation (v8.5.6)
+<img data-fallback="true">
+
+// In app.js - capture phase listener
+window.addEventListener('error', (event) => {
+    if (event.target?.tagName === 'IMG' && event.target.dataset.fallback === 'true') {
+        event.target.parentElement?.classList.add('no-image');
+        event.target.style.display = 'none';
+    }
+}, true);
+```
+
+**Safe DOM Methods:**
+```javascript
+// BAD: innerHTML with user data
+element.innerHTML = `<a href="${userUrl}">${userName}</a>`;
+
+// GOOD: createElement + textContent (v8.5.6)
+const link = document.createElement('a');
+link.href = sanitizeUrl(userUrl);
+link.textContent = userName;  // Safe - auto-escapes
+element.appendChild(link);
+```
+
+**URL Sanitization:**
+```javascript
+// Prevent javascript: protocol injection
+function _sanitizeUrl(url) {
+    if (!url) return '/';
+    if (url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+    return '/';
+}
+```
+
+### Debug Utilities (v8.5.6)
+Located in `public/js/core/debug.js`:
+```javascript
+// Environment-aware logging - only logs in development
+Debug.log('Processing data:', data);      // Only in dev
+Debug.warn('Deprecated function');        // Always shows
+Debug.error('Critical failure', error);   // Always shows
+
+// Category-based logging
+const apiDebug = Debug.withCategory('API');
+apiDebug.log('Request sent');  // [API] Request sent
+
+// Performance timing
+Debug.time('dataLoad');
+// ... operation
+Debug.timeEnd('dataLoad');  // dataLoad: 145.23ms
+```
+
+### Rate Limiting (v8.5.6)
+Located in `public/js/core/rate-limit.js`:
+```javascript
+// Debounce for input fields
+const debouncedSearch = debounce(searchFunction, 300);
+
+// Throttle for scroll/resize
+const throttledUpdate = throttle(updateFunction, 1000);
+
+// Form submission guard (prevents double-clicks)
+const guardedSubmit = RateLimit.submissionGuard.guard(
+    'instrument-form',
+    submitFunction,
+    'Please wait before submitting again'
+);
+```
 
 ### Code Quality
 - Prefer clean, functional code over backward compatibility
 - Use absolute imports
 - Always bump version and update changelog before commit
 - Use git worktrees for parallel development
+- Remove console.log statements before production (57 removed in v8.5.6)
 
 ### Data Integrity
-- Input validation on all user inputs
-- Foreign key constraints enforced
-- Cascade deletion with dependency analysis
+- Input validation on all user inputs (schema-based)
+- Foreign key constraints with CASCADE (v8.5.5)
+- JSON parsing with try-catch error handling
 - Database backups before destructive operations
 
 ---
@@ -278,6 +430,16 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 | `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
 | `docs/roi/ROI_README.md` | ROI system documentation |
 | `docs/deprecated/` | Archived documentation |
+
+### Security Documentation in CHANGELOG.md
+
+| Version | Security Focus |
+|---------|----------------|
+| v8.5.7 | Input Sanitization Framework, CSRF Protection |
+| v8.5.6 | XSS Prevention, Debug Utilities, Rate Limiting |
+| v8.5.5 | Database CASCADE Fixes, Card XSS Fixes |
+| v8.5.4 | JWT HMAC-SHA256, AOI Authentication |
+| v8.5.3 | Modal Null Checks, Loading States |
 
 ---
 
@@ -310,9 +472,22 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 8.5.0 |
+| Current Version | 8.5.7 |
 | Last Deployed | 2025-11-28 |
-| Status | Production-Ready - YAML Configuration System |
+| Status | Production-Ready - Security Hardened |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
+
+### Security Features (v8.5.3-8.5.7)
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| JWT HMAC-SHA256 Signing | v8.5.4 | ✅ Active |
+| XSS Prevention (Event Delegation) | v8.5.6 | ✅ Active |
+| XSS Prevention (DOM Methods) | v8.5.6 | ✅ Active |
+| CSRF Protection | v8.5.7 | ✅ Active |
+| Input Sanitization Framework | v8.5.7 | ✅ Active |
+| Debug Utilities | v8.5.6 | ✅ Active |
+| Rate Limiting | v8.5.6 | ✅ Active |
+| CASCADE Constraints | v8.5.5 | ✅ Active |

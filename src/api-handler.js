@@ -1,7 +1,8 @@
-// SITES Spectral API Handler v8.0.0-beta.2
+// SITES Spectral API Handler v8.5.7
 // Modular architecture with clean separation of concerns
 // Now includes versioned API (v2) with pagination support
 // Added AOI (Areas of Interest) support for UAV/Satellite platforms
+// SECURITY: Added CSRF protection and input sanitization
 
 import { handleAuth, getUserFromRequest } from './auth/authentication.js';
 import { handleStations } from './handlers/stations.js';
@@ -23,6 +24,7 @@ import { handleDocumentation } from './handlers/documentation.js';
 import { handleMaintenance } from './handlers/maintenance.js';
 import { handleCalibration } from './handlers/calibration.js';
 import { logApiRequest } from './utils/logging.js';
+import { csrfProtect, createCSRFErrorResponse } from './utils/csrf.js';
 import {
   createErrorResponse,
   createNotFoundResponse,
@@ -52,6 +54,19 @@ export async function handleApiRequest(request, env, ctx) {
     pathSegments.shift();
   }
 
+  const method = request.method;
+  const resource = pathSegments[0];
+
+  // SECURITY: CSRF Protection for state-changing requests
+  // Skip CSRF check for auth endpoints (login needs to work without existing session)
+  // and health checks (read-only)
+  if (resource !== 'auth' && resource !== 'health') {
+    const csrfResult = csrfProtect(request);
+    if (!csrfResult.isValid) {
+      return createCSRFErrorResponse(csrfResult.error);
+    }
+  }
+
   // Route to V3 API if requested (domain-based routing)
   if (pathSegments[0] === 'v3') {
     return await handleApiV3Request(request, env, ctx);
@@ -62,8 +77,6 @@ export async function handleApiRequest(request, env, ctx) {
     return await handleApiV2Request(request, env, ctx);
   }
 
-  const method = request.method;
-  const resource = pathSegments[0];
   const id = pathSegments[1];
 
   // Log API request for audit trail
@@ -181,11 +194,11 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '8.0.0-rc.4',
+      version: '8.5.7',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'modular',
       apiVersions: ['v1', 'v2', 'v3'],
-      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs']
+      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs', 'csrf-protection', 'input-sanitization']
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -195,12 +208,12 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '8.0.0-rc.4',
+      version: '8.5.7',
       error: error.message,
       database: 'disconnected',
       architecture: 'modular',
       apiVersions: ['v1', 'v2', 'v3'],
-      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs']
+      features: ['aoi-support', 'uav-platforms', 'satellite-platforms', 'maintenance-tracking', 'calibration-logs', 'csrf-protection', 'input-sanitization']
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }

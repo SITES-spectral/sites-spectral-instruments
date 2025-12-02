@@ -1,7 +1,372 @@
 // Validation Utilities
-// Input validation, Swedish compliance, and ecosystem codes
+// Input validation, Swedish compliance, ecosystem codes, and input sanitization
+// SECURITY: Provides centralized validation and sanitization for all API inputs
 
 import { executeQuery, executeQueryFirst } from './database.js';
+
+// ============================================================================
+// Input Sanitization Functions
+// ============================================================================
+
+/**
+ * Sanitize string input - removes control characters and trims whitespace
+ * @param {*} value - Value to sanitize
+ * @param {Object} options - Sanitization options
+ * @returns {string|null} Sanitized string or null
+ */
+export function sanitizeString(value, options = {}) {
+    if (value === null || value === undefined) return null;
+    if (typeof value !== 'string') {
+        value = String(value);
+    }
+
+    const { maxLength = 1000, allowEmpty = false } = options;
+
+    // Remove control characters except newlines and tabs
+    let sanitized = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+    // Trim whitespace
+    sanitized = sanitized.trim();
+
+    // Truncate if too long
+    if (sanitized.length > maxLength) {
+        sanitized = sanitized.substring(0, maxLength);
+    }
+
+    // Return null for empty strings unless allowed
+    if (!allowEmpty && sanitized.length === 0) {
+        return null;
+    }
+
+    return sanitized;
+}
+
+/**
+ * Sanitize and validate integer input
+ * @param {*} value - Value to sanitize
+ * @param {Object} options - Validation options
+ * @returns {number|null} Sanitized integer or null
+ */
+export function sanitizeInteger(value, options = {}) {
+    if (value === null || value === undefined || value === '') return null;
+
+    const { min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER } = options;
+
+    const parsed = parseInt(value, 10);
+    if (isNaN(parsed)) return null;
+    if (parsed < min || parsed > max) return null;
+
+    return parsed;
+}
+
+/**
+ * Sanitize and validate float input
+ * @param {*} value - Value to sanitize
+ * @param {Object} options - Validation options
+ * @returns {number|null} Sanitized float or null
+ */
+export function sanitizeFloat(value, options = {}) {
+    if (value === null || value === undefined || value === '') return null;
+
+    const { min = -Number.MAX_VALUE, max = Number.MAX_VALUE, decimals = null } = options;
+
+    const parsed = parseFloat(value);
+    if (isNaN(parsed) || !isFinite(parsed)) return null;
+    if (parsed < min || parsed > max) return null;
+
+    // Round to specified decimals if provided
+    if (decimals !== null && decimals >= 0) {
+        const factor = Math.pow(10, decimals);
+        return Math.round(parsed * factor) / factor;
+    }
+
+    return parsed;
+}
+
+/**
+ * Sanitize coordinate (latitude or longitude)
+ * @param {*} value - Value to sanitize
+ * @param {string} type - 'latitude' or 'longitude'
+ * @returns {number|null} Sanitized coordinate or null
+ */
+export function sanitizeCoordinate(value, type = 'latitude') {
+    const limits = type === 'latitude'
+        ? { min: -90, max: 90 }
+        : { min: -180, max: 180 };
+
+    return sanitizeFloat(value, { ...limits, decimals: 6 });
+}
+
+/**
+ * Sanitize identifier (alphanumeric with underscores)
+ * @param {*} value - Value to sanitize
+ * @param {Object} options - Validation options
+ * @returns {string|null} Sanitized identifier or null
+ */
+export function sanitizeIdentifier(value, options = {}) {
+    if (value === null || value === undefined) return null;
+
+    const { maxLength = 100, allowDashes = false } = options;
+    const str = String(value).trim();
+
+    // Pattern: alphanumeric and underscores (optionally dashes)
+    const pattern = allowDashes
+        ? /^[a-zA-Z0-9_-]+$/
+        : /^[a-zA-Z0-9_]+$/;
+
+    if (!pattern.test(str)) return null;
+    if (str.length > maxLength) return null;
+
+    return str;
+}
+
+/**
+ * Sanitize acronym (uppercase letters and numbers)
+ * @param {*} value - Value to sanitize
+ * @returns {string|null} Sanitized acronym or null
+ */
+export function sanitizeAcronym(value) {
+    if (value === null || value === undefined) return null;
+
+    const str = String(value).trim().toUpperCase();
+
+    if (!/^[A-Z0-9]{2,10}$/.test(str)) return null;
+
+    return str;
+}
+
+/**
+ * Sanitize JSON input
+ * @param {*} value - Value to sanitize (string or object)
+ * @returns {Object|null} Parsed JSON or null
+ */
+export function sanitizeJSON(value) {
+    if (value === null || value === undefined) return null;
+
+    // If already an object, validate it's not an array (unless that's desired)
+    if (typeof value === 'object' && value !== null) {
+        return value;
+    }
+
+    // Try to parse string as JSON
+    if (typeof value === 'string') {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Sanitize and validate enum value
+ * @param {*} value - Value to validate
+ * @param {Array} allowedValues - List of allowed values
+ * @returns {*} The value if allowed, null otherwise
+ */
+export function sanitizeEnum(value, allowedValues) {
+    if (value === null || value === undefined) return null;
+    if (!Array.isArray(allowedValues)) return null;
+
+    const str = String(value).trim();
+    return allowedValues.includes(str) ? str : null;
+}
+
+/**
+ * Sanitize date string (ISO format)
+ * @param {*} value - Value to sanitize
+ * @returns {string|null} ISO date string or null
+ */
+export function sanitizeDate(value) {
+    if (value === null || value === undefined || value === '') return null;
+
+    const str = String(value).trim();
+
+    // Check ISO date format (YYYY-MM-DD or full ISO)
+    const isoDatePattern = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$/;
+    if (!isoDatePattern.test(str)) return null;
+
+    // Validate it's a real date
+    const date = new Date(str);
+    if (isNaN(date.getTime())) return null;
+
+    // Return date part only for simple dates
+    if (str.length === 10) {
+        return str;
+    }
+
+    return date.toISOString();
+}
+
+/**
+ * Sanitize URL (basic validation)
+ * @param {*} value - Value to sanitize
+ * @returns {string|null} Valid URL string or null
+ */
+export function sanitizeURL(value) {
+    if (value === null || value === undefined || value === '') return null;
+
+    const str = String(value).trim();
+
+    // Only allow http and https protocols
+    if (!str.startsWith('http://') && !str.startsWith('https://')) {
+        return null;
+    }
+
+    // Basic URL validation
+    try {
+        new URL(str);
+        return str;
+    } catch (e) {
+        return null;
+    }
+}
+
+// ============================================================================
+// Request Body Sanitization
+// ============================================================================
+
+/**
+ * Sanitize an entire request body object
+ * @param {Object} body - Request body to sanitize
+ * @param {Object} schema - Schema defining field types and constraints
+ * @returns {Object} Sanitized body object
+ */
+export function sanitizeRequestBody(body, schema) {
+    if (!body || typeof body !== 'object') {
+        return {};
+    }
+
+    const sanitized = {};
+
+    for (const [field, config] of Object.entries(schema)) {
+        const value = body[field];
+
+        switch (config.type) {
+            case 'string':
+                sanitized[field] = sanitizeString(value, config);
+                break;
+            case 'integer':
+                sanitized[field] = sanitizeInteger(value, config);
+                break;
+            case 'float':
+                sanitized[field] = sanitizeFloat(value, config);
+                break;
+            case 'coordinate':
+                sanitized[field] = sanitizeCoordinate(value, config.coordType || 'latitude');
+                break;
+            case 'identifier':
+                sanitized[field] = sanitizeIdentifier(value, config);
+                break;
+            case 'acronym':
+                sanitized[field] = sanitizeAcronym(value);
+                break;
+            case 'json':
+                sanitized[field] = sanitizeJSON(value);
+                break;
+            case 'enum':
+                sanitized[field] = sanitizeEnum(value, config.values);
+                break;
+            case 'date':
+                sanitized[field] = sanitizeDate(value);
+                break;
+            case 'url':
+                sanitized[field] = sanitizeURL(value);
+                break;
+            case 'boolean':
+                sanitized[field] = value === true || value === 'true' || value === 1;
+                break;
+            default:
+                // Pass through unknown types with basic string sanitization
+                sanitized[field] = sanitizeString(value);
+        }
+    }
+
+    return sanitized;
+}
+
+// ============================================================================
+// Field Schemas for Common Entities
+// ============================================================================
+
+/**
+ * Station field schema for sanitization
+ */
+export const STATION_SCHEMA = {
+    display_name: { type: 'string', maxLength: 200 },
+    acronym: { type: 'acronym' },
+    normalized_name: { type: 'identifier', maxLength: 100 },
+    description: { type: 'string', maxLength: 2000 },
+    latitude: { type: 'coordinate', coordType: 'latitude' },
+    longitude: { type: 'coordinate', coordType: 'longitude' },
+    elevation_m: { type: 'float', min: -500, max: 10000, decimals: 2 },
+    timezone: { type: 'string', maxLength: 50 },
+    organization: { type: 'string', maxLength: 200 },
+    contact_email: { type: 'string', maxLength: 200 },
+    website_url: { type: 'url' },
+    status: { type: 'enum', values: ['Active', 'Inactive', 'Maintenance', 'Decommissioned'] }
+};
+
+/**
+ * Platform field schema for sanitization
+ */
+export const PLATFORM_SCHEMA = {
+    station_id: { type: 'integer', min: 1 },
+    display_name: { type: 'string', maxLength: 200 },
+    normalized_name: { type: 'identifier', maxLength: 100 },
+    location_code: { type: 'identifier', maxLength: 20 },
+    ecosystem_code: { type: 'enum', values: ['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA', 'GEN'] },
+    latitude: { type: 'coordinate', coordType: 'latitude' },
+    longitude: { type: 'coordinate', coordType: 'longitude' },
+    platform_height_m: { type: 'float', min: 0, max: 200, decimals: 2 },
+    status: { type: 'enum', values: ['Active', 'Inactive', 'Maintenance', 'Decommissioned'] },
+    mounting_structure: { type: 'string', maxLength: 200 },
+    platform_type: { type: 'string', maxLength: 100 },
+    deployment_date: { type: 'date' },
+    description: { type: 'string', maxLength: 2000 },
+    operation_programs: { type: 'string', maxLength: 500 }
+};
+
+/**
+ * Instrument field schema for sanitization
+ */
+export const INSTRUMENT_SCHEMA = {
+    platform_id: { type: 'integer', min: 1 },
+    display_name: { type: 'string', maxLength: 200 },
+    normalized_name: { type: 'identifier', maxLength: 100 },
+    instrument_type: { type: 'string', maxLength: 100 },
+    legacy_acronym: { type: 'identifier', maxLength: 50 },
+    status: { type: 'enum', values: ['Active', 'Inactive', 'Maintenance', 'Decommissioned'] },
+    measurement_status: { type: 'enum', values: ['Operational', 'Calibrating', 'Offline', 'Unknown'] },
+    latitude: { type: 'coordinate', coordType: 'latitude' },
+    longitude: { type: 'coordinate', coordType: 'longitude' },
+    viewing_direction: { type: 'string', maxLength: 50 },
+    azimuth_degrees: { type: 'float', min: 0, max: 360, decimals: 2 },
+    nadir_degrees: { type: 'float', min: -90, max: 90, decimals: 2 },
+    height_above_ground_m: { type: 'float', min: 0, max: 200, decimals: 2 },
+    deployment_date: { type: 'date' },
+    calibration_date: { type: 'date' },
+    description: { type: 'string', maxLength: 2000 },
+    installation_notes: { type: 'string', maxLength: 2000 },
+    maintenance_notes: { type: 'string', maxLength: 2000 },
+    quality_score: { type: 'float', min: 0, max: 100, decimals: 2 }
+};
+
+/**
+ * ROI field schema for sanitization
+ */
+export const ROI_SCHEMA = {
+    instrument_id: { type: 'integer', min: 1 },
+    roi_name: { type: 'identifier', maxLength: 50 },
+    display_name: { type: 'string', maxLength: 200 },
+    points_json: { type: 'json' },
+    color: { type: 'string', maxLength: 20 },
+    description: { type: 'string', maxLength: 2000 },
+    vegetation_type: { type: 'string', maxLength: 100 },
+    status: { type: 'enum', values: ['Active', 'Inactive', 'Archived'] }
+};
 
 // Valid ecosystem codes for Swedish research stations
 const VALID_ECOSYSTEMS = ['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA', 'GEN'];

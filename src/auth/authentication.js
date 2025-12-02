@@ -117,7 +117,7 @@ export async function authenticateUser(username, password, env) {
 
     // Check admin credentials
     if (credentials.admin?.username === username && credentials.admin?.password === password) {
-      console.log(`Admin user authenticated: ${username}`);
+      // Auth successful - admin user
       return {
         username: credentials.admin.username,
         role: credentials.admin.role,
@@ -132,7 +132,7 @@ export async function authenticateUser(username, password, env) {
         if (stationCreds?.username === username && stationCreds?.password === password) {
           // Get station data from database to get both acronym and integer ID
           const stationData = await getStationByNormalizedName(stationName, env);
-          console.log(`Station user authenticated: ${username} for station: ${stationName}`);
+          // Auth successful - station user
           return {
             username: stationCreds.username,
             role: stationCreds.role,
@@ -237,7 +237,7 @@ export async function getUserFromRequest(request, env) {
       return null;
     }
 
-    console.log(`Valid token for user: ${payload.username}, role: ${payload.role}`);
+    // Token validated successfully
     return {
       username: payload.username,
       role: payload.role,

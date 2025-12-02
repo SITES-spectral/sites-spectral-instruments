@@ -81,7 +81,8 @@
             const spectralRange = instrument.spectral_range || '400-700';
 
             const cardClass = compact ? 'instrument-card compact' : 'instrument-card';
-            const clickHandler = onClick ? `onclick="${onClick}"` : `onclick="showInstrumentEditModal(${JSON.stringify(instrument).replace(/"/g, '&quot;')})"`;
+            // SECURITY FIX: Pass only instrument ID to prevent XSS via JSON in onclick
+            const clickHandler = onClick ? `onclick="${onClick}"` : `onclick="showInstrumentEditModal(${instrument.id})"`;
 
             return `
             <div class="${cardClass}" data-instrument-id="${instrument.id}" ${clickHandler}
@@ -123,9 +124,10 @@
             const status = instrument.status || 'Unknown';
             const statusColor = STATUS_COLORS[status] || '#94a3b8';
 
+            // SECURITY FIX: Pass only instrument ID to prevent XSS via JSON in onclick
             return `
             <div class="instrument-list-item" data-instrument-id="${instrument.id}"
-                 onclick="showInstrumentEditModal(${JSON.stringify(instrument).replace(/"/g, '&quot;')})"
+                 onclick="showInstrumentEditModal(${instrument.id})"
                  role="button" tabindex="0">
                 <span class="status-dot" style="background-color: ${statusColor};" aria-hidden="true"></span>
                 <span class="instrument-icon"><i class="fas fa-sun" aria-hidden="true"></i></span>
@@ -145,9 +147,10 @@
             const statusColor = STATUS_COLORS[status] || '#94a3b8';
             const spectralRange = instrument.spectral_range || '400-700';
 
+            // SECURITY FIX: Pass only instrument ID to prevent XSS via JSON in onclick
             return `
             <tr data-instrument-id="${instrument.id}" class="clickable-row"
-                onclick="showInstrumentEditModal(${JSON.stringify(instrument).replace(/"/g, '&quot;')})">
+                onclick="showInstrumentEditModal(${instrument.id})">
                 <td>
                     <span class="status-dot" style="background-color: ${statusColor};" aria-hidden="true"></span>
                 </td>

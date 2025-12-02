@@ -3,7 +3,15 @@
 
 import { requireAuthentication, checkUserPermissions } from '../auth/permissions.js';
 import { executeQuery, executeQueryFirst, executeQueryRun } from '../utils/database.js';
-import { validateROIData } from '../utils/validation.js';
+import {
+  validateROIData,
+  sanitizeRequestBody,
+  sanitizeString,
+  sanitizeInteger,
+  sanitizeFloat,
+  sanitizeJSON,
+  ROI_SCHEMA
+} from '../utils/validation.js';
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -198,7 +206,31 @@ async function createROI(user, request, env) {
     return createForbiddenResponse();
   }
 
-  const roiData = await request.json();
+  // SECURITY: Parse request body with error handling
+  let rawData;
+  try {
+    rawData = await request.json();
+  } catch (e) {
+    return createErrorResponse('Invalid JSON in request body', 400);
+  }
+
+  // Sanitize ROI data using schema
+  const roiData = sanitizeRequestBody(rawData, ROI_SCHEMA);
+
+  // Handle additional ROI-specific fields
+  if (rawData.alpha !== undefined) roiData.alpha = sanitizeFloat(rawData.alpha, { min: 0, max: 1 });
+  if (rawData.thickness !== undefined) roiData.thickness = sanitizeInteger(rawData.thickness, { min: 1, max: 20 });
+  if (rawData.color_r !== undefined) roiData.color_r = sanitizeInteger(rawData.color_r, { min: 0, max: 255 });
+  if (rawData.color_g !== undefined) roiData.color_g = sanitizeInteger(rawData.color_g, { min: 0, max: 255 });
+  if (rawData.color_b !== undefined) roiData.color_b = sanitizeInteger(rawData.color_b, { min: 0, max: 255 });
+  if (rawData.auto_generated !== undefined) roiData.auto_generated = rawData.auto_generated === true || rawData.auto_generated === 'true';
+  if (rawData.source_image !== undefined) roiData.source_image = sanitizeString(rawData.source_image, { maxLength: 500 });
+  if (rawData.generated_date !== undefined) roiData.generated_date = sanitizeString(rawData.generated_date, { maxLength: 50 });
+  if (rawData.points_json !== undefined) {
+    // Validate points_json is valid JSON
+    const points = sanitizeJSON(rawData.points_json);
+    roiData.points_json = points ? JSON.stringify(points) : rawData.points_json;
+  }
 
   // Validate ROI data
   const validation = validateROIData(roiData);
@@ -302,7 +334,28 @@ async function updateROI(id, user, request, env) {
     return createForbiddenResponse();
   }
 
-  const roiData = await request.json();
+  // SECURITY: Parse request body with error handling
+  let rawData;
+  try {
+    rawData = await request.json();
+  } catch (e) {
+    return createErrorResponse('Invalid JSON in request body', 400);
+  }
+
+  // Sanitize ROI data using schema
+  const roiData = sanitizeRequestBody(rawData, ROI_SCHEMA);
+
+  // Handle additional ROI-specific fields
+  if (rawData.alpha !== undefined) roiData.alpha = sanitizeFloat(rawData.alpha, { min: 0, max: 1 });
+  if (rawData.thickness !== undefined) roiData.thickness = sanitizeInteger(rawData.thickness, { min: 1, max: 20 });
+  if (rawData.color_r !== undefined) roiData.color_r = sanitizeInteger(rawData.color_r, { min: 0, max: 255 });
+  if (rawData.color_g !== undefined) roiData.color_g = sanitizeInteger(rawData.color_g, { min: 0, max: 255 });
+  if (rawData.color_b !== undefined) roiData.color_b = sanitizeInteger(rawData.color_b, { min: 0, max: 255 });
+  if (rawData.source_image !== undefined) roiData.source_image = sanitizeString(rawData.source_image, { maxLength: 500 });
+  if (rawData.points_json !== undefined) {
+    const points = sanitizeJSON(rawData.points_json);
+    roiData.points_json = points ? JSON.stringify(points) : rawData.points_json;
+  }
 
   // First verify ROI exists and get its station
   const checkQuery = `

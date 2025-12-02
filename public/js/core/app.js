@@ -85,7 +85,7 @@
                     }
                 }
 
-                console.log('SITES Spectral v8.0.0 initialized');
+                // App initialized successfully - debug logging removed for production
 
             } catch (error) {
                 console.error('Failed to initialize app:', error);
@@ -158,7 +158,7 @@
                 // Store in state
                 AppState.set('configsLoaded', true);
 
-                console.log('Configurations loaded:', ConfigLoader.getLoadedConfigs());
+                // Configurations loaded - debug logging removed for production
 
             } catch (error) {
                 console.error('Failed to load configurations:', error);
@@ -186,8 +186,21 @@
 
             // Handle global errors
             window.addEventListener('error', (event) => {
+                // SECURITY FIX: Handle image load errors via event delegation
+                // instead of inline onerror handlers to prevent XSS
+                if (event.target && event.target.tagName === 'IMG' &&
+                    event.target.dataset.fallback === 'true') {
+                    const img = event.target;
+                    const parent = img.parentElement;
+                    if (parent) {
+                        parent.classList.add('no-image');
+                    }
+                    img.style.display = 'none';
+                    event.preventDefault();
+                    return;
+                }
                 console.error('Global error:', event.error);
-            });
+            }, true); // Use capture phase for img errors
         }
 
         /**

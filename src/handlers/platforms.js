@@ -10,6 +10,12 @@ import {
   createForbiddenResponse,
   createMethodNotAllowedResponse
 } from '../utils/responses.js';
+import {
+  sanitizeRequestBody,
+  sanitizeCoordinate,
+  PLATFORM_SCHEMA,
+  validatePlatformData
+} from '../utils/validation.js';
 
 /**
  * Handle platform requests
@@ -109,12 +115,6 @@ async function getPlatformsList(user, request, env) {
   const url = new URL(request.url);
   const stationParam = url.searchParams.get('station');
 
-  console.debug('Platform API Debug:', {
-    stationParam,
-    userRole: user.role,
-    userStationNormalizedName: user.station_normalized_name,
-    userStationAcronym: user.station_acronym
-  });
 
   let query = `
     SELECT p.id, p.normalized_name, p.display_name, p.location_code, p.station_id,
@@ -147,16 +147,7 @@ async function getPlatformsList(user, request, env) {
 
   query += ' GROUP BY p.id ORDER BY p.display_name';
 
-  console.debug('Platform query:', query);
-  console.debug('Platform params:', params);
-
   const result = await executeQuery(env, query, params, 'getPlatformsList');
-
-  console.debug('Platform query result:', {
-    success: result?.success,
-    resultCount: result?.results?.length || 0,
-    results: result?.results
-  });
 
   return createSuccessResponse({
     platforms: result?.results || []
@@ -178,7 +169,16 @@ async function updatePlatform(id, user, request, env) {
     return createForbiddenResponse();
   }
 
-  const platformData = await request.json();
+  // SECURITY: Parse and sanitize request body
+  let rawData;
+  try {
+    rawData = await request.json();
+  } catch (e) {
+    return createErrorResponse('Invalid JSON in request body', 400);
+  }
+
+  // Sanitize all fields using schema
+  const platformData = sanitizeRequestBody(rawData, PLATFORM_SCHEMA);
 
   // First verify platform exists and get its station
   const checkQuery = `
@@ -203,15 +203,6 @@ async function updatePlatform(id, user, request, env) {
   const allowedFields = [];
   const values = [];
 
-  // Helper function to round coordinates to exactly 6 decimal places
-  const roundCoordinate = (value) => {
-    if (value === null || value === undefined || value === '') return null;
-    const num = parseFloat(value);
-    if (isNaN(num)) return null;
-    // Round to 6 decimal places: multiply by 1000000, round, divide by 1000000
-    return Math.round(num * 1000000) / 1000000;
-  };
-
   // Fields that station users can edit
   const stationEditableFields = [
     'display_name', 'status', 'mounting_structure', 'platform_height_m',
@@ -221,29 +212,18 @@ async function updatePlatform(id, user, request, env) {
   // Fields that only admin can edit
   const adminOnlyFields = ['location_code', 'ecosystem_code', 'normalized_name'];
 
-  // Add station editable fields with proper data type handling
+  // Add station editable fields - values already sanitized by sanitizeRequestBody
   stationEditableFields.forEach(field => {
-    if (platformData[field] !== undefined) {
-      let value = platformData[field];
-
-      // Apply coordinate rounding to latitude and longitude
-      if (field === 'latitude' || field === 'longitude') {
-        value = roundCoordinate(value);
-      }
-      // Ensure platform_height_m is properly parsed as a number
-      else if (field === 'platform_height_m') {
-        value = value ? parseFloat(value) : null;
-      }
-
+    if (platformData[field] !== undefined && platformData[field] !== null) {
       allowedFields.push(`${field} = ?`);
-      values.push(value);
+      values.push(platformData[field]);
     }
   });
 
-  // Add admin-only fields if user is admin
+  // Add admin-only fields if user is admin - values already sanitized
   if (user.role === 'admin') {
     adminOnlyFields.forEach(field => {
-      if (platformData[field] !== undefined) {
+      if (platformData[field] !== undefined && platformData[field] !== null) {
         allowedFields.push(`${field} = ?`);
         values.push(platformData[field]);
       }
@@ -294,9 +274,24 @@ async function createPlatform(user, request, env) {
     return createForbiddenResponse();
   }
 
-  const platformData = await request.json();
+  // SECURITY: Parse and sanitize request body
+  let rawData;
+  try {
+    rawData = await request.json();
+  } catch (e) {
+    return createErrorResponse('Invalid JSON in request body', 400);
+  }
 
-  // Required fields validation
+  // Sanitize all fields using schema
+  const platformData = sanitizeRequestBody(rawData, PLATFORM_SCHEMA);
+
+  // Validate required fields after sanitization
+  const validation = validatePlatformData(platformData);
+  if (!validation.valid) {
+    return createErrorResponse(validation.errors.join(', '), 400);
+  }
+
+  // Required fields validation (post-sanitization)
   const requiredFields = ['display_name', 'station_id', 'ecosystem_code'];
   for (const field of requiredFields) {
     if (!platformData[field]) {

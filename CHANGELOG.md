@@ -12,6 +12,202 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.5.7] - 2025-11-28
+
+### COMPREHENSIVE API SECURITY: Input Sanitization and CSRF Protection
+
+**Release Date**: 2025-11-28
+**Focus**: API-level security hardening with input validation and CSRF protection
+
+#### Input Sanitization Framework
+
+- **New Sanitization Utilities** (`src/utils/validation.js`):
+  - `sanitizeString()` - Removes control characters, trims, enforces max length
+  - `sanitizeInteger()` - Validates and bounds integer values
+  - `sanitizeFloat()` - Validates floats with decimal precision control
+  - `sanitizeCoordinate()` - Lat/lon validation with 6 decimal precision
+  - `sanitizeIdentifier()` - Alphanumeric validation for normalized names
+  - `sanitizeAcronym()` - Uppercase 2-10 character validation
+  - `sanitizeJSON()` - Safe JSON parsing with validation
+  - `sanitizeEnum()` - Whitelist-based value validation
+  - `sanitizeDate()` - ISO date format validation
+  - `sanitizeURL()` - Protocol-restricted URL validation
+  - `sanitizeRequestBody()` - Schema-based batch sanitization
+
+- **Entity Schemas**: Pre-defined schemas for all entities:
+  - `STATION_SCHEMA` - Station field validation rules
+  - `PLATFORM_SCHEMA` - Platform field validation rules
+  - `INSTRUMENT_SCHEMA` - Instrument field validation rules
+  - `ROI_SCHEMA` - ROI field validation rules
+
+#### Handler Security Updates
+
+- **Platforms Handler** (`src/handlers/platforms.js`):
+  - Added JSON parsing with try-catch error handling
+  - Integrated `sanitizeRequestBody()` for all create/update operations
+  - Removed inline `roundCoordinate` (now uses centralized sanitization)
+  - Removed debug console.log statements
+
+- **Instruments Handler** (`src/handlers/instruments/mutate.js`):
+  - Added JSON parsing error handling
+  - Schema-based sanitization for core fields
+  - Additional sanitization for camera-specific fields
+  - Numeric field validation with proper bounds
+
+- **ROIs Handler** (`src/handlers/rois.js`):
+  - Added JSON parsing error handling
+  - Schema-based sanitization for ROI fields
+  - Color value bounds (0-255) validation
+  - Alpha transparency bounds (0-1) validation
+  - JSON points validation
+
+#### CSRF Protection
+
+- **New CSRF Utility** (`src/utils/csrf.js`):
+  - `validateRequestOrigin()` - Origin/Referer header validation
+  - `csrfProtect()` - Middleware for state-changing requests
+  - `createCSRFErrorResponse()` - Standardized CSRF error responses
+  - Allowed origins whitelist for production and development
+  - Form submission content-type detection
+
+- **API Handler Integration** (`src/api-handler.js`):
+  - CSRF protection applied to all state-changing endpoints
+  - Auth and health endpoints excluded (necessary for login flow)
+  - 403 response for failed CSRF validation
+
+#### Security Documentation
+
+- **AOI Drawing Tools** (`public/js/aoi/aoi-drawing-tools.js`):
+  - Added security note explaining safe innerHTML usage
+  - Documented why static templates are not XSS vulnerabilities
+
+#### Files Modified
+
+- `src/utils/validation.js` - Major expansion with sanitization functions
+- `src/utils/csrf.js` - New CSRF protection module
+- `src/api-handler.js` - CSRF integration, version update
+- `src/handlers/platforms.js` - Sanitization, error handling, log cleanup
+- `src/handlers/instruments/mutate.js` - Sanitization, error handling
+- `src/handlers/rois.js` - Sanitization, error handling
+- `public/js/aoi/aoi-drawing-tools.js` - Security documentation
+
+---
+
+## [8.5.6] - 2025-11-28
+
+### COMPREHENSIVE SECURITY HARDENING
+
+**Release Date**: 2025-11-28
+**Focus**: Complete security audit remediation and code quality improvements
+
+#### Critical Security Fixes
+
+- **XSS Prevention via Event Delegation**: Replaced inline `onerror` handlers with global event delegation
+  - `phenocam-card.js` now uses `data-fallback` attribute instead of inline JavaScript
+  - `app.js` handles image errors via capture-phase event listener
+
+- **XSS Prevention in Navigation**: Replaced `innerHTML` with safe DOM methods
+  - `navigation.js` now uses `createElement`/`textContent` for breadcrumbs
+  - Added `_sanitizeUrl()` to prevent javascript: protocol injection
+
+- **Safe innerHTML Usage**: Added escaping for all dynamic content
+  - `station-dashboard.js` now escapes organization and coordinates data
+
+#### Code Quality Improvements
+
+- **Console.log Cleanup**: Removed 57 debug console.log statements from production code
+  - `station.html` - all debug logs removed
+  - `config-service.js` - initialization log removed
+  - `app.js` - initialization and config logs removed
+  - `form-components.js` - debug log removed
+  - Authentication logs already cleaned in v8.5.5
+
+- **localStorage Safety**: Added try-catch wrapper for JSON.parse
+  - `api.js` - `getUser()` now safely handles corrupted localStorage data
+  - Automatically clears corrupted data and returns null
+
+#### New Security Utilities
+
+- **Debug Utility** (`public/js/core/debug.js`):
+  - Environment-aware logging (only logs in development)
+  - Category-based logging with `Debug.withCategory()`
+  - Timing utilities for performance debugging
+
+- **Rate Limiting Utility** (`public/js/core/rate-limit.js`):
+  - `debounce()` function for input fields
+  - `throttle()` function for API calls
+  - `SubmissionGuard` class to prevent double-submissions
+  - 2-second cooldown between form submissions
+
+#### Files Modified
+
+- `public/js/instruments/phenocam/phenocam-card.js` - XSS fix
+- `public/js/navigation.js` - XSS fix with DOM methods
+- `public/js/station-dashboard.js` - innerHTML escaping
+- `public/js/core/app.js` - Image error handler + log cleanup
+- `public/js/core/config-service.js` - Log cleanup
+- `public/js/form-components.js` - Log cleanup
+- `public/js/api.js` - localStorage safety
+- `public/station.html` - 57 console.logs removed
+
+#### New Files
+
+- `public/js/core/debug.js` - Environment-aware debug utility
+- `public/js/core/rate-limit.js` - Rate limiting and debouncing
+
+---
+
+## [8.5.5] - 2025-11-28
+
+### AUDIT FIXES: Database Integrity, XSS Prevention, and Code Cleanup
+
+**Release Date**: 2025-11-28
+**Focus**: Comprehensive audit fixes for database, security, and code quality
+
+#### Database Fixes (Migration 0034)
+
+- **CASCADE Constraints**: Recreated products table with proper ON DELETE CASCADE:
+  - `station_id` → CASCADE
+  - `platform_id` → CASCADE
+  - `campaign_id` → CASCADE
+  - `aoi_id` → SET NULL
+
+- **Performance Indexes Added**:
+  - `idx_campaigns_aoi_id` on acquisition_campaigns(aoi_id)
+  - `idx_campaigns_station_id` on acquisition_campaigns(station_id)
+  - `idx_campaigns_platform_id` on acquisition_campaigns(platform_id)
+  - `idx_aoi_station_id` on areas_of_interest(station_id)
+  - `idx_aoi_platform_id` on areas_of_interest(platform_id)
+  - `idx_aoi_status` on areas_of_interest(status)
+  - `idx_platforms_ecosystem` on platforms(ecosystem_code)
+  - `idx_error_log_user_id` on error_log(user_id)
+  - `idx_aoi_normalized_name_unique` unique constraint on AOI names
+
+#### Security Fixes
+
+- **XSS Prevention in Card Components**: Fixed JSON injection vulnerability in onclick handlers:
+  - `phenocam-card.js` - render(), renderListItem(), renderTableRow()
+  - `ms-card.js` - render(), renderListItem(), renderTableRow()
+  - `par-card.js` - render(), renderListItem(), renderTableRow()
+  - `showInstrumentEditModal()` now accepts ID and fetches data via API
+  - All card components now pass only instrument ID (not JSON object)
+
+- **Authentication Logging Cleanup**: Removed sensitive console.log statements:
+  - Removed user authentication success logs
+  - Removed token validation logs
+  - Replaced with neutral comments
+
+#### Files Modified
+
+- `migrations/0034_audit_fixes_cascade_indexes.sql` - New migration
+- `public/station.html` - Updated showInstrumentEditModal() to accept ID
+- `public/js/instruments/phenocam/phenocam-card.js` - XSS fixes
+- `public/js/instruments/multispectral/ms-card.js` - XSS fixes
+- `public/js/instruments/par/par-card.js` - XSS fixes
+- `src/auth/authentication.js` - Removed sensitive logging
+
+---
+
 ## [8.5.4] - 2025-11-28
 
 ### SECURITY: JWT HMAC-SHA256 Signing and Authentication Fixes

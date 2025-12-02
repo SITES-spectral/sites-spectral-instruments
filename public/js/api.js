@@ -16,10 +16,17 @@ class SitesSpectralAPI {
         return localStorage.getItem(this.tokenKey);
     }
 
-    // Get stored user data
+    // Get stored user data - SECURITY FIX: wrap JSON.parse in try-catch
     getUser() {
-        const userData = localStorage.getItem(this.userKey);
-        return userData ? JSON.parse(userData) : null;
+        try {
+            const userData = localStorage.getItem(this.userKey);
+            return userData ? JSON.parse(userData) : null;
+        } catch (e) {
+            // If JSON is malformed, clear corrupted data and return null
+            console.error('Corrupted user data in localStorage, clearing');
+            localStorage.removeItem(this.userKey);
+            return null;
+        }
     }
 
     // Set authentication token

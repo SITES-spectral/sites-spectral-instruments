@@ -97,7 +97,8 @@
             const imageProcessing = instrument.image_processing_enabled;
 
             const cardClass = compact ? 'instrument-card compact' : 'instrument-card';
-            const clickHandler = onClick ? `onclick="${onClick}"` : `onclick="showInstrumentEditModal(${JSON.stringify(instrument).replace(/"/g, '&quot;')})"`;
+            // SECURITY FIX: Pass only instrument ID to prevent XSS via JSON in onclick
+            const clickHandler = onClick ? `onclick="${onClick}"` : `onclick="showInstrumentEditModal(${instrument.id})"`;
 
             return `
             <div class="${cardClass}" data-instrument-id="${instrument.id}" ${clickHandler}
@@ -142,7 +143,7 @@
 
             return `
             <div class="instrument-list-item" data-instrument-id="${instrument.id}"
-                 onclick="showInstrumentEditModal(${JSON.stringify(instrument).replace(/"/g, '&quot;')})"
+                 onclick="showInstrumentEditModal(${instrument.id})"
                  role="button" tabindex="0" aria-label="Edit ${this._escapeHtml(instrument.display_name)}">
                 <span class="status-dot" style="background-color: ${statusColor};" aria-hidden="true"></span>
                 <span class="instrument-icon"><i class="fas fa-camera" aria-hidden="true"></i></span>
@@ -162,9 +163,10 @@
             const statusColor = STATUS_COLORS[status] || '#94a3b8';
             const roiCount = instrument.roi_count || 0;
 
+            // SECURITY FIX: Pass only instrument ID to prevent XSS via JSON in onclick
             return `
             <tr data-instrument-id="${instrument.id}" class="clickable-row"
-                onclick="showInstrumentEditModal(${JSON.stringify(instrument).replace(/"/g, '&quot;')})">
+                onclick="showInstrumentEditModal(${instrument.id})">
                 <td>
                     <span class="status-dot" style="background-color: ${statusColor};" aria-hidden="true"></span>
                 </td>
@@ -209,12 +211,14 @@
 
             const imageUrl = instrument.preview_image_url || instrument.latest_image_url;
 
+            // SECURITY FIX: Use data attribute instead of inline onerror to prevent XSS
             return `
             <div class="instrument-card-preview">
                 <img src="${this._escapeHtml(imageUrl)}"
                      alt="Preview image for ${this._escapeHtml(instrument.display_name)}"
                      loading="lazy"
-                     onerror="this.parentElement.classList.add('no-image'); this.style.display='none';">
+                     data-fallback="true"
+                     class="preview-image">
             </div>
             `;
         }
