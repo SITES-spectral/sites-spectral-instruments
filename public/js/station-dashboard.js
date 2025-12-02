@@ -1848,7 +1848,13 @@
             // Use == for type coercion
             const platform = this.platforms.find(p => p.id == platformId);
             if (platform) {
-                this._showEditPlatformModal(platform);
+                // Use global function from station-dashboard.html
+                if (typeof global.openEditPlatformForm === 'function') {
+                    global.openEditPlatformForm(platform);
+                } else {
+                    logger.error('openEditPlatformForm function not found');
+                    this._showNotification('Platform edit form not available', 'error');
+                }
             }
         }
 

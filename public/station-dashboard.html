@@ -8388,6 +8388,212 @@
             openPlatformTypeSelector(stationId);
         }
 
+        // Global function for editing platforms
+        // Called by sitesStationDashboard.editPlatform()
+        window.openEditPlatformForm = function(platform) {
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'station')) {
+                showNotification('Platform editing requires admin or station user privileges', 'error');
+                return;
+            }
+
+            const platformType = (platform.platform_type || 'fixed').toLowerCase();
+            const titleConfig = {
+                fixed: { icon: 'fa-tower-observation', label: 'Fixed Platform' },
+                uav: { icon: 'fa-drone', label: 'UAV / Drone' },
+                satellite: { icon: 'fa-satellite', label: 'Satellite Platform' },
+                mobile: { icon: 'fa-truck', label: 'Mobile Platform' }
+            };
+            const config = titleConfig[platformType] || titleConfig.fixed;
+
+            const modal = document.getElementById('platform-edit-modal');
+            const formContainer = document.getElementById('platform-edit-form');
+
+            if (!modal || !formContainer) {
+                console.error('Platform edit modal not found');
+                return;
+            }
+
+            // Store platform ID for save operation
+            modal.dataset.platformId = platform.id;
+
+            // Update modal header
+            const modalHeader = modal.querySelector('.modal-header-large h3');
+            if (modalHeader) {
+                modalHeader.innerHTML = `<i class="fas ${config.icon}"></i> Edit ${config.label}`;
+            }
+
+            // Build the edit form
+            formContainer.innerHTML = `
+                <form id="edit-platform-form" class="modal-form">
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-platform-display-name">Display Name *</label>
+                                <input type="text" id="edit-platform-display-name" class="form-input" required
+                                       value="${escapeHtml(platform.display_name || '')}"
+                                       placeholder="e.g., Research Platform 01">
+                                <small>Descriptive name for the platform</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-platform-normalized-name">Normalized ID</label>
+                                <input type="text" id="edit-platform-normalized-name" class="form-input" readonly
+                                       value="${escapeHtml(platform.normalized_name || '')}"
+                                       style="background: #f3f4f6; cursor: not-allowed;">
+                                <small>System identifier (cannot be changed)</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-platform-type">Platform Type</label>
+                                <select id="edit-platform-type" class="form-input">
+                                    <option value="fixed" ${platformType === 'fixed' ? 'selected' : ''}>Fixed Tower/Mast</option>
+                                    <option value="uav" ${platformType === 'uav' ? 'selected' : ''}>UAV / Drone</option>
+                                    <option value="satellite" ${platformType === 'satellite' ? 'selected' : ''}>Satellite</option>
+                                    <option value="mobile" ${platformType === 'mobile' ? 'selected' : ''} disabled>Mobile (Coming Soon)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-platform-ecosystem">Ecosystem Code</label>
+                                <select id="edit-platform-ecosystem" class="form-input">
+                                    <option value="">-- Select Ecosystem --</option>
+                                    <option value="FOR" ${platform.ecosystem_code === 'FOR' ? 'selected' : ''}>FOR - Forest</option>
+                                    <option value="AGR" ${platform.ecosystem_code === 'AGR' ? 'selected' : ''}>AGR - Agricultural</option>
+                                    <option value="MIR" ${platform.ecosystem_code === 'MIR' ? 'selected' : ''}>MIR - Mires</option>
+                                    <option value="LAK" ${platform.ecosystem_code === 'LAK' ? 'selected' : ''}>LAK - Lake</option>
+                                    <option value="WET" ${platform.ecosystem_code === 'WET' ? 'selected' : ''}>WET - Wetland</option>
+                                    <option value="GRA" ${platform.ecosystem_code === 'GRA' ? 'selected' : ''}>GRA - Grassland</option>
+                                    <option value="HEA" ${platform.ecosystem_code === 'HEA' ? 'selected' : ''}>HEA - Heathland</option>
+                                    <option value="ALP" ${platform.ecosystem_code === 'ALP' ? 'selected' : ''}>ALP - Alpine</option>
+                                    <option value="GEN" ${platform.ecosystem_code === 'GEN' ? 'selected' : ''}>GEN - General</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-platform-status">Status</label>
+                                <select id="edit-platform-status" class="form-input">
+                                    <option value="Active" ${platform.status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${platform.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="Maintenance" ${platform.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                    <option value="Decommissioned" ${platform.status === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-map-marker-alt"></i> Location</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-platform-latitude">Latitude</label>
+                                <input type="number" id="edit-platform-latitude" class="form-input" step="0.000001"
+                                       value="${platform.latitude || ''}"
+                                       placeholder="e.g., 68.3456">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-platform-longitude">Longitude</label>
+                                <input type="number" id="edit-platform-longitude" class="form-input" step="0.000001"
+                                       value="${platform.longitude || ''}"
+                                       placeholder="e.g., 18.7892">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-platform-height">Height (m)</label>
+                                <input type="number" id="edit-platform-height" class="form-input" step="0.1"
+                                       value="${platform.height || ''}"
+                                       placeholder="e.g., 25.5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-file-alt"></i> Description</h4>
+                        <div class="form-group">
+                            <label for="edit-platform-description">Platform Description</label>
+                            <textarea id="edit-platform-description" class="form-input" rows="3"
+                                      placeholder="Optional description of the platform...">${escapeHtml(platform.description || '')}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePlatformEditModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            // Add form submit handler
+            const form = document.getElementById('edit-platform-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await savePlatformEdits(platform.id);
+            });
+
+            modal.classList.add('show');
+        }
+
+        // Save platform edits
+        async function savePlatformEdits(platformId) {
+            const submitBtn = document.querySelector('#edit-platform-form button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const updateData = {
+                    display_name: document.getElementById('edit-platform-display-name').value.trim(),
+                    platform_type: document.getElementById('edit-platform-type').value,
+                    ecosystem_code: document.getElementById('edit-platform-ecosystem').value || null,
+                    status: document.getElementById('edit-platform-status').value,
+                    latitude: parseFloat(document.getElementById('edit-platform-latitude').value) || null,
+                    longitude: parseFloat(document.getElementById('edit-platform-longitude').value) || null,
+                    height: parseFloat(document.getElementById('edit-platform-height').value) || null,
+                    description: document.getElementById('edit-platform-description').value.trim() || null
+                };
+
+                const response = await fetch(`/api/platforms/${platformId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('sites_spectral_token')}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showNotification('Platform updated successfully!', 'success');
+                    closePlatformEditModal();
+
+                    // Reload platforms
+                    if (window.sitesStationDashboard) {
+                        await window.sitesStationDashboard._loadPlatformsAndInstruments();
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to update platform');
+                }
+            } catch (error) {
+                console.error('Error saving platform:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Open creation form with a specific platform type pre-selected
         function openCreatePlatformFormWithType(stationId, platformType) {
             // Allow both admin and station users to create platforms
