@@ -1105,25 +1105,65 @@
         _groupInstrumentsByType(instruments) {
             if (!Array.isArray(instruments)) return {};
 
-            const categories = {
-                phenocam: { label: 'Phenocams', icon: 'fa-camera', instruments: [] },
-                multispectral: { label: 'MS Sensors', icon: 'fa-satellite', instruments: [] },
-                other: { label: 'Other', icon: 'fa-microchip', instruments: [] }
-            };
+            // Get all categories from YAML config, or use defaults
+            const categories = {};
+
+            if (global.SitesConfig && global.SitesConfig.isLoaded()) {
+                const types = global.SitesConfig.getInstrumentTypes();
+                for (const [key, config] of Object.entries(types)) {
+                    categories[key] = {
+                        label: config.plural || config.label || key,
+                        icon: config.icon || 'fa-cube',
+                        color: config.color || '#6b7280',
+                        instruments: []
+                    };
+                }
+            } else {
+                // Fallback to comprehensive defaults
+                Object.assign(categories, {
+                    phenocam: { label: 'Phenocams', icon: 'fa-camera', color: '#2563eb', instruments: [] },
+                    multispectral: { label: 'MS Sensors', icon: 'fa-satellite-dish', color: '#7c3aed', instruments: [] },
+                    par: { label: 'PAR Sensors', icon: 'fa-sun', color: '#f59e0b', instruments: [] },
+                    ndvi: { label: 'NDVI Sensors', icon: 'fa-leaf', color: '#059669', instruments: [] },
+                    pri: { label: 'PRI Sensors', icon: 'fa-microscope', color: '#ec4899', instruments: [] },
+                    hyperspectral: { label: 'Hyperspectral', icon: 'fa-rainbow', color: '#6366f1', instruments: [] },
+                    thermal: { label: 'Thermal', icon: 'fa-temperature-high', color: '#ef4444', instruments: [] },
+                    lidar: { label: 'LiDAR', icon: 'fa-broadcast-tower', color: '#14b8a6', instruments: [] },
+                    other: { label: 'Other', icon: 'fa-cube', color: '#6b7280', instruments: [] }
+                });
+            }
+
+            // Ensure 'other' category exists
+            if (!categories.other) {
+                categories.other = { label: 'Other', icon: 'fa-cube', color: '#6b7280', instruments: [] };
+            }
 
             instruments.forEach(inst => {
                 if (!inst?.instrument_type) return;
 
                 // Use ConfigService to detect category
                 let category = 'other';
-                if (global.SitesConfig) {
+                if (global.SitesConfig && global.SitesConfig.isLoaded()) {
                     category = global.SitesConfig.detectInstrumentCategory(inst.instrument_type);
                 } else {
+                    // Fallback pattern matching
                     const type = inst.instrument_type.toLowerCase();
-                    if (type.includes('phenocam')) {
+                    if (type.includes('phenocam') || type.includes('phe')) {
                         category = 'phenocam';
-                    } else if (type.includes('multispectral') || type.includes('ms sensor')) {
+                    } else if (type.includes('multispectral') || type.includes('skye') || type.includes('decagon')) {
                         category = 'multispectral';
+                    } else if (type.includes('par') || type.includes('licor')) {
+                        category = 'par';
+                    } else if (type.includes('ndvi')) {
+                        category = 'ndvi';
+                    } else if (type.includes('pri')) {
+                        category = 'pri';
+                    } else if (type.includes('hyperspectral')) {
+                        category = 'hyperspectral';
+                    } else if (type.includes('thermal') || type.includes('infrared')) {
+                        category = 'thermal';
+                    } else if (type.includes('lidar') || type.includes('laser')) {
+                        category = 'lidar';
                     }
                 }
 
@@ -1176,10 +1216,13 @@
             const tabsHeader = categoryKeys.map((key, index) => {
                 const cat = grouped[key];
                 const isActive = index === 0 ? 'active' : '';
+                const catColor = cat.color || '#6b7280';
                 return `
                     <button class="instrument-tab-btn ${isActive}"
                             data-tab="${key}"
                             data-platform="${platformId}"
+                            data-color="${catColor}"
+                            style="${isActive ? `background: ${catColor}; color: white;` : ''}"
                             onclick="sitesStationDashboard.switchInstrumentTab('${platformId}', '${key}')">
                         <i class="fas ${cat.icon} tab-icon"></i>
                         <span>${cat.label}</span>
@@ -1311,9 +1354,20 @@
                 const platformCard = document.querySelector(`.platform-card[data-platform-id="${platformId}"]`);
                 if (!platformCard) return;
 
-                // Update tab buttons
+                // Update tab buttons with color styling
                 platformCard.querySelectorAll(`.instrument-tab-btn[data-platform="${platformId}"]`).forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.tab === tabKey);
+                    const isActive = btn.dataset.tab === tabKey;
+                    btn.classList.toggle('active', isActive);
+
+                    // Apply or remove color styling
+                    if (isActive) {
+                        const color = btn.dataset.color || '#6b7280';
+                        btn.style.background = color;
+                        btn.style.color = 'white';
+                    } else {
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    }
                 });
 
                 // Update tab content

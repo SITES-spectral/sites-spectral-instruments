@@ -14,6 +14,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.8] - 2025-12-02
+
+### 🔧 Instrument Category Detection Fix
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **Instrument Tab Categories**: Fixed instruments showing as "Other" instead of proper types
+  - Root cause: `_groupInstrumentsByType` only had 3 hardcoded categories
+  - Now dynamically loads all categories from YAML config
+  - Supports: Phenocams, Multispectral, PAR, NDVI, PRI, Hyperspectral, Thermal, LiDAR
+
+- **Pattern Matching**: Enhanced fallback pattern matching
+  - Added patterns: `licor` → PAR, `skye`/`decagon` → Multispectral
+  - More accurate type detection when ConfigService unavailable
+
+#### Changed
+
+- **Tab Colors**: Instrument tabs now display category-specific colors
+  - Phenocams: Blue (#2563eb)
+  - Multispectral: Purple (#7c3aed)
+  - PAR Sensors: Amber (#f59e0b)
+  - NDVI Sensors: Green (#059669)
+  - Active tab shows color background with white text
+
+---
+
 ## [9.0.7] - 2025-12-02
 
 ### 🎨 UI/UX Improvements: Platform Cards & Instrument Display
