@@ -14,6 +14,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.12] - 2025-12-02
+
+### 🔧 Platform Creation Button Visibility Fix
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **Platform Controls Not Showing**: Admin and station users couldn't see "Create Platform" button
+  - Root cause: `_showSuccessState()` didn't show admin controls, relied on separate HTML initialization
+  - Fix: Added `_showUserControls()` method called from `_showSuccessState()`
+  - Now properly shows controls based on `canEdit` permission and `stationData.id`
+
+#### Added
+
+- **`_showUserControls()` Method**: New method in SitesStationDashboard class
+  - Shows admin station controls (create/delete station) for admin users only
+  - Shows platform controls (create platform) for admin AND station users
+  - Shows export button for all authenticated users
+  - Adds debug logging for troubleshooting permission issues
+
+#### Technical Details
+
+- Controls visibility now managed in `station-dashboard.js` instead of relying on `station-dashboard.html` synchronization
+- Uses `this.canEdit` property (set in `_verifyAccess()`) for permission checking
+- Eliminates timing race condition between dashboard class and HTML script initialization
+
+---
+
 ## [9.0.11] - 2025-12-02
 
 ### 🔧 Full Edit Modals for Platforms & Instruments

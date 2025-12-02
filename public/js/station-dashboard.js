@@ -2377,6 +2377,45 @@
             if (errorEl) errorEl.style.display = 'none';
             if (welcomeEl) welcomeEl.style.display = 'block';
             if (dashboardEl) dashboardEl.style.display = 'block';
+
+            // Show admin/station user controls based on role
+            this._showUserControls();
+        }
+
+        /**
+         * Show appropriate user controls based on role
+         * @private
+         */
+        _showUserControls() {
+            const adminStationControls = document.getElementById('admin-station-controls');
+            const adminPlatformControls = document.getElementById('admin-platform-controls');
+            const exportBtn = document.getElementById('export-csv-btn');
+
+            // Admin-only station controls (create/delete station)
+            if (adminStationControls) {
+                if (this.currentUser?.role === 'admin' && this.stationData?.id) {
+                    adminStationControls.style.display = 'block';
+                    logger.log('Admin station controls shown');
+                } else {
+                    adminStationControls.style.display = 'none';
+                }
+            }
+
+            // Platform controls for admin OR station users
+            if (adminPlatformControls) {
+                if (this.canEdit && this.stationData?.id) {
+                    adminPlatformControls.style.display = 'block';
+                    logger.log('Platform controls shown for user with edit permission');
+                } else {
+                    adminPlatformControls.style.display = 'none';
+                    logger.log('Platform controls hidden - canEdit:', this.canEdit, 'stationData.id:', this.stationData?.id);
+                }
+            }
+
+            // Export button for all authenticated users
+            if (exportBtn) {
+                exportBtn.style.display = 'flex';
+            }
         }
 
         /**
