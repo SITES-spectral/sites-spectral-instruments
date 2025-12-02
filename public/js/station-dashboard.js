@@ -1141,29 +1141,35 @@
             instruments.forEach(inst => {
                 if (!inst?.instrument_type) return;
 
-                // Use ConfigService to detect category
+                // Reliable pattern matching for instrument type detection
+                // This ensures correct categorization regardless of ConfigService state
+                const type = inst.instrument_type.toLowerCase();
                 let category = 'other';
-                if (global.SitesConfig && global.SitesConfig.isLoaded()) {
-                    category = global.SitesConfig.detectInstrumentCategory(inst.instrument_type);
-                } else {
-                    // Fallback pattern matching
-                    const type = inst.instrument_type.toLowerCase();
-                    if (type.includes('phenocam') || type.includes('phe')) {
-                        category = 'phenocam';
-                    } else if (type.includes('multispectral') || type.includes('skye') || type.includes('decagon')) {
-                        category = 'multispectral';
-                    } else if (type.includes('par') || type.includes('licor')) {
-                        category = 'par';
-                    } else if (type.includes('ndvi')) {
-                        category = 'ndvi';
-                    } else if (type.includes('pri')) {
-                        category = 'pri';
-                    } else if (type.includes('hyperspectral')) {
-                        category = 'hyperspectral';
-                    } else if (type.includes('thermal') || type.includes('infrared')) {
-                        category = 'thermal';
-                    } else if (type.includes('lidar') || type.includes('laser')) {
-                        category = 'lidar';
+
+                // Primary pattern matching (most reliable)
+                if (type.includes('phenocam') || type === 'phe') {
+                    category = 'phenocam';
+                } else if (type.includes('multispectral') || type.includes('ms sensor')) {
+                    category = 'multispectral';
+                } else if (type.includes('par sensor') || type.includes('par')) {
+                    category = 'par';
+                } else if (type.includes('ndvi')) {
+                    category = 'ndvi';
+                } else if (type.includes('pri sensor') || type.includes('pri')) {
+                    category = 'pri';
+                } else if (type.includes('hyperspectral')) {
+                    category = 'hyperspectral';
+                } else if (type.includes('thermal') || type.includes('infrared')) {
+                    category = 'thermal';
+                } else if (type.includes('lidar') || type.includes('laser')) {
+                    category = 'lidar';
+                }
+
+                // Secondary: Try ConfigService if still 'other' and config is loaded
+                if (category === 'other' && global.SitesConfig && global.SitesConfig.isLoaded()) {
+                    const configCategory = global.SitesConfig.detectInstrumentCategory(inst.instrument_type);
+                    if (configCategory !== 'other') {
+                        category = configCategory;
                     }
                 }
 
