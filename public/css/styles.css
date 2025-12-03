@@ -2149,6 +2149,41 @@ body {
     margin-top: 0.25rem;
 }
 
+/* Clickable Image Styles */
+.clickable-image {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Image Container Fallback State */
+.instrument-modal-image-container.no-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background-color: #f8fafc;
+    color: #94a3b8;
+}
+
+.instrument-modal-image-container.no-image::after {
+    content: 'Image not available';
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.instrument-modal-image-container.no-image::before {
+    content: '\f030';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 2.5rem;
+}
+
 /* Responsive Design for Images */
 @media (max-width: 768px) {
     .instrument-thumbnail-container {

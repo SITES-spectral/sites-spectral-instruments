@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.19">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.20">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.19">
+    <meta name="app-version" content="9.0.20">
     <meta name="build-date" content="2025-12-03">
 
     <style>
@@ -4299,14 +4299,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.19"></script>
+    <script src="/js/utils.js?v=9.0.20"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=9.0.19"></script>
-    <script src="/js/components.js?v=9.0.19"></script>
+    <script src="/js/api.js?v=9.0.20"></script>
+    <script src="/js/components.js?v=9.0.20"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4316,10 +4316,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=9.0.19"></script>
-    <script src="/js/station-dashboard.js?v=9.0.19"></script>
-    <script src="/js/navigation.js?v=9.0.19"></script>
-    <script src="/js/export.js?v=9.0.19"></script>
+    <script src="/js/interactive-map.js?v=9.0.20"></script>
+    <script src="/js/station-dashboard.js?v=9.0.20"></script>
+    <script src="/js/navigation.js?v=9.0.20"></script>
+    <script src="/js/export.js?v=9.0.20"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -5051,18 +5051,25 @@
                     `;
                 }
 
+                // Escape display name for safe use in attributes
+                const escapedName = (instrument.display_name || instrument.normalized_name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
                 return `
                     <div class="instrument-modal-image-container">
                         <img
                             src="${imageUrl}"
                             alt="Current phenocam view for ${instrument.display_name || instrument.normalized_name}"
-                            class="instrument-modal-image"
-                            onerror="this.parentElement.innerHTML='<div class=\\'instrument-modal-image-placeholder\\'><i class=\\'fas fa-camera\\'></i><span>Image not available</span></div>'"
+                            class="instrument-modal-image clickable-image"
+                            data-fallback="true"
+                            data-instrument-id="${instrument.id}"
+                            onclick="showFullImage('${instrument.id}', '${imageUrl}', '${escapedName}')"
+                            title="Click to view full-size image with zoom"
+                            style="cursor: pointer;"
                         />
                         <div class="image-caption">
-                            <i class="fas fa-camera"></i>
-                            Representative phenocam view
-                            <span class="image-note">Updated weekly/monthly to show vegetation status</span>
+                            <i class="fas fa-search-plus"></i>
+                            Click image to view full size
+                            <span class="image-note">Representative phenocam view</span>
                         </div>
                     </div>
                 `;

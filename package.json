@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.19",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.19 - Delete Modal Handler Fix",
+  "version": "9.0.20",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.20 - Phenocam Image Zoom Modal",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

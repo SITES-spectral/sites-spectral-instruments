@@ -14,6 +14,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.20] - 2025-12-03
+
+### Phenocam Image Zoom Modal Fix
+
+**Release Date**: 2025-12-03
+
+#### Fixed
+
+- **Phenocam sample image zoom functionality**: Added click handler to open full image modal
+  - **Root Cause**: `createInstrumentModalImage()` rendered phenocam images without click handler
+  - **Solution**: Added `onclick="showFullImage()"` to instrument detail modal images
+  - **File**: `public/station-dashboard.html` lines 5054-5075
+
+#### Added
+
+- **Clickable image styles**: Visual feedback on hoverable/clickable images
+  - `.clickable-image` class with hover effects (scale, shadow)
+  - Cursor pointer for better UX indication
+
+- **Image fallback CSS**: Proper placeholder when images fail to load
+  - `.instrument-modal-image-container.no-image` state styling
+  - CSS pseudo-elements for icon and message display
+  - File: `public/css/styles.css` lines 2152-2185
+
+#### Security
+
+- **XSS-safe image rendering**: Replaced inline `onerror` with `data-fallback` attribute
+  - Uses event delegation pattern from `app.js` for error handling
+  - Escaped display names for safe attribute insertion
+
+#### UX Improvements
+
+- Updated image caption from "Representative phenocam view" to "Click image to view full size"
+- Added search-plus icon to indicate zoom capability
+- Hover effect provides visual feedback that image is clickable
+
+---
+
 ## [9.0.19] - 2025-12-03
 
 ### Fix Delete Platform Modal Handler Connection

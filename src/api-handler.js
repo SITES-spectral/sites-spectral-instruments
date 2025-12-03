@@ -193,7 +193,7 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '9.0.10',
+      version: '9.0.20',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'v3-api',
       apiVersions: ['v3', 'v1-legacy'],
@@ -221,7 +221,7 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '9.0.10',
+      version: '9.0.20',
       error: error.message,
       database: 'disconnected',
       architecture: 'v3-api',

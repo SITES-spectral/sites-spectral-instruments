@@ -10,8 +10,8 @@ account_id = "e5f93ed83288202d33cf9c7b18068f64"
 # Enable auto-deployment from GitHub when commits are pushed to main branch
 
 # Project metadata
-# Version: 2.0.2
-# Release: 2025-09-17
+# Version: 9.0.20
+# Release: 2025-12-03
 # Database Schema: v11 (11 migrations) - Complete normalized schema rewrite
 
 # Static Assets Configuration
@@ -32,7 +32,7 @@ binding = "DOCS_BUCKET"
 [vars]
 ENVIRONMENT = "production"
 APP_NAME = "SITES Spectral Stations & Instruments"
-APP_VERSION = "6.0.1"
+APP_VERSION = "9.0.20"
 USE_CLOUDFLARE_SECRETS = "true"
 
 # Custom domain routing
