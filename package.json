@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.20",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.20 - Phenocam Image Zoom Modal",
+  "version": "9.0.23",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.23 - Static Image Path Fix",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

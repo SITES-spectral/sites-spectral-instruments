@@ -14,6 +14,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.23] - 2025-12-03
+
+### Static Image Path Fix
+
+**Release Date**: 2025-12-03
+
+#### Fixed
+
+- **Phenocam image now loads correctly**: Uses static image path that actually works
+  - Static images exist at `/images/stations/{station}/instruments/{normalized_name}.jpg`
+  - Previous v9.0.22 tried to use API which returns non-functional URLs
+  - Function `loadPhenocamModalImage()` now passes full instrument object
+
+#### Image Path Format
+
+```
+/images/stations/{station_dir}/instruments/{normalized_name}.jpg
+
+Examples:
+/images/stations/abisko/instruments/ANS_FOR_BL01_PHE01.jpg
+/images/stations/lonnstorp/instruments/LON_AGR_PL01_PHE01.jpg
+```
+
+#### Station Directory Mapping
+
+| Acronym | Directory |
+|---------|-----------|
+| ANS | abisko |
+| ASA | asa |
+| GRI | grimso |
+| LON | lonnstorp |
+| RBD | robacksdalen |
+| SKC | skogaryd |
+| SVB | svartberget |
+
+---
+
+## [9.0.22] - 2025-12-03
+
+### Phenocam Image API Loading Fix
+
+**Release Date**: 2025-12-03
+
+#### Fixed
+
+- **Phenocam image not showing in details modal**: Now uses API endpoint like thumbnails
+  - **Root Cause**: Details modal used static URL path that didn't exist
+  - **Solution**: Use `/api/instruments/{id}/latest-image` endpoint (same as card thumbnails)
+  - Added `loadPhenocamModalImage()` function to fetch image from API
+
+#### Technical Details
+
+- Thumbnail cards: Use API endpoint `/api/instruments/{id}/latest-image` - **WORKS**
+- Details modal: Was using static path `/images/stations/{station}/instruments/{name}.jpg` - **BROKEN**
+- Fix: Details modal now uses same API endpoint as thumbnails
+- Image loads asynchronously after modal opens with proper loading/fallback states
+
+---
+
+## [9.0.21] - 2025-12-03
+
+### Phenocam Image Loading States & Fallback
+
+**Release Date**: 2025-12-03
+
+#### Added
+
+- **Loading spinner**: Visual feedback while phenocam image loads
+  - Animated spinner with "Loading phenocam image..." message
+  - Shows immediately when instrument details modal opens
+
+- **Fallback placeholder with SITES Spectral logo**: When image fails to load
+  - Displays SITES Spectral logo as fallback image
+  - Shows "Image not available" with helpful hint message
+  - Amber/warning color scheme to indicate issue
+
+- **No-image placeholder improvement**: When no image URL exists
+  - SITES Spectral logo instead of generic camera icon
+  - "No representative phenocam image available" message
+  - Hint text about sample images being updated periodically
+
+#### Technical Details
+
+- `handlePhenocamImageLoad()` - Shows image and caption on successful load
+- `handlePhenocamImageError()` - Shows fallback with logo on error
+- CSS classes: `.image-loading-spinner`, `.instrument-modal-image-fallback`
+- Uses `onload` and `onerror` event handlers for state transitions
+
+---
+
 ## [9.0.20] - 2025-12-03
 
 ### Phenocam Image Zoom Modal Fix

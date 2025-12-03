@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.20">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.23">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.20">
+    <meta name="app-version" content="9.0.23">
     <meta name="build-date" content="2025-12-03">
 
     <style>
@@ -4299,14 +4299,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.20"></script>
+    <script src="/js/utils.js?v=9.0.23"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=9.0.20"></script>
-    <script src="/js/components.js?v=9.0.20"></script>
+    <script src="/js/api.js?v=9.0.23"></script>
+    <script src="/js/components.js?v=9.0.23"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4316,10 +4316,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=9.0.20"></script>
-    <script src="/js/station-dashboard.js?v=9.0.20"></script>
-    <script src="/js/navigation.js?v=9.0.20"></script>
-    <script src="/js/export.js?v=9.0.20"></script>
+    <script src="/js/interactive-map.js?v=9.0.23"></script>
+    <script src="/js/station-dashboard.js?v=9.0.23"></script>
+    <script src="/js/navigation.js?v=9.0.23"></script>
+    <script src="/js/export.js?v=9.0.23"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -5035,38 +5035,120 @@
             }
         });
 
+        // Handle phenocam image load success
+        function handlePhenocamImageLoad(instrumentId) {
+            const loadingEl = document.getElementById(`image-loading-${instrumentId}`);
+            const fallbackEl = document.getElementById(`image-fallback-${instrumentId}`);
+            const imageEl = document.getElementById(`phenocam-image-${instrumentId}`);
+            const captionEl = document.getElementById(`image-caption-${instrumentId}`);
+
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (fallbackEl) fallbackEl.style.display = 'none';
+            if (imageEl) imageEl.style.display = 'block';
+            if (captionEl) captionEl.style.display = 'flex';
+        }
+
+        // Handle phenocam image load error
+        function handlePhenocamImageError(instrumentId) {
+            const loadingEl = document.getElementById(`image-loading-${instrumentId}`);
+            const fallbackEl = document.getElementById(`image-fallback-${instrumentId}`);
+            const imageEl = document.getElementById(`phenocam-image-${instrumentId}`);
+            const captionEl = document.getElementById(`image-caption-${instrumentId}`);
+
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (imageEl) imageEl.style.display = 'none';
+            if (captionEl) captionEl.style.display = 'none';
+            if (fallbackEl) fallbackEl.style.display = 'flex';
+        }
+
+        // Load phenocam image for the details modal using static path
+        function loadPhenocamModalImage(instrument) {
+            const instrumentId = instrument.id;
+
+            // Map station acronyms to normalized directory names
+            const stationMapping = {
+                'ANS': 'abisko',
+                'ASA': 'asa',
+                'GRI': 'grimso',
+                'LON': 'lonnstorp',
+                'RBD': 'robacksdalen',
+                'SKC': 'skogaryd',
+                'SVB': 'svartberget'
+            };
+
+            const loadingEl = document.getElementById(`image-loading-${instrumentId}`);
+            const fallbackEl = document.getElementById(`image-fallback-${instrumentId}`);
+            const imageEl = document.getElementById(`phenocam-image-${instrumentId}`);
+            const captionEl = document.getElementById(`image-caption-${instrumentId}`);
+
+            // Construct static image URL
+            const stationDir = stationMapping[instrument.station_acronym];
+            if (!stationDir || !instrument.normalized_name) {
+                // No valid path - show fallback
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (fallbackEl) fallbackEl.style.display = 'flex';
+                return;
+            }
+
+            const imageUrl = `/images/stations/${stationDir}/instruments/${instrument.normalized_name}.jpg`;
+            const instrumentName = instrument.display_name || instrument.normalized_name || 'Phenocam';
+
+            // Set up click handler and load image
+            if (imageEl) {
+                imageEl.src = imageUrl;
+                imageEl.onclick = () => showFullImage(instrumentId, imageUrl, instrumentName);
+
+                // Handle load success
+                imageEl.onload = () => {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (fallbackEl) fallbackEl.style.display = 'none';
+                    if (imageEl) imageEl.style.display = 'block';
+                    if (captionEl) captionEl.style.display = 'flex';
+                };
+
+                // Handle load error - show fallback with SITES logo
+                imageEl.onerror = () => {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (imageEl) imageEl.style.display = 'none';
+                    if (captionEl) captionEl.style.display = 'none';
+                    if (fallbackEl) fallbackEl.style.display = 'flex';
+                };
+            }
+        }
+
         function createInstrumentModalImage(instrument) {
             const instrumentType = instrument.instrument_type || 'Unknown';
 
             // Only show phenocam image section for Phenocam instruments
             if (instrumentType === 'Phenocam') {
-                const imageUrl = getInstrumentImageUrl(instrument);
-
-                if (!imageUrl) {
-                    return `
-                        <div class="instrument-modal-image-placeholder">
-                            <i class="fas fa-camera"></i>
-                            <span>No representative phenocam image available</span>
-                        </div>
-                    `;
-                }
-
                 // Escape display name for safe use in attributes
                 const escapedName = (instrument.display_name || instrument.normalized_name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
+                // Return loading state - actual image will be loaded via API
                 return `
-                    <div class="instrument-modal-image-container">
+                    <div class="instrument-modal-image-container" id="phenocam-image-container-${instrument.id}">
+                        <!-- Loading spinner -->
+                        <div class="image-loading-spinner" id="image-loading-${instrument.id}">
+                            <div class="spinner"></div>
+                            <span>Loading phenocam image...</span>
+                        </div>
+                        <!-- Fallback placeholder (hidden by default) -->
+                        <div class="instrument-modal-image-fallback" id="image-fallback-${instrument.id}" style="display: none;">
+                            <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" class="placeholder-logo">
+                            <span>Image not available</span>
+                            <span class="placeholder-hint">No sample image has been uploaded for this phenocam</span>
+                        </div>
+                        <!-- Actual image (hidden, will be populated by API) -->
                         <img
-                            src="${imageUrl}"
                             alt="Current phenocam view for ${instrument.display_name || instrument.normalized_name}"
                             class="instrument-modal-image clickable-image"
-                            data-fallback="true"
+                            id="phenocam-image-${instrument.id}"
                             data-instrument-id="${instrument.id}"
-                            onclick="showFullImage('${instrument.id}', '${imageUrl}', '${escapedName}')"
+                            data-instrument-name="${escapedName}"
                             title="Click to view full-size image with zoom"
-                            style="cursor: pointer;"
+                            style="cursor: pointer; display: none;"
                         />
-                        <div class="image-caption">
+                        <div class="image-caption" id="image-caption-${instrument.id}" style="display: none;">
                             <i class="fas fa-search-plus"></i>
                             Click image to view full size
                             <span class="image-note">Representative phenocam view</span>
@@ -6106,9 +6188,10 @@
                 ${createImageMetadataSection(instrument)}
             `;
 
-            // Load ROI data only for Phenocam instruments
+            // Load ROI data and phenocam image for Phenocam instruments
             if (isPhenocam) {
                 loadROICards(instrument.id, instrument.normalized_name);
+                loadPhenocamModalImage(instrument);
             }
         }
 
