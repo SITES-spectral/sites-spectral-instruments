@@ -1,8 +1,8 @@
 # Frontend Components Documentation
 
-**SITES Spectral v9.0.0**
+**SITES Spectral v9.0.16**
 
-This document provides comprehensive documentation for the frontend JavaScript components introduced or enhanced in version 9.0.0 of SITES Spectral Instruments.
+This document provides comprehensive documentation for the frontend JavaScript components introduced or enhanced in version 9.0.x of SITES Spectral Instruments.
 
 ---
 
@@ -16,6 +16,7 @@ This document provides comprehensive documentation for the frontend JavaScript c
 6. [Config Service Updates](#6-config-service-updates)
 7. [YAML Configuration Files](#7-yaml-configuration-files)
 8. [Integration Examples](#8-integration-examples)
+9. [Edit Modals](#9-edit-modals)
 
 ---
 
@@ -1955,14 +1956,273 @@ await loadData('getInstruments', {
 
 ---
 
+## 9. Edit Modals
+
+**Files:** `public/station-dashboard.html`, `public/js/station-dashboard.js`
+
+The Edit Modal system (v9.0.11+) provides full reactive edit forms for platforms and instruments with type-specific sections.
+
+### Platform Edit Modal
+
+#### openEditPlatformForm(platform)
+
+Opens the platform edit modal with current data pre-filled.
+
+```javascript
+function openEditPlatformForm(platform) {
+    const user = window.sitesStationDashboard?.currentUser || currentUser;
+    const isAdmin = user?.role === 'admin' || user?.role === 'station';
+
+    // Build modal with sections...
+    showModal(modalHTML);
+}
+```
+
+**Sections:**
+1. **General Information** - normalized_name, display_name, location_code, status
+2. **Platform Type** - platform_type (fixed, uav, satellite)
+3. **Ecosystem** - ecosystem_code selection
+4. **Location** - latitude, longitude, height
+5. **Documentation** - description, deployment_date
+
+### Instrument Edit Modal
+
+#### openEditInstrumentForm(instrument)
+
+Opens a type-specific instrument edit modal.
+
+```javascript
+function openEditInstrumentForm(instrument) {
+    const user = window.sitesStationDashboard?.currentUser || currentUser;
+    const isAdmin = user?.role === 'admin' || user?.role === 'station';
+
+    // Route to type-specific form
+    const category = getInstrumentCategory(instrument.instrument_type);
+
+    // Generate appropriate sections
+    let typeSpecificHTML = '';
+    if (category === 'phenocam') {
+        typeSpecificHTML = buildPhenocamSpecsSection(instrument);
+    } else if (category === 'multispectral') {
+        typeSpecificHTML = buildMultispectralSpecsSection(instrument);
+    }
+    // ... additional types
+
+    showModal(modalHTML);
+}
+```
+
+### Type-Specific Sections
+
+#### Phenocam Section
+
+```javascript
+function buildPhenocamSpecsSection(instrument) {
+    return `
+        <div class="form-section">
+            <h3>Camera Specifications</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Camera Brand</label>
+                    <input type="text" name="camera_brand" value="${instrument.camera_brand || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Camera Model</label>
+                    <input type="text" name="camera_model" value="${instrument.camera_model || ''}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Resolution (MP)</label>
+                    <input type="number" name="camera_resolution" step="0.1" value="${instrument.camera_resolution || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Interval (minutes)</label>
+                    <input type="number" name="interval_minutes" value="${instrument.interval_minutes || ''}">
+                </div>
+            </div>
+        </div>
+    `;
+}
+```
+
+#### Multispectral Section
+
+```javascript
+function buildMultispectralSpecsSection(instrument) {
+    return `
+        <div class="form-section">
+            <h3>Sensor Specifications</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Number of Channels</label>
+                    <input type="number" name="number_of_channels" value="${instrument.number_of_channels || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Orientation</label>
+                    <select name="orientation">
+                        <option value="upwelling" ${instrument.orientation === 'upwelling' ? 'selected' : ''}>Upwelling</option>
+                        <option value="downwelling" ${instrument.orientation === 'downwelling' ? 'selected' : ''}>Downwelling</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Datalogger</label>
+                <input type="text" name="datalogger" value="${instrument.datalogger || ''}">
+            </div>
+        </div>
+    `;
+}
+```
+
+#### Additional Instrument Types
+
+| Type | Builder Function | Key Fields |
+|------|------------------|------------|
+| PAR Sensor | `buildPARSensorSpecsSection()` | spectral_range, calibration_coefficient |
+| NDVI Sensor | `buildNDVISensorSpecsSection()` | red_wavelength_nm, nir_wavelength_nm |
+| PRI Sensor | `buildPRISensorSpecsSection()` | band1_wavelength_nm, band2_wavelength_nm |
+| Hyperspectral | `buildHyperspectralSpecsSection()` | spectral_range_start_nm, spectral_range_end_nm |
+
+### Standard Modal Sections
+
+All instrument edit modals include these common sections:
+
+**1. General Information**
+```javascript
+function buildGeneralSection(instrument) {
+    return `
+        <div class="form-section">
+            <h3>General Information</h3>
+            <div class="form-group">
+                <label>Display Name</label>
+                <input type="text" name="display_name" value="${instrument.display_name || ''}">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Testing">Testing</option>
+                </select>
+            </div>
+        </div>
+    `;
+}
+```
+
+**2. Position & Orientation**
+```javascript
+function buildPositionSection(instrument) {
+    return `
+        <div class="form-section">
+            <h3>Position & Orientation</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Latitude</label>
+                    <input type="number" name="latitude" step="0.000001">
+                </div>
+                <div class="form-group">
+                    <label>Longitude</label>
+                    <input type="number" name="longitude" step="0.000001">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Height (m)</label>
+                    <input type="number" name="height" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Viewing Direction</label>
+                    <select name="viewing_direction">
+                        <option value="N">North</option>
+                        <option value="NE">Northeast</option>
+                        <option value="E">East</option>
+                        <!-- etc -->
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+}
+```
+
+### Save Functions
+
+#### saveInstrumentEdits(instrumentId)
+
+Collects form data and submits to API.
+
+```javascript
+async function saveInstrumentEdits(instrumentId) {
+    const form = document.getElementById('edit-instrument-form');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await API.updateInstrument(instrumentId, data);
+        if (response.success) {
+            showNotification('Instrument updated successfully', 'success');
+            closeModal();
+            refreshDashboard();
+        }
+    } catch (error) {
+        showNotification('Failed to update instrument', 'error');
+    }
+}
+```
+
+### Permission Checking
+
+Edit modals use the dashboard instance for permission checks:
+
+```javascript
+// CORRECT: Use dashboard instance as primary source
+const user = window.sitesStationDashboard?.currentUser || currentUser;
+const station = window.sitesStationDashboard?.stationData || stationData;
+
+if (!user || (user.role !== 'admin' && user.role !== 'station')) {
+    showNotification('Edit requires admin or station user privileges', 'error');
+    return;
+}
+```
+
+### Platform Normalized Name Generation
+
+For UAV platforms, normalized names are auto-generated:
+
+```javascript
+function updatePlatformNormalizedName() {
+    const station = window.sitesStationDashboard?.stationData || stationData;
+    const stationAcronym = station?.acronym;
+
+    // Strict validation - no fallback to generic values
+    if (!stationAcronym) {
+        console.error('Station acronym not available');
+        return;
+    }
+
+    const vendor = document.getElementById('uav-vendor')?.value;
+    const model = document.getElementById('uav-model')?.value;
+    const location = document.getElementById('uav-location')?.value || 'UAV01';
+
+    // Generate: ANS_DJI_M3M_UAV01
+    const normalizedName = `${stationAcronym}_${vendor}_${model}_${location}`;
+    document.getElementById('platform-normalized-name').value = normalizedName;
+}
+```
+
+---
+
 ## Document Information
 
 | Property | Value |
 |----------|-------|
-| Version | 9.0.0 |
+| Version | 9.0.16 |
 | Created | 2025-12-02 |
 | Author | SITES Spectral Development Team |
-| Status | Draft |
+| Status | Production |
 
 ---
 

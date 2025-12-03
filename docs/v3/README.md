@@ -1,7 +1,8 @@
 # SITES Spectral V3 Documentation
 
-> [!INFO] Version 9.0.0
+> [!INFO] Version 9.0.16
 > This documentation covers the V3 API and associated frontend components for SITES Spectral.
+> Last Updated: 2025-12-02
 
 ## Documentation Index
 
@@ -16,7 +17,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [[FRONTEND_COMPONENTS]] | Frontend component reference and usage |
+| [[FRONTEND_COMPONENTS]] | Frontend component reference, edit modals, and usage |
 
 ### Supporting Resources
 
@@ -25,6 +26,32 @@
 | Python Scripts | [[../../scripts/python/README\|scripts/python/]] |
 | YAML Configs | `yamls/` directory |
 | Legacy Docs | [[../legacy/\|docs/legacy/]] |
+
+---
+
+## What's New in v9.0.x
+
+### v9.0.16 - Simplified Admin Controls
+- Removed duplicate station controls from header
+- Single source of truth for platform controls
+
+### v9.0.15 - Station Acronym Validation
+- Strict validation - no 'STA' fallback allowed
+- Prevents creation of invalid platforms/instruments
+
+### v9.0.14 - Platform Normalized Name Fix
+- UAV platforms now correctly use station acronym (e.g., `ANS_DJI_M3M_UAV01`)
+
+### v9.0.13 - Permission Check Fix
+- All permission checks use dashboard instance as primary source
+- Fixes "admin privileges required" errors
+
+### v9.0.12 - Platform Controls Visibility
+- Platform creation button properly shows for admin/station users
+
+### v9.0.11 - Full Edit Modals
+- Complete reactive edit forms for platforms and instruments
+- Type-specific instrument forms (Phenocam, Multispectral, PAR, NDVI, PRI, Hyperspectral)
 
 ---
 
@@ -38,6 +65,12 @@
 - **Campaigns**: `GET /api/v3/campaigns`
 - **Products**: `GET /api/v3/products`
 
+### Default API Version
+
+As of v9.0.0, the default API is V3:
+- `/api/stations` → V3 response format
+- `/api/v1/stations` → Legacy V1 format (deprecated)
+
 ### Key Features
 
 - Pagination with cursor/offset support
@@ -45,6 +78,8 @@
 - Spatial queries with bounding box
 - Campaign management
 - Product catalog
+- Type-specific instrument edit forms
+- Real-time permission checking
 
 ---
 

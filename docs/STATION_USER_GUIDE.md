@@ -1,5 +1,8 @@
 # SITES Spectral Instruments Database - Station User Guide
 
+**Version:** 9.0.16
+**Last Updated:** 2025-12-02
+
 ## Overview
 
 Welcome to the SITES Spectral Instruments Database! This system allows you to view and update information about platforms and instruments at your assigned research station. This guide will help you navigate the system and make necessary updates to keep our database current and accurate.
@@ -17,6 +20,26 @@ Once logged in, you'll see:
 - **Platform Cards**: Visual cards showing all platforms at your station
 - **Instrument Cards**: Detailed cards for each phenocam and sensor
 - **Interactive Map**: Geographic view of your station's infrastructure
+- **Platform Controls**: Create new platforms (admin and station users only)
+
+### Creating New Platforms (v9.0.16+)
+
+If you have admin or station user privileges, you can create new platforms directly from your dashboard:
+
+1. **Click "Add Platform"** button in the platforms section
+2. **Select Platform Type**:
+   - **Fixed**: Towers, masts, permanent installations
+   - **UAV**: Drones and unmanned aerial vehicles
+   - **Satellite**: Earth observation satellite platforms
+3. **Fill in required fields**:
+   - For Fixed platforms: normalized name, display name, ecosystem
+   - For UAV platforms: vendor, model, and location (normalized name auto-generated)
+4. **Click Create** to save the new platform
+
+**Important Notes:**
+- Platform normalized names must use your station's acronym (e.g., `ANS_FOR_PL01`)
+- UAV platforms auto-generate their normalized name based on vendor and model
+- Instruments cannot be created with generic station fallbacks - all require valid station data
 
 ## Understanding the Data Structure
 
@@ -71,12 +94,26 @@ You can update extensive information including:
 - Display name
 - Status (Active, Inactive, Maintenance, Removed, Planned, Testing)
 - Instrument type and ecosystem classification
+- Measurement status and legacy acronym
 
-**Camera Specifications:**
+**Type-Specific Specifications (v9.0.11+):**
+
+The edit modal automatically adapts to show relevant fields for each instrument type:
+
+| Instrument Type | Specification Fields |
+|-----------------|---------------------|
+| Phenocam | Camera brand, model, resolution, interval |
+| Multispectral | Number of channels, orientation, datalogger |
+| PAR Sensor | Spectral range, calibration coefficient |
+| NDVI Sensor | Red wavelength, NIR wavelength |
+| PRI Sensor | Band 1 wavelength (~531nm), Band 2 wavelength (~570nm) |
+| Hyperspectral | Spectral range start/end, spectral resolution |
+
+**Camera Specifications (Phenocams):**
 - Camera brand and model
 - Camera resolution
 - Serial number
-- Camera specifications
+- Imaging interval
 
 **Position & Orientation:**
 - Precise latitude and longitude coordinates

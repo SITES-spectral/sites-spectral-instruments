@@ -1,6 +1,6 @@
 # SITES Spectral V3 API Reference
 
-**Version:** 9.0.0
+**Version:** 9.0.16
 **Status:** Production
 **Last Updated:** 2025-12-02
 **Base URL:** `https://<your-server>/api/v3/`
@@ -1618,6 +1618,6 @@ curl -X GET https://<your-server>/api/v3/info \
 
 ---
 
-**Document Version:** 1.0.0
+**Document Version:** 1.0.1
 **API Version:** V3
-**System Version:** 9.0.0
+**System Version:** 9.0.16

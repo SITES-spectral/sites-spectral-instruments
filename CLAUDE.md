@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 9.0.0 - V3 API Default with Modern Frontend (2025-12-02)
+## Current Version: 9.0.16 - Simplified Controls & Full Edit Modals (2025-12-02)
 
 **✅ STATUS: PRODUCTION-READY - V3 API**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -12,6 +12,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **📅 Last Updated:** 2025-12-02
 **🚀 API Version:** V3 (default) | V1 (legacy/deprecated)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
+
+### What's New in v9.0.16
+
+- **Simplified Admin Controls**: Single source of truth for platform creation
+- **Removed Duplicate Controls**: Admin-station-controls eliminated from header
+
+### What's New in v9.0.11-v9.0.15
+
+- **Full Edit Modals (v9.0.11)**: Type-specific edit forms for all instruments
+- **Platform Controls Visibility (v9.0.12)**: Create Platform button properly shows for admin/station users
+- **Permission Check Fix (v9.0.13)**: Dashboard instance used as primary source for user permissions
+- **Platform Normalized Name Fix (v9.0.14)**: UAV platforms correctly use station acronym
+- **Station Acronym Validation (v9.0.15)**: Strict validation - no 'STA' fallback allowed
 
 ### What's New in v9.0.0
 
@@ -481,9 +494,9 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 8.5.7 |
-| Last Deployed | 2025-11-28 |
-| Status | Production-Ready - Security Hardened |
+| Current Version | 9.0.16 |
+| Last Deployed | 2025-12-02 |
+| Status | Production-Ready - V3 API |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |

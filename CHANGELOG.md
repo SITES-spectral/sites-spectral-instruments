@@ -14,6 +14,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.19] - 2025-12-03
+
+### Fix Delete Platform Modal Handler Connection
+
+**Release Date**: 2025-12-03
+
+#### Fixed
+
+- **Delete platform modal not triggered from PlatformTypeCard**: Fixed disconnected modal system
+  - **Root Cause**: `PlatformTypeCard.handleDeletePlatform()` called `DashboardState.openModal('delete-confirmation')`
+    which only set state but had no subscriber to actually show the modal
+  - **Additional Issue**: Modal ID mismatch - 'delete-confirmation' is for instruments, 'delete-platform-modal' is for platforms
+  - **Solution**: Changed `handleDeletePlatform()` to call `showDeletePlatformModal()` directly
+  - **File**: `public/js/components/platform-type-card.js` lines 349-363
+
+#### Technical Details
+
+- The `DashboardState.openModal()` function only sets `activeModal` state (dashboard-state.js:325-330)
+- No subscriber was registered to react to `activeModal` state changes and trigger actual modal display
+- Direct function call pattern is more reliable and matches how other modals work in the codebase
+- Added fallback error handling if `showDeletePlatformModal` function is not found
+
+---
+
+## [9.0.18] - 2025-12-03
+
+### 🔧 Delete Modal & Tab Counter Fixes
+
+**Release Date**: 2025-12-03
+
+#### Fixed
+
+- **Delete platform modal not showing**: Removed conflicting inline `style="display: none;"` from modal element
+  - CSS class `.platform-modal.show { display: flex; }` now works correctly
+  - Modal properly opens when clicking delete button
+
+- **Tab counters showing 0**: Fixed initialization order issue
+  - `_setupPlatformTypeFilter()` now called BEFORE `_loadStationData()`
+  - `_useLegacyTabs` flag is now set before `_updatePlatformTypeCounts()` runs
+  - Counts now correctly update in Fixed/UAV/Satellite tabs
+
+- **Permission check in delete modal**: Uses dashboard instance pattern
+  - `window.sitesStationDashboard?.currentUser || currentUser` for consistent auth
+
+---
+
+## [9.0.17] - 2025-12-02
+
+### 🔧 UAV Normalized Name Fix
+
+**Release Date**: 2025-12-02
+
+#### Fixed
+
+- **UAV normalized name generation**: Fixed issue where UAV platforms used wrong naming pattern
+  - **Problem**: UAV platforms generated `SVB_FOR_UAV01` instead of `SVB_DJI_M3M_UAV01`
+  - **Root Cause**: `updatePlatformNormalizedName()` read platform type from DOM which could be out of sync
+  - **Solution**: Use `selectedPlatformType` global variable as primary source
+
+#### Changed
+
+- **Platform type synchronization**: `onPlatformTypeChange()` now updates `selectedPlatformType` global
+- **Defensive naming logic**: `updatePlatformNormalizedName()` uses `selectedPlatformType || DOM value` pattern
+
+#### Technical Details
+
+- `selectedPlatformType` is set when user selects platform type from modal selector
+- `onPlatformTypeChange()` keeps `selectedPlatformType` in sync when select changes
+- `updatePlatformNormalizedName()` prioritizes `selectedPlatformType` over DOM read
+
+---
+
 ## [9.0.16] - 2025-12-02
 
 ### 🧹 Simplified Admin Controls - Remove Duplicate UI

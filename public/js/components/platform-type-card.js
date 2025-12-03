@@ -352,12 +352,14 @@ class PlatformTypeCard {
             return;
         }
 
-        // Open delete confirmation modal
-        window.DashboardState.openModal('delete-confirmation', {
-            entityType: 'platform',
-            entityId: platformId,
-            entityName: platformName
-        });
+        // Call the delete platform modal function directly
+        // The DashboardState.openModal() only sets state but has no subscriber to actually show the modal
+        if (typeof showDeletePlatformModal === 'function') {
+            showDeletePlatformModal(platformId, platformName);
+        } else {
+            console.error('PlatformTypeCard: showDeletePlatformModal function not found');
+            Utils.showToast('Delete modal not available', 'error');
+        }
     }
 }
 

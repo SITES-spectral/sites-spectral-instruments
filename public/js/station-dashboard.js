@@ -214,12 +214,12 @@
 
                 // Load station data
                 if (this.stationAcronym) {
-                    await this._loadStationData();
-                    await this._loadImageManifest();
-
-                    // Set up UI components
+                    // Set up UI components BEFORE loading data so counters update correctly
                     this._setupPlatformTypeFilter();
                     this._setupEventListeners();
+
+                    await this._loadStationData();
+                    await this._loadImageManifest();
 
                     // Show success state
                     this._showSuccessState();
