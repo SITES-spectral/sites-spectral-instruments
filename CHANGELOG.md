@@ -14,6 +14,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.26] - 2025-12-05
+
+### Map Controls Z-Index Fix
+
+**Release Date**: 2025-12-05
+
+#### Fixed
+
+- **Leaflet map controls no longer overlap navbar**: Fixed z-index stacking issue where map zoom controls and layer selector appeared on top of the page header
+  - Added `position: sticky; top: 0; z-index: 1100;` to navbar
+  - Added `position: relative; z-index: 1;` to station-map container
+  - Reduced Leaflet control z-index to 999 (below navbar's 1100)
+  - Map controls now stay contained within their map bounds
+
+---
+
 ## [9.0.25] - 2025-12-05
 
 ### Locked Platform Type Selection

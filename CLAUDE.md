@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 9.0.25 - Locked Platform Type Selection (2025-12-05)
+## Current Version: 9.0.26 - Map Controls Z-Index Fix (2025-12-05)
 
 **✅ STATUS: PRODUCTION-READY - V3 API**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -13,16 +13,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **🚀 API Version:** V3 (default) | V1 (legacy/deprecated)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
 
-### What's New in v9.0.25
+### What's New in v9.0.26
 
-- **Locked Platform Type Selection**: Platform type is now read-only in creation form after initial selection
-- **Two-Step Workflow**: Select type → Fill details (type cannot be changed in second step)
-- **Visual Indicator**: Shows locked type with colored icon and "(locked)" badge
+- **Map Controls Z-Index Fix**: Leaflet map controls no longer overlap navbar/header
+- **Sticky Navbar**: Navbar now stays on top when scrolling with proper z-index
 
-### What's New in v9.0.24
+### What's New in v9.0.24-v9.0.25
 
-- **Delete Platform Button Fix**: `showModal()` now accepts both string IDs and element objects
-- **Platform Naming Race Condition Fix**: UAV/Satellite platforms no longer incorrectly use ecosystem code
+- **Locked Platform Type Selection (v9.0.25)**: Platform type read-only after initial selection
+- **Delete Platform Button Fix (v9.0.24)**: `showModal()` accepts both string IDs and element objects
+- **Platform Naming Fix (v9.0.24)**: UAV/Satellite platforms use correct naming conventions
 
 ### What's New in v9.0.17-v9.0.23
 
@@ -506,7 +506,7 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 9.0.25 |
+| Current Version | 9.0.26 |
 | Last Deployed | 2025-12-05 |
 | Status | Production-Ready - V3 API |
 | Environment | Cloudflare Workers + D1 Database |

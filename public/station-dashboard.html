@@ -43,6 +43,18 @@
             color: white;
             padding: 1rem 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1100; /* Above Leaflet controls which use z-index ~1000 */
+        }
+
+        /* Contain Leaflet controls within map bounds */
+        .station-map .leaflet-control-container {
+            position: absolute;
+        }
+        .station-map .leaflet-top,
+        .station-map .leaflet-bottom {
+            z-index: 999; /* Below navbar */
         }
 
         .nav-container {
@@ -498,6 +510,8 @@
             height: 400px;
             border-radius: 8px;
             overflow: hidden;
+            position: relative; /* Create stacking context for Leaflet controls */
+            z-index: 1; /* Ensure map stays below navbar */
         }
 
         /* Responsive Design */
@@ -4299,14 +4313,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=9.0.23"></script>
+    <script src="/js/utils.js?v=9.0.25"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=9.0.23"></script>
-    <script src="/js/components.js?v=9.0.23"></script>
+    <script src="/js/api.js?v=9.0.25"></script>
+    <script src="/js/components.js?v=9.0.25"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
     <script src="/js/modal-sections.js?v=7.0.1"></script>
@@ -4316,10 +4330,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=9.0.23"></script>
-    <script src="/js/station-dashboard.js?v=9.0.23"></script>
-    <script src="/js/navigation.js?v=9.0.23"></script>
-    <script src="/js/export.js?v=9.0.23"></script>
+    <script src="/js/interactive-map.js?v=9.0.25"></script>
+    <script src="/js/station-dashboard.js?v=9.0.25"></script>
+    <script src="/js/navigation.js?v=9.0.25"></script>
+    <script src="/js/export.js?v=9.0.25"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
