@@ -16,6 +16,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-alpha.2] - 2025-12-05
+
+### Semantic Naming: location_code → mount_type_code
+
+**Breaking Change**: Renamed `location_code` to `mount_type_code` for semantic clarity.
+
+#### Rationale
+
+The previous `location_code` field was semantically incorrect - it doesn't describe a geographic location, but rather the **mounting structure type**:
+
+| Code | Name | Description |
+|------|------|-------------|
+| PL | Pole/Tower/Mast | Elevated structures (>1.5m height) |
+| BL | Building | Rooftop or facade mounted |
+| GL | Ground Level | Installations below 1.5m height |
+| UAV | UAV Position | Drone flight position identifier |
+| SAT | Satellite | Virtual position for satellite data |
+| MOB | Mobile | Portable platform position |
+| USV | Surface Vehicle | Unmanned surface vehicle position |
+| UUV | Underwater Vehicle | Unmanned underwater vehicle position |
+
+#### Changes
+
+**Domain Layer:**
+- `Platform.mountTypeCode` replaces `Platform.locationCode`
+- Added `MOUNT_TYPE_PREFIXES` constant with metadata for each mount type
+- Added helper methods: `getMountTypePrefix()`, `getMountTypeInfo()`, `isGroundLevel()`
+- `Platform.toJSON()` includes both `mount_type_code` and `location_code` for backwards compatibility
+- `Platform.fromDatabase()` supports both column names for migration period
+
+**Repository Interface:**
+- `getNextMountTypeCode()` replaces `getNextLocationCode()`
+
+**Platform Type Strategies:**
+- All strategies updated to use `mountTypeCode` in naming contexts
+- `FixedPlatformType` now includes mount type selector (PL/BL/GL)
+
+**Database Migration:**
+- `0035_rename_location_code_to_mount_type_code.sql`
+- Uses `ALTER TABLE RENAME COLUMN` (D1 SQLite)
+
+#### Migration Path
+
+1. Deploy v10.0.0-alpha.2
+2. Run migration: `npm run db:migrate`
+3. API responses include both `mount_type_code` and `location_code` during transition
+4. Update frontend to use `mount_type_code`
+5. Remove `location_code` in v10.0.0 stable
+
+---
+
 ## [10.0.0-alpha.1] - 2025-12-05
 
 ### Complete Architectural Redesign - Hexagonal Architecture

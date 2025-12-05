@@ -2,9 +2,10 @@
  * UAV Platform Type Strategy
  *
  * Handles UAV/drone platforms with auto-instrument creation.
- * Naming convention: {STATION}_{VENDOR}_{MODEL}_{LOCATION}
+ * Naming convention: {STATION}_{VENDOR}_{MODEL}_{MOUNT_TYPE_CODE}
  * Example: SVB_DJI_M3M_UAV01, ANS_MICASENSE_REDEDGE_UAV02
  *
+ * Mount Type Code: UAV##
  * NO ecosystem code in UAV platform names.
  *
  * @module domain/platform/types/UAVPlatformType
@@ -107,12 +108,12 @@ export class UAVPlatformType extends PlatformTypeStrategy {
 
   /**
    * Generate normalized name
-   * Pattern: {STATION}_{VENDOR}_{MODEL}_{LOCATION}
+   * Pattern: {STATION}_{VENDOR}_{MODEL}_{MOUNT_TYPE_CODE}
    * @param {Object} context - Naming context
    * @returns {string}
    */
   generateNormalizedName(context) {
-    const { stationAcronym, vendor, model, locationCode } = context;
+    const { stationAcronym, vendor, model, mountTypeCode } = context;
 
     if (!stationAcronym) {
       throw new Error('Station acronym is required for UAV platform naming');
@@ -123,15 +124,15 @@ export class UAVPlatformType extends PlatformTypeStrategy {
     if (!model) {
       throw new Error('Model is required for UAV platform naming');
     }
-    if (!locationCode) {
-      throw new Error('Location code is required for UAV platform naming');
+    if (!mountTypeCode) {
+      throw new Error('Mount type code is required for UAV platform naming');
     }
 
     // Normalize vendor and model (uppercase, no spaces)
     const normalizedVendor = vendor.toUpperCase().replace(/\s+/g, '');
     const normalizedModel = model.toUpperCase().replace(/[\s-]+/g, '');
 
-    return `${stationAcronym}_${normalizedVendor}_${normalizedModel}_${locationCode}`;
+    return `${stationAcronym}_${normalizedVendor}_${normalizedModel}_${mountTypeCode}`;
   }
 
   /**
@@ -139,7 +140,7 @@ export class UAVPlatformType extends PlatformTypeStrategy {
    * @returns {string[]}
    */
   getRequiredFields() {
-    return ['stationId', 'displayName', 'vendor', 'model', 'locationCode'];
+    return ['stationId', 'displayName', 'vendor', 'model', 'mountTypeCode'];
   }
 
   /**
@@ -182,13 +183,14 @@ export class UAVPlatformType extends PlatformTypeStrategy {
         helpText: 'Drone model - determines auto-created instruments'
       },
       {
-        name: 'locationCode',
-        label: 'Location Code',
+        name: 'mountTypeCode',
+        label: 'Mount Type Code',
         type: 'text',
         required: true,
+        readonly: true,
         pattern: /^UAV\d{2}$/,
         placeholder: 'UAV01',
-        helpText: 'Auto-generated location code (e.g., UAV01, UAV02)'
+        helpText: 'Auto-generated UAV position code (e.g., UAV01, UAV02)'
       },
       {
         name: 'description',

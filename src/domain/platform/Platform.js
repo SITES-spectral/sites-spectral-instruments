@@ -13,7 +13,7 @@
  * @property {number} [id] - Database ID (optional for new platforms)
  * @property {string} normalizedName - System identifier (e.g., 'SVB_FOR_PL01')
  * @property {string} displayName - Human-readable name
- * @property {string} locationCode - Location code (e.g., 'PL01', 'UAV01')
+ * @property {string} mountTypeCode - Mount type code (e.g., 'PL01', 'BL01', 'GL01', 'UAV01')
  * @property {number} stationId - Parent station ID
  * @property {string} stationAcronym - Parent station acronym (for naming)
  * @property {string} platformType - Platform type code ('fixed', 'uav', 'satellite')
@@ -22,7 +22,7 @@
  * @property {number} [longitude] - Geographic longitude
  * @property {number} [platformHeightM] - Platform height in meters
  * @property {string} [status] - Platform status
- * @property {string} [mountingStructure] - Mounting structure description
+ * @property {string} [mountingStructure] - Mounting structure description (free text)
  * @property {string} [deploymentDate] - ISO date string
  * @property {string} [description] - Platform description
  * @property {string} [createdAt] - ISO timestamp
@@ -44,6 +44,64 @@ export const ECOSYSTEM_CODES = [
   'LAK', 'CON', 'WET', 'DEC', 'MAR', 'PEA', 'GEN'
 ];
 
+/**
+ * Mount type prefixes - describes physical mounting structure
+ * @constant {Object}
+ */
+export const MOUNT_TYPE_PREFIXES = {
+  PL: {
+    code: 'PL',
+    name: 'Pole/Tower/Mast',
+    description: 'Elevated structures such as observation towers, masts, or poles',
+    minHeight: 1.5,
+    platformTypes: ['fixed']
+  },
+  BL: {
+    code: 'BL',
+    name: 'Building',
+    description: 'Mounted on building rooftops or facades',
+    minHeight: null,
+    platformTypes: ['fixed']
+  },
+  GL: {
+    code: 'GL',
+    name: 'Ground Level',
+    description: 'Installations below 1.5m height',
+    maxHeight: 1.5,
+    platformTypes: ['fixed']
+  },
+  UAV: {
+    code: 'UAV',
+    name: 'UAV Position',
+    description: 'Drone flight position identifier',
+    platformTypes: ['uav']
+  },
+  SAT: {
+    code: 'SAT',
+    name: 'Satellite',
+    description: 'Virtual position for satellite sensor data',
+    platformTypes: ['satellite']
+  },
+  MOB: {
+    code: 'MOB',
+    name: 'Mobile',
+    description: 'Portable/mobile platform position',
+    platformTypes: ['mobile']
+  },
+  USV: {
+    code: 'USV',
+    name: 'Surface Vehicle',
+    description: 'Unmanned surface vehicle position',
+    platformTypes: ['usv']
+  },
+  UUV: {
+    code: 'UUV',
+    name: 'Underwater Vehicle',
+    description: 'Unmanned underwater vehicle position',
+    platformTypes: ['uuv']
+  }
+};
+
 export class Platform {
   /**
    * Create a Platform entity
@@ -53,7 +111,7 @@ export class Platform {
     this.id = props.id || null;
     this.normalizedName = props.normalizedName;
     this.displayName = props.displayName;
-    this.locationCode = props.locationCode;
+    this.mountTypeCode = props.mountTypeCode;
     this.stationId = props.stationId;
     this.stationAcronym = props.stationAcronym;
     this.platformType = props.platformType || 'fixed';
@@ -175,6 +233,33 @@ export class Platform {
   }
 
   /**
+   * Get mount type prefix from mountTypeCode (e.g., 'PL' from 'PL01')
+   * @returns {string|null}
+   */
+  getMountTypePrefix() {
+    if (!this.mountTypeCode) return null;
+    const match = this.mountTypeCode.match(/^([A-Z]+)/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Get mount type info from MOUNT_TYPE_PREFIXES
+   * @returns {Object|null}
+   */
+  getMountTypeInfo() {
+    const prefix = this.getMountTypePrefix();
+    return prefix ? MOUNT_TYPE_PREFIXES[prefix] : null;
+  }
+
+  /**
+   * Check if mount type is ground level (below 1.5m)
+   * @returns {boolean}
+   */
+  isGroundLevel() {
+    return this.getMountTypePrefix() === 'GL';
+  }
+
+  /**
    * Convert to plain object (for serialization)
    * @returns {Object}
    */
@@ -183,7 +268,9 @@ export class Platform {
       id: this.id,
       normalized_name: this.normalizedName,
       display_name: this.displayName,
-      location_code: this.locationCode,
+      mount_type_code: this.mountTypeCode,
+      // Legacy field mapping for backwards compatibility during migration
+      location_code: this.mountTypeCode,
       station_id: this.stationId,
       station_acronym: this.stationAcronym,
       platform_type: this.platformType,
@@ -197,12 +284,15 @@ export class Platform {
       description: this.description,
       created_at: this.createdAt,
       updated_at: this.updatedAt,
-      instrument_count: this.instruments.length
+      instrument_count: this.instruments.length,
+      // Include mount type metadata
+      mount_type_info: this.getMountTypeInfo()
     };
   }
 
   /**
    * Create Platform from database row
+   * Supports both new (mount_type_code) and legacy (location_code) column names
    * @param {Object} row - Database row
    * @returns {Platform}
    */
@@ -211,7 +301,8 @@ export class Platform {
       id: row.id,
       normalizedName: row.normalized_name,
       displayName: row.display_name,
-      locationCode: row.location_code,
+      // Support both new and legacy column names
+      mountTypeCode: row.mount_type_code || row.location_code,
       stationId: row.station_id,
       stationAcronym: row.station_acronym,
       platformType: row.platform_type,

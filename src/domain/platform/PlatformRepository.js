@@ -120,13 +120,14 @@ export class PlatformRepository {
   }
 
   /**
-   * Get next available location code for a station/ecosystem combination
+   * Get next available mount type code for a station/platform type combination
    * @param {number} stationId - Station ID
-   * @param {string} ecosystemCode - Ecosystem code
-   * @returns {Promise<string>} Next location code (e.g., 'PL01', 'PL02')
+   * @param {string} mountTypePrefix - Mount type prefix (PL, BL, GL, UAV, SAT, etc.)
+   * @param {string} [ecosystemCode] - Ecosystem code (for fixed platforms)
+   * @returns {Promise<string>} Next mount type code (e.g., 'PL01', 'BL02', 'UAV01')
    */
-  async getNextLocationCode(stationId, ecosystemCode) {
-    throw new Error('PlatformRepository.getNextLocationCode() must be implemented');
+  async getNextMountTypeCode(stationId, mountTypePrefix, ecosystemCode = null) {
+    throw new Error('PlatformRepository.getNextMountTypeCode() must be implemented');
   }
 
   /**

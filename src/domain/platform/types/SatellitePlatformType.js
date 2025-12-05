@@ -5,6 +5,7 @@
  * Naming convention: {STATION}_{AGENCY}_{SATELLITE}_{SENSOR}
  * Example: SVB_ESA_S2A_MSI, ANS_NASA_LANDSAT9_OLI
  *
+ * Mount Type Code: SAT## (virtual position identifier)
  * NO ecosystem code in satellite platform names.
  *
  * @module domain/platform/types/SatellitePlatformType

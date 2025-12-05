@@ -22,6 +22,7 @@ export {
   PlatformRepository,
   PLATFORM_TYPES,
   ECOSYSTEM_CODES,
+  MOUNT_TYPE_PREFIXES,
   PlatformTypeStrategy,
   FixedPlatformType,
   UAVPlatformType,

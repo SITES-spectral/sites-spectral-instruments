@@ -6,7 +6,12 @@
  * @module domain/platform
  */
 
-export { Platform, PLATFORM_TYPES, ECOSYSTEM_CODES } from './Platform.js';
+export {
+  Platform,
+  PLATFORM_TYPES,
+  ECOSYSTEM_CODES,
+  MOUNT_TYPE_PREFIXES
+} from './Platform.js';
 export { PlatformRepository } from './PlatformRepository.js';
 
 // Export type strategies and registry

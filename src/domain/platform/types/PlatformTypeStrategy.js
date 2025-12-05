@@ -14,7 +14,7 @@
  * @typedef {Object} NamingContext
  * @property {string} stationAcronym - Station acronym (e.g., 'SVB')
  * @property {string} [ecosystemCode] - Ecosystem code for fixed platforms
- * @property {string} [locationCode] - Location code (e.g., 'PL01', 'UAV01')
+ * @property {string} [mountTypeCode] - Mount type code (e.g., 'PL01', 'BL01', 'GL01', 'UAV01')
  * @property {string} [vendor] - UAV vendor (e.g., 'DJI')
  * @property {string} [model] - UAV model (e.g., 'M3M')
  * @property {string} [agency] - Satellite agency (e.g., 'ESA')

@@ -2,14 +2,24 @@
  * Fixed Platform Type Strategy
  *
  * Handles fixed/stationary platforms like towers, masts, and permanent installations.
- * Naming convention: {STATION}_{ECOSYSTEM}_{LOCATION}
- * Example: SVB_FOR_PL01, ANS_MIR_PL02
+ * Naming convention: {STATION}_{ECOSYSTEM}_{MOUNT_TYPE_CODE}
+ * Example: SVB_FOR_PL01, ANS_MIR_BL01, LON_AGR_GL01
+ *
+ * Mount Type Codes:
+ * - PL: Pole/Tower/Mast (elevated structures)
+ * - BL: Building (rooftop or facade mounted)
+ * - GL: Ground Level (below 1.5m height)
  *
  * @module domain/platform/types/FixedPlatformType
  */
 
 import { PlatformTypeStrategy } from './PlatformTypeStrategy.js';
-import { ECOSYSTEM_CODES } from '../Platform.js';
+import { ECOSYSTEM_CODES, MOUNT_TYPE_PREFIXES } from '../Platform.js';
+
+/**
+ * Valid mount type prefixes for fixed platforms
+ */
+const FIXED_MOUNT_TYPES = ['PL', 'BL', 'GL'];
 
 export class FixedPlatformType extends PlatformTypeStrategy {
   /**
@@ -30,12 +40,12 @@ export class FixedPlatformType extends PlatformTypeStrategy {
 
   /**
    * Generate normalized name
-   * Pattern: {STATION}_{ECOSYSTEM}_{LOCATION}
+   * Pattern: {STATION}_{ECOSYSTEM}_{MOUNT_TYPE_CODE}
    * @param {Object} context - Naming context
    * @returns {string}
    */
   generateNormalizedName(context) {
-    const { stationAcronym, ecosystemCode, locationCode } = context;
+    const { stationAcronym, ecosystemCode, mountTypeCode } = context;
 
     if (!stationAcronym) {
       throw new Error('Station acronym is required for fixed platform naming');
@@ -43,11 +53,11 @@ export class FixedPlatformType extends PlatformTypeStrategy {
     if (!ecosystemCode) {
       throw new Error('Ecosystem code is required for fixed platform naming');
     }
-    if (!locationCode) {
-      throw new Error('Location code is required for fixed platform naming');
+    if (!mountTypeCode) {
+      throw new Error('Mount type code is required for fixed platform naming');
     }
 
-    return `${stationAcronym}_${ecosystemCode}_${locationCode}`;
+    return `${stationAcronym}_${ecosystemCode}_${mountTypeCode}`;
   }
 
   /**
@@ -55,7 +65,7 @@ export class FixedPlatformType extends PlatformTypeStrategy {
    * @returns {string[]}
    */
   getRequiredFields() {
-    return ['stationId', 'displayName', 'ecosystemCode', 'locationCode'];
+    return ['stationId', 'displayName', 'ecosystemCode', 'mountTypeCode'];
   }
 
   /**
@@ -64,6 +74,18 @@ export class FixedPlatformType extends PlatformTypeStrategy {
    */
   requiresEcosystem() {
     return true;
+  }
+
+  /**
+   * Get available mount types for fixed platforms
+   * @returns {Object[]}
+   */
+  getAvailableMountTypes() {
+    return FIXED_MOUNT_TYPES.map(code => ({
+      value: code,
+      label: MOUNT_TYPE_PREFIXES[code].name,
+      description: MOUNT_TYPE_PREFIXES[code].description
+    }));
   }
 
   /**
@@ -81,21 +103,30 @@ export class FixedPlatformType extends PlatformTypeStrategy {
         helpText: 'The ecosystem type this platform monitors'
       },
       {
-        name: 'locationCode',
-        label: 'Location Code',
+        name: 'mountType',
+        label: 'Mount Type',
+        type: 'select',
+        required: true,
+        options: this.getAvailableMountTypes(),
+        helpText: 'Physical mounting structure type (PL=Pole/Tower, BL=Building, GL=Ground Level)'
+      },
+      {
+        name: 'mountTypeCode',
+        label: 'Mount Type Code',
         type: 'text',
         required: true,
-        pattern: /^PL\d{2}$/,
+        readonly: true,
+        pattern: /^(PL|BL|GL)\d{2}$/,
         placeholder: 'PL01',
-        helpText: 'Auto-generated location code (e.g., PL01, PL02)'
+        helpText: 'Auto-generated (e.g., PL01=Pole #1, BL01=Building #1, GL01=Ground Level #1)'
       },
       {
         name: 'mountingStructure',
-        label: 'Mounting Structure',
+        label: 'Structure Description',
         type: 'text',
         required: false,
-        placeholder: 'e.g., Tower, Mast, Building',
-        helpText: 'Type of mounting structure'
+        placeholder: 'e.g., 30m observation tower, Building rooftop',
+        helpText: 'Detailed description of the mounting structure'
       },
       {
         name: 'platformHeightM',
