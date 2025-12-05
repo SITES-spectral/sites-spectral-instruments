@@ -14,6 +14,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.27] - 2025-12-05
+
+### Platform Forms Refactor - SOLID Architecture
+
+**Release Date**: 2025-12-05
+
+#### Changed
+
+- **Complete refactor of platform creation forms following SOLID principles**:
+  - Created new `PlatformForms` module (`/js/platform-forms/index.js`)
+  - Each platform type (Fixed, UAV, Satellite) now has its own dedicated form generator
+  - Type-specific naming logic embedded in each generator - no shared code that could cause confusion
+  - Save function explicitly uses passed platform type, never reads from DOM
+  - Platform type is truly locked after selection - not just visually disabled
+
+#### Architecture (Hexagonal Pattern)
+
+- **Single Responsibility**: Each form generator handles only its platform type
+- **Open/Closed**: Add new platform types by adding new generators, not modifying existing code
+- **Dependency Inversion**: `selectPlatformType()` delegates to `PlatformForms.open()`
+
+#### Naming Conventions Enforced
+
+| Platform Type | Pattern | Example | Uses Ecosystem? |
+|--------------|---------|---------|-----------------|
+| Fixed | `{STATION}_{ECOSYSTEM}_{LOCATION}` | `SVB_FOR_PL01` | Yes |
+| UAV | `{STATION}_{VENDOR}_{MODEL}_{LOCATION}` | `SVB_DJI_M3M_UAV01` | **No** |
+| Satellite | `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` | `SVB_ESA_S2A_MSI` | **No** |
+
+#### Files Added
+
+- `public/js/platform-forms/index.js` - New modular platform form system
+
+#### Technical Details
+
+- Normalized name field is now `readonly` - auto-generated only
+- UAV and Satellite forms explicitly set `ecosystem_code: null`
+- Each form includes informational alert about naming convention
+- Legacy `openCreatePlatformFormWithType()` retained as fallback
+
+---
+
 ## [9.0.26] - 2025-12-05
 
 ### Map Controls Z-Index Fix

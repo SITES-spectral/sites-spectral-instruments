@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.26",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.26 - Map Controls Z-Index Fix",
+  "version": "9.0.27",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.27 - Platform Forms Refactor (SOLID)",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

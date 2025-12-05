@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 9.0.26 - Map Controls Z-Index Fix (2025-12-05)
+## Current Version: 9.0.27 - Platform Forms Refactor SOLID (2025-12-05)
 
 **✅ STATUS: PRODUCTION-READY - V3 API**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -13,12 +13,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **🚀 API Version:** V3 (default) | V1 (legacy/deprecated)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
 
-### What's New in v9.0.26
+### What's New in v9.0.27
 
-- **Map Controls Z-Index Fix**: Leaflet map controls no longer overlap navbar/header
-- **Sticky Navbar**: Navbar now stays on top when scrolling with proper z-index
+- **Platform Forms Refactor (SOLID Architecture)**: Complete rewrite of platform creation forms
+- **Dedicated Form Generators**: Each platform type (Fixed, UAV, Satellite) has its own form
+- **Enforced Naming Conventions**: UAV and Satellite never use ecosystem code in names
+- **New Module**: `PlatformForms` in `/js/platform-forms/index.js`
 
-### What's New in v9.0.24-v9.0.25
+### What's New in v9.0.24-v9.0.26
 
 - **Locked Platform Type Selection (v9.0.25)**: Platform type read-only after initial selection
 - **Delete Platform Button Fix (v9.0.24)**: `showModal()` accepts both string IDs and element objects
@@ -506,7 +508,7 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 9.0.26 |
+| Current Version | 9.0.27 |
 | Last Deployed | 2025-12-05 |
 | Status | Production-Ready - V3 API |
 | Environment | Cloudflare Workers + D1 Database |
