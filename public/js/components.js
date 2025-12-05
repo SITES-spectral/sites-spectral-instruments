@@ -318,8 +318,12 @@ class SitesComponents {
     }
 
     // Modal system
-    showModal(modalId) {
-        const modal = document.getElementById(modalId);
+    showModal(modalOrId) {
+        // Accept both string ID and element object (like closeModal does)
+        const modal = typeof modalOrId === 'string'
+            ? document.getElementById(modalOrId)
+            : modalOrId;
+
         if (modal) {
             modal.classList.add('show');
             this.activeModals.add(modal);

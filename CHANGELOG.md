@@ -14,6 +14,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.25] - 2025-12-05
+
+### Locked Platform Type Selection
+
+**Release Date**: 2025-12-05
+
+#### Changed
+
+- **Platform type is now locked after initial selection**: When creating a new platform, the type selected in the first modal (Fixed/UAV/Satellite) is now displayed as read-only in the creation form
+  - Prevents accidental type changes that could cause naming confusion
+  - Shows platform type with colored icon and "(locked)" indicator
+  - Uses hidden input to preserve the selected value for form submission
+  - Clearer two-step workflow: select type → fill details
+
+#### UI Improvements
+
+- Platform type display shows: icon + label + "(locked)" badge
+- Gray background indicates non-editable field
+- Helper text: "Selected in previous step - cannot be changed"
+- Platform type colors match the selection modal icons
+
+---
+
+## [9.0.24] - 2025-12-05
+
+### Delete Platform Button & Platform Naming Fix
+
+**Release Date**: 2025-12-05
+
+#### Fixed
+
+- **Delete platform button now works**: Fixed `showModal()` method in `components.js` to accept both string IDs and element objects
+  - **Root Cause**: `showConfirmDialog()` passed element object to `showModal()`, but `showModal()` only accepted string IDs
+  - **Solution**: Updated `showModal(modalOrId)` to handle both types, matching `closeModal()` behavior
+  - Delete confirmation modal now displays correctly when clicking Delete button on platform cards
+
+- **UAV/Satellite platform naming race condition fixed**: Prevented ecosystem code from incorrectly appearing in platform names
+  - **Root Cause**: During form initialization, `onchange` events could trigger `onPlatformTypeChange()` before dropdown was set, overwriting `selectedPlatformType` with 'fixed'
+  - **Solution**: Added `isInitializingPlatformForm` flag to prevent `selectedPlatformType` from being overwritten during setup
+  - UAV platforms now correctly use `{STATION}_{VENDOR}_{MODEL}_{LOCATION}` naming (e.g., `SVB_DJI_M3M_UAV01`)
+  - Satellite platforms now correctly use `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` naming (e.g., `SVB_ESA_S2A_MSI`)
+
+#### Platform Naming Conventions (Confirmed)
+
+| Platform Type | Naming Pattern | Example |
+|--------------|----------------|---------|
+| Fixed | `{STATION}_{ECOSYSTEM}_{LOCATION}` | `SVB_FOR_PL01` |
+| UAV | `{STATION}_{VENDOR}_{MODEL}_{LOCATION}` | `SVB_DJI_M3M_UAV01` |
+| Satellite | `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` | `SVB_ESA_S2A_MSI` |
+| Mobile | `{STATION}_{ECOSYSTEM}_{CARRIER}_{LOCATION}` | `SVB_FOR_BPK_MOB01` |
+| USV | `{STATION}_{ECOSYSTEM}_{LOCATION}` | `ANS_LAK_USV01` |
+| UUV | `{STATION}_{ECOSYSTEM}_{LOCATION}` | `ANS_LAK_UUV01` |
+
+#### Technical Details
+
+**Files Modified:**
+- `public/js/components.js`: `showModal()` now accepts element objects
+- `public/station-dashboard.html`: Added `isInitializingPlatformForm` flag, updated `onPlatformTypeChange()` and `openCreatePlatformFormWithType()`
+
+---
+
 ## [9.0.23] - 2025-12-03
 
 ### Static Image Path Fix

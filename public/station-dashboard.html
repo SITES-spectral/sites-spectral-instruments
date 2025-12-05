@@ -21,12 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=9.0.23">
-    <link rel="stylesheet" href="/css/form-enhancements.css?v=8.0.0-rc.4">
+    <link rel="stylesheet" href="/css/styles.css?v=9.0.25">
+    <link rel="stylesheet" href="/css/form-enhancements.css?v=9.0.25">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="9.0.23">
-    <meta name="build-date" content="2025-12-03">
+    <meta name="app-version" content="9.0.25">
+    <meta name="build-date" content="2025-12-05">
 
     <style>
         body {
@@ -9503,18 +9503,23 @@
 
             // Update modal title based on platform type
             const titleConfig = {
-                fixed: { icon: 'fa-tower-observation', label: 'Fixed Platform' },
-                uav: { icon: 'fa-crosshairs', label: 'UAV / Drone' },
-                satellite: { icon: 'fa-satellite', label: 'Satellite Platform' },
-                mobile: { icon: 'fa-truck', label: 'Mobile Platform' },
-                usv: { icon: 'fa-ship', label: 'USV Platform' },
-                uuv: { icon: 'fa-water', label: 'UUV Platform' }
+                fixed: { icon: 'fa-tower-observation', label: 'Fixed Platform', color: '#2563eb' },
+                uav: { icon: 'fa-crosshairs', label: 'UAV / Drone', color: '#059669' },
+                satellite: { icon: 'fa-satellite', label: 'Satellite Platform', color: '#7c3aed' },
+                mobile: { icon: 'fa-truck', label: 'Mobile Platform', color: '#f59e0b' },
+                usv: { icon: 'fa-ship', label: 'USV Platform', color: '#06b6d4' },
+                uuv: { icon: 'fa-water', label: 'UUV Platform', color: '#0891b2' }
             };
             const config = titleConfig[platformType] || titleConfig.fixed;
+
             const modalTitle = document.getElementById('create-platform-modal-title');
             if (modalTitle) {
                 modalTitle.innerHTML = `<i class="fas ${config.icon}"></i> Create ${config.label}`;
             }
+
+            // Set initialization flag to prevent race condition with onchange events
+            isInitializingPlatformForm = true;
+
             const form = document.getElementById('create-platform-form');
             form.innerHTML = `
                 <div class="form-section">
@@ -9552,15 +9557,13 @@
                         </div>
                         <div class="form-group">
                             <label for="platform-type">Platform Type</label>
-                            <select id="platform-type" class="form-input" onchange="onPlatformTypeChange()">
-                                <option value="fixed">Fixed Tower/Mast</option>
-                                <option value="uav">UAV / Drone</option>
-                                <option value="satellite">Satellite</option>
-                                <option value="mobile" disabled>Mobile Platform (Coming Soon)</option>
-                                <option value="usv" disabled>USV - Surface Vehicle (Coming Soon)</option>
-                                <option value="uuv" disabled>UUV - Underwater Vehicle (Coming Soon)</option>
-                            </select>
-                            <small>Determines how the platform is categorized in the dashboard</small>
+                            <div id="platform-type-display" class="form-input" style="background: #f3f4f6; cursor: not-allowed; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas ${config.icon}" style="color: ${config.color};"></i>
+                                <span>${config.label}</span>
+                                <span style="margin-left: auto; font-size: 0.75rem; color: #6b7280;">(locked)</span>
+                            </div>
+                            <input type="hidden" id="platform-type" value="${platformType}">
+                            <small>Selected in previous step - cannot be changed</small>
                         </div>
                     </div>
                     <div id="uav-fields-row" style="display: none;">
@@ -9836,13 +9839,20 @@
 
             // Initialize normalized name
             updatePlatformNormalizedName();
+
+            // Clear initialization flag - form is now ready for user interaction
+            isInitializingPlatformForm = false;
+
             document.getElementById('create-platform-modal').classList.add('show');
         }
 
         function onPlatformTypeChange() {
             const platformType = document.getElementById('platform-type')?.value || 'fixed';
-            // Update the global selectedPlatformType to keep it in sync
-            selectedPlatformType = platformType;
+            // Only update selectedPlatformType if not initializing (prevents race condition)
+            // During initialization, selectedPlatformType is already set by selectPlatformType()
+            if (!isInitializingPlatformForm) {
+                selectedPlatformType = platformType;
+            }
             const uavFieldsRow = document.getElementById('uav-fields-row');
             const satelliteFieldsRow = document.getElementById('satellite-fields-row');
             const mobileFieldsRow = document.getElementById('mobile-fields-row');
@@ -10232,6 +10242,7 @@
         // Platform Type Selector Functions (Two-Step Flow)
         let selectedPlatformType = 'fixed';
         let currentStationIdForPlatform = null;
+        let isInitializingPlatformForm = false; // Prevents race condition during form setup
 
         function openPlatformTypeSelector(stationId) {
             // Get user from dashboard instance (primary) or global variable (fallback)

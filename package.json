@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.23",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.23 - Static Image Path Fix",
+  "version": "9.0.25",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.25 - Locked Platform Type Selection",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

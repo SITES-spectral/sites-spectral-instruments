@@ -4,19 +4,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 9.0.16 - Simplified Controls & Full Edit Modals (2025-12-02)
+## Current Version: 9.0.25 - Locked Platform Type Selection (2025-12-05)
 
 **✅ STATUS: PRODUCTION-READY - V3 API**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-02
+**📅 Last Updated:** 2025-12-05
 **🚀 API Version:** V3 (default) | V1 (legacy/deprecated)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
 
-### What's New in v9.0.16
+### What's New in v9.0.25
 
-- **Simplified Admin Controls**: Single source of truth for platform creation
-- **Removed Duplicate Controls**: Admin-station-controls eliminated from header
+- **Locked Platform Type Selection**: Platform type is now read-only in creation form after initial selection
+- **Two-Step Workflow**: Select type → Fill details (type cannot be changed in second step)
+- **Visual Indicator**: Shows locked type with colored icon and "(locked)" badge
+
+### What's New in v9.0.24
+
+- **Delete Platform Button Fix**: `showModal()` now accepts both string IDs and element objects
+- **Platform Naming Race Condition Fix**: UAV/Satellite platforms no longer incorrectly use ecosystem code
+
+### What's New in v9.0.17-v9.0.23
+
+- **Phenocam Image Loading (v9.0.20-v9.0.23)**: Image path and loading state fixes
+- **Delete Modal & Platform Fixes (v9.0.17-v9.0.19)**: Various modal and platform updates
+- **Simplified Admin Controls (v9.0.16)**: Single source of truth for platform creation
 
 ### What's New in v9.0.11-v9.0.15
 
@@ -494,8 +506,8 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 9.0.16 |
-| Last Deployed | 2025-12-02 |
+| Current Version | 9.0.25 |
+| Last Deployed | 2025-12-05 |
 | Status | Production-Ready - V3 API |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
