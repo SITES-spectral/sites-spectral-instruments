@@ -8,11 +8,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **Application Layer**: Implement use cases (commands/queries)
-- **Infrastructure Adapters**: D1 repository implementations
 - **V3 API Controllers**: Request handlers using use cases
 - **Frontend Components**: Complete Vue 3 component library
 - **Testing**: Unit and integration tests
+
+---
+
+## [10.0.0-alpha.3] - 2025-12-05
+
+### Application Layer & Infrastructure Adapters
+
+Complete CQRS implementation with D1 database adapters.
+
+#### Application Layer (Use Cases)
+
+**Commands (Write Operations):**
+- `CreateStation`, `UpdateStation`, `DeleteStation`
+- `CreatePlatform`, `UpdatePlatform`, `DeletePlatform`
+- `CreateInstrument`, `UpdateInstrument`, `DeleteInstrument`
+
+**Queries (Read Operations):**
+- `GetStation`, `ListStations`, `GetStationDashboard`
+- `GetPlatform`, `ListPlatforms`
+- `GetInstrument`, `ListInstruments`
+
+**Features:**
+- CQRS pattern (Command Query Responsibility Segregation)
+- Validation before persistence
+- Dependency injection via constructor
+- Cascading delete protection
+- Auto-instrument creation for UAV platforms
+
+#### Infrastructure Adapters
+
+**D1 Repository Implementations:**
+- `D1StationRepository` - Station CRUD with pagination
+- `D1PlatformRepository` - Platform CRUD with mount_type_code generation
+- `D1InstrumentRepository` - Instrument CRUD with ROI cascade
+
+**Features:**
+- SQL injection prevention via parameterized queries
+- Sort column whitelisting
+- Optimized joins for related data queries
+- JSON serialization for specifications
+
+#### Dependency Injection
+
+**Container (`src/container.js`):**
+```javascript
+const container = createContainer(env);
+// Access use cases
+await container.queries.getStationDashboard.execute('SVB');
+await container.commands.createPlatform.execute(data);
+```
 
 ---
 
