@@ -266,9 +266,28 @@ docs/
 | Entity | Format | Example |
 |--------|--------|---------|
 | Station | `{ACRONYM}` | SVB, ANS, LON, GRI |
-| Platform | `{STATION}_{ECOSYSTEM}_PL##` | SVB_FOR_PL01 |
+| Platform (Fixed) | `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE}` | SVB_FOR_PL01 |
+| Platform (UAV) | `{STATION}_{VENDOR}_{MODEL}_{MOUNT_TYPE}` | SVB_DJI_M3M_UAV01 |
+| Platform (Satellite) | `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` | SVB_ESA_S2A_MSI |
 | Instrument | `{PLATFORM}_{TYPE}{##}` | SVB_FOR_PL01_PHE01 |
 | ROI | `ROI_##` | ROI_01, ROI_02 |
+
+### Mount Type Codes (v10.0.0+)
+
+The `mount_type_code` field describes the **physical mounting structure type** (not geographic location):
+
+| Code | Name | Description | Platform Types |
+|------|------|-------------|----------------|
+| **PL** | Pole/Tower/Mast | Elevated structures (>1.5m height) | fixed |
+| **BL** | Building | Rooftop or facade mounted | fixed |
+| **GL** | Ground Level | Installations below 1.5m height | fixed |
+| **UAV** | UAV Position | Drone flight position identifier | uav |
+| **SAT** | Satellite | Virtual position for satellite data | satellite |
+| **MOB** | Mobile | Portable platform position | mobile |
+| **USV** | Surface Vehicle | Unmanned surface vehicle position | usv |
+| **UUV** | Underwater Vehicle | Unmanned underwater vehicle position | uuv |
+
+> **Note**: In v9.x and earlier, this field was called `location_code`. The rename to `mount_type_code` in v10.0.0 provides semantic clarity - the field describes mounting structure type, not geographic location.
 
 ### Instrument Type Codes
 
@@ -300,7 +319,7 @@ docs/
 
 ```sql
 stations (id, acronym, display_name, description, latitude, longitude, ...)
-platforms (id, station_id, normalized_name, display_name, ecosystem_code, ...)
+platforms (id, station_id, normalized_name, display_name, ecosystem_code, mount_type_code, ...)
 instruments (id, platform_id, normalized_name, instrument_type, status, ...)
 instrument_rois (id, instrument_id, roi_name, polygon_points, color, ...)
 ```

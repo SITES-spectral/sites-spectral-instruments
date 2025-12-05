@@ -57,6 +57,12 @@ The previous `location_code` field was semantically incorrect - it doesn't descr
 - `0035_rename_location_code_to_mount_type_code.sql`
 - Uses `ALTER TABLE RENAME COLUMN` (D1 SQLite)
 
+**Documentation:**
+- Updated `CLAUDE.md` with Mount Type Codes section
+- Updated Entity Naming table with platform type-specific patterns
+- Updated Database Schema to include `mount_type_code` column
+- Updated plan file with naming conventions
+
 #### Migration Path
 
 1. Deploy v10.0.0-alpha.2
