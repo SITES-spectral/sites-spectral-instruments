@@ -1072,7 +1072,7 @@
                             <button class="btn btn-secondary btn-sm" onclick="sitesStationDashboard.editPlatform('${platform.id}')">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-danger btn-sm" onclick="sitesStationDashboard.deletePlatform('${platform.id}', '${escapeHtml(platform.display_name)}')">
+                            <button class="btn btn-danger btn-sm" onclick="sitesStationDashboard.deletePlatform('${platform.id}', '${escapeHtml(platform.normalized_name || platform.display_name)}')">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         ` : ''}

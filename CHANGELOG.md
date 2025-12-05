@@ -14,6 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [9.0.28] - 2025-12-05
+
+### Platform Delete Fix
+
+**Release Date**: 2025-12-05
+
+#### Fixed
+
+- **Platform delete confirmation now shows normalized name** instead of display name
+  - Delete button passes `normalized_name` (e.g., `SVB_DJI_M3M_UAV01`) for clarity
+  - Falls back to display name if normalized name not available
+
+- **Admin platform deletion now works correctly**
+  - Fixed legacy `/api/platforms/:id` DELETE endpoint which always returned Forbidden
+  - Added proper `deletePlatform()` function to legacy handler
+  - Admin users can now delete platforms via standard API endpoint
+  - Proper validation: checks for dependent instruments before deletion
+
+#### Technical Details
+
+- `station-dashboard.js`: Delete button now passes `platform.normalized_name`
+- `src/handlers/platforms.js`: Added `deletePlatform()` function for admin DELETE
+- Maintains backwards compatibility with both legacy and V3 API endpoints
+
+---
+
 ## [9.0.27] - 2025-12-05
 
 ### Platform Forms Refactor - SOLID Architecture

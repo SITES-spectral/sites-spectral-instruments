@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.27",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.27 - Platform Forms Refactor (SOLID)",
+  "version": "9.0.28",
+  "description": "SITES Spectral Multi-Platform Observation Network v9.0.28 - Platform Delete Fix",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

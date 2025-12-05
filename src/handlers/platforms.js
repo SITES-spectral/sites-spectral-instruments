@@ -55,8 +55,10 @@ export async function handlePlatforms(method, id, request, env) {
         return await updatePlatform(id, user, request, env);
 
       case 'DELETE':
-        // Platform deletion is admin-only, redirect to admin handler
-        return createForbiddenResponse();
+        if (!id) {
+          return createErrorResponse('Platform ID required for deletion', 400);
+        }
+        return await deletePlatform(id, user, env);
 
       default:
         return createMethodNotAllowedResponse();
@@ -410,4 +412,62 @@ async function getNextLocationCode(stationId, ecosystemCode, env) {
   }
 
   return 'P01';
+}
+
+/**
+ * Delete platform (admin only)
+ * @param {string} id - Platform ID
+ * @param {Object} user - Authenticated user
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Response} Deletion response
+ */
+async function deletePlatform(id, user, env) {
+  // Only admin can delete platforms
+  if (user.role !== 'admin') {
+    return createForbiddenResponse();
+  }
+
+  // First verify platform exists
+  const checkQuery = `
+    SELECT p.id, p.normalized_name, p.display_name, s.normalized_name as station_normalized_name
+    FROM platforms p
+    JOIN stations s ON p.station_id = s.id
+    WHERE p.id = ?
+  `;
+
+  const existingPlatform = await executeQueryFirst(env, checkQuery, [id], 'deletePlatform-check');
+
+  if (!existingPlatform) {
+    return createNotFoundResponse();
+  }
+
+  // Check for dependent instruments
+  const instrumentCheck = await executeQueryFirst(env,
+    'SELECT COUNT(*) as count FROM instruments WHERE platform_id = ?',
+    [id], 'deletePlatform-instrumentCheck'
+  );
+
+  if (instrumentCheck && instrumentCheck.count > 0) {
+    return createErrorResponse(
+      `Cannot delete platform: ${instrumentCheck.count} instrument(s) are attached. Delete instruments first.`,
+      409
+    );
+  }
+
+  // Delete the platform
+  const result = await executeQueryRun(env,
+    'DELETE FROM platforms WHERE id = ?',
+    [id], 'deletePlatform'
+  );
+
+  if (!result || result.changes === 0) {
+    return createErrorResponse('Failed to delete platform', 500);
+  }
+
+  return createSuccessResponse({
+    success: true,
+    message: 'Platform deleted successfully',
+    id: parseInt(id, 10),
+    normalized_name: existingPlatform.normalized_name
+  });
 }
