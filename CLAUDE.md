@@ -4,7 +4,59 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
 
-## Current Version: 9.0.27 - Platform Forms Refactor SOLID (2025-12-05)
+---
+
+## ARCHITECTURE REQUIREMENTS (MANDATORY)
+
+**All new code MUST follow SOLID principles and Hexagonal Architecture.**
+
+### SOLID Principles (Enforced)
+
+| Principle | Requirement |
+|-----------|-------------|
+| **S**ingle Responsibility | Each class/module has ONE reason to change |
+| **O**pen/Closed | Open for extension, closed for modification |
+| **L**iskov Substitution | Subtypes must be substitutable for base types |
+| **I**nterface Segregation | Many specific interfaces over one general |
+| **D**ependency Inversion | Depend on abstractions, not concretions |
+
+### Hexagonal Architecture (Ports & Adapters)
+
+```
+src/
+├── domain/           # Core business logic (NO external dependencies)
+│   ├── station/      # Station entities, services, repository ports
+│   ├── platform/     # Platform entities, type strategies
+│   └── instrument/   # Instrument entities, type registry
+│
+├── application/      # Use cases (orchestration layer)
+│   ├── commands/     # Write operations (CreatePlatform, DeleteInstrument)
+│   └── queries/      # Read operations (GetStationDashboard, ListPlatforms)
+│
+└── infrastructure/   # External adapters (framework-specific)
+    ├── persistence/  # Database adapters (D1Repository implementations)
+    ├── http/         # API routes, controllers, middleware
+    └── auth/         # Authentication adapters
+```
+
+### Type System Patterns
+
+| Entity | Pattern | Reason |
+|--------|---------|--------|
+| **Platform Types** | Strategy (code-based) | Different behavior (naming, auto-creation) |
+| **Instrument Types** | Registry (config-driven) | Different data schemas (load from YAML) |
+
+### Code Rules
+
+1. **Domain layer has ZERO external dependencies** - no database, HTTP, or framework code
+2. **Repository interfaces (ports) live in domain** - implementations (adapters) in infrastructure
+3. **Use cases orchestrate domain logic** - never put business logic in controllers
+4. **Config-driven over code-driven** - use YAML for instrument types, validation rules
+5. **No monolithic files** - split into focused, single-responsibility modules
+
+---
+
+## Current Version: 9.0.28 - Platform Delete Fix (2025-12-05)
 
 **✅ STATUS: PRODUCTION-READY - V3 API**
 **🌐 Production URL:** https://sites.jobelab.com

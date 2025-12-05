@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "9.0.28",
-  "description": "SITES Spectral Multi-Platform Observation Network v9.0.28 - Platform Delete Fix",
+  "version": "10.0.0-alpha.1",
+  "description": "SITES Spectral v10.0.0 - Hexagonal Architecture with Vue 3 + daisyUI",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

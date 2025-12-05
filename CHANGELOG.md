@@ -7,10 +7,161 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Next Steps (v9.x Roadmap)
-- **Mobile Platform Support**: Complete mobile platform type implementation
-- **USV/UUV Platforms**: Underwater and surface vehicle support
-- **Advanced Spatial Queries**: Enhanced GIS capabilities
+### Next Steps (v10.x Roadmap)
+- **Application Layer**: Implement use cases (commands/queries)
+- **Infrastructure Adapters**: D1 repository implementations
+- **V3 API Controllers**: Request handlers using use cases
+- **Frontend Components**: Complete Vue 3 component library
+- **Testing**: Unit and integration tests
+
+---
+
+## [10.0.0-alpha.1] - 2025-12-05
+
+### Complete Architectural Redesign - Hexagonal Architecture
+
+**Release Date**: 2025-12-05
+**Branch**: v10-architecture
+
+#### Overview
+
+Complete architectural redesign following SOLID principles and Hexagonal (Ports & Adapters) Architecture. This is a fresh implementation on a new branch, not a refactor of v9.x.
+
+#### Architecture
+
+##### Domain Layer (Framework-Agnostic)
+
+- **Station Entity** (`src/domain/station/Station.js`)
+  - Core entity with validation logic
+  - Factory method for database hydration
+
+- **Platform Entity** (`src/domain/platform/Platform.js`)
+  - Supports fixed, UAV, satellite types (mobile, USV, UUV planned)
+  - Ecosystem code validation
+
+- **Instrument Entity** (`src/domain/instrument/Instrument.js`)
+  - Status and measurement status tracking
+  - Specification management
+
+##### Repository Ports (Interfaces)
+
+- `StationRepository` - Station persistence contract
+- `PlatformRepository` - Platform persistence contract
+- `InstrumentRepository` - Instrument persistence contract
+
+##### Platform Type Strategies (Strategy Pattern)
+
+| Strategy | Naming Pattern | Auto-Instruments |
+|----------|---------------|------------------|
+| `FixedPlatformType` | `{STATION}_{ECOSYSTEM}_{LOCATION}` | No |
+| `UAVPlatformType` | `{STATION}_{VENDOR}_{MODEL}_{LOCATION}` | Yes (DJI, MicaSense, etc.) |
+| `SatellitePlatformType` | `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` | Yes |
+
+##### Instrument Type Registry (Registry Pattern)
+
+- Config-driven type definitions (9 types: phenocam, multispectral, PAR, NDVI, PRI, hyperspectral, thermal, LiDAR, radar)
+- Field schema validation
+- Platform compatibility checking
+- Loadable from YAML configuration
+
+#### Frontend (Vue 3 + daisyUI + Tailwind)
+
+##### Technology Stack
+
+- **Vue 3** (Composition API)
+- **Vue Router** (client-side routing)
+- **Pinia** (state management)
+- **Vite** (build tool)
+- **Tailwind CSS + daisyUI** (styling)
+
+##### Structure
+
+```
+frontend/
+├── src/
+│   ├── main.js                 # App entry
+│   ├── App.vue                 # Root component
+│   ├── router/index.js         # Vue Router config
+│   ├── stores/                 # Pinia stores
+│   │   ├── auth.js
+│   │   ├── stations.js
+│   │   ├── platforms.js
+│   │   └── instruments.js
+│   ├── composables/            # Vue composables
+│   │   ├── useApi.js
+│   │   └── useNotifications.js
+│   ├── services/api.js         # V3 API client
+│   ├── components/
+│   │   ├── layout/             # Navbar, Sidebar
+│   │   └── cards/              # Station, Platform, Instrument cards
+│   └── views/                  # Page components
+├── tailwind.config.js          # Custom SITES theme
+└── vite.config.js              # Build config
+```
+
+##### Features
+
+- Dark/light theme toggle
+- Responsive sidebar navigation
+- Station overview dashboard
+- Platform management by type
+- Role-based access control
+
+#### Files Created
+
+**Domain Layer:**
+- `src/domain/station/Station.js`
+- `src/domain/station/StationRepository.js`
+- `src/domain/station/index.js`
+- `src/domain/platform/Platform.js`
+- `src/domain/platform/PlatformRepository.js`
+- `src/domain/platform/index.js`
+- `src/domain/platform/types/PlatformTypeStrategy.js`
+- `src/domain/platform/types/FixedPlatformType.js`
+- `src/domain/platform/types/UAVPlatformType.js`
+- `src/domain/platform/types/SatellitePlatformType.js`
+- `src/domain/platform/types/index.js`
+- `src/domain/instrument/Instrument.js`
+- `src/domain/instrument/InstrumentRepository.js`
+- `src/domain/instrument/InstrumentTypeRegistry.js`
+- `src/domain/instrument/InstrumentFactory.js`
+- `src/domain/instrument/index.js`
+- `src/domain/index.js`
+
+**Frontend:**
+- `frontend/package.json`
+- `frontend/vite.config.js`
+- `frontend/tailwind.config.js`
+- `frontend/postcss.config.js`
+- `frontend/index.html`
+- `frontend/src/main.js`
+- `frontend/src/App.vue`
+- `frontend/src/router/index.js`
+- `frontend/src/services/api.js`
+- `frontend/src/stores/auth.js`
+- `frontend/src/stores/stations.js`
+- `frontend/src/stores/platforms.js`
+- `frontend/src/stores/instruments.js`
+- `frontend/src/composables/useApi.js`
+- `frontend/src/composables/useNotifications.js`
+- `frontend/src/components/layout/TheNavbar.vue`
+- `frontend/src/components/layout/TheSidebar.vue`
+- `frontend/src/components/cards/StationCard.vue`
+- `frontend/src/components/cards/PlatformCard.vue`
+- `frontend/src/components/cards/InstrumentCard.vue`
+- `frontend/src/views/LoginView.vue`
+- `frontend/src/views/DashboardView.vue`
+- `frontend/src/views/StationView.vue`
+- `frontend/src/views/PlatformView.vue`
+- `frontend/src/views/InstrumentView.vue`
+- `frontend/src/views/NotFoundView.vue`
+- `frontend/src/assets/main.css`
+
+#### Migration Strategy
+
+- **Big Bang**: Deploy v10.0.0 when complete, retire v9.x
+- **Database**: Preserved as-is (D1 with 33 migrations)
+- **Development**: Local with remote database connection
 
 ---
 

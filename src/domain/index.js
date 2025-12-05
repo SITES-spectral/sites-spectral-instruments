@@ -1,0 +1,44 @@
+/**
+ * Domain Layer
+ *
+ * Core business logic following Hexagonal Architecture.
+ * This layer is framework-agnostic and contains:
+ * - Entities (Station, Platform, Instrument)
+ * - Repository ports (interfaces)
+ * - Domain services
+ * - Type strategies and registries
+ *
+ * NO external dependencies allowed in this layer.
+ *
+ * @module domain
+ */
+
+// Station domain
+export { Station, StationRepository } from './station/index.js';
+
+// Platform domain
+export {
+  Platform,
+  PlatformRepository,
+  PLATFORM_TYPES,
+  ECOSYSTEM_CODES,
+  PlatformTypeStrategy,
+  FixedPlatformType,
+  UAVPlatformType,
+  SatellitePlatformType,
+  UAV_SPECIFICATIONS,
+  SATELLITE_SPECIFICATIONS,
+  platformTypeRegistry
+} from './platform/index.js';
+
+// Instrument domain
+export {
+  Instrument,
+  InstrumentRepository,
+  INSTRUMENT_STATUSES,
+  MEASUREMENT_STATUSES,
+  InstrumentTypeRegistry,
+  instrumentTypeRegistry,
+  InstrumentFactory,
+  instrumentFactory
+} from './instrument/index.js';

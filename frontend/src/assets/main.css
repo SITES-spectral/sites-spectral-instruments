@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom component styles */
+@layer components {
+  /* Station card styling */
+  .station-card {
+    @apply card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-200;
+  }
+
+  /* Platform card styling */
+  .platform-card {
+    @apply card bg-base-100 shadow-md border border-base-200;
+  }
+
+  /* Instrument card styling */
+  .instrument-card {
+    @apply card bg-base-100 shadow-sm border border-base-200 hover:border-primary transition-colors duration-150;
+  }
+
+  /* Status badges */
+  .status-active {
+    @apply badge badge-success;
+  }
+
+  .status-inactive {
+    @apply badge badge-warning;
+  }
+
+  .status-maintenance {
+    @apply badge badge-info;
+  }
+
+  .status-decommissioned {
+    @apply badge badge-error;
+  }
+
+  /* Platform type badges */
+  .platform-type-fixed {
+    @apply badge bg-platform-fixed text-white border-none;
+  }
+
+  .platform-type-uav {
+    @apply badge bg-platform-uav text-white border-none;
+  }
+
+  .platform-type-satellite {
+    @apply badge bg-platform-satellite text-white border-none;
+  }
+
+  /* Form styling */
+  .form-section {
+    @apply p-4 bg-base-200 rounded-lg mb-4;
+  }
+
+  .form-section-title {
+    @apply text-lg font-semibold mb-3 text-base-content;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
