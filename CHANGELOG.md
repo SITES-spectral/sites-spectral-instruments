@@ -8,9 +8,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **V3 API Controllers**: Request handlers using use cases
 - **Frontend Components**: Complete Vue 3 component library
 - **Testing**: Unit and integration tests
+
+---
+
+## [10.0.0-alpha.4] - 2025-12-05
+
+### HTTP Controllers & Router Integration
+
+Complete HTTP layer with controllers using the new architecture.
+
+#### HTTP Controllers
+
+**New Controllers:**
+- `StationController` - Station CRUD with dashboard endpoint
+- `PlatformController` - Platform CRUD with type/station filtering
+- `InstrumentController` - Instrument CRUD with platform/station filtering
+
+**Features:**
+- Controllers use application layer use cases
+- Consistent error handling (404, 409, 400)
+- Support for both ID and normalized name lookups
+- Query parameter parsing (pagination, sorting, filtering)
+
+#### Router Integration
+
+**V10 API Endpoints (`/api/v10/`):**
+- `/api/v10/stations` - Station management
+- `/api/v10/stations/:acronym/dashboard` - Station dashboard
+- `/api/v10/platforms` - Platform management
+- `/api/v10/platforms/type/:type` - Filter by platform type
+- `/api/v10/instruments` - Instrument management
+- `/api/v10/instruments/:id/details` - Full instrument details
+- `/api/v10/health` - Health check
+- `/api/v10/info` - API information
+
+#### Security
+
+**HTTPS Enforcement:**
+- Added HTTP to HTTPS redirect in worker
+- Excludes localhost/127.0.0.1 for development
+
+#### API Handler Updates
+
+- V10 routes integrated into main API handler
+- Health endpoint updated to reflect v10.0.0-alpha.4
+- API versions: v10 (hexagonal), v3 (default), v1-legacy
 
 ---
 

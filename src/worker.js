@@ -1,5 +1,6 @@
-// SITES Spectral Stations & Instruments - Main Worker
-// Handles both static assets and API routes using Cloudflare Workers
+// SITES Spectral Stations & Instruments - Main Worker v10.0.0
+// Hexagonal Architecture with Cloudflare Workers
+// Handles both static assets and API routes
 
 import { createCors } from './cors';
 import { handleApiRequest } from './api-handler';
@@ -8,7 +9,15 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const { corsHeaders, handleCors } = createCors();
-    
+
+    // HTTPS Enforcement - Redirect HTTP to HTTPS
+    // Note: Cloudflare typically handles this at edge, but we ensure it here
+    if (url.protocol === 'http:' && !url.hostname.includes('localhost') && !url.hostname.includes('127.0.0.1')) {
+      const httpsUrl = new URL(request.url);
+      httpsUrl.protocol = 'https:';
+      return Response.redirect(httpsUrl.toString(), 301);
+    }
+
     // Handle CORS preflight requests
     if (request.method === 'OPTIONS') {
       return handleCors();

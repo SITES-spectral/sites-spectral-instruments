@@ -13,3 +13,13 @@ export {
   D1PlatformRepository,
   D1InstrumentRepository
 } from './persistence/d1/index.js';
+
+// HTTP Controllers
+export {
+  StationController,
+  PlatformController,
+  InstrumentController
+} from './http/controllers/index.js';
+
+// HTTP Router
+export { createRouter } from './http/router.js';

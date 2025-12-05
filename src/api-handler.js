@@ -1,5 +1,6 @@
-// SITES Spectral API Handler v9.0.2
-// V3 API as default - Domain-based routing, spatial queries, campaigns, products
+// SITES Spectral API Handler v10.0.0
+// V10 API (Hexagonal Architecture) - New default for core entities
+// V3 API - Domain-based routing, spatial queries, campaigns, products
 // Legacy V1 handlers maintained for backward compatibility (deprecated)
 // SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
 
@@ -12,6 +13,9 @@ import {
   createInternalServerErrorResponse,
   createUnauthorizedResponse
 } from './utils/responses.js';
+
+// V10 API Handler - Hexagonal Architecture (new)
+import { createRouter } from './infrastructure/http/router.js';
 
 // V3 API Handler - PRIMARY (default)
 import { handleApiV3Request } from './v3/api-handler-v3.js';
@@ -63,6 +67,14 @@ export async function handleApiRequest(request, env, ctx) {
     if (!csrfResult.isValid) {
       return createCSRFErrorResponse(csrfResult.error);
     }
+  }
+
+  // V10 API - Hexagonal Architecture (new)
+  // Route /api/v10/* requests to the new architecture
+  if (pathSegments[0] === 'v10') {
+    pathSegments.shift(); // Remove 'v10' prefix
+    const router = createRouter(env);
+    return await router.handle(request, pathSegments, url);
   }
 
   // V3 API is the default - route explicitly versioned requests
@@ -193,12 +205,16 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '9.0.23',
+      version: '10.0.0-alpha.3',
       database: dbTest ? 'connected' : 'disconnected',
-      architecture: 'v3-api',
-      apiVersions: ['v3', 'v1-legacy'],
+      architecture: 'hexagonal',
+      apiVersions: ['v10', 'v3', 'v1-legacy'],
       defaultApiVersion: 'v3',
       features: [
+        'hexagonal-architecture',
+        'cqrs-pattern',
+        'dependency-injection',
+        'mount-type-codes',
         'v3-api-default',
         'campaigns',
         'products',
@@ -221,11 +237,11 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '9.0.23',
+      version: '10.0.0-alpha.3',
       error: error.message,
       database: 'disconnected',
-      architecture: 'v3-api',
-      apiVersions: ['v3', 'v1-legacy'],
+      architecture: 'hexagonal',
+      apiVersions: ['v10', 'v3', 'v1-legacy'],
       defaultApiVersion: 'v3'
     }), {
       status: 503,
