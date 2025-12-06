@@ -3,8 +3,7 @@
  * Instrument View
  *
  * Displays full instrument details with all specifications.
- * Supports edit/delete operations.
- * Placeholder for ROI management (future).
+ * Supports edit/delete operations and ROI management.
  *
  * Type-aware: Shows all fields defined in InstrumentTypeRegistry.
  */
@@ -12,6 +11,7 @@ import { computed, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useInstrumentsStore } from '@stores/instruments';
 import { usePlatformsStore } from '@stores/platforms';
+import { useROIsStore } from '@stores/rois';
 import { useAuthStore } from '@stores/auth';
 import { useNotifications } from '@composables/useNotifications';
 import {
@@ -21,6 +21,7 @@ import {
 } from '@composables/useTypeRegistry';
 import { getStatus, getMeasurementStatus } from '@composables/useTypes';
 import { InstrumentFormModal, ConfirmModal } from '@components/modals';
+import { ROIViewer, ROIList, ROIFormModal } from '@components/rois';
 
 const props = defineProps({
   id: {
@@ -32,6 +33,7 @@ const props = defineProps({
 const router = useRouter();
 const instrumentsStore = useInstrumentsStore();
 const platformsStore = usePlatformsStore();
+const roisStore = useROIsStore();
 const authStore = useAuthStore();
 const notifications = useNotifications();
 
@@ -40,6 +42,9 @@ const instrument = computed(() => instrumentsStore.currentInstrument);
 
 // Related platform
 const platform = computed(() => platformsStore.currentPlatform);
+
+// ROIs for this instrument
+const rois = computed(() => roisStore.rois);
 
 // Type configuration from registry
 const typeConfig = computed(() => {
@@ -109,9 +114,21 @@ const isLoading = computed(() =>
   instrumentsStore.loading || platformsStore.loading
 );
 
+const roisLoading = computed(() => roisStore.loading);
+
 // Modal states
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
+const showROIFormModal = ref(false);
+const showROIDeleteModal = ref(false);
+
+// ROI state
+const selectedROI = ref(null);
+const roiToEdit = ref(null);
+const roiToDelete = ref(null);
+
+// Show labels toggle
+const showROILabels = ref(true);
 
 // Load instrument and related platform
 async function loadData() {
@@ -119,6 +136,8 @@ async function loadData() {
   const instrumentData = await instrumentsStore.fetchInstrument(instrumentId);
   if (instrumentData) {
     await platformsStore.fetchPlatform(instrumentData.platform_id);
+    // Load ROIs for this instrument
+    await roisStore.fetchROIsByInstrument(instrumentId);
   }
 }
 
@@ -156,6 +175,73 @@ async function handleDelete() {
     router.push({ name: 'platform', params: { id: platformId } });
   } else {
     notifications.error(instrumentsStore.error || 'Failed to delete instrument');
+  }
+}
+
+// ROI handlers
+function handleROIClick(roi) {
+  selectedROI.value = roi;
+}
+
+function handleROIHover(roi) {
+  // Could add hover state here if needed
+}
+
+function handleROISelect(roi) {
+  selectedROI.value = roi;
+}
+
+function openROICreateModal() {
+  roiToEdit.value = null;
+  showROIFormModal.value = true;
+}
+
+function openROIEditModal(roi) {
+  roiToEdit.value = roi;
+  showROIFormModal.value = true;
+}
+
+function openROIDeleteModal(roi) {
+  roiToDelete.value = roi;
+  showROIDeleteModal.value = true;
+}
+
+async function handleROISubmit(formData) {
+  if (roiToEdit.value?.id) {
+    // Update existing ROI
+    const result = await roisStore.updateROI(roiToEdit.value.id, formData);
+    if (result) {
+      notifications.success('ROI updated successfully');
+      showROIFormModal.value = false;
+      roiToEdit.value = null;
+    } else {
+      notifications.error(roisStore.error || 'Failed to update ROI');
+    }
+  } else {
+    // Create new ROI
+    const result = await roisStore.createROI(formData);
+    if (result) {
+      notifications.success('ROI created successfully');
+      showROIFormModal.value = false;
+    } else {
+      notifications.error(roisStore.error || 'Failed to create ROI');
+    }
+  }
+}
+
+async function handleROIDelete() {
+  if (!roiToDelete.value) return;
+
+  const success = await roisStore.deleteROI(roiToDelete.value.id);
+  if (success) {
+    notifications.success('ROI deleted successfully');
+    showROIDeleteModal.value = false;
+    roiToDelete.value = null;
+    if (selectedROI.value?.id === roiToDelete.value?.id) {
+      selectedROI.value = null;
+    }
+  } else {
+    notifications.error(roisStore.error || 'Failed to delete ROI');
   }
 }
 
@@ -357,30 +443,101 @@ const typeBgClass = computed(() => {
         </div>
       </div>
 
-      <!-- ROI Section (Placeholder) -->
+      <!-- ROI Section -->
       <div class="bg-base-100 rounded-lg shadow-lg p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold">
-            Regions of Interest (ROIs)
-            <span class="badge badge-lg ml-2">{{ instrument.roi_count || 0 }}</span>
-          </h2>
-          <button v-if="canEdit" class="btn btn-primary btn-sm" disabled>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Add ROI
-          </button>
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-semibold">
+              Regions of Interest (ROIs)
+            </h2>
+            <span class="badge badge-lg">{{ rois.length }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Toggle labels -->
+            <label class="label cursor-pointer gap-2">
+              <span class="label-text text-sm">Labels</span>
+              <input
+                v-model="showROILabels"
+                type="checkbox"
+                class="toggle toggle-sm toggle-primary"
+              />
+            </label>
+          </div>
         </div>
 
-        <!-- Placeholder -->
-        <div class="alert">
-          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div>
-            <h3 class="font-bold">ROI Management Coming Soon</h3>
-            <div class="text-sm">ROI visualization and editing will be available in a future update.</div>
+        <!-- ROI Viewer and List -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Viewer (2/3 width on large screens) -->
+          <div class="lg:col-span-2">
+            <ROIViewer
+              :rois="rois"
+              :selected-roi-id="selectedROI?.id"
+              :show-labels="showROILabels"
+              :height="400"
+              @roi-click="handleROIClick"
+              @roi-hover="handleROIHover"
+            />
+            <p class="text-sm text-base-content/60 mt-2">
+              Scroll to zoom, drag to pan. Click ROI to select.
+            </p>
           </div>
+
+          <!-- ROI List (1/3 width on large screens) -->
+          <div class="lg:col-span-1">
+            <ROIList
+              :rois="rois"
+              :selected-id="selectedROI?.id"
+              :can-edit="canEdit"
+              :loading="roisLoading"
+              :max-height="350"
+              @select="handleROISelect"
+              @edit="openROIEditModal"
+              @delete="openROIDeleteModal"
+              @create="openROICreateModal"
+            />
+          </div>
+        </div>
+
+        <!-- Selected ROI Details -->
+        <div v-if="selectedROI" class="mt-4 p-4 bg-base-200 rounded-lg">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold">{{ selectedROI.roi_name }}</h3>
+            <button
+              class="btn btn-ghost btn-xs"
+              @click="selectedROI = null"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <label class="text-base-content/60">Points</label>
+              <div>{{ selectedROI.points?.length || 0 }}</div>
+            </div>
+            <div>
+              <label class="text-base-content/60">Color</label>
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded border border-base-300"
+                  :style="{ backgroundColor: `rgb(${selectedROI.color_r ?? 255}, ${selectedROI.color_g ?? 0}, ${selectedROI.color_b ?? 0})` }"
+                ></div>
+                <span>RGB({{ selectedROI.color_r ?? 255 }}, {{ selectedROI.color_g ?? 0 }}, {{ selectedROI.color_b ?? 0 }})</span>
+              </div>
+            </div>
+            <div>
+              <label class="text-base-content/60">Auto Generated</label>
+              <div>{{ selectedROI.auto_generated ? 'Yes' : 'No' }}</div>
+            </div>
+            <div>
+              <label class="text-base-content/60">Created</label>
+              <div>{{ selectedROI.created_at ? new Date(selectedROI.created_at).toLocaleDateString() : '-' }}</div>
+            </div>
+          </div>
+          <p v-if="selectedROI.description" class="mt-2 text-sm text-base-content/70">
+            {{ selectedROI.description }}
+          </p>
         </div>
       </div>
 
@@ -434,6 +591,28 @@ const typeBgClass = computed(() => {
       variant="error"
       :loading="instrumentsStore.loading"
       @confirm="handleDelete"
+    />
+
+    <!-- ROI Form Modal -->
+    <ROIFormModal
+      v-if="instrument"
+      v-model="showROIFormModal"
+      :roi="roiToEdit"
+      :instrument-id="instrument.id"
+      :instrument-name="instrument.normalized_name"
+      :loading="roisStore.loading"
+      @submit="handleROISubmit"
+    />
+
+    <!-- ROI Delete Confirmation Modal -->
+    <ConfirmModal
+      v-model="showROIDeleteModal"
+      title="Delete ROI"
+      :message="`Are you sure you want to delete '${roiToDelete?.roi_name}'? This action cannot be undone.`"
+      confirm-text="Delete ROI"
+      variant="error"
+      :loading="roisStore.loading"
+      @confirm="handleROIDelete"
     />
   </div>
 </template>

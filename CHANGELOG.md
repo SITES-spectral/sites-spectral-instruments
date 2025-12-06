@@ -8,8 +8,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **ROI Management**: Interactive ROI visualization and editing
 - **Map Integration**: Station locations with Leaflet
+
+---
+
+## [10.0.0-alpha.13] - 2025-12-06
+
+### ROI Management
+
+Complete implementation of Region of Interest (ROI) visualization and management.
+Canvas-based ROI viewer with polygon overlay, zoom, pan, and interactive selection.
+
+#### New Components
+
+**ROI Store (frontend/src/stores/rois.js):**
+- CRUD operations for ROIs
+- Fetch by instrument or station
+- Points JSON parsing and serialization
+- Error handling and loading states
+
+**ROI Viewer (frontend/src/components/rois/ROIViewer.vue):**
+- Canvas-based polygon visualization
+- Image background with zoom and pan
+- ROI highlighting on hover/selection
+- Label display with centroids
+- Scroll wheel zoom, drag to pan
+- Responsive container
+
+**ROI Card (frontend/src/components/rois/ROICard.vue):**
+- Color indicator with RGB preview
+- Point count and auto-generated badge
+- Edit/Delete action buttons
+- Compact mode support
+
+**ROI List (frontend/src/components/rois/ROIList.vue):**
+- Sorted ROI display
+- Selection management
+- Create/Edit/Delete actions
+- Loading and empty states
+- Max height with scroll
+
+**ROI Form Modal (frontend/src/components/rois/ROIFormModal.vue):**
+- Create/Edit mode
+- Color presets (8 colors) + custom RGB
+- Opacity and thickness sliders
+- Description field
+- Auto-generated name support
+
+#### InstrumentView Integration
+
+**Updated ROI Section:**
+- Replaced placeholder with full ROI management
+- 2-column layout (viewer + list)
+- ROI labels toggle
+- Selected ROI details panel
+- Create/Edit/Delete modals
+
+**Features:**
+- Load ROIs on instrument fetch
+- Canvas viewer with polygon overlay
+- Click ROI to select, details displayed
+- Full CRUD operations
+- Delete confirmation modal
 
 ---
 
