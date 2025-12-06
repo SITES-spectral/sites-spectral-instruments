@@ -8,8 +8,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **Testing**: Unit and integration tests
 - **ROI Management**: Interactive ROI visualization and editing
+- **Map Integration**: Station locations with Leaflet
+
+---
+
+## [10.0.0-alpha.12] - 2025-12-06
+
+### Testing Infrastructure
+
+Complete testing setup with Vitest for both backend and frontend.
+All 71 frontend tests and 85 backend tests passing.
+
+#### Backend Tests (Domain Entities)
+
+**Station.test.js:**
+- Constructor and default value tests
+- Validation tests (acronym, display name, coordinates)
+- Helper method tests (isActive, getCoordinates)
+- Serialization tests (toJSON, fromDatabase)
+
+**Platform.test.js:**
+- Constructor tests for fixed, UAV, satellite platforms
+- Validation tests (ecosystem requirements, type constraints)
+- Helper method tests (requiresEcosystem, isAirborne, isSpaceborne)
+- Mount type tests (getMountTypePrefix, getMountTypeInfo, isGroundLevel)
+- Instrument management tests
+
+**Instrument.test.js:**
+- Constructor and default value tests
+- Validation tests (required fields, status enums)
+- Calibration tests (needsCalibration with date mocking)
+- Specification management tests
+- Type code extraction tests
+- Serialization tests (JSON parsing)
+
+#### Frontend Tests (Composables)
+
+**useTypeRegistry.test.js:**
+- Platform type strategies (fixed, UAV, satellite)
+- Instrument type registry (all 9 types)
+- Helper functions (getInstrumentTypeConfig, getInstrumentFields)
+- Ecosystem codes and formatFieldValue
+
+**useTypes.test.js:**
+- Status types (Active, Inactive, Maintenance, Decommissioned)
+- Measurement status types
+- Platform types and mount types
+- Helper functions with edge cases
+
+**useNotifications.test.js:**
+- Notification creation with auto-dismiss
+- All notification types (success, error, warning, info)
+- Remove and clearAll functionality
+- Unique ID generation
+
+#### Test Infrastructure
+
+**Frontend (frontend/package.json):**
+- Vitest ^1.4.0 with happy-dom environment
+- @vue/test-utils ^2.4.4 for component testing
+- @vitest/coverage-v8 for coverage reports
+- npm run test, test:run, test:coverage
+
+**Backend (package.json):**
+- Vitest ^4.0.14 with node environment
+- @cloudflare/vitest-pool-workers for Worker testing
+- npm test, test:watch, test:coverage
 
 ---
 
