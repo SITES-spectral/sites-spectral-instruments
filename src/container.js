@@ -10,7 +10,8 @@
 import {
   D1StationRepository,
   D1PlatformRepository,
-  D1InstrumentRepository
+  D1InstrumentRepository,
+  D1AdminRepository
 } from './infrastructure/index.js';
 
 import {
@@ -31,7 +32,11 @@ import {
   GetPlatform,
   ListPlatforms,
   GetInstrument,
-  ListInstruments
+  ListInstruments,
+  // Admin queries
+  GetActivityLogs,
+  GetUserSessions,
+  GetStationStats
 } from './application/index.js';
 
 /**
@@ -47,6 +52,7 @@ export function createContainer(env) {
   const stationRepository = new D1StationRepository(db);
   const platformRepository = new D1PlatformRepository(db);
   const instrumentRepository = new D1InstrumentRepository(db);
+  const adminRepository = new D1AdminRepository(db);
 
   // Shared dependencies
   const deps = {
@@ -76,7 +82,11 @@ export function createContainer(env) {
     getPlatform: new GetPlatform(deps),
     listPlatforms: new ListPlatforms(deps),
     getInstrument: new GetInstrument(deps),
-    listInstruments: new ListInstruments(deps)
+    listInstruments: new ListInstruments(deps),
+    // Admin queries
+    getActivityLogs: new GetActivityLogs(adminRepository),
+    getUserSessions: new GetUserSessions(adminRepository),
+    getStationStats: new GetStationStats(adminRepository)
   };
 
   return {
@@ -86,6 +96,8 @@ export function createContainer(env) {
       platform: platformRepository,
       instrument: instrumentRepository
     },
+    // Admin repository (for direct access)
+    adminRepository,
     // Use cases
     commands,
     queries

@@ -9,7 +9,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Next Steps (v10.x Roadmap)
 - **Testing**: Unit and integration tests
-- **Backend Admin API**: Activity log endpoints
+- **Card Components**: StationCard, PlatformCard, InstrumentCard
+- **Complete Views**: Wire up create/edit/delete flows
+
+---
+
+## [10.0.0-alpha.6] - 2025-12-06
+
+### Backend Admin API
+
+Complete admin analytics API for the admin dashboard.
+
+#### Admin Domain Layer
+
+**New Entities:**
+- `ActivityLog` - Activity log entry with user, action, entity details
+- `UserSessionSummary` - Aggregated user login data
+- `StationActivityStats` - Station activity statistics
+
+**Repository Port:**
+- `AdminRepository` - Interface for admin data access
+
+#### Admin Use Cases (Queries)
+
+- `GetActivityLogs` - Retrieve activity logs with filtering
+  - Filter by station, user, action, entity type
+  - Date range filtering
+  - Pagination support
+- `GetUserSessions` - Get user session summaries
+  - Login history per user
+  - "Never logged in" detection
+- `GetStationStats` - Get station activity statistics
+  - CRUD counts per station
+  - Last activity timestamps
+  - Unique user counts
+
+#### D1 Admin Repository
+
+**Database Queries:**
+- Activity logs with station/platform/instrument joins
+- User sessions with login count aggregation
+- Station stats with action breakdowns
+- System health metrics
+
+#### Admin Controller Endpoints
+
+**New API Endpoints (`/api/v10/admin/`):**
+- `GET /admin/activity-logs` - Activity logs with filters
+  - Query params: station_id, user_id, action, entity_type, start_date, end_date, limit, offset
+- `GET /admin/user-sessions` - User session summaries
+  - Query params: include_inactive
+- `GET /admin/station-stats` - Station activity statistics
+  - Query params: start_date, end_date
+- `GET /admin/health` - Enhanced system health (admin only)
+- `GET /admin/summary` - Dashboard summary with alerts
+
+**Security:**
+- All admin endpoints require admin role
+- `_requireAdmin()` check on each endpoint
+
+#### Container & Router Integration
+
+- Added D1AdminRepository to container
+- Added admin queries to container
+- Added AdminController to router
+- Added admin route handling
 
 ---
 

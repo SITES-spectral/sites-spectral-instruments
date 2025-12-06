@@ -11,14 +11,16 @@
 export {
   D1StationRepository,
   D1PlatformRepository,
-  D1InstrumentRepository
+  D1InstrumentRepository,
+  D1AdminRepository
 } from './persistence/d1/index.js';
 
 // HTTP Controllers
 export {
   StationController,
   PlatformController,
-  InstrumentController
+  InstrumentController,
+  AdminController
 } from './http/controllers/index.js';
 
 // HTTP Router

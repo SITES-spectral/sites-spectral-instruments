@@ -9,3 +9,4 @@
 export { StationController } from './StationController.js';
 export { PlatformController } from './PlatformController.js';
 export { InstrumentController } from './InstrumentController.js';
+export { AdminController } from './AdminController.js';

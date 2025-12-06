@@ -18,3 +18,8 @@ export { ListPlatforms } from './ListPlatforms.js';
 // Instrument queries
 export { GetInstrument } from './GetInstrument.js';
 export { ListInstruments } from './ListInstruments.js';
+
+// Admin queries
+export { GetActivityLogs } from './admin/GetActivityLogs.js';
+export { GetUserSessions } from './admin/GetUserSessions.js';
+export { GetStationStats } from './admin/GetStationStats.js';

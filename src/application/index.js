@@ -37,5 +37,9 @@ export {
   ListPlatforms,
   // Instrument queries
   GetInstrument,
-  ListInstruments
+  ListInstruments,
+  // Admin queries
+  GetActivityLogs,
+  GetUserSessions,
+  GetStationStats
 } from './queries/index.js';

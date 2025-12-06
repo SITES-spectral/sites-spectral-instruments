@@ -11,7 +11,8 @@ import { createContainer } from '../../container.js';
 import {
   StationController,
   PlatformController,
-  InstrumentController
+  InstrumentController,
+  AdminController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
 
@@ -29,7 +30,8 @@ export function createRouter(env) {
   const controllers = {
     stations: new StationController(container),
     platforms: new PlatformController(container),
-    instruments: new InstrumentController(container)
+    instruments: new InstrumentController(container),
+    admin: new AdminController(container)
   };
 
   return {
@@ -59,6 +61,9 @@ export function createRouter(env) {
           case 'instruments':
             return await controllers.instruments.handle(request, resourcePath, url);
 
+          case 'admin':
+            return await handleAdmin(request, resourcePath, url, controllers.admin);
+
           case 'health':
             return await handleHealth(env, container);
 
@@ -77,6 +82,38 @@ export function createRouter(env) {
 }
 
 /**
+ * Admin routes handler
+ */
+async function handleAdmin(request, resourcePath, url, adminController) {
+  const method = request.method;
+  const subResource = resourcePath[0];
+
+  if (method !== 'GET') {
+    return createNotFoundResponse('Method not allowed');
+  }
+
+  switch (subResource) {
+    case 'activity-logs':
+      return await adminController.getActivityLogs(request, url);
+
+    case 'user-sessions':
+      return await adminController.getUserSessions(request, url);
+
+    case 'station-stats':
+      return await adminController.getStationStats(request, url);
+
+    case 'health':
+      return await adminController.getHealth(request);
+
+    case 'summary':
+      return await adminController.getSummary(request, url);
+
+    default:
+      return createNotFoundResponse(`Unknown admin resource: ${subResource}`);
+  }
+}
+
+/**
  * Health check endpoint
  */
 async function handleHealth(env, container) {
@@ -87,7 +124,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.3',
+      version: '10.0.0-alpha.6',
       architecture: 'hexagonal',
       database: 'connected',
       stats: {
@@ -98,7 +135,8 @@ async function handleHealth(env, container) {
         'cqrs-pattern',
         'dependency-injection',
         'domain-driven-design',
-        'mount-type-codes'
+        'mount-type-codes',
+        'admin-analytics'
       ]
     }), {
       status: 200,
@@ -109,7 +147,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.3',
+      version: '10.0.0-alpha.6',
       architecture: 'hexagonal',
       database: 'disconnected',
       error: error.message
@@ -126,7 +164,7 @@ async function handleHealth(env, container) {
 function handleInfo() {
   return new Response(JSON.stringify({
     name: 'SITES Spectral Instruments API',
-    version: '10.0.0-alpha.3',
+    version: '10.0.0-alpha.6',
     architecture: 'hexagonal',
     description: 'Hexagonal Architecture API for managing research station instruments',
     patterns: [
@@ -164,6 +202,13 @@ function handleInfo() {
         create: 'POST /api/v10/instruments',
         update: 'PUT /api/v10/instruments/:id',
         delete: 'DELETE /api/v10/instruments/:id'
+      },
+      admin: {
+        activityLogs: 'GET /api/v10/admin/activity-logs',
+        userSessions: 'GET /api/v10/admin/user-sessions',
+        stationStats: 'GET /api/v10/admin/station-stats',
+        health: 'GET /api/v10/admin/health',
+        summary: 'GET /api/v10/admin/summary'
       }
     },
     mountTypeCodes: {
