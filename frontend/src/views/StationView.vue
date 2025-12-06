@@ -10,7 +10,7 @@ import { useStationsStore } from '@stores/stations';
 import { usePlatformsStore } from '@stores/platforms';
 import { useAuthStore } from '@stores/auth';
 import PlatformCard from '@components/cards/PlatformCard.vue';
-import { PlatformFormModal, ConfirmModal } from '@components/modals';
+import { StationFormModal, PlatformFormModal, ConfirmModal } from '@components/modals';
 import { useNotifications } from '@composables/useNotifications';
 
 const props = defineProps({
@@ -37,6 +37,7 @@ const canEdit = computed(() => {
 const platformsByType = computed(() => platformsStore.platformsByType);
 
 // Modal states
+const showStationEditModal = ref(false);
 const showPlatformModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedPlatform = ref(null);
@@ -53,6 +54,21 @@ async function loadStation() {
 // Load on mount and when acronym changes
 onMounted(loadStation);
 watch(() => props.acronym, loadStation);
+
+// Station edit handlers
+function openEditStationModal() {
+  showStationEditModal.value = true;
+}
+
+async function handleStationSubmit(formData) {
+  const result = await stationsStore.updateStation(station.value.id, formData);
+  if (result) {
+    notifications.success('Station updated successfully');
+    showStationEditModal.value = false;
+  } else {
+    notifications.error(stationsStore.error || 'Failed to update station');
+  }
+}
 
 // Platform CRUD handlers
 function openCreatePlatformModal() {
@@ -143,6 +159,7 @@ async function handleDeletePlatform() {
           <button
             v-if="canEdit"
             class="btn btn-outline btn-sm"
+            @click="openEditStationModal"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -273,6 +290,14 @@ async function handleDeletePlatform() {
         </div>
       </div>
     </div>
+
+    <!-- Station Edit Modal -->
+    <StationFormModal
+      v-if="station"
+      v-model="showStationEditModal"
+      :station="station"
+      @submit="handleStationSubmit"
+    />
 
     <!-- Platform Form Modal -->
     <PlatformFormModal

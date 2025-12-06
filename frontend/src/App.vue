@@ -9,6 +9,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import TheNavbar from '@components/layout/TheNavbar.vue';
 import TheSidebar from '@components/layout/TheSidebar.vue';
+import NotificationToast from '@components/layout/NotificationToast.vue';
 import { useAuthStore } from '@stores/auth';
 
 const route = useRoute();
@@ -27,6 +28,9 @@ const showNavbar = computed(() => {
 
 <template>
   <div class="min-h-screen bg-base-200">
+    <!-- Global Notifications -->
+    <NotificationToast />
+
     <!-- Navbar -->
     <TheNavbar v-if="showNavbar" />
 

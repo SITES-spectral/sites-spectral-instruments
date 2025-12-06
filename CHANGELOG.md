@@ -9,8 +9,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Next Steps (v10.x Roadmap)
 - **Testing**: Unit and integration tests
-- **InstrumentView**: Full instrument detail view with ROI management
-- **StationFormModal**: Edit station details
+- **ROI Management**: Interactive ROI visualization and editing
+
+---
+
+## [10.0.0-alpha.11] - 2025-12-06
+
+### Full Entity Views & Station Editing
+
+Complete implementation of detail views and station editing capability.
+Notifications now display as toast messages.
+
+#### InstrumentView (Complete Rewrite)
+
+**Full Instrument Details:**
+- Type-aware display with instrument-specific styling
+- All specifications from InstrumentTypeRegistry
+- Status and measurement status indicators
+- Timeline section (deployment, calibration dates)
+- Metadata section (ID, timestamps, platform link)
+
+**Features:**
+- Edit/Delete buttons with modal integration
+- Breadcrumb navigation (Dashboard > Station > Platform > Instrument)
+- ROI section (placeholder for future implementation)
+- Type-colored icons and backgrounds
+
+#### StationFormModal & StationForm
+
+**New StationForm.vue:**
+- Edit station basic information (acronym, display name)
+- Location editing (latitude, longitude)
+- Additional fields (website URL, status)
+- Validation with error messages
+- Acronym auto-uppercase and immutable in edit mode
+
+**New StationFormModal.vue:**
+- Wraps StationForm in BaseModal
+- Used for editing existing stations
+
+**Stations Store Enhancement:**
+- Added `updateStation(id, data)` action
+- Updates both currentStation and stations list
+
+#### NotificationToast Component
+
+**New NotificationToast.vue:**
+- Global toast notification display
+- Uses daisyUI alert styling
+- Animated enter/leave transitions
+- Dismiss button for each notification
+- Icons per notification type (success, error, warning, info)
+
+**App.vue Integration:**
+- NotificationToast placed globally for all pages
+- Works with useNotifications composable
+
+#### Updated Exports
+
+**modals/index.js:**
+- Added StationFormModal export
+
+**forms/index.js:**
+- Added StationForm export
 
 ---
 

@@ -16,6 +16,7 @@
  */
 
 // Main form components
+export { default as StationForm } from './StationForm.vue';
 export { default as PlatformForm } from './PlatformForm.vue';
 export { default as InstrumentForm } from './InstrumentForm.vue';
 

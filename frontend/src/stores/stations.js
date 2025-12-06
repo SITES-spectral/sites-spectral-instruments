@@ -77,6 +77,39 @@ export const useStationsStore = defineStore('stations', () => {
   }
 
   /**
+   * Update station
+   * @param {number} id - Station ID
+   * @param {Object} data - Station data
+   * @returns {Promise<Object|null>}
+   */
+  async function updateStation(id, data) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.put(`/stations/${id}`, data);
+      if (response.success) {
+        // Update current station
+        currentStation.value = response.data;
+        // Update in stations list
+        const index = stations.value.findIndex(s => s.id === id);
+        if (index !== -1) {
+          stations.value[index] = response.data;
+        }
+        return response.data;
+      } else {
+        error.value = response.error || 'Failed to update station';
+        return null;
+      }
+    } catch (err) {
+      error.value = err.message;
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
    * Clear current station
    */
   function clearCurrentStation() {
@@ -98,6 +131,7 @@ export const useStationsStore = defineStore('stations', () => {
     // Actions
     fetchStations,
     fetchStation,
+    updateStation,
     clearCurrentStation
   };
 });
