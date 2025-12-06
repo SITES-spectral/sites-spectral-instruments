@@ -788,6 +788,16 @@ export function getInstrumentFields(instrumentType) {
 }
 
 /**
+ * Get instrument type code
+ * @param {string} instrumentType - Instrument type key or name
+ * @returns {string|null}
+ */
+export function getInstrumentTypeCode(instrumentType) {
+  const config = getInstrumentTypeConfig(instrumentType);
+  return config?.code || null;
+}
+
+/**
  * Get summary fields for instrument type (for card display)
  * @param {string} instrumentType - Instrument type key or name
  * @returns {string[]}
@@ -887,6 +897,7 @@ export function useTypeRegistry() {
     // Instrument functions
     getInstrumentTypeConfig,
     getInstrumentFields,
+    getInstrumentTypeCode,
     getInstrumentSummaryFields,
     isInstrumentCompatibleWithPlatform,
     getCompatibleInstrumentTypes,

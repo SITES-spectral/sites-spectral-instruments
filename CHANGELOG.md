@@ -10,7 +10,120 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Next Steps (v10.x Roadmap)
 - **Testing**: Unit and integration tests
 - **Complete Views**: Wire up create/edit/delete flows
-- **Type-Aware Forms**: Dynamic form generation from registry schemas
+- **Type-Aware Modals**: Apply same pattern to view/edit modals
+
+---
+
+## [10.0.0-alpha.9] - 2025-12-06
+
+### Type-Aware Forms (SOLID Forms Architecture)
+
+Complete implementation of registry-driven forms following SOLID principles.
+Forms now dynamically generate fields based on TypeRegistry schemas.
+
+#### Form Architecture
+
+```
+TypeRegistry (useTypeRegistry.js)
+         ↓
+    provides field schemas
+         ↓
+Type-Specific Field Components
+         ↓
+    render ONLY type-relevant fields
+         ↓
+Main Form Components
+         ↓
+    compose type-specific fields + common fields
+```
+
+#### New Components
+
+**Dynamic Field Components (`components/forms/fields/`):**
+- `DynamicField.vue` - Single field renderer from schema
+  - Supports: text, number, select, date, textarea, hidden
+  - Handles validation, placeholders, help text
+  - Responsive size variants (sm, md, lg)
+- `DynamicFieldGroup.vue` - Renders field group from schema
+  - Grid layout with responsive columns
+  - Hidden field support
+  - Automatic value/default management
+
+**Platform Field Components (`components/forms/platform/`):**
+- `FixedPlatformFields.vue` - Fixed platform specific
+  - Ecosystem code selector (from ECOSYSTEM_CODES)
+  - Mount type selector (PL/BL/GL from MOUNT_TYPE_CODES)
+  - Platform height input
+  - Mounting structure description
+  - Name preview: `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE}##`
+- `UAVPlatformFields.vue` - UAV platform specific
+  - Vendor selector (DJI, MicaSense, Parrot, Headwall)
+  - Model selector (dependent on vendor)
+  - Auto-instrument info display
+  - Name preview: `{STATION}_{VENDOR}_{MODEL}_UAV##`
+- `SatellitePlatformFields.vue` - Satellite platform specific
+  - Agency selector (ESA, NASA, JAXA, etc.)
+  - Satellite selector (dependent on agency)
+  - Sensor selector (dependent on satellite)
+  - Satellite/sensor info display
+  - Name preview: `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}`
+
+#### Refactored Form Components
+
+**PlatformForm.vue:**
+- Uses Strategy pattern with `<component :is="...">`
+- Dynamically switches between field components
+- Validation driven by TypeRegistry.fields.required
+- Type-specific field components handle their own logic
+- Common fields (display_name, description, coordinates) in collapse
+
+**InstrumentForm.vue:**
+- Uses Registry pattern with DynamicFieldGroup
+- Field schema generated from INSTRUMENT_TYPE_REGISTRY
+- Platform compatibility filtering (e.g., LiDAR only on UAV/Satellite)
+- Type selection shows compatible instruments
+- Specifications rendered dynamically from schema
+
+#### TypeRegistry Enhancements
+
+**New Helper Function:**
+- `getInstrumentTypeCode(type)` - Returns type code (PHE, MS, PAR, etc.)
+
+**Platform Type Strategies now include:**
+- Field definitions with type, label, required, options, etc.
+- Option dependencies (model depends on vendor, sensor on satellite)
+- Default values for auto-population
+
+**Instrument Type Registry includes:**
+- Field schemas with validation rules
+- Default values for initialization
+- Platform compatibility lists
+
+#### SOLID Principles Applied
+
+- **Single Responsibility**: Each field component handles one platform type
+- **Open/Closed**: Add new types by creating components, not modifying forms
+- **Liskov Substitution**: All field components implement v-model interface
+- **Interface Segregation**: Forms only see fields relevant to current type
+- **Dependency Inversion**: Forms depend on TypeRegistry abstractions
+
+#### File Structure
+
+```
+frontend/src/components/forms/
+├── index.js                     # Form exports
+├── PlatformForm.vue             # Main platform form
+├── InstrumentForm.vue           # Main instrument form
+├── fields/
+│   ├── index.js                 # Field exports
+│   ├── DynamicField.vue         # Single field renderer
+│   └── DynamicFieldGroup.vue    # Field group renderer
+└── platform/
+    ├── index.js                 # Platform field exports
+    ├── FixedPlatformFields.vue  # Fixed platform fields
+    ├── UAVPlatformFields.vue    # UAV platform fields
+    └── SatellitePlatformFields.vue # Satellite fields
+```
 
 ---
 
