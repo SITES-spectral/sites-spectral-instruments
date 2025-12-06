@@ -8,8 +8,96 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **Frontend Components**: Complete Vue 3 component library
 - **Testing**: Unit and integration tests
+- **Backend Admin API**: Activity log endpoints
+
+---
+
+## [10.0.0-alpha.5] - 2025-12-06
+
+### Frontend Components & Admin Dashboard
+
+Complete Vue 3 frontend with forms, modals, maps, and admin analytics.
+
+#### Form Components
+
+**New Form Components:**
+- `PlatformForm.vue` - Platform creation/editing with type-specific fields
+  - Fixed platforms: ecosystem codes, mount type selection (PL/BL/GL)
+  - UAV platforms: vendor/model selection (DJI, MicaSense, Parrot, Headwall)
+  - Satellite platforms: agency/satellite/sensor selection
+  - Real-time name preview
+- `InstrumentForm.vue` - Instrument creation/editing
+  - 9 instrument types with type-specific specifications
+  - Status and measurement status fields
+  - Specification templates per type
+
+#### Modal Components
+
+**New Modal Components:**
+- `BaseModal.vue` - Reusable modal with Teleport
+  - Sizes: sm, md, lg, xl, full
+  - Persistent mode option
+  - Footer slot for actions
+- `ConfirmModal.vue` - Confirmation dialog
+  - Variants: warning, error, info
+  - Used for delete confirmations
+
+#### Map Components
+
+**New Map Components:**
+- `StationMap.vue` - Interactive station map
+  - Leaflet integration
+  - Station markers with popups
+  - Fit to bounds functionality
+- `PlatformMap.vue` - Platform visualization
+  - Platform type color coding (fixed/UAV/satellite)
+  - Legend with platform counts
+  - Coordinate display
+- `useMap.js` - Map composable
+  - Dynamic Leaflet loading
+  - Marker management
+  - Pan, zoom, highlight functions
+
+#### Admin Dashboard
+
+**Enhanced Admin Analytics:**
+- Tabbed interface (Overview, Activity, Users, Trends)
+- Station activity tracking with CRUD counts
+- User login monitoring with "never logged in" detection
+- Weekly activity chart (stacked bar)
+- Monthly trend visualization (12 months)
+- Peak usage hours chart
+- Most active stations ranking
+- Activity trend indicators (up/down/stable)
+- Station details modal with activity history
+
+**Admin Store (`admin.js`):**
+- Activity logs management
+- User session tracking
+- Station statistics
+- Weekly/monthly/yearly trend computation
+- Peak hours analysis
+- Time range filtering (day/week/month/year)
+
+#### Frontend API Integration
+
+**Updated API Service:**
+- V10 API endpoints (`/api/v10/`)
+- Domain-specific APIs: `stationApi`, `platformApi`, `instrumentApi`, `authApi`
+- Health check integration
+
+**Router Updates:**
+- Admin route with `requiresAdmin` guard
+- Admin role check in navigation guard
+
+**Navbar Updates:**
+- Admin link visible only for admin users
+- Admin button in user dropdown
+
+#### Dependencies
+
+- Added `leaflet@^1.9.4` for map functionality
 
 ---
 

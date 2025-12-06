@@ -12,6 +12,7 @@ import { useAuthStore } from '@stores/auth';
 // Lazy-loaded views for code splitting
 const LoginView = () => import('@views/LoginView.vue');
 const DashboardView = () => import('@views/DashboardView.vue');
+const AdminDashboardView = () => import('@views/AdminDashboardView.vue');
 const StationView = () => import('@views/StationView.vue');
 const PlatformView = () => import('@views/PlatformView.vue');
 const InstrumentView = () => import('@views/InstrumentView.vue');
@@ -29,6 +30,12 @@ const routes = [
     name: 'dashboard',
     component: DashboardView,
     meta: { requiresAuth: true, title: 'Dashboard' }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminDashboardView,
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin Dashboard' }
   },
   {
     path: '/stations/:acronym',
@@ -70,7 +77,7 @@ const router = createRouter({
   }
 });
 
-// Navigation guard for authentication
+// Navigation guard for authentication and authorization
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
@@ -84,6 +91,12 @@ router.beforeEach(async (to, from, next) => {
     // Store intended destination
     authStore.setRedirectPath(to.fullPath);
     next({ name: 'login' });
+    return;
+  }
+
+  // Check if route requires admin role
+  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    next({ name: 'dashboard' });
     return;
   }
 
