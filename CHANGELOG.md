@@ -8,7 +8,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **Map Integration**: Station locations with Leaflet
+- **Data Export**: CSV/JSON export for instruments and ROIs
+- **Admin Panel**: User management and system settings
+
+---
+
+## [10.0.0-alpha.14] - 2025-12-06
+
+### Map Integration
+
+Interactive station map with Leaflet on the Dashboard.
+Click markers to navigate to station details.
+
+#### New Components
+
+**StationMap (frontend/src/components/map/StationMap.vue):**
+- Leaflet-based interactive map
+- OpenStreetMap tile layer
+- Custom marker icons (blue default, purple selected)
+- Popup with station info on hover
+- Click to navigate to station
+- Zoom/pan controls
+- Legend overlay
+- Station count badge
+- Responsive container
+- Sweden center default (62.0, 16.0)
+
+#### Dashboard Integration
+
+**Updated Dashboard View:**
+- Added Station Locations section between stats and cards
+- Collapsible map with toggle switch
+- Loading state with spinner
+- Empty state handling
+- Map auto-fits to show all stations
 
 ---
 

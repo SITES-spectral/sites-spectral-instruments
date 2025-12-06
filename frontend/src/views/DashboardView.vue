@@ -3,11 +3,16 @@
  * Dashboard View
  *
  * Main dashboard showing station overview and statistics.
+ * Includes interactive station map.
  */
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useStationsStore } from '@stores/stations';
 import { useAuthStore } from '@stores/auth';
 import StationCard from '@components/cards/StationCard.vue';
+import { StationMap } from '@components/map';
+
+// Map view toggle
+const showMap = ref(true);
 
 const stationsStore = useStationsStore();
 const authStore = useAuthStore();
@@ -91,6 +96,42 @@ const stats = computed(() => {
         <div class="stat-title">Status</div>
         <div class="stat-value text-info">OK</div>
         <div class="stat-desc">All systems operational</div>
+      </div>
+    </div>
+
+    <!-- Station Map Section -->
+    <div class="bg-base-100 rounded-lg shadow-lg p-4 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+          Station Locations
+        </h2>
+        <label class="label cursor-pointer gap-2">
+          <span class="label-text text-sm">Show map</span>
+          <input
+            v-model="showMap"
+            type="checkbox"
+            class="toggle toggle-primary toggle-sm"
+          />
+        </label>
+      </div>
+
+      <!-- Map -->
+      <div v-show="showMap">
+        <StationMap
+          v-if="!stationsStore.loading && stationsStore.stations.length > 0"
+          :stations="stationsStore.stations"
+          :height="350"
+          :clickable="true"
+        />
+        <div v-else-if="stationsStore.loading" class="h-[350px] flex items-center justify-center bg-base-200 rounded-lg">
+          <span class="loading loading-spinner loading-md"></span>
+        </div>
+        <div v-else class="h-[350px] flex items-center justify-center bg-base-200 rounded-lg text-base-content/60">
+          No stations to display
+        </div>
       </div>
     </div>
 
