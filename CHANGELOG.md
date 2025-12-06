@@ -9,8 +9,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Next Steps (v10.x Roadmap)
 - **Testing**: Unit and integration tests
-- **Complete Views**: Wire up create/edit/delete flows
-- **Type-Aware Modals**: Apply same pattern to view/edit modals
+- **InstrumentView**: Full instrument detail view with ROI management
+- **StationFormModal**: Edit station details
+
+---
+
+## [10.0.0-alpha.10] - 2025-12-06
+
+### Full CRUD Modals & Views
+
+Complete implementation of modal-based CRUD operations for platforms and instruments.
+Views now fully functional with create, edit, and delete capabilities.
+
+#### New Modal Components
+
+**PlatformFormModal.vue:**
+- Wraps PlatformForm in BaseModal
+- Supports create and edit modes
+- Integrates with platformsStore
+
+**InstrumentFormModal.vue:**
+- Wraps InstrumentForm in BaseModal
+- Supports create and edit modes
+- Passes platformType for compatibility filtering
+- Integrates with instrumentsStore
+
+**Modal Index (`components/modals/index.js`):**
+- Exports all modal components for clean imports
+- BaseModal, ConfirmModal, PlatformFormModal, InstrumentFormModal
+
+#### Enhanced StationView
+
+**Full Platform CRUD:**
+- "Create Platform" button opens PlatformFormModal
+- PlatformCard edit/delete buttons wired up
+- ConfirmModal for delete confirmation
+- Toast notifications for success/error feedback
+
+**Features:**
+- Modal state management (showPlatformModal, showDeleteModal)
+- selectedPlatform for edit mode
+- platformToDelete for delete confirmation
+- Async handlers with store integration
+
+#### New PlatformView
+
+**Complete Rewrite with Full CRUD:**
+- Displays platform details using type-specific components
+- Lists instruments grouped by type
+- Full platform edit/delete functionality
+- Full instrument create/edit/delete functionality
+
+**Features:**
+- Breadcrumb navigation (Dashboard > Station > Platform)
+- Type-aware platform details (Fixed/UAV/Satellite)
+- Instrument list with InstrumentCard components
+- All modal flows wired up:
+  - PlatformFormModal for editing platform
+  - InstrumentFormModal for create/edit instrument
+  - ConfirmModal for delete confirmations
+
+**Navigation:**
+- Delete platform navigates back to station
+- Empty state with "Add First Instrument" CTA
+
+#### Store Integration
+
+**Platforms Store:**
+- createPlatform, updatePlatform, deletePlatform
+- All wired to views via modal handlers
+
+**Instruments Store:**
+- fetchInstrumentsByPlatform for platform view
+- createInstrument, updateInstrument, deleteInstrument
+- instrumentsByType computed for grouped display
+
+#### Notification Integration
+
+Using `useNotifications` composable:
+- `notifications.success()` for success messages
+- `notifications.error()` for error messages
+- Toast-style notifications with auto-dismiss
+
+#### File Structure
+
+```
+frontend/src/
+├── components/modals/
+│   ├── index.js              # Modal exports
+│   ├── BaseModal.vue         # Base modal component
+│   ├── ConfirmModal.vue      # Delete confirmation
+│   ├── PlatformFormModal.vue # Platform create/edit
+│   └── InstrumentFormModal.vue # Instrument create/edit
+├── views/
+│   ├── StationView.vue       # Enhanced with platform CRUD
+│   └── PlatformView.vue      # Complete rewrite with instrument CRUD
+```
 
 ---
 

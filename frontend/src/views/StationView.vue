@@ -3,13 +3,15 @@
  * Station View
  *
  * Displays station details and its platforms/instruments.
+ * Supports platform CRUD operations via modals.
  */
-import { computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useStationsStore } from '@stores/stations';
 import { usePlatformsStore } from '@stores/platforms';
 import { useAuthStore } from '@stores/auth';
 import PlatformCard from '@components/cards/PlatformCard.vue';
+import { PlatformFormModal, ConfirmModal } from '@components/modals';
+import { useNotifications } from '@composables/useNotifications';
 
 const props = defineProps({
   acronym: {
@@ -17,11 +19,10 @@ const props = defineProps({
     required: true
   }
 });
-
-const route = useRoute();
 const stationsStore = useStationsStore();
 const platformsStore = usePlatformsStore();
 const authStore = useAuthStore();
+const notifications = useNotifications();
 
 // Current station
 const station = computed(() => stationsStore.currentStation);
@@ -35,6 +36,12 @@ const canEdit = computed(() => {
 // Platforms grouped by type
 const platformsByType = computed(() => platformsStore.platformsByType);
 
+// Modal states
+const showPlatformModal = ref(false);
+const showDeleteModal = ref(false);
+const selectedPlatform = ref(null);
+const platformToDelete = ref(null);
+
 // Load station data
 async function loadStation() {
   const stationData = await stationsStore.fetchStation(props.acronym);
@@ -46,6 +53,60 @@ async function loadStation() {
 // Load on mount and when acronym changes
 onMounted(loadStation);
 watch(() => props.acronym, loadStation);
+
+// Platform CRUD handlers
+function openCreatePlatformModal() {
+  selectedPlatform.value = null;
+  showPlatformModal.value = true;
+}
+
+function openEditPlatformModal(platform) {
+  selectedPlatform.value = platform;
+  showPlatformModal.value = true;
+}
+
+function openDeletePlatformModal(platform) {
+  platformToDelete.value = platform;
+  showDeleteModal.value = true;
+}
+
+async function handlePlatformSubmit(formData) {
+  let result;
+
+  if (selectedPlatform.value) {
+    // Update existing platform
+    result = await platformsStore.updatePlatform(selectedPlatform.value.id, formData);
+    if (result) {
+      notifications.success('Platform updated successfully');
+    }
+  } else {
+    // Create new platform
+    result = await platformsStore.createPlatform(formData);
+    if (result) {
+      notifications.success('Platform created successfully');
+    }
+  }
+
+  if (result) {
+    showPlatformModal.value = false;
+    selectedPlatform.value = null;
+  } else {
+    notifications.error(platformsStore.error || 'Failed to save platform');
+  }
+}
+
+async function handleDeletePlatform() {
+  if (!platformToDelete.value) return;
+
+  const success = await platformsStore.deletePlatform(platformToDelete.value.id);
+  if (success) {
+    notifications.success('Platform deleted successfully');
+    showDeleteModal.value = false;
+    platformToDelete.value = null;
+  } else {
+    notifications.error(platformsStore.error || 'Failed to delete platform');
+  }
+}
 </script>
 
 <template>
@@ -127,7 +188,7 @@ watch(() => props.acronym, loadStation);
 
       <!-- Create platform button -->
       <div v-if="canEdit" class="flex justify-end mb-4">
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" @click="openCreatePlatformModal">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -151,6 +212,8 @@ watch(() => props.acronym, loadStation);
               :key="platform.id"
               :platform="platform"
               :can-edit="canEdit"
+              @edit="openEditPlatformModal"
+              @delete="openDeletePlatformModal"
             />
           </div>
         </div>
@@ -169,6 +232,8 @@ watch(() => props.acronym, loadStation);
               :key="platform.id"
               :platform="platform"
               :can-edit="canEdit"
+              @edit="openEditPlatformModal"
+              @delete="openDeletePlatformModal"
             />
           </div>
         </div>
@@ -187,6 +252,8 @@ watch(() => props.acronym, loadStation);
               :key="platform.id"
               :platform="platform"
               :can-edit="canEdit"
+              @edit="openEditPlatformModal"
+              @delete="openDeletePlatformModal"
             />
           </div>
         </div>
@@ -200,11 +267,31 @@ watch(() => props.acronym, loadStation);
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
           <p class="mt-4 text-base-content/60">No platforms found</p>
-          <button v-if="canEdit" class="btn btn-primary mt-4">
+          <button v-if="canEdit" class="btn btn-primary mt-4" @click="openCreatePlatformModal">
             Create First Platform
           </button>
         </div>
       </div>
     </div>
+
+    <!-- Platform Form Modal -->
+    <PlatformFormModal
+      v-model="showPlatformModal"
+      :platform="selectedPlatform"
+      :station-id="station?.id"
+      :station-acronym="station?.acronym || ''"
+      @submit="handlePlatformSubmit"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-model="showDeleteModal"
+      title="Delete Platform"
+      :message="`Are you sure you want to delete '${platformToDelete?.normalized_name || platformToDelete?.display_name}'? This action cannot be undone.`"
+      confirm-text="Delete"
+      variant="error"
+      :loading="platformsStore.loading"
+      @confirm="handleDeletePlatform"
+    />
   </div>
 </template>
