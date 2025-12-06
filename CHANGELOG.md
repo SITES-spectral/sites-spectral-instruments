@@ -9,8 +9,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Next Steps (v10.x Roadmap)
 - **Testing**: Unit and integration tests
-- **Card Components**: StationCard, PlatformCard, InstrumentCard
 - **Complete Views**: Wire up create/edit/delete flows
+- **Form Components**: StationForm, enhanced PlatformForm, InstrumentForm
+
+---
+
+## [10.0.0-alpha.7] - 2025-12-06
+
+### Enhanced Card Components
+
+Complete redesign of Vue 3 card components with type-aware styling.
+
+#### Type Configuration Composable
+
+**New File: `frontend/src/composables/useTypes.js`**
+
+Centralized type configuration for consistent styling across components:
+
+- `MOUNT_TYPES` - Mount type codes (PL, BL, GL, UAV, SAT, etc.) with descriptions
+- `PLATFORM_TYPES` - Platform types (fixed, uav, satellite) with icons and colors
+- `INSTRUMENT_TYPES` - Instrument types with icons, colors, and codes
+- `STATUS_TYPES` - Entity status configurations
+- `MEASUREMENT_STATUS` - Measurement status indicators
+
+**Helper Functions:**
+- `getMountType(code)` - Get mount type info from code (e.g., 'PL01' -> PL info)
+- `getPlatformType(type)` - Get platform type styling
+- `getInstrumentType(type)` - Get instrument type with icon and color
+- `getStatus(status)` - Get status badge styling
+- `getMeasurementStatus(status)` - Get measurement status indicator
+
+#### StationCard Enhancements
+
+- **Compact mode**: Optional `compact` prop for smaller cards
+- **Platform breakdown**: Shows Fixed/UAV/Satellite counts with colors
+- **Updated timestamp**: Shows last updated date in footer
+- **Better coordinate display**: 4 decimal precision
+- **Status styling**: Uses centralized status configuration
+
+#### PlatformCard Enhancements
+
+- **Mount type display**: Shows mount_type_code with tooltip description
+- **ShowStation prop**: Optional station link for cross-station views
+- **Height & coordinates**: Shows platform_height_m and location
+- **Platform type icons**: SVG icons based on platform type
+- **Better grid layout**: Responsive 2-4 column info grid
+
+#### InstrumentCard Enhancements
+
+- **Dynamic icons**: Type-specific SVG icons per instrument type
+  - Camera (phenocam), Layer Group (multispectral), Sun (PAR)
+  - Leaf (NDVI), Microscope (PRI), Rainbow (hyperspectral)
+  - Temperature (thermal), Wave (LiDAR), Dish (radar)
+- **Compact mode**: Optional `compact` prop for dense layouts
+- **ShowPlatform prop**: Optional platform link
+- **ROI count**: Shows associated ROI count
+- **Measurement status**: Colored dot indicator
+
+#### Index Files
+
+- `frontend/src/components/cards/index.js` - Clean card exports
+- `frontend/src/composables/index.js` - Clean composable exports
 
 ---
 
