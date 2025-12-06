@@ -2,13 +2,17 @@
 /**
  * Platform Card Component
  *
- * Displays platform summary with type indicator, mount type,
- * ecosystem, and instrument count.
+ * Type-aware platform card that renders type-specific details.
+ * Uses Strategy pattern - delegates to type-specific components.
  *
  * @module components/cards/PlatformCard
  */
 import { computed } from 'vue';
-import { getPlatformType, getMountType, getStatus } from '@composables/useTypes';
+import { getStatus } from '@composables/useTypes';
+import { getPlatformTypeStrategy } from '@composables/useTypeRegistry';
+import FixedPlatformDetails from './platform/FixedPlatformDetails.vue';
+import UAVPlatformDetails from './platform/UAVPlatformDetails.vue';
+import SatellitePlatformDetails from './platform/SatellitePlatformDetails.vue';
 
 const props = defineProps({
   platform: {
@@ -27,13 +31,9 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete']);
 
-// Platform type configuration
-const platformTypeConfig = computed(() => getPlatformType(props.platform.platform_type));
-
-// Mount type configuration
-const mountTypeConfig = computed(() => {
-  const mtc = props.platform.mount_type_code || props.platform.location_code;
-  return getMountType(mtc);
+// Platform type strategy
+const typeStrategy = computed(() => {
+  return getPlatformTypeStrategy(props.platform.platform_type) || getPlatformTypeStrategy('fixed');
 });
 
 // Status configuration
@@ -44,13 +44,47 @@ const instrumentCount = computed(() => {
   return props.platform.instrument_count || props.platform.instruments?.length || 0;
 });
 
-// Format coordinates
-const coordinates = computed(() => {
-  const { latitude, longitude } = props.platform;
-  if (latitude && longitude) {
-    return `${Number(latitude).toFixed(4)}, ${Number(longitude).toFixed(4)}`;
+// Get the appropriate detail component based on platform type
+const detailComponent = computed(() => {
+  switch (props.platform.platform_type) {
+    case 'uav':
+      return UAVPlatformDetails;
+    case 'satellite':
+      return SatellitePlatformDetails;
+    case 'fixed':
+    default:
+      return FixedPlatformDetails;
   }
-  return null;
+});
+
+// Badge class based on type
+const typeBadgeClass = computed(() => {
+  const classes = {
+    fixed: 'badge-info',
+    uav: 'badge-warning',
+    satellite: 'badge-accent'
+  };
+  return classes[props.platform.platform_type] || 'badge-info';
+});
+
+// Background class based on type
+const typeBgClass = computed(() => {
+  const classes = {
+    fixed: 'bg-info/10',
+    uav: 'bg-warning/10',
+    satellite: 'bg-accent/10'
+  };
+  return classes[props.platform.platform_type] || 'bg-info/10';
+});
+
+// Text class based on type
+const typeTextClass = computed(() => {
+  const classes = {
+    fixed: 'text-info',
+    uav: 'text-warning',
+    satellite: 'text-accent'
+  };
+  return classes[props.platform.platform_type] || 'text-info';
 });
 
 // Get SVG path for platform type icon
@@ -73,13 +107,13 @@ const typeIconPath = computed(() => {
         <div class="flex items-start gap-3 min-w-0 flex-1">
           <!-- Platform type icon -->
           <div
-            :class="['p-2.5 rounded-lg flex-shrink-0', platformTypeConfig.bgClass]"
-            :title="platformTypeConfig.name"
+            :class="['p-2.5 rounded-lg flex-shrink-0', typeBgClass]"
+            :title="typeStrategy.name"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5"
-              :class="platformTypeConfig.textClass"
+              :class="typeTextClass"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -125,59 +159,29 @@ const typeIconPath = computed(() => {
         </div>
       </div>
 
-      <!-- Info Grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
-        <!-- Platform Type -->
-        <div>
-          <span class="text-xs text-base-content/50 block">Type</span>
-          <span :class="['badge badge-sm mt-1', platformTypeConfig.badgeClass]">
-            {{ platformTypeConfig.name }}
-          </span>
-        </div>
-
-        <!-- Mount Type -->
-        <div v-if="mountTypeConfig">
-          <span class="text-xs text-base-content/50 block">Mount</span>
-          <div
-            class="tooltip tooltip-right"
-            :data-tip="mountTypeConfig.description"
-          >
-            <span class="badge badge-sm badge-outline mt-1 font-mono cursor-help">
-              {{ platform.mount_type_code || platform.location_code }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Ecosystem (for fixed platforms) -->
-        <div v-if="platform.ecosystem_code">
-          <span class="text-xs text-base-content/50 block">Ecosystem</span>
-          <span class="font-medium">{{ platform.ecosystem_code }}</span>
-        </div>
-
-        <!-- Instruments -->
-        <div>
-          <span class="text-xs text-base-content/50 block">Instruments</span>
+      <!-- Platform Type Badge + Instrument Count -->
+      <div class="flex items-center justify-between mt-3">
+        <span :class="['badge badge-sm', typeBadgeClass]">
+          {{ typeStrategy.name }}
+        </span>
+        <span class="text-sm">
           <span class="font-semibold text-secondary">{{ instrumentCount }}</span>
-        </div>
+          <span class="text-base-content/60 ml-1">instrument{{ instrumentCount !== 1 ? 's' : '' }}</span>
+        </span>
       </div>
 
-      <!-- Optional: Height & Coordinates -->
-      <div
-        v-if="platform.platform_height_m || coordinates"
-        class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-base-content/50"
-      >
-        <span v-if="platform.platform_height_m">
-          Height: {{ platform.platform_height_m }}m
-        </span>
-        <span v-if="coordinates">
-          {{ coordinates }}
-        </span>
+      <!-- Type-Specific Details -->
+      <div class="mt-3 pt-3 border-t border-base-200">
+        <component
+          :is="detailComponent"
+          :platform="platform"
+        />
       </div>
 
       <!-- Description -->
       <p
         v-if="platform.description"
-        class="text-sm text-base-content/60 mt-2 line-clamp-2"
+        class="text-sm text-base-content/60 mt-3 line-clamp-2"
       >
         {{ platform.description }}
       </p>
@@ -193,7 +197,7 @@ const typeIconPath = computed(() => {
       </div>
 
       <!-- View Details -->
-      <div class="card-actions justify-end mt-2 pt-2 border-t border-base-200">
+      <div class="card-actions justify-end mt-3 pt-2 border-t border-base-200">
         <router-link
           :to="`/platforms/${platform.id}`"
           class="btn btn-ghost btn-xs text-primary"

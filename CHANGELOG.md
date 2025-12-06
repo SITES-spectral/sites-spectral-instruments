@@ -10,7 +10,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Next Steps (v10.x Roadmap)
 - **Testing**: Unit and integration tests
 - **Complete Views**: Wire up create/edit/delete flows
-- **Form Components**: StationForm, enhanced PlatformForm, InstrumentForm
+- **Type-Aware Forms**: Dynamic form generation from registry schemas
+
+---
+
+## [10.0.0-alpha.8] - 2025-12-06
+
+### Type-Aware Architecture (SOLID Refactor)
+
+Complete refactor to truly type-aware cards following SOLID principles.
+Cards now only show fields relevant to their specific type.
+
+#### Architecture Pattern
+
+```
+Domain Layer (Strategy/Registry)
+         ↓
+    defines what fields each type has
+         ↓
+Frontend TypeRegistry (useTypeRegistry.js)
+         ↓
+    provides field schemas for rendering
+         ↓
+Type-Specific Components
+         ↓
+    render ONLY relevant fields
+```
+
+#### Frontend TypeRegistry (`useTypeRegistry.js`)
+
+**Platform Type Strategies** (mirrors domain Strategy pattern):
+- `PLATFORM_TYPE_STRATEGIES` - Field schemas per platform type
+- `getPlatformFields(type)` - Get fields for a platform type
+- `getPlatformExcludedFields(type)` - Fields NOT shown for type
+- `isFieldValidForPlatform(type, field)` - Validation helper
+
+**Instrument Type Registry** (mirrors domain Registry pattern):
+- `INSTRUMENT_TYPE_REGISTRY` - 9 instrument types with field schemas
+- `getInstrumentTypeConfig(type)` - Get type configuration
+- `getInstrumentFields(type)` - Get field schema
+- `getInstrumentSummaryFields(type)` - Fields for card display
+- `isInstrumentCompatibleWithPlatform(inst, plat)` - Compatibility check
+
+**Reference Data:**
+- `MOUNT_TYPE_CODES` - PL, BL, GL, UAV, SAT, MOB, USV, UUV
+- `ECOSYSTEM_CODES` - FOR, AGR, GRA, HEA, MIR, ALP, etc.
+
+#### Type-Specific Platform Components
+
+**FixedPlatformDetails.vue** - Shows only:
+- Ecosystem code with description
+- Mount type (PL/BL/GL) with tooltip
+- Platform height
+- Mounting structure
+- Coordinates
+
+**UAVPlatformDetails.vue** - Shows only:
+- Vendor (DJI, MicaSense, Parrot, etc.)
+- Model (M3M, RedEdge-MX, etc.)
+- Position ID (UAV01, UAV02)
+- Auto-instrument indicator
+
+**SatellitePlatformDetails.vue** - Shows only:
+- Space agency (ESA, NASA, JAXA)
+- Satellite (S2A, L8, etc.)
+- Sensor (MSI, OLI, SAR)
+- Sensor info (band count, resolution)
+
+#### Type-Specific Instrument Components
+
+**InstrumentTypeDetails.vue** - Dynamic component that:
+- Reads field schema from `INSTRUMENT_TYPE_REGISTRY`
+- Only renders fields defined for that type
+- Only shows fields that have values
+- Uses `summaryFields` for card display
+- Supports `showAllFields` for detail views
+
+**Field Schemas by Type:**
+
+| Type | Summary Fields |
+|------|----------------|
+| Phenocam | camera_brand, camera_model, resolution, interval |
+| Multispectral | number_of_channels, spectral_range, orientation |
+| PAR Sensor | spectral_range, sensor_brand, sensor_model |
+| NDVI Sensor | red_wavelength_nm, nir_wavelength_nm, sensor_brand |
+| PRI Sensor | band1_wavelength_nm, band2_wavelength_nm |
+| Hyperspectral | spectral_range_start/end_nm, number_of_bands |
+| Thermal | temperature_range_min/max, resolution |
+| LiDAR | wavelength_nm, pulse_rate, range_m |
+| Radar (SAR) | band, polarization, resolution_m |
+
+#### Refactored Card Components
+
+**PlatformCard.vue:**
+- Uses `<component :is="detailComponent">` pattern
+- Switches between Fixed/UAV/Satellite details
+- No longer shows irrelevant fields
+
+**InstrumentCard.vue:**
+- Uses `<InstrumentTypeDetails>` component
+- Only shows type-relevant specifications
+- `showAllSpecs` prop for detail views
+
+#### SOLID Principles Applied
+
+- **Single Responsibility**: Each detail component handles one type
+- **Open/Closed**: Add new types by extending registry, not modifying components
+- **Liskov Substitution**: All detail components implement same interface
+- **Interface Segregation**: Types only define fields they use
+- **Dependency Inversion**: Components depend on registry abstractions
 
 ---
 
