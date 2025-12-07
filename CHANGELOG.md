@@ -13,6 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.2] - 2025-12-07
+
+### Responsive Badge Sizing
+
+Fixed badge text overflow on small screens with responsive sizing.
+
+#### Changes
+
+**InstrumentCard.vue:**
+- Badges now use `badge-xs sm:badge-sm` for responsive sizing
+- Instrument type code (PHE, MS, etc.) hidden on very small screens
+- Added `whitespace-nowrap` to prevent word wrapping
+
+**PlatformCard.vue:**
+- Status and type badges now responsive (`badge-xs sm:badge-sm`)
+- Instrument count text responsive (`text-xs sm:text-sm`)
+
+**ROIViewer.vue:**
+- ROI count badges now responsive
+- "active" and "legacy" text hidden on small screens
+
+---
+
 ## [10.0.0-beta.1] - 2025-12-07
 
 ### Vue 10 Frontend Polish & UX Improvements

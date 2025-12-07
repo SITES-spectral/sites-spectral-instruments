@@ -191,23 +191,23 @@ const currentIconPaths = computed(() => {
       </div>
 
       <!-- Type + Measurement Status Row -->
-      <div class="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 text-xs">
-        <!-- Instrument type badge -->
-        <span :class="['badge badge-sm', typeConfig?.badgeClass || 'badge-ghost']">
+      <div class="flex items-center flex-wrap gap-2 mt-2 text-xs">
+        <!-- Instrument type badge - responsive sizing -->
+        <span :class="['badge badge-xs sm:badge-sm whitespace-nowrap', typeConfig?.badgeClass || 'badge-ghost']">
           {{ typeConfig?.name || instrument.instrument_type }}
-          <span v-if="typeConfig?.code" class="opacity-70 ml-1">
+          <span v-if="typeConfig?.code" class="opacity-70 ml-1 hidden sm:inline">
             ({{ typeConfig.code }})
           </span>
         </span>
 
         <!-- Measurement status with dot indicator -->
-        <span :class="[measurementConfig.textClass, 'flex items-center gap-1']">
-          <span :class="['w-1.5 h-1.5 rounded-full', measurementConfig.dotClass]"></span>
-          {{ instrument.measurement_status || 'Unknown' }}
+        <span :class="[measurementConfig.textClass, 'flex items-center gap-1 whitespace-nowrap']">
+          <span :class="['w-1.5 h-1.5 rounded-full flex-shrink-0', measurementConfig.dotClass]"></span>
+          <span class="truncate">{{ instrument.measurement_status || 'Unknown' }}</span>
         </span>
 
         <!-- ROI count -->
-        <span v-if="roiCount > 0" class="text-accent">
+        <span v-if="roiCount > 0" class="text-accent whitespace-nowrap">
           {{ roiCount }} ROI{{ roiCount !== 1 ? 's' : '' }}
         </span>
       </div>

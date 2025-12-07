@@ -140,7 +140,7 @@ const typeIconPath = computed(() => {
 
         <!-- Right: Status + Actions -->
         <div class="flex items-center gap-2 flex-shrink-0">
-          <span :class="['badge badge-sm', statusConfig.badgeClass]">
+          <span :class="['badge badge-xs sm:badge-sm whitespace-nowrap', statusConfig.badgeClass]">
             {{ platform.status }}
           </span>
 
@@ -160,13 +160,13 @@ const typeIconPath = computed(() => {
       </div>
 
       <!-- Platform Type Badge + Instrument Count -->
-      <div class="flex items-center justify-between mt-3">
-        <span :class="['badge badge-sm', typeBadgeClass]">
+      <div class="flex items-center justify-between mt-3 gap-2">
+        <span :class="['badge badge-xs sm:badge-sm whitespace-nowrap', typeBadgeClass]">
           {{ typeStrategy.name }}
         </span>
-        <span class="text-sm">
+        <span class="text-xs sm:text-sm whitespace-nowrap">
           <span class="font-semibold text-secondary">{{ instrumentCount }}</span>
-          <span class="text-base-content/60 ml-1">instrument{{ instrumentCount !== 1 ? 's' : '' }}</span>
+          <span class="text-base-content/60 ml-1 hidden xs:inline">instrument{{ instrumentCount !== 1 ? 's' : '' }}</span>
         </span>
       </div>
 

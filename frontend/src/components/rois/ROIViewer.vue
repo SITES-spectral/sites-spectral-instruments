@@ -537,11 +537,11 @@ defineExpose({
 
     <!-- ROI count badge (v10.0.0-alpha.17: shows active/total) -->
     <div class="absolute bottom-2 left-2 flex gap-1">
-      <div class="badge badge-neutral">
-        {{ activeRoiCount }} active
+      <div class="badge badge-xs sm:badge-sm badge-neutral whitespace-nowrap">
+        {{ activeRoiCount }} <span class="hidden sm:inline">active</span>
       </div>
-      <div v-if="showLegacy && legacyRoiCount > 0" class="badge badge-warning badge-outline">
-        {{ legacyRoiCount }} legacy
+      <div v-if="showLegacy && legacyRoiCount > 0" class="badge badge-xs sm:badge-sm badge-warning badge-outline whitespace-nowrap">
+        {{ legacyRoiCount }} <span class="hidden sm:inline">legacy</span>
       </div>
     </div>
   </div>
