@@ -98,18 +98,44 @@ async function handleLogout() {
         </svg>
       </label>
 
-      <!-- Admin Link (only for admins) -->
-      <router-link
-        v-if="authStore.isAdmin"
-        to="/admin"
-        class="btn btn-ghost btn-sm mr-2"
-        :class="{ 'btn-active': route.path === '/admin' }"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        <span class="hidden md:inline">Admin</span>
-      </router-link>
+      <!-- Admin Menu (only for admins) -->
+      <div v-if="authStore.isAdmin" class="dropdown dropdown-end mr-2">
+        <div
+          tabindex="0"
+          role="button"
+          class="btn btn-ghost btn-sm"
+          :class="{ 'btn-active': route.path.startsWith('/admin') }"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span class="hidden md:inline">Admin</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52"
+        >
+          <li>
+            <router-link to="/admin" :class="{ 'active': route.path === '/admin' }">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Dashboard
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/admin/settings" :class="{ 'active': route.path === '/admin/settings' }">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Users & Settings
+            </router-link>
+          </li>
+        </ul>
+      </div>
 
       <!-- User dropdown -->
       <div class="dropdown dropdown-end">
@@ -136,13 +162,20 @@ async function handleLogout() {
               Admin Dashboard
             </router-link>
           </li>
+          <li v-if="authStore.isAdmin">
+            <router-link to="/admin/settings">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Users & Settings
+            </router-link>
+          </li>
           <li>
             <a class="justify-between">
               Profile
               <span class="badge badge-sm badge-outline">Coming soon</span>
             </a>
           </li>
-          <li><a>Settings</a></li>
           <li class="divider"></li>
           <li>
             <button @click="handleLogout" class="text-error">

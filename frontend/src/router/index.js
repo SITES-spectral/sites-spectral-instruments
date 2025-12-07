@@ -13,6 +13,7 @@ import { useAuthStore } from '@stores/auth';
 const LoginView = () => import('@views/LoginView.vue');
 const DashboardView = () => import('@views/DashboardView.vue');
 const AdminDashboardView = () => import('@views/AdminDashboardView.vue');
+const AdminView = () => import('@views/AdminView.vue');
 const StationView = () => import('@views/StationView.vue');
 const PlatformView = () => import('@views/PlatformView.vue');
 const InstrumentView = () => import('@views/InstrumentView.vue');
@@ -36,6 +37,12 @@ const routes = [
     name: 'admin',
     component: AdminDashboardView,
     meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin Dashboard' }
+  },
+  {
+    path: '/admin/settings',
+    name: 'admin-settings',
+    component: AdminView,
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Admin Settings' }
   },
   {
     path: '/stations/:acronym',

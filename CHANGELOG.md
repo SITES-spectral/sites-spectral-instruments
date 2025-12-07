@@ -8,9 +8,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **Admin Panel**: User management and system settings
 - **ROI Drawing Tool**: Create polygons on canvas
 - **Image Upload**: Instrument images
+- **Profile Management**: User profile editing
+
+---
+
+## [10.0.0-alpha.16] - 2025-12-07
+
+### Admin Panel & Role System
+
+Complete admin panel implementation with user management, settings, and enhanced role system.
+
+#### Role System Enhancements
+
+**Auth Store (frontend/src/stores/auth.js):**
+- Added `ADMIN_ROLES` constant: admin, spectral-admin, sites-admin, sites-spectral-admin
+- Added `ADMIN_USERNAMES` constant for username-based admin detection
+- New `isStationAdmin` computed for station-admin role detection
+- New `userStationFromUsername` computed to extract station from username
+- Enhanced `canEditStation` to support station-admin users
+- Exported new computed properties for component use
+
+#### Role Management Composable
+
+**useRoles (frontend/src/composables/useRoles.js):**
+- `STATION_NAMES` constant for SITES network stations
+- `ROLE_DEFINITIONS` with metadata (name, description, level, icon, color)
+- Permission checking: `hasPermission(permission)`
+- Computed properties: `canManageUsers`, `canManageStations`, `canManageSettings`
+- Platform permissions: `canCreatePlatforms`, `canDeletePlatforms`
+- `accessibleStations` based on user role
+- `currentPermissions` object for all permissions
+
+#### Role Hierarchy
+
+| Role | Level | Scope |
+|------|-------|-------|
+| admin, spectral-admin | 100 | Full system access |
+| sites-admin, sites-spectral-admin | 100 | Full system access |
+| station-admin (e.g., abisko-admin) | 75 | Full station access |
+| station (e.g., abisko) | 50 | Limited station access |
+| readonly | 10 | View-only access |
+
+#### User Management Component
+
+**UserManagement (frontend/src/components/admin/UserManagement.vue):**
+- User list with role badges and status
+- Create/Edit user modals
+- Role selection dropdown with all role types
+- Station assignment for station users
+- Delete confirmation
+- Loading and error states
+
+#### Admin Settings View
+
+**AdminView (frontend/src/views/AdminView.vue):**
+- Tabbed interface: Users, Settings, Activity Log
+- System statistics overview (users, stations, platforms, instruments)
+- Role badge display for current user
+- User management tab with full CRUD
+- Settings tab with toggle controls (placeholder)
+- Activity log tab (placeholder)
+- Access denied state for non-admins
+
+#### Navigation Updates
+
+**Router (frontend/src/router/index.js):**
+- Added `/admin/settings` route for admin settings
+
+**Navbar (frontend/src/components/layout/TheNavbar.vue):**
+- Admin dropdown menu with Dashboard and Users & Settings links
+- Active state indicators for admin routes
+- User dropdown includes admin links for admins
 
 ---
 
