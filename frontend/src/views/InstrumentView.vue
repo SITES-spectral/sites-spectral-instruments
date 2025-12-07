@@ -281,6 +281,12 @@ const typeBgClass = computed(() => {
 
   return colors[typeConfig.value.key] || 'bg-gray-500/10';
 });
+
+// ROIs are only supported for Phenocams
+const supportsROIs = computed(() => {
+  if (!typeConfig.value) return false;
+  return typeConfig.value.key === 'phenocam';
+});
 </script>
 
 <template>
@@ -344,29 +350,29 @@ const typeBgClass = computed(() => {
 
             <!-- Names and Info -->
             <div>
-              <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold">
+              <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+                <h1 class="text-xl sm:text-2xl font-bold">
                   {{ instrument.display_name || instrument.normalized_name }}
                 </h1>
-                <span :class="['badge', statusConfig?.badgeClass]">
+                <span :class="['badge badge-sm sm:badge-md whitespace-nowrap', statusConfig?.badgeClass]">
                   {{ instrument.status }}
                 </span>
               </div>
               <code class="text-sm text-base-content/60 font-mono block mt-1">
                 {{ instrument.normalized_name }}
               </code>
-              <div class="flex items-center gap-4 mt-2">
+              <div class="flex items-center flex-wrap gap-2 sm:gap-4 mt-2">
                 <!-- Type -->
-                <span :class="['font-medium', typeColorClass]">
+                <span :class="['font-medium whitespace-nowrap', typeColorClass]">
                   {{ typeConfig?.name || instrument.instrument_type }}
-                  <span v-if="typeConfig?.code" class="text-base-content/50 ml-1">
+                  <span v-if="typeConfig?.code" class="text-base-content/50 ml-1 hidden sm:inline">
                     ({{ typeConfig.code }})
                   </span>
                 </span>
 
                 <!-- Measurement Status -->
-                <span v-if="measurementConfig" :class="[measurementConfig.textClass, 'flex items-center gap-1']">
-                  <span :class="['w-2 h-2 rounded-full', measurementConfig.dotClass]"></span>
+                <span v-if="measurementConfig" :class="[measurementConfig.textClass, 'flex items-center gap-1 whitespace-nowrap']">
+                  <span :class="['w-2 h-2 rounded-full flex-shrink-0', measurementConfig.dotClass]"></span>
                   {{ instrument.measurement_status }}
                 </span>
               </div>
@@ -443,14 +449,14 @@ const typeBgClass = computed(() => {
         </div>
       </div>
 
-      <!-- ROI Section -->
-      <div class="bg-base-100 rounded-lg shadow-lg p-6 mb-6">
+      <!-- ROI Section (only for Phenocams) -->
+      <div v-if="supportsROIs" class="bg-base-100 rounded-lg shadow-lg p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
             <h2 class="text-xl font-semibold">
               Regions of Interest (ROIs)
             </h2>
-            <span class="badge badge-lg">{{ rois.length }}</span>
+            <span class="badge badge-sm sm:badge-lg">{{ rois.length }}</span>
           </div>
           <div class="flex items-center gap-2">
             <!-- Toggle labels -->

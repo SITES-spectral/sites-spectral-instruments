@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.3] - 2025-12-07
+
+### ROI Section for Phenocams Only & Badge Fixes
+
+Fixed ROI section visibility and improved badge responsiveness.
+
+#### Changes
+
+**InstrumentView.vue:**
+- ROI section now only shows for Phenocam instruments
+- Added `supportsROIs` computed property
+- Status badge with responsive sizing (`badge-sm sm:badge-md`)
+- Type code hidden on small screens
+- Added `whitespace-nowrap` to prevent badge text wrapping
+- Header elements use `flex-wrap` for better mobile layout
+
+#### Reasoning
+
+ROIs (Regions of Interest) are only relevant for Phenocam imagery analysis.
+Other instrument types (Multispectral, PAR, NDVI, UAV sensors, Satellite data)
+don't have ROI digitization workflows in SITES Spectral.
+
+---
+
 ## [10.0.0-beta.2] - 2025-12-07
 
 ### Responsive Badge Sizing
