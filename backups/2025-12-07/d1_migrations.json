@@ -1,0 +1,168 @@
+[
+  {
+    "results": [
+      {
+        "id": 1,
+        "name": "0001_initial_schema.sql",
+        "applied_at": "2025-09-17 15:19:21"
+      },
+      {
+        "id": 2,
+        "name": "0002_seed_data.sql",
+        "applied_at": "2025-09-17 15:19:21"
+      },
+      {
+        "id": 3,
+        "name": "0003_phenocams_table.sql",
+        "applied_at": "2025-09-17 15:19:21"
+      },
+      {
+        "id": 4,
+        "name": "0004_mspectral_sensors_table.sql",
+        "applied_at": "2025-09-17 15:19:21"
+      },
+      {
+        "id": 5,
+        "name": "0005_platforms_and_auth.sql",
+        "applied_at": "2025-09-17 15:19:22"
+      },
+      {
+        "id": 6,
+        "name": "0006_test_users.sql",
+        "applied_at": "2025-09-17 15:19:22"
+      },
+      {
+        "id": 7,
+        "name": "0007_thematic_program_tracking.sql",
+        "applied_at": "2025-09-17 15:19:22"
+      },
+      {
+        "id": 8,
+        "name": "0008_fix_station_data_consistency.sql",
+        "applied_at": "2025-09-17 15:19:22"
+      },
+      {
+        "id": 9,
+        "name": "0009_new_normalized_schema.sql",
+        "applied_at": "2025-09-17 15:19:22"
+      },
+      {
+        "id": 10,
+        "name": "0034_audit_fixes_cascade_indexes.sql",
+        "applied_at": "2025-12-02 09:44:11"
+      },
+      {
+        "id": 11,
+        "name": "0012_new_yaml_based_schema.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 12,
+        "name": "0013_import_stations_yaml_data.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 13,
+        "name": "0020_rebuild_from_real_yaml_data.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 14,
+        "name": "0021_import_updated_stations_yaml.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 15,
+        "name": "0022_add_operation_programs_to_platforms.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 16,
+        "name": "0023_create_rois_table.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 17,
+        "name": "0024_import_standardized_stations_data.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 18,
+        "name": "0025_add_missing_schema_fields.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 19,
+        "name": "0026_production_enhancements.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 20,
+        "name": "0027_add_svb_instruments_partial.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 21,
+        "name": "0027_add_multispectral_support.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 22,
+        "name": "0028_schema_consolidation_v7.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 23,
+        "name": "0029_platform_types_and_aoi.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 24,
+        "name": "0030_maintenance_calibration.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 25,
+        "name": "0031_platform_ecosystem_code.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 26,
+        "name": "0032_mobile_platforms_extension.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 27,
+        "name": "0033_usv_uuv_platforms.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 28,
+        "name": "0035_rename_location_code_to_mount_type_code.sql",
+        "applied_at": "2025-12-07 16:51:19"
+      },
+      {
+        "id": 29,
+        "name": "0036_roi_legacy_and_drawing.sql",
+        "applied_at": "2025-12-07 16:51:26"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "EEUR",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.1879
+      },
+      "duration": 0.1879,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 536576,
+      "rows_read": 29,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

@@ -1,0 +1,149 @@
+[
+  {
+    "results": [
+      {
+        "id": 1,
+        "normalized_name": "abisko",
+        "display_name": "Abisko",
+        "acronym": "ANS",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 68.35431844762302,
+        "longitude": 18.81577182723506,
+        "elevation_m": null,
+        "description": "Abisko Scientific Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 2,
+        "normalized_name": "asa",
+        "display_name": "Asa",
+        "acronym": "ASA",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 57.16457057264239,
+        "longitude": 14.78266887117808,
+        "elevation_m": null,
+        "description": "Asa Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 3,
+        "normalized_name": "grimso",
+        "display_name": "Grimsö",
+        "acronym": "GRI",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 59.72893957481183,
+        "longitude": 15.472279444503267,
+        "elevation_m": null,
+        "description": "Grimsö Wildlife Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 4,
+        "normalized_name": "lonnstorp",
+        "display_name": "Lönnstorp",
+        "acronym": "LON",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 55.66915120680076,
+        "longitude": 13.102841729711757,
+        "elevation_m": null,
+        "description": "Lönnstorp Agricultural Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 5,
+        "normalized_name": "robacksdalen",
+        "display_name": "Röbäcksdalen",
+        "acronym": "RBD",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 63.81101813533398,
+        "longitude": 20.23857775473176,
+        "elevation_m": null,
+        "description": "Röbäcksdalen Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 6,
+        "normalized_name": "skogaryd",
+        "display_name": "Skogaryd",
+        "acronym": "SKC",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 58.36489314691996,
+        "longitude": 12.144947284525392,
+        "elevation_m": null,
+        "description": "Skogaryd Research Catchment",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 7,
+        "normalized_name": "svartberget",
+        "display_name": "Svartberget",
+        "acronym": "SVB",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 64.24433725317064,
+        "longitude": 19.76638029816108,
+        "elevation_m": null,
+        "description": "Svartberget Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 8,
+        "normalized_name": "bolmen",
+        "display_name": "Bolmen Research Station",
+        "acronym": "BOL",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 56.996567,
+        "longitude": 13.783417,
+        "elevation_m": null,
+        "description": "Bolmen Research Station",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      },
+      {
+        "id": 9,
+        "normalized_name": "erken",
+        "display_name": "Erken Laboratory",
+        "acronym": "ERK",
+        "status": "Active",
+        "country": "Sweden",
+        "latitude": 59.88374339980456,
+        "longitude": 18.655476188993664,
+        "elevation_m": null,
+        "description": "Erken Laboratory",
+        "created_at": "2025-09-20 19:12:58",
+        "updated_at": "2025-09-20 19:12:58"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "EEUR",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.1749
+      },
+      "duration": 0.1749,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 536576,
+      "rows_read": 9,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

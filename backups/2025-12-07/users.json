@@ -1,0 +1,36 @@
+[
+  {
+    "results": [
+      {
+        "id": 2,
+        "username": "admin",
+        "email": "admin@sites.se",
+        "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+        "role": "admin",
+        "full_name": "System Administrator",
+        "organization": "SITES Spectral",
+        "active": 1,
+        "station_id": null,
+        "created_at": "2025-09-19 10:57:50",
+        "updated_at": "2025-09-19 10:57:50"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "EEUR",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.206
+      },
+      "duration": 0.206,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 536576,
+      "rows_read": 1,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

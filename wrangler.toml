@@ -15,8 +15,9 @@ account_id = "e5f93ed83288202d33cf9c7b18068f64"
 # Database Schema: v12 (36 migrations) - ROI Legacy System
 
 # Static Assets Configuration
+# v10.0.0: Vue 3 + Vite frontend (previously: static HTML in public/)
 [assets]
-directory = "public"
+directory = "public-v10"
 binding = "ASSETS"
 
 [[d1_databases]]
