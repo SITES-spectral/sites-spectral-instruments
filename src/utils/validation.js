@@ -365,7 +365,13 @@ export const ROI_SCHEMA = {
     color: { type: 'string', maxLength: 20 },
     description: { type: 'string', maxLength: 2000 },
     vegetation_type: { type: 'string', maxLength: 100 },
-    status: { type: 'enum', values: ['Active', 'Inactive', 'Archived'] }
+    status: { type: 'enum', values: ['Active', 'Inactive', 'Archived'] },
+    // Legacy ROI fields (v10.0.0-alpha.17)
+    is_legacy: { type: 'boolean' },
+    legacy_date: { type: 'date' },
+    replaced_by_roi_id: { type: 'integer', min: 1 },
+    timeseries_broken: { type: 'boolean' },
+    legacy_reason: { type: 'string', maxLength: 500 }
 };
 
 // Valid ecosystem codes for Swedish research stations

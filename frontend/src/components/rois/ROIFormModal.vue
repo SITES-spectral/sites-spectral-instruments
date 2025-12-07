@@ -4,11 +4,13 @@
  *
  * Modal for creating and editing ROIs.
  * Supports color selection, description, and basic metadata.
+ * v10.0.0-alpha.17: Added interactive drawing canvas
  *
  * @component
  */
 import { ref, computed, watch } from 'vue';
 import BaseModal from '@components/modals/BaseModal.vue';
+import ROIDrawingCanvas from './ROIDrawingCanvas.vue';
 
 const props = defineProps({
   /**
@@ -49,10 +51,35 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+
+  /**
+   * Image URL for drawing canvas (v10.0.0-alpha.17)
+   */
+  imageUrl: {
+    type: String,
+    default: ''
+  },
+
+  /**
+   * Existing ROIs to display on canvas (v10.0.0-alpha.17)
+   */
+  existingRois: {
+    type: Array,
+    default: () => []
   }
 });
 
 const emit = defineEmits(['update:modelValue', 'submit']);
+
+// Drawing canvas ref
+const canvasRef = ref(null);
+
+// Current step: 'draw' or 'details'
+const currentStep = ref('draw');
+
+// Drawn points (v10.0.0-alpha.17)
+const drawnPoints = ref([]);
 
 // Form data
 const formData = ref({
@@ -64,6 +91,9 @@ const formData = ref({
   alpha: 0.3,
   thickness: 2
 });
+
+// Has valid polygon (at least 3 points)
+const hasValidPolygon = computed(() => drawnPoints.value.length >= 3);
 
 // Predefined colors
 const colorPresets = [
@@ -81,9 +111,15 @@ const colorPresets = [
 const isEditing = computed(() => !!props.roi?.id);
 
 // Modal title
-const modalTitle = computed(() =>
-  isEditing.value ? `Edit ${props.roi.roi_name}` : 'Create New ROI'
-);
+const modalTitle = computed(() => {
+  if (isEditing.value) return `Edit ${props.roi.roi_name}`;
+  return currentStep.value === 'draw' ? 'Draw ROI Polygon' : 'ROI Details';
+});
+
+// Show canvas when we have an image and not in edit mode with existing points
+const showDrawingCanvas = computed(() => {
+  return props.imageUrl && currentStep.value === 'draw';
+});
 
 // Color preview style
 const colorPreviewStyle = computed(() => ({
@@ -124,26 +160,60 @@ function resetForm() {
     alpha: 0.3,
     thickness: 2
   };
+  drawnPoints.value = [];
+  currentStep.value = props.imageUrl ? 'draw' : 'details';
 }
 
 function selectColorPreset(preset) {
   formData.value.color_r = preset.r;
   formData.value.color_g = preset.g;
   formData.value.color_b = preset.b;
+  // Update canvas color if ref is available
+  if (canvasRef.value) {
+    canvasRef.value.setColor(preset.r, preset.g, preset.b);
+  }
 }
 
 function handleClose() {
   emit('update:modelValue', false);
 }
 
+// Handle points change from canvas
+function handlePointsChange(points) {
+  drawnPoints.value = points;
+}
+
+// Handle drawing complete from canvas
+function handleDrawingComplete(polygonData) {
+  drawnPoints.value = polygonData.points;
+  formData.value.color_r = polygonData.color_r;
+  formData.value.color_g = polygonData.color_g;
+  formData.value.color_b = polygonData.color_b;
+  formData.value.alpha = polygonData.alpha;
+  formData.value.thickness = polygonData.thickness;
+  // Move to details step
+  currentStep.value = 'details';
+}
+
+// Handle drawing cancel
+function handleDrawingCancel() {
+  drawnPoints.value = [];
+}
+
+// Go back to drawing step
+function goBackToDrawing() {
+  currentStep.value = 'draw';
+}
+
 function handleSubmit() {
   const payload = {
     ...formData.value,
-    instrument_id: parseInt(props.instrumentId)
+    instrument_id: parseInt(props.instrumentId),
+    points: drawnPoints.value
   };
 
-  // Preserve existing points when editing
-  if (isEditing.value && props.roi.points) {
+  // Preserve existing points when editing if no new points drawn
+  if (isEditing.value && drawnPoints.value.length === 0 && props.roi.points) {
     payload.points = props.roi.points;
   }
 
@@ -155,17 +225,93 @@ function handleSubmit() {
   <BaseModal
     :model-value="modelValue"
     :title="modalTitle"
-    size="md"
+    :size="showDrawingCanvas ? 'lg' : 'md'"
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <template #default>
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <!-- Step indicator (when creating with image) -->
+      <div v-if="imageUrl && !isEditing" class="flex items-center justify-center gap-4 mb-4">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+            :class="currentStep === 'draw' ? 'bg-primary text-primary-content' : 'bg-success text-success-content'"
+          >
+            {{ currentStep === 'draw' ? '1' : '✓' }}
+          </div>
+          <span :class="currentStep === 'draw' ? 'font-medium' : 'text-base-content/60'">Draw</span>
+        </div>
+        <div class="w-8 h-0.5 bg-base-300"></div>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+            :class="currentStep === 'details' ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/60'"
+          >
+            2
+          </div>
+          <span :class="currentStep === 'details' ? 'font-medium' : 'text-base-content/60'">Details</span>
+        </div>
+      </div>
+
+      <!-- Drawing Canvas Step (v10.0.0-alpha.17) -->
+      <div v-if="showDrawingCanvas" class="space-y-4">
+        <div class="alert alert-info py-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="text-sm">Click on the image to draw ROI points. Double-click or click the first point to close.</span>
+        </div>
+
+        <!-- Color presets for drawing -->
+        <div class="flex flex-wrap gap-2">
+          <span class="text-sm text-base-content/70">Color:</span>
+          <button
+            v-for="preset in colorPresets"
+            :key="preset.name"
+            type="button"
+            class="w-6 h-6 rounded border-2 border-base-300 hover:border-primary transition-colors"
+            :style="{ backgroundColor: `rgb(${preset.r}, ${preset.g}, ${preset.b})` }"
+            :title="preset.name"
+            @click="selectColorPreset(preset)"
+          ></button>
+        </div>
+
+        <ROIDrawingCanvas
+          ref="canvasRef"
+          :image-url="imageUrl"
+          :existing-rois="existingRois"
+          :editing-roi="isEditing ? roi : null"
+          :height="400"
+          :default-color="{ r: formData.color_r, g: formData.color_g, b: formData.color_b }"
+          @points-change="handlePointsChange"
+          @drawing-complete="handleDrawingComplete"
+          @drawing-cancel="handleDrawingCancel"
+        />
+      </div>
+
+      <!-- Details Form Step -->
+      <form v-else @submit.prevent="handleSubmit" class="space-y-4">
         <!-- Instrument info -->
         <div class="alert alert-info py-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span class="text-sm">ROI for: <strong>{{ instrumentName }}</strong></span>
+        </div>
+
+        <!-- Points summary (when coming from drawing) -->
+        <div v-if="hasValidPolygon" class="alert py-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="text-sm">Polygon drawn with {{ drawnPoints.length }} points</span>
+          <button
+            v-if="imageUrl"
+            type="button"
+            class="btn btn-ghost btn-xs"
+            @click="goBackToDrawing"
+          >
+            Redraw
+          </button>
         </div>
 
         <!-- ROI Name -->
@@ -311,10 +457,23 @@ function handleSubmit() {
       >
         Cancel
       </button>
+
+      <!-- Back button when on details step -->
       <button
+        v-if="currentStep === 'details' && imageUrl && !isEditing"
+        type="button"
+        class="btn btn-ghost"
+        :disabled="loading"
+        @click="goBackToDrawing"
+      >
+        Back
+      </button>
+
+      <button
+        v-if="currentStep === 'details'"
         type="submit"
         class="btn btn-primary"
-        :disabled="loading"
+        :disabled="loading || (!hasValidPolygon && !isEditing)"
         @click="handleSubmit"
       >
         <span v-if="loading" class="loading loading-spinner loading-sm"></span>

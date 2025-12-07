@@ -2,6 +2,7 @@
  * Role Management Composable
  *
  * Provides role-based access control utilities.
+ * v10.0.0-alpha.17: Added ROI edit permissions for Legacy System
  *
  * Role Hierarchy:
  * - admin, spectral-admin, sites-admin, sites-spectral-admin: Full system access
@@ -9,11 +10,21 @@
  * - station (e.g., abisko): Limited edit access to their station
  * - readonly: View-only access
  *
+ * ROI Edit Permissions:
+ * - Super admins can directly edit ROIs (with timeseries_broken warning)
+ * - Station users must create new ROI (old marked as legacy)
+ *
  * @module composables/useRoles
  */
 
 import { computed } from 'vue';
 import { useAuthStore, ADMIN_ROLES, ADMIN_USERNAMES } from '@stores/auth';
+
+/**
+ * Super admin roles that can directly edit ROIs
+ * These roles can override the legacy system with a warning
+ */
+export const SUPER_ADMIN_ROLES = ['admin', 'spectral-admin', 'sites-admin', 'sites-spectral-admin'];
 
 /**
  * Station names for the SITES network
@@ -158,6 +169,49 @@ export function useRoles() {
     return authStore.isAdmin || authStore.isStationAdmin;
   });
 
+  // ============================================================================
+  // ROI Edit Permissions (v10.0.0-alpha.17 - Legacy ROI System)
+  // ============================================================================
+
+  /**
+   * Check if user can directly edit ROIs (super admin only)
+   * Super admins can modify ROIs directly but will get a warning about
+   * breaking time series data, and timeseries_broken flag will be set.
+   */
+  const canDirectEditROI = computed(() => {
+    return SUPER_ADMIN_ROLES.includes(authStore.userRole);
+  });
+
+  /**
+   * Check if user can edit ROIs (through legacy system or direct)
+   * Station users must create new ROI (old marked as legacy)
+   * Super admins can edit directly with warning
+   */
+  const canEditROI = computed(() => {
+    return authStore.isAdmin || authStore.isStationAdmin || authStore.isStationUser;
+  });
+
+  /**
+   * Check if user can create new ROIs
+   */
+  const canCreateROI = computed(() => {
+    return authStore.isAdmin || authStore.isStationAdmin || authStore.isStationUser;
+  });
+
+  /**
+   * Check if user can delete ROIs
+   */
+  const canDeleteROI = computed(() => {
+    return authStore.isAdmin || authStore.isStationAdmin;
+  });
+
+  /**
+   * Check if user can view legacy ROIs
+   */
+  const canViewLegacyROIs = computed(() => {
+    return authStore.isAuthenticated;
+  });
+
   /**
    * Get list of stations user can access
    */
@@ -184,8 +238,11 @@ export function useRoles() {
       'platforms.delete': canDeletePlatforms.value,
       'instruments.create': authStore.isAdmin || authStore.isStationAdmin || authStore.isStationUser,
       'instruments.delete': authStore.isAdmin || authStore.isStationAdmin,
-      'rois.create': authStore.isAdmin || authStore.isStationAdmin || authStore.isStationUser,
-      'rois.delete': authStore.isAdmin || authStore.isStationAdmin,
+      'rois.create': canCreateROI.value,
+      'rois.edit': canEditROI.value,
+      'rois.edit.direct': canDirectEditROI.value,
+      'rois.delete': canDeleteROI.value,
+      'rois.legacy.view': canViewLegacyROIs.value,
       'export.full': authStore.isAdmin
     };
     return permissions[permission] ?? false;
@@ -203,8 +260,11 @@ export function useRoles() {
       'platforms.delete': canDeletePlatforms.value,
       'instruments.create': authStore.isAdmin || authStore.isStationAdmin || authStore.isStationUser,
       'instruments.delete': authStore.isAdmin || authStore.isStationAdmin,
-      'rois.create': authStore.isAdmin || authStore.isStationAdmin || authStore.isStationUser,
-      'rois.delete': authStore.isAdmin || authStore.isStationAdmin,
+      'rois.create': canCreateROI.value,
+      'rois.edit': canEditROI.value,
+      'rois.edit.direct': canDirectEditROI.value,
+      'rois.delete': canDeleteROI.value,
+      'rois.legacy.view': canViewLegacyROIs.value,
       'export.full': authStore.isAdmin
     };
   });
@@ -215,8 +275,9 @@ export function useRoles() {
     ROLE_DEFINITIONS,
     ADMIN_ROLES,
     ADMIN_USERNAMES,
+    SUPER_ADMIN_ROLES,
 
-    // Computed
+    // Computed - General
     currentRoleDisplay,
     roleBadgeClass,
     roleIconClass,
@@ -227,6 +288,13 @@ export function useRoles() {
     canDeletePlatforms,
     accessibleStations,
     currentPermissions,
+
+    // Computed - ROI Permissions (v10.0.0-alpha.17)
+    canDirectEditROI,
+    canEditROI,
+    canCreateROI,
+    canDeleteROI,
+    canViewLegacyROIs,
 
     // Methods
     getRoleDefinition,

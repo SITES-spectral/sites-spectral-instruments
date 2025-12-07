@@ -8,9 +8,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **ROI Drawing Tool**: Create polygons on canvas
 - **Image Upload**: Instrument images
 - **Profile Management**: User profile editing
+
+---
+
+## [10.0.0-alpha.17] - 2025-12-07
+
+### ROI Drawing Tool with Legacy System
+
+Interactive canvas-based ROI polygon drawing with legacy system to protect time series data integrity (L2/L3 phenocam products).
+
+#### Database Migration
+
+**migrations/0036_roi_legacy_and_drawing.sql:**
+- `is_legacy` - Boolean flag to mark ROI as legacy
+- `legacy_date` - Timestamp when ROI was marked as legacy
+- `replaced_by_roi_id` - FK to the replacement ROI
+- `timeseries_broken` - Flag set when admin overrides active ROI
+- `legacy_reason` - Text explaining why ROI was deprecated
+- Indexes for efficient legacy filtering
+
+#### Backend Updates
+
+**ROI Handler (src/handlers/rois.js):**
+- `getNextAvailableROIName()` - Skips legacy ROI numbers
+- `canDirectlyEditROI()` - Permission check for super admins
+- `GET /api/rois?include_legacy=true` - Include legacy in list
+- `GET /api/rois/{id}/edit-mode` - Get edit mode info
+- `POST /api/rois/{id}/legacy` - Mark as legacy, create replacement
+- `PUT /api/rois/{id}/override` - Super admin override (sets timeseries_broken)
+
+**Validation (src/utils/validation.js):**
+- Added legacy fields to ROI_SCHEMA
+
+#### Frontend Components
+
+**New Components:**
+- `ROIDrawingCanvas.vue` - Interactive polygon drawing canvas
+- `LegacyROIWarningModal.vue` - Warning for station users
+- `AdminOverrideConfirmModal.vue` - Double confirmation for admins
+
+**New Composables:**
+- `useROIDrawing.js` - Drawing state and methods
+
+**Updated Components:**
+- `ROIList.vue` - Active/Legacy tabs
+- `ROICard.vue` - Legacy badge, dimmed styling
+- `ROIViewer.vue` - Legacy toggle, dashed lines for legacy
+- `ROIFormModal.vue` - Two-step flow with drawing canvas
+
+#### Role Permissions
+
+**useRoles.js Enhancements:**
+- `SUPER_ADMIN_ROLES` constant
+- `canDirectEditROI` - Super admins only
+- `canEditROI` - Station users and admins
+- `canCreateROI`, `canDeleteROI`, `canViewLegacyROIs`
+- Permission string: `rois.edit.direct`
+
+#### Edit Flow
+
+**Station User Edit:**
+1. Click Edit on active ROI → LegacyROIWarningModal
+2. Old ROI marked legacy with reason
+3. New ROI created with next available number
+4. Legacy ROIs visible in Legacy tab (dimmed)
+
+**Super Admin Edit:**
+1. Click Edit on active ROI → AdminOverrideConfirmModal
+2. Type 'CONFIRM' to proceed
+3. ROI updated directly, `timeseries_broken` flag set
+4. Warning badge displayed on card
 
 ---
 

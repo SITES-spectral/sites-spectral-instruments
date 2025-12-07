@@ -3,6 +3,7 @@
  * ROI Card Component
  *
  * Displays a single ROI with color preview, name, and actions.
+ * v10.0.0-alpha.17: Added legacy ROI badge and styling
  *
  * @component
  */
@@ -39,6 +40,14 @@ const props = defineProps({
   compact: {
     type: Boolean,
     default: false
+  },
+
+  /**
+   * Whether this is a legacy ROI (v10.0.0-alpha.17)
+   */
+  isLegacy: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -49,9 +58,29 @@ const colorStyle = computed(() => {
   const r = props.roi.color_r ?? 255;
   const g = props.roi.color_g ?? 0;
   const b = props.roi.color_b ?? 0;
+  const alpha = props.isLegacy ? 0.5 : 1;
   return {
-    backgroundColor: `rgb(${r}, ${g}, ${b})`
+    backgroundColor: `rgba(${r}, ${g}, ${b}, ${alpha})`
   };
+});
+
+// Card classes based on legacy status
+const cardClasses = computed(() => {
+  const base = 'roi-card flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border';
+
+  if (props.isLegacy) {
+    return [
+      base,
+      'border-base-300 opacity-60',
+      props.selected ? 'bg-base-200 border-base-content/30' : 'bg-base-100/50 hover:bg-base-200/50'
+    ];
+  }
+
+  return [
+    base,
+    'border-base-300 hover:border-primary/50',
+    props.selected ? 'bg-primary/10 border-primary' : 'bg-base-100 hover:bg-base-200'
+  ];
 });
 
 // Point count
@@ -87,11 +116,7 @@ function handleDelete(e) {
 
 <template>
   <div
-    :class="[
-      'roi-card flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all',
-      'border border-base-300 hover:border-primary/50',
-      selected ? 'bg-primary/10 border-primary' : 'bg-base-100 hover:bg-base-200'
-    ]"
+    :class="cardClasses"
     @click="handleClick"
   >
     <!-- Color indicator -->
@@ -102,17 +127,36 @@ function handleDelete(e) {
 
     <!-- Info -->
     <div class="flex-1 min-w-0">
-      <div class="font-medium truncate">
-        {{ roi.roi_name }}
+      <div class="flex items-center gap-2">
+        <span class="font-medium truncate" :class="{ 'line-through': isLegacy }">
+          {{ roi.roi_name }}
+        </span>
+        <!-- Legacy badge (v10.0.0-alpha.17) -->
+        <span v-if="isLegacy" class="badge badge-xs badge-warning gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Legacy
+        </span>
+        <!-- Timeseries broken badge -->
+        <span v-if="roi.timeseries_broken" class="badge badge-xs badge-error gap-1" title="Time series data may be inconsistent">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </span>
       </div>
       <div v-if="!compact" class="text-xs text-base-content/60">
         {{ pointCount }} points
         <span v-if="roi.auto_generated" class="badge badge-xs badge-ghost ml-1">auto</span>
+        <!-- Legacy date info -->
+        <span v-if="isLegacy && roi.legacy_date" class="ml-1">
+          ({{ new Date(roi.legacy_date).toLocaleDateString() }})
+        </span>
       </div>
     </div>
 
-    <!-- Actions -->
-    <div v-if="canEdit" class="flex gap-1 flex-shrink-0">
+    <!-- Actions (only for non-legacy ROIs) -->
+    <div v-if="canEdit && !isLegacy" class="flex gap-1 flex-shrink-0">
       <button
         class="btn btn-ghost btn-xs btn-square"
         title="Edit ROI"
@@ -131,6 +175,13 @@ function handleDelete(e) {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
       </button>
+    </div>
+
+    <!-- View-only indicator for legacy ROIs -->
+    <div v-if="isLegacy" class="flex-shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
     </div>
   </div>
 </template>

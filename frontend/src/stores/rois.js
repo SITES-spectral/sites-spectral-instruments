@@ -2,6 +2,7 @@
  * ROIs Store
  *
  * Manages Regions of Interest (ROI) state and operations.
+ * v10.0.0-alpha.17: Added Legacy ROI System support
  *
  * @module stores/rois
  */
@@ -16,9 +17,30 @@ export const useROIsStore = defineStore('rois', () => {
   const currentROI = ref(null);
   const loading = ref(false);
   const error = ref(null);
+  const includeLegacy = ref(true); // Include legacy ROIs by default for display
 
   // Getters
   const roiCount = computed(() => rois.value.length);
+
+  /**
+   * Active ROIs (not marked as legacy)
+   */
+  const activeRois = computed(() => rois.value.filter(r => !r.is_legacy));
+
+  /**
+   * Legacy ROIs (marked as legacy)
+   */
+  const legacyRois = computed(() => rois.value.filter(r => r.is_legacy));
+
+  /**
+   * Active ROI count
+   */
+  const activeRoiCount = computed(() => activeRois.value.length);
+
+  /**
+   * Legacy ROI count
+   */
+  const legacyRoiCount = computed(() => legacyRois.value.length);
 
   const roisByInstrument = computed(() => {
     const grouped = {};
@@ -59,14 +81,19 @@ export const useROIsStore = defineStore('rois', () => {
   /**
    * Fetch ROIs for an instrument
    * @param {number} instrumentId - Instrument ID
+   * @param {boolean} fetchLegacy - Whether to include legacy ROIs (default: true)
    * @returns {Promise<void>}
    */
-  async function fetchROIsByInstrument(instrumentId) {
+  async function fetchROIsByInstrument(instrumentId, fetchLegacy = true) {
     loading.value = true;
     error.value = null;
 
     try {
-      const response = await api.get('/rois', { instrument: instrumentId });
+      const params = { instrument: instrumentId };
+      if (fetchLegacy) {
+        params.include_legacy = 'true';
+      }
+      const response = await api.get('/rois', params);
       if (response.success) {
         rois.value = (response.data?.rois || []).map(parseROIPoints);
       } else {
@@ -248,16 +275,135 @@ export const useROIsStore = defineStore('rois', () => {
     currentROI.value = null;
   }
 
+  // ============================================================================
+  // Legacy ROI System Actions (v10.0.0-alpha.17)
+  // ============================================================================
+
+  /**
+   * Get ROI edit mode info from backend
+   * @param {number} roiId - ROI ID
+   * @returns {Promise<Object|null>} Edit mode information
+   */
+  async function getROIEditMode(roiId) {
+    try {
+      const response = await api.get(`/rois/${roiId}/edit-mode`);
+      if (response.success) {
+        return response.data;
+      }
+      error.value = response.error || 'Failed to get edit mode';
+      return null;
+    } catch (err) {
+      error.value = err.message;
+      return null;
+    }
+  }
+
+  /**
+   * Mark ROI as legacy and create a replacement
+   * @param {number} roiId - ROI ID to mark as legacy
+   * @param {Object} newRoiData - Data for the new replacement ROI
+   * @param {string} reason - Reason for marking as legacy
+   * @returns {Promise<Object|null>} Result with legacy and new ROI info
+   */
+  async function markAsLegacyAndReplace(roiId, newRoiData, reason = 'Replaced by new ROI') {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await api.post(`/rois/${roiId}/legacy`, {
+        reason,
+        replacement_data: newRoiData
+      });
+
+      if (response.success) {
+        // Refresh ROIs list to get updated data
+        const instrumentId = rois.value.find(r => r.id === roiId)?.instrument_id;
+        if (instrumentId) {
+          await fetchROIsByInstrument(instrumentId);
+        }
+        return response.data;
+      }
+      error.value = response.error || 'Failed to mark ROI as legacy';
+      return null;
+    } catch (err) {
+      error.value = err.message;
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Admin override update - directly edit ROI (sets timeseries_broken flag)
+   * @param {number} roiId - ROI ID
+   * @param {Object} roiData - Updated ROI data
+   * @returns {Promise<Object|null>} Update result
+   */
+  async function adminOverrideUpdate(roiId, roiData) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      // Serialize points if needed
+      const payload = { ...roiData };
+      if (payload.points && Array.isArray(payload.points)) {
+        payload.points_json = JSON.stringify(payload.points);
+        delete payload.points;
+      }
+
+      const response = await api.put(`/rois/${roiId}/override`, payload);
+
+      if (response.success) {
+        // Update local state
+        const index = rois.value.findIndex(r => r.id === roiId);
+        if (index !== -1) {
+          rois.value[index] = {
+            ...rois.value[index],
+            ...roiData,
+            timeseries_broken: true
+          };
+        }
+        if (currentROI.value?.id === roiId) {
+          currentROI.value = {
+            ...currentROI.value,
+            ...roiData,
+            timeseries_broken: true
+          };
+        }
+        return response.data;
+      }
+      error.value = response.error || 'Failed to update ROI';
+      return null;
+    } catch (err) {
+      error.value = err.message;
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Toggle include legacy setting
+   */
+  function setIncludeLegacy(value) {
+    includeLegacy.value = value;
+  }
+
   return {
     // State
     rois,
     currentROI,
     loading,
     error,
+    includeLegacy,
 
     // Getters
     roiCount,
     roisByInstrument,
+    activeRois,
+    legacyRois,
+    activeRoiCount,
+    legacyRoiCount,
 
     // Actions
     fetchROIsByInstrument,
@@ -267,6 +413,12 @@ export const useROIsStore = defineStore('rois', () => {
     updateROI,
     deleteROI,
     clearCurrentROI,
-    clearROIs
+    clearROIs,
+
+    // Legacy System Actions
+    getROIEditMode,
+    markAsLegacyAndReplace,
+    adminOverrideUpdate,
+    setIncludeLegacy
   };
 });

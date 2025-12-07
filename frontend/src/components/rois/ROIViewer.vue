@@ -4,6 +4,7 @@
  *
  * Canvas-based viewer for displaying ROI polygons overlaid on an instrument image.
  * Supports zoom, pan, and ROI highlighting.
+ * v10.0.0-alpha.17: Added legacy ROI toggle and dimmed display
  *
  * @component
  */
@@ -48,10 +49,26 @@ const props = defineProps({
   height: {
     type: [Number, String],
     default: 400
+  },
+
+  /**
+   * Show legacy toggle (v10.0.0-alpha.17)
+   */
+  showLegacyToggle: {
+    type: Boolean,
+    default: true
+  },
+
+  /**
+   * Initial show legacy state
+   */
+  initialShowLegacy: {
+    type: Boolean,
+    default: false
   }
 });
 
-const emit = defineEmits(['roi-click', 'roi-hover']);
+const emit = defineEmits(['roi-click', 'roi-hover', 'toggle-legacy']);
 
 // Refs
 const containerRef = ref(null);
@@ -59,6 +76,39 @@ const canvasRef = ref(null);
 const imageLoaded = ref(false);
 const imageError = ref(false);
 const hoveredRoiId = ref(null);
+
+// Legacy ROI toggle state (v10.0.0-alpha.17)
+const showLegacy = ref(props.initialShowLegacy);
+
+// Computed: Has legacy ROIs
+const hasLegacyRois = computed(() => {
+  return props.rois.some(roi => roi.is_legacy);
+});
+
+// Computed: Filtered ROIs based on legacy toggle
+const visibleRois = computed(() => {
+  if (showLegacy.value) {
+    return props.rois;
+  }
+  return props.rois.filter(roi => !roi.is_legacy);
+});
+
+// Count of legacy ROIs
+const legacyRoiCount = computed(() => {
+  return props.rois.filter(roi => roi.is_legacy).length;
+});
+
+// Count of active ROIs
+const activeRoiCount = computed(() => {
+  return props.rois.filter(roi => !roi.is_legacy).length;
+});
+
+// Toggle legacy visibility
+function toggleLegacy() {
+  showLegacy.value = !showLegacy.value;
+  emit('toggle-legacy', showLegacy.value);
+  draw();
+}
 
 // Image object
 let image = null;
@@ -134,7 +184,8 @@ function pointInPolygon(x, y, points) {
 function findROIAtPosition(canvasX, canvasY) {
   const imagePoint = inverseTransformPoint(canvasX, canvasY);
 
-  for (const roi of props.rois) {
+  // Only find from visible ROIs
+  for (const roi of visibleRois.value) {
     if (roi.points && pointInPolygon(imagePoint.x, imagePoint.y, roi.points)) {
       return roi;
     }
@@ -187,13 +238,16 @@ function draw() {
     ctx.fillText('Loading image...', width / 2, height / 2);
   }
 
-  // Draw ROIs
-  props.rois.forEach(roi => {
+  // Draw ROIs (v10.0.0-alpha.17: legacy styling support)
+  visibleRois.value.forEach(roi => {
     if (!roi.points || roi.points.length < 3) return;
 
     const isSelected = roi.id === props.selectedRoiId;
     const isHovered = roi.id === hoveredRoiId.value;
-    const alpha = roi.alpha ?? 0.3;
+    const isLegacy = roi.is_legacy;
+    const baseAlpha = roi.alpha ?? 0.3;
+    // Legacy ROIs are more transparent
+    const alpha = isLegacy ? baseAlpha * 0.5 : baseAlpha;
 
     ctx.beginPath();
     const firstPoint = transformPoint(roi.points[0].x, roi.points[0].y);
@@ -210,10 +264,15 @@ function draw() {
     ctx.fillStyle = getROIColor(roi, fillAlpha);
     ctx.fill();
 
-    // Stroke
+    // Stroke (legacy ROIs use dashed lines)
     ctx.lineWidth = isSelected ? 3 : (isHovered ? 2 : roi.thickness ?? 2);
-    ctx.strokeStyle = getROIColor(roi, 1);
+    const strokeAlpha = isLegacy ? 0.6 : 1;
+    ctx.strokeStyle = getROIColor(roi, strokeAlpha);
+    if (isLegacy) {
+      ctx.setLineDash([4, 4]);
+    }
     ctx.stroke();
+    ctx.setLineDash([]);
 
     // Label
     if (props.showLabels && roi.roi_name) {
@@ -230,12 +289,12 @@ function draw() {
       const labelPos = transformPoint(centroidX, centroidY);
 
       // Draw label background
-      ctx.font = 'bold 12px sans-serif';
-      const labelText = roi.roi_name;
+      ctx.font = isLegacy ? '11px sans-serif' : 'bold 12px sans-serif';
+      const labelText = isLegacy ? `${roi.roi_name} (legacy)` : roi.roi_name;
       const textMetrics = ctx.measureText(labelText);
       const padding = 4;
 
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillStyle = isLegacy ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.7)';
       ctx.fillRect(
         labelPos.x - textMetrics.width / 2 - padding,
         labelPos.y - 8 - padding,
@@ -244,7 +303,7 @@ function draw() {
       );
 
       // Draw label text
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = isLegacy ? 'rgba(255, 255, 255, 0.7)' : '#fff';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(labelText, labelPos.x, labelPos.y);
@@ -452,6 +511,19 @@ defineExpose({
 
     <!-- Controls overlay -->
     <div class="absolute top-2 right-2 flex gap-1">
+      <!-- Legacy toggle (v10.0.0-alpha.17) -->
+      <button
+        v-if="showLegacyToggle && hasLegacyRois"
+        class="btn btn-sm btn-ghost bg-base-100/80 hover:bg-base-100 gap-1"
+        :class="{ 'btn-active': showLegacy }"
+        :title="showLegacy ? 'Hide legacy ROIs' : 'Show legacy ROIs'"
+        @click="toggleLegacy"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-xs">{{ legacyRoiCount }}</span>
+      </button>
       <button
         class="btn btn-sm btn-square btn-ghost bg-base-100/80 hover:bg-base-100"
         title="Fit to view"
@@ -463,9 +535,14 @@ defineExpose({
       </button>
     </div>
 
-    <!-- ROI count badge -->
-    <div class="absolute bottom-2 left-2 badge badge-neutral">
-      {{ rois.length }} ROI{{ rois.length !== 1 ? 's' : '' }}
+    <!-- ROI count badge (v10.0.0-alpha.17: shows active/total) -->
+    <div class="absolute bottom-2 left-2 flex gap-1">
+      <div class="badge badge-neutral">
+        {{ activeRoiCount }} active
+      </div>
+      <div v-if="showLegacy && legacyRoiCount > 0" class="badge badge-warning badge-outline">
+        {{ legacyRoiCount }} legacy
+      </div>
     </div>
   </div>
 </template>

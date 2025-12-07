@@ -2,6 +2,7 @@
  * Composables Index
  *
  * Re-exports all composable functions.
+ * v10.0.0-alpha.17: Added useROIDrawing
  *
  * @module composables
  */
@@ -9,6 +10,17 @@
 export { useApi } from './useApi';
 export { useAuth } from './useAuth';
 export { useNotifications } from './useNotifications';
+
+// ROI Drawing (v10.0.0-alpha.17)
+export { useROIDrawing, DRAWING_MODES } from './useROIDrawing';
+
+// Role Management
+export {
+  useRoles,
+  SUPER_ADMIN_ROLES,
+  STATION_NAMES,
+  ROLE_DEFINITIONS
+} from './useRoles';
 
 // Simple type styling (colors, badges)
 export {

@@ -111,7 +111,12 @@ export async function handleApiRequest(request, env, ctx) {
         return await handleInstruments(method, pathSegments, request, env);
 
       case 'rois':
-        return await handleROIs(method, id, request, env);
+        // Handle sub-actions for ROI legacy system (v10.0.0-alpha.17)
+        // POST /api/rois/{id}/legacy - Mark ROI as legacy
+        // PUT /api/rois/{id}/override - Admin override edit
+        // GET /api/rois/{id}/edit-mode - Get edit mode info
+        const roiSubAction = pathSegments[2] || null;
+        return await handleROIs(method, id, request, env, roiSubAction);
 
       case 'aois':
         // Special sub-routes for AOIs - require authentication
