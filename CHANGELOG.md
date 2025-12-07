@@ -13,6 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.10] - 2025-12-07
+
+### Fixed Platform Icons & Sidebar Loading
+
+#### Bug Fixes
+
+**Fixed Platform Type Icon:**
+- Changed "fixed" platform icon from building to observation tower
+- Tower icon: lattice structure with cross-beams
+- Updated in PlatformCard.vue, TheSidebar.vue, DashboardView.vue
+
+**Sidebar Navigation Race Condition:**
+- Fixed: Sidebar showed "No platforms" when navigating directly to station
+- Cause: Watch fired before stations were loaded from API
+- Fix: Added `displayStations` to watch dependencies
+- Now correctly loads platforms when stations data becomes available
+
+---
+
 ## [10.0.0-beta.9] - 2025-12-07
 
 ### Improved Mount Type Icons

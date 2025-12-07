@@ -89,8 +89,8 @@ watch(userStation, async (station) => {
 // Platform type icons - matching useTypes.js definitions
 function getPlatformIcon(type) {
   const icons = {
-    // Fixed: Tower/observation tower
-    fixed: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    // Fixed: Observation tower/mast structure
+    fixed: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4',
     // UAV: Drone/quadcopter
     uav: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM12 12m-3 0a3 3 0 106 0 3 3 0 00-6 0',
     // Satellite: Orbital satellite
