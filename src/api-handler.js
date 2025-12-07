@@ -210,7 +210,7 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.3',
+      version: '10.0.0-alpha.17',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'hexagonal',
       apiVersions: ['v10', 'v3', 'v1-legacy'],
@@ -231,7 +231,10 @@ async function handleHealth(env) {
         'mobile-platforms',
         'csrf-protection',
         'input-sanitization',
-        'jwt-hmac-sha256'
+        'jwt-hmac-sha256',
+        'roi-drawing-canvas',
+        'roi-legacy-system',
+        'admin-override-confirmation'
       ]
     }), {
       status: 200,
@@ -242,7 +245,7 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.3',
+      version: '10.0.0-alpha.17',
       error: error.message,
       database: 'disconnected',
       architecture: 'hexagonal',
