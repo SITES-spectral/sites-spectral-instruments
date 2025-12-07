@@ -56,49 +56,34 @@ src/
 
 ---
 
-## Current Version: 9.0.28 - Platform Delete Fix (2025-12-05)
+## Current Version: 10.0.0-alpha.17 - ROI Drawing Tool with Legacy System (2025-12-07)
 
-**✅ STATUS: PRODUCTION-READY - V3 API**
+**✅ STATUS: ALPHA - V10 Hexagonal Architecture**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-05
-**🚀 API Version:** V3 (default) | V1 (legacy/deprecated)
+**📅 Last Updated:** 2025-12-07
+**🚀 API Version:** V10 (hexagonal) | V3 (default) | V1 (legacy/deprecated)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
 
-### What's New in v9.0.27
+### What's New in v10.0.0-alpha.17
 
-- **Platform Forms Refactor (SOLID Architecture)**: Complete rewrite of platform creation forms
-- **Dedicated Form Generators**: Each platform type (Fixed, UAV, Satellite) has its own form
-- **Enforced Naming Conventions**: UAV and Satellite never use ecosystem code in names
-- **New Module**: `PlatformForms` in `/js/platform-forms/index.js`
+- **ROI Drawing Tool**: Interactive canvas-based polygon drawing
+- **Legacy ROI System**: Preserves ROI numbers for L2/L3 data integrity
+- **Permission-based Editing**: Station users create new ROIs, super admins can override
+- **New Components**: ROIDrawingCanvas, LegacyROIWarningModal, AdminOverrideConfirmModal
+- **New Composable**: useROIDrawing for drawing state management
 
-### What's New in v9.0.24-v9.0.26
+### What's New in v10.0.0-alpha.16
 
-- **Locked Platform Type Selection (v9.0.25)**: Platform type read-only after initial selection
-- **Delete Platform Button Fix (v9.0.24)**: `showModal()` accepts both string IDs and element objects
-- **Platform Naming Fix (v9.0.24)**: UAV/Satellite platforms use correct naming conventions
+- **Admin Panel**: Complete user management with role-based access
+- **Role System**: SUPER_ADMIN_ROLES, station-admin, station user hierarchy
+- **Settings View**: Tabbed interface for users, settings, activity log
 
-### What's New in v9.0.17-v9.0.23
+### What's New in v10.0.0-alpha.13-15
 
-- **Phenocam Image Loading (v9.0.20-v9.0.23)**: Image path and loading state fixes
-- **Delete Modal & Platform Fixes (v9.0.17-v9.0.19)**: Various modal and platform updates
-- **Simplified Admin Controls (v9.0.16)**: Single source of truth for platform creation
-
-### What's New in v9.0.11-v9.0.15
-
-- **Full Edit Modals (v9.0.11)**: Type-specific edit forms for all instruments
-- **Platform Controls Visibility (v9.0.12)**: Create Platform button properly shows for admin/station users
-- **Permission Check Fix (v9.0.13)**: Dashboard instance used as primary source for user permissions
-- **Platform Normalized Name Fix (v9.0.14)**: UAV platforms correctly use station acronym
-- **Station Acronym Validation (v9.0.15)**: Strict validation - no 'STA' fallback allowed
-
-### What's New in v9.0.0
-
-- **V3 API Default**: All `/api/` endpoints now use V3 routing with pagination
-- **Campaign Management**: Full CRUD for acquisition campaigns
-- **Product Catalog**: Browse and filter data products
-- **Modern Frontend**: New components with YAML-driven configuration
-- **Legacy API Deprecated**: V1 available at `/api/v1/` (removal in v10.0.0)
+- **ROI Management (alpha.13)**: Full CRUD with canvas viewer
+- **Map Integration (alpha.14)**: Leaflet-based station mapping
+- **Data Export (alpha.15)**: CSV/JSON export with role-based access
 
 ---
 
@@ -324,6 +309,22 @@ instruments (id, platform_id, normalized_name, instrument_type, status, ...)
 instrument_rois (id, instrument_id, roi_name, polygon_points, color, ...)
 ```
 
+### ROI Legacy Fields (v10.0.0-alpha.17)
+
+```sql
+-- Migration: 0036_roi_legacy_and_drawing.sql
+ALTER TABLE instrument_rois ADD COLUMN is_legacy BOOLEAN DEFAULT false;
+ALTER TABLE instrument_rois ADD COLUMN legacy_date DATETIME;
+ALTER TABLE instrument_rois ADD COLUMN replaced_by_roi_id INTEGER REFERENCES instrument_rois(id);
+ALTER TABLE instrument_rois ADD COLUMN timeseries_broken BOOLEAN DEFAULT false;
+ALTER TABLE instrument_rois ADD COLUMN legacy_reason TEXT;
+
+-- Indexes
+CREATE INDEX idx_instrument_rois_is_legacy ON instrument_rois(is_legacy);
+CREATE INDEX idx_instrument_rois_legacy_date ON instrument_rois(legacy_date);
+CREATE INDEX idx_instrument_rois_timeseries_broken ON instrument_rois(timeseries_broken);
+```
+
 ### User Management
 
 ```sql
@@ -350,11 +351,36 @@ activity_log (id, user_id, action, entity_type, entity_id, ...)
 - **Full CRUD**: Create, read, update, delete for all entities
 - **Validation**: Real-time input validation with helpful error messages
 
-### ROI System
-- **Interactive Drawing**: Canvas-based polygon digitizer
-- **YAML Import**: Batch import from YAML files
-- **Validation**: ROI_XX naming format enforced
-- **Color Picker**: 8 presets + custom RGB
+### ROI System (v10.0.0-alpha.17)
+
+#### Drawing Tool
+- **Interactive Canvas**: Click to add points, double-click to close polygon
+- **Edit Mode**: Drag vertices to modify existing ROIs
+- **Visual Feedback**: Dashed line to cursor, highlight on hover
+- **Color Presets**: 8 presets + custom RGB with live preview
+- **Keyboard Shortcuts**: Right-click undo, Escape cancel
+
+#### Legacy System
+- **Data Integrity**: Preserves ROI numbers for L2/L3 phenocam products
+- **Station User Flow**: Edit creates new ROI, marks old as legacy
+- **Admin Override**: Super admins can edit directly with double confirmation
+- **Flags**: `is_legacy`, `legacy_date`, `replaced_by_roi_id`, `timeseries_broken`
+
+#### Permission Hierarchy
+| Role | Edit Behavior |
+|------|---------------|
+| Station User | Must create new ROI (old → legacy) |
+| Station Admin | Must create new ROI (old → legacy) |
+| Super Admin | Can override with warning (`timeseries_broken` flag set) |
+
+#### Components
+- `ROIDrawingCanvas.vue` - Interactive polygon drawing
+- `ROIViewer.vue` - Canvas display with legacy toggle
+- `ROIList.vue` - Active/Legacy tabs
+- `ROICard.vue` - Legacy badge, timeseries warning
+- `ROIFormModal.vue` - Two-step flow (draw → details)
+- `LegacyROIWarningModal.vue` - Station user warning
+- `AdminOverrideConfirmModal.vue` - Type 'CONFIRM' to proceed
 
 ### Data Export
 - **Formats**: CSV, TSV, JSON
@@ -579,12 +605,25 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 9.0.27 |
-| Last Deployed | 2025-12-05 |
-| Status | Production-Ready - V3 API |
+| Current Version | 10.0.0-alpha.17 |
+| Last Deployed | 2025-12-07 |
+| Status | Alpha - V10 Hexagonal Architecture |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
+
+### v10.0.0 Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| ROI Drawing Tool | v10.0.0-alpha.17 | ✅ Active |
+| Legacy ROI System | v10.0.0-alpha.17 | ✅ Active |
+| Admin Panel | v10.0.0-alpha.16 | ✅ Active |
+| Role Management | v10.0.0-alpha.16 | ✅ Active |
+| Data Export | v10.0.0-alpha.15 | ✅ Active |
+| Map Integration | v10.0.0-alpha.14 | ✅ Active |
+| ROI Management | v10.0.0-alpha.13 | ✅ Active |
+| Testing Infrastructure | v10.0.0-alpha.12 | ✅ Active |
 
 ### Security Features (v8.5.3-8.5.7)
 
