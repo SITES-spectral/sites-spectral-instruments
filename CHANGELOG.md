@@ -13,6 +13,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.5] - 2025-12-07
+
+### Quick Access Dashboard for Station Users
+
+Replaced redundant "Research Stations" section with useful Quick Access for station users.
+
+#### Changes
+
+**DashboardView.vue:**
+- Station users now see "Quick Access" section instead of single station card
+- Quick Access shows all platforms with direct links
+- Each platform card shows:
+  - Platform type icon (tower, UAV, satellite)
+  - Display name and ecosystem/mount type codes
+  - Instrument count
+  - Status badge
+- Click any platform to navigate directly to it
+- Admins still see "Research Stations" with all station cards
+
+**TheSidebar.vue (API Fix):**
+- Fixed incorrect API endpoints for loading platforms/instruments
+- Correct: `/api/v10/platforms/station/:id`
+- Correct: `/api/v10/instruments/platform/:id`
+
+#### User Experience
+
+- Station users get immediate access to their platforms from dashboard
+- No redundant station card when user only has one station
+- Cleaner, more actionable dashboard interface
+
+---
+
 ## [10.0.0-beta.4] - 2025-12-07
 
 ### Hierarchical Sidebar Navigation

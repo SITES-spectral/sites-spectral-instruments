@@ -4,8 +4,10 @@
  *
  * Main dashboard showing station overview and statistics.
  * Includes interactive station map and data export.
+ * For station users: shows quick access to platforms/instruments
+ * For admins: shows all research stations
  */
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useStationsStore } from '@stores/stations';
 import { useAuthStore } from '@stores/auth';
 import { useNotifications } from '@composables/useNotifications';
@@ -26,6 +28,10 @@ function handleExported(result) {
 
 const stationsStore = useStationsStore();
 const authStore = useAuthStore();
+
+// Quick access data for station users
+const platforms = ref([]);
+const loadingPlatforms = ref(false);
 
 // Load stations on mount
 onMounted(async () => {
@@ -51,6 +57,44 @@ const visibleStations = computed(() => {
   // Default: show all (for safety)
   return stationsStore.stations;
 });
+
+// Check if user is a station user (single station access)
+const isStationUser = computed(() => {
+  return !authStore.isAdmin && visibleStations.value.length === 1;
+});
+
+// Get the user's station (for station users)
+const userStation = computed(() => {
+  return isStationUser.value ? visibleStations.value[0] : null;
+});
+
+// Load platforms when station user's station is available
+watch(userStation, async (station) => {
+  if (station) {
+    loadingPlatforms.value = true;
+    try {
+      const response = await fetch(`/api/v10/platforms/station/${station.id}`);
+      if (response.ok) {
+        const result = await response.json();
+        platforms.value = result.data || [];
+      }
+    } catch (error) {
+      console.error('Failed to load platforms:', error);
+    } finally {
+      loadingPlatforms.value = false;
+    }
+  }
+}, { immediate: true });
+
+// Platform type icon
+function getPlatformIcon(type) {
+  const icons = {
+    fixed: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    uav: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
+    satellite: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
+  };
+  return icons[type] || icons.fixed;
+}
 
 // Welcome name - prefer display_name from station data
 const welcomeName = computed(() => {
@@ -205,7 +249,69 @@ const stats = computed(() => {
       <span>{{ stationsStore.error }}</span>
     </div>
 
-    <!-- Station cards grid -->
+    <!-- Quick Access for Station Users -->
+    <div v-else-if="isStationUser">
+      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Quick Access - {{ userStation?.display_name || userStation?.acronym }}
+      </h2>
+
+      <!-- Loading platforms -->
+      <div v-if="loadingPlatforms" class="flex justify-center py-8">
+        <span class="loading loading-spinner loading-md"></span>
+      </div>
+
+      <!-- Platforms grid -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <router-link
+          v-for="platform in platforms"
+          :key="platform.id"
+          :to="`/platforms/${platform.id}`"
+          class="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer"
+        >
+          <div class="card-body p-4">
+            <div class="flex items-start gap-3">
+              <!-- Platform icon -->
+              <div class="p-2 rounded-lg bg-primary/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getPlatformIcon(platform.platform_type)" />
+                </svg>
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-sm truncate">{{ platform.display_name || platform.normalized_name }}</h3>
+                <p class="text-xs text-base-content/60">{{ platform.ecosystem_code }} - {{ platform.mount_type_code }}</p>
+
+                <!-- Instrument count -->
+                <div class="flex items-center gap-1 mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                  </svg>
+                  <span class="text-xs font-medium">{{ platform.instrument_count || 0 }} instruments</span>
+                </div>
+              </div>
+
+              <!-- Status badge -->
+              <span :class="[
+                'badge badge-xs',
+                platform.status === 'Active' ? 'badge-success' : 'badge-ghost'
+              ]">
+                {{ platform.status }}
+              </span>
+            </div>
+          </div>
+        </router-link>
+
+        <!-- Empty state -->
+        <div v-if="platforms.length === 0" class="col-span-full text-center py-8 text-base-content/50">
+          No platforms found
+        </div>
+      </div>
+    </div>
+
+    <!-- Station cards grid (for admins) -->
     <div v-else>
       <h2 class="text-lg font-semibold mb-4">Research Stations</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
