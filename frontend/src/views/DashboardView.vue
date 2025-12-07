@@ -86,12 +86,21 @@ watch(userStation, async (station) => {
   }
 }, { immediate: true });
 
-// Platform type icon
+// Platform type icons - matching useTypes.js definitions
 function getPlatformIcon(type) {
   const icons = {
+    // Fixed: Tower/observation tower
     fixed: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-    uav: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
-    satellite: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
+    // UAV: Drone/quadcopter
+    uav: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM12 12m-3 0a3 3 0 106 0 3 3 0 00-6 0',
+    // Satellite: Orbital satellite
+    satellite: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+    // Mobile: Truck
+    mobile: 'M8 17h.01M14 17h.01M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zM5 17H3v-4a1 1 0 011-1h1V9a1 1 0 011-1h8a1 1 0 011 1v3h2a1 1 0 011 1v4h-2',
+    // USV: Ship/boat
+    usv: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+    // UUV: Water/submarine
+    uuv: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
   };
   return icons[type] || icons.fixed;
 }

@@ -13,6 +13,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.7] - 2025-12-07
+
+### Type-Specific Icons for Platforms and Instruments
+
+Added proper icons matching useTypes.js definitions for all platform and instrument types.
+
+#### Changes
+
+**TheSidebar.vue:**
+- Platform icons now match type definitions:
+  - Fixed: Tower/observation tower
+  - UAV: Drone/quadcopter with center
+  - Satellite: Orbital satellite
+  - Mobile: Truck
+  - USV: Ship/boat
+  - UUV: Underwater vehicle
+- Instrument icons now match type definitions:
+  - Phenocam: Camera with lens
+  - Multispectral: Layer stack
+  - PAR Sensor: Sun with rays
+  - NDVI Sensor: Leaf/plant
+  - PRI Sensor: Microscope/monitor
+  - Hyperspectral: Rainbow spectrum
+  - Thermal: Temperature gauge
+  - LiDAR: Wave/pulse pattern
+  - Radar/SAR: Satellite dish signal
+
+**DashboardView.vue (Quick Access):**
+- Platform icons updated to match sidebar
+
+#### Consistency
+
+Icons now consistent with useTypes.js definitions across
+sidebar navigation and Quick Access cards.
+
+---
+
 ## [10.0.0-beta.6] - 2025-12-07
 
 ### Full Normalized Names in Navigation
