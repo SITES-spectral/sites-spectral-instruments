@@ -3,16 +3,26 @@
  * Dashboard View
  *
  * Main dashboard showing station overview and statistics.
- * Includes interactive station map.
+ * Includes interactive station map and data export.
  */
 import { computed, onMounted, ref } from 'vue';
 import { useStationsStore } from '@stores/stations';
 import { useAuthStore } from '@stores/auth';
+import { useNotifications } from '@composables/useNotifications';
 import StationCard from '@components/cards/StationCard.vue';
 import { StationMap } from '@components/map';
+import { ExportModal } from '@components/modals';
 
 // Map view toggle
 const showMap = ref(true);
+
+// Export modal
+const showExportModal = ref(false);
+const notifications = useNotifications();
+
+function handleExported(result) {
+  notifications.success(`Exported ${result.type} as ${result.format.toUpperCase()}`);
+}
 
 const stationsStore = useStationsStore();
 const authStore = useAuthStore();
@@ -45,11 +55,22 @@ const stats = computed(() => {
 <template>
   <div>
     <!-- Page header -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold">Dashboard</h1>
-      <p class="text-base-content/60">
-        Welcome back, {{ authStore.user?.username || 'User' }}
-      </p>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <p class="text-base-content/60">
+          Welcome back, {{ authStore.user?.username || 'User' }}
+        </p>
+      </div>
+      <button
+        class="btn btn-outline btn-sm"
+        @click="showExportModal = true"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Export Data
+      </button>
     </div>
 
     <!-- Statistics cards -->
@@ -159,5 +180,12 @@ const stats = computed(() => {
         />
       </div>
     </div>
+
+    <!-- Export Modal -->
+    <ExportModal
+      v-model="showExportModal"
+      default-type="stations"
+      @exported="handleExported"
+    />
   </div>
 </template>

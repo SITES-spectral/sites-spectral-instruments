@@ -8,8 +8,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v10.x Roadmap)
-- **Data Export**: CSV/JSON export for instruments and ROIs
 - **Admin Panel**: User management and system settings
+- **ROI Drawing Tool**: Create polygons on canvas
+- **Image Upload**: Instrument images
+
+---
+
+## [10.0.0-alpha.15] - 2025-12-07
+
+### Data Export
+
+Comprehensive data export functionality for all entities.
+Supports CSV and JSON formats with role-based access.
+
+#### New Composable
+
+**useExport (frontend/src/composables/useExport.js):**
+- Export types: stations, platforms, instruments, ROIs, full
+- Format support: CSV and JSON
+- Automatic filename generation with date
+- CSV field escaping and JSON formatting
+- Admin-only full export option
+- Scope filtering (by station, platform, instrument)
+
+#### Export Modal
+
+**ExportModal (frontend/src/components/modals/ExportModal.vue):**
+- Export type selection with descriptions
+- Format selection (CSV/JSON)
+- Role-based type availability (admin-only for full export)
+- Scope information display
+- Loading and error states
+
+#### View Integration
+
+**Dashboard:**
+- Export Data button in header
+- Export modal with all types available
+
+**StationView:**
+- Export button next to Edit button
+- Pre-scoped to current station
+- Exports filtered to station's data
+
+#### Role-Based Access
+
+| Role | Export Scope |
+|------|-------------|
+| station | Own station data only |
+| station-admin | Own station data only |
+| admin / spectral-admin | All stations (full export) |
 
 ---
 

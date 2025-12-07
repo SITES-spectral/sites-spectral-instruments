@@ -10,8 +10,15 @@ import { useStationsStore } from '@stores/stations';
 import { usePlatformsStore } from '@stores/platforms';
 import { useAuthStore } from '@stores/auth';
 import PlatformCard from '@components/cards/PlatformCard.vue';
-import { StationFormModal, PlatformFormModal, ConfirmModal } from '@components/modals';
+import { StationFormModal, PlatformFormModal, ConfirmModal, ExportModal } from '@components/modals';
 import { useNotifications } from '@composables/useNotifications';
+
+// Export modal
+const showExportModal = ref(false);
+
+function handleExported(result) {
+  notifications.success(`Exported ${result.type} as ${result.format.toUpperCase()}`);
+}
 
 const props = defineProps({
   acronym: {
@@ -155,17 +162,28 @@ async function handleDeletePlatform() {
             </p>
           </div>
 
-          <!-- Edit button -->
-          <button
-            v-if="canEdit"
-            class="btn btn-outline btn-sm"
-            @click="openEditStationModal"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit
-          </button>
+          <!-- Action buttons -->
+          <div class="flex gap-2">
+            <button
+              class="btn btn-outline btn-sm"
+              @click="showExportModal = true"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export
+            </button>
+            <button
+              v-if="canEdit"
+              class="btn btn-outline btn-sm"
+              @click="openEditStationModal"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit
+            </button>
+          </div>
         </div>
 
         <!-- Station metadata -->
@@ -317,6 +335,15 @@ async function handleDeletePlatform() {
       variant="error"
       :loading="platformsStore.loading"
       @confirm="handleDeletePlatform"
+    />
+
+    <!-- Export Modal -->
+    <ExportModal
+      v-if="station"
+      v-model="showExportModal"
+      default-type="instruments"
+      :scope="{ stationId: station.id, stationAcronym: station.acronym }"
+      @exported="handleExported"
     />
   </div>
 </template>
