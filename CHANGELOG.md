@@ -13,6 +13,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.4] - 2025-12-07
+
+### Hierarchical Sidebar Navigation
+
+Complete rewrite of sidebar with collapsible tree structure for navigating Stations, Platforms, and Instruments.
+
+#### New Features
+
+**TheSidebar.vue - Complete Rewrite:**
+- Hierarchical tree navigation: Stations → Platforms → Instruments
+- Collapsible sections with expand/collapse buttons
+- Dynamic data loading with loading spinners
+- Auto-expand based on current route (station/platform/instrument)
+- Platform and instrument data cached after first load
+- Visual tree structure with border lines for hierarchy
+- Platform type icons (fixed/tower, UAV, satellite)
+- Instrument type icons (camera for phenocam, sensor for others)
+- Active item highlighting with primary color
+- Admin section with Dashboard and Users & Settings links
+- Station user filtering (only shows assigned station)
+- Responsive design with truncation for long names
+
+#### User Experience
+
+- Navigate directly to any instrument without multiple clicks
+- Current location auto-expands in tree for context
+- Visual hierarchy makes station/platform/instrument relationships clear
+- Loading states prevent UI confusion during data fetch
+
+#### Files Modified
+
+- `frontend/src/components/layout/TheSidebar.vue` - Complete rewrite
+
+---
+
 ## [10.0.0-beta.3] - 2025-12-07
 
 ### ROI Section for Phenocams Only & Badge Fixes
