@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.6] - 2025-12-07
+
+### Full Normalized Names in Navigation
+
+Display full normalized names for better identification of platforms and instruments.
+
+#### Changes
+
+**TheSidebar.vue:**
+- Platforms now show full normalized name (e.g., "SVB_FOR_PL01" instead of "PL01")
+- Instruments show full normalized name (e.g., "SVB_FOR_PL01_PHE01" instead of "PHE01")
+
+**DashboardView.vue (Quick Access):**
+- Platform cards show normalized_name as primary identifier (monospace font)
+- Display name shown as secondary description below
+
+#### Reasoning
+
+Full normalized names are unique identifiers that follow SITES naming conventions.
+Shortened names like "PL01" or "PHE01" are not distinctive enough to identify
+which platform or instrument is being referenced.
+
+---
+
 ## [10.0.0-beta.5] - 2025-12-07
 
 ### Quick Access Dashboard for Station Users

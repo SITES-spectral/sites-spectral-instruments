@@ -281,8 +281,8 @@ const stats = computed(() => {
               </div>
 
               <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-sm truncate">{{ platform.display_name || platform.normalized_name }}</h3>
-                <p class="text-xs text-base-content/60">{{ platform.ecosystem_code }} - {{ platform.mount_type_code }}</p>
+                <h3 class="font-semibold text-sm truncate font-mono">{{ platform.normalized_name }}</h3>
+                <p class="text-xs text-base-content/60 truncate">{{ platform.display_name }}</p>
 
                 <!-- Instrument count -->
                 <div class="flex items-center gap-1 mt-2">

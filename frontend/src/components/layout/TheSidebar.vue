@@ -313,7 +313,7 @@ function getInstrumentIcon(type) {
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 flex-shrink-0 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getPlatformIcon(platform.platform_type)" />
                   </svg>
-                  <span class="truncate">{{ platform.normalized_name?.split('_').slice(-1)[0] || platform.display_name }}</span>
+                  <span class="truncate">{{ platform.normalized_name || platform.display_name }}</span>
                 </router-link>
               </div>
 
@@ -336,7 +336,7 @@ function getInstrumentIcon(type) {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 flex-shrink-0 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getInstrumentIcon(instrument.instrument_type)" />
                     </svg>
-                    <span class="truncate">{{ instrument.normalized_name?.split('_').slice(-1)[0] || instrument.display_name }}</span>
+                    <span class="truncate">{{ instrument.normalized_name || instrument.display_name }}</span>
                   </router-link>
                 </li>
 
