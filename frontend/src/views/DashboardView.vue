@@ -105,6 +105,34 @@ function getPlatformIcon(type) {
   return icons[type] || icons.fixed;
 }
 
+// Mount type icons - PL (pole/tower), BL (building), GL (ground level)
+function getMountTypeIcon(mountTypeCode) {
+  if (!mountTypeCode) return null;
+  const prefix = mountTypeCode.match(/^([A-Z]+)/)?.[1];
+
+  const icons = {
+    PL: 'M12 2v20M8 22h8M8 6h8',
+    BL: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
+    GL: 'M3 17h18M7 17v-3h10v3M12 14v-2'
+  };
+
+  return icons[prefix] || null;
+}
+
+// Mount type color class
+function getMountTypeColor(mountTypeCode) {
+  if (!mountTypeCode) return 'text-base-content/40';
+  const prefix = mountTypeCode.match(/^([A-Z]+)/)?.[1];
+
+  const colors = {
+    PL: 'text-info',
+    BL: 'text-secondary',
+    GL: 'text-success'
+  };
+
+  return colors[prefix] || 'text-base-content/40';
+}
+
 // Welcome name - prefer display_name from station data
 const welcomeName = computed(() => {
   // Try to get display name from user's station if they're a station user
@@ -282,10 +310,26 @@ const stats = computed(() => {
         >
           <div class="card-body p-4">
             <div class="flex items-start gap-3">
-              <!-- Platform icon -->
-              <div class="p-2 rounded-lg bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getPlatformIcon(platform.platform_type)" />
+              <!-- Platform type + Mount type icons -->
+              <div class="flex flex-col items-center gap-1">
+                <!-- Platform type icon -->
+                <div class="p-2 rounded-lg bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getPlatformIcon(platform.platform_type)" />
+                  </svg>
+                </div>
+                <!-- Mount type icon (PL/BL/GL) -->
+                <svg
+                  v-if="getMountTypeIcon(platform.mount_type_code)"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  :class="getMountTypeColor(platform.mount_type_code)"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  :title="platform.mount_type_code"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getMountTypeIcon(platform.mount_type_code)" />
                 </svg>
               </div>
 

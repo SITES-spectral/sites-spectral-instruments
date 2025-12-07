@@ -13,6 +13,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.8] - 2025-12-07
+
+### Mount Type Icons (PL/BL/GL)
+
+Added mount type icons alongside platform type icons to distinguish physical mounting structures.
+
+#### Mount Type Codes
+
+| Code | Name | Icon | Description |
+|------|------|------|-------------|
+| PL | Pole/Tower/Mast | Vertical line with base | Elevated structures >1.5m height |
+| BL | Building | House/building shape | Rooftop or facade mounted |
+| GL | Ground Level | Low horizontal with ground | Installations <1.5m height |
+
+#### Changes
+
+**TheSidebar.vue:**
+- Added `getMountTypeIcon()` function returning SVG path for mount types
+- Added `getMountTypeColor()` function: PL=info, BL=secondary, GL=success
+- Platform links now show both platform type icon AND mount type icon
+- Mount type icon displayed with appropriate color coding
+- Tooltip shows mount_type_code on hover
+
+**DashboardView.vue (Quick Access):**
+- Added same mount type icon functions
+- Quick Access cards show mount type icon below platform type icon
+- Vertical icon stack: platform type (large) + mount type (small)
+
+#### Visual Design
+
+- Mount type icons are smaller (h-3 in sidebar, h-4 in cards)
+- Color-coded for quick identification
+- Displayed alongside (sidebar) or below (cards) platform type icons
+
+---
+
 ## [10.0.0-beta.7] - 2025-12-07
 
 ### Type-Specific Icons for Platforms and Instruments
