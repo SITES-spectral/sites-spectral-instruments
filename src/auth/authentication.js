@@ -60,6 +60,7 @@ export async function handleAuth(method, pathSegments, request, env) {
         return createErrorResponse('Login failed', 500);
       }
 
+    case 'me':
     case 'verify':
       if (method !== 'GET') {
         return createErrorResponse('Method not allowed', 405);

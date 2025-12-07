@@ -128,6 +128,9 @@ export class Platform {
 
     // Associated instruments (loaded separately)
     this.instruments = [];
+
+    // Instrument count (can be set from query or computed from instruments)
+    this.instrumentCount = props.instrumentCount || 0;
   }
 
   /**
@@ -284,7 +287,8 @@ export class Platform {
       description: this.description,
       created_at: this.createdAt,
       updated_at: this.updatedAt,
-      instrument_count: this.instruments.length,
+      // Use either loaded instruments count or the stored count from query
+      instrument_count: this.instruments.length > 0 ? this.instruments.length : this.instrumentCount,
       // Include mount type metadata
       mount_type_info: this.getMountTypeInfo()
     };
@@ -315,7 +319,9 @@ export class Platform {
       deploymentDate: row.deployment_date,
       description: row.description,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
+      // Include instrument count from query (if available)
+      instrumentCount: row.instrument_count || 0
     });
   }
 }

@@ -32,9 +32,45 @@ onMounted(async () => {
   await stationsStore.fetchStations();
 });
 
-// Statistics
+// Filter stations based on user role
+const visibleStations = computed(() => {
+  // Admins see all stations
+  if (authStore.isAdmin) {
+    return stationsStore.stations;
+  }
+
+  // Station users see only their station
+  const userStation = authStore.user?.station_normalized_name;
+  if (userStation) {
+    return stationsStore.stations.filter(s =>
+      s.normalized_name === userStation ||
+      s.acronym?.toLowerCase() === userStation.toLowerCase()
+    );
+  }
+
+  // Default: show all (for safety)
+  return stationsStore.stations;
+});
+
+// Welcome name - prefer display_name from station data
+const welcomeName = computed(() => {
+  // Try to get display name from user's station if they're a station user
+  const userStation = authStore.user?.station_normalized_name;
+  if (userStation && !authStore.isAdmin) {
+    const station = stationsStore.stations.find(s =>
+      s.normalized_name === userStation
+    );
+    if (station?.display_name) {
+      return station.display_name;
+    }
+  }
+  // Fallback to username
+  return authStore.user?.username || 'User';
+});
+
+// Statistics - use visible stations
 const stats = computed(() => {
-  const stations = stationsStore.stations;
+  const stations = visibleStations.value;
   let totalPlatforms = 0;
   let totalInstruments = 0;
 
@@ -47,7 +83,7 @@ const stats = computed(() => {
     stations: stations.length,
     platforms: totalPlatforms,
     instruments: totalInstruments,
-    active: stationsStore.activeStations.length
+    active: stations.filter(s => s.status === 'Active').length
   };
 });
 </script>
@@ -59,7 +95,7 @@ const stats = computed(() => {
       <div>
         <h1 class="text-2xl font-bold">Dashboard</h1>
         <p class="text-base-content/60">
-          Welcome back, {{ authStore.user?.username || 'User' }}
+          Welcome back, {{ welcomeName }}
         </p>
       </div>
       <button
@@ -174,7 +210,7 @@ const stats = computed(() => {
       <h2 class="text-lg font-semibold mb-4">Research Stations</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <StationCard
-          v-for="station in stationsStore.stations"
+          v-for="station in visibleStations"
           :key="station.id"
           :station="station"
         />

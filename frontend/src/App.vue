@@ -44,11 +44,14 @@ const showNavbar = computed(() => {
         class="flex-1 p-4 lg:p-6"
         :class="{ 'ml-64': showSidebar }"
       >
-        <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </transition>
-        </router-view>
+        <!-- Content wrapper with max-width for better readability on large screens -->
+        <div class="max-w-6xl mx-auto">
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
       </main>
     </div>
   </div>

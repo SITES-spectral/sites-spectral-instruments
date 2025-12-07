@@ -140,7 +140,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'camera',
     color: '#3b82f6',
     bgClass: 'bg-blue-500/10',
-    textClass: 'text-blue-500'
+    textClass: 'text-blue-500',
+    badgeClass: 'badge-info'
   },
   multispectral: {
     key: 'multispectral',
@@ -149,7 +150,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'layer-group',
     color: '#8b5cf6',
     bgClass: 'bg-purple-500/10',
-    textClass: 'text-purple-500'
+    textClass: 'text-purple-500',
+    badgeClass: 'badge-secondary'
   },
   par_sensor: {
     key: 'par_sensor',
@@ -158,7 +160,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'sun',
     color: '#f59e0b',
     bgClass: 'bg-amber-500/10',
-    textClass: 'text-amber-500'
+    textClass: 'text-amber-500',
+    badgeClass: 'badge-warning'
   },
   ndvi_sensor: {
     key: 'ndvi_sensor',
@@ -167,7 +170,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'leaf',
     color: '#22c55e',
     bgClass: 'bg-green-500/10',
-    textClass: 'text-green-500'
+    textClass: 'text-green-500',
+    badgeClass: 'badge-success'
   },
   pri_sensor: {
     key: 'pri_sensor',
@@ -176,7 +180,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'microscope',
     color: '#06b6d4',
     bgClass: 'bg-cyan-500/10',
-    textClass: 'text-cyan-500'
+    textClass: 'text-cyan-500',
+    badgeClass: 'badge-accent'
   },
   hyperspectral: {
     key: 'hyperspectral',
@@ -185,7 +190,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'rainbow',
     color: '#ec4899',
     bgClass: 'bg-pink-500/10',
-    textClass: 'text-pink-500'
+    textClass: 'text-pink-500',
+    badgeClass: 'badge-secondary badge-outline'
   },
   thermal: {
     key: 'thermal',
@@ -194,7 +200,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'temperature-high',
     color: '#ef4444',
     bgClass: 'bg-red-500/10',
-    textClass: 'text-red-500'
+    textClass: 'text-red-500',
+    badgeClass: 'badge-error'
   },
   lidar: {
     key: 'lidar',
@@ -203,7 +210,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'wave-square',
     color: '#14b8a6',
     bgClass: 'bg-teal-500/10',
-    textClass: 'text-teal-500'
+    textClass: 'text-teal-500',
+    badgeClass: 'badge-accent badge-outline'
   },
   radar: {
     key: 'radar',
@@ -212,7 +220,8 @@ export const INSTRUMENT_TYPES = {
     icon: 'satellite-dish',
     color: '#6366f1',
     bgClass: 'bg-indigo-500/10',
-    textClass: 'text-indigo-500'
+    textClass: 'text-indigo-500',
+    badgeClass: 'badge-primary'
   }
 };
 
@@ -238,11 +247,23 @@ export const STATUS_TYPES = {
     textClass: 'text-info',
     dotClass: 'bg-info'
   },
-  Decommissioned: {
-    name: 'Decommissioned',
+  Removed: {
+    name: 'Removed',
     badgeClass: 'badge-error',
     textClass: 'text-error',
     dotClass: 'bg-error'
+  },
+  Decommissioned: {
+    name: 'Decommissioned',
+    badgeClass: 'badge-neutral',
+    textClass: 'text-neutral',
+    dotClass: 'bg-neutral'
+  },
+  Pending: {
+    name: 'Pending',
+    badgeClass: 'badge-ghost',
+    textClass: 'text-base-content/60',
+    dotClass: 'bg-base-content/50'
   }
 };
 
@@ -344,7 +365,8 @@ export function getInstrumentType(instrumentType) {
     icon: 'cube',
     color: '#6b7280',
     bgClass: 'bg-gray-500/10',
-    textClass: 'text-gray-500'
+    textClass: 'text-gray-500',
+    badgeClass: 'badge-ghost'
   };
 }
 

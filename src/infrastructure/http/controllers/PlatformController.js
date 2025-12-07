@@ -102,7 +102,7 @@ export class PlatformController {
       return createNotFoundResponse(`Platform '${id}' not found`);
     }
 
-    return createSuccessResponse(platform.toJSON());
+    return createSuccessResponse({ data: platform.toJSON() });
   }
 
   /**
@@ -131,8 +131,10 @@ export class PlatformController {
       });
 
       return createSuccessResponse({
-        platform: result.platform.toJSON(),
-        instruments: result.instruments.map(i => i.toJSON())
+        data: {
+          platform: result.platform.toJSON(),
+          instruments: result.instruments.map(i => i.toJSON())
+        }
       }, 201);
     } catch (error) {
       return createErrorResponse(error.message, 400);
@@ -155,7 +157,7 @@ export class PlatformController {
         status: body.status
       });
 
-      return createSuccessResponse(platform.toJSON());
+      return createSuccessResponse({ data: platform.toJSON() });
     } catch (error) {
       if (error.message.includes('not found')) {
         return createNotFoundResponse(error.message);

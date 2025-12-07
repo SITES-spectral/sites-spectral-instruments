@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "10.0.0-alpha.17",
+  "version": "10.0.0-beta.1",
   "description": "SITES Spectral v10.0.0 - Hexagonal Architecture with Vue 3 + daisyUI",
   "main": "src/worker.js",
   "scripts": {

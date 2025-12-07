@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-frontend",
-  "version": "10.0.0-alpha.17",
+  "version": "10.0.0-beta.1",
   "private": true,
   "type": "module",
   "scripts": {

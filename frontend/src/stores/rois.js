@@ -94,7 +94,12 @@ export const useROIsStore = defineStore('rois', () => {
         params.include_legacy = 'true';
       }
       const response = await api.get('/rois', params);
-      if (response.success) {
+      // V10 API returns {rois: [...]} directly
+      if (response.rois) {
+        rois.value = response.rois.map(parseROIPoints);
+      } else if (response.data?.rois) {
+        rois.value = response.data.rois.map(parseROIPoints);
+      } else if (response.success) {
         rois.value = (response.data?.rois || []).map(parseROIPoints);
       } else {
         error.value = response.error || 'Failed to fetch ROIs';
@@ -117,7 +122,12 @@ export const useROIsStore = defineStore('rois', () => {
 
     try {
       const response = await api.get('/rois', { station: stationAcronym });
-      if (response.success) {
+      // V10 API returns {rois: [...]} directly
+      if (response.rois) {
+        rois.value = response.rois.map(parseROIPoints);
+      } else if (response.data?.rois) {
+        rois.value = response.data.rois.map(parseROIPoints);
+      } else if (response.success) {
         rois.value = (response.data?.rois || []).map(parseROIPoints);
       } else {
         error.value = response.error || 'Failed to fetch ROIs';
@@ -140,8 +150,10 @@ export const useROIsStore = defineStore('rois', () => {
 
     try {
       const response = await api.get(`/rois/${id}`);
-      if (response.success) {
-        currentROI.value = parseROIPoints(response.data);
+      // V10 API returns ROI object directly (with id, roi_name, etc.)
+      const roiData = response.id ? response : (response.data || (response.success ? response.data : null));
+      if (roiData) {
+        currentROI.value = parseROIPoints(roiData);
         return currentROI.value;
       } else {
         error.value = response.error || 'ROI not found';
@@ -173,12 +185,14 @@ export const useROIsStore = defineStore('rois', () => {
       }
 
       const response = await api.post('/rois', payload);
-      if (response.success) {
+      // V10 API returns created ROI directly (with id)
+      const createdROI = response.id ? response : (response.data || (response.success ? response.data : null));
+      if (createdROI) {
         // Refetch ROIs for the instrument
         if (roiData.instrument_id) {
           await fetchROIsByInstrument(roiData.instrument_id);
         }
-        return response.data;
+        return createdROI;
       } else {
         error.value = response.error || 'Failed to create ROI';
         return null;
@@ -210,7 +224,9 @@ export const useROIsStore = defineStore('rois', () => {
       }
 
       const response = await api.put(`/rois/${id}`, payload);
-      if (response.success) {
+      // V10 API returns updated ROI directly (with id)
+      const updatedROI = response.id ? response : (response.data || (response.success ? response.data : null));
+      if (updatedROI || response.success) {
         const index = rois.value.findIndex(r => r.id === id);
         if (index !== -1) {
           rois.value[index] = parseROIPoints({ ...rois.value[index], ...roiData });
@@ -218,7 +234,7 @@ export const useROIsStore = defineStore('rois', () => {
         if (currentROI.value?.id === id) {
           currentROI.value = parseROIPoints({ ...currentROI.value, ...roiData });
         }
-        return response.data;
+        return updatedROI || response.data;
       } else {
         error.value = response.error || 'Failed to update ROI';
         return null;
@@ -242,7 +258,8 @@ export const useROIsStore = defineStore('rois', () => {
 
     try {
       const response = await api.delete(`/rois/${id}`);
-      if (response.success) {
+      // V10 API returns {deleted: true} or {success: true}
+      if (response.deleted || response.success) {
         rois.value = rois.value.filter(r => r.id !== id);
         if (currentROI.value?.id === id) {
           currentROI.value = null;
@@ -287,8 +304,10 @@ export const useROIsStore = defineStore('rois', () => {
   async function getROIEditMode(roiId) {
     try {
       const response = await api.get(`/rois/${roiId}/edit-mode`);
-      if (response.success) {
-        return response.data;
+      // V10 API returns edit mode info directly
+      const editModeData = response.can_direct_edit !== undefined ? response : (response.data || (response.success ? response.data : null));
+      if (editModeData) {
+        return editModeData;
       }
       error.value = response.error || 'Failed to get edit mode';
       return null;
@@ -315,13 +334,15 @@ export const useROIsStore = defineStore('rois', () => {
         replacement_data: newRoiData
       });
 
-      if (response.success) {
+      // V10 API returns result directly
+      const result = response.legacy_roi || response.new_roi ? response : (response.data || (response.success ? response.data : null));
+      if (result) {
         // Refresh ROIs list to get updated data
         const instrumentId = rois.value.find(r => r.id === roiId)?.instrument_id;
         if (instrumentId) {
           await fetchROIsByInstrument(instrumentId);
         }
-        return response.data;
+        return result;
       }
       error.value = response.error || 'Failed to mark ROI as legacy';
       return null;
@@ -353,7 +374,9 @@ export const useROIsStore = defineStore('rois', () => {
 
       const response = await api.put(`/rois/${roiId}/override`, payload);
 
-      if (response.success) {
+      // V10 API returns updated ROI directly
+      const updatedROI = response.id ? response : (response.data || (response.success ? response.data : null));
+      if (updatedROI || response.success) {
         // Update local state
         const index = rois.value.findIndex(r => r.id === roiId);
         if (index !== -1) {
@@ -370,7 +393,7 @@ export const useROIsStore = defineStore('rois', () => {
             timeseries_broken: true
           };
         }
-        return response.data;
+        return updatedROI || response.data;
       }
       error.value = response.error || 'Failed to update ROI';
       return null;

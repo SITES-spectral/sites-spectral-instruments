@@ -13,6 +13,172 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.1] - 2025-12-07
+
+### Vue 10 Frontend Polish & UX Improvements
+
+Major UI/UX improvements consolidating changes from alpha.21-23.
+
+#### Bug Fixes
+
+**Instrument View Details Navigation:**
+- Changed InstrumentCard "View Details" button from emit event to router-link
+- Navigation now works correctly to `/instruments/{id}` route
+- Both editor and non-editor view buttons use router-link
+
+**Status Badge Colors:**
+- Added distinct badge colors for all status types:
+  - Active: `badge-success` (green)
+  - Inactive: `badge-warning` (yellow)
+  - Maintenance: `badge-info` (blue)
+  - Removed: `badge-error` (red)
+  - Decommissioned: `badge-neutral` (gray)
+  - Pending: `badge-ghost` (muted)
+
+#### New Features
+
+**Instrument Type Badges (useTypes.js):**
+- Added `badgeClass` property to all instrument types
+- Types now display as colored badges instead of plain text:
+  - Phenocam: `badge-info` (blue)
+  - Multispectral: `badge-secondary` (purple)
+  - PAR Sensor: `badge-warning` (amber)
+  - NDVI Sensor: `badge-success` (green)
+  - PRI Sensor: `badge-accent` (teal)
+  - Hyperspectral: `badge-secondary badge-outline`
+  - Thermal: `badge-error` (red)
+  - LiDAR: `badge-accent badge-outline`
+  - Radar: `badge-primary`
+
+**InstrumentCard Component:**
+- Instrument type now renders as proper badge with distinct colors
+- Updated template to use `typeConfig.badgeClass`
+
+#### Layout Improvements
+
+**Max-Width Constraint (App.vue):**
+- Added `max-w-6xl mx-auto` wrapper to main content area
+- Content no longer stretches to full width on large monitors
+- Maximum width of 1152px for better readability
+- Centered layout on wide screens
+- Maintains responsive behavior on smaller screens
+
+#### Files Modified
+
+- `frontend/src/App.vue` - Added max-width container
+- `frontend/src/composables/useTypes.js` - Added badgeClass to instrument types, status types
+- `frontend/src/components/cards/InstrumentCard.vue` - Router-link navigation, badge styling
+
+---
+
+## [10.0.0-alpha.20] - 2025-12-07
+
+### Platform Instrument Counts & Font Size Improvements
+
+Fixed platform cards showing 0 instruments and improved font readability.
+
+#### Backend Changes
+
+**D1PlatformRepository.js:**
+- Added instrument count subquery to `findById()`, `findByNormalizedName()`, `findByStationId()`, and `findAll()`
+- Platform queries now include `(SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count`
+
+**Platform Entity (src/domain/platform/Platform.js):**
+- Added `instrumentCount` property to store count from query
+- Updated `toJSON()` to return `instrument_count` from stored count or loaded instruments
+- Updated `fromDatabase()` to parse `instrument_count` from database row
+
+#### Frontend Changes
+
+**main.css:**
+- Increased base font size to 16px for better readability
+- Increased `.text-xs` from 12px to 13px
+- Increased `.text-sm` from 14px to 15px
+- Added line-height improvements for card and table text
+
+#### Issues Fixed
+
+- Platform cards now display correct instrument counts instead of 0
+- Text throughout the application is larger and more readable
+
+---
+
+## [10.0.0-alpha.19] - 2025-12-07
+
+### API Response Format Fix
+
+Fixed V10 API controller responses to consistently wrap data in `{data: ...}` format for compatibility with Vue frontend stores.
+
+#### Backend Changes
+
+**StationController.js:**
+- `get()` now returns `{data: station}` instead of `station` directly
+- `create()` now returns `{data: station}` instead of `station` directly
+- `update()` now returns `{data: station}` instead of `station` directly
+- `dashboard()` now returns `{data: result}` instead of `result` directly
+
+**PlatformController.js:**
+- `get()` now returns `{data: platform}` instead of `platform` directly
+- `create()` now returns `{data: {platform, instruments}}` wrapped
+- `update()` now returns `{data: platform}` instead of `platform` directly
+
+**InstrumentController.js:**
+- `get()` now returns `{data: instrument}` instead of `instrument` directly
+- `create()` now returns `{data: instrument}` instead of `instrument` directly
+- `update()` now returns `{data: instrument}` instead of `instrument` directly
+
+#### Issue Fixed
+
+- Station detail view was showing "Station not found" because frontend stores expected `response.data` but API returned data directly
+- Consistent API response format now matches frontend expectations
+
+---
+
+## [10.0.0-alpha.18] - 2025-12-07
+
+### Station User Dashboard Filtering
+
+Improved dashboard experience for station users with proper filtering and display names.
+
+#### Backend Changes
+
+**D1StationRepository (src/infrastructure/persistence/d1/D1StationRepository.js):**
+- Added aggregate counts to `findAll()` query via subqueries
+- Platform count, instrument count, and ROI count included in station data
+
+**Station Entity (src/domain/station/Station.js):**
+- Added `platformCount`, `instrumentCount`, `roiCount` properties
+- Updated `toJSON()` to serialize counts as snake_case
+- Updated `fromDatabase()` to parse counts from DB rows
+
+#### Frontend Changes
+
+**DashboardView.vue:**
+- Added `visibleStations` computed - filters stations for station users
+- Added `welcomeName` computed - shows station display_name instead of username
+- Updated stats to use filtered stations
+- Updated station cards to show only relevant stations
+
+**TheSidebar.vue:**
+- Updated `displayStations` to filter for station users
+- Admin users see all stations
+- Station users see only their assigned station
+
+**TheNavbar.vue:**
+- Added stations store import
+- Updated `userName` computed to show station display_name for station users
+- Admin users continue to see their username
+
+#### User Experience
+
+- Station users now see only their station on dashboard
+- Welcome message shows "Svartberget" instead of "svartberget"
+- Sidebar filtered to show only assigned station
+- Header shows station display name in top-right user menu
+- Statistics cards reflect only the user's station data
+
+---
+
 ## [10.0.0-alpha.17] - 2025-12-07
 
 ### ROI Drawing Tool with Legacy System

@@ -67,8 +67,22 @@ export class D1StationRepository {
     const safeSort = allowedSortColumns.includes(sortBy) ? sortBy : 'acronym';
     const safeOrder = sortOrder.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
+    // Include platform and instrument counts via subqueries
     const results = await this.db
-      .prepare(`SELECT * FROM stations ORDER BY ${safeSort} ${safeOrder} LIMIT ? OFFSET ?`)
+      .prepare(`
+        SELECT s.*,
+          (SELECT COUNT(*) FROM platforms p WHERE p.station_id = s.id) as platform_count,
+          (SELECT COUNT(*) FROM instruments i
+           JOIN platforms p ON i.platform_id = p.id
+           WHERE p.station_id = s.id) as instrument_count,
+          (SELECT COUNT(*) FROM instrument_rois r
+           JOIN instruments i ON r.instrument_id = i.id
+           JOIN platforms p ON i.platform_id = p.id
+           WHERE p.station_id = s.id) as roi_count
+        FROM stations s
+        ORDER BY ${safeSort} ${safeOrder}
+        LIMIT ? OFFSET ?
+      `)
       .bind(limit, offset)
       .all();
 

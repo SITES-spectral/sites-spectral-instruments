@@ -50,8 +50,12 @@ export const useInstrumentsStore = defineStore('instruments', () => {
     error.value = null;
 
     try {
-      const response = await api.get(`/platforms/${platformId}/instruments`);
-      if (response.success) {
+      // V10 API endpoint for instruments by platform
+      const response = await api.get(`/instruments/platform/${platformId}`);
+      // V10 API returns {data: [...]} or {success: true, data: [...]}
+      if (response.data) {
+        instruments.value = response.data || [];
+      } else if (response.success) {
         instruments.value = response.data || [];
       } else {
         error.value = response.error || 'Failed to fetch instruments';
@@ -73,8 +77,12 @@ export const useInstrumentsStore = defineStore('instruments', () => {
     error.value = null;
 
     try {
-      const response = await api.get(`/stations/${stationId}/instruments`);
-      if (response.success) {
+      // V10 API endpoint for instruments by station
+      const response = await api.get(`/instruments/station/${stationId}`);
+      // V10 API returns {data: [...]} or {success: true, data: [...]}
+      if (response.data) {
+        instruments.value = response.data || [];
+      } else if (response.success) {
         instruments.value = response.data || [];
       } else {
         error.value = response.error || 'Failed to fetch instruments';
@@ -97,9 +105,11 @@ export const useInstrumentsStore = defineStore('instruments', () => {
 
     try {
       const response = await api.get(`/instruments/${id}`);
-      if (response.success) {
-        currentInstrument.value = response.data;
-        return response.data;
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const instrumentData = response.data || (response.success ? response.data : null);
+      if (instrumentData) {
+        currentInstrument.value = instrumentData;
+        return instrumentData;
       } else {
         error.value = response.error || 'Instrument not found';
         return null;
@@ -123,9 +133,11 @@ export const useInstrumentsStore = defineStore('instruments', () => {
 
     try {
       const response = await api.post('/instruments', instrumentData);
-      if (response.success) {
-        instruments.value.push(response.data);
-        return response.data;
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const newInstrument = response.data || (response.success ? response.data : null);
+      if (newInstrument) {
+        instruments.value.push(newInstrument);
+        return newInstrument;
       } else {
         error.value = response.error || 'Failed to create instrument';
         return null;
@@ -150,15 +162,17 @@ export const useInstrumentsStore = defineStore('instruments', () => {
 
     try {
       const response = await api.put(`/instruments/${id}`, instrumentData);
-      if (response.success) {
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const updatedInstrument = response.data || (response.success ? response.data : null);
+      if (updatedInstrument) {
         const index = instruments.value.findIndex(i => i.id === id);
         if (index !== -1) {
-          instruments.value[index] = response.data;
+          instruments.value[index] = updatedInstrument;
         }
         if (currentInstrument.value?.id === id) {
-          currentInstrument.value = response.data;
+          currentInstrument.value = updatedInstrument;
         }
-        return response.data;
+        return updatedInstrument;
       } else {
         error.value = response.error || 'Failed to update instrument';
         return null;
@@ -182,7 +196,8 @@ export const useInstrumentsStore = defineStore('instruments', () => {
 
     try {
       const response = await api.delete(`/instruments/${id}`);
-      if (response.success) {
+      // V10 API returns {deleted: true} or {success: true}
+      if (response.deleted || response.success) {
         instruments.value = instruments.value.filter(i => i.id !== id);
         if (currentInstrument.value?.id === id) {
           currentInstrument.value = null;

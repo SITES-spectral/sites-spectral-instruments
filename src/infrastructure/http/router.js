@@ -15,6 +15,8 @@ import {
   AdminController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
+import { handleAuth } from '../../auth/authentication.js';
+import { handleROIs } from '../../handlers/rois.js';
 
 /**
  * Create router with all controllers
@@ -69,6 +71,18 @@ export function createRouter(env) {
 
           case 'info':
             return handleInfo();
+
+          case 'auth':
+            // Auth routes - forward to auth handler
+            // pathSegments: ['auth', 'login'] or ['auth', 'me'] or ['auth', 'verify']
+            return await handleAuth(request.method, ['auth', ...resourcePath], request, env);
+
+          case 'rois':
+            // ROIs routes - forward to legacy handler
+            // resourcePath: [] or [id] or [id, 'legacy'] or [id, 'override'] or [id, 'edit-mode']
+            const roiId = resourcePath[0] || null;
+            const roiSubAction = resourcePath[1] || null;
+            return await handleROIs(request.method, roiId, request, env, roiSubAction);
 
           default:
             return createNotFoundResponse(`Unknown resource: ${resource}`);

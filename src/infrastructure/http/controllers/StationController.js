@@ -67,7 +67,7 @@ export class StationController {
       return createNotFoundResponse(`Station '${id}' not found`);
     }
 
-    return createSuccessResponse(station.toJSON());
+    return createSuccessResponse({ data: station.toJSON() });
   }
 
   /**
@@ -80,7 +80,7 @@ export class StationController {
       return createNotFoundResponse(`Station '${acronym}' not found`);
     }
 
-    return createSuccessResponse(result);
+    return createSuccessResponse({ data: result });
   }
 
   /**
@@ -100,7 +100,7 @@ export class StationController {
         contactEmail: body.contact_email || body.contactEmail
       });
 
-      return createSuccessResponse(station.toJSON(), 201);
+      return createSuccessResponse({ data: station.toJSON() }, 201);
     } catch (error) {
       return createErrorResponse(error.message, 400);
     }
@@ -123,7 +123,7 @@ export class StationController {
         contactEmail: body.contact_email || body.contactEmail
       });
 
-      return createSuccessResponse(station.toJSON());
+      return createSuccessResponse({ data: station.toJSON() });
     } catch (error) {
       if (error.message.includes('not found')) {
         return createNotFoundResponse(error.message);

@@ -23,9 +23,26 @@ onMounted(async () => {
 // Current station acronym
 const currentAcronym = computed(() => route.params.acronym);
 
-// Stations to display
+// Stations to display - filtered for station users
 const displayStations = computed(() => {
-  return stationsStore.activeStations;
+  const stations = stationsStore.activeStations;
+
+  // Admins see all stations
+  if (authStore.isAdmin) {
+    return stations;
+  }
+
+  // Station users see only their station
+  const userStation = authStore.user?.station_normalized_name;
+  if (userStation) {
+    return stations.filter(s =>
+      s.normalized_name === userStation ||
+      s.acronym?.toLowerCase() === userStation.toLowerCase()
+    );
+  }
+
+  // Default: show all (fallback)
+  return stations;
 });
 
 // Check if station is selected

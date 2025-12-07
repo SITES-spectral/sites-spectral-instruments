@@ -28,7 +28,12 @@ export class D1PlatformRepository {
    */
   async findById(id) {
     const result = await this.db
-      .prepare('SELECT * FROM platforms WHERE id = ?')
+      .prepare(`
+        SELECT p.*,
+          (SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count
+        FROM platforms p
+        WHERE p.id = ?
+      `)
       .bind(id)
       .first();
 
@@ -42,7 +47,12 @@ export class D1PlatformRepository {
    */
   async findByNormalizedName(normalizedName) {
     const result = await this.db
-      .prepare('SELECT * FROM platforms WHERE normalized_name = ?')
+      .prepare(`
+        SELECT p.*,
+          (SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count
+        FROM platforms p
+        WHERE p.normalized_name = ?
+      `)
       .bind(normalizedName.toUpperCase())
       .first();
 
@@ -56,7 +66,13 @@ export class D1PlatformRepository {
    */
   async findByStationId(stationId) {
     const results = await this.db
-      .prepare('SELECT * FROM platforms WHERE station_id = ? ORDER BY normalized_name')
+      .prepare(`
+        SELECT p.*,
+          (SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count
+        FROM platforms p
+        WHERE p.station_id = ?
+        ORDER BY p.normalized_name
+      `)
       .bind(stationId)
       .all();
 
@@ -84,15 +100,15 @@ export class D1PlatformRepository {
     const params = [];
 
     if (stationId) {
-      conditions.push('station_id = ?');
+      conditions.push('p.station_id = ?');
       params.push(stationId);
     }
     if (platformType) {
-      conditions.push('platform_type = ?');
+      conditions.push('p.platform_type = ?');
       params.push(platformType);
     }
     if (ecosystemCode) {
-      conditions.push('ecosystem_code = ?');
+      conditions.push('p.ecosystem_code = ?');
       params.push(ecosystemCode);
     }
 
@@ -106,7 +122,9 @@ export class D1PlatformRepository {
     const safeOrder = sortOrder.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
     const query = `
-      SELECT * FROM platforms
+      SELECT p.*,
+        (SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count
+      FROM platforms p
       ${whereClause}
       ORDER BY ${safeSort} ${safeOrder}
       LIMIT ? OFFSET ?

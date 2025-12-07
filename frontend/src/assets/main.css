@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base font size increase for readability */
+@layer base {
+  html {
+    font-size: 16px; /* Increase from default 14px */
+  }
+
+  body {
+    @apply text-base leading-relaxed;
+  }
+
+  /* Increase minimum text sizes */
+  .text-xs {
+    font-size: 0.8125rem; /* 13px instead of 12px */
+    line-height: 1.25rem;
+  }
+
+  .text-sm {
+    font-size: 0.9375rem; /* 15px instead of 14px */
+    line-height: 1.375rem;
+  }
+
+  /* Card text improvements */
+  .card-body {
+    @apply text-base;
+  }
+
+  /* Table text improvements */
+  th, td {
+    @apply text-base;
+  }
+}
+
 /* Custom component styles */
 @layer components {
   /* Station card styling */

@@ -103,8 +103,8 @@ export class InstrumentController {
     }
 
     // Handle both entity and plain object (from withDetails)
-    const data = typeof instrument.toJSON === 'function' ? instrument.toJSON() : instrument;
-    return createSuccessResponse(data);
+    const instrumentData = typeof instrument.toJSON === 'function' ? instrument.toJSON() : instrument;
+    return createSuccessResponse({ data: instrumentData });
   }
 
   /**
@@ -124,7 +124,7 @@ export class InstrumentController {
         specifications: body.specifications || {}
       });
 
-      return createSuccessResponse(instrument.toJSON(), 201);
+      return createSuccessResponse({ data: instrument.toJSON() }, 201);
     } catch (error) {
       return createErrorResponse(error.message, 400);
     }
@@ -146,7 +146,7 @@ export class InstrumentController {
         specifications: body.specifications
       });
 
-      return createSuccessResponse(instrument.toJSON());
+      return createSuccessResponse({ data: instrument.toJSON() });
     } catch (error) {
       if (error.message.includes('not found')) {
         return createNotFoundResponse(error.message);

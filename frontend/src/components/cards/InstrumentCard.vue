@@ -192,10 +192,10 @@ const currentIconPaths = computed(() => {
 
       <!-- Type + Measurement Status Row -->
       <div class="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 text-xs">
-        <!-- Instrument type with code -->
-        <span class="font-medium" :class="typeTextClass">
+        <!-- Instrument type badge -->
+        <span :class="['badge badge-sm', typeConfig?.badgeClass || 'badge-ghost']">
           {{ typeConfig?.name || instrument.instrument_type }}
-          <span v-if="typeConfig?.code" class="text-base-content/50 ml-1">
+          <span v-if="typeConfig?.code" class="opacity-70 ml-1">
             ({{ typeConfig.code }})
           </span>
         </span>
@@ -232,12 +232,12 @@ const currentIconPaths = computed(() => {
 
       <!-- Actions -->
       <div v-if="canEdit" class="flex justify-end gap-1 mt-2 pt-2 border-t border-base-200">
-        <button
-          @click="emit('view', instrument)"
+        <router-link
+          :to="`/instruments/${instrument.id}`"
           class="btn btn-ghost btn-xs"
         >
           View
-        </button>
+        </router-link>
         <button
           @click="emit('edit', instrument)"
           class="btn btn-ghost btn-xs text-primary"
@@ -254,15 +254,15 @@ const currentIconPaths = computed(() => {
 
       <!-- View only action for non-editors (and non-compact) -->
       <div v-else-if="!compact" class="flex justify-end mt-2 pt-2 border-t border-base-200">
-        <button
-          @click="emit('view', instrument)"
+        <router-link
+          :to="`/instruments/${instrument.id}`"
           class="btn btn-ghost btn-xs text-primary"
         >
           View Details
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
-        </button>
+        </router-link>
       </div>
     </div>
   </div>

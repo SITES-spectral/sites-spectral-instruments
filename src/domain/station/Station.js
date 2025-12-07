@@ -39,6 +39,11 @@ export class Station {
     this.createdAt = props.createdAt || null;
     this.updatedAt = props.updatedAt || null;
 
+    // Aggregate counts (optional - populated by queries)
+    this.platformCount = props.platformCount || 0;
+    this.instrumentCount = props.instrumentCount || 0;
+    this.roiCount = props.roiCount || 0;
+
     // Validate on construction
     this.validate();
   }
@@ -104,7 +109,10 @@ export class Station {
       longitude: this.longitude,
       status: this.status,
       created_at: this.createdAt,
-      updated_at: this.updatedAt
+      updated_at: this.updatedAt,
+      platform_count: this.platformCount,
+      instrument_count: this.instrumentCount,
+      roi_count: this.roiCount
     };
   }
 
@@ -124,7 +132,10 @@ export class Station {
       longitude: row.longitude,
       status: row.status,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
+      platformCount: row.platform_count || 0,
+      instrumentCount: row.instrument_count || 0,
+      roiCount: row.roi_count || 0
     });
   }
 }

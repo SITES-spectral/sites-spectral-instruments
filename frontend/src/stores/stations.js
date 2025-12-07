@@ -38,7 +38,10 @@ export const useStationsStore = defineStore('stations', () => {
 
     try {
       const response = await api.get('/stations');
-      if (response.success) {
+      // V10 API returns {data: [...], meta: {...}} or {success: true, data: [...]}
+      if (response.data) {
+        stations.value = response.data || [];
+      } else if (response.success) {
         stations.value = response.data || [];
       } else {
         error.value = response.error || 'Failed to fetch stations';
@@ -61,9 +64,11 @@ export const useStationsStore = defineStore('stations', () => {
 
     try {
       const response = await api.get(`/stations/${acronym}`);
-      if (response.success) {
-        currentStation.value = response.data;
-        return response.data;
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const stationData = response.data || (response.success ? response.data : null);
+      if (stationData) {
+        currentStation.value = stationData;
+        return stationData;
       } else {
         error.value = response.error || 'Station not found';
         return null;
@@ -88,15 +93,17 @@ export const useStationsStore = defineStore('stations', () => {
 
     try {
       const response = await api.put(`/stations/${id}`, data);
-      if (response.success) {
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const stationData = response.data || (response.success ? response.data : null);
+      if (stationData) {
         // Update current station
-        currentStation.value = response.data;
+        currentStation.value = stationData;
         // Update in stations list
         const index = stations.value.findIndex(s => s.id === id);
         if (index !== -1) {
-          stations.value[index] = response.data;
+          stations.value[index] = stationData;
         }
-        return response.data;
+        return stationData;
       } else {
         error.value = response.error || 'Failed to update station';
         return null;

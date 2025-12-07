@@ -7,10 +7,12 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@stores/auth';
+import { useStationsStore } from '@stores/stations';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const stationsStore = useStationsStore();
 
 // Build breadcrumbs from route
 const breadcrumbs = computed(() => {
@@ -26,8 +28,21 @@ const breadcrumbs = computed(() => {
   return crumbs;
 });
 
-// User display name
+// User display name - prefer station display_name for station users
 const userName = computed(() => {
+  const userStation = authStore.user?.station_normalized_name;
+
+  // Station users show their station's display name
+  if (userStation && !authStore.isAdmin) {
+    const station = stationsStore.stations.find(s =>
+      s.normalized_name === userStation
+    );
+    if (station?.display_name) {
+      return station.display_name;
+    }
+  }
+
+  // Fallback to username
   return authStore.user?.username || 'User';
 });
 

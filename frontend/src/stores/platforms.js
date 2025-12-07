@@ -45,8 +45,12 @@ export const usePlatformsStore = defineStore('platforms', () => {
     error.value = null;
 
     try {
-      const response = await api.get(`/stations/${stationId}/platforms`);
-      if (response.success) {
+      // V10 API endpoint for platforms by station
+      const response = await api.get(`/platforms/station/${stationId}`);
+      // V10 API returns {data: [...], meta: {...}} or {success: true, data: [...]}
+      if (response.data) {
+        platforms.value = response.data || [];
+      } else if (response.success) {
         platforms.value = response.data || [];
       } else {
         error.value = response.error || 'Failed to fetch platforms';
@@ -69,9 +73,11 @@ export const usePlatformsStore = defineStore('platforms', () => {
 
     try {
       const response = await api.get(`/platforms/${id}`);
-      if (response.success) {
-        currentPlatform.value = response.data;
-        return response.data;
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const platformData = response.data || (response.success ? response.data : null);
+      if (platformData) {
+        currentPlatform.value = platformData;
+        return platformData;
       } else {
         error.value = response.error || 'Platform not found';
         return null;
@@ -95,10 +101,12 @@ export const usePlatformsStore = defineStore('platforms', () => {
 
     try {
       const response = await api.post('/platforms', platformData);
-      if (response.success) {
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const newPlatform = response.data || (response.success ? response.data : null);
+      if (newPlatform) {
         // Add to local state
-        platforms.value.push(response.data);
-        return response.data;
+        platforms.value.push(newPlatform);
+        return newPlatform;
       } else {
         error.value = response.error || 'Failed to create platform';
         return null;
@@ -123,16 +131,18 @@ export const usePlatformsStore = defineStore('platforms', () => {
 
     try {
       const response = await api.put(`/platforms/${id}`, platformData);
-      if (response.success) {
+      // V10 API returns {data: {...}} or {success: true, data: {...}}
+      const updatedPlatform = response.data || (response.success ? response.data : null);
+      if (updatedPlatform) {
         // Update local state
         const index = platforms.value.findIndex(p => p.id === id);
         if (index !== -1) {
-          platforms.value[index] = response.data;
+          platforms.value[index] = updatedPlatform;
         }
         if (currentPlatform.value?.id === id) {
-          currentPlatform.value = response.data;
+          currentPlatform.value = updatedPlatform;
         }
-        return response.data;
+        return updatedPlatform;
       } else {
         error.value = response.error || 'Failed to update platform';
         return null;
@@ -156,7 +166,8 @@ export const usePlatformsStore = defineStore('platforms', () => {
 
     try {
       const response = await api.delete(`/platforms/${id}`);
-      if (response.success) {
+      // V10 API returns {deleted: true} or {success: true}
+      if (response.deleted || response.success) {
         // Remove from local state
         platforms.value = platforms.value.filter(p => p.id !== id);
         if (currentPlatform.value?.id === id) {
