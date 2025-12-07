@@ -111,9 +111,12 @@ function getMountTypeIcon(mountTypeCode) {
   const prefix = mountTypeCode.match(/^([A-Z]+)/)?.[1];
 
   const icons = {
-    PL: 'M12 2v20M8 22h8M8 6h8',
-    BL: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
-    GL: 'M3 17h18M7 17v-3h10v3M12 14v-2'
+    // PL: Tower - lattice transmission tower
+    PL: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4',
+    // BL: Building - multi-story with windows and door
+    BL: 'M3 21h18M5 21V8l7-6 7 6v13M9 12h2v2H9M13 12h2v2h-2M11 21v-4h2v4',
+    // GL: Flower - plant at ground level
+    GL: 'M12 22v-7M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8M12 7V4M8 9l-2-2M16 9l2-2'
   };
 
   return icons[prefix] || null;

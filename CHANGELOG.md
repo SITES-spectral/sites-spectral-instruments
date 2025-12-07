@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.9] - 2025-12-07
+
+### Improved Mount Type Icons
+
+Updated mount type icons for better visual recognition.
+
+#### Icon Updates
+
+| Code | Before | After |
+|------|--------|-------|
+| PL | Simple pole | Lattice transmission tower |
+| BL | Basic house | Multi-story building with windows |
+| GL | Horizontal line | Flower/plant icon |
+
+---
+
 ## [10.0.0-beta.8] - 2025-12-07
 
 ### Mount Type Icons (PL/BL/GL)
@@ -23,9 +39,9 @@ Added mount type icons alongside platform type icons to distinguish physical mou
 
 | Code | Name | Icon | Description |
 |------|------|------|-------------|
-| PL | Pole/Tower/Mast | Vertical line with base | Elevated structures >1.5m height |
-| BL | Building | House/building shape | Rooftop or facade mounted |
-| GL | Ground Level | Low horizontal with ground | Installations <1.5m height |
+| PL | Pole/Tower/Mast | Lattice tower | Elevated structures >1.5m height |
+| BL | Building | Building with windows | Rooftop or facade mounted |
+| GL | Ground Level | Flower/plant | Installations <1.5m height |
 
 #### Changes
 
