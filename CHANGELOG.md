@@ -7,9 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Next Steps (v10.x Roadmap)
-- **Image Upload**: Instrument images
-- **Profile Management**: User profile editing
+### Next Steps (v11.x Roadmap)
+- **Phase 4**: Legacy Cleanup - Delete V1/V3 handlers
+- **Phase 5**: Frontend Migration - Vue.js V11 API
+- **Phase 6**: Documentation - Vocabulary mapping
+
+---
+
+## [11.0.0-alpha.1] - 2025-12-08
+
+### V11 Fresh Start - Hexagonal Architecture + Standard Vocabularies
+
+Major architecture revision with complete SOLID compliance and international vocabulary alignment.
+
+#### New Domain Entities
+
+**AOI (Area of Interest)**
+- Geospatial support (Point, Polygon, MultiPolygon)
+- Mission types: monitoring, survey, calibration
+- Recurrence patterns: daily, weekly, monthly, seasonal, one_time
+- GeoJSON/KML import support
+
+**Campaign**
+- Field campaign management
+- Status workflow: planned → active → completed/cancelled
+- Participant and coordinator tracking
+- Objectives and expected outcomes
+
+**Product**
+- Processing levels: L0, L1, L2, L3, L4 (Copernicus aligned)
+- Quality control levels: raw → quality_controlled → validated → research_grade
+- Data license metadata: CC-BY-4.0 (ICOS/SITES compatible)
+- DOI and citation support
+
+#### Application Layer (CQRS)
+
+**Commands (15 new)**
+- AOI: Create, Update, Delete, ImportGeoJSON, ImportKML
+- Campaign: Create, Update, Delete, Start, Complete
+- Product: Create, Update, Delete, SetQualityScore, PromoteQuality
+
+**Queries (7 new)**
+- AOI: Get, List, ExportGeoJSON
+- Campaign: Get, List
+- Product: Get, List
+
+#### Infrastructure Layer
+
+**D1 Repositories (3 new)**
+- D1AOIRepository - Geospatial queries, bounding box search
+- D1CampaignRepository - Status filtering, date range queries
+- D1ProductRepository - Processing level, quality score filters
+
+**Database Migration (0037)**
+- Darwin Core fields: dwc_location_id, dwc_geodetic_datum, dwc_country_code
+- ICOS station types: TER, ATM, AQA, INT
+- License metadata: CC-BY-4.0, license_url, associated_doi
+- Vocabulary mappings table
+
+#### Standard Vocabulary Alignment
+
+| Standard | Alignment |
+|----------|-----------|
+| Darwin Core | Location metadata, coordinates |
+| ICOS | Station types, measurement objectives |
+| ESA Copernicus | Processing levels (L0-L4) |
+| CC-BY-4.0 | Default data license |
+
+#### Files Created
+
+**Domain Layer (14 files)**
+- `src/domain/aoi/` - AOI.js, AOIRepository.js, AOIService.js, GeoJSONParser.js, index.js
+- `src/domain/campaign/` - Campaign.js, CampaignRepository.js, CampaignService.js, index.js
+- `src/domain/product/` - Product.js, ProductRepository.js, ProductService.js, index.js
+- `src/domain/index.js` - Updated exports
+
+**Application Layer (22 files)**
+- `src/application/commands/` - 15 new command handlers
+- `src/application/queries/` - 7 new query handlers
+- Updated index.js exports
+
+**Infrastructure Layer (4 files)**
+- `src/infrastructure/persistence/d1/` - 3 new D1 repositories
+- `migrations/0037_v11_vocabulary_alignment.sql`
 
 ---
 

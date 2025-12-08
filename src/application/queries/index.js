@@ -19,6 +19,19 @@ export { ListPlatforms } from './ListPlatforms.js';
 export { GetInstrument } from './GetInstrument.js';
 export { ListInstruments } from './ListInstruments.js';
 
+// AOI queries
+export { GetAOI } from './GetAOI.js';
+export { ListAOIs } from './ListAOIs.js';
+export { ExportAOIsGeoJSON } from './ExportAOIsGeoJSON.js';
+
+// Campaign queries
+export { GetCampaign } from './GetCampaign.js';
+export { ListCampaigns } from './ListCampaigns.js';
+
+// Product queries
+export { GetProduct } from './GetProduct.js';
+export { ListProducts } from './ListProducts.js';
+
 // Admin queries
 export { GetActivityLogs } from './admin/GetActivityLogs.js';
 export { GetUserSessions } from './admin/GetUserSessions.js';

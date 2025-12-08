@@ -10,3 +10,6 @@ export { D1StationRepository } from './D1StationRepository.js';
 export { D1PlatformRepository } from './D1PlatformRepository.js';
 export { D1InstrumentRepository } from './D1InstrumentRepository.js';
 export { D1AdminRepository } from './D1AdminRepository.js';
+export { D1AOIRepository } from './D1AOIRepository.js';
+export { D1CampaignRepository } from './D1CampaignRepository.js';
+export { D1ProductRepository } from './D1ProductRepository.js';

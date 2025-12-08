@@ -3,7 +3,7 @@
  *
  * Core business logic following Hexagonal Architecture.
  * This layer is framework-agnostic and contains:
- * - Entities (Station, Platform, Instrument)
+ * - Entities (Station, Platform, Instrument, AOI, Campaign, Product)
  * - Repository ports (interfaces)
  * - Domain services
  * - Type strategies and registries
@@ -43,3 +43,25 @@ export {
   InstrumentFactory,
   instrumentFactory
 } from './instrument/index.js';
+
+// AOI domain
+export {
+  AOI,
+  AOIRepository,
+  AOIService,
+  GeoJSONParser
+} from './aoi/index.js';
+
+// Campaign domain
+export {
+  Campaign,
+  CampaignRepository,
+  CampaignService
+} from './campaign/index.js';
+
+// Product domain
+export {
+  Product,
+  ProductRepository,
+  ProductService
+} from './product/index.js';

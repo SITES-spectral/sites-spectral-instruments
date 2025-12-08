@@ -12,7 +12,10 @@ export {
   D1StationRepository,
   D1PlatformRepository,
   D1InstrumentRepository,
-  D1AdminRepository
+  D1AdminRepository,
+  D1AOIRepository,
+  D1CampaignRepository,
+  D1ProductRepository
 } from './persistence/d1/index.js';
 
 // HTTP Controllers
