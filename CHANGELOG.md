@@ -8,9 +8,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v11.x Roadmap)
-- **Phase 4**: Legacy Cleanup - Delete V1/V3 handlers
 - **Phase 5**: Frontend Migration - Vue.js V11 API
 - **Phase 6**: Documentation - Vocabulary mapping
+
+---
+
+## [11.0.0-alpha.2] - 2025-12-08
+
+### Phase 4: Legacy Cleanup & V11 Controllers
+
+#### HTTP Controllers (3 new)
+- `AOIController` - GeoJSON/KML import, geospatial export, full CRUD
+- `CampaignController` - Status workflow (start/complete), full CRUD
+- `ProductController` - Quality scoring, DOI lookup, processing level filters
+
+#### API Routing Simplified
+- V10/V11 API is now the primary routing target
+- Core entities (stations, platforms, instruments, aois, campaigns, products) route to hexagonal architecture
+- Removed V3 API entirely (9 files deleted)
+- Deleted legacy V1 entity handlers (11 files deleted)
+
+#### Files Deleted (20 files, ~340 KB removed)
+**V3 API (9 files)**
+- `src/v3/api-handler-v3.js`
+- `src/v3/handlers/*.js` (8 handler files)
+
+**V1 Legacy Handlers (11 files)**
+- `src/handlers/stations.js`
+- `src/handlers/platforms.js`
+- `src/handlers/instruments.js`
+- `src/handlers/instruments/` directory (4 files)
+- `src/handlers/aois.js`
+- `src/handlers/phenocam-rois.js`
+- `src/handlers/channels.js`
+- `src/handlers/sensor-models.js`
+- `src/handlers/documentation.js`
+- `src/handlers/maintenance.js`
+- `src/handlers/calibration.js`
+
+#### Files Kept (Specialized Handlers)
+- `src/handlers/rois.js` - ROI legacy system
+- `src/handlers/export.js` - Data export
+- `src/handlers/users.js` - User management
+- `src/handlers/analytics.js` - Analytics
+- `src/handlers/ecosystems.js` - Lookup table
+- `src/handlers/status-codes.js` - Lookup table
+- `src/handlers/research-programs.js` - Lookup table
 
 ---
 

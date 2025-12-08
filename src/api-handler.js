@@ -1,7 +1,6 @@
-// SITES Spectral API Handler v10.0.0
-// V10 API (Hexagonal Architecture) - New default for core entities
-// V3 API - Domain-based routing, spatial queries, campaigns, products
-// Legacy V1 handlers maintained for backward compatibility (deprecated)
+// SITES Spectral API Handler v11.0.0
+// V10/V11 API (Hexagonal Architecture) - Primary API with full feature support
+// Legacy V1 handlers maintained for specialized endpoints (auth, export, ROIs, values)
 // SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
 
 import { handleAuth, getUserFromRequest } from './auth/authentication.js';
@@ -14,31 +13,20 @@ import {
   createUnauthorizedResponse
 } from './utils/responses.js';
 
-// V10 API Handler - Hexagonal Architecture (new)
+// V10/V11 API Handler - Hexagonal Architecture (PRIMARY)
 import { createRouter } from './infrastructure/http/router.js';
 
-// V3 API Handler - PRIMARY (default)
-import { handleApiV3Request } from './v3/api-handler-v3.js';
-
-// Legacy V1 handlers (deprecated - will be removed in v10.0.0)
-import { handleStations } from './handlers/stations.js';
-import { handlePlatforms } from './handlers/platforms.js';
-import { handleInstruments } from './handlers/instruments.js';
+// Specialized handlers (kept for specific functionality)
 import { handleROIs } from './handlers/rois.js';
-import { handleAOIs, getAOIsByPlatformType, getAOIsGeoJSON } from './handlers/aois.js';
 import { handleExport } from './handlers/export.js';
 import { handleAdmin } from './admin/admin-router.js';
-import { handleResearchPrograms, getResearchProgramsValues } from './handlers/research-programs.js';
-import { handlePhenocamROIs } from './handlers/phenocam-rois.js';
-import { handleEcosystems, getEcosystemDropdownValues } from './handlers/ecosystems.js';
-import { handleStatusCodes, getStatusDropdownValues } from './handlers/status-codes.js';
 import { handleUsers } from './handlers/users.js';
 import { handleAnalytics } from './handlers/analytics.js';
-import { handleChannels } from './handlers/channels.js';
-import { handleSensorModels } from './handlers/sensor-models.js';
-import { handleDocumentation } from './handlers/documentation.js';
-import { handleMaintenance } from './handlers/maintenance.js';
-import { handleCalibration } from './handlers/calibration.js';
+
+// Lookup table handlers (for dropdown values)
+import { handleResearchPrograms, getResearchProgramsValues } from './handlers/research-programs.js';
+import { handleEcosystems, getEcosystemDropdownValues } from './handlers/ecosystems.js';
+import { handleStatusCodes, getStatusDropdownValues } from './handlers/status-codes.js';
 
 /**
  * Main API request handler with modular routing
@@ -69,23 +57,12 @@ export async function handleApiRequest(request, env, ctx) {
     }
   }
 
-  // V10 API - Hexagonal Architecture (new)
-  // Route /api/v10/* requests to the new architecture
-  if (pathSegments[0] === 'v10') {
-    pathSegments.shift(); // Remove 'v10' prefix
+  // V10/V11 API - Hexagonal Architecture (PRIMARY)
+  // Route /api/v10/* requests to the hexagonal architecture router
+  if (pathSegments[0] === 'v10' || pathSegments[0] === 'v11') {
+    pathSegments.shift(); // Remove version prefix
     const router = createRouter(env);
     return await router.handle(request, pathSegments, url);
-  }
-
-  // V3 API is the default - route explicitly versioned requests
-  if (pathSegments[0] === 'v3') {
-    return await handleApiV3Request(request, env, ctx);
-  }
-
-  // Legacy V1 routes (deprecated) - keep for backward compatibility
-  // These will be removed in v10.0.0
-  if (pathSegments[0] === 'v1') {
-    pathSegments.shift(); // Remove 'v1' prefix and continue to legacy handlers
   }
 
   const id = pathSegments[1];
@@ -95,53 +72,42 @@ export async function handleApiRequest(request, env, ctx) {
 
   try {
     switch (resource) {
+      // === AUTHENTICATION ===
       case 'auth':
         return await handleAuth(method, pathSegments, request, env);
 
+      // === ADMIN PANEL ===
       case 'admin':
         return await handleAdmin(method, pathSegments, request, env);
 
+      // === CORE ENTITIES - Route to V10 Router ===
       case 'stations':
-        return await handleStations(method, id, request, env);
-
       case 'platforms':
-        return await handlePlatforms(method, id, request, env);
-
       case 'instruments':
-        return await handleInstruments(method, pathSegments, request, env);
+      case 'aois':
+      case 'campaigns':
+      case 'products': {
+        // Forward unversioned core entity requests to V10 router
+        const router = createRouter(env);
+        return await router.handle(request, pathSegments, url);
+      }
 
+      // === SPECIALIZED HANDLERS ===
       case 'rois':
-        // Handle sub-actions for ROI legacy system (v10.0.0-alpha.17)
-        // POST /api/rois/{id}/legacy - Mark ROI as legacy
-        // PUT /api/rois/{id}/override - Admin override edit
-        // GET /api/rois/{id}/edit-mode - Get edit mode info
+        // ROI management with legacy system support
         const roiSubAction = pathSegments[2] || null;
         return await handleROIs(method, id, request, env, roiSubAction);
-
-      case 'aois':
-        // Special sub-routes for AOIs - require authentication
-        if (pathSegments[1] === 'geojson' && pathSegments[2]) {
-          const user = await getUserFromRequest(request, env);
-          if (!user) {
-            return createUnauthorizedResponse();
-          }
-          return await getAOIsGeoJSON(pathSegments[2], user, env);
-        }
-        if (pathSegments[1] === 'by-platform-type' && pathSegments[2]) {
-          const user = await getUserFromRequest(request, env);
-          if (!user) {
-            return createUnauthorizedResponse();
-          }
-          return await getAOIsByPlatformType(pathSegments[2], user, env);
-        }
-        return await handleAOIs(method, id, request, env);
-
-      case 'phenocam-rois':
-        return await handlePhenocamROIs(method, pathSegments, request, env);
 
       case 'export':
         return await handleExport(method, pathSegments, request, env);
 
+      case 'users':
+        return await handleUsers(method, pathSegments, request, env);
+
+      case 'analytics':
+        return await handleAnalytics(method, pathSegments, request, env);
+
+      // === LOOKUP TABLES (Dropdown Values) ===
       case 'research-programs':
         return await handleResearchPrograms(method, id, request, env);
 
@@ -151,29 +117,8 @@ export async function handleApiRequest(request, env, ctx) {
       case 'status-codes':
         return await handleStatusCodes(method, id, request, env);
 
-      case 'users':
-        return await handleUsers(method, pathSegments, request, env);
-
-      case 'analytics':
-        return await handleAnalytics(method, pathSegments, request, env);
-
-      case 'channels':
-        return await handleChannels(method, pathSegments, request, env);
-
-      case 'sensor-models':
-        return await handleSensorModels(method, pathSegments, request, env);
-
-      case 'documentation':
-        return await handleDocumentation(method, pathSegments, request, env);
-
-      case 'maintenance':
-        return await handleMaintenance(method, pathSegments, request, env);
-
-      case 'calibration':
-        return await handleCalibration(method, pathSegments, request, env);
-
       case 'values':
-        // Special endpoint for dropdown/multiselect values
+        // Aggregated dropdown values endpoint
         if (pathSegments[1] === 'research-programs') {
           return await getResearchProgramsValues(request, env);
         }
@@ -185,6 +130,7 @@ export async function handleApiRequest(request, env, ctx) {
         }
         return createNotFoundResponse();
 
+      // === HEALTH CHECK ===
       case 'health':
         return await handleHealth(env);
 
@@ -210,31 +156,28 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.17',
+      version: '11.0.0-alpha.1',
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'hexagonal',
-      apiVersions: ['v10', 'v3', 'v1-legacy'],
-      defaultApiVersion: 'v3',
+      apiVersion: 'v10/v11',
       features: [
         'hexagonal-architecture',
         'cqrs-pattern',
         'dependency-injection',
-        'mount-type-codes',
-        'v3-api-default',
+        'domain-driven-design',
+        'aoi-geospatial',
         'campaigns',
         'products',
-        'spatial-queries',
-        'pagination',
-        'aoi-support',
-        'uav-platforms',
-        'satellite-platforms',
-        'mobile-platforms',
+        'geojson-kml-import',
+        'darwin-core-vocabulary',
+        'icos-station-types',
+        'copernicus-processing-levels',
+        'cc-by-4-license',
         'csrf-protection',
         'input-sanitization',
         'jwt-hmac-sha256',
         'roi-drawing-canvas',
-        'roi-legacy-system',
-        'admin-override-confirmation'
+        'roi-legacy-system'
       ]
     }), {
       status: 200,
@@ -245,12 +188,11 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.17',
+      version: '11.0.0-alpha.1',
       error: error.message,
       database: 'disconnected',
       architecture: 'hexagonal',
-      apiVersions: ['v10', 'v3', 'v1-legacy'],
-      defaultApiVersion: 'v3'
+      apiVersion: 'v10/v11'
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
