@@ -8,8 +8,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v11.x Roadmap)
-- **Phase 5**: Frontend Migration - Vue.js V11 API
 - **Phase 6**: Documentation - Vocabulary mapping
+
+---
+
+## [11.0.0-alpha.5] - 2025-12-08
+
+### Phase 5: Frontend Migration to V11 API
+
+Vue.js frontend updated to use V11 API with new Maintenance and Calibration components.
+
+#### API Service Updated (`frontend/src/services/api.js`)
+
+**Base URL Changed**: `/api/v10` → `/api/v11`
+
+**New API Endpoints Added**:
+
+| API | Methods |
+|-----|---------|
+| `maintenanceApi` | list, get, create, update, delete, timeline, pending, overdue, complete, forPlatform, forInstrument, forStation |
+| `calibrationApi` | list, get, create, update, delete, current, timeline, expired, expiring, expire, forInstrument, forStation, statistics, cloudCoverDistribution, optimalConditions |
+| `aoiApi` | list, get, create, update, delete, byStation, byPlatformType, byGeometryType, importGeoJSON, importKML, exportGeoJSON |
+| `campaignApi` | list, get, create, update, delete, byStation, byPlatform, active, start, complete, cancel, addParticipant, removeParticipant |
+| `productApi` | list, get, create, update, delete, byInstrument, byCampaign, byProcessingLevel, byType, updateQualityScore, lookupDOI |
+| `roiApi` | list, get, create, update, delete, markLegacy |
+
+#### New Vue.js Components
+
+**Maintenance Components** (`frontend/src/components/maintenance/`):
+- `MaintenanceTimeline.vue` - Timeline visualization for platform/instrument maintenance
+- `MaintenanceFormModal.vue` - Create/edit maintenance records
+
+**Calibration Components** (`frontend/src/components/calibration/`):
+- `CalibrationTimeline.vue` - Timeline visualization with current calibration status
+- `CalibrationFormModal.vue` - Comprehensive calibration form with all V8 features
+
+#### MaintenanceTimeline Features
+- Summary stats (total, scheduled, completed, overdue)
+- Type-specific icons (preventive, corrective, cleaning, etc.)
+- Priority badges (low, normal, high, critical)
+- Status workflow (schedule → complete)
+- Quick-complete action button
+- Edit/create modal integration
+
+#### CalibrationTimeline Features
+- Current valid calibration display with expiry warning
+- Expiring soon notifications (30-day threshold)
+- Summary stats (total, valid, pending, expired)
+- Panel tracking display (type, serial, condition)
+- Ambient conditions badges (cloud cover, solar angle)
+- Cleaning workflow indicators
+- Quality score display with color coding
+- Edit/expire actions
+
+#### CalibrationFormModal Sections
+1. **Calibration Details** - Type, timing, dates, duration, validity
+2. **Reflectance Panel** - Type, serial, condition, calibration date
+3. **Ambient Conditions** - Cloud cover, solar angles, temperature, humidity, wind
+4. **Sensor Cleaning** - Performed flag, method, solution, before/after state
+5. **Quality Metrics** - Passed, score, deviation
+6. **Personnel & Documentation** - Performed by, laboratory, certificate
 
 ---
 
