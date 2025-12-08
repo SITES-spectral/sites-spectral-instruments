@@ -18,12 +18,34 @@ import { ExportModal } from '@components/modals';
 // Map view toggle
 const showMap = ref(true);
 
+// Show all platforms toggle (dimmed for non-selected stations)
+const showAllPlatforms = ref(false);
+
+// All platforms from all stations (for map display when toggle enabled)
+const allStationsPlatforms = ref([]);
+const loadingAllPlatforms = ref(false);
+
+// Map component ref for hover interactivity
+const stationMapRef = ref(null);
+
 // Export modal
 const showExportModal = ref(false);
 const notifications = useNotifications();
 
 function handleExported(result) {
   notifications.success(`Exported ${result.type} as ${result.format.toUpperCase()}`);
+}
+
+// Platform card hover handlers for map interactivity
+function handlePlatformHover(platform) {
+  // Only highlight fixed platforms with coordinates
+  if (platform.platform_type === 'fixed' && platform.latitude && platform.longitude) {
+    stationMapRef.value?.highlightPlatform(platform.id);
+  }
+}
+
+function handlePlatformLeave() {
+  stationMapRef.value?.clearHighlight();
 }
 
 const stationsStore = useStationsStore();
@@ -33,34 +55,77 @@ const authStore = useAuthStore();
 const platforms = ref([]);
 const loadingPlatforms = ref(false);
 
-// All platforms for map display (fixed platforms with coordinates)
-const allPlatforms = ref([]);
+// Platforms for selected station on map (fixed platforms with coordinates)
+const selectedStationPlatforms = ref([]);
 
 // Load stations on mount
 onMounted(async () => {
   await stationsStore.fetchStations();
-  // Load all platforms for map markers
-  await loadAllPlatforms();
 });
 
-// Load all platforms with coordinates for map display
-async function loadAllPlatforms() {
+// Load platforms for a specific station (for map display)
+async function loadPlatformsForStation(stationId) {
+  if (!stationId) {
+    selectedStationPlatforms.value = [];
+    return;
+  }
+
   try {
-    // Fetch all platforms (use high limit to get all in one request)
-    const response = await fetch('/api/v11/platforms?limit=200');
+    const response = await fetch(`/api/v11/platforms/station/${stationId}`);
     if (response.ok) {
       const result = await response.json();
       // Filter to only fixed platforms with coordinates
-      allPlatforms.value = (result.data || []).filter(p =>
+      selectedStationPlatforms.value = (result.data || []).filter(p =>
         p.platform_type === 'fixed' &&
         p.latitude != null &&
         p.longitude != null
       );
     }
   } catch (error) {
-    console.error('Failed to load platforms for map:', error);
+    console.error('Failed to load platforms for station:', error);
+    selectedStationPlatforms.value = [];
   }
 }
+
+// Load all platforms from all stations (for showing other stations dimmed)
+async function loadAllPlatforms() {
+  if (loadingAllPlatforms.value) return;
+
+  loadingAllPlatforms.value = true;
+  try {
+    // Fetch all platforms with high limit
+    const response = await fetch('/api/v11/platforms?limit=500');
+    if (response.ok) {
+      const result = await response.json();
+      // Filter to only fixed platforms with coordinates
+      allStationsPlatforms.value = (result.data || []).filter(p =>
+        p.platform_type === 'fixed' &&
+        p.latitude != null &&
+        p.longitude != null
+      );
+    }
+  } catch (error) {
+    console.error('Failed to load all platforms:', error);
+    allStationsPlatforms.value = [];
+  } finally {
+    loadingAllPlatforms.value = false;
+  }
+}
+
+// Compute platforms for other stations (exclude selected station)
+const otherStationsPlatforms = computed(() => {
+  if (!showAllPlatforms.value || !userStation.value) return [];
+  return allStationsPlatforms.value.filter(p =>
+    p.station_id !== userStation.value.id
+  );
+});
+
+// Watch showAllPlatforms toggle - load all platforms when enabled
+watch(showAllPlatforms, async (enabled) => {
+  if (enabled && allStationsPlatforms.value.length === 0) {
+    await loadAllPlatforms();
+  }
+});
 
 // Filter stations based on user role
 const visibleStations = computed(() => {
@@ -102,6 +167,8 @@ watch(userStation, async (station) => {
         const result = await response.json();
         platforms.value = result.data || [];
       }
+      // Also load platforms for map display
+      await loadPlatformsForStation(station.id);
     } catch (error) {
       console.error('Failed to load platforms:', error);
     } finally {
@@ -273,22 +340,37 @@ const stats = computed(() => {
           </svg>
           Station Locations
         </h2>
-        <label class="label cursor-pointer gap-2">
-          <span class="label-text text-sm">Show map</span>
-          <input
-            v-model="showMap"
-            type="checkbox"
-            class="toggle toggle-primary toggle-sm"
-          />
-        </label>
+        <div class="flex items-center gap-4">
+          <!-- Show all platforms toggle -->
+          <label v-if="userStation" class="label cursor-pointer gap-2">
+            <span class="label-text text-xs text-base-content/60">Show other stations</span>
+            <input
+              v-model="showAllPlatforms"
+              type="checkbox"
+              class="toggle toggle-xs"
+              :disabled="loadingAllPlatforms"
+            />
+          </label>
+          <!-- Show map toggle -->
+          <label class="label cursor-pointer gap-2">
+            <span class="label-text text-sm">Show map</span>
+            <input
+              v-model="showMap"
+              type="checkbox"
+              class="toggle toggle-primary toggle-sm"
+            />
+          </label>
+        </div>
       </div>
 
       <!-- Map -->
       <div v-show="showMap">
         <StationMap
+          ref="stationMapRef"
           v-if="!stationsStore.loading && stationsStore.stations.length > 0"
           :stations="stationsStore.stations"
-          :platforms="allPlatforms"
+          :platforms="selectedStationPlatforms"
+          :other-platforms="otherStationsPlatforms"
           :show-platforms="true"
           :height="350"
           :clickable="true"
@@ -337,6 +419,8 @@ const stats = computed(() => {
           :key="platform.id"
           :to="`/platforms/${platform.id}`"
           class="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer"
+          @mouseenter="handlePlatformHover(platform)"
+          @mouseleave="handlePlatformLeave"
         >
           <div class="card-body p-4">
             <div class="flex items-start gap-3">

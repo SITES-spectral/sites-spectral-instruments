@@ -12,6 +12,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.10] - 2025-12-08
+
+### Interactive Platform Map with Hover Interactivity
+
+#### New Features
+- **Platform Toggle**: Added "Show other stations" toggle to display platforms from all stations
+- **Dimmed Other Stations**: Other stations' platforms appear dimmed (35% opacity, smaller size) to avoid confusion with selected station
+- **Hover Interactivity**: Hovering over platform cards centers the map on that platform and opens its popup
+
+#### StationMap Component Enhancements
+- Added `otherPlatforms` prop for dimmed platform markers from other stations
+- Exposed `highlightPlatform(platformId)` method - centers map and opens popup
+- Exposed `clearHighlight()` method - closes popup and resets map view
+- Added `platformMarkerMap` for O(1) marker lookup by platform ID
+- New `updateOtherPlatformMarkers()` function for dimmed marker management
+
+#### DashboardView Enhancements
+- Added `showAllPlatforms` toggle state
+- Added `allStationsPlatforms` ref to store all platforms
+- Added `loadAllPlatforms()` function to fetch all platforms (limit=500)
+- Added `otherStationsPlatforms` computed that filters out selected station
+- Added `handlePlatformHover()` and `handlePlatformLeave()` for map interactivity
+- Platform cards now trigger map highlight on mouseenter/mouseleave
+
+#### Visual Design
+- Selected station platforms: Full-size triangle markers (12px)
+- Other stations' platforms: Smaller dimmed triangles (8px, 35% opacity)
+- Smooth animations when panning between platform highlights
+
+---
+
 ## [11.0.0-alpha.9] - 2025-12-08
 
 ### UI/UX Fixes & Platform Map Markers

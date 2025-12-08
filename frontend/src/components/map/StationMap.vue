@@ -22,9 +22,17 @@ const props = defineProps({
   },
 
   /**
-   * Array of platform objects with lat/lon (for fixed platforms)
+   * Array of platform objects with lat/lon (for selected station)
    */
   platforms: {
+    type: Array,
+    default: () => []
+  },
+
+  /**
+   * Array of platform objects from other stations (dimmed display)
+   */
+  otherPlatforms: {
     type: Array,
     default: () => []
   },
@@ -87,6 +95,8 @@ const mapContainer = ref(null);
 let map = null;
 let markers = [];
 let platformMarkers = [];
+let platformMarkerMap = new Map(); // Map of platform ID to marker
+let otherPlatformMarkers = [];
 
 // Height style
 const heightStyle = computed(() => {
@@ -121,8 +131,10 @@ function createMarkerIcon(station, isSelected = false) {
 
 /**
  * Create platform marker icon based on mount type
+ * @param {Object} platform - Platform object
+ * @param {boolean} dimmed - Whether to show dimmed (for other stations)
  */
-function createPlatformMarkerIcon(platform) {
+function createPlatformMarkerIcon(platform, dimmed = false) {
   // Mount type colors: PL=tower(orange), BL=building(teal), GL=ground(green)
   const mountType = platform.mount_type_code?.match(/^([A-Z]+)/)?.[1] || 'PL';
   const colors = {
@@ -132,22 +144,28 @@ function createPlatformMarkerIcon(platform) {
   };
   const color = colors[mountType] || '#f97316';
 
+  // Dimmed markers are smaller and more transparent
+  const size = dimmed ? { left: 4, right: 4, bottom: 8 } : { left: 6, right: 6, bottom: 12 };
+  const opacity = dimmed ? 0.35 : 1;
+  const shadow = dimmed ? 'none' : 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))';
+
   // Triangle/tower shape for platforms
   return L.divIcon({
-    className: 'platform-marker',
+    className: dimmed ? 'platform-marker-dimmed' : 'platform-marker',
     html: `
       <div style="
         width: 0;
         height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-bottom: 12px solid ${color};
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-        cursor: pointer;
+        border-left: ${size.left}px solid transparent;
+        border-right: ${size.right}px solid transparent;
+        border-bottom: ${size.bottom}px solid ${color};
+        opacity: ${opacity};
+        filter: ${shadow};
+        cursor: ${dimmed ? 'default' : 'pointer'};
       "></div>
     `,
-    iconSize: [12, 12],
-    iconAnchor: [6, 12]
+    iconSize: [size.left * 2, size.bottom],
+    iconAnchor: [size.left, size.bottom]
   });
 }
 
@@ -290,6 +308,7 @@ function updatePlatformMarkers() {
   // Clear existing platform markers
   platformMarkers.forEach(marker => map.removeLayer(marker));
   platformMarkers = [];
+  platformMarkerMap.clear();
 
   // Only show if showPlatforms is enabled
   if (!props.showPlatforms) return;
@@ -304,7 +323,7 @@ function updatePlatformMarkers() {
 
     const marker = L.marker(
       [platform.latitude, platform.longitude],
-      { icon: createPlatformMarkerIcon(platform) }
+      { icon: createPlatformMarkerIcon(platform, false) }
     );
 
     // Popup
@@ -324,6 +343,57 @@ function updatePlatformMarkers() {
 
     marker.addTo(map);
     platformMarkers.push(marker);
+    platformMarkerMap.set(platform.id, marker);
+  });
+}
+
+/**
+ * Update other platforms markers (dimmed, from other stations)
+ */
+function updateOtherPlatformMarkers() {
+  if (!map) return;
+
+  // Clear existing other platform markers
+  otherPlatformMarkers.forEach(marker => map.removeLayer(marker));
+  otherPlatformMarkers = [];
+
+  // Only show if showPlatforms is enabled and we have other platforms
+  if (!props.showPlatforms || !props.otherPlatforms?.length) return;
+
+  // Add dimmed platform markers for other stations
+  props.otherPlatforms.forEach(platform => {
+    // Skip if no coordinates
+    if (platform.latitude == null || platform.longitude == null) return;
+
+    // Only show fixed platforms (not UAV/satellite)
+    if (platform.platform_type !== 'fixed') return;
+
+    const marker = L.marker(
+      [platform.latitude, platform.longitude],
+      { icon: createPlatformMarkerIcon(platform, true) }
+    );
+
+    // Simpler popup for other stations' platforms
+    marker.bindPopup(`
+      <div style="min-width: 150px; font-family: system-ui, sans-serif; opacity: 0.8;">
+        <div style="font-weight: 500; font-size: 12px; color: #888;">
+          <code style="background: #f1f5f9; padding: 1px 4px; border-radius: 2px;">
+            ${platform.normalized_name || platform.display_name}
+          </code>
+        </div>
+        <div style="font-size: 11px; color: #aaa; margin-top: 4px;">
+          Other station platform
+        </div>
+      </div>
+    `);
+
+    // Only hover events for dimmed markers (no click navigation)
+    marker.on('mouseover', () => {
+      marker.openPopup();
+    });
+
+    marker.addTo(map);
+    otherPlatformMarkers.push(marker);
   });
 }
 
@@ -336,6 +406,8 @@ function destroyMap() {
     map = null;
     markers = [];
     platformMarkers = [];
+    platformMarkerMap.clear();
+    otherPlatformMarkers = [];
   }
 }
 
@@ -352,7 +424,11 @@ onUnmounted(() => {
 watch(() => props.stations, updateMarkers, { deep: true });
 watch(() => props.selectedId, updateMarkers);
 watch(() => props.platforms, updatePlatformMarkers, { deep: true });
-watch(() => props.showPlatforms, updatePlatformMarkers);
+watch(() => props.showPlatforms, () => {
+  updatePlatformMarkers();
+  updateOtherPlatformMarkers();
+});
+watch(() => props.otherPlatforms, updateOtherPlatformMarkers, { deep: true });
 watch(() => props.center, (newCenter) => {
   if (map) {
     map.setView(newCenter, props.zoom);
@@ -362,7 +438,7 @@ watch(() => props.center, (newCenter) => {
 // Expose methods
 defineExpose({
   fitBounds: () => {
-    const allMarkers = [...markers, ...platformMarkers];
+    const allMarkers = [...markers, ...platformMarkers, ...otherPlatformMarkers];
     if (map && allMarkers.length > 0) {
       const group = L.featureGroup(allMarkers);
       map.fitBounds(group.getBounds().pad(0.2));
@@ -371,6 +447,39 @@ defineExpose({
   setView: (center, zoom) => {
     if (map) {
       map.setView(center, zoom || props.zoom);
+    }
+  },
+  /**
+   * Highlight a platform marker by platform ID - centers map and opens popup
+   * @param {number|string} platformId - Platform ID to highlight
+   */
+  highlightPlatform: (platformId) => {
+    if (!map || !platformId) return;
+
+    // Find the marker from our map
+    const marker = platformMarkerMap.get(platformId);
+    if (!marker) return;
+
+    // Find the platform for coordinates
+    const platform = props.platforms.find(p => p.id === platformId);
+    if (!platform || platform.latitude == null || platform.longitude == null) return;
+
+    // Pan smoothly to the platform and open popup
+    map.setView([platform.latitude, platform.longitude], 14, { animate: true });
+    marker.openPopup();
+  },
+  /**
+   * Clear highlight (close popups and reset view)
+   */
+  clearHighlight: () => {
+    if (map) {
+      map.closePopup();
+      // Fit back to all markers
+      const allMarkers = [...markers, ...platformMarkers, ...otherPlatformMarkers];
+      if (allMarkers.length > 0) {
+        const group = L.featureGroup(allMarkers);
+        map.fitBounds(group.getBounds().pad(0.2), { animate: true });
+      }
     }
   }
 });
