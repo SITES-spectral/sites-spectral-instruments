@@ -266,6 +266,7 @@ const stats = computed(() => {
           :stations="stationsStore.stations"
           :height="350"
           :clickable="true"
+          :selected-id="userStation?.id"
         />
         <div v-else-if="stationsStore.loading" class="h-[350px] flex items-center justify-center bg-base-200 rounded-lg">
           <span class="loading loading-spinner loading-md"></span>
