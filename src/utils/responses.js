@@ -112,3 +112,19 @@ export function createRateLimitResponse() {
     headers: { 'Content-Type': 'application/json' }
   });
 }
+
+// Aliases for V11 controller compatibility
+export function jsonResponse(data, status = 200) {
+  return createSuccessResponse(data, status);
+}
+
+export function errorResponse(message, status = 400) {
+  return createErrorResponse(message, status);
+}
+
+export function notFoundResponse(message = 'Resource not found') {
+  return new Response(JSON.stringify({ error: message }), {
+    status: 404,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}

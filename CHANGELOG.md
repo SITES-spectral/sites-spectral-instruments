@@ -7,11 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Next Steps (v11.x Roadmap)
-- **Phase 8**: Production Deployment
-
 ### Future Consideration (Flagged)
 - **Platform Mount Type Codes**: Consider migrating from legacy codes (PL, BL, GL) to standard acronyms (TWR, BLD, GND, AER) for better alignment with ICOS/Copernicus terminology. This would require database migration and frontend updates.
+
+---
+
+## [11.0.0-alpha.8] - 2025-12-08
+
+### Phase 8: Production Deployment
+
+V11 Hexagonal Architecture deployed to production.
+
+#### Deployment Summary
+
+| Component | Status | URL |
+|-----------|--------|-----|
+| Cloudflare Worker | ✅ Deployed | sites-spectral-instruments.jose-e5f.workers.dev |
+| Production Domain | ✅ Live | sites.jobelab.com |
+| D1 Database | ✅ Connected | 9 stations, all data intact |
+| Vue.js Frontend | ✅ Built | 101 modules, 601 KiB |
+
+#### V11 API Features (Production)
+
+- **Hexagonal Architecture**: Complete Ports & Adapters pattern
+- **CQRS Pattern**: Separated Commands and Queries
+- **Domain-Driven Design**: 6 core domains (Station, Platform, Instrument, ROI, Maintenance, Calibration)
+- **Standard Vocabularies**: Darwin Core, ICOS, Copernicus alignment
+- **Mount Type Codes**: Legacy codes preserved (PL, BL, GL, UAV, SAT)
+
+#### Build Fix
+
+- Added response utility aliases (`jsonResponse`, `errorResponse`, `notFoundResponse`) for V11 controller compatibility
+
+#### Verified Endpoints
+
+```
+GET /api/v11/health     → 200 OK (architecture: hexagonal)
+GET /api/v11/stations   → 200 OK (9 stations returned)
+```
 
 ---
 
