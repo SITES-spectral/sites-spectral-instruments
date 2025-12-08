@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "10.0.0-beta.12",
-  "description": "SITES Spectral v10.0.0 - Hexagonal Architecture with Vue 3 + daisyUI",
+  "version": "11.0.0-alpha.1",
+  "description": "SITES Spectral v11.0.0 - Hexagonal Architecture + Standard Vocabularies (Darwin Core, ICOS, Copernicus)",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
