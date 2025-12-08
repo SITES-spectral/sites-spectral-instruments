@@ -70,6 +70,118 @@ const canEdit = computed(() => {
 // Instruments grouped by type
 const instrumentsByType = computed(() => instrumentsStore.instrumentsByType);
 
+// Active tab for instrument types
+const activeInstrumentTab = ref('all');
+
+// Instrument type definitions with icons and colors
+const instrumentTypes = {
+  all: {
+    key: 'all',
+    name: 'All',
+    icon: 'M4 6h16M4 12h16M4 18h16',
+    bgClass: 'bg-base-300',
+    textClass: 'text-base-content',
+    borderClass: 'border-base-content'
+  },
+  Phenocam: {
+    key: 'Phenocam',
+    name: 'Phenocams',
+    icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9zM15 13a3 3 0 11-6 0 3 3 0 016 0z',
+    bgClass: 'bg-blue-500/10',
+    textClass: 'text-blue-500',
+    borderClass: 'border-blue-500'
+  },
+  'Multispectral Sensor': {
+    key: 'Multispectral Sensor',
+    name: 'Multispectral',
+    icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+    bgClass: 'bg-purple-500/10',
+    textClass: 'text-purple-500',
+    borderClass: 'border-purple-500'
+  },
+  'PAR Sensor': {
+    key: 'PAR Sensor',
+    name: 'PAR Sensors',
+    icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+    bgClass: 'bg-amber-500/10',
+    textClass: 'text-amber-500',
+    borderClass: 'border-amber-500'
+  },
+  'NDVI Sensor': {
+    key: 'NDVI Sensor',
+    name: 'NDVI Sensors',
+    icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z',
+    bgClass: 'bg-green-500/10',
+    textClass: 'text-green-500',
+    borderClass: 'border-green-500'
+  },
+  'PRI Sensor': {
+    key: 'PRI Sensor',
+    name: 'PRI Sensors',
+    icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z',
+    bgClass: 'bg-cyan-500/10',
+    textClass: 'text-cyan-500',
+    borderClass: 'border-cyan-500'
+  },
+  Hyperspectral: {
+    key: 'Hyperspectral',
+    name: 'Hyperspectral',
+    icon: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
+    bgClass: 'bg-pink-500/10',
+    textClass: 'text-pink-500',
+    borderClass: 'border-pink-500'
+  },
+  Thermal: {
+    key: 'Thermal',
+    name: 'Thermal',
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+    bgClass: 'bg-red-500/10',
+    textClass: 'text-red-500',
+    borderClass: 'border-red-500'
+  },
+  LiDAR: {
+    key: 'LiDAR',
+    name: 'LiDAR',
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+    bgClass: 'bg-teal-500/10',
+    textClass: 'text-teal-500',
+    borderClass: 'border-teal-500'
+  },
+  'Radar (SAR)': {
+    key: 'Radar (SAR)',
+    name: 'Radar/SAR',
+    icon: 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',
+    bgClass: 'bg-indigo-500/10',
+    textClass: 'text-indigo-500',
+    borderClass: 'border-indigo-500'
+  }
+};
+
+// Available tabs (only show types that have instruments)
+const availableInstrumentTabs = computed(() => {
+  const tabs = [instrumentTypes.all];
+  for (const [typeName, instruments] of Object.entries(instrumentsByType.value)) {
+    if (instruments.length > 0 && instrumentTypes[typeName]) {
+      tabs.push(instrumentTypes[typeName]);
+    }
+  }
+  return tabs;
+});
+
+// Get count for an instrument type
+function getInstrumentTypeCount(typeKey) {
+  if (typeKey === 'all') return instrumentsStore.instrumentCount;
+  return instrumentsByType.value[typeKey]?.length || 0;
+}
+
+// Filtered instruments based on active tab
+const filteredInstruments = computed(() => {
+  if (activeInstrumentTab.value === 'all') {
+    return Object.values(instrumentsByType.value).flat();
+  }
+  return instrumentsByType.value[activeInstrumentTab.value] || [];
+});
+
 // Loading states
 const isLoading = computed(() =>
   platformsStore.loading || instrumentsStore.loading
@@ -272,44 +384,60 @@ const typeBadgeClass = computed(() => {
 
       <!-- Instruments Section -->
       <div class="bg-base-100 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold">
-            Instruments
-            <span class="badge badge-lg ml-2">{{ instrumentsStore.instrumentCount }}</span>
-          </h2>
+        <!-- Header with tabs and add button -->
+        <div class="flex flex-col gap-4 mb-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold">
+              Instruments
+              <span class="badge badge-lg ml-2">{{ instrumentsStore.instrumentCount }}</span>
+            </h2>
 
-          <button v-if="canEdit" class="btn btn-primary btn-sm" @click="openCreateInstrumentModal">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Instrument
-          </button>
-        </div>
+            <button v-if="canEdit" class="btn btn-primary btn-sm" @click="openCreateInstrumentModal">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Instrument
+            </button>
+          </div>
 
-        <!-- Instruments by type -->
-        <div v-if="instrumentsStore.instrumentCount > 0" class="space-y-6">
-          <div v-for="(instruments, typeName) in instrumentsByType" :key="typeName">
-            <h3 class="text-lg font-medium mb-3 flex items-center gap-2">
-              <span class="badge badge-secondary">{{ typeName }}</span>
-              <span class="text-base-content/60 text-sm font-normal">
-                {{ instruments.length }} instrument{{ instruments.length !== 1 ? 's' : '' }}
+          <!-- Instrument Type Tabs -->
+          <div v-if="instrumentsStore.instrumentCount > 0" class="flex flex-wrap gap-2">
+            <button
+              v-for="tab in availableInstrumentTabs"
+              :key="tab.key"
+              class="btn btn-sm gap-2 transition-all"
+              :class="[
+                activeInstrumentTab === tab.key
+                  ? `${tab.bgClass} ${tab.textClass} border-2 ${tab.borderClass}`
+                  : 'btn-ghost border border-base-300'
+              ]"
+              @click="activeInstrumentTab = tab.key"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon" />
+              </svg>
+              <span>{{ tab.name }}</span>
+              <span class="badge badge-sm" :class="activeInstrumentTab === tab.key ? 'badge-neutral' : 'badge-ghost'">
+                {{ getInstrumentTypeCount(tab.key) }}
               </span>
-            </h3>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <InstrumentCard
-                v-for="instrument in instruments"
-                :key="instrument.id"
-                :instrument="instrument"
-                :can-edit="canEdit"
-                @edit="openEditInstrumentModal"
-                @delete="openDeleteInstrumentModal"
-              />
-            </div>
+            </button>
           </div>
         </div>
 
+        <!-- Instruments grid -->
+        <div v-if="filteredInstruments.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <InstrumentCard
+            v-for="instrument in filteredInstruments"
+            :key="instrument.id"
+            :instrument="instrument"
+            :can-edit="canEdit"
+            @edit="openEditInstrumentModal"
+            @delete="openDeleteInstrumentModal"
+          />
+        </div>
+
         <!-- Empty state -->
-        <div v-else class="text-center py-8">
+        <div v-else-if="!instrumentsStore.loading" class="text-center py-8">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
           </svg>
@@ -317,6 +445,11 @@ const typeBadgeClass = computed(() => {
           <button v-if="canEdit" class="btn btn-primary mt-4" @click="openCreateInstrumentModal">
             Add First Instrument
           </button>
+        </div>
+
+        <!-- Loading state -->
+        <div v-if="instrumentsStore.loading" class="flex justify-center py-8">
+          <span class="loading loading-spinner loading-md"></span>
         </div>
       </div>
     </div>

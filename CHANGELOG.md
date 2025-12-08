@@ -13,6 +13,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.11] - 2025-12-08
+
+### Tabbed Navigation for Platforms and Instruments
+
+Major UX improvement with tabbed navigation to filter by type.
+
+#### Station View - Platform Type Tabs
+
+- **All Platforms**: View all platforms in one grid
+- **Fixed Platforms**: Tower icon (blue/info color)
+- **UAV Platforms**: Drone icon (yellow/warning color)
+- **Satellite Platforms**: Satellite icon (purple/accent color)
+- **Mobile Platforms**: Truck icon (neutral color)
+
+Features:
+- Only shows tabs for types that have platforms
+- Count badges on each tab
+- Active tab has colored border and background
+- Icons for quick visual identification
+
+#### Platform View - Instrument Type Tabs
+
+- **All Instruments**: View all instruments
+- **Phenocams**: Camera icon (blue)
+- **Multispectral**: Layer stack icon (purple)
+- **PAR Sensors**: Sun icon (amber)
+- **NDVI Sensors**: Sparkle/leaf icon (green)
+- **PRI Sensors**: Sensor icon (cyan)
+- **Hyperspectral**: Palette icon (pink)
+- **Thermal**: Temperature icon (red)
+- **LiDAR**: Lightning bolt icon (teal)
+- **Radar/SAR**: Signal waves icon (indigo)
+
+Features:
+- Dynamic tabs based on available instrument types
+- Distinctive colors for each instrument type
+- Count badges showing number of instruments per type
+- Clean, modern tab button design
+
+---
+
 ## [10.0.0-beta.10] - 2025-12-07
 
 ### Fixed Platform Icons & Sidebar Loading

@@ -4,6 +4,7 @@
  *
  * Displays station details and its platforms/instruments.
  * Supports platform CRUD operations via modals.
+ * Features tabbed navigation for platform types.
  */
 import { computed, ref, onMounted, watch } from 'vue';
 import { useStationsStore } from '@stores/stations';
@@ -42,6 +43,82 @@ const canEdit = computed(() => {
 
 // Platforms grouped by type
 const platformsByType = computed(() => platformsStore.platformsByType);
+
+// Active tab for platform types
+const activeTab = ref('all');
+
+// Platform type definitions with icons and colors
+const platformTypes = {
+  all: {
+    key: 'all',
+    name: 'All Platforms',
+    icon: 'M4 6h16M4 12h16M4 18h16',
+    bgClass: 'bg-base-300',
+    textClass: 'text-base-content',
+    borderClass: 'border-base-content'
+  },
+  fixed: {
+    key: 'fixed',
+    name: 'Fixed Platforms',
+    icon: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4',
+    bgClass: 'bg-info/10',
+    textClass: 'text-info',
+    borderClass: 'border-info'
+  },
+  uav: {
+    key: 'uav',
+    name: 'UAV Platforms',
+    icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
+    bgClass: 'bg-warning/10',
+    textClass: 'text-warning',
+    borderClass: 'border-warning'
+  },
+  satellite: {
+    key: 'satellite',
+    name: 'Satellite Platforms',
+    icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+    bgClass: 'bg-accent/10',
+    textClass: 'text-accent',
+    borderClass: 'border-accent'
+  },
+  mobile: {
+    key: 'mobile',
+    name: 'Mobile Platforms',
+    icon: 'M8 17h.01M14 17h.01M5 17H3v-4a1 1 0 011-1h1V9a1 1 0 011-1h8a1 1 0 011 1v3h2a1 1 0 011 1v4h-2m-8 0a2 2 0 11-4 0m10 0a2 2 0 11-4 0',
+    bgClass: 'bg-neutral/10',
+    textClass: 'text-neutral',
+    borderClass: 'border-neutral'
+  }
+};
+
+// Available tabs (only show types that have platforms)
+const availableTabs = computed(() => {
+  const tabs = [platformTypes.all];
+  if (platformsByType.value.fixed?.length > 0) tabs.push(platformTypes.fixed);
+  if (platformsByType.value.uav?.length > 0) tabs.push(platformTypes.uav);
+  if (platformsByType.value.satellite?.length > 0) tabs.push(platformTypes.satellite);
+  if (platformsByType.value.mobile?.length > 0) tabs.push(platformTypes.mobile);
+  return tabs;
+});
+
+// Get count for a platform type
+function getTypeCount(typeKey) {
+  if (typeKey === 'all') return platformsStore.platformCount;
+  return platformsByType.value[typeKey]?.length || 0;
+}
+
+// Filtered platforms based on active tab
+const filteredPlatforms = computed(() => {
+  if (activeTab.value === 'all') {
+    return [
+      ...(platformsByType.value.fixed || []),
+      ...(platformsByType.value.uav || []),
+      ...(platformsByType.value.satellite || []),
+      ...(platformsByType.value.mobile || [])
+    ];
+  }
+  return platformsByType.value[activeTab.value] || [];
+});
 
 // Modal states
 const showStationEditModal = ref(false);
@@ -221,90 +298,71 @@ async function handleDeletePlatform() {
         </div>
       </div>
 
-      <!-- Create platform button -->
-      <div v-if="canEdit" class="flex justify-end mb-4">
-        <button class="btn btn-primary" @click="openCreatePlatformModal">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Create Platform
-        </button>
-      </div>
-
-      <!-- Platforms by type -->
-      <div class="space-y-6">
-        <!-- Fixed Platforms -->
-        <div v-if="platformsByType.fixed.length > 0">
-          <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            <span class="badge badge-info">Fixed</span>
-            <span class="text-base-content/60 text-sm font-normal">
-              {{ platformsByType.fixed.length }} platforms
-            </span>
-          </h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <PlatformCard
-              v-for="platform in platformsByType.fixed"
-              :key="platform.id"
-              :platform="platform"
-              :can-edit="canEdit"
-              @edit="openEditPlatformModal"
-              @delete="openDeletePlatformModal"
-            />
+      <!-- Platforms Section with Tabs -->
+      <div class="bg-base-100 rounded-lg shadow-lg p-6">
+        <!-- Header with tabs and create button -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <!-- Platform Type Tabs -->
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="tab in availableTabs"
+              :key="tab.key"
+              class="btn btn-sm gap-2 transition-all"
+              :class="[
+                activeTab === tab.key
+                  ? `${tab.bgClass} ${tab.textClass} border-2 ${tab.borderClass}`
+                  : 'btn-ghost border border-base-300'
+              ]"
+              @click="activeTab = tab.key"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon" />
+              </svg>
+              <span class="hidden sm:inline">{{ tab.name }}</span>
+              <span class="badge badge-sm" :class="activeTab === tab.key ? 'badge-neutral' : 'badge-ghost'">
+                {{ getTypeCount(tab.key) }}
+              </span>
+            </button>
           </div>
+
+          <!-- Create Platform Button -->
+          <button v-if="canEdit" class="btn btn-primary btn-sm" @click="openCreatePlatformModal">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Platform
+          </button>
         </div>
 
-        <!-- UAV Platforms -->
-        <div v-if="platformsByType.uav.length > 0">
-          <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            <span class="badge badge-warning">UAV</span>
-            <span class="text-base-content/60 text-sm font-normal">
-              {{ platformsByType.uav.length }} platforms
-            </span>
-          </h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <PlatformCard
-              v-for="platform in platformsByType.uav"
-              :key="platform.id"
-              :platform="platform"
-              :can-edit="canEdit"
-              @edit="openEditPlatformModal"
-              @delete="openDeletePlatformModal"
-            />
-          </div>
-        </div>
-
-        <!-- Satellite Platforms -->
-        <div v-if="platformsByType.satellite.length > 0">
-          <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            <span class="badge badge-secondary">Satellite</span>
-            <span class="text-base-content/60 text-sm font-normal">
-              {{ platformsByType.satellite.length }} platforms
-            </span>
-          </h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <PlatformCard
-              v-for="platform in platformsByType.satellite"
-              :key="platform.id"
-              :platform="platform"
-              :can-edit="canEdit"
-              @edit="openEditPlatformModal"
-              @delete="openDeletePlatformModal"
-            />
-          </div>
+        <!-- Platform Grid -->
+        <div v-if="filteredPlatforms.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <PlatformCard
+            v-for="platform in filteredPlatforms"
+            :key="platform.id"
+            :platform="platform"
+            :can-edit="canEdit"
+            @edit="openEditPlatformModal"
+            @delete="openDeletePlatformModal"
+          />
         </div>
 
         <!-- Empty state -->
         <div
-          v-if="platformsStore.platformCount === 0 && !platformsStore.loading"
-          class="text-center py-12 bg-base-100 rounded-lg"
+          v-else-if="!platformsStore.loading"
+          class="text-center py-12"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4" />
           </svg>
           <p class="mt-4 text-base-content/60">No platforms found</p>
           <button v-if="canEdit" class="btn btn-primary mt-4" @click="openCreatePlatformModal">
             Create First Platform
           </button>
+        </div>
+
+        <!-- Loading state -->
+        <div v-if="platformsStore.loading" class="flex justify-center py-8">
+          <span class="loading loading-spinner loading-md"></span>
         </div>
       </div>
     </div>
