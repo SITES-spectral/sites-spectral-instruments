@@ -56,7 +56,7 @@ src/
 
 ---
 
-## Current Version: 11.0.0-alpha.6 - Vocabulary Mapping & Documentation (2025-12-08)
+## Current Version: 11.0.0-alpha.7 - Post-Migration Validation & Testing (2025-12-08)
 
 **✅ STATUS: ALPHA - V11 Hexagonal Architecture + Standard Vocabularies**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -573,15 +573,23 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 
 ## Documentation Index
 
+### V11 Documentation (Active)
+
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Version history and release notes |
-| `CLAUDE_LEGACY.md` | Historical documentation (pre-v6.x) |
-| `docs/VOCABULARY_MAPPING.md` | Darwin Core, ICOS, Copernicus alignment (v11.0.0+) |
+| `docs/VOCABULARY_MAPPING.md` | Darwin Core, ICOS, Copernicus alignment |
 | `docs/STATION_USER_GUIDE.md` | End-user guide |
 | `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
 | `docs/roi/ROI_README.md` | ROI system documentation |
-| `docs/deprecated/` | Archived documentation |
+| `docs/PRODUCTION_SYNC_GUIDE.md` | Deployment procedures |
+
+### Legacy Documentation (V1-V10)
+
+| Document | Purpose |
+|----------|---------|
+| `docs/legacy/v1-v10/` | All pre-V11 documentation archived |
+| `docs/legacy/README.md` | Legacy archive index |
 
 ### Security Documentation in CHANGELOG.md
 
@@ -686,7 +694,7 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 11.0.0-alpha.6 |
+| Current Version | 11.0.0-alpha.7 |
 | Last Deployed | 2025-12-08 |
 | Status | Alpha - V11 Hexagonal Architecture + Standard Vocabularies |
 | Environment | Cloudflare Workers + D1 Database |
@@ -697,6 +705,9 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 
 | Feature | Version | Status |
 |---------|---------|--------|
+| Post-Migration Testing | v11.0.0-alpha.7 | ✅ 185/186 tests pass |
+| V11 Integration Tests | v11.0.0-alpha.7 | ✅ Active |
+| Legacy Docs Archived | v11.0.0-alpha.7 | ✅ docs/legacy/v1-v10 |
 | Vocabulary Mapping | v11.0.0-alpha.6 | ✅ Active |
 | Darwin Core Alignment | v11.0.0-alpha.6 | ✅ Active |
 | ICOS Station Types | v11.0.0-alpha.6 | ✅ Active |

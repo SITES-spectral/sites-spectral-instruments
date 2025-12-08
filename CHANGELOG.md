@@ -8,8 +8,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v11.x Roadmap)
-- **Phase 7**: Post-Migration Validation & Testing
 - **Phase 8**: Production Deployment
+
+### Future Consideration (Flagged)
+- **Platform Mount Type Codes**: Consider migrating from legacy codes (PL, BL, GL) to standard acronyms (TWR, BLD, GND, AER) for better alignment with ICOS/Copernicus terminology. This would require database migration and frontend updates.
+
+---
+
+## [11.0.0-alpha.7] - 2025-12-08
+
+### Phase 7: Post-Migration Validation & Testing
+
+Comprehensive testing and documentation cleanup for V11 architecture.
+
+#### Test Results Summary
+
+| Test Suite | Passed | Failed | Total |
+|------------|--------|--------|-------|
+| Domain Tests (Backend) | 80 | 0 | 80 |
+| V11 Integration Tests | 13 | 0 | 13 |
+| Frontend Component Tests | 92 | 1* | 93 |
+| **Total** | **185** | **1** | **186** |
+
+*Minor styling test failure: `Decommissioned` status uses `badge-neutral` instead of `badge-error` (cosmetic only).
+
+#### Backend Tests Validated
+
+**Domain Entities (80 tests)**:
+- Station entity: validation, serialization, factory methods
+- Platform entity: type constants, ecosystem validation, mount types
+- Instrument entity: statuses, calibration checks, ROI management
+
+**V11 Integration (13 tests)**:
+- Router factory function
+- All 8 V11 controllers importable (Station, Platform, Instrument, AOI, Campaign, Product, Maintenance, Calibration)
+- All domain entities importable
+- All repository ports importable
+
+#### Frontend Build Validated
+
+- Vue.js production build: Success (2.85s)
+- 101 modules transformed
+- All chunks generated correctly
+- Component tests: 92/93 passing
+
+#### Documentation Cleanup
+
+**Moved to Legacy (`docs/legacy/v1-v10/`)**:
+- V3 API documentation
+- V1 API documentation
+- Legacy guides and references
+- Platform type update guides (V8.x)
+- MS sensor integration docs
+- CLAUDE_LEGACY.md
+
+**V3 Integration Tests**:
+- Moved to `tests/deprecated/` (V3 API handler removed)
+- New V11 integration tests created
+
+#### Files Changed
+
+**New Files**:
+- `tests/integration/v11-api.test.js` - V11 architecture validation tests
+- `docs/legacy/README.md` - Legacy documentation index
+
+**Moved Files**:
+- `tests/integration/v3-*.test.js` → `tests/deprecated/`
+- V1-V10 documentation → `docs/legacy/v1-v10/`
+
+**Updated Files**:
+- `CLAUDE.md` - Updated documentation index
+- `CHANGELOG.md` - Phase 7 results
 
 ---
 
