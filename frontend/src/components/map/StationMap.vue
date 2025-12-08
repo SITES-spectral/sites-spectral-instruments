@@ -456,12 +456,13 @@ defineExpose({
   highlightPlatform: (platformId) => {
     if (!map || !platformId) return;
 
-    // Find the marker from our map
-    const marker = platformMarkerMap.get(platformId);
+    // Try both number and string versions of ID
+    const numId = typeof platformId === 'string' ? parseInt(platformId, 10) : platformId;
+    const marker = platformMarkerMap.get(platformId) || platformMarkerMap.get(numId);
     if (!marker) return;
 
     // Find the platform for coordinates
-    const platform = props.platforms.find(p => p.id === platformId);
+    const platform = props.platforms.find(p => p.id === platformId || p.id === numId);
     if (!platform || platform.latitude == null || platform.longitude == null) return;
 
     // Pan smoothly to the platform and open popup

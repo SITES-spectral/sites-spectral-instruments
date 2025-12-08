@@ -114,10 +114,15 @@ async function loadAllPlatforms() {
 
 // Compute platforms for other stations (exclude selected station)
 const otherStationsPlatforms = computed(() => {
-  if (!showAllPlatforms.value || !userStation.value) return [];
-  return allStationsPlatforms.value.filter(p =>
-    p.station_id !== userStation.value.id
-  );
+  if (!showAllPlatforms.value) return [];
+  // If user has a home station, exclude it; otherwise show all
+  if (userStation.value) {
+    return allStationsPlatforms.value.filter(p =>
+      p.station_id !== userStation.value.id
+    );
+  }
+  // For admins: show all platforms from all stations
+  return allStationsPlatforms.value;
 });
 
 // Watch showAllPlatforms toggle - load all platforms when enabled
@@ -341,15 +346,16 @@ const stats = computed(() => {
           Station Locations
         </h2>
         <div class="flex items-center gap-4">
-          <!-- Show all platforms toggle -->
-          <label v-if="userStation" class="label cursor-pointer gap-2">
-            <span class="label-text text-xs text-base-content/60">Show other stations</span>
+          <!-- Show all platforms toggle - always visible -->
+          <label class="label cursor-pointer gap-2">
+            <span class="label-text text-xs text-base-content/60">Show all platforms</span>
             <input
               v-model="showAllPlatforms"
               type="checkbox"
               class="toggle toggle-xs"
               :disabled="loadingAllPlatforms"
             />
+            <span v-if="loadingAllPlatforms" class="loading loading-spinner loading-xs"></span>
           </label>
           <!-- Show map toggle -->
           <label class="label cursor-pointer gap-2">
