@@ -12,6 +12,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.9] - 2025-12-08
+
+### UI/UX Fixes & Platform Map Markers
+
+#### Version Display Fixes
+- **Login Page**: Updated version display to v11.0.0 (was v10.0.0)
+- **Admin Dashboard**: Updated API version display to v11 (was v10)
+
+#### API Endpoint Migration
+- Updated all remaining v10 API calls to v11:
+  - `TheSidebar.vue`: platforms and instruments endpoints
+  - `DashboardView.vue`: platforms endpoint
+
+#### Platform Markers on Map
+- **New Feature**: Fixed platforms now display on the station map
+- Triangle markers show platform locations with mount-type colors:
+  - Orange (🔺): Tower/Mast (PL)
+  - Teal (🔺): Building (BL)
+  - Green (🔺): Ground Level (GL)
+- Popup shows platform details: name, mount type, ecosystem, coordinates
+- Legend updated with platform marker types
+- Click navigates to platform detail view
+
+#### StationMap Component Enhancements
+- Added `platforms` prop for platform marker data
+- Added `showPlatforms` prop to toggle platform markers
+- New functions: `createPlatformMarkerIcon()`, `createPlatformPopupContent()`, `updatePlatformMarkers()`
+- Updated legend to show platform mount types when platforms are displayed
+
+---
+
 ## [11.0.0-alpha.8] - 2025-12-08
 
 ### Phase 8: Production Deployment

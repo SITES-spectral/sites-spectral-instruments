@@ -22,6 +22,22 @@ const props = defineProps({
   },
 
   /**
+   * Array of platform objects with lat/lon (for fixed platforms)
+   */
+  platforms: {
+    type: Array,
+    default: () => []
+  },
+
+  /**
+   * Show platform markers (fixed platforms with coordinates)
+   */
+  showPlatforms: {
+    type: Boolean,
+    default: true
+  },
+
+  /**
    * Map height
    */
   height: {
@@ -62,7 +78,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['station-click', 'station-hover']);
+const emit = defineEmits(['station-click', 'station-hover', 'platform-click']);
 
 const router = useRouter();
 const mapContainer = ref(null);
@@ -70,6 +86,7 @@ const mapContainer = ref(null);
 // Map instance
 let map = null;
 let markers = [];
+let platformMarkers = [];
 
 // Height style
 const heightStyle = computed(() => {
@@ -100,6 +117,68 @@ function createMarkerIcon(station, isSelected = false) {
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2]
   });
+}
+
+/**
+ * Create platform marker icon based on mount type
+ */
+function createPlatformMarkerIcon(platform) {
+  // Mount type colors: PL=tower(orange), BL=building(teal), GL=ground(green)
+  const mountType = platform.mount_type_code?.match(/^([A-Z]+)/)?.[1] || 'PL';
+  const colors = {
+    PL: '#f97316',  // Orange - tower/mast
+    BL: '#14b8a6',  // Teal - building
+    GL: '#22c55e'   // Green - ground level
+  };
+  const color = colors[mountType] || '#f97316';
+
+  // Triangle/tower shape for platforms
+  return L.divIcon({
+    className: 'platform-marker',
+    html: `
+      <div style="
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 12px solid ${color};
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        cursor: pointer;
+      "></div>
+    `,
+    iconSize: [12, 12],
+    iconAnchor: [6, 12]
+  });
+}
+
+/**
+ * Create popup content for platform
+ */
+function createPlatformPopupContent(platform) {
+  const mountType = platform.mount_type_code?.match(/^([A-Z]+)/)?.[1] || '?';
+  const mountNames = { PL: 'Tower/Mast', BL: 'Building', GL: 'Ground Level' };
+
+  return `
+    <div style="min-width: 200px; font-family: system-ui, sans-serif;">
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">
+        <code style="background: #f1f5f9; padding: 1px 4px; border-radius: 2px;">
+          ${platform.normalized_name || platform.display_name}
+        </code>
+      </div>
+      <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+        ${platform.display_name || ''}
+      </div>
+      <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
+        <strong>Mount:</strong> ${mountNames[mountType] || mountType} (${platform.mount_type_code || '?'})
+      </div>
+      <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
+        <strong>Ecosystem:</strong> ${platform.ecosystem_code || 'N/A'}
+      </div>
+      <div style="font-size: 11px; color: #888;">
+        ${platform.latitude?.toFixed(5) || '?'}, ${platform.longitude?.toFixed(5) || '?'}
+      </div>
+    </div>
+  `;
 }
 
 /**
@@ -191,11 +270,61 @@ function updateMarkers() {
     markers.push(marker);
   });
 
-  // Fit bounds if we have stations
-  if (markers.length > 0) {
-    const group = L.featureGroup(markers);
+  // Update platform markers too
+  updatePlatformMarkers();
+
+  // Fit bounds if we have stations or platforms
+  const allMarkers = [...markers, ...platformMarkers];
+  if (allMarkers.length > 0) {
+    const group = L.featureGroup(allMarkers);
     map.fitBounds(group.getBounds().pad(0.2));
   }
+}
+
+/**
+ * Update platform markers on the map
+ */
+function updatePlatformMarkers() {
+  if (!map) return;
+
+  // Clear existing platform markers
+  platformMarkers.forEach(marker => map.removeLayer(marker));
+  platformMarkers = [];
+
+  // Only show if showPlatforms is enabled
+  if (!props.showPlatforms) return;
+
+  // Add new platform markers (only fixed platforms with coordinates)
+  props.platforms.forEach(platform => {
+    // Skip if no coordinates
+    if (platform.latitude == null || platform.longitude == null) return;
+
+    // Only show fixed platforms (not UAV/satellite)
+    if (platform.platform_type !== 'fixed') return;
+
+    const marker = L.marker(
+      [platform.latitude, platform.longitude],
+      { icon: createPlatformMarkerIcon(platform) }
+    );
+
+    // Popup
+    marker.bindPopup(createPlatformPopupContent(platform));
+
+    // Events
+    marker.on('click', () => {
+      emit('platform-click', platform);
+      if (props.clickable) {
+        router.push({ name: 'platform', params: { id: platform.id } });
+      }
+    });
+
+    marker.on('mouseover', () => {
+      marker.openPopup();
+    });
+
+    marker.addTo(map);
+    platformMarkers.push(marker);
+  });
 }
 
 /**
@@ -206,6 +335,7 @@ function destroyMap() {
     map.remove();
     map = null;
     markers = [];
+    platformMarkers = [];
   }
 }
 
@@ -221,6 +351,8 @@ onUnmounted(() => {
 // Watch for changes
 watch(() => props.stations, updateMarkers, { deep: true });
 watch(() => props.selectedId, updateMarkers);
+watch(() => props.platforms, updatePlatformMarkers, { deep: true });
+watch(() => props.showPlatforms, updatePlatformMarkers);
 watch(() => props.center, (newCenter) => {
   if (map) {
     map.setView(newCenter, props.zoom);
@@ -230,8 +362,9 @@ watch(() => props.center, (newCenter) => {
 // Expose methods
 defineExpose({
   fitBounds: () => {
-    if (map && markers.length > 0) {
-      const group = L.featureGroup(markers);
+    const allMarkers = [...markers, ...platformMarkers];
+    if (map && allMarkers.length > 0) {
+      const group = L.featureGroup(allMarkers);
       map.fitBounds(group.getBounds().pad(0.2));
     }
   },
@@ -253,7 +386,8 @@ defineExpose({
 
     <!-- Legend -->
     <div class="absolute bottom-3 left-3 bg-base-100/90 rounded-lg p-2 shadow-md z-[1000]">
-      <div class="flex items-center gap-4 text-xs">
+      <div class="flex flex-wrap items-center gap-3 text-xs">
+        <!-- Station markers -->
         <div class="flex items-center gap-1">
           <span class="w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow"></span>
           <span>Station</span>
@@ -262,6 +396,22 @@ defineExpose({
           <span class="w-3.5 h-3.5 bg-purple-500 rounded-full border-2 border-white shadow"></span>
           <span>Selected</span>
         </div>
+        <!-- Platform markers (when shown) -->
+        <template v-if="showPlatforms && platforms.length > 0">
+          <span class="text-base-content/40">|</span>
+          <div class="flex items-center gap-1">
+            <span class="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[9px] border-l-transparent border-r-transparent border-b-orange-500"></span>
+            <span>Tower</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[9px] border-l-transparent border-r-transparent border-b-teal-500"></span>
+            <span>Building</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[9px] border-l-transparent border-r-transparent border-b-green-500"></span>
+            <span>Ground</span>
+          </div>
+        </template>
       </div>
     </div>
 

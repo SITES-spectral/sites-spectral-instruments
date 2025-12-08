@@ -137,8 +137,8 @@ async function loadPlatformsForStation(station) {
 
   loadingPlatforms.value.add(station.id);
   try {
-    // Correct endpoint: /api/v10/platforms/station/:stationId
-    const response = await fetch(`/api/v10/platforms/station/${station.id}`);
+    // V11 API endpoint
+    const response = await fetch(`/api/v11/platforms/station/${station.id}`);
     if (response.ok) {
       const result = await response.json();
       platformsByStation.value[station.id] = result.data || [];
@@ -156,8 +156,8 @@ async function loadInstrumentsForPlatform(platformId) {
 
   loadingInstruments.value.add(platformId);
   try {
-    // Correct endpoint: /api/v10/instruments/platform/:platformId
-    const response = await fetch(`/api/v10/instruments/platform/${platformId}`);
+    // V11 API endpoint
+    const response = await fetch(`/api/v11/instruments/platform/${platformId}`);
     if (response.ok) {
       const result = await response.json();
       instrumentsByPlatform.value[platformId] = result.data || [];

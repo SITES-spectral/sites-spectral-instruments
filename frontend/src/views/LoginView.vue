@@ -116,7 +116,7 @@ async function handleLogin() {
 
         <!-- Footer -->
         <div class="text-center mt-6 text-sm text-base-content/50">
-          <p>SITES Spectral v10.0.0</p>
+          <p>SITES Spectral v11.0.0</p>
         </div>
       </div>
     </div>

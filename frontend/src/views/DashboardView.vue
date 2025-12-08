@@ -33,10 +33,33 @@ const authStore = useAuthStore();
 const platforms = ref([]);
 const loadingPlatforms = ref(false);
 
+// All platforms for map display (fixed platforms with coordinates)
+const allPlatforms = ref([]);
+
 // Load stations on mount
 onMounted(async () => {
   await stationsStore.fetchStations();
+  // Load all platforms for map markers
+  await loadAllPlatforms();
 });
+
+// Load all platforms with coordinates for map display
+async function loadAllPlatforms() {
+  try {
+    const response = await fetch('/api/v11/platforms');
+    if (response.ok) {
+      const result = await response.json();
+      // Filter to only fixed platforms with coordinates
+      allPlatforms.value = (result.data || []).filter(p =>
+        p.platform_type === 'fixed' &&
+        p.latitude != null &&
+        p.longitude != null
+      );
+    }
+  } catch (error) {
+    console.error('Failed to load platforms for map:', error);
+  }
+}
 
 // Filter stations based on user role
 const visibleStations = computed(() => {
@@ -73,7 +96,7 @@ watch(userStation, async (station) => {
   if (station) {
     loadingPlatforms.value = true;
     try {
-      const response = await fetch(`/api/v10/platforms/station/${station.id}`);
+      const response = await fetch(`/api/v11/platforms/station/${station.id}`);
       if (response.ok) {
         const result = await response.json();
         platforms.value = result.data || [];
@@ -264,6 +287,8 @@ const stats = computed(() => {
         <StationMap
           v-if="!stationsStore.loading && stationsStore.stations.length > 0"
           :stations="stationsStore.stations"
+          :platforms="allPlatforms"
+          :show-platforms="true"
           :height="350"
           :clickable="true"
           :selected-id="userStation?.id"

@@ -716,7 +716,7 @@ onMounted(() => {
             <div class="text-sm text-base-content/60">Architecture</div>
           </div>
           <div class="text-center p-4 bg-base-200 rounded-lg">
-            <div class="text-xl font-bold">v10</div>
+            <div class="text-xl font-bold">v11</div>
             <div class="text-sm text-base-content/60">API Version</div>
           </div>
         </div>
