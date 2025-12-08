@@ -43,7 +43,17 @@ export {
   UpdateProduct,
   DeleteProduct,
   SetProductQualityScore,
-  PromoteProductQuality
+  PromoteProductQuality,
+  // Maintenance commands (V11)
+  CreateMaintenanceRecord,
+  UpdateMaintenanceRecord,
+  DeleteMaintenanceRecord,
+  CompleteMaintenanceRecord,
+  // Calibration commands (V11)
+  CreateCalibrationRecord,
+  UpdateCalibrationRecord,
+  DeleteCalibrationRecord,
+  ExpireCalibrationRecord
 } from './commands/index.js';
 
 // Queries (Read operations)
@@ -71,5 +81,14 @@ export {
   // Admin queries
   GetActivityLogs,
   GetUserSessions,
-  GetStationStats
+  GetStationStats,
+  // Maintenance queries (V11)
+  GetMaintenanceRecord,
+  ListMaintenanceRecords,
+  GetMaintenanceTimeline,
+  // Calibration queries (V11)
+  GetCalibrationRecord,
+  ListCalibrationRecords,
+  GetCalibrationTimeline,
+  GetCurrentCalibration
 } from './queries/index.js';

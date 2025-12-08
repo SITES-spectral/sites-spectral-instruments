@@ -8,24 +8,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v11.x Roadmap)
-
-#### Maintenance Domain (All Platforms/Instruments)
-- MaintenanceRecord entity with timeline history
-- Track: date, type (preventive, corrective, inspection), description, performed_by
-- Platform maintenance records (cleaning, structural checks, power systems)
-- Instrument maintenance records (sensor cleaning, firmware updates, repairs)
-- Timeline view showing all maintenance events
-
-#### Calibration Domain (Multispectral Sensors Only)
-- CalibrationRecord entity with timeline history
-- Track: date, calibration_type, coefficients, certificate_url, performed_by
-- Instrument type validation (only for multispectral instruments)
-- Support for field and laboratory calibrations
-- Calibration certificate storage
-
-#### Other Phases
 - **Phase 5**: Frontend Migration - Vue.js V11 API
 - **Phase 6**: Documentation - Vocabulary mapping
+
+---
+
+## [11.0.0-alpha.3] - 2025-12-08
+
+### Maintenance & Calibration Domains Complete
+
+Full implementation of Maintenance and Calibration tracking with timeline visualization support.
+
+#### Maintenance Domain (Platforms AND Instruments)
+
+**Entity**: `MaintenanceRecord`
+- Unified maintenance for both platforms and instruments
+- Entity types: `platform`, `instrument`
+- Maintenance types: preventive, corrective, inspection, cleaning, calibration, upgrade, repair, replacement, installation, decommissioning
+- Status workflow: scheduled → in_progress → completed/cancelled/deferred
+- Priority levels: low, normal, high, critical
+- Scheduling: scheduled_date, completed_date, next_scheduled_date
+- Cost and duration tracking
+- Parts replacement logging (JSON)
+
+**Commands**:
+- `CreateMaintenanceRecord` - Create new maintenance with entity validation
+- `UpdateMaintenanceRecord` - Update existing record
+- `DeleteMaintenanceRecord` - Delete record
+- `CompleteMaintenanceRecord` - Mark as completed with work details
+
+**Queries**:
+- `GetMaintenanceRecord` - Get single record by ID
+- `ListMaintenanceRecords` - List with filters (station, platform, instrument, type, status)
+- `GetMaintenanceTimeline` - Timeline visualization with grouping and summary
+
+**API Endpoints**:
+- `GET /api/v10/maintenance` - List records
+- `GET /api/v10/maintenance/:id` - Get single record
+- `GET /api/v10/maintenance/timeline` - Timeline for entity
+- `GET /api/v10/maintenance/pending` - Pending maintenance
+- `GET /api/v10/maintenance/overdue` - Overdue maintenance
+- `POST /api/v10/maintenance` - Create record
+- `POST /api/v10/maintenance/:id/complete` - Mark completed
+- `PUT /api/v10/maintenance/:id` - Update record
+- `DELETE /api/v10/maintenance/:id` - Delete record
+
+#### Calibration Domain (Multispectral/Hyperspectral Only)
+
+**Entity**: `CalibrationRecord`
+- Only for multispectral and hyperspectral instruments (validated in domain)
+- Calibration types: factory, field, laboratory, cross_calibration, vicarious, radiometric, spectral, geometric, dark_current, flat_field
+- Status: valid, expired, superseded, pending_review
+- Validity period: calibration_date, valid_until
+- Certificate tracking: certificate_number, certificate_url, laboratory
+- Per-channel coefficients (JSON)
+- Quality metrics: uncertainty, temperature, humidity
+
+**Commands**:
+- `CreateCalibrationRecord` - Create with instrument type validation
+- `UpdateCalibrationRecord` - Update existing record
+- `DeleteCalibrationRecord` - Delete record
+- `ExpireCalibrationRecord` - Mark as expired/superseded
+
+**Queries**:
+- `GetCalibrationRecord` - Get single record by ID
+- `ListCalibrationRecords` - List with filters
+- `GetCalibrationTimeline` - Timeline per instrument with summary
+- `GetCurrentCalibration` - Get current valid calibration with expiry warning
+
+**API Endpoints**:
+- `GET /api/v10/calibrations` - List records
+- `GET /api/v10/calibrations/:id` - Get single record
+- `GET /api/v10/calibrations/current` - Current valid calibration
+- `GET /api/v10/calibrations/timeline` - Timeline for instrument
+- `GET /api/v10/calibrations/expired` - Expired calibrations
+- `GET /api/v10/calibrations/expiring` - Expiring within N days
+- `POST /api/v10/calibrations` - Create (multispectral only)
+- `POST /api/v10/calibrations/:id/expire` - Mark as expired
+- `PUT /api/v10/calibrations/:id` - Update record
+- `DELETE /api/v10/calibrations/:id` - Delete record
+
+#### Database Migration (0038)
+
+**New Tables**:
+- `maintenance_records` - Unified maintenance for platforms and instruments
+- `calibration_records` - Simplified calibration with validity tracking
+
+**New Views**:
+- `v_platform_maintenance_timeline` - Platform maintenance history
+- `v_instrument_maintenance_timeline` - Instrument maintenance history
+- `v_current_calibrations` - Active calibrations with expiry status
+- `v_calibration_timeline` - Full calibration history per instrument
+
+**Note**: V8 tables (`maintenance_history`, `calibration_logs`) are preserved for backward compatibility. V11 tables use simpler structure optimized for timeline visualization.
 
 ---
 

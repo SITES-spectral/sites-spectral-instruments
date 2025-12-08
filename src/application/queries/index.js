@@ -36,3 +36,14 @@ export { ListProducts } from './ListProducts.js';
 export { GetActivityLogs } from './admin/GetActivityLogs.js';
 export { GetUserSessions } from './admin/GetUserSessions.js';
 export { GetStationStats } from './admin/GetStationStats.js';
+
+// Maintenance queries (V11 - Timeline for platforms/instruments)
+export { GetMaintenanceRecord } from './GetMaintenanceRecord.js';
+export { ListMaintenanceRecords } from './ListMaintenanceRecords.js';
+export { GetMaintenanceTimeline } from './GetMaintenanceTimeline.js';
+
+// Calibration queries (V11 - Multispectral/Hyperspectral only)
+export { GetCalibrationRecord } from './GetCalibrationRecord.js';
+export { ListCalibrationRecords } from './ListCalibrationRecords.js';
+export { GetCalibrationTimeline } from './GetCalibrationTimeline.js';
+export { GetCurrentCalibration } from './GetCurrentCalibration.js';

@@ -16,7 +16,9 @@ import {
   // V11 Domain repositories
   D1AOIRepository,
   D1CampaignRepository,
-  D1ProductRepository
+  D1ProductRepository,
+  D1MaintenanceRepository,
+  D1CalibrationRepository
 } from './infrastructure/index.js';
 
 import {
@@ -50,6 +52,16 @@ import {
   DeleteProduct,
   SetProductQualityScore,
   PromoteProductQuality,
+  // Maintenance Commands (V11)
+  CreateMaintenanceRecord,
+  UpdateMaintenanceRecord,
+  DeleteMaintenanceRecord,
+  CompleteMaintenanceRecord,
+  // Calibration Commands (V11)
+  CreateCalibrationRecord,
+  UpdateCalibrationRecord,
+  DeleteCalibrationRecord,
+  ExpireCalibrationRecord,
   // Station Queries
   GetStation,
   ListStations,
@@ -73,7 +85,16 @@ import {
   // Admin queries
   GetActivityLogs,
   GetUserSessions,
-  GetStationStats
+  GetStationStats,
+  // Maintenance Queries (V11)
+  GetMaintenanceRecord,
+  ListMaintenanceRecords,
+  GetMaintenanceTimeline,
+  // Calibration Queries (V11)
+  GetCalibrationRecord,
+  ListCalibrationRecords,
+  GetCalibrationTimeline,
+  GetCurrentCalibration
 } from './application/index.js';
 
 /**
@@ -96,6 +117,8 @@ export function createContainer(env) {
   const aoiRepository = new D1AOIRepository(db);
   const campaignRepository = new D1CampaignRepository(db);
   const productRepository = new D1ProductRepository(db);
+  const maintenanceRepository = new D1MaintenanceRepository(db);
+  const calibrationRepository = new D1CalibrationRepository(db);
 
   // ===== SHARED DEPENDENCIES =====
   const deps = {
@@ -106,7 +129,9 @@ export function createContainer(env) {
     // V11 Domains
     aoiRepository,
     campaignRepository,
-    productRepository
+    productRepository,
+    maintenanceRepository,
+    calibrationRepository
   };
 
   // ===== COMMANDS =====
@@ -140,7 +165,17 @@ export function createContainer(env) {
     updateProduct: new UpdateProduct(deps),
     deleteProduct: new DeleteProduct(deps),
     setProductQualityScore: new SetProductQualityScore(deps),
-    promoteProductQuality: new PromoteProductQuality(deps)
+    promoteProductQuality: new PromoteProductQuality(deps),
+    // Maintenance commands (V11)
+    createMaintenanceRecord: new CreateMaintenanceRecord(deps),
+    updateMaintenanceRecord: new UpdateMaintenanceRecord(deps),
+    deleteMaintenanceRecord: new DeleteMaintenanceRecord(deps),
+    completeMaintenanceRecord: new CompleteMaintenanceRecord(deps),
+    // Calibration commands (V11)
+    createCalibrationRecord: new CreateCalibrationRecord(deps),
+    updateCalibrationRecord: new UpdateCalibrationRecord(deps),
+    deleteCalibrationRecord: new DeleteCalibrationRecord(deps),
+    expireCalibrationRecord: new ExpireCalibrationRecord(deps)
   };
 
   // ===== QUERIES =====
@@ -168,7 +203,16 @@ export function createContainer(env) {
     // Admin queries
     getActivityLogs: new GetActivityLogs(adminRepository),
     getUserSessions: new GetUserSessions(adminRepository),
-    getStationStats: new GetStationStats(adminRepository)
+    getStationStats: new GetStationStats(adminRepository),
+    // Maintenance queries (V11)
+    getMaintenanceRecord: new GetMaintenanceRecord(deps),
+    listMaintenanceRecords: new ListMaintenanceRecords(deps),
+    getMaintenanceTimeline: new GetMaintenanceTimeline(deps),
+    // Calibration queries (V11)
+    getCalibrationRecord: new GetCalibrationRecord(deps),
+    listCalibrationRecords: new ListCalibrationRecords(deps),
+    getCalibrationTimeline: new GetCalibrationTimeline(deps),
+    getCurrentCalibration: new GetCurrentCalibration(deps)
   };
 
   return {
@@ -181,7 +225,9 @@ export function createContainer(env) {
       // V11 Domains
       aoi: aoiRepository,
       campaign: campaignRepository,
-      product: productRepository
+      product: productRepository,
+      maintenance: maintenanceRepository,
+      calibration: calibrationRepository
     },
     // Admin repository (for direct access)
     adminRepository,

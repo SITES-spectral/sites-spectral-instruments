@@ -18,6 +18,12 @@ export {
   D1ProductRepository
 } from './persistence/d1/index.js';
 
+// Maintenance Persistence (V11)
+export { D1MaintenanceRepository } from './persistence/maintenance/index.js';
+
+// Calibration Persistence (V11)
+export { D1CalibrationRepository } from './persistence/calibration/index.js';
+
 // HTTP Controllers
 export {
   StationController,

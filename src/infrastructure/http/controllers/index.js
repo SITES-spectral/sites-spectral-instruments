@@ -19,3 +19,5 @@ export { AdminController } from './AdminController.js';
 export { AOIController } from './AOIController.js';
 export { CampaignController } from './CampaignController.js';
 export { ProductController } from './ProductController.js';
+export { MaintenanceController } from './MaintenanceController.js';
+export { CalibrationController } from './CalibrationController.js';

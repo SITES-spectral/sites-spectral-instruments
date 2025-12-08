@@ -41,3 +41,15 @@ export { UpdateProduct } from './UpdateProduct.js';
 export { DeleteProduct } from './DeleteProduct.js';
 export { SetProductQualityScore } from './SetProductQualityScore.js';
 export { PromoteProductQuality } from './PromoteProductQuality.js';
+
+// Maintenance commands (V11 - Timeline for platforms/instruments)
+export { CreateMaintenanceRecord } from './CreateMaintenanceRecord.js';
+export { UpdateMaintenanceRecord } from './UpdateMaintenanceRecord.js';
+export { DeleteMaintenanceRecord } from './DeleteMaintenanceRecord.js';
+export { CompleteMaintenanceRecord } from './CompleteMaintenanceRecord.js';
+
+// Calibration commands (V11 - Multispectral/Hyperspectral only)
+export { CreateCalibrationRecord } from './CreateCalibrationRecord.js';
+export { UpdateCalibrationRecord } from './UpdateCalibrationRecord.js';
+export { DeleteCalibrationRecord } from './DeleteCalibrationRecord.js';
+export { ExpireCalibrationRecord } from './ExpireCalibrationRecord.js';

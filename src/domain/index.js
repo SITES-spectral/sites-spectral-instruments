@@ -1,9 +1,9 @@
 /**
- * Domain Layer
+ * Domain Layer (V11 Architecture)
  *
  * Core business logic following Hexagonal Architecture.
  * This layer is framework-agnostic and contains:
- * - Entities (Station, Platform, Instrument, AOI, Campaign, Product)
+ * - Entities (Station, Platform, Instrument, AOI, Campaign, Product, Maintenance, Calibration)
  * - Repository ports (interfaces)
  * - Domain services
  * - Type strategies and registries
@@ -65,3 +65,17 @@ export {
   ProductRepository,
   ProductService
 } from './product/index.js';
+
+// Maintenance domain (V11)
+export {
+  MaintenanceRecord,
+  MaintenanceRepository,
+  MaintenanceService
+} from './maintenance/index.js';
+
+// Calibration domain (V11 - Multispectral sensors only)
+export {
+  CalibrationRecord,
+  CalibrationRepository,
+  CalibrationService
+} from './calibration/index.js';

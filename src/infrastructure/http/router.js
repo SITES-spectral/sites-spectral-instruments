@@ -15,7 +15,9 @@ import {
   AdminController,
   AOIController,
   CampaignController,
-  ProductController
+  ProductController,
+  MaintenanceController,
+  CalibrationController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
 import { handleAuth } from '../../auth/authentication.js';
@@ -42,7 +44,9 @@ export function createRouter(env) {
     // V11 domains
     aois: new AOIController(container),
     campaigns: new CampaignController(container),
-    products: new ProductController(container)
+    products: new ProductController(container),
+    maintenance: new MaintenanceController(container),
+    calibrations: new CalibrationController(container)
   };
 
   return {
@@ -80,6 +84,12 @@ export function createRouter(env) {
 
           case 'products':
             return await controllers.products.handle(request, resourcePath, url);
+
+          case 'maintenance':
+            return await handleMaintenance(request, resourcePath, url, controllers.maintenance);
+
+          case 'calibrations':
+            return await handleCalibrations(request, resourcePath, url, controllers.calibrations);
 
           case 'admin':
             return await handleAdmin(request, resourcePath, url, controllers.admin);
@@ -146,6 +156,85 @@ async function handleAdmin(request, resourcePath, url, adminController) {
 }
 
 /**
+ * Maintenance routes handler
+ */
+async function handleMaintenance(request, resourcePath, url, maintenanceController) {
+  const method = request.method;
+  const id = resourcePath[0];
+  const subAction = resourcePath[1];
+
+  // Special routes
+  if (id === 'timeline' && method === 'GET') {
+    return await maintenanceController.timeline(request);
+  }
+  if (id === 'pending' && method === 'GET') {
+    return await maintenanceController.pending(request);
+  }
+  if (id === 'overdue' && method === 'GET') {
+    return await maintenanceController.overdue(request);
+  }
+
+  // CRUD routes
+  if (!id) {
+    if (method === 'GET') return await maintenanceController.list(request);
+    if (method === 'POST') return await maintenanceController.create(request);
+    return createNotFoundResponse('Method not allowed');
+  }
+
+  // ID-specific routes
+  if (subAction === 'complete' && method === 'POST') {
+    return await maintenanceController.complete(request, id);
+  }
+
+  if (method === 'GET') return await maintenanceController.get(request, id);
+  if (method === 'PUT') return await maintenanceController.update(request, id);
+  if (method === 'DELETE') return await maintenanceController.delete(request, id);
+
+  return createNotFoundResponse(`Unknown maintenance action: ${subAction}`);
+}
+
+/**
+ * Calibrations routes handler
+ */
+async function handleCalibrations(request, resourcePath, url, calibrationController) {
+  const method = request.method;
+  const id = resourcePath[0];
+  const subAction = resourcePath[1];
+
+  // Special routes
+  if (id === 'timeline' && method === 'GET') {
+    return await calibrationController.timeline(request);
+  }
+  if (id === 'current' && method === 'GET') {
+    return await calibrationController.current(request);
+  }
+  if (id === 'expired' && method === 'GET') {
+    return await calibrationController.expired(request);
+  }
+  if (id === 'expiring' && method === 'GET') {
+    return await calibrationController.expiring(request);
+  }
+
+  // CRUD routes
+  if (!id) {
+    if (method === 'GET') return await calibrationController.list(request);
+    if (method === 'POST') return await calibrationController.create(request);
+    return createNotFoundResponse('Method not allowed');
+  }
+
+  // ID-specific routes
+  if (subAction === 'expire' && method === 'POST') {
+    return await calibrationController.expire(request, id);
+  }
+
+  if (method === 'GET') return await calibrationController.get(request, id);
+  if (method === 'PUT') return await calibrationController.update(request, id);
+  if (method === 'DELETE') return await calibrationController.delete(request, id);
+
+  return createNotFoundResponse(`Unknown calibration action: ${subAction}`);
+}
+
+/**
  * Health check endpoint
  */
 async function handleHealth(env, container) {
@@ -172,6 +261,8 @@ async function handleHealth(env, container) {
         'aoi-geospatial',
         'campaigns',
         'products',
+        'maintenance-timeline',
+        'calibration-timeline',
         'darwin-core-vocabulary',
         'icos-station-types',
         'copernicus-processing-levels'
@@ -288,6 +379,29 @@ function handleInfo() {
         stationStats: 'GET /api/v10/admin/station-stats',
         health: 'GET /api/v10/admin/health',
         summary: 'GET /api/v10/admin/summary'
+      },
+      maintenance: {
+        list: 'GET /api/v10/maintenance',
+        get: 'GET /api/v10/maintenance/:id',
+        timeline: 'GET /api/v10/maintenance/timeline?entity_type=platform&entity_id=:id',
+        pending: 'GET /api/v10/maintenance/pending',
+        overdue: 'GET /api/v10/maintenance/overdue',
+        create: 'POST /api/v10/maintenance',
+        complete: 'POST /api/v10/maintenance/:id/complete',
+        update: 'PUT /api/v10/maintenance/:id',
+        delete: 'DELETE /api/v10/maintenance/:id'
+      },
+      calibrations: {
+        list: 'GET /api/v10/calibrations',
+        get: 'GET /api/v10/calibrations/:id',
+        current: 'GET /api/v10/calibrations/current?instrument_id=:id',
+        timeline: 'GET /api/v10/calibrations/timeline?instrument_id=:id',
+        expired: 'GET /api/v10/calibrations/expired',
+        expiring: 'GET /api/v10/calibrations/expiring?days=30',
+        create: 'POST /api/v10/calibrations (multispectral/hyperspectral only)',
+        expire: 'POST /api/v10/calibrations/:id/expire',
+        update: 'PUT /api/v10/calibrations/:id',
+        delete: 'DELETE /api/v10/calibrations/:id'
       }
     },
     mountTypeCodes: {
