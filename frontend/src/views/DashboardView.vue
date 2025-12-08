@@ -46,7 +46,8 @@ onMounted(async () => {
 // Load all platforms with coordinates for map display
 async function loadAllPlatforms() {
   try {
-    const response = await fetch('/api/v11/platforms');
+    // Fetch all platforms (use high limit to get all in one request)
+    const response = await fetch('/api/v11/platforms?limit=200');
     if (response.ok) {
       const result = await response.json();
       // Filter to only fixed platforms with coordinates
