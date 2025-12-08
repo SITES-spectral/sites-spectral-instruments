@@ -1,0 +1,204 @@
+# SITES Spectral Measurement Objectives
+# Aligned with ICOS measurement variables
+# Version: 11.0.0
+# Reference: https://www.icos-cp.eu/observations
+
+measurement_objectives:
+  vegetation_health:
+    name: "Vegetation Health & Phenology"
+    description: "Monitoring vegetation status, phenological events, and ecosystem dynamics"
+    icos_variable: "Ecosystem flux"
+    copernicus_service: "Land Monitoring"
+    essential_climate_variable: "Phenology"
+    instruments:
+      - Phenocam
+      - Multispectral
+      - NDVI
+      - PRI
+      - Hyperspectral
+    primary_products:
+      - GCC   # Green Chromatic Coordinate
+      - NDVI  # Normalized Difference Vegetation Index
+      - EVI   # Enhanced Vegetation Index
+      - PRI   # Photochemical Reflectance Index
+      - LAI   # Leaf Area Index
+    temporal_resolution: "sub-daily to daily"
+    spatial_scale: "plot to landscape"
+    applications:
+      - Phenology tracking
+      - Drought stress detection
+      - Growing season length
+      - Productivity estimation
+
+  radiation_balance:
+    name: "Radiation Balance"
+    description: "Solar and thermal radiation measurements for energy balance studies"
+    icos_variable: "Radiation"
+    copernicus_service: null
+    essential_climate_variable: "Surface Radiation Budget"
+    instruments:
+      - PAR
+      - Pyranometer
+      - Net_radiometer
+      - Albedometer
+    primary_products:
+      - PPFD  # Photosynthetic Photon Flux Density
+      - SW_IN # Shortwave incoming
+      - SW_OUT # Shortwave outgoing
+      - LW_IN # Longwave incoming
+      - LW_OUT # Longwave outgoing
+      - NETRAD # Net radiation
+    temporal_resolution: "continuous (1-30 min)"
+    spatial_scale: "point"
+    applications:
+      - Energy balance studies
+      - PAR interception
+      - Albedo monitoring
+      - Light use efficiency
+
+  atmospheric_composition:
+    name: "Atmospheric Composition"
+    description: "Greenhouse gas and atmospheric constituent monitoring"
+    icos_variable: "CO2/CH4 mole fraction"
+    copernicus_service: "Atmosphere"
+    essential_climate_variable: "Carbon Dioxide, Methane"
+    instruments:
+      - CO2_sensor
+      - CH4_sensor
+      - Gas_analyzer
+      - Eddy_covariance
+    primary_products:
+      - CO2_concentration
+      - CH4_concentration
+      - NEE  # Net Ecosystem Exchange
+      - GPP  # Gross Primary Production
+      - Reco # Ecosystem Respiration
+    temporal_resolution: "continuous (30 min)"
+    spatial_scale: "footprint (hectares)"
+    applications:
+      - Carbon cycle monitoring
+      - GHG flux estimation
+      - Source/sink attribution
+      - Climate mitigation verification
+
+  structural_characterization:
+    name: "Structural Characterization"
+    description: "3D vegetation structure, biomass, and canopy architecture"
+    icos_variable: null
+    copernicus_service: "Land Monitoring"
+    essential_climate_variable: "Above-ground Biomass"
+    instruments:
+      - LiDAR
+      - Hyperspectral
+      - SAR
+    primary_products:
+      - CHM   # Canopy Height Model
+      - LAI   # Leaf Area Index
+      - AGB   # Above-ground Biomass
+      - FPAR  # Fraction of Absorbed PAR
+    temporal_resolution: "campaign-based"
+    spatial_scale: "plot to landscape"
+    applications:
+      - Biomass estimation
+      - Forest inventory
+      - Habitat mapping
+      - Carbon stock assessment
+
+  water_quality:
+    name: "Water Quality"
+    description: "Aquatic ecosystem monitoring including optical and biogeochemical properties"
+    icos_variable: "Ocean carbon"
+    copernicus_service: "Marine"
+    essential_climate_variable: "Ocean Colour"
+    instruments:
+      - Fluorometer
+      - Turbidity
+      - Chlorophyll
+      - Water_spectroradiometer
+      - CTD
+    primary_products:
+      - Chlorophyll_a
+      - Turbidity
+      - CDOM  # Colored Dissolved Organic Matter
+      - Secchi_depth
+      - TSS   # Total Suspended Solids
+    temporal_resolution: "continuous to daily"
+    spatial_scale: "point to lake"
+    applications:
+      - Algal bloom detection
+      - Eutrophication monitoring
+      - Carbon cycling
+      - Ecological status assessment
+
+  snow_ice:
+    name: "Snow & Ice"
+    description: "Cryosphere monitoring including snow cover, ice extent, and albedo"
+    icos_variable: null
+    copernicus_service: "Climate"
+    essential_climate_variable: "Snow Cover"
+    instruments:
+      - Albedometer
+      - Snow_depth_sensor
+      - Thermal_camera
+      - Time_lapse_camera
+    primary_products:
+      - Snow_cover_fraction
+      - Snow_depth
+      - Snow_albedo
+      - Melt_onset_date
+      - Ice_phenology
+    temporal_resolution: "daily"
+    spatial_scale: "point to catchment"
+    applications:
+      - Snow hydrology
+      - Climate change impacts
+      - Glacier monitoring
+      - Seasonal snow tracking
+
+  meteorology:
+    name: "Meteorological Conditions"
+    description: "Standard meteorological measurements for environmental context"
+    icos_variable: "Meteorology"
+    copernicus_service: null
+    essential_climate_variable: "Surface Temperature"
+    instruments:
+      - Weather_station
+      - Thermometer
+      - Hygrometer
+      - Anemometer
+      - Rain_gauge
+    primary_products:
+      - Air_temperature
+      - Relative_humidity
+      - Wind_speed
+      - Wind_direction
+      - Precipitation
+      - Pressure
+    temporal_resolution: "continuous (1-10 min)"
+    spatial_scale: "point"
+    applications:
+      - Environmental monitoring
+      - Flux data quality control
+      - Phenology drivers
+      - Climate analysis
+
+# Essential Climate Variables (ECV) mapping
+# Reference: https://gcos.wmo.int/en/essential-climate-variables
+essential_climate_variables:
+  atmospheric:
+    - Surface Wind Speed and Direction
+    - Surface Pressure
+    - Precipitation
+    - Surface Radiation Budget
+  terrestrial:
+    - Above-ground Biomass
+    - Albedo
+    - Fire
+    - Land Cover
+    - Leaf Area Index
+    - Phenology
+    - Snow Cover
+    - Soil Moisture
+  oceanic:
+    - Ocean Colour
+    - Sea Surface Temperature

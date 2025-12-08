@@ -8,7 +8,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v11.x Roadmap)
-- **Phase 6**: Documentation - Vocabulary mapping
+- **Phase 7**: Post-Migration Validation & Testing
+- **Phase 8**: Production Deployment
+
+---
+
+## [11.0.0-alpha.6] - 2025-12-08
+
+### Phase 6: Documentation - Vocabulary Mapping
+
+Comprehensive vocabulary alignment with international standards (Darwin Core, ICOS, Copernicus) for enhanced interoperability.
+
+#### New Documentation
+
+**`docs/VOCABULARY_MAPPING.md`** - Complete vocabulary mapping documentation:
+- Darwin Core location field alignment (locationID, decimalLatitude/Longitude, etc.)
+- ICOS station type classification (TER, ATM, AQA, INT)
+- Copernicus processing level mapping (L0→L3)
+- ICOS measurement objectives alignment
+- Ecosystem code to IGBP land cover mapping
+- License metadata (CC-BY-4.0 for ICOS/SITES compatibility)
+
+#### New YAML Configuration Files (`yamls/core/`)
+
+| File | Purpose |
+|------|---------|
+| `station-types.yaml` | ICOS-aligned station classification (TER, ATM, AQA, INT) |
+| `mount-types-extended.yaml` | Standard vocabulary mount types with ICOS/Copernicus mappings |
+| `measurement-objectives.yaml` | ICOS measurement variable mappings |
+| `vocabulary-mappings.yaml` | Darwin Core, ICOS, Copernicus term mappings |
+
+#### Station Type Classification (NEW)
+
+| Code | Name | ICOS Domain | Description |
+|------|------|-------------|-------------|
+| TER | Terrestrial Ecosystem | ecosystem | Land ecosystem monitoring |
+| ATM | Atmospheric | atmosphere | Atmospheric composition |
+| AQA | Aquatic | ocean | Lake/river/coastal water |
+| INT | Integrated | multiple | Multi-domain observation |
+
+#### Mount Type Vocabulary Mapping (NEW)
+
+Legacy codes preserved as primary; standard names added for interoperability:
+
+| Code | Name | Standard Name | ICOS Equivalent |
+|------|------|---------------|-----------------|
+| PL | Pole/Tower/Mast | tower | flux_tower |
+| BL | Building | building | building_station |
+| GL | Ground Level | ground | ground_station |
+| UAV | UAV Position | aerial | - |
+| SAT | Satellite | satellite | - |
+| MOB | Mobile | mobile | mobile_station |
+| USV | Surface Vehicle | surface_vehicle | - |
+| UUV | Underwater Vehicle | subsurface | - |
+
+#### Measurement Objectives (NEW)
+
+| Objective | Instruments | ICOS Variable | Copernicus Service |
+|-----------|-------------|---------------|-------------------|
+| vegetation_health | Phenocam, MS, NDVI, PRI | Ecosystem flux | Land Monitoring |
+| radiation_balance | PAR, Pyranometer, Net Radiometer | Radiation | - |
+| atmospheric_composition | CO2, CH4 sensors | CO2/CH4 mole fraction | Atmosphere |
+| structural_characterization | LiDAR, Hyperspectral | - | Land Monitoring |
+| water_quality | Fluorometer, Turbidity | Ocean carbon | Marine |
+| snow_ice | Albedometer, Temperature | Cryosphere | Climate |
+
+#### Darwin Core Alignment
+
+Stations now support Darwin Core location metadata:
+- `dwc_locationID` - Unique identifier (e.g., `urn:sites:station:SVB`)
+- `dwc_decimalLatitude` / `dwc_decimalLongitude` - WGS84 coordinates
+- `dwc_geodeticDatum` - Spatial reference (EPSG:4326)
+- `dwc_countryCode` - ISO 3166-1 code
+- `dwc_stateProvince` / `dwc_locality` - Human-readable location
+
+#### License Metadata
+
+All SITES Spectral data released under **CC-BY-4.0**:
+- Compatible with ICOS open data policy
+- Compatible with SITES data sharing requirements
+- GBIF-compatible for Darwin Core Archive export
+
+#### CLAUDE.md Updates
+
+- Added "Vocabulary & Standard Alignment" section
+- Updated Documentation Index with vocabulary mapping
+- Updated Production Information to v11.0.0-alpha.6
+- Added v11.0.0 Features table
 
 ---
 

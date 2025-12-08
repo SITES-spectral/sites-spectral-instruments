@@ -1,0 +1,305 @@
+# SITES Spectral Vocabulary Mappings
+# External standard term mappings for interoperability
+# Version: 11.0.0
+
+# Darwin Core Term Mappings
+# Reference: https://dwc.tdwg.org/list/
+darwin_core:
+  location:
+    station_id:
+      dwc_term: locationID
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/locationID"
+      description: "Unique identifier for the station"
+      example: "urn:sites:station:SVB"
+
+    latitude:
+      dwc_term: decimalLatitude
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/decimalLatitude"
+      description: "Geographic latitude in decimal degrees"
+      data_type: decimal
+      precision: 6
+
+    longitude:
+      dwc_term: decimalLongitude
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/decimalLongitude"
+      description: "Geographic longitude in decimal degrees"
+      data_type: decimal
+      precision: 6
+
+    geodetic_datum:
+      dwc_term: geodeticDatum
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/geodeticDatum"
+      description: "Spatial reference system"
+      default: "EPSG:4326"
+      alternative_values: ["WGS84", "EPSG:4326"]
+
+    coordinate_uncertainty_m:
+      dwc_term: coordinateUncertaintyInMeters
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters"
+      description: "Horizontal distance from coordinates describing smallest circle"
+
+    country_code:
+      dwc_term: countryCode
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/countryCode"
+      description: "ISO 3166-1-alpha-2 country code"
+      default: "SE"
+
+    state_province:
+      dwc_term: stateProvince
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/stateProvince"
+      description: "Name of the county or region"
+
+    locality:
+      dwc_term: locality
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/locality"
+      description: "Human-readable location description"
+
+  record:
+    record_id:
+      dwc_term: occurrenceID
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/occurrenceID"
+      description: "Unique identifier for the observation record"
+
+    event_date:
+      dwc_term: eventDate
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/eventDate"
+      description: "Date or date-time of observation"
+      format: "ISO 8601"
+
+    sampling_protocol:
+      dwc_term: samplingProtocol
+      dwc_uri: "http://rs.tdwg.org/dwc/terms/samplingProtocol"
+      description: "Method used for measurement"
+
+# ICOS Term Mappings
+# Reference: https://www.icos-cp.eu/ and CPMETA ontology
+icos:
+  station:
+    station_class:
+      icos_term: stationClass
+      description: "ICOS station classification (Class 1, Class 2, Associated)"
+      values:
+        - Class 1
+        - Class 2
+        - Associated
+
+    station_theme:
+      icos_term: theme
+      description: "ICOS thematic domain"
+      values:
+        - Atmosphere
+        - Ecosystem
+        - Ocean
+
+  platform:
+    tower:
+      icos_term: flux_tower
+      description: "Eddy covariance flux measurement tower"
+      cpmeta_uri: "https://meta.icos-cp.eu/resources/stationtypes/flux_tower"
+
+    building:
+      icos_term: building_station
+      description: "Building-mounted measurement station"
+
+    ground:
+      icos_term: ground_station
+      description: "Ground-level measurement installation"
+
+  measurement:
+    ecosystem_flux:
+      icos_term: NEE
+      unit: "umol m-2 s-1"
+      description: "Net Ecosystem Exchange of CO2"
+
+    gross_primary_production:
+      icos_term: GPP
+      unit: "umol m-2 s-1"
+      description: "Gross Primary Production"
+
+    ecosystem_respiration:
+      icos_term: Reco
+      unit: "umol m-2 s-1"
+      description: "Ecosystem Respiration"
+
+# Copernicus Term Mappings
+# Reference: https://dataspace.copernicus.eu/
+copernicus:
+  processing_levels:
+    L0:
+      copernicus_term: Level-0
+      description: "Raw instrument data"
+
+    L1:
+      copernicus_term: Level-1C
+      description: "Top-of-atmosphere reflectance, geometrically corrected"
+
+    L2:
+      copernicus_term: Level-2A
+      description: "Bottom-of-atmosphere reflectance, atmospherically corrected"
+
+    L3:
+      copernicus_term: Level-3
+      description: "Temporally composited products"
+
+  satellites:
+    S2A:
+      copernicus_term: Sentinel-2A
+      launch_date: "2015-06-23"
+      orbit: "Sun-synchronous"
+      altitude_km: 786
+
+    S2B:
+      copernicus_term: Sentinel-2B
+      launch_date: "2017-03-07"
+      orbit: "Sun-synchronous"
+      altitude_km: 786
+
+    S3A:
+      copernicus_term: Sentinel-3A
+      launch_date: "2016-02-16"
+      orbit: "Sun-synchronous"
+      altitude_km: 814.5
+
+    S3B:
+      copernicus_term: Sentinel-3B
+      launch_date: "2018-04-25"
+      orbit: "Sun-synchronous"
+      altitude_km: 814.5
+
+  sensors:
+    MSI:
+      copernicus_term: "Multi-Spectral Instrument"
+      satellite: [S2A, S2B]
+      bands: 13
+      spatial_resolution_m: [10, 20, 60]
+
+    OLCI:
+      copernicus_term: "Ocean and Land Colour Instrument"
+      satellite: [S3A, S3B]
+      bands: 21
+      spatial_resolution_m: 300
+
+    SLSTR:
+      copernicus_term: "Sea and Land Surface Temperature Radiometer"
+      satellite: [S3A, S3B]
+      bands: 11
+      spatial_resolution_m: [500, 1000]
+
+# CF Standard Names
+# Reference: https://cfconventions.org/standard-names.html
+cf_standard_names:
+  radiation:
+    PAR:
+      cf_name: "surface_downwelling_photosynthetic_photon_flux_in_air"
+      unit: "mol m-2 s-1"
+
+    shortwave_incoming:
+      cf_name: "surface_downwelling_shortwave_flux_in_air"
+      unit: "W m-2"
+
+    shortwave_outgoing:
+      cf_name: "surface_upwelling_shortwave_flux_in_air"
+      unit: "W m-2"
+
+    longwave_incoming:
+      cf_name: "surface_downwelling_longwave_flux_in_air"
+      unit: "W m-2"
+
+    longwave_outgoing:
+      cf_name: "surface_upwelling_longwave_flux_in_air"
+      unit: "W m-2"
+
+  meteorology:
+    air_temperature:
+      cf_name: "air_temperature"
+      unit: "K"
+
+    relative_humidity:
+      cf_name: "relative_humidity"
+      unit: "1"
+
+    wind_speed:
+      cf_name: "wind_speed"
+      unit: "m s-1"
+
+    wind_direction:
+      cf_name: "wind_from_direction"
+      unit: "degree"
+
+    precipitation:
+      cf_name: "precipitation_amount"
+      unit: "kg m-2"
+
+  vegetation:
+    leaf_area_index:
+      cf_name: "leaf_area_index"
+      unit: "1"
+
+    vegetation_cover:
+      cf_name: "vegetation_area_fraction"
+      unit: "1"
+
+# License Mappings
+licenses:
+  CC-BY-4.0:
+    name: "Creative Commons Attribution 4.0 International"
+    url: "https://creativecommons.org/licenses/by/4.0/"
+    dcterms_uri: "http://purl.org/dc/terms/license"
+    icos_compatible: true
+    sites_compatible: true
+    gbif_compatible: true
+
+  CC-BY-SA-4.0:
+    name: "Creative Commons Attribution-ShareAlike 4.0 International"
+    url: "https://creativecommons.org/licenses/by-sa/4.0/"
+    icos_compatible: true
+    sites_compatible: true
+
+  CC0-1.0:
+    name: "CC0 1.0 Universal Public Domain Dedication"
+    url: "https://creativecommons.org/publicdomain/zero/1.0/"
+    icos_compatible: true
+    sites_compatible: true
+
+# Ecosystem Classification Mappings
+ecosystem_mappings:
+  igbp:
+    FOR:
+      igbp_class: 5
+      igbp_name: "Mixed Forests"
+
+    CON:
+      igbp_class: 1
+      igbp_name: "Evergreen Needleleaf Forests"
+
+    DEC:
+      igbp_class: 4
+      igbp_name: "Deciduous Broadleaf Forests"
+
+    AGR:
+      igbp_class: 12
+      igbp_name: "Croplands"
+
+    GRA:
+      igbp_class: 10
+      igbp_name: "Grasslands"
+
+    HEA:
+      igbp_class: 7
+      igbp_name: "Open Shrublands"
+
+    MIR:
+      igbp_class: 11
+      igbp_name: "Permanent Wetlands"
+
+    PEA:
+      igbp_class: 11
+      igbp_name: "Permanent Wetlands"
+
+    WET:
+      igbp_class: 11
+      igbp_name: "Permanent Wetlands"
+
+    LAK:
+      igbp_class: 17
+      igbp_name: "Water Bodies"

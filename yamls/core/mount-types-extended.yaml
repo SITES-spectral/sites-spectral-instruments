@@ -1,0 +1,190 @@
+# SITES Spectral Mount Types - Extended Vocabulary
+# Primary codes preserved from SITES Spectral legacy system
+# Standard vocabulary mappings added for ICOS/Copernicus interoperability
+# Version: 11.0.0
+
+mount_types:
+  # Fixed installations
+  PL:
+    code: PL
+    name: "Pole/Tower/Mast"
+    standard_name: "tower"
+    description: "Fixed tower or mast installation (>1.5m height)"
+    category: fixed
+    icos_equivalent: "flux_tower"
+    copernicus_equivalent: null
+    typical_height_m:
+      min: 1.5
+      max: 50
+    icon: "fa-tower-observation"
+    color: "#4A90D9"
+    examples:
+      - Eddy covariance tower
+      - Meteorological mast
+      - Phenocam tower
+
+  BL:
+    code: BL
+    name: "Building"
+    standard_name: "building"
+    description: "Building-mounted installation (rooftop or facade)"
+    category: fixed
+    icos_equivalent: "building_station"
+    copernicus_equivalent: null
+    typical_height_m:
+      min: 3
+      max: 30
+    icon: "fa-building"
+    color: "#6C757D"
+    examples:
+      - Rooftop weather station
+      - Facade-mounted sensor
+      - Observatory dome
+
+  GL:
+    code: GL
+    name: "Ground Level"
+    standard_name: "ground"
+    description: "Ground-level installation (<1.5m height)"
+    category: fixed
+    icos_equivalent: "ground_station"
+    copernicus_equivalent: null
+    typical_height_m:
+      min: 0
+      max: 1.5
+    icon: "fa-leaf"
+    color: "#28A745"
+    examples:
+      - Soil sensors
+      - Ground-based spectroradiometer
+      - Understory phenocam
+
+  # Aerial platforms
+  UAV:
+    code: UAV
+    name: "UAV Position"
+    standard_name: "aerial"
+    description: "Airborne platform including UAVs and aircraft"
+    category: uav
+    icos_equivalent: null
+    copernicus_equivalent: "airborne_campaign"
+    typical_altitude_m:
+      min: 5
+      max: 500
+    icon: "fa-crosshairs"
+    color: "#FFC107"
+    examples:
+      - Multirotor drone
+      - Fixed-wing UAV
+      - Research aircraft
+
+  # Orbital platforms
+  SAT:
+    code: SAT
+    name: "Satellite"
+    standard_name: "satellite"
+    description: "Orbital Earth observation platform"
+    category: satellite
+    icos_equivalent: null
+    copernicus_equivalent: "sentinel_mission"
+    orbital_altitude_km:
+      min: 400
+      max: 36000
+    icon: "fa-satellite"
+    color: "#9B59B6"
+    examples:
+      - Sentinel-2
+      - Landsat
+      - MODIS
+
+  # Mobile platforms
+  MOB:
+    code: MOB
+    name: "Mobile"
+    standard_name: "mobile"
+    description: "Portable or vehicle-mounted platform for temporal deployments"
+    category: mobile
+    icos_equivalent: "mobile_station"
+    copernicus_equivalent: null
+    icon: "fa-truck"
+    color: "#E67E22"
+    examples:
+      - Field spectrometer
+      - Mobile LiDAR
+      - Vehicle-mounted sensor
+
+  # Surface vehicles
+  USV:
+    code: USV
+    name: "Surface Vehicle"
+    standard_name: "surface_vehicle"
+    description: "Unmanned surface vehicle for water body surveys"
+    category: usv
+    icos_equivalent: null
+    copernicus_equivalent: "marine_platform"
+    icon: "fa-ship"
+    color: "#17A2B8"
+    examples:
+      - Autonomous boat
+      - Surface drone
+      - Kayak-mounted sensor
+
+  # Underwater vehicles
+  UUV:
+    code: UUV
+    name: "Underwater Vehicle"
+    standard_name: "subsurface"
+    description: "Underwater vehicle for aquatic surveys (ROV/AUV)"
+    category: uuv
+    icos_equivalent: null
+    copernicus_equivalent: "underwater_platform"
+    icon: "fa-water"
+    color: "#20C997"
+    examples:
+      - ROV (Remotely Operated Vehicle)
+      - AUV (Autonomous Underwater Vehicle)
+      - Underwater glider
+
+# Category groupings
+categories:
+  fixed:
+    name: "Fixed Installations"
+    description: "Permanent, stationary platforms"
+    mount_types: [PL, BL, GL]
+    auto_create_instruments: false
+
+  uav:
+    name: "Unmanned Aerial Vehicles"
+    description: "Drone and airborne platforms"
+    mount_types: [UAV]
+    auto_create_instruments: true
+
+  satellite:
+    name: "Satellite Platforms"
+    description: "Earth observation satellites"
+    mount_types: [SAT]
+    auto_create_instruments: true
+
+  mobile:
+    name: "Mobile Platforms"
+    description: "Portable and vehicle-mounted systems"
+    mount_types: [MOB]
+    auto_create_instruments: false
+
+  aquatic:
+    name: "Aquatic Vehicles"
+    description: "Surface and underwater platforms"
+    mount_types: [USV, UUV]
+    auto_create_instruments: false
+
+# Standard vocabulary mapping (for interoperability)
+# Maps SITES Spectral codes to international standard names
+standard_vocabulary_mapping:
+  PL: tower
+  BL: building
+  GL: ground
+  UAV: aerial
+  SAT: satellite
+  MOB: mobile
+  USV: surface_vehicle
+  UUV: subsurface

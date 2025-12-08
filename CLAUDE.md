@@ -56,22 +56,40 @@ src/
 
 ---
 
-## Current Version: 10.0.0-alpha.17 - ROI Drawing Tool with Legacy System (2025-12-07)
+## Current Version: 11.0.0-alpha.6 - Vocabulary Mapping & Documentation (2025-12-08)
 
-**✅ STATUS: ALPHA - V10 Hexagonal Architecture**
+**✅ STATUS: ALPHA - V11 Hexagonal Architecture + Standard Vocabularies**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-07
-**🚀 API Version:** V10 (hexagonal) | V3 (default) | V1 (legacy/deprecated)
+**📅 Last Updated:** 2025-12-08
+**🚀 API Version:** V11 (hexagonal)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256
+**📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
+
+### What's New in v11.0.0-alpha.6
+
+- **Vocabulary Mapping Documentation**: Darwin Core, ICOS, Copernicus alignment documentation
+- **YAML Configurations**: station-types, mount-types-extended, measurement-objectives, vocabulary-mappings
+- **Standard Compliance**: CC-BY-4.0 license metadata, ICOS station types, Darwin Core location fields
+
+### What's New in v11.0.0-alpha.5
+
+- **Phase 5 Frontend Migration**: Vue.js API updated from V10 to V11
+- **MaintenanceTimeline Component**: Timeline visualization with status badges and quick-complete actions
+- **CalibrationTimeline Component**: Calibration timeline with expiry warnings and quality scoring
+
+### What's New in v11.0.0-alpha.4
+
+- **V8 Calibration Workflow**: 55+ field comprehensive calibration records
+- **Panel Tracking**: Spectralon panel serial numbers, condition tracking
+- **Ambient Conditions**: Cloud cover (including "intermittent"), solar angle optimization
+- **Cleaning Workflow**: Before/after cleaning calibrations per session
 
 ### What's New in v10.0.0-alpha.17
 
 - **ROI Drawing Tool**: Interactive canvas-based polygon drawing
 - **Legacy ROI System**: Preserves ROI numbers for L2/L3 data integrity
 - **Permission-based Editing**: Station users create new ROIs, super admins can override
-- **New Components**: ROIDrawingCanvas, LegacyROIWarningModal, AdminOverrideConfirmModal
-- **New Composable**: useROIDrawing for drawing state management
 
 ### What's New in v10.0.0-alpha.16
 
@@ -559,6 +577,7 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 |----------|---------|
 | `CHANGELOG.md` | Version history and release notes |
 | `CLAUDE_LEGACY.md` | Historical documentation (pre-v6.x) |
+| `docs/VOCABULARY_MAPPING.md` | Darwin Core, ICOS, Copernicus alignment (v11.0.0+) |
 | `docs/STATION_USER_GUIDE.md` | End-user guide |
 | `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
 | `docs/roi/ROI_README.md` | ROI system documentation |
@@ -599,20 +618,95 @@ SitesConfig.detectInstrumentCategory('Phenocam')
 
 ---
 
+## Vocabulary & Standard Alignment (v11.0.0+)
+
+SITES Spectral V11 aligns terminology with international standards for interoperability.
+
+### Standards Referenced
+
+| Standard | Focus | Documentation |
+|----------|-------|---------------|
+| **Darwin Core** | Biodiversity data exchange | `docs/VOCABULARY_MAPPING.md` |
+| **ICOS** | Carbon cycle observation | https://www.icos-cp.eu/ |
+| **Copernicus** | Earth observation | https://dataspace.copernicus.eu/ |
+| **SITES** | Swedish ecosystem science | https://www.fieldsites.se/ |
+
+### Station Type Classification (ICOS Aligned)
+
+| Code | Name | ICOS Domain | Description |
+|------|------|-------------|-------------|
+| **TER** | Terrestrial Ecosystem | ecosystem | Forests, grasslands, wetlands |
+| **ATM** | Atmospheric | atmosphere | GHG monitoring |
+| **AQA** | Aquatic | ocean | Lake/river monitoring |
+| **INT** | Integrated | multiple | Multi-domain stations |
+
+### Mount Type Vocabulary Mapping
+
+Legacy codes remain primary; standard names added for interoperability:
+
+| Code | Name | Standard Name | ICOS Equivalent |
+|------|------|---------------|-----------------|
+| **PL** | Pole/Tower/Mast | tower | flux_tower |
+| **BL** | Building | building | building_station |
+| **GL** | Ground Level | ground | ground_station |
+| **UAV** | UAV Position | aerial | - |
+| **SAT** | Satellite | satellite | - |
+| **MOB** | Mobile | mobile | mobile_station |
+| **USV** | Surface Vehicle | surface_vehicle | - |
+| **UUV** | Underwater Vehicle | subsurface | - |
+
+### Darwin Core Location Fields
+
+Stations include Darwin Core metadata:
+- `dwc_locationID` - Unique identifier (e.g., `urn:sites:station:SVB`)
+- `dwc_decimalLatitude` / `dwc_decimalLongitude` - WGS84 coordinates
+- `dwc_geodeticDatum` - `EPSG:4326`
+- `dwc_countryCode` - ISO 3166-1 code (e.g., `SE`)
+
+### License Metadata
+
+All SITES Spectral data uses **CC-BY-4.0**, compatible with ICOS and SITES open data policies.
+
+### Vocabulary YAML Files
+
+| Config File | Purpose |
+|-------------|---------|
+| `yamls/core/station-types.yaml` | ICOS-aligned station classification |
+| `yamls/core/mount-types-extended.yaml` | Standard vocabulary mount types |
+| `yamls/core/measurement-objectives.yaml` | ICOS measurement variables |
+| `yamls/core/vocabulary-mappings.yaml` | Darwin Core, ICOS, Copernicus term mappings |
+
+See `docs/VOCABULARY_MAPPING.md` for complete documentation.
+
+---
+
 ## Production Information
 
 | Property | Value |
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 10.0.0-alpha.17 |
-| Last Deployed | 2025-12-07 |
-| Status | Alpha - V10 Hexagonal Architecture |
+| Current Version | 11.0.0-alpha.6 |
+| Last Deployed | 2025-12-08 |
+| Status | Alpha - V11 Hexagonal Architecture + Standard Vocabularies |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
 
-### v10.0.0 Features
+### v11.0.0 Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| Vocabulary Mapping | v11.0.0-alpha.6 | ✅ Active |
+| Darwin Core Alignment | v11.0.0-alpha.6 | ✅ Active |
+| ICOS Station Types | v11.0.0-alpha.6 | ✅ Active |
+| Maintenance Timeline | v11.0.0-alpha.5 | ✅ Active |
+| Calibration Timeline | v11.0.0-alpha.5 | ✅ Active |
+| V8 Calibration Workflow | v11.0.0-alpha.4 | ✅ Active |
+| Maintenance Domain | v11.0.0-alpha.3 | ✅ Active |
+| Calibration Domain | v11.0.0-alpha.3 | ✅ Active |
+
+### v10.0.0 Features (Inherited)
 
 | Feature | Version | Status |
 |---------|---------|--------|

@@ -1,0 +1,124 @@
+# SITES Spectral Station Types
+# ICOS-aligned station classification
+# Version: 11.0.0
+# Reference: https://www.icos-cp.eu/
+
+station_types:
+  terrestrial_ecosystem:
+    code: TER
+    name: "Terrestrial Ecosystem"
+    description: "Land ecosystem monitoring including forests, grasslands, and wetlands"
+    icos_domain: ecosystem
+    sites_thematic: spectral
+    measurement_focus:
+      - carbon_flux
+      - vegetation_dynamics
+      - phenology
+      - water_balance
+    typical_instruments:
+      - Phenocam
+      - Multispectral
+      - NDVI
+      - PAR
+      - Eddy covariance
+    color: "#228B22"  # Forest green
+
+  atmospheric:
+    code: ATM
+    name: "Atmospheric"
+    description: "Atmospheric composition and greenhouse gas monitoring"
+    icos_domain: atmosphere
+    sites_thematic: null
+    measurement_focus:
+      - greenhouse_gases
+      - aerosols
+      - radiation
+      - meteorology
+    typical_instruments:
+      - CO2_sensor
+      - CH4_sensor
+      - Pyranometer
+      - Net_radiometer
+    color: "#4169E1"  # Royal blue
+
+  aquatic:
+    code: AQA
+    name: "Aquatic"
+    description: "Lake, river, and coastal water monitoring"
+    icos_domain: ocean
+    sites_thematic: aquanet
+    measurement_focus:
+      - water_quality
+      - carbon_cycle
+      - primary_production
+      - optical_properties
+    typical_instruments:
+      - Fluorometer
+      - Turbidity
+      - Chlorophyll
+      - Underwater_camera
+    color: "#1E90FF"  # Dodger blue
+
+  integrated:
+    code: INT
+    name: "Integrated"
+    description: "Multi-domain observation station spanning multiple ecosystem types"
+    icos_domain: multiple
+    sites_thematic: multiple
+    measurement_focus:
+      - cross_domain
+      - ecosystem_coupling
+      - landscape_scale
+    typical_instruments:
+      - All_types
+    icos_class_eligible: true
+    color: "#9932CC"  # Dark orchid
+
+# ICOS Class definitions
+icos_classes:
+  class_1:
+    name: "ICOS Class 1"
+    description: "Highest level of standardization and data quality"
+    requirements:
+      - Full ICOS protocol compliance
+      - Continuous measurements
+      - Real-time data transmission
+      - Regular audits
+    stations:
+      - SVB  # Svartberget
+      - SKO  # Skogaryd
+
+  class_2:
+    name: "ICOS Class 2"
+    description: "Standard ICOS station with some flexibility"
+    requirements:
+      - ICOS protocol compliance
+      - Regular measurements
+      - Quality-controlled data
+    stations:
+      - ABK  # Abisko
+
+  associated:
+    name: "ICOS Associated"
+    description: "Stations associated with ICOS but not fully integrated"
+    requirements:
+      - Partial protocol compliance
+      - Regular data sharing
+    stations: []
+
+# SITES Thematic Programs mapping
+sites_programs:
+  spectral:
+    name: "SITES Spectral"
+    focus: "Vegetation phenology and spectral measurements"
+    lead_station: SVB
+
+  aquanet:
+    name: "SITES AquaNet"
+    focus: "Aquatic ecosystem monitoring"
+    lead_station: ERK
+
+  water:
+    name: "SITES Water"
+    focus: "Hydrological monitoring"
+    lead_station: null
