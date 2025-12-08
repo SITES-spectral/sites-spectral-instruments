@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Next Steps (v11.x Roadmap)
+
+#### Maintenance Domain (All Platforms/Instruments)
+- MaintenanceRecord entity with timeline history
+- Track: date, type (preventive, corrective, inspection), description, performed_by
+- Platform maintenance records (cleaning, structural checks, power systems)
+- Instrument maintenance records (sensor cleaning, firmware updates, repairs)
+- Timeline view showing all maintenance events
+
+#### Calibration Domain (Multispectral Sensors Only)
+- CalibrationRecord entity with timeline history
+- Track: date, calibration_type, coefficients, certificate_url, performed_by
+- Instrument type validation (only for multispectral instruments)
+- Support for field and laboratory calibrations
+- Calibration certificate storage
+
+#### Other Phases
 - **Phase 5**: Frontend Migration - Vue.js V11 API
 - **Phase 6**: Documentation - Vocabulary mapping
 
