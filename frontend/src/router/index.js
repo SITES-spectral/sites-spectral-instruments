@@ -33,6 +33,11 @@ const routes = [
     meta: { requiresAuth: true, title: 'Dashboard' }
   },
   {
+    // Alias for dashboard - supports /dashboard URL
+    path: '/dashboard',
+    redirect: '/'
+  },
+  {
     path: '/admin',
     name: 'admin',
     component: AdminDashboardView,
