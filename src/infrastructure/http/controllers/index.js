@@ -1,12 +1,21 @@
 /**
- * HTTP Controllers
+ * HTTP Controllers (V11 Architecture)
  *
  * Controllers that map HTTP requests to application use cases.
+ * All controllers follow SOLID principles and Hexagonal Architecture.
  *
  * @module infrastructure/http/controllers
  */
 
+// Core entity controllers
 export { StationController } from './StationController.js';
 export { PlatformController } from './PlatformController.js';
 export { InstrumentController } from './InstrumentController.js';
+
+// Admin controller
 export { AdminController } from './AdminController.js';
+
+// V11 Domain controllers
+export { AOIController } from './AOIController.js';
+export { CampaignController } from './CampaignController.js';
+export { ProductController } from './ProductController.js';

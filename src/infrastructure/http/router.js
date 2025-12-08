@@ -1,8 +1,8 @@
 /**
- * HTTP Router (v10 Architecture)
+ * HTTP Router (V11 Architecture)
  *
- * Routes requests to controllers using the new Hexagonal Architecture.
- * Can be used alongside legacy handlers during migration.
+ * Routes requests to controllers using Hexagonal Architecture.
+ * V11: Full support for AOI, Campaign, Product domains.
  *
  * @module infrastructure/http/router
  */
@@ -12,7 +12,10 @@ import {
   StationController,
   PlatformController,
   InstrumentController,
-  AdminController
+  AdminController,
+  AOIController,
+  CampaignController,
+  ProductController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
 import { handleAuth } from '../../auth/authentication.js';
@@ -28,12 +31,18 @@ export function createRouter(env) {
   // Create dependency injection container
   const container = createContainer(env);
 
-  // Initialize controllers
+  // Initialize controllers (V11 Architecture)
   const controllers = {
+    // Core entities
     stations: new StationController(container),
     platforms: new PlatformController(container),
     instruments: new InstrumentController(container),
-    admin: new AdminController(container)
+    // Admin
+    admin: new AdminController(container),
+    // V11 domains
+    aois: new AOIController(container),
+    campaigns: new CampaignController(container),
+    products: new ProductController(container)
   };
 
   return {
@@ -62,6 +71,15 @@ export function createRouter(env) {
 
           case 'instruments':
             return await controllers.instruments.handle(request, resourcePath, url);
+
+          case 'aois':
+            return await controllers.aois.handle(request, resourcePath, url);
+
+          case 'campaigns':
+            return await controllers.campaigns.handle(request, resourcePath, url);
+
+          case 'products':
+            return await controllers.products.handle(request, resourcePath, url);
 
           case 'admin':
             return await handleAdmin(request, resourcePath, url, controllers.admin);
@@ -138,7 +156,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.8',
+      version: '11.0.0-alpha.1',
       architecture: 'hexagonal',
       database: 'connected',
       stats: {
@@ -150,7 +168,13 @@ async function handleHealth(env, container) {
         'dependency-injection',
         'domain-driven-design',
         'mount-type-codes',
-        'admin-analytics'
+        'admin-analytics',
+        'aoi-geospatial',
+        'campaigns',
+        'products',
+        'darwin-core-vocabulary',
+        'icos-station-types',
+        'copernicus-processing-levels'
       ]
     }), {
       status: 200,
@@ -161,7 +185,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '10.0.0-alpha.8',
+      version: '11.0.0-alpha.1',
       architecture: 'hexagonal',
       database: 'disconnected',
       error: error.message
@@ -178,9 +202,9 @@ async function handleHealth(env, container) {
 function handleInfo() {
   return new Response(JSON.stringify({
     name: 'SITES Spectral Instruments API',
-    version: '10.0.0-alpha.8',
+    version: '11.0.0-alpha.1',
     architecture: 'hexagonal',
-    description: 'Hexagonal Architecture API for managing research station instruments',
+    description: 'V11 Hexagonal Architecture API with Darwin Core, ICOS, Copernicus vocabulary alignment',
     patterns: [
       'Hexagonal (Ports & Adapters)',
       'CQRS (Command Query Responsibility Segregation)',
@@ -189,6 +213,12 @@ function handleInfo() {
       'Strategy Pattern (Platform Types)',
       'Registry Pattern (Instrument Types)'
     ],
+    standards: {
+      darwinCore: ['dwc_locationID', 'dwc_geodeticDatum', 'decimalLatitude', 'decimalLongitude'],
+      icos: ['TER (Terrestrial)', 'ATM (Atmospheric)', 'AQA (Aquatic)', 'INT (Integrated)'],
+      copernicus: ['L0', 'L1', 'L2', 'L3', 'L4'],
+      licenses: ['CC-BY-4.0', 'CC-BY-SA-4.0', 'ODC-BY']
+    },
     endpoints: {
       stations: {
         list: 'GET /api/v10/stations',
@@ -217,6 +247,41 @@ function handleInfo() {
         update: 'PUT /api/v10/instruments/:id',
         delete: 'DELETE /api/v10/instruments/:id'
       },
+      aois: {
+        list: 'GET /api/v10/aois',
+        get: 'GET /api/v10/aois/:id',
+        byStation: 'GET /api/v10/aois/station/:stationId',
+        exportGeoJSON: 'GET /api/v10/aois/export/geojson',
+        create: 'POST /api/v10/aois',
+        importGeoJSON: 'POST /api/v10/aois/import/geojson',
+        importKML: 'POST /api/v10/aois/import/kml',
+        update: 'PUT /api/v10/aois/:id',
+        delete: 'DELETE /api/v10/aois/:id'
+      },
+      campaigns: {
+        list: 'GET /api/v10/campaigns',
+        get: 'GET /api/v10/campaigns/:id',
+        byStation: 'GET /api/v10/campaigns/station/:stationId',
+        active: 'GET /api/v10/campaigns/active',
+        create: 'POST /api/v10/campaigns',
+        start: 'POST /api/v10/campaigns/:id/start',
+        complete: 'POST /api/v10/campaigns/:id/complete',
+        update: 'PUT /api/v10/campaigns/:id',
+        delete: 'DELETE /api/v10/campaigns/:id'
+      },
+      products: {
+        list: 'GET /api/v10/products',
+        get: 'GET /api/v10/products/:id',
+        byDOI: 'GET /api/v10/products/doi/:doi',
+        byInstrument: 'GET /api/v10/products/instrument/:instrumentId',
+        byCampaign: 'GET /api/v10/products/campaign/:campaignId',
+        byProcessingLevel: 'GET /api/v10/products/processing-level/:level',
+        create: 'POST /api/v10/products',
+        setQualityScore: 'POST /api/v10/products/:id/quality-score',
+        promoteQuality: 'POST /api/v10/products/:id/promote-quality',
+        update: 'PUT /api/v10/products/:id',
+        delete: 'DELETE /api/v10/products/:id'
+      },
       admin: {
         activityLogs: 'GET /api/v10/admin/activity-logs',
         userSessions: 'GET /api/v10/admin/user-sessions',
@@ -234,6 +299,18 @@ function handleInfo() {
       MOB: 'Mobile',
       USV: 'Surface Vehicle',
       UUV: 'Underwater Vehicle'
+    },
+    processingLevels: {
+      L0: 'Raw data',
+      L1: 'Georeferenced/registered',
+      L2: 'Atmospherically corrected',
+      L3: 'Composites/aggregated',
+      L4: 'Derived products'
+    },
+    qualityControlLevels: {
+      raw: 'No QC applied',
+      quality_controlled: 'Automated QC passed',
+      validated: 'Expert validated'
     }
   }), {
     status: 200,
