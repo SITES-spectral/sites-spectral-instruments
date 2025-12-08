@@ -4,7 +4,7 @@
  * Manages user authentication state, tokens, and permissions.
  *
  * Role Hierarchy:
- * - admin, spectral-admin, sites-admin, sites-spectral-admin: Full system access
+ * - admin, sites-admin, spectral-admin: Full system access (Super Admins)
  * - station-admin (e.g., abisko-admin): Full access to their station
  * - station (e.g., abisko): Limited edit access to their station
  * - readonly: View-only access
@@ -18,13 +18,14 @@ import { api } from '@services/api';
 
 /**
  * Admin role identifiers (full system access)
+ * Super admins with full privileges
  */
-export const ADMIN_ROLES = ['admin', 'spectral-admin', 'sites-admin', 'sites-spectral-admin'];
+export const ADMIN_ROLES = ['admin', 'sites-admin', 'spectral-admin'];
 
 /**
  * Admin usernames that get full access regardless of role field
  */
-export const ADMIN_USERNAMES = ['admin', 'spectral-admin', 'sites-admin', 'sites-spectral-admin'];
+export const ADMIN_USERNAMES = ['admin', 'sites-admin', 'spectral-admin'];
 
 export const useAuthStore = defineStore('auth', () => {
   // State

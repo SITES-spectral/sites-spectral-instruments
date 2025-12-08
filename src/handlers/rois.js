@@ -29,8 +29,9 @@ import {
 
 /**
  * Super admin roles that can directly edit ROIs (bypassing legacy workflow)
+ * admin, sites-admin, spectral-admin have full system privileges
  */
-const SUPER_ADMIN_ROLES = ['admin', 'spectral-admin', 'sites-admin', 'sites-spectral-admin'];
+const SUPER_ADMIN_ROLES = ['admin', 'sites-admin', 'spectral-admin'];
 
 /**
  * Check if user can directly edit ROIs (super admin only)

@@ -13,6 +13,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [10.0.0-beta.12] - 2025-12-08
+
+### Super Admin Roles Correction
+
+Fixed the super admin roles to match the correct permission model.
+
+#### Changes
+
+**Super Admin Roles (Full System Privileges):**
+- `admin` - System administrator
+- `sites-admin` - SITES network administrator
+- `spectral-admin` - Spectral project administrator
+
+**Removed:**
+- `sites-spectral-admin` was incorrectly included in super admin roles
+
+#### Files Modified
+
+- `frontend/src/stores/auth.js` - Fixed ADMIN_ROLES and ADMIN_USERNAMES
+- `frontend/src/composables/useRoles.js` - Fixed SUPER_ADMIN_ROLES
+- `src/handlers/rois.js` - Fixed SUPER_ADMIN_ROLES for ROI legacy system
+
+#### Permission Model Clarification
+
+| Role | View All Stations | Edit Own Station | Edit Other Stations |
+|------|-------------------|------------------|---------------------|
+| Super Admin (admin, sites-admin, spectral-admin) | ✅ Yes | ✅ Yes | ✅ Yes |
+| Station Admin (e.g., abisko-admin) | ✅ Yes (read-only) | ✅ Yes | ❌ No |
+| Station User (e.g., abisko) | ✅ Yes (read-only) | ✅ Yes | ❌ No |
+| ReadOnly | ✅ Yes | ❌ No | ❌ No |
+
+---
+
 ## [10.0.0-beta.11] - 2025-12-08
 
 ### Tabbed Navigation for Platforms and Instruments

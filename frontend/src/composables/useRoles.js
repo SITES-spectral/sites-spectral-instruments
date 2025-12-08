@@ -5,7 +5,7 @@
  * v10.0.0-alpha.17: Added ROI edit permissions for Legacy System
  *
  * Role Hierarchy:
- * - admin, spectral-admin, sites-admin, sites-spectral-admin: Full system access
+ * - admin, sites-admin, spectral-admin: Full system access (Super Admins)
  * - station-admin (e.g., abisko-admin): Full access to their station
  * - station (e.g., abisko): Limited edit access to their station
  * - readonly: View-only access
@@ -24,7 +24,7 @@ import { useAuthStore, ADMIN_ROLES, ADMIN_USERNAMES } from '@stores/auth';
  * Super admin roles that can directly edit ROIs
  * These roles can override the legacy system with a warning
  */
-export const SUPER_ADMIN_ROLES = ['admin', 'spectral-admin', 'sites-admin', 'sites-spectral-admin'];
+export const SUPER_ADMIN_ROLES = ['admin', 'sites-admin', 'spectral-admin'];
 
 /**
  * Station names for the SITES network
