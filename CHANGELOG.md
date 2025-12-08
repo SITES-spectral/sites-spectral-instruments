@@ -13,6 +13,128 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.4] - 2025-12-08
+
+### V8 Calibration Workflow Features
+
+Enhanced CalibrationRecord entity with comprehensive field calibration workflow support based on real-world requirements.
+
+#### Calibration Workflow Support
+
+**User Workflow Context**:
+- 2 calibrations per session (~2 hours around solar maximum)
+- Done before AND after cleaning the instrument
+- Track if only after-cleaning was done (for data quality assessment)
+
+**New Calibration Timing Enum**:
+- `before_cleaning` - Done before cleaning instrument
+- `after_cleaning` - Done after cleaning instrument
+- `both` - Full calibration (before + after)
+- `not_applicable` - Cleaning not part of this calibration
+
+#### Reflectance Panel Tracking (NEW)
+
+| Field | Description |
+|-------|-------------|
+| `panel_type` | spectralon_99, spectralon_50, gray_18, white_reference, black_reference, custom |
+| `panel_serial_number` | Panel serial for traceability |
+| `panel_calibration_date` | When panel was last calibrated |
+| `panel_condition` | excellent, good, fair, poor |
+| `panel_nominal_reflectance` | e.g., 0.99 for Spectralon 99% |
+
+#### Ambient Conditions (NEW)
+
+| Field | Description |
+|-------|-------------|
+| `cloud_cover` | **IMPORTANT**: clear, mostly_clear, partly_cloudy, mostly_cloudy, overcast, **intermittent** (variable/passing clouds) |
+| `solar_zenith_angle` | Solar zenith in degrees (0-90) - optimal ≤45° |
+| `solar_azimuth_angle` | Solar azimuth in degrees (0-360) |
+| `wind_speed_ms` | Wind speed in m/s (affects panel stability) |
+| `temperature_celsius` | Air temperature |
+| `humidity_percent` | Relative humidity (optional) |
+
+#### Sensor State Before/After (NEW)
+
+**Cleanliness States**: clean, dusty, dirty, contaminated
+
+**Cleaning Details**:
+- `cleaning_performed` - Boolean flag
+- `cleaning_method` - dry_wipe, compressed_air, wet_clean, ultrasonic
+- `cleaning_solution` - Solution used if wet cleaning
+
+**Physical Aspect**: Text descriptions before/after cleaning
+
+#### Measurements & Dark Current (NEW)
+
+| Field | Description |
+|-------|-------------|
+| `measurements_before_json` | Per-channel measurements before calibration |
+| `measurements_after_json` | Per-channel measurements after calibration |
+| `dark_current_values_json` | Array of dark current readings |
+| `integration_time_ms` | Integration time used |
+
+#### Quality Metrics (NEW)
+
+| Field | Description |
+|-------|-------------|
+| `quality_passed` | Boolean QC flag |
+| `quality_score` | 0-100 overall score |
+| `deviation_from_reference` | % deviation from expected |
+| `uncertainty` | Measurement uncertainty |
+| `rmse` | Root mean square error |
+| `r2` | R-squared coefficient (0-1) |
+
+#### Documentation Fields (NEW)
+
+| Field | Description |
+|-------|-------------|
+| `photos_json` | Array of photo URLs/paths |
+| `raw_data_path` | Path to raw calibration data files |
+| `methodology` | Calibration methodology description |
+
+#### Helper Methods (CalibrationRecord)
+
+```javascript
+// Check if calibration was at optimal solar conditions
+record.wasAtOptimalSolarAngle();  // true if zenith ≤ 45°
+
+// Check ambient conditions suitability
+record.checkAmbientConditionsSuitability();
+// Returns: { suitable: boolean, warnings: string[] }
+
+// Get parsed measurements
+record.getMeasurementsBefore();
+record.getMeasurementsAfter();
+record.getDarkCurrentValues();
+record.getPhotos();
+```
+
+#### Database Migration 0038 Enhanced
+
+**New Views**:
+- `v_calibration_quality_analysis` - Aggregated quality metrics per instrument
+- `v_panel_usage` - Panel usage tracking across instruments/stations
+
+**New Indexes**:
+- `idx_cr_timing` - Calibration timing filter
+- `idx_cr_panel_serial` - Panel serial lookup
+- `idx_cr_cloud_cover` - Cloud condition analysis
+- `idx_cr_quality_passed` - QC filter
+- `idx_cr_cleaning_performed` - Cleaning workflow filter
+
+#### Repository Enhancements
+
+**New D1CalibrationRepository Methods**:
+- `findByPanelSerial(serialNumber)` - Find calibrations using specific panel
+- `findByCloudCondition(cloudCover)` - Filter by cloud conditions
+- `getStatistics(instrumentId)` - Aggregated calibration stats
+- `getCloudCoverDistribution(instrumentId)` - Cloud cover analysis
+- `findOptimalConditionCalibrations(instrumentId)` - Find calibrations with optimal conditions
+
+**Note**: V8 tables (`maintenance_history`, `calibration_logs`) are NOT preserved. This is a fresh V11 implementation without backward compatibility.
+
+---
+
 ## [11.0.0-alpha.3] - 2025-12-08
 
 ### Maintenance & Calibration Domains Complete
@@ -100,7 +222,7 @@ Full implementation of Maintenance and Calibration tracking with timeline visual
 - `v_current_calibrations` - Active calibrations with expiry status
 - `v_calibration_timeline` - Full calibration history per instrument
 
-**Note**: V8 tables (`maintenance_history`, `calibration_logs`) are preserved for backward compatibility. V11 tables use simpler structure optimized for timeline visualization.
+**Note**: V8 tables (`maintenance_history`, `calibration_logs`) are NOT preserved. This is a fresh V11 implementation without backward compatibility.
 
 ---
 

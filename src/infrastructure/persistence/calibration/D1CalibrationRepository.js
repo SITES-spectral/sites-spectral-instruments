@@ -4,6 +4,14 @@
  * Implements CalibrationRepository port using Cloudflare D1.
  * Only supports multispectral and hyperspectral instruments.
  *
+ * V11 Features:
+ * - Full panel tracking (type, serial, calibration date, condition)
+ * - Ambient conditions (cloud cover with intermittent, solar angles)
+ * - Sensor state before/after with cleaning workflow
+ * - Quality metrics (quality score, deviation, RMSE, R²)
+ * - Dark current values and integration time
+ * - Photo documentation and raw data paths
+ *
  * @module infrastructure/persistence/calibration/D1CalibrationRepository
  */
 
@@ -21,7 +29,7 @@ export class D1CalibrationRepository extends CalibrationRepository {
       .bind(id)
       .first();
 
-    return result ? this.mapToEntity(result) : null;
+    return result ? CalibrationRecord.fromRow(result) : null;
   }
 
   async findByInstrumentId(instrumentId) {
@@ -34,7 +42,7 @@ export class D1CalibrationRepository extends CalibrationRepository {
       .bind(instrumentId)
       .all();
 
-    return results.results.map(row => this.mapToEntity(row));
+    return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 
   async findCurrentValid(instrumentId, channelId = null) {
@@ -58,26 +66,56 @@ export class D1CalibrationRepository extends CalibrationRepository {
       .bind(...params)
       .first();
 
-    return result ? this.mapToEntity(result) : null;
+    return result ? CalibrationRecord.fromRow(result) : null;
   }
 
   async findAll(filters = {}) {
     let sql = 'SELECT * FROM calibration_records WHERE 1=1';
     const params = [];
 
+    if (filters.instrumentId) {
+      sql += ' AND instrument_id = ?';
+      params.push(filters.instrumentId);
+    }
+
+    if (filters.stationId) {
+      sql += ' AND station_id = ?';
+      params.push(filters.stationId);
+    }
+
     if (filters.channelId) {
       sql += ' AND channel_id = ?';
       params.push(filters.channelId);
     }
 
-    if (filters.type) {
-      sql += ' AND type = ?';
-      params.push(filters.type);
+    if (filters.type || filters.calibrationType) {
+      sql += ' AND calibration_type = ?';
+      params.push(filters.type || filters.calibrationType);
     }
 
     if (filters.status) {
       sql += ' AND status = ?';
       params.push(filters.status);
+    }
+
+    if (filters.calibrationTiming) {
+      sql += ' AND calibration_timing = ?';
+      params.push(filters.calibrationTiming);
+    }
+
+    if (filters.cloudCover) {
+      sql += ' AND cloud_cover = ?';
+      params.push(filters.cloudCover);
+    }
+
+    if (filters.qualityPassed !== undefined) {
+      sql += ' AND quality_passed = ?';
+      params.push(filters.qualityPassed ? 1 : 0);
+    }
+
+    if (filters.cleaningPerformed !== undefined) {
+      sql += ' AND cleaning_performed = ?';
+      params.push(filters.cleaningPerformed ? 1 : 0);
     }
 
     if (filters.startDate) {
@@ -90,6 +128,16 @@ export class D1CalibrationRepository extends CalibrationRepository {
       params.push(filters.endDate);
     }
 
+    if (filters.performedBy) {
+      sql += ' AND performed_by LIKE ?';
+      params.push(`%${filters.performedBy}%`);
+    }
+
+    if (filters.panelType) {
+      sql += ' AND panel_type = ?';
+      params.push(filters.panelType);
+    }
+
     sql += ' ORDER BY calibration_date DESC';
     sql += ` LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`;
 
@@ -98,7 +146,7 @@ export class D1CalibrationRepository extends CalibrationRepository {
       ? await stmt.bind(...params).all()
       : await stmt.all();
 
-    return results.results.map(row => this.mapToEntity(row));
+    return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 
   async findTimeline(instrumentId, options = {}) {
@@ -123,6 +171,11 @@ export class D1CalibrationRepository extends CalibrationRepository {
       params.push(options.endDate);
     }
 
+    if (options.includeExpired === false) {
+      sql += ' AND status != ?';
+      params.push('expired');
+    }
+
     sql += ' ORDER BY calibration_date ASC';
 
     const results = await this.db
@@ -130,7 +183,7 @@ export class D1CalibrationRepository extends CalibrationRepository {
       .bind(...params)
       .all();
 
-    return results.results.map(row => this.mapToEntity(row));
+    return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 
   async findExpired() {
@@ -144,7 +197,7 @@ export class D1CalibrationRepository extends CalibrationRepository {
       `)
       .all();
 
-    return results.results.map(row => this.mapToEntity(row));
+    return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 
   async findExpiringWithin(days) {
@@ -163,7 +216,33 @@ export class D1CalibrationRepository extends CalibrationRepository {
       .bind(futureDate.toISOString().split('T')[0])
       .all();
 
-    return results.results.map(row => this.mapToEntity(row));
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findByPanelSerial(panelSerialNumber) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE panel_serial_number = ?
+        ORDER BY calibration_date DESC
+      `)
+      .bind(panelSerialNumber)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findByCloudCondition(cloudCover) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE cloud_cover = ?
+        ORDER BY calibration_date DESC
+      `)
+      .bind(cloudCover)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 
   async save(record) {
@@ -174,35 +253,148 @@ export class D1CalibrationRepository extends CalibrationRepository {
   }
 
   async create(record) {
+    const now = new Date().toISOString();
+
     const result = await this.db
       .prepare(`
         INSERT INTO calibration_records (
-          instrument_id, channel_id, type, status,
-          calibration_date, valid_until, performed_by, laboratory,
-          certificate_number, certificate_url, reference_standard,
-          coefficients, uncertainty, temperature_celsius, humidity_percent,
-          notes, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          instrument_id, instrument_type, station_id, channel_id,
+          calibration_type, calibration_timing, status,
+          calibration_date, calibration_start_time, calibration_end_time, duration_minutes,
+          valid_from, valid_until,
+          performed_by, performed_by_user_id, laboratory,
+          certificate_number, certificate_url,
+          panel_type, panel_serial_number, panel_calibration_date, panel_condition, panel_nominal_reflectance,
+          reference_standard,
+          temperature_celsius, humidity_percent, cloud_cover, wind_speed_ms,
+          solar_zenith_angle, solar_azimuth_angle, ambient_conditions_json,
+          cleanliness_state_before, physical_aspect_before,
+          cleaning_performed, cleaning_method, cleaning_solution,
+          cleanliness_state_after, physical_aspect_after,
+          measurements_before_json, measurements_after_json,
+          coefficients_json,
+          dark_current_values_json, integration_time_ms,
+          quality_passed, quality_score, deviation_from_reference, uncertainty, rmse, r2, quality_notes,
+          description, methodology, notes, photos_json, raw_data_path,
+          attachments_json, metadata_json,
+          created_at, updated_at, created_by
+        ) VALUES (
+          ?, ?, ?, ?,
+          ?, ?, ?,
+          ?, ?, ?, ?,
+          ?, ?,
+          ?, ?, ?,
+          ?, ?,
+          ?, ?, ?, ?, ?,
+          ?,
+          ?, ?, ?, ?,
+          ?, ?, ?,
+          ?, ?,
+          ?, ?, ?,
+          ?, ?,
+          ?, ?,
+          ?,
+          ?, ?,
+          ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?,
+          ?, ?,
+          ?, ?, ?
+        )
       `)
       .bind(
+        // Instrument reference
         record.instrumentId,
-        record.channelId,
-        record.type,
+        record.instrumentType,
+        record.stationId,
+        record.channelId || null,
+
+        // Classification
+        record.calibrationType,
+        record.calibrationTiming,
         record.status,
+
+        // Dates
         record.calibrationDate,
+        record.calibrationStartTime,
+        record.calibrationEndTime,
+        record.durationMinutes,
+        record.validFrom,
         record.validUntil,
+
+        // Personnel
         record.performedBy,
+        record.performedByUserId,
         record.laboratory,
+
+        // Certificate
         record.certificateNumber,
         record.certificateUrl,
+
+        // Panel
+        record.panelType,
+        record.panelSerialNumber,
+        record.panelCalibrationDate,
+        record.panelCondition,
+        record.panelNominalReflectance,
         record.referenceStandard,
-        record.coefficients ? JSON.stringify(record.coefficients) : null,
-        record.uncertainty,
+
+        // Ambient conditions
         record.temperatureCelsius,
         record.humidityPercent,
+        record.cloudCover,
+        record.windSpeedMs,
+        record.solarZenithAngle,
+        record.solarAzimuthAngle,
+        record.ambientConditionsJson,
+
+        // Sensor state before
+        record.cleanlinessStateBefore,
+        record.physicalAspectBefore,
+
+        // Cleaning
+        record.cleaningPerformed ? 1 : 0,
+        record.cleaningMethod,
+        record.cleaningSolution,
+
+        // Sensor state after
+        record.cleanlinessStateAfter,
+        record.physicalAspectAfter,
+
+        // Measurements
+        record.measurementsBeforeJson ? (typeof record.measurementsBeforeJson === 'string' ? record.measurementsBeforeJson : JSON.stringify(record.measurementsBeforeJson)) : null,
+        record.measurementsAfterJson ? (typeof record.measurementsAfterJson === 'string' ? record.measurementsAfterJson : JSON.stringify(record.measurementsAfterJson)) : null,
+
+        // Coefficients
+        record.coefficients ? JSON.stringify(record.coefficients) : null,
+
+        // Dark current
+        record.darkCurrentValuesJson ? (typeof record.darkCurrentValuesJson === 'string' ? record.darkCurrentValuesJson : JSON.stringify(record.darkCurrentValuesJson)) : null,
+        record.integrationTimeMs,
+
+        // Quality metrics
+        record.qualityPassed !== null ? (record.qualityPassed ? 1 : 0) : null,
+        record.qualityScore,
+        record.deviationFromReference,
+        record.uncertainty,
+        record.rmse,
+        record.r2,
+        record.qualityNotes,
+
+        // Documentation
+        record.description,
+        record.methodology,
         record.notes,
-        record.createdAt,
-        record.updatedAt
+        record.photosJson ? (typeof record.photosJson === 'string' ? record.photosJson : JSON.stringify(record.photosJson)) : null,
+        record.rawDataPath,
+
+        // Metadata
+        record.attachments ? JSON.stringify(record.attachments) : null,
+        record.metadata ? JSON.stringify(record.metadata) : null,
+
+        // Audit
+        record.createdAt || now,
+        record.updatedAt || now,
+        record.createdBy
       )
       .run();
 
@@ -211,39 +403,132 @@ export class D1CalibrationRepository extends CalibrationRepository {
   }
 
   async update(record) {
+    const now = new Date().toISOString();
+
     await this.db
       .prepare(`
         UPDATE calibration_records SET
-          instrument_id = ?, channel_id = ?, type = ?, status = ?,
-          calibration_date = ?, valid_until = ?, performed_by = ?,
-          laboratory = ?, certificate_number = ?, certificate_url = ?,
-          reference_standard = ?, coefficients = ?, uncertainty = ?,
-          temperature_celsius = ?, humidity_percent = ?, notes = ?,
+          instrument_id = ?, instrument_type = ?, station_id = ?, channel_id = ?,
+          calibration_type = ?, calibration_timing = ?, status = ?,
+          calibration_date = ?, calibration_start_time = ?, calibration_end_time = ?, duration_minutes = ?,
+          valid_from = ?, valid_until = ?,
+          performed_by = ?, performed_by_user_id = ?, laboratory = ?,
+          certificate_number = ?, certificate_url = ?,
+          panel_type = ?, panel_serial_number = ?, panel_calibration_date = ?, panel_condition = ?, panel_nominal_reflectance = ?,
+          reference_standard = ?,
+          temperature_celsius = ?, humidity_percent = ?, cloud_cover = ?, wind_speed_ms = ?,
+          solar_zenith_angle = ?, solar_azimuth_angle = ?, ambient_conditions_json = ?,
+          cleanliness_state_before = ?, physical_aspect_before = ?,
+          cleaning_performed = ?, cleaning_method = ?, cleaning_solution = ?,
+          cleanliness_state_after = ?, physical_aspect_after = ?,
+          measurements_before_json = ?, measurements_after_json = ?,
+          coefficients_json = ?,
+          dark_current_values_json = ?, integration_time_ms = ?,
+          quality_passed = ?, quality_score = ?, deviation_from_reference = ?, uncertainty = ?, rmse = ?, r2 = ?, quality_notes = ?,
+          description = ?, methodology = ?, notes = ?, photos_json = ?, raw_data_path = ?,
+          attachments_json = ?, metadata_json = ?,
           updated_at = ?
         WHERE id = ?
       `)
       .bind(
+        // Instrument reference
         record.instrumentId,
-        record.channelId,
-        record.type,
+        record.instrumentType,
+        record.stationId,
+        record.channelId || null,
+
+        // Classification
+        record.calibrationType,
+        record.calibrationTiming,
         record.status,
+
+        // Dates
         record.calibrationDate,
+        record.calibrationStartTime,
+        record.calibrationEndTime,
+        record.durationMinutes,
+        record.validFrom,
         record.validUntil,
+
+        // Personnel
         record.performedBy,
+        record.performedByUserId,
         record.laboratory,
+
+        // Certificate
         record.certificateNumber,
         record.certificateUrl,
+
+        // Panel
+        record.panelType,
+        record.panelSerialNumber,
+        record.panelCalibrationDate,
+        record.panelCondition,
+        record.panelNominalReflectance,
         record.referenceStandard,
-        record.coefficients ? JSON.stringify(record.coefficients) : null,
-        record.uncertainty,
+
+        // Ambient conditions
         record.temperatureCelsius,
         record.humidityPercent,
+        record.cloudCover,
+        record.windSpeedMs,
+        record.solarZenithAngle,
+        record.solarAzimuthAngle,
+        record.ambientConditionsJson,
+
+        // Sensor state before
+        record.cleanlinessStateBefore,
+        record.physicalAspectBefore,
+
+        // Cleaning
+        record.cleaningPerformed ? 1 : 0,
+        record.cleaningMethod,
+        record.cleaningSolution,
+
+        // Sensor state after
+        record.cleanlinessStateAfter,
+        record.physicalAspectAfter,
+
+        // Measurements
+        record.measurementsBeforeJson ? (typeof record.measurementsBeforeJson === 'string' ? record.measurementsBeforeJson : JSON.stringify(record.measurementsBeforeJson)) : null,
+        record.measurementsAfterJson ? (typeof record.measurementsAfterJson === 'string' ? record.measurementsAfterJson : JSON.stringify(record.measurementsAfterJson)) : null,
+
+        // Coefficients
+        record.coefficients ? JSON.stringify(record.coefficients) : null,
+
+        // Dark current
+        record.darkCurrentValuesJson ? (typeof record.darkCurrentValuesJson === 'string' ? record.darkCurrentValuesJson : JSON.stringify(record.darkCurrentValuesJson)) : null,
+        record.integrationTimeMs,
+
+        // Quality metrics
+        record.qualityPassed !== null ? (record.qualityPassed ? 1 : 0) : null,
+        record.qualityScore,
+        record.deviationFromReference,
+        record.uncertainty,
+        record.rmse,
+        record.r2,
+        record.qualityNotes,
+
+        // Documentation
+        record.description,
+        record.methodology,
         record.notes,
-        new Date().toISOString(),
+        record.photosJson ? (typeof record.photosJson === 'string' ? record.photosJson : JSON.stringify(record.photosJson)) : null,
+        record.rawDataPath,
+
+        // Metadata
+        record.attachments ? JSON.stringify(record.attachments) : null,
+        record.metadata ? JSON.stringify(record.metadata) : null,
+
+        // Audit
+        now,
+
+        // WHERE
         record.id
       )
       .run();
 
+    record.updatedAt = now;
     return record;
   }
 
@@ -256,27 +541,73 @@ export class D1CalibrationRepository extends CalibrationRepository {
     return true;
   }
 
-  mapToEntity(row) {
-    return new CalibrationRecord({
-      id: row.id,
-      instrumentId: row.instrument_id,
-      channelId: row.channel_id,
-      type: row.type,
-      status: row.status,
-      calibrationDate: row.calibration_date,
-      validUntil: row.valid_until,
-      performedBy: row.performed_by,
-      laboratory: row.laboratory,
-      certificateNumber: row.certificate_number,
-      certificateUrl: row.certificate_url,
-      referenceStandard: row.reference_standard,
-      coefficients: row.coefficients ? JSON.parse(row.coefficients) : null,
-      uncertainty: row.uncertainty,
-      temperatureCelsius: row.temperature_celsius,
-      humidityPercent: row.humidity_percent,
-      notes: row.notes,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    });
+  /**
+   * Get calibration statistics for an instrument
+   */
+  async getStatistics(instrumentId) {
+    const result = await this.db
+      .prepare(`
+        SELECT
+          COUNT(*) as total_calibrations,
+          COUNT(CASE WHEN status = 'valid' THEN 1 END) as valid_count,
+          COUNT(CASE WHEN status = 'expired' THEN 1 END) as expired_count,
+          COUNT(CASE WHEN quality_passed = 1 THEN 1 END) as passed_count,
+          AVG(quality_score) as avg_quality_score,
+          MAX(calibration_date) as last_calibration_date,
+          MIN(calibration_date) as first_calibration_date
+        FROM calibration_records
+        WHERE instrument_id = ?
+      `)
+      .bind(instrumentId)
+      .first();
+
+    return result;
+  }
+
+  /**
+   * Get cloud cover distribution for calibrations
+   */
+  async getCloudCoverDistribution(instrumentId = null) {
+    let sql = `
+      SELECT
+        cloud_cover,
+        COUNT(*) as count,
+        AVG(quality_score) as avg_quality_score
+      FROM calibration_records
+      WHERE cloud_cover IS NOT NULL
+    `;
+    const params = [];
+
+    if (instrumentId) {
+      sql += ' AND instrument_id = ?';
+      params.push(instrumentId);
+    }
+
+    sql += ' GROUP BY cloud_cover ORDER BY count DESC';
+
+    const results = params.length > 0
+      ? await this.db.prepare(sql).bind(...params).all()
+      : await this.db.prepare(sql).all();
+
+    return results.results;
+  }
+
+  /**
+   * Find calibrations with optimal conditions (solar zenith <= 45°, clear/mostly_clear sky)
+   */
+  async findOptimalConditionCalibrations(instrumentId) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE instrument_id = ?
+          AND solar_zenith_angle IS NOT NULL
+          AND solar_zenith_angle <= 45
+          AND cloud_cover IN ('clear', 'mostly_clear')
+        ORDER BY calibration_date DESC
+      `)
+      .bind(instrumentId)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 }
