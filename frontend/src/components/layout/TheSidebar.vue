@@ -91,20 +91,37 @@ watch([currentStationAcronym, currentPlatformId, currentInstrumentId, displaySta
 const displayStations = computed(() => {
   const stations = stationsStore.activeStations;
 
-  // Admins see all stations
+  // Super admins see all stations
   if (authStore.isAdmin) {
     return stations;
   }
 
-  // Station users see only their station
-  const userStation = authStore.user?.station_normalized_name;
-  if (userStation) {
+  // Station admins and users - get their station from various sources
+  let userStationKey = null;
+
+  // Try station_normalized_name first
+  if (authStore.user?.station_normalized_name) {
+    userStationKey = authStore.user.station_normalized_name;
+  }
+  // For station-admins, extract station from username (e.g., "lonnstorp-admin" -> "lonnstorp")
+  else if (authStore.isStationAdmin && authStore.userStationFromUsername) {
+    userStationKey = authStore.userStationFromUsername;
+  }
+  // For regular station users, try username as station name
+  else if (authStore.isStationUser && authStore.user?.username) {
+    userStationKey = authStore.user.username;
+  }
+
+  // Filter to user's station if we found one
+  if (userStationKey) {
+    const key = userStationKey.toLowerCase();
     return stations.filter(s =>
-      s.normalized_name === userStation ||
-      s.acronym?.toLowerCase() === userStation.toLowerCase()
+      s.normalized_name?.toLowerCase() === key ||
+      s.acronym?.toLowerCase() === key
     );
   }
 
+  // Fallback: show all stations (shouldn't reach here normally)
   return stations;
 });
 

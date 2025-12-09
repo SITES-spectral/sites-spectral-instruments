@@ -12,6 +12,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.20] - 2025-12-09
+
+### Station Admin Visibility Fix
+
+#### Bug Fix: Sidebar and Dashboard for Station Admins
+- **Issue**: Station admins (e.g., `lonnstorp-admin`) couldn't see sidebar or Quick Access
+- **Root Cause**: `displayStations` and `visibleStations` only checked `station_normalized_name`
+- **Fix**: Now uses multiple sources to identify user's station:
+  1. `station_normalized_name` from user data
+  2. `userStationFromUsername` for station-admins (extracts from username pattern)
+  3. `username` for regular station users
+
+#### Station Detection Sources (Priority Order)
+```
+1. user.station_normalized_name (explicit assignment)
+2. username.replace(/-admin$/, '') (for station-admin role)
+3. user.username (for station role)
+```
+
+#### Files Modified
+- `TheSidebar.vue`: Updated `displayStations` computed property
+- `DashboardView.vue`: Updated `visibleStations` computed property
+
+---
+
 ## [11.0.0-alpha.19] - 2025-12-09
 
 ### Dashboard Platform Management

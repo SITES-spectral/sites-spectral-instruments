@@ -1,16 +1,16 @@
 {
-  "version": "11.0.0-alpha.18",
+  "version": "11.0.0-alpha.19",
   "buildDate": "2025-12-09",
-  "timestamp": 1765279996936,
+  "timestamp": 1765280857146,
   "files": {
-    "/css/styles.css?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/utils.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/api.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/components.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/interactive-map.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/dashboard.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/station-dashboard.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/navigation.js?v=11.0.0-alpha.18": "11.0.0-alpha.18",
-    "/js/export.js?v=11.0.0-alpha.18": "11.0.0-alpha.18"
+    "/css/styles.css?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/utils.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/api.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/components.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/interactive-map.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/dashboard.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/station-dashboard.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/navigation.js?v=11.0.0-alpha.19": "11.0.0-alpha.19",
+    "/js/export.js?v=11.0.0-alpha.19": "11.0.0-alpha.19"
   }
 }
