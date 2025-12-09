@@ -32,6 +32,15 @@ export function validateStationAccess(user, stationId) {
     return true;
   }
 
+  // Station-admin users can only access their own station (with full edit/delete)
+  if (user.role === 'station-admin') {
+    // Check multiple formats: integer ID, string acronym, and normalized name
+    return user.station_id === stationId ||
+           user.station_id === parseInt(stationId, 10) ||
+           user.station_acronym === stationId ||
+           user.station_normalized_name === stationId;
+  }
+
   // Station users can only access their own station
   if (user.role === 'station') {
     // Check multiple formats: integer ID, string acronym, and normalized name
@@ -71,6 +80,16 @@ export function checkUserPermissions(user, resource, action) {
       aois: ['read', 'write', 'delete', 'admin'],
       campaigns: ['read', 'write', 'delete', 'admin'],
       products: ['read', 'write', 'delete', 'admin'],
+      export: ['read']
+    },
+    'station-admin': {
+      stations: ['read'],
+      platforms: ['read', 'write', 'delete'],
+      instruments: ['read', 'write', 'delete'],
+      rois: ['read', 'write', 'delete'],
+      aois: ['read', 'write', 'delete'],
+      campaigns: ['read', 'write', 'delete'],
+      products: ['read', 'write', 'delete'],
       export: ['read']
     },
     station: {
@@ -183,6 +202,16 @@ export function filterDataByPermissions(user, data, stationIdField = 'station_id
   // Admin users see all data
   if (user.role === 'admin') {
     return data;
+  }
+
+  // Station-admin users see only their station's data
+  if (user.role === 'station-admin' && user.station_id) {
+    return data.filter(item =>
+      item[stationIdField] === user.station_id ||
+      item.station_normalized_name === user.station_normalized_name ||
+      item.station_acronym === user.station_acronym ||
+      item.id === user.station_id
+    );
   }
 
   // Station users see only their station's data

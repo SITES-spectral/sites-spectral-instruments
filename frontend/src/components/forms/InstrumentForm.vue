@@ -19,6 +19,7 @@ import {
   getInstrumentTypeCode
 } from '@composables/useTypeRegistry';
 import { DynamicFieldGroup } from './fields';
+import { InstrumentIcon } from '@components/common';
 
 const props = defineProps({
   instrument: {
@@ -232,7 +233,12 @@ function handleCancel() {
             :value="type.value"
             class="radio radio-primary radio-sm"
           />
-          <span>{{ type.icon }}</span>
+          <InstrumentIcon
+            :icon="type.icon"
+            :size="18"
+            :stroke-width="2"
+            :color="type.color"
+          />
           <span>{{ type.label }}</span>
         </label>
       </div>

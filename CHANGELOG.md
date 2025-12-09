@@ -12,6 +12,171 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.14] - 2025-12-09
+
+### Platform Mini-Map: Zoom & Scale Controls
+
+#### Enhanced Features
+- **Zoom Controls**: Always-visible zoom +/- buttons in top-right corner
+  - Compact 24x24px buttons sized for mini-map
+  - Clean shadow and border-radius styling
+- **Scale Bar**: Metric scale indicator in bottom-left corner
+  - Compact 100px max width
+  - Metric only (no imperial) for clean display
+  - Semi-transparent background for readability
+- **Double-Click Zoom**: Enabled for quick zoom interaction
+- **Touch Zoom**: Pinch-to-zoom enabled on mobile devices
+
+#### UX Improvements
+- Users can now explore the map area while keeping platform centered
+- Scale bar provides spatial context at all zoom levels
+- Dragging remains disabled by default for clean embedded experience
+
+---
+
+## [11.0.0-alpha.13] - 2025-12-09
+
+### Platform Mini-Map Enhancement
+
+#### New Components
+- **PlatformMiniMap.vue**: Compact Leaflet map for platform cards
+  - Displays platform location with color-coded triangle marker
+  - Mount type colors: PL=orange, BL=teal, GL=green, UAV=yellow, SAT=purple
+  - 180px height, non-interactive by default (configurable)
+  - Popup support with platform details
+  - Graceful fallback when coordinates unavailable
+
+#### Enhanced Components
+- **FixedPlatformDetails.vue**: Now includes mini-map above details grid
+  - Mini-map shows when platform has coordinates
+  - Coordinates displayed as text below map
+  - Clean layout with map → details → coordinates flow
+
+#### Features
+- **Dynamic Leaflet Loading**: Loads Leaflet CSS and JS only when needed
+- **Memory Management**: Proper cleanup on component unmount
+- **Responsive Design**: Map fills container width, fixed height
+- **Mount Type Markers**: Triangle markers color-coded by mount type code
+- **SOLID Compliance**: Single responsibility, focused interface
+
+#### Props (PlatformMiniMap)
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `platform` | Object | required | Platform with lat/lon |
+| `height` | Number | 200 | Map height in pixels |
+| `zoom` | Number | 14 | Initial zoom level |
+| `interactive` | Boolean | false | Enable dragging/zooming |
+| `showPopup` | Boolean | false | Auto-open marker popup |
+
+---
+
+## [11.0.0-alpha.12] - 2025-12-09
+
+### Icon System: Lucide Icons with Ancient Symbolism
+
+#### New Icon System
+- **Lucide Vue Integration**: Replaced text-based icon display with proper icon components
+  - Package: `lucide-vue-next` (ISC license, MIT-compatible)
+  - Bundle size: ~3KB added (tree-shaken, only imports used icons)
+  - Vue 3 native with full TypeScript support
+  - 1400+ icons available, clean stroke-based design
+
+#### Components
+- **InstrumentIcon.vue**: Reusable icon component with props for size, color, stroke width
+  - Supports all instrument type icons
+  - Maps Font Awesome style names to Lucide components
+  - Includes ancient symbolism documentation
+- **IconShowcase.vue**: Demo component showing all icons with descriptions
+  - Size examples (12px to 48px)
+  - Stroke width examples (1px to 3px)
+  - Scientific color palette examples
+
+#### Icon Mapping with Ancient Symbolism
+Each instrument icon inspired by ancient symbolic traditions:
+
+| Type | Icon | Lucide Component | Ancient Inspiration |
+|------|------|------------------|---------------------|
+| Phenocam | `camera` | `Camera` | Egyptian Eye of Horus - observation |
+| Multispectral | `layer-group` | `Layers` | Aztec stepped pyramid - data processing levels |
+| PAR Sensor | `sun` | `Sun` | Egyptian Ra - solar radiation |
+| NDVI Sensor | `leaf` | `Leaf` | Celtic Tree of Life - vegetation health |
+| PRI Sensor | `microscope` | `Microscope` | Greek scientific precision |
+| Hyperspectral | `rainbow` | `Rainbow` | Norse Bifrost - spectral bridge |
+| Thermal | `temperature-high` | `Thermometer` | Greek geometric precision |
+| LiDAR | `wave-square` | `Waves` | Chinese water patterns - continuous flow |
+| Radar | `satellite-dish` | `Radar` | Modern technology - SAR |
+
+#### Documentation
+- **ICON_SYSTEM.md**: Comprehensive icon system documentation
+  - Usage examples with Vue components
+  - Icon design standards (size, stroke, color)
+  - Ancient symbolism references (Egyptian, Norse, Celtic, Greek, Mayan, Chinese)
+  - Migration guide from Font Awesome
+  - License compliance (ISC)
+
+#### Updated Components
+- **InstrumentForm.vue**: Now uses `InstrumentIcon` component instead of text display
+  - Icons show with proper colors and sizing
+  - Consistent 18px size, 2px stroke width
+  - Type-specific colors from registry
+
+#### Benefits
+- **Performance**: Tree-shaking ensures only used icons are bundled
+- **Accessibility**: Semantic SVG icons with proper attributes
+- **Maintainability**: Single source of truth for icon mapping
+- **Design**: Consistent stroke-based icons across application
+- **License**: ISC license (commercial-friendly, no attribution required)
+- **Cultural Depth**: Ancient symbolism adds meaning to each icon choice
+
+---
+
+## [11.0.0-alpha.11] - 2025-12-09
+
+### Enhanced User Management: Station Admins & Sites Admin
+
+#### New User Types
+- **sites-admin**: Global administrator with full access to all stations
+  - Role: `admin`
+  - Permissions: `read`, `write`, `edit`, `delete`, `admin`
+  - Access: All stations
+- **station-admin** (per station): Station-specific administrators
+  - Role: `station-admin`
+  - Permissions: `read`, `write`, `edit`, `delete`
+  - Access: Single assigned station only
+  - Format: `{station}-admin` (e.g., `abisko-admin`, `skogaryd-admin`)
+
+#### New Cloudflare Secrets
+- `SITES_ADMIN_CREDENTIALS` - Global admin credentials
+- `STATION_{NAME}_ADMIN_CREDENTIALS` - Per-station admin credentials (9 secrets)
+
+#### Backend Permission System Updates
+- Added `station-admin` role to permission matrix in `permissions.js`
+- Updated `validateStationAccess()` to recognize `station-admin` role
+- Updated `filterDataByPermissions()` to handle `station-admin` role
+- Login response now includes `station_id`, `edit_privileges`, and `permissions`
+
+#### Authentication Module Updates
+- Extended `loadCredentials()` to load `sites_admin` and `station_admins`
+- Extended `authenticateUser()` to authenticate against new user types
+- Station-admin users get `station-admin` role in JWT token
+- Full backwards compatibility with existing `admin` and `station` users
+
+#### Frontend Permission Updates
+- Updated `canEditStation()` in auth store to properly compare station IDs and acronyms
+- Station-admin users now see create/edit buttons for their assigned station
+
+#### New Scripts
+- `scripts/add-admin-users.js` - Generate and deploy admin user credentials
+
+#### User Role Summary
+| Role | Username Pattern | Access | Edit | Delete |
+|------|------------------|--------|------|--------|
+| admin | `admin`, `sites-admin` | All | ✅ | ✅ |
+| station-admin | `{station}-admin` | Own station | ✅ | ✅ |
+| station | `{station}` | Own station | ✅ | ❌ |
+
+---
+
 ## [11.0.0-alpha.10] - 2025-12-08
 
 ### Interactive Platform Map with Hover Interactivity

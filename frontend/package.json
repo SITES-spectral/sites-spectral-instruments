@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-frontend",
-  "version": "10.0.0-beta.11",
+  "version": "11.0.0-alpha.13",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,26 +14,27 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "pinia": "^2.1.7",
     "@vueuse/core": "^10.9.0",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "lucide-vue-next": "^0.556.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
-    "@vue/test-utils": "^2.4.4",
-    "vite": "^5.2.0",
-    "vitest": "^1.4.0",
     "@vitest/coverage-v8": "^1.4.0",
-    "happy-dom": "^14.3.6",
-    "tailwindcss": "^3.4.3",
-    "postcss": "^8.4.38",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/test-utils": "^2.4.4",
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.10.1",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
-    "@vue/eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.2.5"
+    "happy-dom": "^14.3.6",
+    "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "tailwindcss": "^3.4.3",
+    "vite": "^5.2.0",
+    "vitest": "^1.4.0"
   }
 }

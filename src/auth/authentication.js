@@ -47,8 +47,11 @@ export async function handleAuth(method, pathSegments, request, env) {
           user: {
             username: user.username,
             role: user.role,
+            station_id: user.station_id,
             station_acronym: user.station_acronym,
-            station_normalized_name: user.station_normalized_name
+            station_normalized_name: user.station_normalized_name,
+            edit_privileges: user.edit_privileges,
+            permissions: user.permissions
           }
         }), {
           status: 200,
@@ -120,18 +123,53 @@ export async function authenticateUser(username, password, env) {
       return null;
     }
 
-    // Check admin credentials
+    // Check admin credentials (original admin)
     if (credentials.admin?.username === username && credentials.admin?.password === password) {
       // Auth successful - admin user
       return {
         username: credentials.admin.username,
         role: credentials.admin.role,
         station_acronym: null,
-        station_normalized_name: null
+        station_normalized_name: null,
+        edit_privileges: true,
+        permissions: ['read', 'write', 'edit', 'delete', 'admin']
       };
     }
 
-    // Check station credentials
+    // Check sites-admin credentials (global admin)
+    if (credentials.sites_admin?.username === username && credentials.sites_admin?.password === password) {
+      // Auth successful - sites-admin user
+      return {
+        username: credentials.sites_admin.username,
+        role: 'admin',
+        station_acronym: null,
+        station_normalized_name: null,
+        edit_privileges: true,
+        permissions: credentials.sites_admin.permissions || ['read', 'write', 'edit', 'delete', 'admin']
+      };
+    }
+
+    // Check station-admin credentials
+    if (credentials.station_admins) {
+      for (const [stationName, adminCreds] of Object.entries(credentials.station_admins)) {
+        if (adminCreds?.username === username && adminCreds?.password === password) {
+          // Get station data from database to get both acronym and integer ID
+          const stationData = await getStationByNormalizedName(stationName, env);
+          // Auth successful - station-admin user
+          return {
+            username: adminCreds.username,
+            role: adminCreds.role || 'station-admin',
+            station_id: stationData?.id || null,
+            station_acronym: stationData?.acronym || adminCreds.station_id,
+            station_normalized_name: stationName,
+            edit_privileges: true,
+            permissions: adminCreds.permissions || ['read', 'write', 'edit', 'delete']
+          };
+        }
+      }
+    }
+
+    // Check station credentials (regular station users)
     if (credentials.stations) {
       for (const [stationName, stationCreds] of Object.entries(credentials.stations)) {
         if (stationCreds?.username === username && stationCreds?.password === password) {
@@ -145,7 +183,7 @@ export async function authenticateUser(username, password, env) {
             station_acronym: stationData?.acronym || null,
             station_normalized_name: stationName,
             edit_privileges: stationCreds.edit_privileges || false,
-            permissions: stationCreds.permissions || ["read"]
+            permissions: stationCreds.permissions || ['read']
           };
         }
       }
@@ -276,14 +314,26 @@ async function loadCredentials(env) {
     if (env.USE_CLOUDFLARE_SECRETS === 'true') {
       const credentials = {
         admin: JSON.parse(env.ADMIN_CREDENTIALS || '{}'),
+        sites_admin: null,
         stations: {},
+        station_admins: {},
         jwt_secret: env.JWT_SECRET
       };
+
+      // Load sites-admin credentials (global admin)
+      if (env.SITES_ADMIN_CREDENTIALS) {
+        try {
+          credentials.sites_admin = JSON.parse(env.SITES_ADMIN_CREDENTIALS);
+        } catch (parseError) {
+          console.warn('Failed to parse sites-admin credentials:', parseError);
+        }
+      }
 
       // Load station credentials from individual secrets
       const stationNames = ['abisko', 'asa', 'bolmen', 'erken', 'grimso', 'lonnstorp', 'robacksdalen', 'skogaryd', 'svartberget'];
 
       for (const stationName of stationNames) {
+        // Load regular station user credentials
         const secretName = `STATION_${stationName.toUpperCase()}_CREDENTIALS`;
         const stationSecret = env[secretName];
         if (stationSecret) {
@@ -291,6 +341,17 @@ async function loadCredentials(env) {
             credentials.stations[stationName] = JSON.parse(stationSecret);
           } catch (parseError) {
             console.warn(`Failed to parse credentials for ${stationName}:`, parseError);
+          }
+        }
+
+        // Load station-admin credentials
+        const adminSecretName = `STATION_${stationName.toUpperCase()}_ADMIN_CREDENTIALS`;
+        const adminSecret = env[adminSecretName];
+        if (adminSecret) {
+          try {
+            credentials.station_admins[stationName] = JSON.parse(adminSecret);
+          } catch (parseError) {
+            console.warn(`Failed to parse admin credentials for ${stationName}:`, parseError);
           }
         }
       }

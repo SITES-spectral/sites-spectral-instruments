@@ -100,16 +100,30 @@ export const useAuthStore = defineStore('auth', () => {
     // Station admin can edit their station
     if (isStationAdmin.value) {
       const stationName = userStationFromUsername.value;
-      // If passed an acronym, compare directly
+      const stationAcronym = user.value?.station_acronym;
+      const stationId = user.value?.station_id;
+
+      // If passed an acronym (string), compare with acronym or normalized name
       if (typeof stationIdOrAcronym === 'string') {
-        return stationIdOrAcronym.toLowerCase() === stationName?.toLowerCase();
+        const input = stationIdOrAcronym.toLowerCase();
+        return input === stationName?.toLowerCase() ||
+               input === stationAcronym?.toLowerCase();
       }
-      // If passed an ID, compare with userStation
-      return userStation.value === stationIdOrAcronym;
+      // If passed an ID (number), compare with station_id
+      return stationId === stationIdOrAcronym;
     }
 
     // Regular station user can edit their assigned station
-    if (isStationUser.value && userStation.value === stationIdOrAcronym) return true;
+    if (isStationUser.value) {
+      const stationId = user.value?.station_id;
+      const stationAcronym = user.value?.station_acronym;
+
+      if (typeof stationIdOrAcronym === 'string') {
+        return stationIdOrAcronym.toLowerCase() === stationAcronym?.toLowerCase();
+      }
+      return stationId === stationIdOrAcronym;
+    }
+
     return false;
   }
 
