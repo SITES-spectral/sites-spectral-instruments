@@ -15,6 +15,21 @@ import { PlatformTypeStrategy } from './PlatformTypeStrategy.js';
 
 /**
  * Known UAV vendors and their models with auto-instrument specifications
+ *
+ * DJI Mavic 3 Multispectral (M3M):
+ * - 4 x 5MP multispectral cameras (Green, Red, Red Edge, NIR)
+ * - 1 x 20MP RGB camera (1/2" CMOS, 4944×3700)
+ * - RTK/PPK support
+ *
+ * DJI Phantom 4 Multispectral (P4M):
+ * - 6 x 2MP multispectral cameras (Blue, Green, Red, Red Edge, NIR + RGB)
+ * - Integrated into single gimbal
+ * - RTK support
+ *
+ * MicaSense RedEdge-MX:
+ * - 5 bands (Blue, Green, Red, Red Edge, NIR)
+ * - Global shutter, 3.2MP per band
+ * - DLS 2 light sensor compatible
  */
 export const UAV_SPECIFICATIONS = {
   DJI: {
@@ -22,31 +37,49 @@ export const UAV_SPECIFICATIONS = {
       M3M: {
         displayName: 'Mavic 3 Multispectral',
         instruments: [
-          { type: 'Multispectral Sensor', name: 'Multispectral Camera', channels: 5 },
-          { type: 'Phenocam', name: 'RGB Camera', resolution: '20MP' }
+          {
+            type: 'Multispectral Sensor',
+            name: 'Multispectral Camera',
+            channels: 4,
+            bands: ['Green (560nm)', 'Red (650nm)', 'Red Edge (730nm)', 'NIR (860nm)'],
+            resolution: '5MP per band'
+          },
+          {
+            type: 'RGB Camera',
+            name: 'RGB Camera',
+            resolution_mp: 20,
+            sensor_size: '1/2" CMOS',
+            focal_length_mm: 24
+          }
         ]
       },
       P4M: {
         displayName: 'Phantom 4 Multispectral',
         instruments: [
-          { type: 'Multispectral Sensor', name: 'Multispectral Camera', channels: 6 }
+          {
+            type: 'Multispectral Sensor',
+            name: 'Multispectral Camera',
+            channels: 6,
+            bands: ['Blue (450nm)', 'Green (560nm)', 'Red (650nm)', 'Red Edge (730nm)', 'NIR (840nm)', 'RGB'],
+            resolution: '2MP per band'
+          }
         ]
       },
       M30T: {
         displayName: 'Matrice 30T',
         instruments: [
-          { type: 'Phenocam', name: 'Wide Camera', resolution: '12MP' },
-          { type: 'Phenocam', name: 'Zoom Camera', resolution: '48MP' },
+          { type: 'RGB Camera', name: 'Wide Camera', resolution_mp: 12 },
+          { type: 'RGB Camera', name: 'Zoom Camera', resolution_mp: 48 },
           { type: 'Thermal Camera', name: 'Thermal Camera', resolution: '640x512' }
         ]
       },
       M300: {
         displayName: 'Matrice 300 RTK',
-        instruments: [] // Payload dependent
+        instruments: [] // Payload dependent - user must add instruments manually
       },
       M350: {
         displayName: 'Matrice 350 RTK',
-        instruments: [] // Payload dependent
+        instruments: [] // Payload dependent - user must add instruments manually
       }
     }
   },
@@ -55,14 +88,26 @@ export const UAV_SPECIFICATIONS = {
       REDEDGE_MX: {
         displayName: 'RedEdge-MX',
         instruments: [
-          { type: 'Multispectral Sensor', name: 'Multispectral Camera', channels: 5 }
+          {
+            type: 'Multispectral Sensor',
+            name: 'RedEdge-MX Multispectral',
+            channels: 5,
+            bands: ['Blue (475nm)', 'Green (560nm)', 'Red (668nm)', 'Red Edge (717nm)', 'NIR (840nm)'],
+            resolution: '3.2MP per band'
+          }
         ]
       },
       ALTUM_PT: {
         displayName: 'Altum-PT',
         instruments: [
-          { type: 'Multispectral Sensor', name: 'Multispectral Camera', channels: 5 },
-          { type: 'Thermal Camera', name: 'Thermal Camera', resolution: '320x256' }
+          {
+            type: 'Multispectral Sensor',
+            name: 'Altum Multispectral',
+            channels: 5,
+            bands: ['Blue (475nm)', 'Green (560nm)', 'Red (668nm)', 'Red Edge (717nm)', 'NIR (842nm)'],
+            resolution: '3.2MP per band'
+          },
+          { type: 'Thermal Camera', name: 'Thermal Radiometer', resolution: '320x256' }
         ]
       }
     }
@@ -72,7 +117,13 @@ export const UAV_SPECIFICATIONS = {
       SEQUOIA_PLUS: {
         displayName: 'Sequoia+',
         instruments: [
-          { type: 'Multispectral Sensor', name: 'Multispectral Camera', channels: 4 }
+          {
+            type: 'Multispectral Sensor',
+            name: 'Sequoia+ Multispectral',
+            channels: 4,
+            bands: ['Green (550nm)', 'Red (660nm)', 'Red Edge (735nm)', 'NIR (790nm)'],
+            resolution: '1.2MP per band'
+          }
         ]
       }
     }
@@ -82,7 +133,13 @@ export const UAV_SPECIFICATIONS = {
       NANO_HYPERSPEC: {
         displayName: 'Nano-Hyperspec',
         instruments: [
-          { type: 'Hyperspectral Sensor', name: 'Hyperspectral Camera', bands: 270 }
+          {
+            type: 'Hyperspectral Sensor',
+            name: 'Nano-Hyperspec Imager',
+            bands: 270,
+            spectral_range: '400-1000nm',
+            spectral_resolution: '2.2nm'
+          }
         ]
       }
     }
@@ -290,17 +347,27 @@ export class UAVPlatformType extends PlatformTypeStrategy {
       const typeCode = this._getInstrumentTypeCode(inst.type);
       const number = String(index + 1).padStart(2, '0');
 
+      // Build specifications object with all available fields
+      const specifications = {
+        autoCreated: true,
+        sourceModel: `${vendor} ${modelSpec.displayName}`
+      };
+
+      // Add type-specific specifications
+      if (inst.channels) specifications.channels = inst.channels;
+      if (inst.resolution) specifications.resolution = inst.resolution;
+      if (inst.bands) specifications.bands = inst.bands;
+      if (inst.resolution_mp) specifications.resolution_mp = inst.resolution_mp;
+      if (inst.sensor_size) specifications.sensor_size = inst.sensor_size;
+      if (inst.focal_length_mm) specifications.focal_length_mm = inst.focal_length_mm;
+      if (inst.spectral_range) specifications.spectral_range = inst.spectral_range;
+      if (inst.spectral_resolution) specifications.spectral_resolution = inst.spectral_resolution;
+
       return {
         instrumentType: inst.type,
         displayName: inst.name,
         normalizedName: `${normalizedName}_${typeCode}${number}`,
-        specifications: {
-          channels: inst.channels,
-          resolution: inst.resolution,
-          bands: inst.bands,
-          autoCreated: true,
-          sourceModel: `${vendor} ${modelSpec.displayName}`
-        }
+        specifications
       };
     });
   }
@@ -317,6 +384,7 @@ export class UAVPlatformType extends PlatformTypeStrategy {
       'Multispectral Sensor': 'MS',
       'Hyperspectral Sensor': 'HYP',
       'Thermal Camera': 'TIR',
+      'RGB Camera': 'RGB',
       'LiDAR': 'LID'
     };
     return typeMap[typeName] || 'INS';

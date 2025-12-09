@@ -153,6 +153,21 @@ const DEFAULT_INSTRUMENT_TYPES = {
       polarization: { type: 'string', required: false },
       resolution_m: { type: 'number', required: false }
     }
+  },
+  rgb_camera: {
+    name: 'RGB Camera',
+    description: 'Aerial RGB camera for high-resolution visible imaging',
+    icon: 'video',
+    color: '#0ea5e9',
+    code: 'RGB',
+    category: 'imaging',
+    platforms: ['uav'],
+    fieldSchema: {
+      resolution_mp: { type: 'number', required: false },
+      sensor_size: { type: 'string', required: false },
+      focal_length_mm: { type: 'number', required: false },
+      fov_degrees: { type: 'number', required: false }
+    }
   }
 };
 

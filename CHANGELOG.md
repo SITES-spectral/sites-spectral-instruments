@@ -12,9 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [11.0.0-alpha.27] - 2025-12-09
+## [11.0.0-alpha.28] - 2025-12-09
 
-### UAV Platform Creation - Complete Fix
+### UAV Platform Creation - Complete Fix with RGB Camera Type
 
 #### Bug Fixes
 - **toLowerCase Error**: Fixed "Cannot read properties of undefined (reading 'toLowerCase')"
@@ -33,16 +33,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New migration: `0039_add_specifications_column.sql`
   - Stores auto-created instrument metadata as JSON
 
+- **Instrument Type Separation**: Added new "RGB Camera" type for UAV aerial imaging
+  - Phenocams (PHE) are for fixed installation repeat photography
+  - RGB Cameras (RGB) are for UAV aerial high-resolution imaging
+  - Updated UAV_SPECIFICATIONS to use correct instrument types
+
 #### Database Changes
 - **Migration 0039**: `ALTER TABLE instruments ADD COLUMN specifications TEXT DEFAULT '{}'`
 
-#### UAV Auto-Instrument Creation
-Successfully creates platforms with auto-created instruments:
+#### New Instrument Type
+- **RGB Camera**: Aerial RGB camera for high-resolution visible imaging
+  - Code: `RGB`
+  - Category: imaging
+  - Platforms: UAV only
+  - Fields: resolution_mp, sensor_size, focal_length_mm, fov_degrees
+
+#### UAV Auto-Instrument Creation (Updated with Accurate Specs)
 - **DJI Mavic 3 Multispectral (M3M)**:
-  - MS01: Multispectral Camera (5 channels)
-  - PHE02: RGB Camera (20MP)
+  - MS01: Multispectral Camera (4 bands: Green 560nm, Red 650nm, Red Edge 730nm, NIR 860nm, 5MP per band)
+  - RGB02: RGB Camera (20MP, 1/2" CMOS, 24mm focal length)
 - **DJI Phantom 4 Multispectral (P4M)**:
-  - MS01: Multispectral Camera (6 channels)
+  - MS01: Multispectral Camera (6 bands incl RGB, Blue 450nm, Green 560nm, Red 650nm, Red Edge 730nm, NIR 840nm)
+- **MicaSense RedEdge-MX**:
+  - MS01: RedEdge-MX Multispectral (5 bands: Blue 475nm, Green 560nm, Red 668nm, Red Edge 717nm, NIR 840nm, 3.2MP)
+- **MicaSense Altum-PT**:
+  - MS01: Altum Multispectral (5 bands, 3.2MP)
+  - TIR02: Thermal Radiometer (320x256)
 
 ---
 

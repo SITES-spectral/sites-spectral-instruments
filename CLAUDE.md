@@ -56,7 +56,7 @@ src/
 
 ---
 
-## Current Version: 11.0.0-alpha.7 - Post-Migration Validation & Testing (2025-12-08)
+## Current Version: 11.0.0-alpha.28 - UAV Platform Auto-Instrument Creation (2025-12-09)
 
 **✅ STATUS: ALPHA - V11 Hexagonal Architecture + Standard Vocabularies**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -294,14 +294,23 @@ The `mount_type_code` field describes the **physical mounting structure type** (
 
 ### Instrument Type Codes
 
-| Code | Type | Example |
-|------|------|---------|
-| PHE | Phenocam | SVB_FOR_PL01_PHE01 |
-| MS | Multispectral | SVB_FOR_PL01_MS01 |
-| PAR | PAR Sensor | SVB_MIR_PL03_PAR01 |
-| NDVI | NDVI Sensor | ANS_FOR_PL01_NDVI01 |
-| PRI | PRI Sensor | LON_AGR_PL01_PRI01 |
-| HYP | Hyperspectral | GRI_FOR_PL01_HYP01 |
+| Code | Type | Platform | Example |
+|------|------|----------|---------|
+| PHE | Phenocam | fixed | SVB_FOR_PL01_PHE01 |
+| MS | Multispectral Sensor | fixed, uav, satellite | SVB_FOR_PL01_MS01 |
+| RGB | RGB Camera | uav | ANS_DJI_M3M_UAV01_RGB02 |
+| PAR | PAR Sensor | fixed | SVB_MIR_PL03_PAR01 |
+| NDVI | NDVI Sensor | fixed | ANS_FOR_PL01_NDVI01 |
+| PRI | PRI Sensor | fixed | LON_AGR_PL01_PRI01 |
+| HYP | Hyperspectral Sensor | fixed, uav, satellite | GRI_FOR_PL01_HYP01 |
+| TIR | Thermal Camera | fixed, uav, satellite | ANS_DJI_M3M_UAV01_TIR01 |
+| LID | LiDAR | uav, satellite | SVB_DJI_M350_UAV01_LID01 |
+| SAR | Radar (SAR) | satellite | SVB_ESA_S1A_SAR01 |
+
+> **Note on Phenocam vs RGB Camera (v11.0.0-alpha.28)**:
+> - **Phenocam (PHE)**: Fixed installation digital cameras for repeat photography and phenology monitoring
+> - **RGB Camera (RGB)**: UAV-mounted aerial RGB cameras for high-resolution visible imaging
+> These are distinct instrument types with different use cases.
 
 ### Ecosystem Codes (12 Types)
 
