@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.25] - 2025-12-09
+
+### Critical Bug Fix: Variable Hoisting Error
+
+#### Bug Fix
+- **Vue Runtime Error**: Fixed "can't access lexical declaration 'i' before initialization"
+  - Root Cause: `displayStations` computed was used in `watch()` before it was defined
+  - Fix: Moved `displayStations` definition above the `watch()` call that uses it
+  - This was causing the entire app to crash on load
+
+#### Technical Details
+- JavaScript `const` variables cannot be accessed before their declaration (temporal dead zone)
+- The minified variable `i` was the internal name for `displayStations`
+- This bug was introduced in v11.0.0-alpha.20 when adding `displayStations` to the watch array
+
+---
+
 ## [11.0.0-alpha.24] - 2025-12-09
 
 ### UAV Platform Backend Validation Fix

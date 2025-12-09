@@ -51,43 +51,8 @@ const currentInstrumentId = computed(() => {
   return null;
 });
 
-// Auto-expand based on current route
-// Watch displayStations as well to handle race condition when stations load after route
-watch([currentStationAcronym, currentPlatformId, currentInstrumentId, displayStations], async () => {
-  // Auto-expand current station
-  if (currentStationAcronym.value && displayStations.value.length > 0) {
-    expandedStations.value.add(currentStationAcronym.value);
-    // Load platforms for this station if not loaded
-    const station = displayStations.value.find(s => s.acronym === currentStationAcronym.value);
-    if (station && !platformsByStation.value[station.id]) {
-      await loadPlatformsForStation(station);
-    }
-  }
-
-  // Auto-expand current platform's station and the platform itself
-  if (currentPlatformId.value && platformsStore.currentPlatform) {
-    const platform = platformsStore.currentPlatform;
-    expandedStations.value.add(platform.station_acronym);
-    expandedPlatforms.value.add(currentPlatformId.value);
-    // Load instruments for this platform if not loaded
-    if (!instrumentsByPlatform.value[currentPlatformId.value]) {
-      await loadInstrumentsForPlatform(currentPlatformId.value);
-    }
-  }
-
-  // Auto-expand instrument's platform and station
-  if (currentInstrumentId.value && instrumentsStore.currentInstrument) {
-    const instrument = instrumentsStore.currentInstrument;
-    const platformId = instrument.platform_id;
-    expandedPlatforms.value.add(platformId);
-    // Load the platform to get station info
-    if (!instrumentsByPlatform.value[platformId]) {
-      await loadInstrumentsForPlatform(platformId);
-    }
-  }
-}, { immediate: true });
-
 // Stations to display - filtered for station users
+// IMPORTANT: This must be defined BEFORE the watch() that uses it
 const displayStations = computed(() => {
   const stations = stationsStore.activeStations;
 
@@ -124,6 +89,42 @@ const displayStations = computed(() => {
   // Fallback: show all stations (shouldn't reach here normally)
   return stations;
 });
+
+// Auto-expand based on current route
+// Watch displayStations as well to handle race condition when stations load after route
+watch([currentStationAcronym, currentPlatformId, currentInstrumentId, displayStations], async () => {
+  // Auto-expand current station
+  if (currentStationAcronym.value && displayStations.value.length > 0) {
+    expandedStations.value.add(currentStationAcronym.value);
+    // Load platforms for this station if not loaded
+    const station = displayStations.value.find(s => s.acronym === currentStationAcronym.value);
+    if (station && !platformsByStation.value[station.id]) {
+      await loadPlatformsForStation(station);
+    }
+  }
+
+  // Auto-expand current platform's station and the platform itself
+  if (currentPlatformId.value && platformsStore.currentPlatform) {
+    const platform = platformsStore.currentPlatform;
+    expandedStations.value.add(platform.station_acronym);
+    expandedPlatforms.value.add(currentPlatformId.value);
+    // Load instruments for this platform if not loaded
+    if (!instrumentsByPlatform.value[currentPlatformId.value]) {
+      await loadInstrumentsForPlatform(currentPlatformId.value);
+    }
+  }
+
+  // Auto-expand instrument's platform and station
+  if (currentInstrumentId.value && instrumentsStore.currentInstrument) {
+    const instrument = instrumentsStore.currentInstrument;
+    const platformId = instrument.platform_id;
+    expandedPlatforms.value.add(platformId);
+    // Load the platform to get station info
+    if (!instrumentsByPlatform.value[platformId]) {
+      await loadInstrumentsForPlatform(platformId);
+    }
+  }
+}, { immediate: true });
 
 // Toggle station expansion
 async function toggleStation(station) {
