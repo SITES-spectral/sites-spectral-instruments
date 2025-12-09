@@ -567,6 +567,9 @@ export function validateSwedishCoordinates(latitude, longitude) {
  * @returns {string} Normalized name
  */
 export function generateNormalizedName(displayName) {
+  if (!displayName || typeof displayName !== 'string') {
+    return '';
+  }
   return displayName
     .toLowerCase()
     .replace(/\s+/g, '_')

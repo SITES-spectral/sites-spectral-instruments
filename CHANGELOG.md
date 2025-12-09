@@ -12,6 +12,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.27] - 2025-12-09
+
+### UAV Platform Creation - Complete Fix
+
+#### Bug Fixes
+- **toLowerCase Error**: Fixed "Cannot read properties of undefined (reading 'toLowerCase')"
+  - Added null checks to `InstrumentTypeRegistry.getType()`, `getTypeByCode()`, `getTypeByName()`
+  - Added null checks to `D1PlatformRepository.findByNormalizedName()`
+  - Added null checks to `D1StationRepository.findByAcronym()`
+  - Added null checks to `generateNormalizedName()` in validation.js
+
+- **Invalid Instrument Type**: Fixed "Invalid instrument type: undefined" error
+  - `InstrumentFactory.create()` now supports two signatures:
+    - `create(props)` - single object with instrumentType inside
+    - `create(instrumentType, props)` - separate type and props
+  - Fixed `getAutoCreatedInstruments()` to accept both `normalizedName` and `platformName`
+
+- **Missing Specifications Column**: Added `specifications` column to instruments table
+  - New migration: `0039_add_specifications_column.sql`
+  - Stores auto-created instrument metadata as JSON
+
+#### Database Changes
+- **Migration 0039**: `ALTER TABLE instruments ADD COLUMN specifications TEXT DEFAULT '{}'`
+
+#### UAV Auto-Instrument Creation
+Successfully creates platforms with auto-created instruments:
+- **DJI Mavic 3 Multispectral (M3M)**:
+  - MS01: Multispectral Camera (5 channels)
+  - PHE02: RGB Camera (20MP)
+- **DJI Phantom 4 Multispectral (P4M)**:
+  - MS01: Multispectral Camera (6 channels)
+
+---
+
+## [11.0.0-alpha.26] - 2025-12-09
+
+### Database Column Mapping Fix
+
+#### Bug Fix
+- **Platform Creation 400 Error**: Fixed `no such column: mount_type_code` SQLite error
+  - Root Cause: Database column is `location_code`, code used `mount_type_code`
+  - Fix: Updated D1PlatformRepository to use `location_code` in SQL queries
+  - Added `Platform.create()` static factory method (was missing)
+
+#### Technical Details
+- `D1PlatformRepository.getNextMountTypeCode()`: Changed to query `location_code`
+- `D1PlatformRepository.save()`: Changed INSERT/UPDATE to use `location_code`
+- `Platform.create()`: Added missing factory method used by CreatePlatform command
+- Domain model uses `mount_type_code` internally, repository maps to DB `location_code`
+
+---
+
 ## [11.0.0-alpha.25] - 2025-12-09
 
 ### Critical Bug Fix: Variable Hoisting Error

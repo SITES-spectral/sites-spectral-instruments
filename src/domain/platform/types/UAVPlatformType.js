@@ -273,7 +273,9 @@ export class UAVPlatformType extends PlatformTypeStrategy {
    * @returns {Object[]} Array of instrument data to create
    */
   getAutoCreatedInstruments(platformData) {
-    const { vendor, model, normalizedName } = platformData;
+    const { vendor, model } = platformData;
+    // Support both normalizedName and platformName (from CreatePlatform command)
+    const normalizedName = platformData.normalizedName || platformData.platformName;
 
     if (!vendor || !model) return [];
 

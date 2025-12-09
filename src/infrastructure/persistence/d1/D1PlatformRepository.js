@@ -46,6 +46,9 @@ export class D1PlatformRepository {
    * @returns {Promise<Platform|null>}
    */
   async findByNormalizedName(normalizedName) {
+    if (!normalizedName || typeof normalizedName !== 'string') {
+      return null;
+    }
     const result = await this.db
       .prepare(`
         SELECT p.*,
@@ -181,10 +184,11 @@ export class D1PlatformRepository {
    */
   async getNextMountTypeCode(stationId, mountTypePrefix, ecosystemCode = null) {
     // Build query to find existing codes
+    // NOTE: Database column is 'location_code', mapped to domain 'mount_type_code'
     let query = `
-      SELECT mount_type_code FROM platforms
+      SELECT location_code FROM platforms
       WHERE station_id = ?
-      AND mount_type_code LIKE ?
+      AND location_code LIKE ?
     `;
     const params = [stationId, `${mountTypePrefix}%`];
 
@@ -201,7 +205,7 @@ export class D1PlatformRepository {
     // Find highest number
     let maxNumber = 0;
     for (const row of results.results) {
-      const code = row.mount_type_code || '';
+      const code = row.location_code || '';
       const match = code.match(new RegExp(`^${mountTypePrefix}(\\d+)$`));
       if (match) {
         const num = parseInt(match[1], 10);
@@ -222,6 +226,9 @@ export class D1PlatformRepository {
     const data = platform.toJSON();
     const now = new Date().toISOString();
 
+    // NOTE: Database column is 'location_code', domain uses 'mount_type_code'
+    const locationCode = data.mount_type_code || data.location_code;
+
     if (platform.id) {
       // Update existing
       await this.db
@@ -231,7 +238,7 @@ export class D1PlatformRepository {
             description = ?,
             platform_type = ?,
             ecosystem_code = ?,
-            mount_type_code = ?,
+            location_code = ?,
             latitude = ?,
             longitude = ?,
             status = ?,
@@ -243,7 +250,7 @@ export class D1PlatformRepository {
           data.description,
           data.platform_type,
           data.ecosystem_code,
-          data.mount_type_code,
+          locationCode,
           data.latitude,
           data.longitude,
           data.status,
@@ -259,7 +266,7 @@ export class D1PlatformRepository {
         .prepare(`
           INSERT INTO platforms (
             station_id, normalized_name, display_name, description,
-            platform_type, ecosystem_code, mount_type_code,
+            platform_type, ecosystem_code, location_code,
             latitude, longitude, status,
             created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -271,7 +278,7 @@ export class D1PlatformRepository {
           data.description,
           data.platform_type,
           data.ecosystem_code,
-          data.mount_type_code,
+          locationCode,
           data.latitude,
           data.longitude,
           data.status || 'Active',

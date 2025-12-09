@@ -362,7 +362,9 @@ export class SatellitePlatformType extends PlatformTypeStrategy {
    * @returns {Object[]} Array with single instrument data
    */
   getAutoCreatedInstruments(platformData) {
-    const { agency, satellite, sensor, normalizedName } = platformData;
+    const { agency, satellite, sensor } = platformData;
+    // Support both normalizedName and platformName (from CreatePlatform command)
+    const normalizedName = platformData.normalizedName || platformData.platformName;
 
     if (!agency || !satellite || !sensor) return [];
 

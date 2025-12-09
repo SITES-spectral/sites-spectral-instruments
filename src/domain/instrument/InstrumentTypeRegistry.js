@@ -230,6 +230,7 @@ export class InstrumentTypeRegistry {
    * @returns {InstrumentTypeConfig|null}
    */
   getType(typeKey) {
+    if (!typeKey || typeof typeKey !== 'string') return null;
     return this._types.get(typeKey.toLowerCase()) || null;
   }
 
@@ -239,6 +240,7 @@ export class InstrumentTypeRegistry {
    * @returns {InstrumentTypeConfig|null}
    */
   getTypeByCode(code) {
+    if (!code || typeof code !== 'string') return null;
     const key = this._codeToKey.get(code.toUpperCase());
     return key ? this._types.get(key) : null;
   }
@@ -249,6 +251,7 @@ export class InstrumentTypeRegistry {
    * @returns {InstrumentTypeConfig|null}
    */
   getTypeByName(displayName) {
+    if (!displayName || typeof displayName !== 'string') return null;
     for (const config of this._types.values()) {
       if (config.name.toLowerCase() === displayName.toLowerCase()) {
         return config;

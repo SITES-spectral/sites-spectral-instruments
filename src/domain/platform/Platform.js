@@ -295,6 +295,15 @@ export class Platform {
   }
 
   /**
+   * Factory method to create a new Platform entity
+   * @param {PlatformProps} props - Platform properties
+   * @returns {Platform}
+   */
+  static create(props) {
+    return new Platform(props);
+  }
+
+  /**
    * Create Platform from database row
    * Supports both new (mount_type_code) and legacy (location_code) column names
    * @param {Object} row - Database row

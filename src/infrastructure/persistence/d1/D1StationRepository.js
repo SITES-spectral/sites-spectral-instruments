@@ -41,6 +41,9 @@ export class D1StationRepository {
    * @returns {Promise<Station|null>}
    */
   async findByAcronym(acronym) {
+    if (!acronym || typeof acronym !== 'string') {
+      return null;
+    }
     const result = await this.db
       .prepare('SELECT * FROM stations WHERE acronym = ?')
       .bind(acronym.toUpperCase())

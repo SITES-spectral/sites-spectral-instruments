@@ -28,21 +28,38 @@ export class InstrumentFactory {
 
   /**
    * Create a new Instrument entity
-   * @param {Object} props - Instrument properties
+   * @param {string|Object} instrumentTypeOrProps - Instrument type string or props object
+   * @param {Object} [props] - Instrument properties (if first arg is type string)
    * @returns {Instrument}
    * @throws {Error} If validation fails
    */
-  create(props) {
+  create(instrumentTypeOrProps, props) {
+    // Support both signatures:
+    // create(props) - single object with instrumentType inside
+    // create(instrumentType, props) - separate type and props
+    let instrumentType;
+    let instrumentProps;
+
+    if (typeof instrumentTypeOrProps === 'string') {
+      // Called as create(instrumentType, props)
+      instrumentType = instrumentTypeOrProps;
+      instrumentProps = { ...props, instrumentType };
+    } else {
+      // Called as create(props) with props.instrumentType
+      instrumentProps = instrumentTypeOrProps;
+      instrumentType = instrumentProps.instrumentType;
+    }
+
     // Validate instrument type
-    if (!this._registry.isValidType(props.instrumentType)) {
-      throw new Error(`Invalid instrument type: ${props.instrumentType}`);
+    if (!this._registry.isValidType(instrumentType)) {
+      throw new Error(`Invalid instrument type: ${instrumentType}`);
     }
 
     // Validate specifications if provided
-    if (props.specifications) {
+    if (instrumentProps.specifications) {
       const validation = this._registry.validateSpecifications(
-        props.instrumentType,
-        props.specifications
+        instrumentType,
+        instrumentProps.specifications
       );
       if (!validation.valid) {
         throw new Error(`Specification validation failed: ${validation.errors.join(', ')}`);
@@ -50,7 +67,7 @@ export class InstrumentFactory {
     }
 
     // Create instrument
-    const instrument = new Instrument(props);
+    const instrument = new Instrument(instrumentProps);
 
     // Run entity validation
     instrument.validate();
