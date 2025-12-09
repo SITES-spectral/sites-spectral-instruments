@@ -93,6 +93,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
+  // Initialize auth state from stored token (on page refresh)
+  // Only initialize if we have a token but no user data yet
+  if (authStore.token && !authStore.user) {
+    await authStore.initialize();
+  }
+
   // Set page title
   document.title = to.meta.title
     ? `${to.meta.title} | SITES Spectral`

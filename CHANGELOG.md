@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.21] - 2025-12-09
+
+### Auth Initialization Fix
+
+#### Critical Bug Fix: Page Refresh Authentication
+- **Issue**: Sidebar and navigation disappeared after page refresh
+- **Root Cause**: Auth store's `initialize()` was never called on page load
+  - Token was restored from localStorage
+  - But `user` data remained null (not fetched from server)
+  - `isAuthenticated` returned false because it checks `token && user`
+- **Fix**: Added auth initialization in router navigation guard
+  - Now calls `authStore.initialize()` when token exists but user is null
+  - Fetches user data from `/api/v11/auth/me` endpoint
+  - Properly restores session state on page refresh
+
+#### Technical Details
+- Modified `router/index.js` navigation guard
+- Initialization runs before route authentication check
+- Only runs once per session (when user is null)
+
+---
+
 ## [11.0.0-alpha.20] - 2025-12-09
 
 ### Station Admin Visibility Fix
