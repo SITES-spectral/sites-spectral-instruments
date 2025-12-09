@@ -105,11 +105,10 @@ export const PLATFORM_TYPE_STRATEGIES = {
       },
       mount_type_code: {
         label: 'Position ID',
-        type: 'text',
-        required: true,
-        pattern: '^UAV\\d{2}$',
-        placeholder: 'UAV01',
-        helpText: 'UAV position identifier (e.g., UAV01)'
+        type: 'hidden',
+        required: false,
+        defaultValue: 'UAV',
+        helpText: 'Auto-generated UAV position identifier'
       }
     },
 
@@ -175,7 +174,7 @@ export const PLATFORM_TYPE_STRATEGIES = {
       mount_type_code: {
         label: 'Virtual Position',
         type: 'hidden',
-        required: true,
+        required: false,
         defaultValue: 'SAT',
         helpText: 'Automatically set to SAT'
       }
