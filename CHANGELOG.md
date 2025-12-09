@@ -12,6 +12,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.18] - 2025-12-09
+
+### Mount-Type Specific Platform Icons
+
+#### Dashboard Quick Access Cards
+- **Mount-Type Driven Icons**: Fixed platform cards now show mount-type specific icons
+  - PL (Tower/Mast): Tower with observation platform and cabin
+  - BL (Building): Multi-story building with rooftop sensor
+  - GL (Ground Level): Low-profile installation with sensor array
+- **Color-Coded Cards**: Background and icon colors match mount type
+  - PL: Blue (info)
+  - BL: Purple (secondary)
+  - GL: Green (success)
+  - UAV: Yellow (warning)
+  - Satellite: Accent
+- **Helper Functions**: New `getPlatformDisplayIcon()`, `getPlatformBgClass()`, `getPlatformTextClass()` for consistent platform rendering
+
+#### Station View Platform Type Tabs
+- **Improved Tab Icons**: Better SVG paths for platform type tabs
+  - Fixed: Tower with observation platform
+  - UAV: Drone with propeller arms (radial pattern)
+  - Satellite: Orbital satellite with angular solar panels
+
+#### Station Map Platform Markers
+- **Existing Implementation**: Map already uses mount-type specific colored triangle markers
+  - Tower (PL): Orange triangles
+  - Building (BL): Teal triangles
+  - Ground (GL): Green triangles
+
+---
+
 ## [11.0.0-alpha.17] - 2025-12-09
 
 ### Sidebar Reference Guide

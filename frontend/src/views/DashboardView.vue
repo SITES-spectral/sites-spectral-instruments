@@ -185,12 +185,12 @@ watch(userStation, async (station) => {
 // Platform type icons - matching useTypes.js definitions
 function getPlatformIcon(type) {
   const icons = {
-    // Fixed: Observation tower/mast structure
+    // Fixed: Generic tower (used as fallback)
     fixed: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4',
-    // UAV: Drone/quadcopter
-    uav: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM12 12m-3 0a3 3 0 106 0 3 3 0 00-6 0',
-    // Satellite: Orbital satellite
-    satellite: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+    // UAV: Drone with propellers
+    uav: 'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83',
+    // Satellite: Orbital satellite with panels
+    satellite: 'M13 7L9 3 5 7l4 4M17 11l4 4-4 4-4-4M8 12l4 4 4-4-4-4-4 4zM16 8l3-3M5 16l3 3',
     // Mobile: Truck
     mobile: 'M8 17h.01M14 17h.01M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zM5 17H3v-4a1 1 0 011-1h1V9a1 1 0 011-1h8a1 1 0 011 1v3h2a1 1 0 011 1v4h-2',
     // USV: Ship/boat
@@ -199,6 +199,57 @@ function getPlatformIcon(type) {
     uuv: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
   };
   return icons[type] || icons.fixed;
+}
+
+// Get the best icon for a platform - mount-type specific for fixed platforms
+function getPlatformDisplayIcon(platform) {
+  // For fixed platforms, use mount-type specific icons
+  if (platform.platform_type === 'fixed' && platform.mount_type_code) {
+    const mountIcon = getMountTypeIcon(platform.mount_type_code);
+    if (mountIcon) return mountIcon;
+  }
+  // For non-fixed platforms or no mount type, use platform type icon
+  return getPlatformIcon(platform.platform_type);
+}
+
+// Get background color class for platform card
+function getPlatformBgClass(platform) {
+  if (platform.platform_type === 'fixed' && platform.mount_type_code) {
+    const prefix = platform.mount_type_code.match(/^([A-Z]+)/)?.[1];
+    const classes = {
+      PL: 'bg-info/10',      // Tower - blue
+      BL: 'bg-secondary/10', // Building - purple
+      GL: 'bg-success/10'    // Ground - green
+    };
+    return classes[prefix] || 'bg-primary/10';
+  }
+  // Non-fixed platform types
+  const typeClasses = {
+    uav: 'bg-warning/10',
+    satellite: 'bg-accent/10',
+    mobile: 'bg-neutral/10'
+  };
+  return typeClasses[platform.platform_type] || 'bg-primary/10';
+}
+
+// Get text color class for platform card icon
+function getPlatformTextClass(platform) {
+  if (platform.platform_type === 'fixed' && platform.mount_type_code) {
+    const prefix = platform.mount_type_code.match(/^([A-Z]+)/)?.[1];
+    const classes = {
+      PL: 'text-info',      // Tower - blue
+      BL: 'text-secondary', // Building - purple
+      GL: 'text-success'    // Ground - green
+    };
+    return classes[prefix] || 'text-primary';
+  }
+  // Non-fixed platform types
+  const typeClasses = {
+    uav: 'text-warning',
+    satellite: 'text-accent',
+    mobile: 'text-neutral'
+  };
+  return typeClasses[platform.platform_type] || 'text-primary';
 }
 
 // Mount type icons - PL (pole/tower), BL (building), GL (ground level)
@@ -430,26 +481,21 @@ const stats = computed(() => {
         >
           <div class="card-body p-4">
             <div class="flex items-start gap-3">
-              <!-- Platform type + Mount type icons -->
-              <div class="flex flex-col items-center gap-1">
-                <!-- Platform type icon -->
-                <div class="p-2 rounded-lg bg-primary/10">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getPlatformIcon(platform.platform_type)" />
-                  </svg>
-                </div>
-                <!-- Mount type icon (PL/BL/GL) -->
+              <!-- Platform icon - mount-type specific for fixed platforms -->
+              <div
+                class="p-2.5 rounded-lg"
+                :class="getPlatformBgClass(platform)"
+                :title="platform.mount_type_code || platform.platform_type"
+              >
                 <svg
-                  v-if="getMountTypeIcon(platform.mount_type_code)"
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  :class="getMountTypeColor(platform.mount_type_code)"
+                  class="h-6 w-6"
+                  :class="getPlatformTextClass(platform)"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  :title="platform.mount_type_code"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getMountTypeIcon(platform.mount_type_code)" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getPlatformDisplayIcon(platform)" />
                 </svg>
               </div>
 

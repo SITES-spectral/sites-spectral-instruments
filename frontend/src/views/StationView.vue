@@ -60,7 +60,8 @@ const platformTypes = {
   fixed: {
     key: 'fixed',
     name: 'Fixed Platforms',
-    icon: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4',
+    // Tower/mast icon - represents towers, buildings, ground installations
+    icon: 'M12 2v20M8 22h8M8 4l4 8 4-8M6 12h12M9 12v4h6v-4',
     bgClass: 'bg-info/10',
     textClass: 'text-info',
     borderClass: 'border-info'
@@ -68,7 +69,8 @@ const platformTypes = {
   uav: {
     key: 'uav',
     name: 'UAV Platforms',
-    icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
+    // Drone with propellers (radial pattern)
+    icon: 'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83',
     bgClass: 'bg-warning/10',
     textClass: 'text-warning',
     borderClass: 'border-warning'
@@ -76,7 +78,8 @@ const platformTypes = {
   satellite: {
     key: 'satellite',
     name: 'Satellite Platforms',
-    icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+    // Orbital satellite with angular solar panels
+    icon: 'M13 7L9 3 5 7l4 4M17 11l4 4-4 4-4-4M8 12l4 4 4-4-4-4-4 4zM16 8l3-3M5 16l3 3',
     bgClass: 'bg-accent/10',
     textClass: 'text-accent',
     borderClass: 'border-accent'
