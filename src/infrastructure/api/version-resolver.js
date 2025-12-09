@@ -8,7 +8,7 @@
  * - Header-based version selection: X-API-Version
  *
  * @module infrastructure/api/version-resolver
- * @version 11.0.0-alpha.32
+ * @version 11.0.0-alpha.33
  */
 
 /**
@@ -19,7 +19,7 @@
 const VERSION_CONFIG = {
   current: {
     version: 'v11',
-    versionNumber: '11.0.0-alpha.32'
+    versionNumber: '11.0.0-alpha.33'
   },
   aliases: {
     latest: 'v11',

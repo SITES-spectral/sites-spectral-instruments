@@ -1,5 +1,5 @@
-// SITES Spectral Stations & Instruments - Main Worker v10.0.0
-// Hexagonal Architecture with Cloudflare Workers
+// SITES Spectral Stations & Instruments - Main Worker v11.0.0
+// Hexagonal Architecture with Cloudflare Workers + API Version Aliases
 // Handles both static assets and API routes
 
 import { createCors } from './cors';

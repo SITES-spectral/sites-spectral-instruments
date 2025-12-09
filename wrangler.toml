@@ -10,12 +10,12 @@ account_id = "e5f93ed83288202d33cf9c7b18068f64"
 # Enable auto-deployment from GitHub when commits are pushed to main branch
 
 # Project metadata
-# Version: 10.0.0-alpha.17
-# Release: 2025-12-07
-# Database Schema: v12 (36 migrations) - ROI Legacy System
+# Version: 11.0.0-alpha.33
+# Release: 2025-12-09
+# Database Schema: v12 (36 migrations) - ROI Legacy System + Hexagonal Architecture
 
 # Static Assets Configuration
-# v10.0.0: Vue 3 + Vite frontend (previously: static HTML in public/)
+# v11.0.0: Hexagonal Architecture + API Version Aliases
 [assets]
 directory = "public-v10"
 binding = "ASSETS"
@@ -33,7 +33,7 @@ binding = "DOCS_BUCKET"
 [vars]
 ENVIRONMENT = "production"
 APP_NAME = "SITES Spectral Stations & Instruments"
-APP_VERSION = "10.0.0-alpha.17"
+APP_VERSION = "11.0.0-alpha.33"
 USE_CLOUDFLARE_SECRETS = "true"
 
 # Custom domain routing

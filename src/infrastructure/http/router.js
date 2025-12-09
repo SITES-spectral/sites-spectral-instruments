@@ -57,7 +57,7 @@ export function createRouter(env) {
      * Handle API request using new architecture
      *
      * @param {Request} request - HTTP request
-     * @param {string[]} pathSegments - URL path segments (after /api/v10/)
+     * @param {string[]} pathSegments - URL path segments (after /api/v11/ or /api/latest/)
      * @param {URL} url - Parsed URL
      * @returns {Promise<Response>}
      */
@@ -312,96 +312,96 @@ function handleInfo() {
     },
     endpoints: {
       stations: {
-        list: 'GET /api/v10/stations',
-        get: 'GET /api/v10/stations/:id',
-        dashboard: 'GET /api/v10/stations/:acronym/dashboard',
-        create: 'POST /api/v10/stations',
-        update: 'PUT /api/v10/stations/:id',
-        delete: 'DELETE /api/v10/stations/:id'
+        list: 'GET /api/v11/stations',
+        get: 'GET /api/v11/stations/:id',
+        dashboard: 'GET /api/v11/stations/:acronym/dashboard',
+        create: 'POST /api/v11/stations',
+        update: 'PUT /api/v11/stations/:id',
+        delete: 'DELETE /api/v11/stations/:id'
       },
       platforms: {
-        list: 'GET /api/v10/platforms',
-        get: 'GET /api/v10/platforms/:id',
-        byStation: 'GET /api/v10/platforms/station/:stationId',
-        byType: 'GET /api/v10/platforms/type/:type',
-        create: 'POST /api/v10/platforms',
-        update: 'PUT /api/v10/platforms/:id',
-        delete: 'DELETE /api/v10/platforms/:id'
+        list: 'GET /api/v11/platforms',
+        get: 'GET /api/v11/platforms/:id',
+        byStation: 'GET /api/v11/platforms/station/:stationId',
+        byType: 'GET /api/v11/platforms/type/:type',
+        create: 'POST /api/v11/platforms',
+        update: 'PUT /api/v11/platforms/:id',
+        delete: 'DELETE /api/v11/platforms/:id'
       },
       instruments: {
-        list: 'GET /api/v10/instruments',
-        get: 'GET /api/v10/instruments/:id',
-        details: 'GET /api/v10/instruments/:id/details',
-        byPlatform: 'GET /api/v10/instruments/platform/:platformId',
-        byStation: 'GET /api/v10/instruments/station/:stationId',
-        create: 'POST /api/v10/instruments',
-        update: 'PUT /api/v10/instruments/:id',
-        delete: 'DELETE /api/v10/instruments/:id'
+        list: 'GET /api/v11/instruments',
+        get: 'GET /api/v11/instruments/:id',
+        details: 'GET /api/v11/instruments/:id/details',
+        byPlatform: 'GET /api/v11/instruments/platform/:platformId',
+        byStation: 'GET /api/v11/instruments/station/:stationId',
+        create: 'POST /api/v11/instruments',
+        update: 'PUT /api/v11/instruments/:id',
+        delete: 'DELETE /api/v11/instruments/:id'
       },
       aois: {
-        list: 'GET /api/v10/aois',
-        get: 'GET /api/v10/aois/:id',
-        byStation: 'GET /api/v10/aois/station/:stationId',
-        exportGeoJSON: 'GET /api/v10/aois/export/geojson',
-        create: 'POST /api/v10/aois',
-        importGeoJSON: 'POST /api/v10/aois/import/geojson',
-        importKML: 'POST /api/v10/aois/import/kml',
-        update: 'PUT /api/v10/aois/:id',
-        delete: 'DELETE /api/v10/aois/:id'
+        list: 'GET /api/v11/aois',
+        get: 'GET /api/v11/aois/:id',
+        byStation: 'GET /api/v11/aois/station/:stationId',
+        exportGeoJSON: 'GET /api/v11/aois/export/geojson',
+        create: 'POST /api/v11/aois',
+        importGeoJSON: 'POST /api/v11/aois/import/geojson',
+        importKML: 'POST /api/v11/aois/import/kml',
+        update: 'PUT /api/v11/aois/:id',
+        delete: 'DELETE /api/v11/aois/:id'
       },
       campaigns: {
-        list: 'GET /api/v10/campaigns',
-        get: 'GET /api/v10/campaigns/:id',
-        byStation: 'GET /api/v10/campaigns/station/:stationId',
-        active: 'GET /api/v10/campaigns/active',
-        create: 'POST /api/v10/campaigns',
-        start: 'POST /api/v10/campaigns/:id/start',
-        complete: 'POST /api/v10/campaigns/:id/complete',
-        update: 'PUT /api/v10/campaigns/:id',
-        delete: 'DELETE /api/v10/campaigns/:id'
+        list: 'GET /api/v11/campaigns',
+        get: 'GET /api/v11/campaigns/:id',
+        byStation: 'GET /api/v11/campaigns/station/:stationId',
+        active: 'GET /api/v11/campaigns/active',
+        create: 'POST /api/v11/campaigns',
+        start: 'POST /api/v11/campaigns/:id/start',
+        complete: 'POST /api/v11/campaigns/:id/complete',
+        update: 'PUT /api/v11/campaigns/:id',
+        delete: 'DELETE /api/v11/campaigns/:id'
       },
       products: {
-        list: 'GET /api/v10/products',
-        get: 'GET /api/v10/products/:id',
-        byDOI: 'GET /api/v10/products/doi/:doi',
-        byInstrument: 'GET /api/v10/products/instrument/:instrumentId',
-        byCampaign: 'GET /api/v10/products/campaign/:campaignId',
-        byProcessingLevel: 'GET /api/v10/products/processing-level/:level',
-        create: 'POST /api/v10/products',
-        setQualityScore: 'POST /api/v10/products/:id/quality-score',
-        promoteQuality: 'POST /api/v10/products/:id/promote-quality',
-        update: 'PUT /api/v10/products/:id',
-        delete: 'DELETE /api/v10/products/:id'
+        list: 'GET /api/v11/products',
+        get: 'GET /api/v11/products/:id',
+        byDOI: 'GET /api/v11/products/doi/:doi',
+        byInstrument: 'GET /api/v11/products/instrument/:instrumentId',
+        byCampaign: 'GET /api/v11/products/campaign/:campaignId',
+        byProcessingLevel: 'GET /api/v11/products/processing-level/:level',
+        create: 'POST /api/v11/products',
+        setQualityScore: 'POST /api/v11/products/:id/quality-score',
+        promoteQuality: 'POST /api/v11/products/:id/promote-quality',
+        update: 'PUT /api/v11/products/:id',
+        delete: 'DELETE /api/v11/products/:id'
       },
       admin: {
-        activityLogs: 'GET /api/v10/admin/activity-logs',
-        userSessions: 'GET /api/v10/admin/user-sessions',
-        stationStats: 'GET /api/v10/admin/station-stats',
-        health: 'GET /api/v10/admin/health',
-        summary: 'GET /api/v10/admin/summary'
+        activityLogs: 'GET /api/v11/admin/activity-logs',
+        userSessions: 'GET /api/v11/admin/user-sessions',
+        stationStats: 'GET /api/v11/admin/station-stats',
+        health: 'GET /api/v11/admin/health',
+        summary: 'GET /api/v11/admin/summary'
       },
       maintenance: {
-        list: 'GET /api/v10/maintenance',
-        get: 'GET /api/v10/maintenance/:id',
-        timeline: 'GET /api/v10/maintenance/timeline?entity_type=platform&entity_id=:id',
-        pending: 'GET /api/v10/maintenance/pending',
-        overdue: 'GET /api/v10/maintenance/overdue',
-        create: 'POST /api/v10/maintenance',
-        complete: 'POST /api/v10/maintenance/:id/complete',
-        update: 'PUT /api/v10/maintenance/:id',
-        delete: 'DELETE /api/v10/maintenance/:id'
+        list: 'GET /api/v11/maintenance',
+        get: 'GET /api/v11/maintenance/:id',
+        timeline: 'GET /api/v11/maintenance/timeline?entity_type=platform&entity_id=:id',
+        pending: 'GET /api/v11/maintenance/pending',
+        overdue: 'GET /api/v11/maintenance/overdue',
+        create: 'POST /api/v11/maintenance',
+        complete: 'POST /api/v11/maintenance/:id/complete',
+        update: 'PUT /api/v11/maintenance/:id',
+        delete: 'DELETE /api/v11/maintenance/:id'
       },
       calibrations: {
-        list: 'GET /api/v10/calibrations',
-        get: 'GET /api/v10/calibrations/:id',
-        current: 'GET /api/v10/calibrations/current?instrument_id=:id',
-        timeline: 'GET /api/v10/calibrations/timeline?instrument_id=:id',
-        expired: 'GET /api/v10/calibrations/expired',
-        expiring: 'GET /api/v10/calibrations/expiring?days=30',
-        create: 'POST /api/v10/calibrations (multispectral/hyperspectral only)',
-        expire: 'POST /api/v10/calibrations/:id/expire',
-        update: 'PUT /api/v10/calibrations/:id',
-        delete: 'DELETE /api/v10/calibrations/:id'
+        list: 'GET /api/v11/calibrations',
+        get: 'GET /api/v11/calibrations/:id',
+        current: 'GET /api/v11/calibrations/current?instrument_id=:id',
+        timeline: 'GET /api/v11/calibrations/timeline?instrument_id=:id',
+        expired: 'GET /api/v11/calibrations/expired',
+        expiring: 'GET /api/v11/calibrations/expiring?days=30',
+        create: 'POST /api/v11/calibrations (multispectral/hyperspectral only)',
+        expire: 'POST /api/v11/calibrations/:id/expire',
+        update: 'PUT /api/v11/calibrations/:id',
+        delete: 'DELETE /api/v11/calibrations/:id'
       }
     },
     mountTypeCodes: {

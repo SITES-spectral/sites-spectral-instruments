@@ -1,6 +1,6 @@
 # =============================================================================
 # API Versions Configuration
-# SITES Spectral v11.0.0-alpha.32
+# SITES Spectral v11.0.0-alpha.33
 # =============================================================================
 # Single source of truth for API versioning, aliases, and migration paths.
 # All frontend and backend components should reference this configuration.
@@ -20,7 +20,7 @@ _meta:
 
 current:
   version: "v11"
-  version_number: "11.0.0-alpha.32"
+  version_number: "11.0.0-alpha.33"
   description: "Hexagonal Architecture + Standard Vocabularies (Darwin Core, ICOS, Copernicus)"
   release_date: "2025-12-09"
   status: "alpha"

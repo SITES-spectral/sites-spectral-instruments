@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.33] - 2025-12-09
+
+### Version Consistency Fix
+
+#### Hardcoded Version Cleanup
+- **wrangler.toml**: Updated APP_VERSION from `10.0.0-alpha.17` to `11.0.0-alpha.33`
+- **src/worker.js**: Updated version comment from v10.0.0 to v11.0.0
+- **src/infrastructure/http/router.js**: Updated API documentation endpoints from `/api/v10/*` to `/api/v11/*`
+- **src/infrastructure/api/version-resolver.js**: Updated versionNumber to `11.0.0-alpha.33`
+- **tests/setup.js**: Updated APP_VERSION from `8.0.0-rc.2` to `11.0.0-alpha.33`
+- **tests/utils/test-helpers.js**: Updated APP_VERSION from `8.0.0-rc.1` to `11.0.0-alpha.33`
+- **public/js/core/api-config.js**: Updated version comment to `11.0.0-alpha.33`
+
+#### Why This Matters
+Consistent version numbers across all files ensures:
+- Accurate debugging and error tracking
+- Correct version reporting in API responses
+- Test environment alignment with production
+- Clear audit trail for deployments
+
+---
+
 ## [11.0.0-alpha.32] - 2025-12-09
 
 ### API Version Aliases & Maintenance/Calibration Timelines

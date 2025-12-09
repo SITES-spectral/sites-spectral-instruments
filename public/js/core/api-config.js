@@ -1,6 +1,6 @@
 /**
  * API Configuration Service
- * SITES Spectral v11.0.0-alpha.32
+ * SITES Spectral v11.0.0-alpha.33
  *
  * Single source of truth for API endpoints in the frontend.
  * Uses semantic aliases (/api/latest) for production to avoid

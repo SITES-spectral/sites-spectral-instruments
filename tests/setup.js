@@ -377,7 +377,7 @@ const mockEnv = {
   DB: new MockD1Database(),
   ENVIRONMENT: 'test',
   APP_NAME: 'SITES Spectral Test',
-  APP_VERSION: '8.0.0-rc.2',
+  APP_VERSION: '11.0.0-alpha.33',
   JWT_SECRET: 'test-jwt-secret-key-for-testing-only',
   USE_CLOUDFLARE_SECRETS: 'false',
 };
