@@ -60,7 +60,7 @@ src/
 
 ---
 
-## Current Version: 11.0.0-alpha.30 - Domain-Driven Authorization (2025-12-09)
+## Current Version: 11.0.0-alpha.31 - Station Users Read-Only (2025-12-09)
 
 **✅ STATUS: ALPHA - V11 Hexagonal Architecture + Standard Vocabularies**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -70,12 +70,12 @@ src/
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256, Domain Authorization
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
 
-### What's New in v11.0.0-alpha.30
+### What's New in v11.0.0-alpha.31
 
-- **Domain-Driven Authorization**: Hexagonal Architecture authorization system
-- **Station-Specific Admin Permissions**: `svb-admin` can only edit SVB station data
-- **Global Admin Access**: Only `admin` and `sites-admin` have full global access
-- **53 Authorization Tests**: Comprehensive test coverage for permission scenarios
+- **Station Users Read-Only**: Regular station users (e.g., `svartberget`) can only view data
+- **Station Admins CRUD**: Only `*-admin` users can create/update/delete at their station
+- **Global Admins Full Access**: `admin` and `sites-admin` can delete stations
+- **57 Authorization Tests**: Comprehensive test coverage for all permission scenarios
 
 ### What's New in v11.0.0-alpha.6
 
@@ -714,7 +714,7 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 11.0.0-alpha.30 |
+| Current Version | 11.0.0-alpha.31 |
 | Last Deployed | 2025-12-09 |
 | Status | Alpha - V11 Hexagonal Architecture + Standard Vocabularies |
 | Environment | Cloudflare Workers + D1 Database |
@@ -725,9 +725,10 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 
 | Feature | Version | Status |
 |---------|---------|--------|
+| Station Users Read-Only | v11.0.0-alpha.31 | ✅ Active |
 | Domain Authorization | v11.0.0-alpha.30 | ✅ Active |
 | Station-Specific Admin | v11.0.0-alpha.30 | ✅ Active |
-| Authorization Tests | v11.0.0-alpha.30 | ✅ 53 tests pass |
+| Authorization Tests | v11.0.0-alpha.31 | ✅ 57 tests pass |
 | Post-Migration Testing | v11.0.0-alpha.7 | ✅ 185/186 tests pass |
 | V11 Integration Tests | v11.0.0-alpha.7 | ✅ Active |
 | Legacy Docs Archived | v11.0.0-alpha.7 | ✅ docs/legacy/v1-v10 |

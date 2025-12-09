@@ -12,6 +12,12 @@ import { User } from './User.js';
 
 /**
  * Permission matrix defining allowed actions per resource per role type
+ *
+ * Roles:
+ * - globalAdmin: Full CRUD on everything including deleting stations
+ * - stationAdmin: CRUD on their station's resources (no station delete)
+ * - stationUser: READ-ONLY access to their station
+ * - readonly: READ-ONLY access to all stations
  */
 const PERMISSION_MATRIX = {
   globalAdmin: {
@@ -27,25 +33,29 @@ const PERMISSION_MATRIX = {
     export: ['read']
   },
   stationAdmin: {
-    stations: ['read'],  // Can only read station info, not modify
+    // Station admins can READ station info but NOT modify or delete stations
+    stations: ['read'],
+    // Full CRUD on their station's platforms, instruments, ROIs, etc.
     platforms: ['read', 'write', 'delete'],
     instruments: ['read', 'write', 'delete'],
     rois: ['read', 'write', 'delete'],
     aois: ['read', 'write', 'delete'],
     campaigns: ['read', 'write', 'delete'],
     products: ['read', 'write', 'delete'],
-    users: [],  // No user management
-    admin: [],  // No admin panel access
+    // No user management or admin panel access
+    users: [],
+    admin: [],
     export: ['read']
   },
+  // Regular station users (e.g., 'svartberget') are READ-ONLY
   stationUser: {
     stations: ['read'],
-    platforms: ['read', 'write'],
-    instruments: ['read', 'write'],
-    rois: ['read', 'write'],
-    aois: ['read', 'write'],
-    campaigns: ['read', 'write'],
-    products: ['read', 'write'],
+    platforms: ['read'],
+    instruments: ['read'],
+    rois: ['read'],
+    aois: ['read'],
+    campaigns: ['read'],
+    products: ['read'],
     users: [],
     admin: [],
     export: ['read']

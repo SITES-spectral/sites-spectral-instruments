@@ -12,6 +12,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.31] - 2025-12-09
+
+### Station Users are Read-Only
+
+#### Permission Model Fix
+- **Station Users** (e.g., `svartberget`, `lonnstorp`): Now **READ-ONLY** access
+  - Cannot create, update, or delete any resources
+  - Can only view their station's data
+- **Station Admins** (e.g., `svartberget-admin`, `svb-admin`): Full **CRUD** on their station
+  - Can create, update, delete platforms, instruments, ROIs, AOIs
+  - Cannot delete or modify station records
+- **Global Admins** (`admin`, `sites-admin`): Full **CRUD** including station deletion
+
+#### Updated Permission Matrix
+
+| Username | Role | Stations | Platforms | Instruments | ROIs/AOIs | Users | Admin |
+|----------|------|----------|-----------|-------------|-----------|-------|-------|
+| `admin` | Global Admin | CRUD | CRUD | CRUD | CRUD | CRUD | ✅ |
+| `sites-admin` | Global Admin | CRUD | CRUD | CRUD | CRUD | CRUD | ✅ |
+| `svb-admin` | Station Admin | Read | CRUD (SVB) | CRUD (SVB) | CRUD (SVB) | ❌ | ❌ |
+| `svartberget` | Station User | Read | **Read** | **Read** | **Read** | ❌ | ❌ |
+| `readonly` | Readonly | Read | Read | Read | Read | ❌ | ❌ |
+
+#### Test Updates
+- 57 authorization tests (up from 53)
+- Added tests for station user read-only enforcement
+
+---
+
 ## [11.0.0-alpha.30] - 2025-12-09
 
 ### Domain-Driven Authorization System
@@ -19,9 +48,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Security Enhancement
 - **Station-Specific Admin Permissions**: Enforced strict station-scoped access for admin users
   - Global admins (`admin`, `sites-admin` usernames): Full access to ALL stations
-  - Station admins (`svb-admin`, `ans-admin`, etc.): Access ONLY to their assigned station
-  - Station users: Edit access to their station only (no delete)
-  - Readonly users: View access to all stations
+  - Station admins (`svb-admin`, `ans-admin`, etc.): CRUD on their assigned station only
+  - Station users: Read-only access to their station
+  - Readonly users: Read-only access to all stations
 
 #### New Domain Layer
 - **Authorization Domain** (`src/domain/authorization/`)
@@ -30,22 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `AuthorizationService.js`: Domain service for authorization decisions
   - Follows SOLID principles and Hexagonal Architecture
 
-#### Permission Matrix (Updated)
-
-| Username | Role | Stations | Platforms | Instruments | Users | Admin Panel |
-|----------|------|----------|-----------|-------------|-------|-------------|
-| `admin` | Global Admin | CRUD | CRUD | CRUD | CRUD | Access |
-| `sites-admin` | Global Admin | CRUD | CRUD | CRUD | CRUD | Access |
-| `svb-admin` | Station Admin | Read | CRUD (SVB) | CRUD (SVB) | ❌ | ❌ |
-| `svartberget` | Station User | Read | Read/Write | Read/Write | ❌ | ❌ |
-| `viewer` | Readonly | Read | Read | Read | ❌ | ❌ |
-
 #### Files Added
 - `src/domain/authorization/Role.js` - Role value object
 - `src/domain/authorization/User.js` - User entity
 - `src/domain/authorization/AuthorizationService.js` - Authorization service
 - `src/domain/authorization/index.js` - Module exports
-- `tests/domain/authorization.test.js` - 53 comprehensive tests
+- `tests/domain/authorization.test.js` - Comprehensive tests
 
 #### Files Modified
 - `src/auth/permissions.js` - Refactored to use domain authorization

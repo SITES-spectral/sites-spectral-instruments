@@ -127,6 +127,8 @@ export class User {
 
   /**
    * Check if user can edit resources at a specific station
+   * Only global admins and station admins can edit (not regular station users)
+   *
    * @param {string|number} stationId - Station identifier
    * @returns {boolean}
    */
@@ -136,13 +138,13 @@ export class User {
       return true;
     }
 
-    // Read-only users cannot edit
-    if (this.isReadOnly()) {
-      return false;
+    // Station admins can edit only their own station
+    if (this.isStationAdmin() && this.hasAccessToStation(stationId)) {
+      return true;
     }
 
-    // Station admins and users can only edit their own station
-    return this.hasAccessToStation(stationId);
+    // Regular station users and read-only users cannot edit
+    return false;
   }
 
   /**

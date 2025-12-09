@@ -268,6 +268,18 @@ describe('Authorization Domain', () => {
         expect(svbAdmin.canEditStation('lonnstorp')).toBe(false);
       });
 
+      it('should NOT allow regular station user to edit (read-only)', () => {
+        const stationUser = new User({
+          username: 'svartberget',
+          role: 'station',
+          stationId: 1,
+          stationAcronym: 'SVB',
+          stationNormalizedName: 'svartberget'
+        });
+        expect(stationUser.canEditStation('svartberget')).toBe(false);
+        expect(stationUser.canEditStation('lonnstorp')).toBe(false);
+      });
+
       it('should NOT allow readonly user to edit', () => {
         const readonly = new User({ username: 'viewer', role: 'readonly' });
         expect(readonly.canEditStation('svartberget')).toBe(false);
@@ -386,7 +398,7 @@ describe('Authorization Domain', () => {
         });
       });
 
-      describe('Station User', () => {
+      describe('Station User (Read-Only)', () => {
         const stationUser = new User({
           username: 'svartberget',
           role: 'station',
@@ -395,13 +407,28 @@ describe('Authorization Domain', () => {
           stationNormalizedName: 'svartberget'
         });
 
-        it('should allow station user to write instruments at own station', () => {
-          const result = service.authorize(stationUser, 'instruments', 'write', { stationId: 1 });
+        it('should allow station user to read instruments', () => {
+          const result = service.authorize(stationUser, 'instruments', 'read', { stationId: 1 });
           expect(result.allowed).toBe(true);
+        });
+
+        it('should DENY station user from writing instruments', () => {
+          const result = service.authorize(stationUser, 'instruments', 'write', { stationId: 1 });
+          expect(result.allowed).toBe(false);
         });
 
         it('should DENY station user from deleting instruments', () => {
           const result = service.authorize(stationUser, 'instruments', 'delete', { stationId: 1 });
+          expect(result.allowed).toBe(false);
+        });
+
+        it('should DENY station user from writing platforms', () => {
+          const result = service.authorize(stationUser, 'platforms', 'write', { stationId: 1 });
+          expect(result.allowed).toBe(false);
+        });
+
+        it('should DENY station user from writing ROIs', () => {
+          const result = service.authorize(stationUser, 'rois', 'write', { stationId: 1 });
           expect(result.allowed).toBe(false);
         });
       });
