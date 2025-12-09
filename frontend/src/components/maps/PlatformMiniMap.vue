@@ -2,17 +2,18 @@
 /**
  * Platform Mini Map Component
  *
- * Compact Leaflet map focused on a single platform's location.
- * Designed to be embedded in platform cards.
+ * Compact Leaflet map showing a platform in context with other station platforms.
+ * The selected platform is highlighted while siblings are shown in muted colors.
  *
  * SOLID Compliance:
- * - Single Responsibility: Only displays platform location
- * - Dependency Inversion: Takes platform object, doesn't fetch data
+ * - Single Responsibility: Displays platform location with station context
+ * - Dependency Inversion: Takes platform object, fetches siblings via API
  * - Interface Segregation: Minimal props, focused interface
  *
  * @module components/maps/PlatformMiniMap
  */
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { api } from '@services/api';
 
 const props = defineProps({
   platform: {
@@ -34,6 +35,10 @@ const props = defineProps({
   showPopup: {
     type: Boolean,
     default: false
+  },
+  showSiblings: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -41,6 +46,7 @@ const props = defineProps({
 const mapContainer = ref(null);
 const isLoading = ref(true);
 const error = ref(null);
+const siblingPlatforms = ref([]);
 let mapInstance = null;
 let L = null;
 
@@ -49,59 +55,80 @@ const hasCoordinates = computed(() => {
   return props.platform?.latitude != null && props.platform?.longitude != null;
 });
 
-// Mount type colors (matching existing convention)
+// Selected platform highlight color (bright cyan/teal for visibility)
+const SELECTED_COLOR = '#06b6d4';  // Cyan-500 - stands out from other colors
+
+// Mount type colors for sibling platforms (muted versions)
 const MOUNT_TYPE_COLORS = {
-  PL: '#f97316',  // Orange - tower/mast
-  BL: '#14b8a6',  // Teal - building
-  GL: '#22c55e',  // Green - ground level
-  UAV: '#eab308', // Yellow - UAV
-  SAT: '#8b5cf6'  // Purple - satellite
+  PL: '#fb923c',  // Orange-400 - tower/mast
+  BL: '#2dd4bf',  // Teal-400 - building
+  GL: '#4ade80',  // Green-400 - ground level
+  UAV: '#facc15', // Yellow-400 - UAV
+  SAT: '#a78bfa'  // Violet-400 - satellite
+};
+
+// Muted colors for siblings (lower opacity appearance)
+const SIBLING_COLORS = {
+  PL: '#fdba74',  // Orange-300
+  BL: '#5eead4',  // Teal-300
+  GL: '#86efac',  // Green-300
+  UAV: '#fde047', // Yellow-300
+  SAT: '#c4b5fd'  // Violet-300
 };
 
 /**
- * Get marker color based on mount type
+ * Get marker color based on mount type (for siblings)
  */
-function getMarkerColor(platform) {
+function getSiblingMarkerColor(platform) {
   const mountCode = platform.mount_type_code?.match(/^([A-Z]+)/)?.[1] || 'PL';
-  return MOUNT_TYPE_COLORS[mountCode] || MOUNT_TYPE_COLORS.PL;
+  return SIBLING_COLORS[mountCode] || SIBLING_COLORS.PL;
 }
 
 /**
  * Create platform marker icon (triangle pointing up)
+ * @param {Object} platform - Platform object
+ * @param {boolean} isSelected - Whether this is the selected platform
  */
-function createPlatformMarkerIcon(platform) {
+function createPlatformMarkerIcon(platform, isSelected = false) {
   if (!L) return null;
 
-  const color = getMarkerColor(platform);
+  const color = isSelected ? SELECTED_COLOR : getSiblingMarkerColor(platform);
+  const size = isSelected ? { width: 10, height: 16 } : { width: 6, height: 10 };
+  const shadow = isSelected
+    ? 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));'
+    : 'filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));';
 
   return L.divIcon({
-    className: 'platform-mini-marker',
+    className: `platform-mini-marker ${isSelected ? 'selected' : 'sibling'}`,
     html: `
       <div style="
         width: 0;
         height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-bottom: 14px solid ${color};
-        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+        border-left: ${size.width}px solid transparent;
+        border-right: ${size.width}px solid transparent;
+        border-bottom: ${size.height}px solid ${color};
+        ${shadow}
       "></div>
     `,
-    iconSize: [16, 14],
-    iconAnchor: [8, 14],
-    popupAnchor: [0, -14]
+    iconSize: [size.width * 2, size.height],
+    iconAnchor: [size.width, size.height],
+    popupAnchor: [0, -size.height]
   });
 }
 
 /**
  * Create popup content for marker
  */
-function createPopupContent(platform) {
+function createPopupContent(platform, isSelected = false) {
   const name = platform.display_name || platform.normalized_name || 'Platform';
   const mountCode = platform.mount_type_code || platform.location_code || '';
+  const selectedBadge = isSelected
+    ? '<span class="text-[10px] bg-cyan-100 text-cyan-700 px-1 rounded ml-1">Current</span>'
+    : '';
 
   return `
     <div class="platform-mini-popup text-sm">
-      <div class="font-semibold">${name}</div>
+      <div class="font-semibold">${name}${selectedBadge}</div>
       ${mountCode ? `<div class="text-xs text-gray-500">${mountCode}</div>` : ''}
       <div class="text-xs text-gray-400 mt-1">
         ${Number(platform.latitude).toFixed(5)}°N<br>
@@ -109,6 +136,47 @@ function createPopupContent(platform) {
       </div>
     </div>
   `;
+}
+
+/**
+ * Fetch sibling platforms from the same station
+ */
+async function fetchSiblingPlatforms() {
+  if (!props.showSiblings) return [];
+
+  const stationId = props.platform?.station_id;
+  if (!stationId) return [];
+
+  try {
+    const response = await api.get(`/platforms/station/${stationId}`);
+    const platforms = response.data || [];
+
+    // Filter to only platforms with coordinates, excluding current
+    return platforms.filter(p =>
+      p.id !== props.platform.id &&
+      p.latitude != null &&
+      p.longitude != null
+    );
+  } catch (err) {
+    console.warn('Failed to fetch sibling platforms:', err);
+    return [];
+  }
+}
+
+/**
+ * Calculate bounds to fit all platforms
+ */
+function calculateBounds(platforms) {
+  if (!L || platforms.length === 0) return null;
+
+  const coords = platforms
+    .filter(p => p.latitude != null && p.longitude != null)
+    .map(p => [p.latitude, p.longitude]);
+
+  if (coords.length === 0) return null;
+  if (coords.length === 1) return null; // Single point, use default zoom
+
+  return L.latLngBounds(coords);
 }
 
 /**
@@ -130,22 +198,23 @@ async function initMap() {
       link.rel = 'stylesheet';
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
       document.head.appendChild(link);
-      // Wait a moment for CSS to load
       await new Promise(resolve => setTimeout(resolve, 50));
     }
 
+    // Fetch sibling platforms
+    siblingPlatforms.value = await fetchSiblingPlatforms();
+
     const center = [props.platform.latitude, props.platform.longitude];
 
-    // Create map instance with compact settings
-    // Always enable zoom control for better UX, but keep dragging optional
+    // Create map instance
     mapInstance = L.map(mapContainer.value, {
       center,
       zoom: props.zoom,
-      zoomControl: true,  // Always show zoom controls
+      zoomControl: true,
       dragging: props.interactive,
       scrollWheelZoom: false,
-      doubleClickZoom: true,  // Allow double-click zoom
-      touchZoom: true,  // Allow pinch zoom on mobile
+      doubleClickZoom: true,
+      touchZoom: true,
       boxZoom: false,
       keyboard: false,
       attributionControl: false
@@ -156,7 +225,7 @@ async function initMap() {
       maxZoom: 18
     }).addTo(mapInstance);
 
-    // Add scale control (metric only for compact display)
+    // Add scale control
     L.control.scale({
       metric: true,
       imperial: false,
@@ -164,17 +233,38 @@ async function initMap() {
       position: 'bottomleft'
     }).addTo(mapInstance);
 
-    // Add platform marker
-    const marker = L.marker(center, {
-      icon: createPlatformMarkerIcon(props.platform)
+    // Add sibling platform markers first (so they appear behind selected)
+    siblingPlatforms.value.forEach(siblingPlatform => {
+      const siblingMarker = L.marker(
+        [siblingPlatform.latitude, siblingPlatform.longitude],
+        { icon: createPlatformMarkerIcon(siblingPlatform, false) }
+      ).addTo(mapInstance);
+
+      siblingMarker.bindPopup(createPopupContent(siblingPlatform, false));
+    });
+
+    // Add selected platform marker (on top)
+    const selectedMarker = L.marker(center, {
+      icon: createPlatformMarkerIcon(props.platform, true),
+      zIndexOffset: 1000  // Ensure it's on top
     }).addTo(mapInstance);
 
-    // Bind popup
-    marker.bindPopup(createPopupContent(props.platform));
+    selectedMarker.bindPopup(createPopupContent(props.platform, true));
 
-    // Open popup if requested
     if (props.showPopup) {
-      marker.openPopup();
+      selectedMarker.openPopup();
+    }
+
+    // Fit bounds if we have multiple platforms
+    if (siblingPlatforms.value.length > 0) {
+      const allPlatforms = [props.platform, ...siblingPlatforms.value];
+      const bounds = calculateBounds(allPlatforms);
+      if (bounds) {
+        mapInstance.fitBounds(bounds, {
+          padding: [20, 20],
+          maxZoom: 16  // Don't zoom in too close
+        });
+      }
     }
 
     isLoading.value = false;
@@ -212,7 +302,8 @@ onUnmounted(() => {
 
 // Watch for platform changes
 watch(() => props.platform, async (newPlatform, oldPlatform) => {
-  if (newPlatform?.latitude !== oldPlatform?.latitude ||
+  if (newPlatform?.id !== oldPlatform?.id ||
+      newPlatform?.latitude !== oldPlatform?.latitude ||
       newPlatform?.longitude !== oldPlatform?.longitude) {
     destroyMap();
     await nextTick();
@@ -253,6 +344,21 @@ watch(() => props.platform, async (newPlatform, oldPlatform) => {
         :style="{ height: `${height}px` }"
       ></div>
 
+      <!-- Legend (compact) -->
+      <div
+        v-if="siblingPlatforms.length > 0"
+        class="absolute top-2 left-2 bg-white/90 rounded px-2 py-1 text-[10px] z-20 shadow-sm"
+      >
+        <div class="flex items-center gap-1">
+          <span class="inline-block w-0 h-0 border-l-[4px] border-r-[4px] border-b-[7px] border-l-transparent border-r-transparent border-b-cyan-500"></span>
+          <span class="text-gray-600">Current</span>
+        </div>
+        <div class="flex items-center gap-1 mt-0.5">
+          <span class="inline-block w-0 h-0 border-l-[3px] border-r-[3px] border-b-[5px] border-l-transparent border-r-transparent border-b-gray-400"></span>
+          <span class="text-gray-500">{{ siblingPlatforms.length }} other{{ siblingPlatforms.length !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+
       <!-- Attribution overlay (compact) -->
       <div class="absolute bottom-0.5 right-1 text-[8px] text-base-content/30 z-20">
         OSM
@@ -292,6 +398,10 @@ watch(() => props.platform, async (newPlatform, oldPlatform) => {
 :deep(.platform-mini-marker) {
   background: none !important;
   border: none !important;
+}
+
+:deep(.platform-mini-marker.selected) {
+  z-index: 1000 !important;
 }
 
 /* Popup styling */

@@ -12,6 +12,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.15] - 2025-12-09
+
+### Platform Mini-Map: Station Context with Sibling Platforms
+
+#### New Features
+- **Sibling Platform Display**: Shows all platforms from the same station
+  - Fetches sibling platforms via API using station_id
+  - Displays siblings as smaller, muted color markers
+  - Current platform highlighted in cyan (#06b6d4) with larger marker
+- **Auto-Fit Bounds**: Map automatically zooms to fit all station platforms
+  - Padding for comfortable viewing
+  - Max zoom 16 to prevent over-zooming
+- **Interactive Legend**: Compact legend showing current vs other platforms
+  - Shows count of sibling platforms
+  - Triangle icons matching marker styles
+- **Popup Enhancement**: "Current" badge on selected platform popup
+
+#### Visual Design
+- **Selected Platform**: Cyan (#06b6d4), larger triangle (10x16px)
+- **Sibling Platforms**: Muted mount-type colors, smaller triangles (6x10px)
+  - PL (Tower): Orange-300
+  - BL (Building): Teal-300
+  - GL (Ground): Green-300
+  - UAV: Yellow-300
+  - SAT: Violet-300
+
+#### Props
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `showSiblings` | Boolean | true | Show other station platforms |
+
+---
+
 ## [11.0.0-alpha.14] - 2025-12-09
 
 ### Platform Mini-Map: Zoom & Scale Controls
