@@ -8,12 +8,14 @@
  * For admins: shows all research stations
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStationsStore } from '@stores/stations';
+import { usePlatformsStore } from '@stores/platforms';
 import { useAuthStore } from '@stores/auth';
 import { useNotifications } from '@composables/useNotifications';
 import StationCard from '@components/cards/StationCard.vue';
 import { StationMap } from '@components/map';
-import { ExportModal } from '@components/modals';
+import { ExportModal, PlatformFormModal } from '@components/modals';
 
 // Map view toggle
 const showMap = ref(true);
@@ -48,12 +50,52 @@ function handlePlatformLeave() {
   stationMapRef.value?.clearHighlight();
 }
 
+const router = useRouter();
 const stationsStore = useStationsStore();
+const platformsStore = usePlatformsStore();
 const authStore = useAuthStore();
 
 // Quick access data for station users
 const platforms = ref([]);
 const loadingPlatforms = ref(false);
+
+// Platform creation modal state
+const showPlatformModal = ref(false);
+
+// Can user edit their station?
+const canEdit = computed(() => {
+  if (!userStation.value) return false;
+  return authStore.canEditStation(userStation.value.id);
+});
+
+// Platform creation handlers
+function openCreatePlatformModal() {
+  showPlatformModal.value = true;
+}
+
+async function handlePlatformSubmit(formData) {
+  const result = await platformsStore.createPlatform(formData);
+  if (result) {
+    notifications.success('Platform created successfully');
+    showPlatformModal.value = false;
+    // Refresh platforms list
+    if (userStation.value) {
+      loadingPlatforms.value = true;
+      try {
+        const response = await fetch(`/api/v11/platforms/station/${userStation.value.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          platforms.value = data.data || [];
+        }
+        await loadPlatformsForStation(userStation.value.id);
+      } finally {
+        loadingPlatforms.value = false;
+      }
+    }
+  } else {
+    notifications.error(platformsStore.error || 'Failed to create platform');
+  }
+}
 
 // Platforms for selected station on map (fixed platforms with coordinates)
 const selectedStationPlatforms = ref([]);
@@ -457,12 +499,43 @@ const stats = computed(() => {
 
     <!-- Quick Access for Station Users -->
     <div v-else-if="isStationUser">
-      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Quick Access - {{ userStation?.display_name || userStation?.acronym }}
-      </h2>
+      <!-- Section header with action buttons -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Quick Access - {{ userStation?.display_name || userStation?.acronym }}
+        </h2>
+
+        <!-- Action buttons -->
+        <div class="flex gap-2">
+          <!-- Create Platform button (if user can edit) -->
+          <button
+            v-if="canEdit"
+            class="btn btn-primary btn-sm"
+            @click="openCreatePlatformModal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Platform
+          </button>
+
+          <!-- View Station link -->
+          <router-link
+            v-if="userStation"
+            :to="`/stations/${userStation.acronym}`"
+            class="btn btn-outline btn-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Manage Station
+          </router-link>
+        </div>
+      </div>
 
       <!-- Loading platforms -->
       <div v-if="loadingPlatforms" class="flex justify-center py-8">
@@ -547,6 +620,15 @@ const stats = computed(() => {
       v-model="showExportModal"
       default-type="stations"
       @exported="handleExported"
+    />
+
+    <!-- Platform Form Modal (for station users) -->
+    <PlatformFormModal
+      v-if="userStation"
+      v-model="showPlatformModal"
+      :station-id="userStation.id"
+      :station-acronym="userStation.acronym || ''"
+      @submit="handlePlatformSubmit"
     />
   </div>
 </template>

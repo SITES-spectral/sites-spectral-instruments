@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.19] - 2025-12-09
+
+### Dashboard Platform Management
+
+#### New Feature: Create Platform from Dashboard
+- **Create Platform Button**: Station users with edit permissions now see "Create Platform" button
+- **Manage Station Link**: Quick access to full station management page
+- **Platform Form Modal**: Opens same form used in station view for consistency
+- **Automatic Refresh**: Platform list refreshes after successful creation
+
+#### Permission-Based Access
+- `canEdit` computed property checks if user can edit their station
+- Button only shows for station users with edit permissions (station-admin or station role)
+- Admins always have access
+
+#### UX Improvements
+- Action buttons in Quick Access header row (responsive flex layout)
+- "Manage Station" button links to full station page for advanced management
+- Success/error notifications after platform operations
+
+---
+
 ## [11.0.0-alpha.18] - 2025-12-09
 
 ### Mount-Type Specific Platform Icons
