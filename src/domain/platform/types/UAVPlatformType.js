@@ -210,27 +210,46 @@ export class UAVPlatformType extends PlatformTypeStrategy {
   validate(data) {
     const errors = [];
 
-    if (!data.displayName) {
-      errors.push('Display name is required');
-    }
+    // displayName is optional - will be auto-generated from normalized name if not provided
+    // Check both camelCase and snake_case since frontend may use either
+    // if (!data.displayName && !data.display_name) {
+    //   errors.push('Display name is required');
+    // }
 
-    if (!data.vendor) {
+    // Check both camelCase and snake_case variants
+    const vendor = data.vendor;
+    const model = data.model;
+
+    if (!vendor) {
       errors.push('UAV vendor is required');
-    } else if (!UAV_SPECIFICATIONS[data.vendor.toUpperCase()]) {
-      errors.push(`Unknown vendor: ${data.vendor}. Known vendors: ${Object.keys(UAV_SPECIFICATIONS).join(', ')}`);
+    } else if (!UAV_SPECIFICATIONS[vendor.toUpperCase()]) {
+      errors.push(`Unknown vendor: ${vendor}. Known vendors: ${Object.keys(UAV_SPECIFICATIONS).join(', ')}`);
     }
 
-    if (!data.model) {
+    if (!model) {
       errors.push('UAV model is required');
-    } else if (data.vendor) {
-      const vendorSpec = UAV_SPECIFICATIONS[data.vendor.toUpperCase()];
-      if (vendorSpec && !vendorSpec.models[data.model.toUpperCase()]) {
-        errors.push(`Unknown model for ${data.vendor}: ${data.model}`);
+    } else if (vendor) {
+      const vendorSpec = UAV_SPECIFICATIONS[vendor.toUpperCase()];
+      if (vendorSpec) {
+        // Normalize model name: M3M, RedEdge-MX -> REDEDGE_MX, etc.
+        const normalizedModel = model.toUpperCase().replace(/-/g, '_').replace(/\s+/g, '_');
+        const modelVariants = [
+          model,                    // Original
+          model.toUpperCase(),      // M3M
+          normalizedModel,          // REDEDGE_MX
+          model.replace(/-/g, ''),  // RedEdgeMX
+        ];
+
+        const modelFound = modelVariants.some(m => vendorSpec.models[m]);
+        if (!modelFound) {
+          errors.push(`Unknown model for ${vendor}: ${model}. Available: ${Object.keys(vendorSpec.models).join(', ')}`);
+        }
       }
     }
 
     // UAV platforms should NOT have ecosystem code
-    if (data.ecosystemCode) {
+    const ecosystemCode = data.ecosystemCode || data.ecosystem_code;
+    if (ecosystemCode) {
       errors.push('UAV platforms should not have ecosystem code');
     }
 

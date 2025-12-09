@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.24] - 2025-12-09
+
+### UAV Platform Backend Validation Fix
+
+#### Bug Fix
+- **UAV Platform Creation 400 Error**: Fixed backend validation errors when creating UAV platforms
+  - Removed required `displayName` check (auto-generated from normalized name)
+  - Added flexible model name matching (M3M, RedEdge-MX, REDEDGE_MX all work)
+  - Added snake_case/camelCase compatibility for ecosystem_code check
+
+#### Technical Details
+- Updated `UAVPlatformType.validate()` in backend domain layer
+- Model validation now tries multiple name variants (uppercase, with/without hyphens/underscores)
+- Display name is optional - falls back to normalized platform name
+
+---
+
 ## [11.0.0-alpha.23] - 2025-12-09
 
 ### UAV & Satellite Platform Validation Fix
