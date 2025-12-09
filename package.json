@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "11.0.0-alpha.28",
+  "version": "11.0.0-alpha.29",
   "description": "SITES Spectral v11.0.0 - Hexagonal Architecture + Standard Vocabularies (Darwin Core, ICOS, Copernicus)",
   "main": "src/worker.js",
   "scripts": {

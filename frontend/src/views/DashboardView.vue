@@ -59,6 +59,40 @@ const authStore = useAuthStore();
 const platforms = ref([]);
 const loadingPlatforms = ref(false);
 
+// Platform type filter tab
+const selectedPlatformType = ref('all');
+
+// Platform type tabs configuration
+const platformTypeTabs = computed(() => {
+  const counts = {
+    all: platforms.value.length,
+    fixed: 0,
+    uav: 0,
+    satellite: 0
+  };
+
+  platforms.value.forEach(p => {
+    if (counts[p.platform_type] !== undefined) {
+      counts[p.platform_type]++;
+    }
+  });
+
+  return [
+    { key: 'all', label: 'All', count: counts.all, icon: 'M4 6h16M4 12h16M4 18h16' },
+    { key: 'fixed', label: 'Fixed', count: counts.fixed, icon: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4' },
+    { key: 'uav', label: 'UAV', count: counts.uav, icon: 'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83' },
+    { key: 'satellite', label: 'Satellite', count: counts.satellite, icon: 'M13 7L9 3 5 7l4 4M17 11l4 4-4 4-4-4M8 12l4 4 4-4-4-4-4 4zM16 8l3-3M5 16l3 3' }
+  ].filter(tab => tab.key === 'all' || tab.count > 0);
+});
+
+// Filtered platforms based on selected tab
+const filteredPlatforms = computed(() => {
+  if (selectedPlatformType.value === 'all') {
+    return platforms.value;
+  }
+  return platforms.value.filter(p => p.platform_type === selectedPlatformType.value);
+});
+
 // Platform creation modal state
 const showPlatformModal = ref(false);
 
@@ -554,6 +588,31 @@ const stats = computed(() => {
         </div>
       </div>
 
+      <!-- Platform Type Tabs -->
+      <div class="tabs tabs-boxed bg-base-200 p-1 mb-4 inline-flex">
+        <button
+          v-for="tab in platformTypeTabs"
+          :key="tab.key"
+          class="tab gap-2"
+          :class="{ 'tab-active': selectedPlatformType === tab.key }"
+          @click="selectedPlatformType = tab.key"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon" />
+          </svg>
+          {{ tab.label }}
+          <span class="badge badge-sm" :class="selectedPlatformType === tab.key ? 'badge-primary' : 'badge-ghost'">
+            {{ tab.count }}
+          </span>
+        </button>
+      </div>
+
       <!-- Loading platforms -->
       <div v-if="loadingPlatforms" class="flex justify-center py-8">
         <span class="loading loading-spinner loading-md"></span>
@@ -562,7 +621,7 @@ const stats = computed(() => {
       <!-- Platforms grid -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <router-link
-          v-for="platform in platforms"
+          v-for="platform in filteredPlatforms"
           :key="platform.id"
           :to="`/platforms/${platform.id}`"
           class="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer"
@@ -614,8 +673,13 @@ const stats = computed(() => {
         </router-link>
 
         <!-- Empty state -->
-        <div v-if="platforms.length === 0" class="col-span-full text-center py-8 text-base-content/50">
-          No platforms found
+        <div v-if="filteredPlatforms.length === 0" class="col-span-full text-center py-8 text-base-content/50">
+          <template v-if="platforms.length === 0">
+            No platforms found
+          </template>
+          <template v-else>
+            No {{ selectedPlatformType }} platforms found
+          </template>
         </div>
       </div>
     </div>

@@ -12,6 +12,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.29] - 2025-12-09
+
+### Dashboard Platform Type Tabs
+
+#### New Feature
+- **Platform Type Filter Tabs**: Added tabbed navigation to filter platforms by type on the station dashboard
+  - All: Shows all platforms
+  - Fixed: Shows only fixed platforms (towers, buildings, ground level)
+  - UAV: Shows only UAV platforms (drones)
+  - Satellite: Shows only satellite platforms
+  - Tabs only appear if there are platforms of that type
+  - Badge counts show number of platforms per type
+
+#### UI Improvements
+- Clear visual separation between platform types on the Quick Access dashboard
+- Tabs with icons matching platform type cards
+- Active tab highlighting with badge color change
+
+---
+
 ## [11.0.0-alpha.28] - 2025-12-09
 
 ### UAV Platform Creation - Complete Fix with RGB Camera Type
