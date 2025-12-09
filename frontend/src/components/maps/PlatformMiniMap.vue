@@ -344,10 +344,10 @@ watch(() => props.platform, async (newPlatform, oldPlatform) => {
         :style="{ height: `${height}px` }"
       ></div>
 
-      <!-- Legend (compact) -->
+      <!-- Legend (compact) - positioned below zoom controls -->
       <div
         v-if="siblingPlatforms.length > 0"
-        class="absolute top-2 left-2 bg-white/90 rounded px-2 py-1 text-[10px] z-20 shadow-sm"
+        class="absolute top-16 right-2 bg-white/90 rounded px-2 py-1 text-[10px] z-20 shadow-sm"
       >
         <div class="flex items-center gap-1">
           <span class="inline-block w-0 h-0 border-l-[4px] border-r-[4px] border-b-[7px] border-l-transparent border-r-transparent border-b-cyan-500"></span>
