@@ -12,6 +12,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.30] - 2025-12-09
+
+### Domain-Driven Authorization System
+
+#### Security Enhancement
+- **Station-Specific Admin Permissions**: Enforced strict station-scoped access for admin users
+  - Global admins (`admin`, `sites-admin` usernames): Full access to ALL stations
+  - Station admins (`svb-admin`, `ans-admin`, etc.): Access ONLY to their assigned station
+  - Station users: Edit access to their station only (no delete)
+  - Readonly users: View access to all stations
+
+#### New Domain Layer
+- **Authorization Domain** (`src/domain/authorization/`)
+  - `Role.js`: Role value object with type-safe constants
+  - `User.js`: User entity with station access validation
+  - `AuthorizationService.js`: Domain service for authorization decisions
+  - Follows SOLID principles and Hexagonal Architecture
+
+#### Permission Matrix (Updated)
+
+| Username | Role | Stations | Platforms | Instruments | Users | Admin Panel |
+|----------|------|----------|-----------|-------------|-------|-------------|
+| `admin` | Global Admin | CRUD | CRUD | CRUD | CRUD | Access |
+| `sites-admin` | Global Admin | CRUD | CRUD | CRUD | CRUD | Access |
+| `svb-admin` | Station Admin | Read | CRUD (SVB) | CRUD (SVB) | ❌ | ❌ |
+| `svartberget` | Station User | Read | Read/Write | Read/Write | ❌ | ❌ |
+| `viewer` | Readonly | Read | Read | Read | ❌ | ❌ |
+
+#### Files Added
+- `src/domain/authorization/Role.js` - Role value object
+- `src/domain/authorization/User.js` - User entity
+- `src/domain/authorization/AuthorizationService.js` - Authorization service
+- `src/domain/authorization/index.js` - Module exports
+- `tests/domain/authorization.test.js` - 53 comprehensive tests
+
+#### Files Modified
+- `src/auth/permissions.js` - Refactored to use domain authorization
+- `src/handlers/users.js` - Uses `requireGlobalAdmin()` middleware
+- `src/infrastructure/http/controllers/AdminController.js` - Uses domain authorization
+
+#### Security Benefits
+- Closes privilege escalation vulnerability for station admins
+- Enforces least privilege principle
+- Clear separation between global and station admin access
+- Comprehensive test coverage for authorization scenarios
+
+---
+
 ## [11.0.0-alpha.29] - 2025-12-09
 
 ### Dashboard Platform Type Tabs

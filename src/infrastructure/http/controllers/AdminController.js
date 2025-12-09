@@ -3,9 +3,11 @@
  *
  * HTTP controller for admin endpoints.
  * Maps HTTP requests to admin query use cases.
- * All endpoints require admin role.
+ * All endpoints require GLOBAL admin role (admin or sites-admin usernames only).
+ * Station admins (e.g., svb-admin) cannot access these endpoints.
  *
  * @module infrastructure/http/controllers/AdminController
+ * @version 11.0.0-alpha.30
  */
 
 import {
@@ -13,6 +15,7 @@ import {
   createErrorResponse,
   createForbiddenResponse
 } from '../../../utils/responses.js';
+import { validateAdminPermission } from '../../../auth/permissions.js';
 
 /**
  * Admin Controller
@@ -27,13 +30,16 @@ export class AdminController {
   }
 
   /**
-   * Check if user has admin role
+   * Check if user has GLOBAL admin role
+   * Uses domain authorization to distinguish global admins from station admins
    * @private
    */
   _requireAdmin(request) {
     const user = request.user;
-    if (!user || user.role !== 'admin') {
-      return createForbiddenResponse('Admin access required');
+
+    // Use domain authorization to validate global admin status
+    if (!validateAdminPermission(user)) {
+      return createForbiddenResponse('Global admin access required. Station admins cannot access admin panel.');
     }
     return null;
   }

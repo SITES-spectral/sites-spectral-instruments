@@ -1,23 +1,47 @@
 // Permissions Module
 // Role-based access control and permission validation
+// v11.0.0-alpha.30: Refactored to use domain authorization service
 
 import { createForbiddenResponse, createUnauthorizedResponse } from '../utils/responses.js';
+import { User, AuthorizationService, authorizationService } from '../domain/authorization/index.js';
+
+/**
+ * Convert raw JWT payload to User entity
+ * @param {Object} payload - Raw user payload from JWT
+ * @returns {User|null} User entity or null
+ */
+function createUserEntity(payload) {
+  if (!payload) return null;
+  try {
+    return new User(payload);
+  } catch (error) {
+    console.warn('Failed to create User entity:', error.message);
+    return null;
+  }
+}
 
 /**
  * Validate admin permission for user
+ * Only global admins (admin, sites-admin usernames) have admin permissions
+ *
  * @param {Object} user - User object from token
- * @returns {boolean} True if user has admin permissions
+ * @returns {boolean} True if user has global admin permissions
  */
 export function validateAdminPermission(user) {
   if (!user) {
     return false;
   }
 
-  return user.role === 'admin';
+  const userEntity = createUserEntity(user);
+  if (!userEntity) return false;
+
+  return userEntity.isGlobalAdmin();
 }
 
 /**
  * Validate station access for user
+ * Uses domain User entity for consistent authorization logic
+ *
  * @param {Object} user - User object from token
  * @param {string} stationId - Station ID or normalized name to access
  * @returns {boolean} True if user can access the station
@@ -27,108 +51,71 @@ export function validateStationAccess(user, stationId) {
     return false;
   }
 
-  // Admin users can access all stations
-  if (user.role === 'admin') {
-    return true;
+  const userEntity = createUserEntity(user);
+  if (!userEntity) return false;
+
+  return userEntity.hasAccessToStation(stationId);
+}
+
+/**
+ * Validate station edit access for user
+ * Checks if user can modify resources at a specific station
+ *
+ * @param {Object} user - User object from token
+ * @param {string} stationId - Station ID or normalized name
+ * @returns {boolean} True if user can edit at the station
+ */
+export function validateStationEditAccess(user, stationId) {
+  if (!user) {
+    return false;
   }
 
-  // Station-admin users can only access their own station (with full edit/delete)
-  if (user.role === 'station-admin') {
-    // Check multiple formats: integer ID, string acronym, and normalized name
-    return user.station_id === stationId ||
-           user.station_id === parseInt(stationId, 10) ||
-           user.station_acronym === stationId ||
-           user.station_normalized_name === stationId;
+  const userEntity = createUserEntity(user);
+  if (!userEntity) return false;
+
+  return userEntity.canEditStation(stationId);
+}
+
+/**
+ * Validate station delete access for user
+ * Checks if user can delete resources at a specific station
+ *
+ * @param {Object} user - User object from token
+ * @param {string} stationId - Station ID or normalized name
+ * @returns {boolean} True if user can delete at the station
+ */
+export function validateStationDeleteAccess(user, stationId) {
+  if (!user) {
+    return false;
   }
 
-  // Station users can only access their own station
-  if (user.role === 'station') {
-    // Check multiple formats: integer ID, string acronym, and normalized name
-    return user.station_id === stationId ||
-           user.station_id === parseInt(stationId, 10) ||
-           user.station_acronym === stationId ||
-           user.station_normalized_name === stationId;
-  }
+  const userEntity = createUserEntity(user);
+  if (!userEntity) return false;
 
-  // Read-only users can access all stations (for viewing only)
-  if (user.role === 'readonly') {
-    return true;
-  }
-
-  return false;
+  return userEntity.canDeleteAtStation(stationId);
 }
 
 /**
  * Check user permissions for a specific resource and action
+ * Uses domain AuthorizationService for consistent authorization logic
+ *
  * @param {Object} user - User object from token
  * @param {string} resource - Resource type (stations, platforms, instruments, rois)
  * @param {string} action - Action type (read, write, delete, admin)
+ * @param {Object} context - Additional context (stationId, etc.)
  * @returns {Object} Permission result with allowed status and reason
  */
-export function checkUserPermissions(user, resource, action) {
+export function checkUserPermissions(user, resource, action, context = {}) {
   if (!user) {
     return { allowed: false, reason: 'No user provided' };
   }
 
-  // Define permission matrix
-  const permissions = {
-    admin: {
-      stations: ['read', 'write', 'delete', 'admin'],
-      platforms: ['read', 'write', 'delete', 'admin'],
-      instruments: ['read', 'write', 'delete', 'admin'],
-      rois: ['read', 'write', 'delete', 'admin'],
-      aois: ['read', 'write', 'delete', 'admin'],
-      campaigns: ['read', 'write', 'delete', 'admin'],
-      products: ['read', 'write', 'delete', 'admin'],
-      export: ['read']
-    },
-    'station-admin': {
-      stations: ['read'],
-      platforms: ['read', 'write', 'delete'],
-      instruments: ['read', 'write', 'delete'],
-      rois: ['read', 'write', 'delete'],
-      aois: ['read', 'write', 'delete'],
-      campaigns: ['read', 'write', 'delete'],
-      products: ['read', 'write', 'delete'],
-      export: ['read']
-    },
-    station: {
-      stations: ['read'],
-      platforms: ['read', 'write'],
-      instruments: ['read', 'write'],
-      rois: ['read', 'write'],
-      aois: ['read', 'write'],
-      campaigns: ['read', 'write'],
-      products: ['read', 'write'],
-      export: ['read']
-    },
-    readonly: {
-      stations: ['read'],
-      platforms: ['read'],
-      instruments: ['read'],
-      rois: ['read'],
-      aois: ['read'],
-      campaigns: ['read'],
-      products: ['read'],
-      export: ['read']
-    }
-  };
-
-  const userPermissions = permissions[user.role];
-  if (!userPermissions) {
-    return { allowed: false, reason: `Unknown user role: ${user.role}` };
+  const userEntity = createUserEntity(user);
+  if (!userEntity) {
+    return { allowed: false, reason: 'Invalid user data' };
   }
 
-  const resourcePermissions = userPermissions[resource];
-  if (!resourcePermissions) {
-    return { allowed: false, reason: `No permissions defined for resource: ${resource}` };
-  }
-
-  const allowed = resourcePermissions.includes(action);
-  return {
-    allowed,
-    reason: allowed ? 'Permission granted' : `Action '${action}' not allowed for role '${user.role}' on resource '${resource}'`
-  };
+  return authorizationService.authorize(userEntity, resource, action, context);
 }
 
 /**
@@ -189,6 +176,8 @@ export async function requireStationAccess(request, env, stationId) {
 
 /**
  * Filter data based on user permissions
+ * Uses domain AuthorizationService for consistent filtering
+ *
  * @param {Object} user - User object from token
  * @param {Array} data - Array of data objects (stations, platforms, etc.)
  * @param {string} stationIdField - Field name that contains station ID
@@ -199,35 +188,75 @@ export function filterDataByPermissions(user, data, stationIdField = 'station_id
     return [];
   }
 
-  // Admin users see all data
-  if (user.role === 'admin') {
-    return data;
+  const userEntity = createUserEntity(user);
+  if (!userEntity) {
+    return [];
   }
 
-  // Station-admin users see only their station's data
-  if (user.role === 'station-admin' && user.station_id) {
-    return data.filter(item =>
-      item[stationIdField] === user.station_id ||
-      item.station_normalized_name === user.station_normalized_name ||
-      item.station_acronym === user.station_acronym ||
-      item.id === user.station_id
-    );
+  return authorizationService.filterByPermissions(userEntity, data, stationIdField);
+}
+
+/**
+ * Middleware function to require station edit access
+ * For write operations at a specific station
+ *
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @param {string} stationId - Station ID to validate edit access for
+ * @returns {Object|Response} User object or error response
+ */
+export async function requireStationEditAccess(request, env, stationId) {
+  const user = await requireAuthentication(request, env);
+  if (user instanceof Response) {
+    return user; // Return error response
   }
 
-  // Station users see only their station's data
-  if (user.role === 'station' && user.station_id) {
-    return data.filter(item =>
-      item[stationIdField] === user.station_id ||
-      item.station_normalized_name === user.station_normalized_name ||
-      item.station_acronym === user.station_acronym ||
-      item.id === user.station_id
-    );
+  if (!validateStationEditAccess(user, stationId)) {
+    return createForbiddenResponse(`You do not have edit access to station ${stationId}`);
   }
 
-  // Read-only users see all data (for viewing)
-  if (user.role === 'readonly') {
-    return data;
+  return user;
+}
+
+/**
+ * Middleware function to require station delete access
+ * For delete operations at a specific station
+ *
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @param {string} stationId - Station ID to validate delete access for
+ * @returns {Object|Response} User object or error response
+ */
+export async function requireStationDeleteAccess(request, env, stationId) {
+  const user = await requireAuthentication(request, env);
+  if (user instanceof Response) {
+    return user; // Return error response
   }
 
-  return [];
+  if (!validateStationDeleteAccess(user, stationId)) {
+    return createForbiddenResponse(`You do not have delete access to station ${stationId}`);
+  }
+
+  return user;
+}
+
+/**
+ * Middleware function to require global admin access
+ * For system-wide admin operations
+ *
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Object|Response} User object or error response
+ */
+export async function requireGlobalAdmin(request, env) {
+  const user = await requireAuthentication(request, env);
+  if (user instanceof Response) {
+    return user; // Return error response
+  }
+
+  if (!validateAdminPermission(user)) {
+    return createForbiddenResponse('Global admin privileges required. Station admins cannot access this endpoint.');
+  }
+
+  return user;
 }

@@ -1,8 +1,10 @@
 // Users Management Handler
 // Admin-only user listing and management interface
 // NOTE: Actual credential modification requires updating Cloudflare secrets
+// v11.0.0-alpha.30: Uses domain authorization for global admin validation
 
 import { getUserFromRequest } from '../auth/authentication.js';
+import { requireGlobalAdmin, validateAdminPermission } from '../auth/permissions.js';
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -13,7 +15,9 @@ import {
 import { logSecurityEvent } from '../utils/logging.js';
 
 /**
- * Handle user management requests (Admin only)
+ * Handle user management requests (Global Admin only)
+ * Station admins (e.g., svb-admin) cannot access user management
+ *
  * @param {string} method - HTTP method
  * @param {Array} pathSegments - Path segments from URL
  * @param {Request} request - The request object
@@ -21,16 +25,15 @@ import { logSecurityEvent } from '../utils/logging.js';
  * @returns {Response} Users response
  */
 export async function handleUsers(method, pathSegments, request, env) {
-  // Authenticate user
-  const user = await getUserFromRequest(request, env);
-  if (!user) {
-    return createUnauthorizedResponse();
-  }
-
-  // Only admin users can manage users
-  if (user.role !== 'admin') {
-    await logSecurityEvent('UNAUTHORIZED_USER_ACCESS', user, request, env);
-    return createForbiddenResponse('Admin privileges required for user management');
+  // Require global admin (admin or sites-admin usernames only)
+  const user = await requireGlobalAdmin(request, env);
+  if (user instanceof Response) {
+    // Log unauthorized access attempt
+    const attemptingUser = await getUserFromRequest(request, env);
+    if (attemptingUser) {
+      await logSecurityEvent('UNAUTHORIZED_USER_ACCESS', attemptingUser, request, env);
+    }
+    return user; // Returns the 403 Forbidden response
   }
 
   const action = pathSegments[1];
