@@ -1,102 +1,157 @@
 # =============================================================================
 # API Versions Configuration
-# SITES Spectral v9.0.0
+# SITES Spectral v11.0.0-alpha.32
 # =============================================================================
-# Configuration for API versioning, migration paths, and feature availability
-# across different API versions.
+# Single source of truth for API versioning, aliases, and migration paths.
+# All frontend and backend components should reference this configuration.
 # =============================================================================
 
 _meta:
-  version: "1.0.0"
-  description: "API version configuration and migration settings"
-  last_updated: "2025-12-02"
+  version: "2.0.0"
+  description: "API version configuration with semantic aliases"
+  last_updated: "2025-12-09"
+  architecture: "hexagonal"
 
 # =============================================================================
-# API VERSION DEFINITIONS
+# CURRENT VERSION CONFIGURATION (Primary Entry Point)
 # =============================================================================
-# Each version defines supported features, deprecation status, and endpoints
+# This is the single source of truth for the production API version.
+# When bumping versions, update this section first.
 
-api_versions:
+current:
+  version: "v11"
+  version_number: "11.0.0-alpha.32"
+  description: "Hexagonal Architecture + Standard Vocabularies (Darwin Core, ICOS, Copernicus)"
+  release_date: "2025-12-09"
+  status: "alpha"
+
+# =============================================================================
+# SEMANTIC ALIASES
+# =============================================================================
+# Use aliases in production to avoid hardcoding version numbers.
+# Frontend should use /api/latest or /api/stable for production.
+
+aliases:
+  # Production alias - always points to the current stable version
+  latest: "v11"
+
+  # Stable alias - points to current production-ready version
+  stable: "v11"
+
+  # Current alias - same as latest (for compatibility)
+  current: "v11"
+
+  # Legacy alias - for backward compatibility testing
+  legacy: "v10"
+
+# =============================================================================
+# SUPPORTED VERSIONS
+# =============================================================================
+# All versions currently available in the API router
+
+supported_versions:
   # ---------------------------------------------------------------------------
-  # API V1 - Legacy Version (Deprecated)
+  # API V11 - Hexagonal Architecture (CURRENT)
   # ---------------------------------------------------------------------------
-  v1:
-    version: "1.0.0"
-    status: "deprecated"
-    description: "Original API version - basic CRUD operations"
-    release_date: "2024-01-01"
-    deprecation_date: "2025-06-01"
-    end_of_life_date: "2026-01-01"
+  v11:
+    version: "11.0.0-alpha.32"
+    status: "current"
+    description: "Hexagonal Architecture + Darwin Core/ICOS/Copernicus Vocabularies"
+    release_date: "2025-12-08"
+    is_default: true
 
-    features:
-      stations: true
-      platforms: true
-      instruments: true
-      rois: false
-      campaigns: false
-      products: false
-      pagination: false
-      filtering: "basic"
-      sorting: false
-
-    endpoints:
-      prefix: "/api/v1"
-      authentication: "basic"
-      rate_limiting: false
-
-    migration_guide: "https://docs.sites.jobelab.com/api/v1-to-v2"
-    support_contact: "sites-support@jobelab.com"
-
-  # ---------------------------------------------------------------------------
-  # API V2 - Enhanced Version
-  # ---------------------------------------------------------------------------
-  v2:
-    version: "2.0.0"
-    status: "stable"
-    description: "Enhanced API with ROI support and advanced filtering"
-    release_date: "2025-01-01"
+    architecture:
+      pattern: "hexagonal"
+      features:
+        - "ports-and-adapters"
+        - "domain-driven-design"
+        - "cqrs-pattern"
+        - "dependency-injection"
+        - "strategy-pattern"
+        - "registry-pattern"
 
     features:
       stations: true
       platforms: true
       instruments: true
       rois: true
-      campaigns: false
-      products: false
+      aois: true
+      campaigns: true
+      products: true
+      maintenance: true
+      calibrations: true
       pagination: true
       filtering: "advanced"
       sorting: true
+      search: true
+      bulk_operations: true
+      darwin_core: true
+      icos_integration: true
+      copernicus_levels: true
 
     endpoints:
-      prefix: "/api/v2"
-      authentication: "jwt"
+      prefix: "/api/v11"
+      authentication: "jwt-hmac-sha256"
       rate_limiting: true
       rate_limits:
-        per_minute: 60
-        per_hour: 1000
+        per_minute: 120
+        per_hour: 5000
+        burst: 200
 
     improvements:
-      - "Added ROI management endpoints"
-      - "Advanced filtering with multiple parameters"
-      - "Pagination support for large datasets"
-      - "Sorting by multiple fields"
-      - "JWT authentication"
-      - "Rate limiting protection"
-
-    breaking_changes:
-      - "Authentication changed from basic to JWT"
-      - "Response format includes metadata wrapper"
-      - "Error responses use standard error codes"
+      - "Hexagonal Architecture (Ports & Adapters)"
+      - "SOLID principles enforcement"
+      - "Darwin Core vocabulary alignment"
+      - "ICOS station type classification"
+      - "Copernicus processing levels"
+      - "Maintenance timeline management"
+      - "Calibration workflow (55+ fields)"
+      - "CC-BY-4.0 license metadata"
+      - "Platform type strategies"
+      - "Config-driven instrument types"
 
   # ---------------------------------------------------------------------------
-  # API V3 - Campaign and Product Management (Current/Default)
+  # API V10 - ROI Legacy + Admin Panel (LEGACY)
+  # ---------------------------------------------------------------------------
+  v10:
+    version: "10.0.0"
+    status: "legacy"
+    description: "ROI Management + Admin Panel + Role-based Access"
+    release_date: "2025-11-01"
+    deprecation_date: "2026-03-01"
+    sunset_date: "2026-06-01"
+
+    features:
+      stations: true
+      platforms: true
+      instruments: true
+      rois: true
+      aois: true
+      campaigns: true
+      products: true
+      pagination: true
+      filtering: "advanced"
+      sorting: true
+      admin_panel: true
+      role_management: true
+
+    endpoints:
+      prefix: "/api/v10"
+      authentication: "jwt-hmac-sha256"
+      rate_limiting: true
+
+    migration_guide: "Upgrade to /api/v11 or use /api/latest alias"
+
+  # ---------------------------------------------------------------------------
+  # API V3 - Campaign and Product Management (DEPRECATED)
   # ---------------------------------------------------------------------------
   v3:
     version: "3.0.0"
-    status: "current"
-    description: "Full-featured API with campaigns, products, and advanced data management"
-    release_date: "2025-12-02"
-    is_default: true
+    status: "deprecated"
+    description: "Legacy API with campaigns and products"
+    release_date: "2025-06-01"
+    deprecation_date: "2025-12-01"
+    sunset_date: "2026-03-01"
 
     features:
       stations: true
@@ -108,60 +163,89 @@ api_versions:
       pagination: true
       filtering: "advanced"
       sorting: true
-      search: true
-      bulk_operations: true
-      webhooks: false
 
     endpoints:
       prefix: "/api/v3"
       authentication: "jwt"
       rate_limiting: true
-      rate_limits:
-        per_minute: 120
-        per_hour: 5000
-        burst: 200
 
-    improvements:
-      - "Campaign management for field surveys and UAV missions"
-      - "Product tracking for data deliverables"
-      - "Full-text search across entities"
-      - "Bulk create/update/delete operations"
-      - "Enhanced pagination with cursor support"
-      - "Expanded filtering with logical operators"
-      - "Webhook support (coming soon)"
-      - "GraphQL endpoint (coming soon)"
+    migration_guide: "Upgrade to /api/v11 or use /api/latest alias"
 
-    breaking_changes:
-      - "Platform responses include campaign associations"
-      - "Instrument responses include product linkages"
-      - "Pagination uses cursor-based system"
-      - "Filtering syntax uses JSON query format"
+  # ---------------------------------------------------------------------------
+  # API V2 - Enhanced Version (DEPRECATED)
+  # ---------------------------------------------------------------------------
+  v2:
+    version: "2.0.0"
+    status: "deprecated"
+    description: "Enhanced API with ROI support and advanced filtering"
+    release_date: "2025-01-01"
+    deprecation_date: "2025-06-01"
+    sunset_date: "2025-12-31"
+
+    features:
+      stations: true
+      platforms: true
+      instruments: true
+      rois: true
+      pagination: true
+      filtering: "advanced"
+      sorting: true
+
+    endpoints:
+      prefix: "/api/v2"
+      authentication: "jwt"
+      rate_limiting: true
+
+  # ---------------------------------------------------------------------------
+  # API V1 - Legacy Version (END OF LIFE)
+  # ---------------------------------------------------------------------------
+  v1:
+    version: "1.0.0"
+    status: "end_of_life"
+    description: "Original API version - basic CRUD operations"
+    release_date: "2024-01-01"
+    deprecation_date: "2025-06-01"
+    end_of_life_date: "2025-12-01"
+
+    features:
+      stations: true
+      platforms: true
+      instruments: true
+      rois: false
+      pagination: false
+      filtering: "basic"
+      sorting: false
+
+    endpoints:
+      prefix: "/api/v1"
+      authentication: "basic"
+      rate_limiting: false
 
 # =============================================================================
-# VERSION SELECTION
+# VERSION SELECTION CONFIGURATION
 # =============================================================================
-# Configuration for how API versions are selected and negotiated
 
 version_selection:
   # Default version when none specified
-  default_version: "v3"
+  default_version: "v11"
 
   # Version selection methods
   methods:
-    # Via URL path: /api/v3/stations
+    # Via URL path: /api/v11/stations or /api/latest/stations
     url_path:
       enabled: true
       pattern: "/api/{version}/"
+      supports_aliases: true
 
-    # Via Accept header: Accept: application/vnd.sites.v3+json
-    accept_header:
-      enabled: true
-      pattern: "application/vnd.sites.{version}+json"
-
-    # Via custom header: X-API-Version: v3
+    # Via custom header: X-API-Version: v11
     custom_header:
       enabled: true
       header_name: "X-API-Version"
+
+    # Via Accept header: Accept: application/vnd.sites.v11+json
+    accept_header:
+      enabled: true
+      pattern: "application/vnd.sites.{version}+json"
 
   # Priority order (highest to lowest)
   priority:
@@ -171,33 +255,28 @@ version_selection:
     - "default_version"
 
 # =============================================================================
+# RESPONSE HEADERS
+# =============================================================================
+# Headers included in API responses for version tracking
+
+response_headers:
+  enabled: true
+  headers:
+    current_version: "X-API-Version"
+    resolved_version: "X-API-Resolved-Version"
+    version_status: "X-API-Version-Status"
+    alias_used: "X-API-Alias"
+    latest_version: "X-API-Latest-Version"
+    deprecation_warning: "X-API-Deprecated"
+    sunset_date: "X-API-Sunset-Date"
+
+# =============================================================================
 # MIGRATION SETTINGS
 # =============================================================================
-# Configuration for handling version migrations and compatibility
 
 migration:
   # Allow automatic version negotiation
   auto_negotiate: true
-
-  # Return version info in response headers
-  version_headers:
-    enabled: true
-    current_version: "X-API-Version"
-    latest_version: "X-API-Latest-Version"
-    deprecated_warning: "X-API-Deprecated"
-    sunset_date: "X-API-Sunset-Date"
-
-  # Version compatibility matrix
-  compatibility:
-    v1_to_v2:
-      automatic: false
-      requires_update: true
-      adapter_available: true
-
-    v2_to_v3:
-      automatic: true
-      requires_update: false
-      adapter_available: true
 
   # Deprecation warnings
   deprecation_warnings:
@@ -212,118 +291,62 @@ migration:
     security_patches_after_eol: 6
 
 # =============================================================================
-# RESPONSE FORMAT
+# FRONTEND CONFIGURATION
 # =============================================================================
-# Standard response structures across API versions
+# Configuration for frontend API clients
 
-response_format:
-  v1:
-    structure: "direct"
-    example: |
-      {
-        "id": 1,
-        "name": "Station Name"
-      }
+frontend:
+  # Recommended API path for production frontend
+  production:
+    base_path: "/api/latest"
+    version_mode: "alias"
+    description: "Uses semantic alias - auto-resolves to current version"
 
-  v2:
-    structure: "wrapped"
-    example: |
-      {
-        "data": {
-          "id": 1,
-          "name": "Station Name"
-        },
-        "meta": {
-          "version": "v2",
-          "timestamp": "2025-12-02T10:00:00Z"
-        }
-      }
+  # Development configuration (explicit version for testing)
+  development:
+    base_path: "/api/v11"
+    version_mode: "explicit"
+    description: "Pin to specific version for development"
 
-  v3:
-    structure: "wrapped_extended"
-    example: |
-      {
-        "data": {
-          "id": 1,
-          "name": "Station Name",
-          "relationships": {
-            "platforms": "/api/v3/stations/1/platforms"
-          }
-        },
-        "meta": {
-          "version": "v3",
-          "timestamp": "2025-12-02T10:00:00Z",
-          "request_id": "req_abc123"
-        },
-        "links": {
-          "self": "/api/v3/stations/1"
-        }
-      }
+  # Test configuration
+  test:
+    base_path: "/api/v11"
+    version_mode: "explicit"
+    description: "Pin to specific version for testing stability"
 
 # =============================================================================
-# FEATURE FLAGS
+# VERSION BUMP CHECKLIST
 # =============================================================================
-# Features available in different API versions
-
-features:
-  pagination:
-    v1: false
-    v2: "offset-based"
-    v3: "cursor-based"
-
-  filtering:
-    v1: "none"
-    v2: "simple"
-    v3: "advanced-json"
-
-  sorting:
-    v1: false
-    v2: "single-field"
-    v3: "multi-field"
-
-  search:
-    v1: false
-    v2: false
-    v3: "full-text"
-
-  bulk_operations:
-    v1: false
-    v2: false
-    v3: true
-
-  campaigns:
-    v1: false
-    v2: false
-    v3: true
-
-  products:
-    v1: false
-    v2: false
-    v3: true
+# When releasing a new API version:
+#
+# 1. Update current.version and current.version_number above
+# 2. Update aliases.latest and aliases.stable to new version
+# 3. Add new version to supported_versions
+# 4. Update previous version status to "legacy"
+# 5. Update version_selection.default_version if needed
+# 6. Update frontend.development.base_path if needed
+# 7. Run: npm run build && npm run deploy
+#
+# NO frontend code changes required if using /api/latest alias!
+# =============================================================================
 
 # =============================================================================
-# DOCUMENTATION
+# DOCUMENTATION LINKS
 # =============================================================================
-# Links to version-specific documentation
 
 documentation:
   base_url: "https://docs.sites.jobelab.com/api"
 
   versions:
-    v1:
-      docs_url: "https://docs.sites.jobelab.com/api/v1"
-      changelog_url: "https://docs.sites.jobelab.com/api/v1/changelog"
-      migration_guide: "https://docs.sites.jobelab.com/api/v1-to-v2"
+    v11:
+      docs_url: "https://docs.sites.jobelab.com/api/v11"
+      changelog_url: "https://docs.sites.jobelab.com/api/v11/changelog"
+      openapi_spec: "https://docs.sites.jobelab.com/api/v11/openapi.yaml"
 
-    v2:
-      docs_url: "https://docs.sites.jobelab.com/api/v2"
-      changelog_url: "https://docs.sites.jobelab.com/api/v2/changelog"
-      migration_guide: "https://docs.sites.jobelab.com/api/v2-to-v3"
-      openapi_spec: "https://docs.sites.jobelab.com/api/v2/openapi.yaml"
+    v10:
+      docs_url: "https://docs.sites.jobelab.com/api/v10"
+      migration_guide: "https://docs.sites.jobelab.com/api/v10-to-v11"
 
     v3:
       docs_url: "https://docs.sites.jobelab.com/api/v3"
-      changelog_url: "https://docs.sites.jobelab.com/api/v3/changelog"
-      openapi_spec: "https://docs.sites.jobelab.com/api/v3/openapi.yaml"
-      graphql_schema: "https://docs.sites.jobelab.com/api/v3/schema.graphql"
-      interactive_docs: "https://api.sites.jobelab.com/docs"
+      migration_guide: "https://docs.sites.jobelab.com/api/v3-to-v11"

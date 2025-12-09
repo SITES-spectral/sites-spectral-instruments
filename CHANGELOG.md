@@ -12,6 +12,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.32] - 2025-12-09
+
+### API Version Aliases & Maintenance/Calibration Timelines
+
+#### API Versioning System (Major Feature)
+- **Semantic Version Aliases**: API now supports semantic aliases for cleaner version management
+  - `/api/latest` - Always resolves to current production version (v11)
+  - `/api/stable` - Same as latest, alias for stability
+  - `/api/current` - Same as latest, for compatibility
+  - `/api/legacy` - Points to previous version (v10) for backward compatibility
+- **Version Headers**: All API responses now include:
+  - `X-API-Version`: Resolved version (e.g., `v11`)
+  - `X-API-Version-Status`: Status (`current`, `legacy`, `deprecated`)
+  - `X-API-Alias`: Original alias if used (e.g., `latest`)
+  - `X-API-Latest-Version`: Latest available version
+- **Frontend Configuration**: `public/js/core/api-config.js` provides environment-aware API path selection
+- **Single Source of Truth**: `yamls/api/api-versions.yaml` centralizes all version configuration
+
+#### Maintenance Timeline Integration
+- **Backend API Methods**: Full CRUD for maintenance records via `/api/latest/maintenance`
+  - `GET /maintenance/timeline?entity_type=platform&entity_id=123`
+  - `GET /maintenance/pending`, `GET /maintenance/overdue`
+  - `POST /maintenance`, `PUT /maintenance/:id`, `DELETE /maintenance/:id`
+  - `POST /maintenance/:id/complete` - Quick-complete action
+- **Frontend Section**: `public/js/modals/sections/maintenance-timeline.js`
+  - Timeline visualization with status badges
+  - Overdue highlighting
+  - Quick-complete actions for station admins
+  - Full form modal for scheduling maintenance
+
+#### Calibration Timeline Integration
+- **Backend API Methods**: Full CRUD for calibration records via `/api/latest/calibrations`
+  - `GET /calibrations/timeline?instrument_id=123`
+  - `GET /calibrations/current?instrument_id=123`
+  - `GET /calibrations/expired`, `GET /calibrations/expiring?days=30`
+  - `POST /calibrations`, `PUT /calibrations/:id`, `DELETE /calibrations/:id`
+  - `POST /calibrations/:id/expire` - Mark as expired
+- **Frontend Section**: `public/js/modals/sections/calibration-timeline.js`
+  - Calibration history with expiry warnings
+  - Quality scoring badges
+  - Panel tracking (Spectralon panel serial numbers)
+  - Ambient conditions logging (cloud cover, solar elevation, temperature)
+  - 55+ field calibration form
+
+#### Files Added
+- `src/infrastructure/api/version-resolver.js` - Backend version resolution
+- `public/js/core/api-config.js` - Frontend API configuration service
+- `public/js/modals/sections/maintenance-timeline.js` - Maintenance UI component
+- `public/js/modals/sections/calibration-timeline.js` - Calibration UI component
+
+#### Files Modified
+- `src/api-handler.js` - Integrated version resolver with alias support
+- `public/js/api.js` - Added maintenance/calibration API methods, uses `_fetchLatest()`
+- `yamls/api/api-versions.yaml` - Complete rewrite with v10/v11 definitions and aliases
+
+#### Version Bump Process
+When releasing a new version, update only `yamls/api/api-versions.yaml`:
+1. Update `current.version` and `current.version_number`
+2. Update `aliases.latest` and `aliases.stable`
+3. Deploy - NO frontend code changes required!
+
+---
+
 ## [11.0.0-alpha.31] - 2025-12-09
 
 ### Station Users are Read-Only

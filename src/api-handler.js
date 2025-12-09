@@ -1,6 +1,6 @@
-// SITES Spectral API Handler v11.0.0
-// V10/V11 API (Hexagonal Architecture) - Primary API with full feature support
-// Legacy V1 handlers maintained for specialized endpoints (auth, export, ROIs, values)
+// SITES Spectral API Handler v11.0.0-alpha.32
+// V11 API (Hexagonal Architecture) - Primary API with full feature support
+// Supports semantic aliases: /api/latest, /api/stable, /api/current
 // SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
 
 import { handleAuth, getUserFromRequest } from './auth/authentication.js';
@@ -13,8 +13,16 @@ import {
   createUnauthorizedResponse
 } from './utils/responses.js';
 
-// V10/V11 API Handler - Hexagonal Architecture (PRIMARY)
+// V11 API Handler - Hexagonal Architecture (PRIMARY)
 import { createRouter } from './infrastructure/http/router.js';
+
+// API Version Resolver (supports /api/latest, /api/stable, etc.)
+import {
+  resolveAPIVersion,
+  addVersionHeaders,
+  createUnsupportedVersionResponse,
+  getVersionInfo
+} from './infrastructure/api/version-resolver.js';
 
 // Specialized handlers (kept for specific functionality)
 import { handleROIs } from './handlers/rois.js';
@@ -57,12 +65,35 @@ export async function handleApiRequest(request, env, ctx) {
     }
   }
 
-  // V10/V11 API - Hexagonal Architecture (PRIMARY)
-  // Route /api/v10/* requests to the hexagonal architecture router
-  if (pathSegments[0] === 'v10' || pathSegments[0] === 'v11') {
+  // V11 API - Hexagonal Architecture with Version Resolution (PRIMARY)
+  // Supports: /api/v11, /api/v10, /api/latest, /api/stable, /api/current
+  const versionedPaths = ['v10', 'v11', 'latest', 'stable', 'current', 'legacy'];
+
+  if (versionedPaths.includes(pathSegments[0])) {
+    // Resolve version (handles aliases like /api/latest → v11)
+    const versionInfo = resolveAPIVersion(request);
+
+    // Check for unsupported version
+    if (versionInfo.error) {
+      return createUnsupportedVersionResponse(versionInfo);
+    }
+
+    // Log deprecated version usage
+    if (versionInfo.status === 'legacy' || versionInfo.status === 'deprecated') {
+      console.warn(`Deprecated API version used: ${versionInfo.resolved} (requested: ${versionInfo.requested})`);
+    }
+
     pathSegments.shift(); // Remove version prefix
     const router = createRouter(env);
-    return await router.handle(request, pathSegments, url);
+
+    // Add version info to request for downstream handlers
+    request.apiVersion = versionInfo;
+
+    // Get response from router
+    const response = await router.handle(request, pathSegments, url);
+
+    // Add version headers to response
+    return addVersionHeaders(response, versionInfo);
   }
 
   const id = pathSegments[1];
@@ -149,6 +180,8 @@ export async function handleApiRequest(request, env, ctx) {
  * @returns {Response} Health status response
  */
 async function handleHealth(env) {
+  const versionInfo = getVersionInfo();
+
   try {
     // Test database connectivity
     const dbTest = await env.DB.prepare('SELECT 1 as test').first();
@@ -156,15 +189,23 @@ async function handleHealth(env) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '11.0.0-alpha.1',
+      version: versionInfo.current.versionNumber,
       database: dbTest ? 'connected' : 'disconnected',
       architecture: 'hexagonal',
-      apiVersion: 'v10/v11',
+      api: {
+        current: versionInfo.current.version,
+        aliases: versionInfo.aliases,
+        supported: versionInfo.supported.map(v => v.version),
+        recommendation: 'Use /api/latest for production'
+      },
       features: [
         'hexagonal-architecture',
         'cqrs-pattern',
         'dependency-injection',
         'domain-driven-design',
+        'api-version-aliases',
+        'maintenance-timeline',
+        'calibration-workflow',
         'aoi-geospatial',
         'campaigns',
         'products',
@@ -181,18 +222,25 @@ async function handleHealth(env) {
       ]
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Version': versionInfo.current.version,
+        'X-API-Latest-Version': versionInfo.aliases.latest
+      }
     });
   } catch (error) {
     console.error('Health check failed:', error);
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '11.0.0-alpha.1',
+      version: versionInfo.current.versionNumber,
       error: error.message,
       database: 'disconnected',
       architecture: 'hexagonal',
-      apiVersion: 'v10/v11'
+      api: {
+        current: versionInfo.current.version,
+        recommendation: 'Use /api/latest for production'
+      }
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }

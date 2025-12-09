@@ -1,14 +1,16 @@
 /**
- * SITES Spectral Instruments - V3 API Client
+ * SITES Spectral Instruments - API Client
  *
- * Extends the existing SitesSpectralAPI pattern to support V3 endpoints
- * with pagination, platform extensions, AOI spatial queries, campaigns, and products.
+ * Unified API client supporting V11 Hexagonal Architecture with:
+ * - Semantic version aliases (/api/latest, /api/stable)
+ * - Maintenance and calibration timelines
+ * - Pagination, platform extensions, AOI spatial queries, campaigns, and products
  *
- * @module api-v3
- * @version 9.0.0
- * @requires api.js (SitesSpectralAPI base class)
+ * @module api
+ * @version 11.0.0-alpha.32
  * @requires core/debug.js (Debug utilities)
  * @requires core/config-service.js (SitesConfig)
+ * @requires core/api-config.js (API configuration service)
  */
 
 (function(global) {
@@ -124,23 +126,50 @@
     }
 
     /**
-     * V3 API Client for SITES Spectral
-     * Extends SitesSpectralAPI functionality with V3 specific features
+     * SITES Spectral API Client
+     * Unified API client with support for semantic version aliases
      */
     class SitesSpectralAPIv3 {
         constructor() {
             /** @private */
             this._baseAPI = global.sitesAPI;
 
-            /** V3 API base path */
+            /**
+             * Primary API base path - uses /api/latest for production
+             * This auto-resolves to the current version (v11) on the server
+             */
+            this.latestBasePath = '/api/latest';
+
+            /** V3 API base path (legacy - deprecated) */
             this.v3BasePath = '/api/v3';
+
+            /** V10/V11 API base path (explicit version) */
+            this.v10BasePath = '/api/v10';
+
+            /** V11 API base path (explicit version) */
+            this.v11BasePath = '/api/v11';
 
             /** Default pagination settings from config or sensible defaults */
             this.defaultPageSize = 20;
             this.maxPageSize = 100;
 
-            /** Default timeout for V3 requests (ms) */
+            /** Default timeout for requests (ms) */
             this.defaultTimeout = 15000;
+
+            /** Use API config if available */
+            this._apiConfig = global.apiConfig || null;
+        }
+
+        /**
+         * Get the preferred API base path
+         * Uses /api/latest for production, can be overridden by apiConfig
+         * @returns {string}
+         */
+        getPreferredBasePath() {
+            if (this._apiConfig) {
+                return this._apiConfig.getBasePath();
+            }
+            return this.latestBasePath;
         }
 
         // ==========================================
@@ -292,6 +321,82 @@
                 logger.error(`V3 Request failed for ${url}:`, error);
                 throw error;
             }
+        }
+
+        /**
+         * Make API request using preferred path (/api/latest or configured)
+         * This is the recommended method for new code
+         * @private
+         * @param {string} endpoint - API endpoint (without version prefix)
+         * @param {Object} [options={}] - Fetch options
+         * @param {boolean} [requireAuth=true] - Whether authentication is required
+         * @returns {Promise<V3Response>}
+         */
+        async _fetchLatest(endpoint, options = {}, requireAuth = true) {
+            const basePath = this.getPreferredBasePath();
+            const url = `${basePath}${endpoint}`;
+            const timeout = options.timeout || this.defaultTimeout;
+
+            // Create abort controller for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+            const headers = requireAuth ? this.getAuthHeaders() : { 'Content-Type': 'application/json' };
+
+            const config = {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    ...headers,
+                    ...(options.headers || {})
+                }
+            };
+
+            try {
+                logger.log(`API Request: ${config.method || 'GET'} ${url}`);
+
+                const response = await fetch(url, config);
+                clearTimeout(timeoutId);
+
+                // Log version info from headers
+                const apiVersion = response.headers.get('X-API-Version');
+                const versionStatus = response.headers.get('X-API-Version-Status');
+                if (apiVersion) {
+                    logger.log(`API Version: ${apiVersion} (${versionStatus})`);
+                }
+
+                if (!response.ok) {
+                    await this._handleV3Error(response);
+                }
+
+                const data = await response.json();
+                logger.log(`API Response: ${response.status}`, data);
+
+                return new V3Response(data);
+            } catch (error) {
+                clearTimeout(timeoutId);
+
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timed out. Please try again.');
+                }
+
+                logger.error(`API Request failed for ${url}:`, error);
+                throw error;
+            }
+        }
+
+        /**
+         * Make V10 API request with authentication (V11 Hexagonal Architecture)
+         * @deprecated Use _fetchLatest() instead for new code
+         * @private
+         * @param {string} endpoint - API endpoint (without /api/v10 prefix)
+         * @param {Object} [options={}] - Fetch options
+         * @param {boolean} [requireAuth=true] - Whether authentication is required
+         * @returns {Promise<V3Response>}
+         */
+        async _fetchV10(endpoint, options = {}, requireAuth = true) {
+            // Redirect to _fetchLatest for automatic version resolution
+            return this._fetchLatest(endpoint, options, requireAuth);
         }
 
         /**
@@ -826,6 +931,259 @@
          */
         async checkHealth() {
             return this._fetchV3('/health', {}, false);
+        }
+
+        // ==========================================
+        // Maintenance Methods (V11 Architecture)
+        // ==========================================
+
+        /**
+         * Get maintenance timeline for an entity (platform or instrument)
+         * @param {string} entityType - Entity type ('platform' or 'instrument')
+         * @param {number|string} entityId - Entity ID
+         * @returns {Promise<V3Response>}
+         */
+        async getMaintenanceTimeline(entityType, entityId) {
+            const params = {
+                entity_type: entityType,
+                entity_id: entityId
+            };
+            return this._fetchV10(`/maintenance/timeline${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get pending maintenance items
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number|string} [filters.stationId] - Filter by station ID
+         * @returns {Promise<V3Response>}
+         */
+        async getPendingMaintenance(filters = {}) {
+            return this._fetchV10(`/maintenance/pending${this._buildQueryString(filters)}`);
+        }
+
+        /**
+         * Get overdue maintenance items
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number|string} [filters.stationId] - Filter by station ID
+         * @returns {Promise<V3Response>}
+         */
+        async getOverdueMaintenance(filters = {}) {
+            return this._fetchV10(`/maintenance/overdue${this._buildQueryString(filters)}`);
+        }
+
+        /**
+         * Get all maintenance records with optional filtering
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {string} [filters.entity_type] - Filter by entity type
+         * @param {number|string} [filters.entity_id] - Filter by entity ID
+         * @param {string} [filters.status] - Filter by status
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getMaintenanceRecords(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
+            return this._fetchV10(`/maintenance${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get single maintenance record by ID
+         * @param {number|string} id - Maintenance record ID
+         * @returns {Promise<V3Response>}
+         */
+        async getMaintenanceRecord(id) {
+            return this._fetchV10(`/maintenance/${encodeURIComponent(id)}`);
+        }
+
+        /**
+         * Create a new maintenance record
+         * @param {Object} maintenanceData - Maintenance data
+         * @param {string} maintenanceData.entity_type - Entity type (platform, instrument)
+         * @param {number} maintenanceData.entity_id - Entity ID
+         * @param {string} maintenanceData.maintenance_type - Type of maintenance
+         * @param {string} [maintenanceData.description] - Description
+         * @param {string} [maintenanceData.scheduled_date] - Scheduled date (ISO format)
+         * @param {string} [maintenanceData.priority] - Priority level
+         * @returns {Promise<V3Response>}
+         */
+        async createMaintenanceRecord(maintenanceData) {
+            return this._fetchV10('/maintenance', {
+                method: 'POST',
+                body: JSON.stringify(maintenanceData)
+            });
+        }
+
+        /**
+         * Update a maintenance record
+         * @param {number|string} id - Maintenance record ID
+         * @param {Object} maintenanceData - Updated data
+         * @returns {Promise<V3Response>}
+         */
+        async updateMaintenanceRecord(id, maintenanceData) {
+            return this._fetchV10(`/maintenance/${encodeURIComponent(id)}`, {
+                method: 'PUT',
+                body: JSON.stringify(maintenanceData)
+            });
+        }
+
+        /**
+         * Mark maintenance as complete
+         * @param {number|string} id - Maintenance record ID
+         * @param {Object} [completionData={}] - Completion details
+         * @param {string} [completionData.notes] - Completion notes
+         * @param {string} [completionData.completed_date] - Completion date (ISO format)
+         * @returns {Promise<V3Response>}
+         */
+        async completeMaintenanceRecord(id, completionData = {}) {
+            return this._fetchV10(`/maintenance/${encodeURIComponent(id)}/complete`, {
+                method: 'POST',
+                body: JSON.stringify(completionData)
+            });
+        }
+
+        /**
+         * Delete a maintenance record
+         * @param {number|string} id - Maintenance record ID
+         * @returns {Promise<V3Response>}
+         */
+        async deleteMaintenanceRecord(id) {
+            return this._fetchV10(`/maintenance/${encodeURIComponent(id)}`, {
+                method: 'DELETE'
+            });
+        }
+
+        // ==========================================
+        // Calibration Methods (V11 Architecture)
+        // ==========================================
+
+        /**
+         * Get calibration timeline for an instrument
+         * @param {number|string} instrumentId - Instrument ID
+         * @returns {Promise<V3Response>}
+         */
+        async getCalibrationTimeline(instrumentId) {
+            const params = { instrument_id: instrumentId };
+            return this._fetchV10(`/calibrations/timeline${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get current calibration for an instrument
+         * @param {number|string} instrumentId - Instrument ID
+         * @returns {Promise<V3Response>}
+         */
+        async getCurrentCalibration(instrumentId) {
+            const params = { instrument_id: instrumentId };
+            return this._fetchV10(`/calibrations/current${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get expired calibrations
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number|string} [filters.stationId] - Filter by station ID
+         * @returns {Promise<V3Response>}
+         */
+        async getExpiredCalibrations(filters = {}) {
+            return this._fetchV10(`/calibrations/expired${this._buildQueryString(filters)}`);
+        }
+
+        /**
+         * Get calibrations expiring within a time period
+         * @param {number} [days=30] - Days until expiration
+         * @param {Object} [filters={}] - Additional filters
+         * @returns {Promise<V3Response>}
+         */
+        async getExpiringCalibrations(days = 30, filters = {}) {
+            const params = { days, ...filters };
+            return this._fetchV10(`/calibrations/expiring${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get all calibration records with optional filtering
+         * @param {Object} [filters={}] - Filter parameters
+         * @param {number|string} [filters.instrument_id] - Filter by instrument ID
+         * @param {string} [filters.status] - Filter by status
+         * @param {number} [page=1] - Page number
+         * @param {number} [limit] - Items per page
+         * @returns {Promise<V3Response>}
+         */
+        async getCalibrationRecords(filters = {}, page = 1, limit = null) {
+            const params = {
+                ...filters,
+                page: page,
+                limit: limit || this.defaultPageSize
+            };
+            return this._fetchV10(`/calibrations${this._buildQueryString(params)}`);
+        }
+
+        /**
+         * Get single calibration record by ID
+         * @param {number|string} id - Calibration record ID
+         * @returns {Promise<V3Response>}
+         */
+        async getCalibrationRecord(id) {
+            return this._fetchV10(`/calibrations/${encodeURIComponent(id)}`);
+        }
+
+        /**
+         * Create a new calibration record
+         * @param {Object} calibrationData - Calibration data
+         * @param {number} calibrationData.instrument_id - Instrument ID
+         * @param {string} calibrationData.calibration_date - Calibration date (ISO format)
+         * @param {string} [calibrationData.expiration_date] - Expiration date (ISO format)
+         * @param {string} [calibrationData.method] - Calibration method
+         * @param {string} [calibrationData.certificate_number] - Certificate number
+         * @param {Object} [calibrationData.measurements] - Calibration measurements
+         * @param {Object} [calibrationData.ambient_conditions] - Ambient conditions
+         * @param {Object} [calibrationData.panel_info] - Spectralon panel info
+         * @returns {Promise<V3Response>}
+         */
+        async createCalibrationRecord(calibrationData) {
+            return this._fetchV10('/calibrations', {
+                method: 'POST',
+                body: JSON.stringify(calibrationData)
+            });
+        }
+
+        /**
+         * Update a calibration record
+         * @param {number|string} id - Calibration record ID
+         * @param {Object} calibrationData - Updated data
+         * @returns {Promise<V3Response>}
+         */
+        async updateCalibrationRecord(id, calibrationData) {
+            return this._fetchV10(`/calibrations/${encodeURIComponent(id)}`, {
+                method: 'PUT',
+                body: JSON.stringify(calibrationData)
+            });
+        }
+
+        /**
+         * Expire a calibration record
+         * @param {number|string} id - Calibration record ID
+         * @param {Object} [expirationData={}] - Expiration details
+         * @param {string} [expirationData.reason] - Expiration reason
+         * @returns {Promise<V3Response>}
+         */
+        async expireCalibrationRecord(id, expirationData = {}) {
+            return this._fetchV10(`/calibrations/${encodeURIComponent(id)}/expire`, {
+                method: 'POST',
+                body: JSON.stringify(expirationData)
+            });
+        }
+
+        /**
+         * Delete a calibration record
+         * @param {number|string} id - Calibration record ID
+         * @returns {Promise<V3Response>}
+         */
+        async deleteCalibrationRecord(id) {
+            return this._fetchV10(`/calibrations/${encodeURIComponent(id)}`, {
+                method: 'DELETE'
+            });
         }
 
         // ==========================================
