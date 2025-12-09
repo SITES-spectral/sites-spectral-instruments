@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.22] - 2025-12-09
+
+### Platform Form UI Improvements
+
+#### Bug Fixes
+- **Platform Type Icons**: Fixed icons not displaying in Create Platform modal
+  - Issue: Text keys (e.g., "tower-observation") were displayed instead of actual icons
+  - Fix: Added SVG path definitions and rendering for platform type icons
+  - Icons now match the card icons: tower for Fixed, drone for UAV, satellite for Satellite
+
+- **Coordinate Fields Visibility**: Removed unnecessary lat/lon fields for UAV and Satellite
+  - Issue: Latitude/Longitude fields appeared in Optional Fields for all platform types
+  - Fix: Changed condition from `!== 'satellite'` to `=== 'fixed'`
+  - Only Fixed platforms have meaningful physical coordinates
+  - UAV platforms have dynamic flight positions
+  - Satellite platforms use virtual orbital positions
+
+#### Files Modified
+- `PlatformForm.vue`: Added `platformIconPaths` object, SVG icon rendering, conditional coordinates
+
+---
+
 ## [11.0.0-alpha.21] - 2025-12-09
 
 ### Auth Initialization Fix

@@ -46,6 +46,34 @@ const platformFieldComponents = {
   satellite: markRaw(SatellitePlatformFields)
 };
 
+// SVG paths for platform type icons (Lucide-style)
+const platformIconPaths = {
+  // Tower/observation - fixed platform default
+  'tower-observation': [
+    'M12 2v20',        // Vertical pole
+    'M8 22h8',         // Base
+    'M8 4l4 8 4-8',    // Tower structure (inverted V)
+    'M6 12h12',        // Platform/observation deck
+    'M9 12v4h6v-4'     // Cabin/housing
+  ],
+  // Drone/UAV - quadcopter style
+  'drone': [
+    'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0',
+    'M12 2v4', 'M12 18v4',
+    'M4.93 4.93l2.83 2.83', 'M16.24 16.24l2.83 2.83',
+    'M2 12h4', 'M18 12h4',
+    'M4.93 19.07l2.83-2.83', 'M16.24 7.76l2.83-2.83'
+  ],
+  // Satellite - orbital satellite with solar panels
+  'satellite': [
+    'M13 7L9 3 5 7l4 4',
+    'M17 11l4 4-4 4-4-4',
+    'M8 12l4 4 4-4-4-4-4 4z',
+    'M16 8l3-3',
+    'M5 16l3 3'
+  ]
+};
+
 // Get available platform types from registry
 const platformTypes = computed(() => {
   return Object.entries(PLATFORM_TYPE_STRATEGIES).map(([key, config]) => ({
@@ -203,7 +231,23 @@ function handleCancel() {
             :value="type.value"
             class="radio radio-primary radio-sm"
           />
-          <span class="text-xl">{{ type.icon }}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5"
+            :class="selectedType === type.value ? 'text-primary' : 'text-base-content/60'"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              v-for="(path, idx) in platformIconPaths[type.icon]"
+              :key="idx"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              :d="path"
+            />
+          </svg>
           <span>{{ type.label }}</span>
         </label>
       </div>
@@ -254,8 +298,8 @@ function handleCancel() {
           ></textarea>
         </div>
 
-        <!-- Coordinates (only for non-satellite platforms) -->
-        <div v-if="selectedType !== 'satellite'" class="grid grid-cols-2 gap-4">
+        <!-- Coordinates (only for fixed platforms - UAV/Satellite don't have fixed coordinates) -->
+        <div v-if="selectedType === 'fixed'" class="grid grid-cols-2 gap-4">
           <div class="form-control">
             <label class="label">
               <span class="label-text">Latitude</span>
