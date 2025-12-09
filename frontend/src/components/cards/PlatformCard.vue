@@ -87,18 +87,54 @@ const typeTextClass = computed(() => {
   return classes[props.platform.platform_type] || 'text-info';
 });
 
-// Get SVG path for platform type icon
-const typeIconPath = computed(() => {
+// Mount type icons for fixed platforms
+const mountTypeIconPaths = {
+  // PL: Tower/Mast - triangular tower with observation platform
+  PL: [
+    'M12 2v20',        // Vertical pole
+    'M8 22h8',         // Base
+    'M8 4l4 8 4-8',    // Tower structure (inverted V)
+    'M6 12h12',        // Platform/observation deck
+    'M9 12v4h6v-4'     // Cabin/housing
+  ],
+  // BL: Building - building with rooftop installation
+  BL: [
+    'M3 21h18',        // Ground line
+    'M5 21V7l7-4 7 4v14', // Building outline
+    'M9 21v-6h6v6',    // Door
+    'M9 9h.01M15 9h.01', // Windows
+    'M12 3v2'          // Antenna/sensor on roof
+  ],
+  // GL: Ground Level - low installation with sensors
+  GL: [
+    'M3 17h18',        // Ground line
+    'M7 17v-4h10v4',   // Low platform/enclosure
+    'M12 13v-3',       // Sensor pole
+    'M10 10h4',        // Sensor crossbar
+    'M9 7l3-3 3 3'     // Sensor head
+  ]
+};
+
+// Get SVG paths for platform type icon (array format for multiple paths)
+const typeIconPaths = computed(() => {
+  // For fixed platforms, use mount-type specific icons
+  if (props.platform.platform_type === 'fixed') {
+    const mountCode = props.platform.mount_type_code?.match(/^([A-Z]+)/)?.[1] || 'PL';
+    return mountTypeIconPaths[mountCode] || mountTypeIconPaths.PL;
+  }
+
+  // Non-fixed platform types
   const paths = {
-    // Fixed: Observation tower/mast structure
-    fixed: 'M12 2v20M8 22h8M8 6l4 16 4-16M10 12h4',
     // UAV: Drone/quadcopter
-    uav: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
-    // Satellite: Orbital satellite
-    satellite: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
+    uav: ['M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0', 'M12 2v4', 'M12 18v4', 'M4.93 4.93l2.83 2.83', 'M16.24 16.24l2.83 2.83', 'M2 12h4', 'M18 12h4', 'M4.93 19.07l2.83-2.83', 'M16.24 7.76l2.83-2.83'],
+    // Satellite: Orbital satellite with solar panels
+    satellite: ['M13 7L9 3 5 7l4 4', 'M17 11l4 4-4 4-4-4', 'M8 12l4 4 4-4-4-4-4 4z', 'M16 8l3-3', 'M5 16l3 3']
   };
-  return paths[props.platform.platform_type] || paths.fixed;
+  return paths[props.platform.platform_type] || mountTypeIconPaths.PL;
 });
+
+// Check if using multi-path icon format
+const isMultiPath = computed(() => Array.isArray(typeIconPaths.value));
 </script>
 
 <template>
@@ -108,7 +144,7 @@ const typeIconPath = computed(() => {
       <div class="flex items-start justify-between gap-2">
         <!-- Left: Icon + Names -->
         <div class="flex items-start gap-3 min-w-0 flex-1">
-          <!-- Platform type icon -->
+          <!-- Platform type icon (mount-type specific for fixed platforms) -->
           <div
             :class="['p-2.5 rounded-lg flex-shrink-0', typeBgClass]"
             :title="typeStrategy.name"
@@ -122,10 +158,12 @@ const typeIconPath = computed(() => {
               stroke="currentColor"
             >
               <path
+                v-for="(path, idx) in typeIconPaths"
+                :key="idx"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                :d="typeIconPath"
+                :d="path"
               />
             </svg>
           </div>

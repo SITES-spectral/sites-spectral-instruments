@@ -94,7 +94,8 @@ const instrumentTypes = {
   'Multispectral Sensor': {
     key: 'Multispectral Sensor',
     name: 'Multispectral',
-    icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+    // Stacked layers icon representing spectral bands
+    icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
     bgClass: 'bg-purple-500/10',
     textClass: 'text-purple-500',
     borderClass: 'border-purple-500'

@@ -12,6 +12,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.16] - 2025-12-09
+
+### Icon System Harmonization
+
+#### Fixed Instrument Icons
+- **Multispectral**: Changed from book-like icon to proper stacked layers icon
+  - Represents spectral bands as layered data
+  - Consistent across InstrumentCard and PlatformView
+- **Updated SVG Paths**: All instrument icons now use Lucide-style paths:
+  - Camera (Phenocam): Camera with lens
+  - Layers (Multispectral): Three stacked perspective planes
+  - Sun (PAR): Sun with rays and center circle
+  - Leaf (NDVI): Botanical leaf shape
+  - Microscope (PRI): Scientific microscope
+  - Rainbow (Hyperspectral): Concentric arcs
+  - Thermometer (Thermal): Temperature gauge
+  - Waves (LiDAR): Wave pattern
+  - Radar (Satellite-dish): Radio signal waves
+
+#### Mount-Type Specific Platform Icons
+- **PL (Pole/Tower/Mast)**: Triangular tower with observation platform
+  - Vertical pole with base, tower structure, platform deck, and cabin
+- **BL (Building)**: Building with rooftop sensor installation
+  - Building outline with roof antenna, door, and windows
+- **GL (Ground Level)**: Low installation with sensor array
+  - Ground line, low enclosure, sensor pole with crossbar
+
+#### Platform Type Icons
+- **UAV**: Drone with propeller arms (radial pattern from center)
+- **Satellite**: Orbital satellite with angular solar panels
+
+---
+
 ## [11.0.0-alpha.15] - 2025-12-09
 
 ### Platform Mini-Map: Station Context with Sibling Platforms
