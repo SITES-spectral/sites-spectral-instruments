@@ -12,6 +12,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.17] - 2025-12-09
+
+### Sidebar Reference Guide
+
+#### New Feature: Collapsible Reference Guide
+- **Main Toggle**: "Reference Guide" section with expand/collapse
+- **Station Codes**: All 9 SITES stations (ANS, ABK, ERK, GRI, LON, RBD, SKG, SRC, SVB)
+- **Ecosystem Codes**: 11 ecosystem types (FOR, CON, DEC, AGR, GRA, HEA, MIR, WET, PEA, ALP, LAK)
+- **Mount Types**: 5 platform mount types with color coding
+  - PL (Tower/Mast) - Blue/Info
+  - BL (Building) - Purple/Secondary
+  - GL (Ground Level) - Green/Success
+  - UAV (Drone Position) - Yellow/Warning
+  - SAT (Satellite) - Accent
+- **Instrument Types**: 8 instrument codes (PHE, MS, PAR, NDVI, PRI, HYP, THR, LID)
+- **Naming Patterns**: Quick reference for normalized name construction
+
+#### Naming Conventions Guide (Detailed)
+- **Platform Naming**: Format and examples for Fixed, UAV, and Satellite platforms
+- **Instrument Naming**: Format and examples by instrument type
+- **File Naming (L0-L3)**: Data processing level file conventions
+  - L0 Raw: `INSTRUMENT_YYYYMMDD_HHMMSS.jpg`
+  - L1 Processed: `INSTRUMENT_YYYYMMDD_HHMMSS_L1.tif`
+  - L2 Product: `INSTRUMENT_YYYYMMDD_PRODUCT_L2.tif`
+  - L3 Composite: `INSTRUMENT_YYYYMMDD_PRODUCT_L3.csv`
+
+#### UI Design
+- DaisyUI collapse components for smooth expand/collapse
+- Color-coded abbreviation codes per category
+- Compact text sizes (xs/10px) for sidebar fit
+- Border separators between items in detailed sections
+
+---
+
 ## [11.0.0-alpha.16] - 2025-12-09
 
 ### Icon System Harmonization

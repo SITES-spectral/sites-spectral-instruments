@@ -22,6 +22,10 @@ const authStore = useAuthStore();
 const expandedStations = ref(new Set());
 const expandedPlatforms = ref(new Set());
 
+// Reference guide expanded state
+const expandedReferenceGuide = ref(false);
+const expandedReferenceSections = ref(new Set());
+
 // Platform and instrument cache (keyed by station/platform id)
 const platformsByStation = ref({});
 const instrumentsByPlatform = ref({});
@@ -285,6 +289,90 @@ function getInstrumentIcon(type) {
   // Default: Generic sensor/chip icon
   return 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z';
 }
+
+// Toggle reference section
+function toggleReferenceSection(section) {
+  if (expandedReferenceSections.value.has(section)) {
+    expandedReferenceSections.value.delete(section);
+  } else {
+    expandedReferenceSections.value.add(section);
+  }
+}
+
+// Reference guide data
+const stationCodes = [
+  { code: 'ANS', name: 'Asa', description: 'Asa Research Station' },
+  { code: 'ABK', name: 'Abisko', description: 'Abisko Scientific Research Station' },
+  { code: 'ERK', name: 'Erken', description: 'Erken Laboratory' },
+  { code: 'GRI', name: 'Grimsö', description: 'Grimsö Wildlife Research Station' },
+  { code: 'LON', name: 'Lönnstorp', description: 'Lönnstorp Research Station' },
+  { code: 'RBD', name: 'Röbäcksdalen', description: 'Röbäcksdalen Field Research Station' },
+  { code: 'SKG', name: 'Skogaryd', description: 'Skogaryd Research Catchment' },
+  { code: 'SRC', name: 'Stordalen', description: 'Stordalen Mire' },
+  { code: 'SVB', name: 'Svartberget', description: 'Svartberget Research Station' }
+];
+
+const ecosystemCodes = [
+  { code: 'FOR', name: 'Forest', description: 'Mixed or general forest' },
+  { code: 'CON', name: 'Coniferous', description: 'Coniferous forest (spruce, pine)' },
+  { code: 'DEC', name: 'Deciduous', description: 'Deciduous forest (birch, oak)' },
+  { code: 'AGR', name: 'Arable', description: 'Agricultural cropland' },
+  { code: 'GRA', name: 'Grassland', description: 'Natural grassland' },
+  { code: 'HEA', name: 'Heathland', description: 'Heath and shrubland' },
+  { code: 'MIR', name: 'Mires', description: 'Wetland mire ecosystems' },
+  { code: 'WET', name: 'Wetland', description: 'General wetland' },
+  { code: 'PEA', name: 'Peatland', description: 'Peat-forming wetlands' },
+  { code: 'ALP', name: 'Alpine', description: 'Alpine/subalpine zones' },
+  { code: 'LAK', name: 'Lake', description: 'Freshwater lake' }
+];
+
+const mountTypeCodes = [
+  { code: 'PL', name: 'Pole/Tower/Mast', description: 'Elevated structure >1.5m', color: 'text-info' },
+  { code: 'BL', name: 'Building', description: 'Rooftop or facade mount', color: 'text-secondary' },
+  { code: 'GL', name: 'Ground Level', description: 'Installation <1.5m height', color: 'text-success' },
+  { code: 'UAV', name: 'UAV Position', description: 'Drone flight position', color: 'text-warning' },
+  { code: 'SAT', name: 'Satellite', description: 'Virtual satellite position', color: 'text-accent' }
+];
+
+const instrumentCodes = [
+  { code: 'PHE', name: 'Phenocam', description: 'Digital camera for phenology' },
+  { code: 'MS', name: 'Multispectral', description: 'Multi-band spectral sensor' },
+  { code: 'PAR', name: 'PAR Sensor', description: 'Photosynthetically Active Radiation' },
+  { code: 'NDVI', name: 'NDVI Sensor', description: 'Vegetation index sensor' },
+  { code: 'PRI', name: 'PRI Sensor', description: 'Photochemical Reflectance Index' },
+  { code: 'HYP', name: 'Hyperspectral', description: 'Imaging spectrometer' },
+  { code: 'THR', name: 'Thermal', description: 'Infrared thermal sensor' },
+  { code: 'LID', name: 'LiDAR', description: 'Light Detection and Ranging' }
+];
+
+// Naming pattern examples (brief)
+const namingExamples = [
+  { pattern: '{STATION}_{ECOSYSTEM}_{MOUNT}{##}', example: 'SVB_FOR_PL01', description: 'Fixed platform' },
+  { pattern: '{STATION}_{VENDOR}_{MODEL}_{MOUNT}{##}', example: 'SVB_DJI_M3M_UAV01', description: 'UAV platform' },
+  { pattern: '{PLATFORM}_{TYPE}{##}', example: 'SVB_FOR_PL01_PHE01', description: 'Instrument' }
+];
+
+// Detailed naming conventions guide
+const namingConventions = {
+  platforms: [
+    { type: 'Fixed Platform', format: 'STATION_ECOSYSTEM_MOUNT##', example: 'SVB_FOR_PL01', notes: 'Station + ecosystem type + mount type with sequence number' },
+    { type: 'UAV Platform', format: 'STATION_VENDOR_MODEL_UAV##', example: 'LON_DJI_M3M_UAV01', notes: 'Station + drone vendor + model + UAV sequence number' },
+    { type: 'Satellite Platform', format: 'STATION_AGENCY_SAT_SENSOR', example: 'SVB_ESA_S2A_MSI', notes: 'Station + space agency + satellite + sensor name' }
+  ],
+  instruments: [
+    { type: 'Phenocam', format: 'PLATFORM_PHE##', example: 'SVB_FOR_PL01_PHE01', notes: 'Platform name + PHE + sequence number' },
+    { type: 'Multispectral', format: 'PLATFORM_MS##', example: 'SVB_FOR_PL01_MS01', notes: 'Platform name + MS + sequence number' },
+    { type: 'PAR Sensor', format: 'PLATFORM_PAR##', example: 'ANS_MIR_PL02_PAR01', notes: 'Platform name + PAR + sequence number' },
+    { type: 'NDVI Sensor', format: 'PLATFORM_NDVI##', example: 'LON_AGR_PL01_NDVI01', notes: 'Platform name + NDVI + sequence number' },
+    { type: 'Hyperspectral', format: 'PLATFORM_HYP##', example: 'GRI_FOR_PL01_HYP01', notes: 'Platform name + HYP + sequence number' }
+  ],
+  files: [
+    { type: 'L0 Raw Image', format: 'INSTRUMENT_YYYYMMDD_HHMMSS.jpg', example: 'SVB_FOR_PL01_PHE01_20240615_120000.jpg', notes: 'Instrument + date + time (UTC)' },
+    { type: 'L1 Processed', format: 'INSTRUMENT_YYYYMMDD_HHMMSS_L1.tif', example: 'SVB_FOR_PL01_PHE01_20240615_120000_L1.tif', notes: 'L1 registered/calibrated image' },
+    { type: 'L2 Product', format: 'INSTRUMENT_YYYYMMDD_PRODUCT_L2.tif', example: 'SVB_FOR_PL01_PHE01_20240615_GCC_L2.tif', notes: 'L2 vegetation index product' },
+    { type: 'L3 Composite', format: 'INSTRUMENT_YYYYMMDD_PRODUCT_L3.csv', example: 'SVB_FOR_PL01_PHE01_202406_GCC_L3.csv', notes: 'L3 daily/monthly composite' }
+  ]
+};
 </script>
 
 <template>
@@ -462,6 +550,237 @@ function getInstrumentIcon(type) {
             </router-link>
           </li>
         </ul>
+      </div>
+
+      <!-- Reference Guide Section -->
+      <div class="mt-6 pt-4 border-t border-base-200">
+        <!-- Main toggle -->
+        <button
+          @click="expandedReferenceGuide = !expandedReferenceGuide"
+          class="flex items-center justify-between w-full text-xs font-medium text-base-content/50 uppercase tracking-wide mb-2 px-1 hover:text-base-content/70 transition-colors"
+        >
+          <span class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            Reference Guide
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-3 w-3 transition-transform"
+            :class="{ 'rotate-180': expandedReferenceGuide }"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <div v-if="expandedReferenceGuide" class="space-y-1">
+          <!-- Station Codes -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('stations')"
+              @change="toggleReferenceSection('stations')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Station Codes
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-1 pt-1">
+                <div
+                  v-for="item in stationCodes"
+                  :key="item.code"
+                  class="flex items-start gap-2 text-xs py-0.5"
+                >
+                  <code class="font-mono font-semibold text-primary min-w-[2.5rem]">{{ item.code }}</code>
+                  <span class="text-base-content/70">{{ item.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ecosystem Codes -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('ecosystems')"
+              @change="toggleReferenceSection('ecosystems')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Ecosystem Codes
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-1 pt-1">
+                <div
+                  v-for="item in ecosystemCodes"
+                  :key="item.code"
+                  class="flex items-start gap-2 text-xs py-0.5"
+                >
+                  <code class="font-mono font-semibold text-success min-w-[2.5rem]">{{ item.code }}</code>
+                  <span class="text-base-content/70">{{ item.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mount Type Codes -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('mounts')"
+              @change="toggleReferenceSection('mounts')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Mount Types
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-1 pt-1">
+                <div
+                  v-for="item in mountTypeCodes"
+                  :key="item.code"
+                  class="flex items-start gap-2 text-xs py-0.5"
+                >
+                  <code :class="['font-mono font-semibold min-w-[2.5rem]', item.color]">{{ item.code }}</code>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-base-content/80">{{ item.name }}</span>
+                    <span class="text-base-content/50 block text-[10px]">{{ item.description }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instrument Type Codes -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('instruments')"
+              @change="toggleReferenceSection('instruments')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Instrument Types
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-1 pt-1">
+                <div
+                  v-for="item in instrumentCodes"
+                  :key="item.code"
+                  class="flex items-start gap-2 text-xs py-0.5"
+                >
+                  <code class="font-mono font-semibold text-secondary min-w-[2.5rem]">{{ item.code }}</code>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-base-content/80">{{ item.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Naming Convention Examples -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('naming')"
+              @change="toggleReferenceSection('naming')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Naming Patterns
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-2 pt-1">
+                <div
+                  v-for="item in namingExamples"
+                  :key="item.example"
+                  class="text-xs"
+                >
+                  <div class="text-base-content/50 text-[10px] mb-0.5">{{ item.description }}:</div>
+                  <code class="font-mono text-accent block">{{ item.example }}</code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Platform Naming Conventions -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('platform-naming')"
+              @change="toggleReferenceSection('platform-naming')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Platform Naming
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-2 pt-1">
+                <div
+                  v-for="item in namingConventions.platforms"
+                  :key="item.type"
+                  class="text-xs border-b border-base-300/50 pb-2 last:border-0"
+                >
+                  <div class="font-medium text-info mb-0.5">{{ item.type }}</div>
+                  <code class="font-mono text-accent text-[10px] block mb-0.5">{{ item.format }}</code>
+                  <code class="font-mono text-success/80 text-[10px] block mb-0.5">→ {{ item.example }}</code>
+                  <div class="text-base-content/50 text-[10px]">{{ item.notes }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instrument Naming Conventions -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('instrument-naming')"
+              @change="toggleReferenceSection('instrument-naming')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              Instrument Naming
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-2 pt-1">
+                <div
+                  v-for="item in namingConventions.instruments"
+                  :key="item.type"
+                  class="text-xs border-b border-base-300/50 pb-2 last:border-0"
+                >
+                  <div class="font-medium text-secondary mb-0.5">{{ item.type }}</div>
+                  <code class="font-mono text-accent text-[10px] block mb-0.5">{{ item.format }}</code>
+                  <code class="font-mono text-success/80 text-[10px] block mb-0.5">→ {{ item.example }}</code>
+                  <div class="text-base-content/50 text-[10px]">{{ item.notes }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- File Naming Conventions -->
+          <div class="collapse collapse-arrow bg-base-200/50 rounded">
+            <input
+              type="checkbox"
+              :checked="expandedReferenceSections.has('file-naming')"
+              @change="toggleReferenceSection('file-naming')"
+            />
+            <div class="collapse-title text-xs font-medium py-2 px-3 min-h-0">
+              File Naming (L0-L3)
+            </div>
+            <div class="collapse-content px-2">
+              <div class="space-y-2 pt-1">
+                <div
+                  v-for="item in namingConventions.files"
+                  :key="item.type"
+                  class="text-xs border-b border-base-300/50 pb-2 last:border-0"
+                >
+                  <div class="font-medium text-warning mb-0.5">{{ item.type }}</div>
+                  <code class="font-mono text-accent text-[10px] block mb-0.5 break-all">{{ item.format }}</code>
+                  <code class="font-mono text-success/80 text-[10px] block mb-0.5 break-all">→ {{ item.example }}</code>
+                  <div class="text-base-content/50 text-[10px]">{{ item.notes }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </aside>
