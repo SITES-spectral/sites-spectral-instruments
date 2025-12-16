@@ -12,6 +12,116 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.42] - 2025-12-16
+
+### Analytics and Export Hexagonal Architecture Migration
+
+Complete migration of Analytics and Export domains to hexagonal architecture, following SOLID principles.
+
+---
+
+### Analytics Domain (`src/domain/analytics/`)
+
+| File | Purpose |
+|------|---------|
+| `AnalyticsRepository.js` | Repository port interface for analytics data access |
+| `AnalyticsService.js` | Business logic for system analytics and metrics |
+| `index.js` | Barrel exports |
+
+#### Analytics Service Features
+
+- **System Overview**: Total counts, status breakdowns, instrument types, ecosystems, deployment timeline
+- **Station Analytics**: Station rankings by data richness score, platform/instrument/ROI counts
+- **Instrument Analytics**: Deployment trends, camera brands/models, measurement status, height distribution, ROI statistics
+- **Activity Analytics**: Recent activity, activity by day/type, entity creation timeline
+- **System Health**: Database health check, data quality scores, coordinate/metadata completeness, recommendations
+
+#### Analytics Infrastructure
+
+**Repository**: `src/infrastructure/persistence/d1/D1AnalyticsRepository.js`
+- All D1/SQL-specific analytics queries isolated in adapter
+- Supports parallel query execution for performance
+- Graceful handling of missing activity_log table
+
+**Controller**: `src/infrastructure/http/controllers/AnalyticsController.js`
+- Admin-only access restriction
+- Static method handlers for each analytics endpoint
+- Clean separation of HTTP concerns from business logic
+
+---
+
+### Export Domain (`src/domain/export/`)
+
+| File | Purpose |
+|------|---------|
+| `ExportRepository.js` | Repository port interface for export data access |
+| `ExportService.js` | Business logic for data export and CSV generation |
+| `index.js` | Barrel exports |
+
+#### Export Service Features
+
+- **Station CSV Export**: Complete station data with platforms, instruments, ROIs
+- **Access Control**: Permission checking for station access
+- **CSV Generation**: Proper escaping, deduplication, metadata headers
+- **Role-Based Access**: Admin sees all, station users see their station, readonly can view all
+
+#### Export Infrastructure
+
+**Repository**: `src/infrastructure/persistence/d1/D1ExportRepository.js`
+- Comprehensive JOIN query for station export data
+- Station lookup by ID, normalized_name, or acronym
+
+**Controller**: `src/infrastructure/http/controllers/ExportController.js`
+- Authentication required for all exports
+- CSV response with proper headers and Content-Disposition
+
+---
+
+### API Endpoints (V11)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v11/analytics` | System overview (admin only) |
+| `GET` | `/api/v11/analytics/overview` | System overview |
+| `GET` | `/api/v11/analytics/stations` | Station analytics with rankings |
+| `GET` | `/api/v11/analytics/instruments` | Instrument deployment analytics |
+| `GET` | `/api/v11/analytics/activity` | Activity analytics |
+| `GET` | `/api/v11/analytics/health` | System health metrics |
+| `GET` | `/api/v11/export/station/:id` | Export station data to CSV |
+
+---
+
+### Files Created
+
+**Domain Layer:**
+- `src/domain/analytics/AnalyticsRepository.js`
+- `src/domain/analytics/AnalyticsService.js`
+- `src/domain/analytics/index.js`
+- `src/domain/export/ExportRepository.js`
+- `src/domain/export/ExportService.js`
+- `src/domain/export/index.js`
+
+**Infrastructure Layer:**
+- `src/infrastructure/persistence/d1/D1AnalyticsRepository.js`
+- `src/infrastructure/persistence/d1/D1ExportRepository.js`
+- `src/infrastructure/http/controllers/AnalyticsController.js`
+- `src/infrastructure/http/controllers/ExportController.js`
+
+### Files Modified
+
+- `src/domain/index.js` - Added Analytics and Export domain exports
+- `src/infrastructure/persistence/d1/index.js` - Added D1AnalyticsRepository, D1ExportRepository exports
+- `src/infrastructure/http/controllers/index.js` - Added AnalyticsController, ExportController exports
+- `src/infrastructure/http/router.js` - Added analytics and export routes
+- `src/api-handler.js` - Routes /api/analytics and /api/export through V11 router
+
+### Testing
+
+- Fixed vitest/esbuild permissions (chmod +x)
+- All 144 tests pass
+
+---
+
 ## [11.0.0-alpha.41] - 2025-12-16
 
 ### ROI and User Domain Hexagonal Architecture Migration

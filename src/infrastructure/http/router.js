@@ -19,7 +19,9 @@ import {
   MaintenanceController,
   CalibrationController,
   ROIController,
-  UserController
+  UserController,
+  AnalyticsController,
+  ExportController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
 import { handleAuth } from '../../auth/authentication.js';
@@ -116,6 +118,14 @@ export function createRouter(env) {
           case 'users':
             // User management - V11 hexagonal architecture (v11.0.0-alpha.41)
             return await controllers.users.handle(request, resourcePath, url);
+
+          case 'analytics':
+            // Analytics - V11 hexagonal architecture (v11.0.0-alpha.42)
+            return await AnalyticsController.handle(request, env, request.method, ['analytics', ...resourcePath]);
+
+          case 'export':
+            // Export - V11 hexagonal architecture (v11.0.0-alpha.42)
+            return await ExportController.handle(request, env, request.method, ['export', ...resourcePath]);
 
           default:
             return createNotFoundResponse(`Unknown resource: ${resource}`);

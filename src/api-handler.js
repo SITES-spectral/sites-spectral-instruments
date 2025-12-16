@@ -1,4 +1,4 @@
-// SITES Spectral API Handler v11.0.0-alpha.32
+// SITES Spectral API Handler v11.0.0-alpha.42
 // V11 API (Hexagonal Architecture) - Primary API with full feature support
 // Supports semantic aliases: /api/latest, /api/stable, /api/current
 // SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
@@ -24,10 +24,12 @@ import {
   getVersionInfo
 } from './infrastructure/api/version-resolver.js';
 
-// Specialized handlers (kept for specific functionality)
-import { handleExport } from './handlers/export.js';
+// V11 Hexagonal Controllers for Analytics and Export
+import { AnalyticsController } from './infrastructure/http/controllers/AnalyticsController.js';
+import { ExportController } from './infrastructure/http/controllers/ExportController.js';
+
+// Admin router (for admin panel functionality)
 import { handleAdmin } from './admin/admin-router.js';
-import { handleAnalytics } from './handlers/analytics.js';
 
 // Lookup table handlers (for dropdown values)
 import { handleResearchPrograms, getResearchProgramsValues } from './handlers/research-programs.js';
@@ -117,19 +119,14 @@ export async function handleApiRequest(request, env, ctx) {
       case 'campaigns':
       case 'products':
       case 'rois':
-      case 'users': {
+      case 'users':
+      case 'analytics':
+      case 'export': {
         // Forward unversioned core entity requests to V11 router (hexagonal architecture)
+        // Analytics and Export now use V11 hexagonal architecture (v11.0.0-alpha.42)
         const router = createRouter(env);
         return await router.handle(request, pathSegments, url);
       }
-
-      // === SPECIALIZED HANDLERS ===
-
-      case 'export':
-        return await handleExport(method, pathSegments, request, env);
-
-      case 'analytics':
-        return await handleAnalytics(method, pathSegments, request, env);
 
       // === LOOKUP TABLES (Dropdown Values) ===
       case 'research-programs':

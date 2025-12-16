@@ -23,3 +23,5 @@ export { MaintenanceController } from './MaintenanceController.js';
 export { CalibrationController } from './CalibrationController.js';
 export { ROIController } from './ROIController.js';
 export { UserController } from './UserController.js';
+export { AnalyticsController } from './AnalyticsController.js';
+export { ExportController } from './ExportController.js';

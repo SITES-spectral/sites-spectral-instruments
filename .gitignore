@@ -228,9 +228,9 @@ user-data/
 upload_logs/
 failed_uploads/
 
-# Analytics and monitoring
-analytics/
-monitoring/
+# Analytics and monitoring (root level only, not src/domain/analytics)
+/analytics/
+/monitoring/
 
 # Configuration overrides (local development)
 local.config.js

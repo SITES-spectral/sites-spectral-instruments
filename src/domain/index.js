@@ -92,3 +92,15 @@ export {
   UserCredentialsPort,
   UserService
 } from './user/index.js';
+
+// Analytics domain (V11)
+export {
+  AnalyticsRepository,
+  AnalyticsService
+} from './analytics/index.js';
+
+// Export domain (V11)
+export {
+  ExportRepository,
+  ExportService
+} from './export/index.js';
