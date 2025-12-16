@@ -4,17 +4,24 @@
  * HTTP controller for calibration record endpoints.
  * Implements V11 API routes for calibration timeline management.
  * Only supports multispectral and hyperspectral instruments.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/CalibrationController
  */
 
 import { jsonResponse, errorResponse, notFoundResponse } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 export class CalibrationController {
-  constructor(container) {
+  /**
+   * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
+   */
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
     this.repositories = container.repositories;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
@@ -22,6 +29,12 @@ export class CalibrationController {
    * List calibration records with optional filters
    */
   async list(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const filters = {
@@ -55,6 +68,12 @@ export class CalibrationController {
    * Get a single calibration record
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'read'
+    );
+    if (response) return response;
+
     try {
       const record = await this.queries.getCalibrationRecord.execute(parseInt(id));
 
@@ -72,6 +91,12 @@ export class CalibrationController {
    * Get current valid calibration for an instrument
    */
   async current(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const instrumentId = url.searchParams.get('instrument_id');
@@ -100,6 +125,12 @@ export class CalibrationController {
    * Get calibration timeline for an instrument
    */
   async timeline(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const instrumentId = url.searchParams.get('instrument_id');
@@ -132,6 +163,12 @@ export class CalibrationController {
    * Get expired calibrations
    */
   async expired(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'read'
+    );
+    if (response) return response;
+
     try {
       const records = await this.repositories.calibration.findExpired();
 
@@ -146,6 +183,12 @@ export class CalibrationController {
    * Get calibrations expiring within N days
    */
   async expiring(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const days = parseInt(url.searchParams.get('days')) || 30;
@@ -164,8 +207,15 @@ export class CalibrationController {
   /**
    * POST /api/v11/calibrations
    * Create a new calibration record (multispectral/hyperspectral only)
+   * Requires write permission on calibrations resource
    */
   async create(request) {
+    // Authorization: station admins can create calibration records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'write'
+    );
+    if (response) return response;
+
     try {
       const data = await request.json();
 
@@ -186,8 +236,15 @@ export class CalibrationController {
   /**
    * PUT /api/v11/calibrations/:id
    * Update a calibration record
+   * Requires write permission on calibrations resource
    */
   async update(request, id) {
+    // Authorization: station admins can update calibration records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'write'
+    );
+    if (response) return response;
+
     try {
       const data = await request.json();
       data.id = parseInt(id);
@@ -206,8 +263,15 @@ export class CalibrationController {
   /**
    * POST /api/v11/calibrations/:id/expire
    * Mark a calibration record as expired
+   * Requires write permission on calibrations resource
    */
   async expire(request, id) {
+    // Authorization: station admins can expire calibration records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'write'
+    );
+    if (response) return response;
+
     try {
       const data = await request.json();
       const reason = data.reason || 'expired';
@@ -229,8 +293,15 @@ export class CalibrationController {
   /**
    * DELETE /api/v11/calibrations/:id
    * Delete a calibration record
+   * Requires delete permission on calibrations resource
    */
   async delete(request, id) {
+    // Authorization: station admins can delete calibration records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'calibrations', 'delete'
+    );
+    if (response) return response;
+
     try {
       await this.commands.deleteCalibrationRecord.execute(parseInt(id));
 

@@ -4,6 +4,7 @@
  * HTTP controller for acquisition campaign endpoints.
  * Maps HTTP requests to application use cases.
  * Supports status workflow (planned → active → completed).
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/CampaignController
  */
@@ -13,6 +14,7 @@ import {
   createErrorResponse,
   createNotFoundResponse
 } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * Campaign Controller
@@ -20,16 +22,24 @@ import {
 export class CampaignController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * GET /campaigns - List campaigns with filters
    */
   async list(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'read'
+    );
+    if (response) return response;
+
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '25', 10),
@@ -69,6 +79,12 @@ export class CampaignController {
    * GET /campaigns/:id - Get campaign by ID
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'read'
+    );
+    if (response) return response;
+
     const campaign = await this.queries.getCampaign.execute(parseInt(id, 10));
 
     if (!campaign) {
@@ -82,6 +98,12 @@ export class CampaignController {
    * GET /campaigns/station/:stationId - Get campaigns by station
    */
   async getByStation(request, stationId, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.listCampaigns.execute({
       stationId: parseInt(stationId, 10),
       limit: 100
@@ -97,6 +119,12 @@ export class CampaignController {
    * GET /campaigns/active - Get active campaigns
    */
   async getActive(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.listCampaigns.execute({
       status: 'active',
       limit: 100
@@ -110,9 +138,24 @@ export class CampaignController {
 
   /**
    * POST /campaigns - Create campaign
+   * Requires write permission on campaigns resource
    */
   async create(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Get station ID for authorization context
+    const stationId = body.station_id || body.stationId;
+
+    // Authorization: station admins can create campaigns at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'write', { stationId }
+    );
+    if (response) return response;
 
     try {
       const campaign = await this.commands.createCampaign.execute({
@@ -141,9 +184,27 @@ export class CampaignController {
 
   /**
    * PUT /campaigns/:id - Update campaign
+   * Requires write permission on campaigns resource
    */
   async update(request, id) {
-    const body = await request.json();
+    // First get the campaign to determine its station
+    const existingCampaign = await this.queries.getCampaign.execute(parseInt(id, 10));
+    if (!existingCampaign) {
+      return createNotFoundResponse(`Campaign '${id}' not found`);
+    }
+
+    // Authorization: station admins can update campaigns at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'write', { stationId: existingCampaign.stationId }
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const campaign = await this.commands.updateCampaign.execute({
@@ -175,8 +236,21 @@ export class CampaignController {
 
   /**
    * POST /campaigns/:id/start - Start campaign (planned → active)
+   * Requires write permission on campaigns resource
    */
   async start(request, id) {
+    // First get the campaign to determine its station
+    const existingCampaign = await this.queries.getCampaign.execute(parseInt(id, 10));
+    if (!existingCampaign) {
+      return createNotFoundResponse(`Campaign '${id}' not found`);
+    }
+
+    // Authorization: station admins can start campaigns at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'write', { stationId: existingCampaign.stationId }
+    );
+    if (response) return response;
+
     const body = await request.json().catch(() => ({}));
 
     try {
@@ -199,8 +273,21 @@ export class CampaignController {
 
   /**
    * POST /campaigns/:id/complete - Complete campaign (active → completed)
+   * Requires write permission on campaigns resource
    */
   async complete(request, id) {
+    // First get the campaign to determine its station
+    const existingCampaign = await this.queries.getCampaign.execute(parseInt(id, 10));
+    if (!existingCampaign) {
+      return createNotFoundResponse(`Campaign '${id}' not found`);
+    }
+
+    // Authorization: station admins can complete campaigns at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'write', { stationId: existingCampaign.stationId }
+    );
+    if (response) return response;
+
     const body = await request.json().catch(() => ({}));
 
     try {
@@ -225,8 +312,21 @@ export class CampaignController {
 
   /**
    * DELETE /campaigns/:id - Delete campaign
+   * Requires delete permission on campaigns resource
    */
   async delete(request, id) {
+    // First get the campaign to determine its station
+    const existingCampaign = await this.queries.getCampaign.execute(parseInt(id, 10));
+    if (!existingCampaign) {
+      return createNotFoundResponse(`Campaign '${id}' not found`);
+    }
+
+    // Authorization: station admins can delete campaigns at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'campaigns', 'delete', { stationId: existingCampaign.stationId }
+    );
+    if (response) return response;
+
     try {
       await this.commands.deleteCampaign.execute(parseInt(id, 10));
       return createSuccessResponse({ deleted: true });

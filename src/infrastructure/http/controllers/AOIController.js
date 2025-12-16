@@ -4,6 +4,7 @@
  * HTTP controller for Areas of Interest endpoints.
  * Maps HTTP requests to application use cases.
  * Supports GeoJSON/KML import and geospatial queries.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/AOIController
  */
@@ -13,6 +14,7 @@ import {
   createErrorResponse,
   createNotFoundResponse
 } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * AOI Controller
@@ -20,16 +22,24 @@ import {
 export class AOIController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * GET /aois - List AOIs with filters
    */
   async list(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'read'
+    );
+    if (response) return response;
+
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '25', 10),
@@ -63,6 +73,12 @@ export class AOIController {
    * GET /aois/:id - Get AOI by ID
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'read'
+    );
+    if (response) return response;
+
     const aoi = await this.queries.getAOI.execute(parseInt(id, 10));
 
     if (!aoi) {
@@ -76,6 +92,12 @@ export class AOIController {
    * GET /aois/station/:stationId - Get AOIs by station
    */
   async getByStation(request, stationId, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.listAOIs.execute({
       stationId: parseInt(stationId, 10),
       limit: 100
@@ -91,6 +113,12 @@ export class AOIController {
    * GET /aois/export/geojson - Export AOIs as GeoJSON FeatureCollection
    */
   async exportGeoJSON(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'read'
+    );
+    if (response) return response;
+
     const stationId = url.searchParams.get('station_id');
     const aoiIds = url.searchParams.get('aoi_ids')?.split(',').map(id => parseInt(id, 10));
 
@@ -110,9 +138,24 @@ export class AOIController {
 
   /**
    * POST /aois - Create AOI
+   * Requires write permission on aois resource
    */
   async create(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Get station ID for authorization context
+    const stationId = body.station_id || body.stationId;
+
+    // Authorization: station admins can create AOIs at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'write', { stationId }
+    );
+    if (response) return response;
 
     try {
       const aoi = await this.commands.createAOI.execute({
@@ -137,9 +180,24 @@ export class AOIController {
 
   /**
    * POST /aois/import/geojson - Import AOIs from GeoJSON
+   * Requires write permission on aois resource
    */
   async importGeoJSON(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Get station ID for authorization context
+    const stationId = body.station_id || body.stationId;
+
+    // Authorization: station admins can import AOIs at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'write', { stationId }
+    );
+    if (response) return response;
 
     try {
       const aois = await this.commands.importGeoJSON.execute({
@@ -161,9 +219,24 @@ export class AOIController {
 
   /**
    * POST /aois/import/kml - Import AOIs from KML
+   * Requires write permission on aois resource
    */
   async importKML(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Get station ID for authorization context
+    const stationId = body.station_id || body.stationId;
+
+    // Authorization: station admins can import AOIs at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'write', { stationId }
+    );
+    if (response) return response;
 
     try {
       const aois = await this.commands.importKML.execute({
@@ -185,9 +258,27 @@ export class AOIController {
 
   /**
    * PUT /aois/:id - Update AOI
+   * Requires write permission on aois resource
    */
   async update(request, id) {
-    const body = await request.json();
+    // First get the AOI to determine its station
+    const existingAOI = await this.queries.getAOI.execute(parseInt(id, 10));
+    if (!existingAOI) {
+      return createNotFoundResponse(`AOI '${id}' not found`);
+    }
+
+    // Authorization: station admins can update AOIs at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'write', { stationId: existingAOI.stationId }
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const aoi = await this.commands.updateAOI.execute({
@@ -214,8 +305,21 @@ export class AOIController {
 
   /**
    * DELETE /aois/:id - Delete AOI
+   * Requires delete permission on aois resource
    */
   async delete(request, id) {
+    // First get the AOI to determine its station
+    const existingAOI = await this.queries.getAOI.execute(parseInt(id, 10));
+    if (!existingAOI) {
+      return createNotFoundResponse(`AOI '${id}' not found`);
+    }
+
+    // Authorization: station admins can delete AOIs at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'aois', 'delete', { stationId: existingAOI.stationId }
+    );
+    if (response) return response;
+
     try {
       await this.commands.deleteAOI.execute(parseInt(id, 10));
       return createSuccessResponse({ deleted: true });

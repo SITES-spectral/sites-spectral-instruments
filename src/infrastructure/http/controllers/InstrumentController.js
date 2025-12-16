@@ -3,6 +3,7 @@
  *
  * HTTP controller for instrument endpoints.
  * Maps HTTP requests to application use cases.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/InstrumentController
  */
@@ -12,6 +13,7 @@ import {
   createErrorResponse,
   createNotFoundResponse
 } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * Instrument Controller
@@ -19,16 +21,24 @@ import {
 export class InstrumentController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * GET /instruments - List all instruments
    */
   async list(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'read'
+    );
+    if (response) return response;
+
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '25', 10),
@@ -62,6 +72,12 @@ export class InstrumentController {
    * GET /instruments/platform/:platformId - Get instruments by platform
    */
   async byPlatform(request, platformId) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'read'
+    );
+    if (response) return response;
+
     const instruments = await this.queries.listInstruments.byPlatformId(
       parseInt(platformId, 10)
     );
@@ -75,6 +91,12 @@ export class InstrumentController {
    * GET /instruments/station/:stationId - Get instruments by station
    */
   async byStation(request, stationId) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'read'
+    );
+    if (response) return response;
+
     const instruments = await this.queries.listInstruments.byStationId(
       parseInt(stationId, 10)
     );
@@ -88,6 +110,12 @@ export class InstrumentController {
    * GET /instruments/:id - Get instrument by ID or normalized name
    */
   async get(request, id, withDetails = false) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'read'
+    );
+    if (response) return response;
+
     let instrument;
 
     if (/^\d+$/.test(id)) {
@@ -109,13 +137,32 @@ export class InstrumentController {
 
   /**
    * POST /instruments - Create instrument
+   * Requires write permission on instruments resource
    */
   async create(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Get platform to determine station for authorization
+    const platformId = body.platform_id || body.platformId;
+    let platform = null;
+    if (platformId) {
+      platform = await this.queries.getPlatform.byId(parseInt(platformId, 10));
+    }
+
+    // Authorization: station admins can create instruments at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'write', { stationId: platform?.stationId }
+    );
+    if (response) return response;
 
     try {
       const instrument = await this.commands.createInstrument.execute({
-        platformId: body.platform_id || body.platformId,
+        platformId,
         instrumentType: body.instrument_type || body.instrumentType,
         normalizedName: body.normalized_name || body.normalizedName,
         displayName: body.display_name || body.displayName,
@@ -132,12 +179,36 @@ export class InstrumentController {
 
   /**
    * PUT /instruments/:id - Update instrument
+   * Requires write permission on instruments resource
    */
   async update(request, id) {
-    const body = await request.json();
+    // First get the instrument to determine its station
+    let instrument = await this.queries.getInstrument.byId(parseInt(id, 10));
+    if (!instrument) {
+      return createNotFoundResponse(`Instrument '${id}' not found`);
+    }
+
+    // Get platform to determine station
+    let platform = null;
+    if (instrument.platformId) {
+      platform = await this.queries.getPlatform.byId(instrument.platformId);
+    }
+
+    // Authorization: station admins can update instruments at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'write', { stationId: platform?.stationId }
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
-      const instrument = await this.commands.updateInstrument.execute({
+      const updatedInstrument = await this.commands.updateInstrument.execute({
         id: parseInt(id, 10),
         displayName: body.display_name || body.displayName,
         description: body.description,
@@ -146,7 +217,7 @@ export class InstrumentController {
         specifications: body.specifications
       });
 
-      return createSuccessResponse({ data: instrument.toJSON() });
+      return createSuccessResponse({ data: updatedInstrument.toJSON() });
     } catch (error) {
       if (error.message.includes('not found')) {
         return createNotFoundResponse(error.message);
@@ -157,8 +228,27 @@ export class InstrumentController {
 
   /**
    * DELETE /instruments/:id - Delete instrument
+   * Requires delete permission on instruments resource
    */
   async delete(request, id, url) {
+    // First get the instrument to determine its station
+    let instrument = await this.queries.getInstrument.byId(parseInt(id, 10));
+    if (!instrument) {
+      return createNotFoundResponse(`Instrument '${id}' not found`);
+    }
+
+    // Get platform to determine station
+    let platform = null;
+    if (instrument.platformId) {
+      platform = await this.queries.getPlatform.byId(instrument.platformId);
+    }
+
+    // Authorization: station admins can delete instruments at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'instruments', 'delete', { stationId: platform?.stationId }
+    );
+    if (response) return response;
+
     const cascade = url.searchParams.get('cascade') === 'true';
 
     try {

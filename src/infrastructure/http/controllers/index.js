@@ -21,3 +21,5 @@ export { CampaignController } from './CampaignController.js';
 export { ProductController } from './ProductController.js';
 export { MaintenanceController } from './MaintenanceController.js';
 export { CalibrationController } from './CalibrationController.js';
+export { ROIController } from './ROIController.js';
+export { UserController } from './UserController.js';

@@ -25,10 +25,8 @@ import {
 } from './infrastructure/api/version-resolver.js';
 
 // Specialized handlers (kept for specific functionality)
-import { handleROIs } from './handlers/rois.js';
 import { handleExport } from './handlers/export.js';
 import { handleAdmin } from './admin/admin-router.js';
-import { handleUsers } from './handlers/users.js';
 import { handleAnalytics } from './handlers/analytics.js';
 
 // Lookup table handlers (for dropdown values)
@@ -111,29 +109,24 @@ export async function handleApiRequest(request, env, ctx) {
       case 'admin':
         return await handleAdmin(method, pathSegments, request, env);
 
-      // === CORE ENTITIES - Route to V10 Router ===
+      // === CORE ENTITIES - Route to V11 Router ===
       case 'stations':
       case 'platforms':
       case 'instruments':
       case 'aois':
       case 'campaigns':
-      case 'products': {
-        // Forward unversioned core entity requests to V10 router
+      case 'products':
+      case 'rois':
+      case 'users': {
+        // Forward unversioned core entity requests to V11 router (hexagonal architecture)
         const router = createRouter(env);
         return await router.handle(request, pathSegments, url);
       }
 
       // === SPECIALIZED HANDLERS ===
-      case 'rois':
-        // ROI management with legacy system support
-        const roiSubAction = pathSegments[2] || null;
-        return await handleROIs(method, id, request, env, roiSubAction);
 
       case 'export':
         return await handleExport(method, pathSegments, request, env);
-
-      case 'users':
-        return await handleUsers(method, pathSegments, request, env);
 
       case 'analytics':
         return await handleAnalytics(method, pathSegments, request, env);

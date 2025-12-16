@@ -5,9 +5,10 @@
  * Maps HTTP requests to admin query use cases.
  * All endpoints require GLOBAL admin role (admin or sites-admin usernames only).
  * Station admins (e.g., svb-admin) cannot access these endpoints.
+ * v11.0.0-alpha.34: Added authentication middleware
  *
  * @module infrastructure/http/controllers/AdminController
- * @version 11.0.0-alpha.30
+ * @version 11.0.0-alpha.34
  */
 
 import {
@@ -15,7 +16,7 @@ import {
   createErrorResponse,
   createForbiddenResponse
 } from '../../../utils/responses.js';
-import { validateAdminPermission } from '../../../auth/permissions.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * Admin Controller
@@ -23,33 +24,42 @@ import { validateAdminPermission } from '../../../auth/permissions.js';
 export class AdminController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.adminRepository = container.adminRepository;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * Check if user has GLOBAL admin role
-   * Uses domain authorization to distinguish global admins from station admins
+   * Uses domain authorization middleware
    * @private
    */
-  _requireAdmin(request) {
-    const user = request.user;
+  async _requireAdmin(request) {
+    // Authenticate and authorize for admin resource
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'admin', 'admin'
+    );
+    if (response) return { user: null, response };
 
-    // Use domain authorization to validate global admin status
-    if (!validateAdminPermission(user)) {
-      return createForbiddenResponse('Global admin access required. Station admins cannot access admin panel.');
+    // Check global admin status
+    if (!this.auth.isGlobalAdmin(user)) {
+      return {
+        user: null,
+        response: createForbiddenResponse('Global admin access required. Station admins cannot access admin panel.')
+      };
     }
-    return null;
+    return { user, response: null };
   }
 
   /**
    * GET /admin/activity-logs - Get activity logs
    */
   async getActivityLogs(request, url) {
-    const forbidden = this._requireAdmin(request);
-    if (forbidden) return forbidden;
+    const { user, response } = await this._requireAdmin(request);
+    if (response) return response;
 
     try {
       const stationId = url.searchParams.get('station_id');
@@ -86,8 +96,8 @@ export class AdminController {
    * GET /admin/user-sessions - Get user session summaries
    */
   async getUserSessions(request, url) {
-    const forbidden = this._requireAdmin(request);
-    if (forbidden) return forbidden;
+    const { user, response } = await this._requireAdmin(request);
+    if (response) return response;
 
     try {
       const includeInactive = url.searchParams.get('include_inactive') === 'true';
@@ -108,8 +118,8 @@ export class AdminController {
    * GET /admin/station-stats - Get station activity statistics
    */
   async getStationStats(request, url) {
-    const forbidden = this._requireAdmin(request);
-    if (forbidden) return forbidden;
+    const { user, response } = await this._requireAdmin(request);
+    if (response) return response;
 
     try {
       const startDate = url.searchParams.get('start_date');
@@ -132,8 +142,8 @@ export class AdminController {
    * GET /admin/health - Get system health (enhanced)
    */
   async getHealth(request) {
-    const forbidden = this._requireAdmin(request);
-    if (forbidden) return forbidden;
+    const { user, response } = await this._requireAdmin(request);
+    if (response) return response;
 
     try {
       const health = await this.adminRepository.getSystemHealth();
@@ -148,8 +158,8 @@ export class AdminController {
    * GET /admin/summary - Get admin dashboard summary
    */
   async getSummary(request, url) {
-    const forbidden = this._requireAdmin(request);
-    if (forbidden) return forbidden;
+    const { user, response } = await this._requireAdmin(request);
+    if (response) return response;
 
     try {
       // Get stats for last 30 days by default

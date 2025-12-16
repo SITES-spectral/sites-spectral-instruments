@@ -3,17 +3,24 @@
  *
  * HTTP controller for maintenance record endpoints.
  * Implements V11 API routes for maintenance timeline management.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/MaintenanceController
  */
 
 import { jsonResponse, errorResponse, notFoundResponse } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 export class MaintenanceController {
-  constructor(container) {
+  /**
+   * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
+   */
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
     this.repositories = container.repositories;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
@@ -21,6 +28,12 @@ export class MaintenanceController {
    * List maintenance records with optional filters
    */
   async list(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const filters = {
@@ -57,6 +70,12 @@ export class MaintenanceController {
    * Get a single maintenance record
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'read'
+    );
+    if (response) return response;
+
     try {
       const record = await this.queries.getMaintenanceRecord.execute(parseInt(id));
 
@@ -74,6 +93,12 @@ export class MaintenanceController {
    * Get maintenance timeline for an entity
    */
   async timeline(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const entityType = url.searchParams.get('entity_type');
@@ -103,6 +128,12 @@ export class MaintenanceController {
    * Get pending/scheduled maintenance records
    */
   async pending(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'read'
+    );
+    if (response) return response;
+
     try {
       const url = new URL(request.url);
       const stationId = url.searchParams.get('station_id');
@@ -120,6 +151,12 @@ export class MaintenanceController {
    * Get overdue maintenance records
    */
   async overdue(request) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'read'
+    );
+    if (response) return response;
+
     try {
       const records = await this.repositories.maintenance.findOverdue();
 
@@ -132,8 +169,15 @@ export class MaintenanceController {
   /**
    * POST /api/v11/maintenance
    * Create a new maintenance record
+   * Requires write permission on maintenance resource
    */
   async create(request) {
+    // Authorization: station admins can create maintenance records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'write'
+    );
+    if (response) return response;
+
     try {
       const data = await request.json();
 
@@ -151,8 +195,15 @@ export class MaintenanceController {
   /**
    * PUT /api/v11/maintenance/:id
    * Update a maintenance record
+   * Requires write permission on maintenance resource
    */
   async update(request, id) {
+    // Authorization: station admins can update maintenance records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'write'
+    );
+    if (response) return response;
+
     try {
       const data = await request.json();
       data.id = parseInt(id);
@@ -171,8 +222,15 @@ export class MaintenanceController {
   /**
    * POST /api/v11/maintenance/:id/complete
    * Mark a maintenance record as completed
+   * Requires write permission on maintenance resource
    */
   async complete(request, id) {
+    // Authorization: station admins can complete maintenance records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'write'
+    );
+    if (response) return response;
+
     try {
       const data = await request.json();
       data.id = parseInt(id);
@@ -191,8 +249,15 @@ export class MaintenanceController {
   /**
    * DELETE /api/v11/maintenance/:id
    * Delete a maintenance record
+   * Requires delete permission on maintenance resource
    */
   async delete(request, id) {
+    // Authorization: station admins can delete maintenance records
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'maintenance', 'delete'
+    );
+    if (response) return response;
+
     try {
       await this.commands.deleteMaintenanceRecord.execute(parseInt(id));
 

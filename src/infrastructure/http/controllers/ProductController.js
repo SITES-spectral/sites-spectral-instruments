@@ -4,6 +4,7 @@
  * HTTP controller for data product endpoints.
  * Maps HTTP requests to application use cases.
  * Supports processing levels (L0-L4), quality control, and DOI assignment.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/ProductController
  */
@@ -13,6 +14,7 @@ import {
   createErrorResponse,
   createNotFoundResponse
 } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * Product Controller
@@ -20,16 +22,24 @@ import {
 export class ProductController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * GET /products - List products with filters
    */
   async list(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'read'
+    );
+    if (response) return response;
+
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '25', 10),
@@ -75,6 +85,12 @@ export class ProductController {
    * GET /products/:id - Get product by ID
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'read'
+    );
+    if (response) return response;
+
     const product = await this.queries.getProduct.byId(parseInt(id, 10));
 
     if (!product) {
@@ -88,6 +104,12 @@ export class ProductController {
    * GET /products/doi/:doi - Get product by DOI
    */
   async getByDOI(request, doi) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'read'
+    );
+    if (response) return response;
+
     // DOI may contain slashes, so join segments
     const product = await this.queries.getProduct.byDOI(doi);
 
@@ -102,6 +124,12 @@ export class ProductController {
    * GET /products/instrument/:instrumentId - Get products by instrument
    */
   async getByInstrument(request, instrumentId, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'read'
+    );
+    if (response) return response;
+
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '50', 10),
       100
@@ -122,6 +150,12 @@ export class ProductController {
    * GET /products/campaign/:campaignId - Get products by campaign
    */
   async getByCampaign(request, campaignId, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.listProducts.execute({
       campaignId: parseInt(campaignId, 10),
       limit: 100
@@ -137,6 +171,12 @@ export class ProductController {
    * GET /products/processing-level/:level - Get products by processing level
    */
   async getByProcessingLevel(request, level, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.listProducts.execute({
       processingLevel: level.toUpperCase(),
       limit: 100
@@ -150,9 +190,23 @@ export class ProductController {
 
   /**
    * POST /products - Create product
+   * Requires write permission on products resource
    */
   async create(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Authorization: station admins can create products
+    // Note: Product station context would ideally come from instrument → platform → station
+    // For now, we check general write permission
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'write'
+    );
+    if (response) return response;
 
     try {
       const product = await this.commands.createProduct.execute({
@@ -190,9 +244,27 @@ export class ProductController {
 
   /**
    * PUT /products/:id - Update product
+   * Requires write permission on products resource
    */
   async update(request, id) {
-    const body = await request.json();
+    // First verify product exists
+    const existingProduct = await this.queries.getProduct.byId(parseInt(id, 10));
+    if (!existingProduct) {
+      return createNotFoundResponse(`Product '${id}' not found`);
+    }
+
+    // Authorization: station admins can update products
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'write'
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const product = await this.commands.updateProduct.execute({
@@ -230,9 +302,21 @@ export class ProductController {
 
   /**
    * POST /products/:id/quality-score - Set quality score
+   * Requires write permission on products resource
    */
   async setQualityScore(request, id) {
-    const body = await request.json();
+    // Authorization: station admins can set quality scores
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'write'
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const product = await this.commands.setProductQualityScore.execute({
@@ -255,9 +339,21 @@ export class ProductController {
 
   /**
    * POST /products/:id/promote-quality - Promote quality control level
+   * Requires write permission on products resource
    */
   async promoteQuality(request, id) {
-    const body = await request.json();
+    // Authorization: station admins can promote quality levels
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'write'
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const product = await this.commands.promoteProductQuality.execute({
@@ -281,8 +377,21 @@ export class ProductController {
 
   /**
    * DELETE /products/:id - Delete product
+   * Requires delete permission on products resource
    */
   async delete(request, id) {
+    // First verify product exists
+    const existingProduct = await this.queries.getProduct.byId(parseInt(id, 10));
+    if (!existingProduct) {
+      return createNotFoundResponse(`Product '${id}' not found`);
+    }
+
+    // Authorization: station admins can delete products
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'products', 'delete'
+    );
+    if (response) return response;
+
     try {
       await this.commands.deleteProduct.execute(parseInt(id, 10));
       return createSuccessResponse({ deleted: true });

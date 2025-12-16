@@ -3,6 +3,7 @@
  *
  * HTTP controller for platform endpoints.
  * Maps HTTP requests to application use cases.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/PlatformController
  */
@@ -12,6 +13,7 @@ import {
   createErrorResponse,
   createNotFoundResponse
 } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * Platform Controller
@@ -19,16 +21,24 @@ import {
 export class PlatformController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * GET /platforms - List all platforms
    */
   async list(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'read'
+    );
+    if (response) return response;
+
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '25', 10),
@@ -60,6 +70,12 @@ export class PlatformController {
    * GET /platforms/station/:stationId - Get platforms by station
    */
   async byStation(request, stationId) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'read'
+    );
+    if (response) return response;
+
     const platforms = await this.queries.listPlatforms.byStationId(
       parseInt(stationId, 10)
     );
@@ -73,6 +89,12 @@ export class PlatformController {
    * GET /platforms/type/:type - Get platforms by type
    */
   async byType(request, platformType, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.listPlatforms.execute({
       platformType,
       page: parseInt(url.searchParams.get('page') || '1', 10),
@@ -89,6 +111,12 @@ export class PlatformController {
    * GET /platforms/:id - Get platform by ID or normalized name
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'read'
+    );
+    if (response) return response;
+
     let platform;
 
     // Check if ID is numeric or normalized name
@@ -107,13 +135,28 @@ export class PlatformController {
 
   /**
    * POST /platforms - Create platform
+   * Requires write permission on platforms resource
    */
   async create(request) {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Get station ID for authorization context
+    const stationId = body.station_id || body.stationId;
+
+    // Authorization: station admins can create platforms at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'write', { stationId }
+    );
+    if (response) return response;
 
     try {
       const result = await this.commands.createPlatform.execute({
-        stationId: body.station_id || body.stationId,
+        stationId,
         platformType: body.platform_type || body.platformType || 'fixed',
         ecosystemCode: body.ecosystem_code || body.ecosystemCode,
         mountTypeCode: body.mount_type_code || body.mountTypeCode,
@@ -143,12 +186,30 @@ export class PlatformController {
 
   /**
    * PUT /platforms/:id - Update platform
+   * Requires write permission on platforms resource
    */
   async update(request, id) {
-    const body = await request.json();
+    // First get the platform to determine its station
+    let platform = await this.queries.getPlatform.byId(parseInt(id, 10));
+    if (!platform) {
+      return createNotFoundResponse(`Platform '${id}' not found`);
+    }
+
+    // Authorization: station admins can update platforms at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'write', { stationId: platform.stationId }
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
-      const platform = await this.commands.updatePlatform.execute({
+      const updatedPlatform = await this.commands.updatePlatform.execute({
         id: parseInt(id, 10),
         displayName: body.display_name || body.displayName,
         description: body.description,
@@ -157,7 +218,7 @@ export class PlatformController {
         status: body.status
       });
 
-      return createSuccessResponse({ data: platform.toJSON() });
+      return createSuccessResponse({ data: updatedPlatform.toJSON() });
     } catch (error) {
       if (error.message.includes('not found')) {
         return createNotFoundResponse(error.message);
@@ -168,8 +229,21 @@ export class PlatformController {
 
   /**
    * DELETE /platforms/:id - Delete platform
+   * Requires delete permission on platforms resource
    */
   async delete(request, id) {
+    // First get the platform to determine its station
+    let platform = await this.queries.getPlatform.byId(parseInt(id, 10));
+    if (!platform) {
+      return createNotFoundResponse(`Platform '${id}' not found`);
+    }
+
+    // Authorization: station admins can delete platforms at their station
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'platforms', 'delete', { stationId: platform.stationId }
+    );
+    if (response) return response;
+
     try {
       await this.commands.deletePlatform.execute(parseInt(id, 10));
       return createSuccessResponse({ deleted: true });

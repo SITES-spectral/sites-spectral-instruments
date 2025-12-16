@@ -13,3 +13,4 @@ export { D1AdminRepository } from './D1AdminRepository.js';
 export { D1AOIRepository } from './D1AOIRepository.js';
 export { D1CampaignRepository } from './D1CampaignRepository.js';
 export { D1ProductRepository } from './D1ProductRepository.js';
+export { D1ROIRepository } from './D1ROIRepository.js';

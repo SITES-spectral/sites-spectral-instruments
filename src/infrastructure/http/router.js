@@ -17,11 +17,12 @@ import {
   CampaignController,
   ProductController,
   MaintenanceController,
-  CalibrationController
+  CalibrationController,
+  ROIController,
+  UserController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
 import { handleAuth } from '../../auth/authentication.js';
-import { handleROIs } from '../../handlers/rois.js';
 
 /**
  * Create router with all controllers
@@ -34,19 +35,22 @@ export function createRouter(env) {
   const container = createContainer(env);
 
   // Initialize controllers (V11 Architecture)
+  // Pass env to controllers for authentication middleware (v11.0.0-alpha.34)
   const controllers = {
     // Core entities
-    stations: new StationController(container),
-    platforms: new PlatformController(container),
-    instruments: new InstrumentController(container),
+    stations: new StationController(container, env),
+    platforms: new PlatformController(container, env),
+    instruments: new InstrumentController(container, env),
     // Admin
-    admin: new AdminController(container),
+    admin: new AdminController(container, env),
     // V11 domains
-    aois: new AOIController(container),
-    campaigns: new CampaignController(container),
-    products: new ProductController(container),
-    maintenance: new MaintenanceController(container),
-    calibrations: new CalibrationController(container)
+    aois: new AOIController(container, env),
+    campaigns: new CampaignController(container, env),
+    products: new ProductController(container, env),
+    maintenance: new MaintenanceController(container, env),
+    calibrations: new CalibrationController(container, env),
+    rois: new ROIController(env.DB, env),
+    users: new UserController(env, container.repositories?.stations)
   };
 
   return {
@@ -106,11 +110,12 @@ export function createRouter(env) {
             return await handleAuth(request.method, ['auth', ...resourcePath], request, env);
 
           case 'rois':
-            // ROIs routes - forward to legacy handler
-            // resourcePath: [] or [id] or [id, 'legacy'] or [id, 'override'] or [id, 'edit-mode']
-            const roiId = resourcePath[0] || null;
-            const roiSubAction = resourcePath[1] || null;
-            return await handleROIs(request.method, roiId, request, env, roiSubAction);
+            // ROIs routes - V11 hexagonal architecture (v11.0.0-alpha.41)
+            return await controllers.rois.handle(request, resourcePath, url);
+
+          case 'users':
+            // User management - V11 hexagonal architecture (v11.0.0-alpha.41)
+            return await controllers.users.handle(request, resourcePath, url);
 
           default:
             return createNotFoundResponse(`Unknown resource: ${resource}`);

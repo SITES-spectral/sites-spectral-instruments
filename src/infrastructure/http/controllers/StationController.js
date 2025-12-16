@@ -3,6 +3,7 @@
  *
  * HTTP controller for station endpoints.
  * Maps HTTP requests to application use cases.
+ * v11.0.0-alpha.34: Added authentication and authorization middleware
  *
  * @module infrastructure/http/controllers/StationController
  */
@@ -12,6 +13,7 @@ import {
   createErrorResponse,
   createNotFoundResponse
 } from '../../../utils/responses.js';
+import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 
 /**
  * Station Controller
@@ -19,16 +21,24 @@ import {
 export class StationController {
   /**
    * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(container) {
+  constructor(container, env) {
     this.queries = container.queries;
     this.commands = container.commands;
+    this.auth = new AuthMiddleware(env);
   }
 
   /**
    * GET /stations - List all stations
    */
   async list(request, url) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'stations', 'read'
+    );
+    if (response) return response;
+
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Math.min(
       parseInt(url.searchParams.get('limit') || '25', 10),
@@ -54,6 +64,12 @@ export class StationController {
    * GET /stations/:id - Get station by ID or acronym
    */
   async get(request, id) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'stations', 'read'
+    );
+    if (response) return response;
+
     let station;
 
     // Check if ID is numeric or acronym
@@ -74,6 +90,12 @@ export class StationController {
    * GET /stations/:acronym/dashboard - Get station dashboard
    */
   async dashboard(request, acronym) {
+    // Authentication required for read
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'stations', 'read'
+    );
+    if (response) return response;
+
     const result = await this.queries.getStationDashboard.execute(acronym.toUpperCase());
 
     if (!result) {
@@ -85,9 +107,21 @@ export class StationController {
 
   /**
    * POST /stations - Create station
+   * Requires global admin role
    */
   async create(request) {
-    const body = await request.json();
+    // Authorization: only global admins can create stations
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'stations', 'write'
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const station = await this.commands.createStation.execute({
@@ -108,9 +142,21 @@ export class StationController {
 
   /**
    * PUT /stations/:id - Update station
+   * Requires global admin role
    */
   async update(request, id) {
-    const body = await request.json();
+    // Authorization: only global admins can update stations
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'stations', 'write'
+    );
+    if (response) return response;
+
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
     try {
       const station = await this.commands.updateStation.execute({
@@ -134,8 +180,15 @@ export class StationController {
 
   /**
    * DELETE /stations/:id - Delete station
+   * Requires global admin role with delete permission
    */
   async delete(request, id) {
+    // Authorization: only global admins can delete stations
+    const { user, response } = await this.auth.authenticateAndAuthorize(
+      request, 'stations', 'delete'
+    );
+    if (response) return response;
+
     try {
       await this.commands.deleteStation.execute(parseInt(id, 10));
       return createSuccessResponse({ deleted: true });

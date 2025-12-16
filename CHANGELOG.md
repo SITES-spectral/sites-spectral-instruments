@@ -12,6 +12,137 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.41] - 2025-12-16
+
+### ROI and User Domain Hexagonal Architecture Migration
+
+Complete migration of ROI and User domains to hexagonal architecture pattern.
+
+---
+
+### User Domain Hexagonal Architecture Migration
+
+Complete migration of the User management domain to hexagonal architecture pattern.
+
+#### New Domain Layer (`src/domain/user/`)
+
+| File | Purpose |
+|------|---------|
+| `UserCredentialsPort.js` | Port interface for credential access (abstraction) |
+| `UserService.js` | Business logic for user management |
+| `index.js` | Barrel exports |
+
+#### Domain Service Features
+
+- **List Users**: Enumerate all users from credentials store
+- **Role Change Analysis**: Security impact analysis with warnings and recommendations
+- **User Lookup**: Find user by username
+
+#### New Infrastructure Layer
+
+**Credentials Adapter**: `src/infrastructure/auth/CloudflareCredentialsAdapter.js`
+- Loads credentials from Cloudflare environment secrets
+- Caches credentials for performance
+- Supports admin and 9 SITES station credentials
+- `loadCredentials()`, `validateCredentials()`
+- `getAdminCredentials()`, `getStationCredentials()`, `getAllStationCredentials()`
+
+**HTTP Controller**: `src/infrastructure/http/controllers/UserController.js`
+- Global admin restriction (only `admin` and `sites-admin` usernames)
+- Input validation and security event logging
+- Endpoints: list, audit, analyze-role-change
+
+#### API Endpoints (V11)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v11/users` | List all users (global admin only) |
+| `GET` | `/api/v11/users/audit` | Get security audit log |
+| `POST` | `/api/v11/users/analyze-role-change` | Analyze role change security impact |
+
+#### Security Features
+
+- **Global Admin Only**: User management restricted to `admin` and `sites-admin` usernames
+- **Security Event Logging**: All access attempts logged
+- **Read-Only**: Actual user changes require Cloudflare secrets modification
+
+#### Files Modified
+
+- `src/domain/index.js` - Added User domain exports
+- `src/infrastructure/http/controllers/index.js` - Added UserController export
+- `src/infrastructure/http/router.js` - Added users route
+- `src/api-handler.js` - Routes /api/users through V11 router
+
+---
+
+### ROI Domain Hexagonal Architecture Migration
+
+Complete migration of the ROI (Region of Interest) domain to hexagonal architecture pattern.
+
+#### New Domain Layer (`src/domain/roi/`)
+
+| File | Purpose |
+|------|---------|
+| `ROI.js` | Domain entity with validation, status management, legacy handling |
+| `ROIRepository.js` | Repository port interface (abstract contract) |
+| `ROIService.js` | Business logic orchestration service |
+| `index.js` | Barrel exports |
+
+#### Domain Entity Features
+
+- **Validation**: ROI name pattern (`ROI_XX`), polygon points, color values, alpha
+- **Status Management**: Active, Inactive, Archived states
+- **Legacy System**: `markAsLegacy()`, `markTimeseriesBroken()`, replacement chains
+- **Data Mapping**: `fromDatabase()`, `fromRequest()`, `toJSON()` factory methods
+- **Computed Properties**: `getColorHex()`, `getColorRGBA()`, `getPointCount()`
+
+#### New Infrastructure Layer
+
+**Repository Adapter**: `src/infrastructure/persistence/d1/D1ROIRepository.js`
+- Full CRUD operations against D1 database
+- `findById()`, `findByInstrumentId()`, `findByStationId()`, `findAll()`
+- `save()` (insert/update), `delete()`, `markAsLegacy()`
+- `getNextROIName()` - Generates next available ROI number
+- `existsByName()`, `countByInstrument()`, `findWithReplacementChain()`
+- `getInstrumentInfo()` - For authorization context
+
+**HTTP Controller**: `src/infrastructure/http/controllers/ROIController.js`
+- Uses `ROIService` for business logic
+- Input sanitization via `ROI_SCHEMA`
+- Authorization via `AuthMiddleware`
+- Super admin restriction (only admin/sites-admin/spectral-admin can modify ROIs)
+
+#### API Endpoints (V11)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v11/rois` | List ROIs with filters |
+| `GET` | `/api/v11/rois/:id` | Get ROI by ID |
+| `GET` | `/api/v11/rois/instrument/:instrumentId` | Get ROIs by instrument |
+| `GET` | `/api/v11/rois/:id/edit-mode` | Get edit mode info for user |
+| `POST` | `/api/v11/rois` | Create ROI (super admin only) |
+| `PUT` | `/api/v11/rois/:id` | Update ROI (super admin only) |
+| `PUT` | `/api/v11/rois/:id/override` | Admin override update (sets timeseries_broken) |
+| `POST` | `/api/v11/rois/:id/legacy` | Mark ROI as legacy (super admin only) |
+| `DELETE` | `/api/v11/rois/:id` | Delete ROI (super admin only) |
+
+#### Architecture Benefits
+
+- **Separation of Concerns**: Domain logic isolated from infrastructure
+- **Testability**: Service can be unit tested with mock repository
+- **Maintainability**: Changes to D1 implementation don't affect domain logic
+- **SOLID Compliance**: Single responsibility, dependency inversion
+
+#### Files Modified
+
+- `src/domain/index.js` - Added ROI exports
+- `src/infrastructure/persistence/d1/index.js` - Added D1ROIRepository export
+- `src/infrastructure/http/controllers/index.js` - Added ROIController export
+- `src/infrastructure/http/router.js` - Routes to ROIController
+- `src/api-handler.js` - Routes /api/rois through V11 router
+
+---
+
 ## [11.0.0-alpha.40] - 2025-12-16
 
 ### Consolidated Release: Modals, Database Fixes, and Data Integrity

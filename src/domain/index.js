@@ -79,3 +79,16 @@ export {
   CalibrationRepository,
   CalibrationService
 } from './calibration/index.js';
+
+// ROI domain (V11)
+export {
+  ROI,
+  ROIRepository,
+  ROIService
+} from './roi/index.js';
+
+// User domain (V11)
+export {
+  UserCredentialsPort,
+  UserService
+} from './user/index.js';

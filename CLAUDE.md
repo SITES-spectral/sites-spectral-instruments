@@ -766,3 +766,35 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 | Debug Utilities | v8.5.6 | ✅ Active |
 | Rate Limiting | v8.5.6 | ✅ Active |
 | CASCADE Constraints | v8.5.5 | ✅ Active |
+
+---
+
+## SITES Spectral Agents Team
+
+Specialized AI agents are available for domain-specific tasks. The central repository is at:
+`/home/jobelund/agents-teams/sites-spectral-agents-team/`
+
+Agents are typically symlinked to `.claude/agents/` in each project for easy access.
+
+### Key Agents for Instruments Registry
+
+| Agent | Invoke | Best For |
+|-------|--------|----------|
+| **Luna** | `@luna` | Visual design, UI/UX for station interface |
+| **River** | `@river` | UX flow design, user journeys |
+| **Shield** | `@shield` | Security, CSRF, XSS prevention, JWT |
+| **Cascade** | `@cascade` | Backend architecture, Cloudflare Workers |
+| **Quarry** | `@quarry` | D1 database schema, SQL migrations |
+| **Hexi** | `@hexi` | Hexagonal architecture, SOLID principles |
+| **Forge** | `@forge` | Cross-app ecosystem development |
+| **Pebble** | `@pebble` | Testing, QA, test automation |
+| **Misty** | `@misty` | DevOps, Cloudflare deployment |
+
+### Usage
+```markdown
+@hexi, review the hexagonal architecture implementation
+@shield, audit the input sanitization framework
+```
+
+### Full Documentation
+See `/home/jobelund/agents-teams/sites-spectral-agents-team/AGENTS.md` for complete agent descriptions and recommended combinations.

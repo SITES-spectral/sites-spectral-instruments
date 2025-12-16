@@ -1,6 +1,7 @@
 // ROIs Handler Module
 // ROI (Region of Interest) operations
 // v10.0.0-alpha.17: Added Legacy ROI System for time series data protection
+// v11.0.0-alpha.34: Restricted all ROI editing to super admins only
 
 import { requireAuthentication, checkUserPermissions } from '../auth/permissions.js';
 import { executeQuery, executeQueryFirst, executeQueryRun } from '../utils/database.js';
@@ -268,16 +269,17 @@ async function getROIsList(user, request, env) {
 
 /**
  * Create new ROI
+ * RESTRICTED: Only super admins can create ROIs (v11.0.0-alpha.34)
  * @param {Object} user - Authenticated user
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Response} Creation response
  */
 async function createROI(user, request, env) {
-  // Check if user has write permissions for ROIs
-  const permission = checkUserPermissions(user, 'rois', 'write');
-  if (!permission.allowed) {
-    return createForbiddenResponse();
+  // v11.0.0-alpha.34: Only super admins can create ROIs
+  // This protects phenocam time series data integrity
+  if (!canDirectlyEditROI(user)) {
+    return createForbiddenResponse('Only super admins can create ROIs. Contact an administrator for ROI changes.');
   }
 
   // SECURITY: Parse request body with error handling
@@ -382,6 +384,7 @@ async function createROI(user, request, env) {
 
 /**
  * Update ROI data
+ * RESTRICTED: Only super admins can update ROIs (v11.0.0-alpha.34)
  * @param {string} id - ROI ID
  * @param {Object} user - Authenticated user
  * @param {Request} request - The request object
@@ -389,10 +392,10 @@ async function createROI(user, request, env) {
  * @returns {Response} Update response
  */
 async function updateROI(id, user, request, env) {
-  // Check if user has write permissions for ROIs
-  const permission = checkUserPermissions(user, 'rois', 'write');
-  if (!permission.allowed) {
-    return createForbiddenResponse();
+  // v11.0.0-alpha.34: Only super admins can update ROIs
+  // This protects phenocam time series data integrity
+  if (!canDirectlyEditROI(user)) {
+    return createForbiddenResponse('Only super admins can update ROIs. Contact an administrator for ROI changes.');
   }
 
   // SECURITY: Parse request body with error handling
@@ -488,16 +491,17 @@ async function updateROI(id, user, request, env) {
 
 /**
  * Delete ROI
+ * RESTRICTED: Only super admins can delete ROIs (v11.0.0-alpha.34)
  * @param {string} id - ROI ID
  * @param {Object} user - Authenticated user
  * @param {Object} env - Environment variables and bindings
  * @returns {Response} Deletion response
  */
 async function deleteROI(id, user, env) {
-  // Check if user has delete permissions for ROIs
-  const permission = checkUserPermissions(user, 'rois', 'delete');
-  if (!permission.allowed) {
-    return createForbiddenResponse();
+  // v11.0.0-alpha.34: Only super admins can delete ROIs
+  // This protects phenocam time series data integrity
+  if (!canDirectlyEditROI(user)) {
+    return createForbiddenResponse('Only super admins can delete ROIs. Contact an administrator for ROI changes.');
   }
 
   // First verify ROI exists and get its station
@@ -608,6 +612,7 @@ async function getROIEditMode(id, user, env) {
 
 /**
  * Mark ROI as legacy and optionally create a replacement
+ * RESTRICTED: Only super admins can mark ROIs as legacy (v11.0.0-alpha.34)
  * @param {string} id - ROI ID
  * @param {Object} user - Authenticated user
  * @param {Request} request - The request object
@@ -615,10 +620,9 @@ async function getROIEditMode(id, user, env) {
  * @returns {Response} Legacy marking response
  */
 async function markROIAsLegacy(id, user, request, env) {
-  // Check write permission
-  const permission = checkUserPermissions(user, 'rois', 'write');
-  if (!permission.allowed) {
-    return createForbiddenResponse();
+  // v11.0.0-alpha.34: Only super admins can mark ROIs as legacy
+  if (!canDirectlyEditROI(user)) {
+    return createForbiddenResponse('Only super admins can mark ROIs as legacy. Contact an administrator for ROI changes.');
   }
 
   // Parse request body
