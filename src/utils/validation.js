@@ -316,7 +316,8 @@ export const PLATFORM_SCHEMA = {
     station_id: { type: 'integer', min: 1 },
     display_name: { type: 'string', maxLength: 200 },
     normalized_name: { type: 'identifier', maxLength: 100 },
-    location_code: { type: 'identifier', maxLength: 20 },
+    mount_type_code: { type: 'identifier', maxLength: 20 },
+    location_code: { type: 'identifier', maxLength: 20 }, // Legacy alias for mount_type_code
     ecosystem_code: { type: 'enum', values: ['HEA', 'AGR', 'MIR', 'LAK', 'WET', 'GRA', 'FOR', 'ALP', 'CON', 'DEC', 'MAR', 'PEA', 'GEN'] },
     latitude: { type: 'coordinate', coordType: 'latitude' },
     longitude: { type: 'coordinate', coordType: 'longitude' },
@@ -463,8 +464,10 @@ export function validatePlatformData(data) {
     errors.push('Display name is required');
   }
 
-  if (!data.location_code || !/^[A-Z]{2,3}\d{2}$/.test(data.location_code)) {
-    errors.push('Location code must follow format like HEA01, GRA02, etc.');
+  // Support both mount_type_code (new) and location_code (legacy)
+  const mountTypeCode = data.mount_type_code || data.location_code;
+  if (!mountTypeCode || !/^[A-Z]{2,3}\d{2}$/.test(mountTypeCode)) {
+    errors.push('Mount type code must follow format like PL01, BL02, UAV01, etc.');
   }
 
   if (data.ecosystem_code && !VALID_ECOSYSTEMS.includes(data.ecosystem_code)) {
@@ -638,55 +641,57 @@ export async function generateAlternativeAcronym(baseAcronym, env) {
  * Check platform conflicts within a station
  * @param {number} stationId - Station ID
  * @param {string} normalizedName - Platform normalized name to check
- * @param {string} locationCode - Platform location code to check
+ * @param {string} mountTypeCode - Platform mount type code to check
  * @param {Object} env - Environment variables and bindings
  * @returns {Array} Array of conflicts found
  */
-export async function checkPlatformConflicts(stationId, normalizedName, locationCode, env) {
+export async function checkPlatformConflicts(stationId, normalizedName, mountTypeCode, env) {
+  // Column renamed from location_code to mount_type_code in migration 0035/0040
   const query = `
-    SELECT normalized_name, location_code FROM platforms
-    WHERE station_id = ? AND (normalized_name = ? OR location_code = ?)
+    SELECT normalized_name, mount_type_code FROM platforms
+    WHERE station_id = ? AND (normalized_name = ? OR mount_type_code = ?)
   `;
 
-  const result = await executeQuery(env, query, [stationId, normalizedName, locationCode], 'checkPlatformConflicts');
+  const result = await executeQuery(env, query, [stationId, normalizedName, mountTypeCode], 'checkPlatformConflicts');
 
   return (result?.results || []).map(r => ({
-    field: r.normalized_name === normalizedName ? 'normalized_name' : 'location_code',
-    value: r.normalized_name === normalizedName ? r.normalized_name : r.location_code
+    field: r.normalized_name === normalizedName ? 'normalized_name' : 'mount_type_code',
+    value: r.normalized_name === normalizedName ? r.normalized_name : r.mount_type_code
   }));
 }
 
 /**
  * Generate platform alternatives to resolve conflicts
  * @param {string} normalizedName - Platform normalized name
- * @param {string} locationCode - Platform location code
+ * @param {string} mountTypeCode - Platform mount type code
  * @param {number} stationId - Station ID
  * @param {Object} env - Environment variables and bindings
  * @returns {Object} Alternative names and codes
  */
-export async function generatePlatformAlternatives(normalizedName, locationCode, stationId, env) {
+export async function generatePlatformAlternatives(normalizedName, mountTypeCode, stationId, env) {
+  // Column renamed from location_code to mount_type_code in migration 0035/0040
   const existingQuery = `
-    SELECT normalized_name, location_code FROM platforms
+    SELECT normalized_name, mount_type_code FROM platforms
     WHERE station_id = ?
   `;
 
   const existing = await executeQuery(env, existingQuery, [stationId], 'generatePlatformAlternatives');
   const existingNames = existing?.results?.map(r => r.normalized_name) || [];
-  const existingCodes = existing?.results?.map(r => r.location_code) || [];
+  const existingCodes = existing?.results?.map(r => r.mount_type_code) || [];
 
   return {
     normalized_name: generateAlternativeNormalizedNameSync(normalizedName, existingNames),
-    location_code: generateNextLocationCode(locationCode, existingCodes)
+    mount_type_code: generateNextMountTypeCode(mountTypeCode, existingCodes)
   };
 }
 
 /**
- * Generate next available location code
- * @param {string} baseCode - Base location code (e.g., "HEA01")
- * @param {Array} existingCodes - Array of existing location codes
- * @returns {string} Next available location code
+ * Generate next available mount type code
+ * @param {string} baseCode - Base mount type code (e.g., "PL01")
+ * @param {Array} existingCodes - Array of existing mount type codes
+ * @returns {string} Next available mount type code
  */
-function generateNextLocationCode(baseCode, existingCodes) {
+function generateNextMountTypeCode(baseCode, existingCodes) {
   const prefix = baseCode.replace(/\d+$/, '');
   let counter = 1;
 

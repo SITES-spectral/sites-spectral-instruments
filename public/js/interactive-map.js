@@ -215,7 +215,7 @@ class SitesInteractiveMap {
                 ${platformData.normalized_name && platformData.normalized_name !== platformData.display_name ?
                     `<p><small style="opacity: 0.7; color: #059669; font-family: 'Courier New', monospace; font-weight: 600;">${platformData.normalized_name}</small></p>` : ''}
                 ${platformData.ecosystem_code ? `<p><strong>Ecosystem:</strong> ${platformData.ecosystem_code}</p>` : ''}
-                ${platformData.location_code ? `<p><strong>Location:</strong> ${platformData.location_code}</p>` : ''}
+                ${(platformData.mount_type_code || platformData.location_code) ? `<p><strong>Mount Type:</strong> ${platformData.mount_type_code || platformData.location_code}</p>` : ''}
                 <p><strong>Instruments:</strong> ${instrumentCount}</p>
                 ${platformData.description ? `<p><strong>Description:</strong> ${platformData.description}</p>` : ''}
             </div>

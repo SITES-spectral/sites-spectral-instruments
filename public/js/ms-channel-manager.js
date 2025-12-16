@@ -15,6 +15,9 @@ const MSChannelManager = (() => {
     // Channel storage for current editing session
     let currentChannels = [];
 
+    // Track which channel is being edited (-1 = not editing, adding new)
+    let editingIndex = -1;
+
     /**
      * Initialize channel manager with existing channels
      * @param {array} channels - Array of channel objects
@@ -321,7 +324,7 @@ const MSChannelManager = (() => {
     }
 
     /**
-     * Add channel from form inputs
+     * Add or update channel from form inputs
      * @returns {boolean} - Success status
      */
     function addChannelFromForm() {
@@ -344,8 +347,7 @@ const MSChannelManager = (() => {
             return false;
         }
 
-        const channel = {
-            channel_number: currentChannels.length + 1,
+        const channelData = {
             channel_name: channelName,
             center_wavelength_nm: wavelength,
             bandwidth_nm: bandwidth,
@@ -353,7 +355,24 @@ const MSChannelManager = (() => {
             band_type: bandType
         };
 
-        const success = addChannel(channel);
+        let success;
+
+        if (editingIndex >= 0) {
+            // Update existing channel
+            channelData.channel_number = currentChannels[editingIndex].channel_number;
+            success = updateChannel(editingIndex, channelData);
+            if (success) {
+                console.log(`✅ Updated channel ${editingIndex + 1}`);
+                editingIndex = -1;
+                clearRowHighlights();
+                updateFormButtons(false);
+            }
+        } else {
+            // Add new channel
+            channelData.channel_number = currentChannels.length + 1;
+            success = addChannel(channelData);
+        }
+
         if (success) {
             resetChannelForm();
             renderChannelsTable('ms-channels-table');
@@ -379,8 +398,156 @@ const MSChannelManager = (() => {
      * @param {number} index - Channel index
      */
     function editChannelUI(index) {
-        // TODO: Implement edit UI
-        alert('Edit channel functionality - TODO');
+        const idx = parseInt(index);
+        if (idx < 0 || idx >= currentChannels.length) {
+            console.error('Invalid channel index for editing');
+            return;
+        }
+
+        const channel = currentChannels[idx];
+        editingIndex = idx;
+
+        // Populate form with channel data
+        const bandTypeSelect = document.getElementById('channel-band-type');
+        const wavelengthInput = document.getElementById('channel-wavelength');
+        const bandwidthSelect = document.getElementById('channel-bandwidth');
+        const bandwidthCustom = document.getElementById('channel-bandwidth-custom');
+        const channelNameInput = document.getElementById('channel-name');
+
+        if (bandTypeSelect) bandTypeSelect.value = channel.band_type || '';
+        if (wavelengthInput) wavelengthInput.value = channel.center_wavelength_nm || '';
+        if (channelNameInput) channelNameInput.value = channel.channel_name || '';
+
+        // Handle bandwidth - check if it matches a preset
+        const bandwidthPresets = MSValidation.getBandwidthPresets();
+        const matchingPreset = bandwidthPresets.find(p => p.value === channel.bandwidth_nm);
+
+        if (bandwidthSelect) {
+            if (matchingPreset) {
+                bandwidthSelect.value = channel.bandwidth_nm;
+                if (bandwidthCustom) bandwidthCustom.style.display = 'none';
+            } else {
+                bandwidthSelect.value = 'custom';
+                if (bandwidthCustom) {
+                    bandwidthCustom.style.display = 'block';
+                    bandwidthCustom.value = channel.bandwidth_nm;
+                }
+            }
+        }
+
+        // Update form button to show "Update" instead of "Add"
+        updateFormButtons(true);
+
+        // Highlight the row being edited
+        highlightEditingRow(idx);
+
+        // Scroll form into view
+        const form = document.getElementById('channel-creation-form');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        console.log(`✏️ Editing channel ${idx + 1}: ${channel.channel_name}`);
+    }
+
+    /**
+     * Cancel edit mode and reset form
+     */
+    function cancelEdit() {
+        editingIndex = -1;
+        resetChannelForm();
+        updateFormButtons(false);
+        clearRowHighlights();
+    }
+
+    /**
+     * Update form buttons based on edit mode (safe DOM methods)
+     * @param {boolean} isEditing - Whether in edit mode
+     */
+    function updateFormButtons(isEditing) {
+        const formContainer = document.getElementById('channel-creation-form');
+        if (!formContainer) return;
+
+        const buttonsRow = formContainer.querySelector('.row.mt-2 .col-md-12');
+        if (!buttonsRow) return;
+
+        // Clear existing buttons
+        while (buttonsRow.firstChild) {
+            buttonsRow.removeChild(buttonsRow.firstChild);
+        }
+
+        if (isEditing) {
+            // Update button
+            const updateBtn = document.createElement('button');
+            updateBtn.type = 'button';
+            updateBtn.className = 'btn btn-sm btn-primary';
+            updateBtn.onclick = function() { MSChannelManager.addChannelFromForm(); };
+            const updateIcon = document.createElement('i');
+            updateIcon.className = 'fas fa-save';
+            updateBtn.appendChild(updateIcon);
+            updateBtn.appendChild(document.createTextNode(' Update Channel'));
+            buttonsRow.appendChild(updateBtn);
+
+            // Cancel button
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.className = 'btn btn-sm btn-secondary';
+            cancelBtn.style.marginLeft = '5px';
+            cancelBtn.onclick = function() { MSChannelManager.cancelEdit(); };
+            const cancelIcon = document.createElement('i');
+            cancelIcon.className = 'fas fa-times';
+            cancelBtn.appendChild(cancelIcon);
+            cancelBtn.appendChild(document.createTextNode(' Cancel'));
+            buttonsRow.appendChild(cancelBtn);
+        } else {
+            // Add button
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'btn btn-sm btn-success';
+            addBtn.onclick = function() { MSChannelManager.addChannelFromForm(); };
+            const addIcon = document.createElement('i');
+            addIcon.className = 'fas fa-plus';
+            addBtn.appendChild(addIcon);
+            addBtn.appendChild(document.createTextNode(' Add Channel'));
+            buttonsRow.appendChild(addBtn);
+
+            // Reset button
+            const resetBtn = document.createElement('button');
+            resetBtn.type = 'button';
+            resetBtn.className = 'btn btn-sm btn-secondary';
+            resetBtn.style.marginLeft = '5px';
+            resetBtn.onclick = function() { MSChannelManager.resetChannelForm(); };
+            const resetIcon = document.createElement('i');
+            resetIcon.className = 'fas fa-undo';
+            resetBtn.appendChild(resetIcon);
+            resetBtn.appendChild(document.createTextNode(' Reset'));
+            buttonsRow.appendChild(resetBtn);
+        }
+    }
+
+    /**
+     * Highlight the row being edited
+     * @param {number} index - Row index to highlight
+     */
+    function highlightEditingRow(index) {
+        clearRowHighlights();
+        const row = document.getElementById(`channel-row-${index}`);
+        if (row) {
+            row.style.backgroundColor = '#fff3cd';
+            row.style.transition = 'background-color 0.3s';
+        }
+    }
+
+    /**
+     * Clear all row highlights
+     */
+    function clearRowHighlights() {
+        currentChannels.forEach((_, idx) => {
+            const row = document.getElementById(`channel-row-${idx}`);
+            if (row) {
+                row.style.backgroundColor = '';
+            }
+        });
     }
 
     /**
@@ -479,6 +646,7 @@ const MSChannelManager = (() => {
         addChannelFromForm,
         resetChannelForm,
         editChannelUI,
+        cancelEdit,
         deleteChannelUI,
         loadChannelsFromServer,
         saveChannelsToServer

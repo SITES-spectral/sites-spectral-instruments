@@ -12,6 +12,319 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [11.0.0-alpha.40] - 2025-12-16
+
+### Consolidated Release: Modals, Database Fixes, and Data Integrity
+
+This release consolidates multiple improvements from alpha.36 through alpha.39.
+
+#### New Features
+
+**Campaign & Product Modals (alpha.36)**
+- `public/js/modals/campaign-modal.js` - Full CRUD for campaigns
+- `public/js/modals/product-modal.js` - Full CRUD for products
+- Safe DOM methods throughout (XSS prevention)
+
+**MS Channel Manager Edit (alpha.37)**
+- Full edit functionality in `public/js/ms-channel-manager.js`
+- Row highlighting, Update/Cancel buttons
+
+#### Database Migrations
+
+**Migration 0040**: `location_code` → `mount_type_code` rename
+- Semantic clarity: describes mounting structure type, not geographic location
+
+**Migration 0041**: Coordinate validation triggers
+- 6 triggers ensuring lat/lon are within valid ranges
+- Applied to stations, platforms, instruments tables
+
+#### Code Updates
+
+- `D1PlatformRepository.js` - Uses `mount_type_code` column
+- `validation.js` - Updated schema and validation functions
+- `platform-forms/index.js` - Form data uses `mount_type_code`
+- `interactive-map.js` - Display with backward-compatible fallback
+- `station-dashboard.js` - Integrated new modals
+
+---
+
+## [11.0.0-alpha.39] - 2025-12-16
+
+### Coordinate Validation Triggers
+
+Added migration to ensure coordinate validation triggers exist for data integrity.
+
+#### New Migration
+
+- **Migration 0041**: `0041_coordinate_validation_triggers.sql`
+- Re-applies 6 coordinate validation triggers that may not have been created from migration 0028
+- Idempotent - safe to run multiple times
+
+#### Triggers Created
+
+| Trigger | Table | Event | Validation |
+|---------|-------|-------|------------|
+| `validate_station_coordinates_insert` | stations | INSERT | lat: -90 to 90, lon: -180 to 180 |
+| `validate_station_coordinates_update` | stations | UPDATE | lat: -90 to 90, lon: -180 to 180 |
+| `validate_platform_coordinates_insert` | platforms | INSERT | lat: -90 to 90, lon: -180 to 180 |
+| `validate_platform_coordinates_update` | platforms | UPDATE | lat: -90 to 90, lon: -180 to 180 |
+| `validate_instrument_coordinates_insert` | instruments | INSERT | lat: -90 to 90, lon: -180 to 180 |
+| `validate_instrument_coordinates_update` | instruments | UPDATE | lat: -90 to 90, lon: -180 to 180 |
+
+#### Data Integrity
+
+These triggers ensure that any latitude/longitude values inserted or updated are within valid ranges:
+- **Latitude**: -90° to 90° (South Pole to North Pole)
+- **Longitude**: -180° to 180° (International Date Line)
+
+Invalid coordinates will be rejected with a descriptive error message.
+
+---
+
+## [11.0.0-alpha.38] - 2025-12-16
+
+### Database Column Rename: location_code → mount_type_code
+
+Complete codebase update to use semantically correct `mount_type_code` column name.
+
+#### Background
+
+The `location_code` field was semantically incorrect as it describes the mounting structure type
+(PL=Pole/Tower, BL=Building, GL=Ground Level, UAV, SAT, etc.), not a geographic location.
+
+#### Migration
+
+- **New migration 0040**: `0040_fix_mount_type_code_rename.sql`
+- Performs `ALTER TABLE platforms RENAME COLUMN location_code TO mount_type_code`
+- Safe to run even if migration 0035 was already applied
+
+#### Files Updated
+
+**Backend:**
+- `src/infrastructure/persistence/d1/D1PlatformRepository.js` - SQL queries use `mount_type_code`
+- `src/utils/validation.js` - Schema and validation functions updated
+- `src/domain/platform/Platform.js` - Already supported both (unchanged)
+
+**Frontend:**
+- `public/js/platform-forms/index.js` - Form data uses `mount_type_code`
+- `public/js/interactive-map.js` - Display uses `mount_type_code` with fallback
+
+#### Backward Compatibility
+
+- Domain Platform.js accepts both `mount_type_code` and `location_code` in input
+- Validation schema accepts both field names
+- Frontend has fallback: `platformData.mount_type_code || platformData.location_code`
+
+---
+
+## [11.0.0-alpha.37] - 2025-12-16
+
+### MS Channel Manager Edit Functionality
+
+Complete implementation of channel editing in the multispectral sensor channel manager.
+
+#### Changes to `public/js/ms-channel-manager.js`
+
+- **Edit Mode Support**: Added `editingIndex` variable to track which channel is being edited
+- **`editChannelUI(index)`**: Now fully functional - populates form with channel data, switches to edit mode
+- **`cancelEdit()`**: New function to cancel edit mode and reset form
+- **`updateFormButtons(isEditing)`**: Dynamically updates form buttons using safe DOM methods
+- **`highlightEditingRow(index)`**: Visual feedback showing which row is being edited (yellow highlight)
+- **`clearRowHighlights()`**: Removes all row highlights when exiting edit mode
+- **`addChannelFromForm()`**: Now handles both add and update operations based on `editingIndex`
+
+#### User Experience
+
+- Click edit button on any channel row → form populates with channel data
+- Form button changes from "Add Channel" to "Update Channel"
+- Cancel button appears to exit edit mode without saving
+- Row being edited is highlighted in yellow
+- After update, form resets and returns to add mode
+
+#### Security
+
+- All DOM manipulation uses safe methods (createElement, textContent, appendChild)
+- No innerHTML with dynamic content
+- XSS prevention throughout
+
+---
+
+## [11.0.0-alpha.36] - 2025-12-16
+
+### Campaign & Product Modal Implementation
+
+Complete implementation of Campaign and Product detail modals, replacing TODO placeholders with full functionality.
+
+#### New Modal Files Created
+
+1. **Campaign Modal** (`public/js/modals/campaign-modal.js`)
+   - View mode: Display campaign details with status badges
+   - Create mode: Full form for new campaigns
+   - Edit mode: Modify existing campaigns
+   - Campaign types: field_campaign, continuous_monitoring, calibration, validation, experimental
+   - Status tracking: planned, active, completed, cancelled, on_hold
+   - Participant management with dynamic list
+   - Objectives and expected outcomes sections
+   - Funding source and budget fields
+   - Safe DOM methods (createElement, textContent, appendChild)
+
+2. **Product Modal** (`public/js/modals/product-modal.js`)
+   - View mode: Display product details with processing level badges
+   - Create mode: Full form for new products
+   - Edit mode: Modify existing products
+   - Processing levels: L0 (raw), L1 (corrected), L2 (derived), L3 (aggregated), L4 (model)
+   - Product types: image, timeseries, vegetation_index, spectral_data, composite, calibration, derived
+   - Quality control levels: raw, quality_controlled, validated, research_grade
+   - License support: CC-BY-4.0, CC-BY-SA-4.0, CC0-1.0, proprietary
+   - DOI and citation fields
+   - File size formatting and quality score display
+   - Resolution fields (spatial and temporal)
+   - Safe DOM methods (XSS prevention)
+
+#### Dashboard Integration
+
+- Updated `station-dashboard.js` to use new modals:
+  - `viewCampaignDetails()` - Now opens CampaignModal.show()
+  - `viewProductDetails()` - Now opens ProductModal.show()
+  - `showCreateCampaignModal()` - Now opens CampaignModal.showCreate()
+- Modal script includes added to `station-dashboard.html`
+
+#### Security
+
+- All modals use safe DOM manipulation (createElement, textContent, appendChild)
+- No innerHTML with user data
+- Proper event delegation patterns
+- XSS prevention throughout
+
+---
+
+## [11.0.0-alpha.35] - 2025-12-16
+
+### Enhanced Instrument Modal System
+
+#### New Modular Instrument Modals
+Complete implementation of the enhanced modal system for all spectral sensor types identified in the UX audit.
+
+**New Modal Files Created:**
+
+1. **NDVI Sensor Modal** (`public/js/instruments/ndvi/ndvi-modal.js`)
+   - Red wavelength configuration (580-720nm range)
+   - NIR wavelength configuration (720-1100nm range)
+   - Bandwidth fields for both bands (FWHM)
+   - Sensor brand selection with "Other" option
+   - Calibration coefficient field
+   - Orientation (uplooking/downlooking/dual)
+   - Field of view, cable length, datalogger fields
+   - Full validation with range checking
+
+2. **PRI Sensor Modal** (`public/js/instruments/pri/pri-modal.js`)
+   - Band 1 wavelength (~531nm xanthophyll sensitive)
+   - Band 2 wavelength (~570nm reference)
+   - Bandwidth fields for narrow-band measurements
+   - Informational callout explaining PRI science
+   - Sensor brand selection including Skye, Apogee, Ocean Insight
+   - Calibration coefficient and orientation fields
+
+3. **Hyperspectral Sensor Modal** (`public/js/instruments/hyperspectral/hyperspectral-modal.js`)
+   - **Sensor Hardware Section**: Brand, model, serial, sensor type (pushbroom/snapshot/etc)
+   - **Spectral Configuration Section**: Range start/end, resolution, sampling interval, number of bands
+   - **Imaging Specifications Section**: Spatial resolution, bit depth (8-16 bit), FOV, frame rate, integration time
+   - **Calibration & Data Section**: Method, reference panel, dark current correction, data format
+   - Comprehensive validation for spectral ranges
+
+**Directory Structure Created:**
+```
+public/js/instruments/
+├── ndvi/
+│   └── ndvi-modal.js
+├── pri/
+│   └── pri-modal.js
+└── hyperspectral/
+    └── hyperspectral-modal.js
+```
+
+#### Frontend Integration
+- Updated `station-dashboard.html` to load enhanced modal modules
+- Modals integrate with existing `InstrumentManager` system
+- Backward compatible with basic `instrument-modals.js` implementation
+- Auto-registration with InstrumentManager when available
+
+#### Sensor Brands Supported
+
+| Sensor Type | Brands |
+|-------------|--------|
+| NDVI | Apogee, Skye, METER, Holland Scientific, Decagon |
+| PRI | Skye, Apogee, METER, Ocean Insight, Decagon |
+| Hyperspectral | Headwall, Specim, HySpex, AVIRIS, Resonon, Cubert, Corning, BaySpec, Ocean Insight |
+
+#### Validation Rules
+
+| Field | NDVI | PRI | Hyperspectral |
+|-------|------|-----|---------------|
+| Spectral range | 580-720nm (red), 720-1100nm (NIR) | 520-545nm (band1), 555-590nm (band2) | 200-2500nm |
+| Resolution | - | - | 0.1-50nm |
+| Number of bands | 2 | 2 | 10-2000 |
+| Field of view | 0-180° | 0-180° | 0-180° |
+
+---
+
+## [11.0.0-alpha.34] - 2025-12-16
+
+### Security: V11 Authentication Middleware & ROI Restrictions
+
+#### Critical Security Fix: V11 Controllers Now Protected
+All V11 Hexagonal Architecture controllers now have proper authentication and authorization middleware.
+
+**Controllers Updated (9 total):**
+- `StationController.js` - Read requires auth, write/delete requires global admin
+- `PlatformController.js` - Read requires auth, write/delete requires station admin context
+- `InstrumentController.js` - Read requires auth, write/delete requires station admin context
+- `AdminController.js` - All endpoints require global admin role
+- `AOIController.js` - Read requires auth, write/delete requires station admin context
+- `CampaignController.js` - Read requires auth, write/delete requires station admin context
+- `ProductController.js` - Read requires auth, write/delete requires station admin
+- `MaintenanceController.js` - Read requires auth, write/delete requires station admin
+- `CalibrationController.js` - Read requires auth, write/delete requires station admin
+
+**Authorization Pattern:**
+```javascript
+const { user, response } = await this.auth.authenticateAndAuthorize(
+  request, 'resource', 'action', { stationId }
+);
+if (response) return response;
+```
+
+#### ROI Editing Restricted to Super Admins Only
+**Breaking Change**: Only super admins (`admin`, `sites-admin`, `spectral-admin`) can now create, update, or delete ROIs.
+
+- `createROI()` - Super admin only
+- `updateROI()` - Super admin only
+- `deleteROI()` - Super admin only
+- `markROIAsLegacy()` - Super admin only
+- `adminOverrideUpdate()` - Super admin only (unchanged)
+
+**Rationale**: ROI definitions directly affect phenocam time series data integrity. L2/L3 processing depends on consistent ROI boundaries. Restricting ROI editing to super admins prevents accidental data corruption.
+
+**Error Message**: Non-admin users receive: `"Only super admins can [create|update|delete] ROIs. Contact an administrator for ROI changes."`
+
+#### Files Created
+- `src/infrastructure/http/middleware/AuthMiddleware.js` - Authentication/authorization middleware
+
+#### Files Modified
+- `src/infrastructure/http/router.js` - Pass `env` to all controllers
+- `src/infrastructure/http/controllers/StationController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/PlatformController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/InstrumentController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/AdminController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/AOIController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/CampaignController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/ProductController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/MaintenanceController.js` - v11.0.0-alpha.34 auth
+- `src/infrastructure/http/controllers/CalibrationController.js` - v11.0.0-alpha.34 auth
+- `src/handlers/rois.js` - Super admin only editing
+
+---
+
 ## [11.0.0-alpha.33] - 2025-12-09
 
 ### Version Consistency Fix

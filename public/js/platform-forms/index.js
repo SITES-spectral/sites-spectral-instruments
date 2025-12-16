@@ -537,29 +537,30 @@
             };
 
             // Add type-specific fields
+            // Note: mount_type_code renamed from location_code in v10.0.0
             switch (platformType) {
                 case 'fixed': {
                     platformData.ecosystem_code = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
-                    platformData.location_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
+                    platformData.mount_type_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
                     platformData.mounting_structure = document.getElementById('platform-mounting-structure')?.value || null;
                     platformData.platform_height_m = parseFloat(document.getElementById('platform-height')?.value) || null;
-                    if (!platformData.location_code) throw new Error('Location code is required');
+                    if (!platformData.mount_type_code) throw new Error('Mount type code is required');
                     break;
                 }
                 case 'uav': {
-                    platformData.location_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
+                    platformData.mount_type_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
                     platformData.drone_vendor = document.getElementById('platform-drone-vendor')?.value;
                     platformData.drone_model = document.getElementById('platform-drone-model')?.value;
                     // UAV does NOT use ecosystem_code in naming
                     platformData.ecosystem_code = null;
-                    if (!platformData.location_code) throw new Error('UAV number is required');
+                    if (!platformData.mount_type_code) throw new Error('UAV number is required');
                     break;
                 }
                 case 'satellite': {
                     platformData.space_agency = document.getElementById('platform-space-agency')?.value;
                     platformData.satellite = document.getElementById('platform-satellite')?.value;
                     platformData.sensor = document.getElementById('platform-sensor')?.value;
-                    platformData.location_code = `${platformData.satellite}_${platformData.sensor}`;
+                    platformData.mount_type_code = `${platformData.satellite}_${platformData.sensor}`;
                     // Satellite does NOT use ecosystem_code in naming
                     platformData.ecosystem_code = null;
                     break;

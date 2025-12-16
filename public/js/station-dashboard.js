@@ -1755,9 +1755,15 @@
 
             try {
                 const response = await global.sitesAPIv3.getCampaign(campaignId);
-                // TODO: Implement campaign details modal
-                logger.log('Campaign details:', response.data);
-                this._showNotification('Campaign details modal coming soon', 'info');
+                if (response.data && typeof CampaignModal !== 'undefined') {
+                    CampaignModal.show(response.data, {
+                        canEdit: this.canEdit,
+                        onSave: () => this.loadCampaigns()
+                    });
+                } else {
+                    logger.error('CampaignModal not loaded or no data');
+                    this._showNotification('Campaign modal not available', 'error');
+                }
             } catch (error) {
                 logger.error('Error fetching campaign details:', error);
                 this._showNotification('Error loading campaign details', 'error');
@@ -1776,9 +1782,15 @@
 
             try {
                 const response = await global.sitesAPIv3.getProduct(productId);
-                // TODO: Implement product details modal
-                logger.log('Product details:', response.data);
-                this._showNotification('Product details modal coming soon', 'info');
+                if (response.data && typeof ProductModal !== 'undefined') {
+                    ProductModal.show(response.data, {
+                        canEdit: this.canEdit,
+                        onSave: () => this.loadProducts()
+                    });
+                } else {
+                    logger.error('ProductModal not loaded or no data');
+                    this._showNotification('Product modal not available', 'error');
+                }
             } catch (error) {
                 logger.error('Error fetching product details:', error);
                 this._showNotification('Error loading product details', 'error');
@@ -1831,8 +1843,15 @@
                 return;
             }
 
-            // TODO: Implement campaign creation modal
-            this._showNotification('Campaign creation modal coming soon', 'info');
+            if (typeof CampaignModal !== 'undefined') {
+                CampaignModal.showCreate({
+                    stationId: this.stationData?.id,
+                    onSave: () => this.loadCampaigns()
+                });
+            } else {
+                logger.error('CampaignModal not loaded');
+                this._showNotification('Campaign modal not available', 'error');
+            }
         }
 
         /**
