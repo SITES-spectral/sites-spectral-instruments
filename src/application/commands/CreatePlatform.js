@@ -154,17 +154,18 @@ export class CreatePlatform {
 
   /**
    * Get mount type prefix based on platform type
+   * All codes normalized to 3 letters (v12.0.0 - BREAKING CHANGE)
    * @private
    */
   _getMountTypePrefix(platformType) {
     const prefixMap = {
-      fixed: 'PL', // Default to pole, can be overridden
+      fixed: 'TWR', // Default to tower, can be overridden (formerly PL)
       uav: 'UAV',
       satellite: 'SAT',
       mobile: 'MOB',
       usv: 'USV',
       uuv: 'UUV'
     };
-    return prefixMap[platformType] || 'PL';
+    return prefixMap[platformType] || 'TWR';
   }
 }

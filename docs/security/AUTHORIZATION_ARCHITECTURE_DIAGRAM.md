@@ -254,7 +254,7 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│ 1. User "svb-admin" attempts to DELETE /api/platforms/SVB_FOR_PL01    │
+│ 1. User "svb-admin" attempts to DELETE /api/platforms/SVB_FOR_TWR01   │
 └──────────────────────┬─────────────────────────────────────────────────┘
                        │
                        ▼
@@ -271,7 +271,7 @@
                        ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │ 3. Handler resolves stationId from platform                           │
-│    • Query: SELECT station_id FROM platforms WHERE id = 'SVB_FOR_PL01'│
+│    • Query: SELECT station_id FROM platforms WHERE id = 'SVB_FOR_TWR01'│
 │    • Result: station_id = 7 (Svartberget)                            │
 └──────────────────────┬─────────────────────────────────────────────────┘
                        │
@@ -296,7 +296,7 @@
 │        username: 'svb-admin',                                         │
 │        role: 'station-admin',                                         │
 │        station: 'SVB',                                                │
-│        platform_id: 'SVB_FOR_PL01',                                   │
+│        platform_id: 'SVB_FOR_TWR01',                                  │
 │        action: 'delete'                                               │
 │      })                                                               │
 │    • Return response:                                                 │
@@ -311,7 +311,7 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│ 1. User "svb-admin" attempts to DELETE /api/platforms/ANS_FOR_PL01    │
+│ 1. User "svb-admin" attempts to DELETE /api/platforms/ANS_FOR_BLD01   │
 │    (Abisko platform, not Svartberget)                                 │
 └──────────────────────┬─────────────────────────────────────────────────┘
                        │
@@ -329,7 +329,7 @@
                        ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │ 3. Handler resolves stationId from platform                           │
-│    • Query: SELECT station_id FROM platforms WHERE id = 'ANS_FOR_PL01'│
+│    • Query: SELECT station_id FROM platforms WHERE id = 'ANS_FOR_BLD01'│
 │    • Result: station_id = 1 (Abisko)    ← Platform is at ANS (id=1)  │
 └──────────────────────┬─────────────────────────────────────────────────┘
                        │
@@ -358,7 +358,7 @@
 │        role: 'station-admin',                                         │
 │        user_station: 'SVB',                                           │
 │        target_station: 'ANS',                                         │
-│        endpoint: '/api/platforms/ANS_FOR_PL01',                       │
+│        endpoint: '/api/platforms/ANS_FOR_BLD01',                      │
 │        action: 'delete',                                              │
 │        reason: 'Station admin cannot access other station'            │
 │      })                                                               │

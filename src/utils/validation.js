@@ -466,8 +466,8 @@ export function validatePlatformData(data) {
 
   // Support both mount_type_code (new) and location_code (legacy)
   const mountTypeCode = data.mount_type_code || data.location_code;
-  if (!mountTypeCode || !/^[A-Z]{2,3}\d{2}$/.test(mountTypeCode)) {
-    errors.push('Mount type code must follow format like PL01, BL02, UAV01, etc.');
+  if (!mountTypeCode || !/^[A-Z]{3}\d{2}$/.test(mountTypeCode)) {
+    errors.push('Mount type code must follow format like TWR01, BLD02, GND01, UAV01, SAT, etc.');
   }
 
   if (data.ecosystem_code && !VALID_ECOSYSTEMS.includes(data.ecosystem_code)) {

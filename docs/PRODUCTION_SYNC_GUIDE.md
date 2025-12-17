@@ -67,7 +67,7 @@ Each instrument now includes:
 ```yaml
 instruments:
   phenocams:
-    LON_AGR_PL01_PHE01:
+    LON_AGR_TWR01_PHE01:
       # ... existing fields ...
       maintenance:
         calibration_date: "2025-05-15"
@@ -78,7 +78,7 @@ instruments:
         last_image_timestamp: "2025-10-02T14:35:22Z"
         image_quality_score: 0.95
         image_processing_enabled: true
-        image_archive_path: "/data/archive/lon_agr_pl01_phe01"
+        image_archive_path: "/data/archive/lon_agr_twr01_phe01"
 ```
 
 ## Comparing Changes

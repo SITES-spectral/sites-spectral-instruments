@@ -828,7 +828,7 @@ if (adminUser instanceof Response) {
 ✅ GET /api/stations (all stations)
 ✅ GET /api/admin/user-sessions (system-wide)
 ✅ POST /api/platforms (create at any station)
-✅ DELETE /api/instruments/SVB_FOR_PL01_PHE01 (delete at any station)
+✅ DELETE /api/instruments/SVB_FOR_TWR01_PHE01 (delete at any station)
 ✅ GET /api/analytics/station-stats (system-wide)
 ```
 
@@ -841,7 +841,7 @@ if (adminUser instanceof Response) {
 ✅ GET /api/stations (all stations)
 ✅ GET /api/admin/user-sessions (system-wide)
 ✅ POST /api/platforms (create at any station)
-✅ DELETE /api/instruments/ANS_FOR_PL01_PHE01 (delete at any station)
+✅ DELETE /api/instruments/ANS_FOR_BLD01_PHE01 (delete at any station)
 ✅ GET /api/analytics/station-stats (system-wide)
 ```
 
@@ -853,7 +853,7 @@ if (adminUser instanceof Response) {
 
 ✅ GET /api/stations/svartberget (own station)
 ✅ POST /api/platforms (create at SVB only)
-✅ DELETE /api/instruments/SVB_FOR_PL01_PHE01 (delete at SVB)
+✅ DELETE /api/instruments/SVB_FOR_TWR01_PHE01 (delete at SVB)
 ✅ PUT /api/rois/123 (edit ROI at SVB)
 ✅ GET /api/export/station/SVB (export SVB data)
 ```
@@ -873,7 +873,7 @@ if (adminUser instanceof Response) {
 ❌ POST /api/platforms (create at ANS station)
    Response: 403 Forbidden - "Station admin svb-admin cannot access station ANS"
 
-❌ DELETE /api/instruments/ANS_FOR_PL01_PHE01
+❌ DELETE /api/instruments/ANS_FOR_BLD01_PHE01
    Response: 403 Forbidden - "Station admin svb-admin cannot access station ANS"
 
 ❌ GET /api/analytics/station-stats (system-wide)
@@ -890,9 +890,9 @@ if (adminUser instanceof Response) {
 // Expected: Limited write access to SVB only
 
 ✅ GET /api/stations/svartberget (own station)
-✅ PUT /api/instruments/SVB_FOR_PL01_PHE01 (edit at SVB)
+✅ PUT /api/instruments/SVB_FOR_TWR01_PHE01 (edit at SVB)
 ✅ POST /api/rois (create ROI at SVB - old ROI becomes legacy)
-❌ DELETE /api/platforms/SVB_FOR_PL01 (no delete permission)
+❌ DELETE /api/platforms/SVB_FOR_TWR01 (no delete permission)
 ❌ GET /api/admin/user-sessions (no admin access)
 ```
 

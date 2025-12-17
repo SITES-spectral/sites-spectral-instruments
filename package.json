@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "11.0.0-alpha.42",
-  "description": "SITES Spectral v11.0.0 - Hexagonal Architecture + Standard Vocabularies (Darwin Core, ICOS, Copernicus)",
+  "version": "12.0.0",
+  "description": "SITES Spectral v12.0.0 - Normalized Mount Type Codes + Hexagonal Architecture + Standard Vocabularies",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

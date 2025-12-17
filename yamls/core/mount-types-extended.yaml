@@ -1,13 +1,21 @@
 # SITES Spectral Mount Types - Extended Vocabulary
-# Primary codes preserved from SITES Spectral legacy system
+# Normalized to consistent 3-letter codes (v12.0.0 - BREAKING CHANGE)
 # Standard vocabulary mappings added for ICOS/Copernicus interoperability
-# Version: 11.0.0
+# Version: 12.0.0
+#
+# v12.0.0 Changes (BREAKING):
+#   - PL -> TWR (Tower/Mast - standard aviation/infrastructure abbreviation)
+#   - BL -> BLD (Building - common abbreviation)
+#   - GL -> GND (Ground - standard abbreviation)
+#   - All mount type codes now consistently 3 letters
+#   - Platform and instrument normalized_name values updated
 
 mount_types:
   # Fixed installations
-  PL:
-    code: PL
-    name: "Pole/Tower/Mast"
+  TWR:
+    code: TWR
+    name: "Tower/Mast"
+    legacy_code: PL
     standard_name: "tower"
     description: "Fixed tower or mast installation (>1.5m height)"
     category: fixed
@@ -23,9 +31,10 @@ mount_types:
       - Meteorological mast
       - Phenocam tower
 
-  BL:
-    code: BL
+  BLD:
+    code: BLD
     name: "Building"
+    legacy_code: BL
     standard_name: "building"
     description: "Building-mounted installation (rooftop or facade)"
     category: fixed
@@ -41,9 +50,10 @@ mount_types:
       - Facade-mounted sensor
       - Observatory dome
 
-  GL:
-    code: GL
+  GND:
+    code: GND
     name: "Ground Level"
+    legacy_code: GL
     standard_name: "ground"
     description: "Ground-level installation (<1.5m height)"
     category: fixed
@@ -150,7 +160,7 @@ categories:
   fixed:
     name: "Fixed Installations"
     description: "Permanent, stationary platforms"
-    mount_types: [PL, BL, GL]
+    mount_types: [TWR, BLD, GND]
     auto_create_instruments: false
 
   uav:
@@ -180,11 +190,18 @@ categories:
 # Standard vocabulary mapping (for interoperability)
 # Maps SITES Spectral codes to international standard names
 standard_vocabulary_mapping:
-  PL: tower
-  BL: building
-  GL: ground
+  TWR: tower
+  BLD: building
+  GND: ground
   UAV: aerial
   SAT: satellite
   MOB: mobile
   USV: surface_vehicle
   UUV: subsurface
+
+# Legacy code mapping (for backward compatibility)
+# Maps old 2-letter codes to new 3-letter codes
+legacy_code_mapping:
+  PL: TWR
+  BL: BLD
+  GL: GND

@@ -119,10 +119,10 @@ Station admins will **CONTINUE** to have full access within their station:
 |-----------|-----------------|-----------------|
 | `GET /api/platforms` (SVB) | ✅ Allowed | ❌ DENIED |
 | `POST /api/platforms` (SVB) | ✅ Allowed | ❌ DENIED |
-| `DELETE /api/platforms/SVB_FOR_PL01` | ✅ Allowed | N/A |
-| `DELETE /api/platforms/ANS_FOR_PL01` | ❌ DENIED | ✅ Allowed (if ans-admin) |
-| `PUT /api/instruments/SVB_FOR_PL01_PHE01` | ✅ Allowed | N/A |
-| `DELETE /api/instruments/ANS_FOR_PL01_PHE01` | ❌ DENIED | ✅ Allowed (if ans-admin) |
+| `DELETE /api/platforms/SVB_FOR_TWR01` | ✅ Allowed | N/A |
+| `DELETE /api/platforms/ANS_FOR_BLD01` | ❌ DENIED | ✅ Allowed (if ans-admin) |
+| `PUT /api/instruments/SVB_FOR_TWR01_PHE01` | ✅ Allowed | N/A |
+| `DELETE /api/instruments/ANS_FOR_BLD01_PHE01` | ❌ DENIED | ✅ Allowed (if ans-admin) |
 | `GET /api/export/station/SVB` | ✅ Allowed | ❌ DENIED |
 
 ---

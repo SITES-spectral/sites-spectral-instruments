@@ -7,8 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Future Consideration (Flagged)
-- **Platform Mount Type Codes**: Consider migrating from legacy codes (PL, BL, GL) to standard acronyms (TWR, BLD, GND, AER) for better alignment with ICOS/Copernicus terminology. This would require database migration and frontend updates.
+---
+
+## [12.0.0] - 2025-12-17
+
+### BREAKING CHANGE: Normalized Mount Type Codes
+
+**Major version bump due to breaking changes in platform and instrument naming.**
+
+All mount type codes standardized to consistent 3-letter format for better alignment with industry standards and international vocabularies. This affects:
+- Platform `normalized_name` values (e.g., `SVB_FOR_PL01` → `SVB_FOR_TWR01`)
+- Instrument `normalized_name` values (e.g., `SVB_FOR_PL01_PHE01` → `SVB_FOR_TWR01_PHE01`)
+- API responses containing these identifiers
+
+#### Code Changes
+
+| Old Code | New Code | Name | Rationale |
+|----------|----------|------|-----------|
+| PL | **TWR** | Tower/Mast | Standard aviation/infrastructure abbreviation |
+| BL | **BLD** | Building | Common abbreviation |
+| GL | **GND** | Ground Level | Standard abbreviation |
+
+**Note**: UAV, SAT, MOB, USV, UUV codes remain unchanged (already 3 letters).
+
+#### Database Migration
+
+**Migration 0042**: `0042_normalize_mount_type_codes.sql`
+- Updates `mount_type_code` column values (PL→TWR, BL→BLD, GL→GND)
+- Updates `normalized_name` for platforms (e.g., SVB_FOR_PL01 → SVB_FOR_TWR01)
+- Updates `normalized_name` for instruments (e.g., SVB_FOR_PL01_PHE01 → SVB_FOR_TWR01_PHE01)
+
+#### Files Updated
+
+**Domain Layer:**
+- `src/domain/platform/Platform.js` - Updated `MOUNT_TYPE_PREFIXES`, added `LEGACY_MOUNT_TYPE_MAP`
+- `src/domain/platform/types/FixedPlatformType.js` - Updated `FIXED_MOUNT_TYPES` to [TWR, BLD, GND]
+
+**Application Layer:**
+- `src/application/commands/CreatePlatform.js` - Default mount type changed from PL to TWR
+
+**Infrastructure Layer:**
+- `src/utils/validation.js` - Updated regex pattern and error messages
+
+**Configuration:**
+- `yamls/core/mount-types-extended.yaml` - Updated codes, added `legacy_code` fields, added `legacy_code_mapping`
+
+**Documentation:**
+- `CLAUDE.md` - Updated naming conventions, mount type codes table, examples
+
+#### Backward Compatibility
+
+- Domain `Platform.js` includes `LEGACY_MOUNT_TYPE_MAP` for old→new code conversion
+- YAML config includes `legacy_code` field and `legacy_code_mapping` section
+- `isGroundLevel()` method supports both GND and GL codes
+
+#### Migration Guide
+
+1. **Backup database** before applying migration
+2. Run migration: `npm run db:migrate`
+3. Update any external systems that reference platform/instrument names
+4. Update any hardcoded references to old codes (PL, BL, GL)
 
 ---
 

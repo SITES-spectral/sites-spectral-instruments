@@ -82,13 +82,13 @@ stations:
 ### Platform Level
 ```yaml
 platforms:
-  LON_AGR_PL01:
-    display_name: Lönnstorp Agriculture Platform 01
+  LON_AGR_TWR01:
+    display_name: Lönnstorp Agriculture Tower 01
     operation_programs:
       - SLU
       - SITES
       - ICOS
-    mounting_structure: Mast
+    mounting_structure: Tower
     platform_height_m: 10.0
     status: Active
 ```
@@ -97,8 +97,8 @@ platforms:
 ```yaml
 instruments:
   phenocams:
-    LON_AGR_PL01_PHE01:
-      display_name: Lönnstorp Agriculture Platform 01 Phenocam 01
+    LON_AGR_TWR01_PHE01:
+      display_name: Lönnstorp Agriculture Tower 01 Phenocam 01
       instrument_type: phenocam
       ecosystem_code: AGR
       status: Active

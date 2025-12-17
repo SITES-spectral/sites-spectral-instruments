@@ -290,7 +290,7 @@ function parseYAMLROIs(yamlText) {
 
 ```javascript
 // User clicks "Create ROI" button on instrument details
-showROICreationModal(instrumentId, 'SVB_FOR_PL01_PHE01');
+showROICreationModal(instrumentId, 'SVB_FOR_TWR01_PHE01');
 
 // Modal opens with:
 // - Empty canvas ready for drawing
@@ -339,6 +339,7 @@ rois:
       - [800, 100]
       - [0, 100]
     thickness: 7
+    auto_generated: false
 */
 
 // System:

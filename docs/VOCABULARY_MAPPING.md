@@ -91,9 +91,9 @@ SITES Spectral mount types with ICOS/Copernicus vocabulary mappings. Legacy code
 
 | Code | Name | Standard Name | ICOS Equivalent | Copernicus Equivalent |
 |------|------|---------------|-----------------|----------------------|
-| **PL** | Pole/Tower/Mast | tower | flux tower | - |
-| **BL** | Building | building | building station | - |
-| **GL** | Ground Level | ground | ground station | - |
+| **TWR** | Tower | tower | flux tower | - |
+| **BLD** | Building | building | building station | - |
+| **GND** | Ground Level | ground | ground station | - |
 | **UAV** | UAV Position | aerial | - | airborne campaign |
 | **SAT** | Satellite | satellite | - | Sentinel mission |
 | **MOB** | Mobile | mobile | mobile station | - |
@@ -323,13 +323,13 @@ V11 API responses include both project-specific codes and standard vocabulary te
     }
   },
   "platform": {
-    "normalized_name": "SVB_FOR_PL01",
-    "mount_type_code": "PL",
+    "normalized_name": "SVB_FOR_TWR01",
+    "mount_type_code": "TWR",
     "mount_type_standard": "tower",
     "icos_equivalent": "flux_tower"
   },
   "instrument": {
-    "normalized_name": "SVB_FOR_PL01_PHE01",
+    "normalized_name": "SVB_FOR_TWR01_PHE01",
     "instrument_type": "Phenocam",
     "measurement_objective": "vegetation_health"
   }

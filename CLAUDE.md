@@ -60,15 +60,28 @@ src/
 
 ---
 
-## Current Version: 11.0.0-alpha.31 - Station Users Read-Only (2025-12-09)
+## Current Version: 12.0.0 - Normalized Mount Type Codes (2025-12-17)
 
-**✅ STATUS: ALPHA - V11 Hexagonal Architecture + Standard Vocabularies**
+**✅ STATUS: STABLE - V12 Major Release**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-09
-**🚀 API Version:** V11 (hexagonal)
+**📅 Last Updated:** 2025-12-17
+**🚀 API Version:** V12 (hexagonal + normalized codes)
 **🔒 Security Features:** CSRF Protection, Input Sanitization, JWT HMAC-SHA256, Domain Authorization
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
+
+### What's New in v12.0.0
+
+**BREAKING CHANGE**: All mount type codes normalized to consistent 3 letters:
+- `PL` → `TWR` (Tower/Mast - standard aviation/infrastructure abbreviation)
+- `BL` → `BLD` (Building - common abbreviation)
+- `GL` → `GND` (Ground Level - standard abbreviation)
+
+**Impact**:
+- Platform `normalized_name` values change (e.g., `SVB_FOR_PL01` → `SVB_FOR_TWR01`)
+- Instrument `normalized_name` values change (e.g., `SVB_FOR_PL01_PHE01` → `SVB_FOR_TWR01_PHE01`)
+- API responses reflect new naming convention
+- Database Migration 0042 applies changes automatically
 
 ### What's New in v11.0.0-alpha.31
 
@@ -280,40 +293,42 @@ docs/
 | Entity | Format | Example |
 |--------|--------|---------|
 | Station | `{ACRONYM}` | SVB, ANS, LON, GRI |
-| Platform (Fixed) | `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE}` | SVB_FOR_PL01 |
+| Platform (Fixed) | `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE}` | SVB_FOR_TWR01 |
 | Platform (UAV) | `{STATION}_{VENDOR}_{MODEL}_{MOUNT_TYPE}` | SVB_DJI_M3M_UAV01 |
 | Platform (Satellite) | `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` | SVB_ESA_S2A_MSI |
-| Instrument | `{PLATFORM}_{TYPE}{##}` | SVB_FOR_PL01_PHE01 |
+| Instrument | `{PLATFORM}_{TYPE}{##}` | SVB_FOR_TWR01_PHE01 |
 | ROI | `ROI_##` | ROI_01, ROI_02 |
 
-### Mount Type Codes (v10.0.0+)
+### Mount Type Codes (v12.0.0+)
 
-The `mount_type_code` field describes the **physical mounting structure type** (not geographic location):
+The `mount_type_code` field describes the **physical mounting structure type** (not geographic location).
 
-| Code | Name | Description | Platform Types |
-|------|------|-------------|----------------|
-| **PL** | Pole/Tower/Mast | Elevated structures (>1.5m height) | fixed |
-| **BL** | Building | Rooftop or facade mounted | fixed |
-| **GL** | Ground Level | Installations below 1.5m height | fixed |
-| **UAV** | UAV Position | Drone flight position identifier | uav |
-| **SAT** | Satellite | Virtual position for satellite data | satellite |
-| **MOB** | Mobile | Portable platform position | mobile |
-| **USV** | Surface Vehicle | Unmanned surface vehicle position | usv |
-| **UUV** | Underwater Vehicle | Unmanned underwater vehicle position | uuv |
+**All codes normalized to consistent 3 letters** in v12.0.0:
 
-> **Note**: In v9.x and earlier, this field was called `location_code`. The rename to `mount_type_code` in v10.0.0 provides semantic clarity - the field describes mounting structure type, not geographic location.
+| Code | Name | Legacy | Description | Platform Types |
+|------|------|--------|-------------|----------------|
+| **TWR** | Tower/Mast | PL | Elevated structures (>1.5m height) | fixed |
+| **BLD** | Building | BL | Rooftop or facade mounted | fixed |
+| **GND** | Ground Level | GL | Installations below 1.5m height | fixed |
+| **UAV** | UAV Position | - | Drone flight position identifier | uav |
+| **SAT** | Satellite | - | Virtual position for satellite data | satellite |
+| **MOB** | Mobile | - | Portable platform position | mobile |
+| **USV** | Surface Vehicle | - | Unmanned surface vehicle position | usv |
+| **UUV** | Underwater Vehicle | - | Unmanned underwater vehicle position | uuv |
+
+> **Note**: In v9.x and earlier, this field was called `location_code`. Renamed to `mount_type_code` in v10.0.0 for semantic clarity. **Codes normalized to 3 letters in v12.0.0** (breaking change).
 
 ### Instrument Type Codes
 
 | Code | Type | Platform | Example |
 |------|------|----------|---------|
-| PHE | Phenocam | fixed | SVB_FOR_PL01_PHE01 |
-| MS | Multispectral Sensor | fixed, uav, satellite | SVB_FOR_PL01_MS01 |
+| PHE | Phenocam | fixed | SVB_FOR_TWR01_PHE01 |
+| MS | Multispectral Sensor | fixed, uav, satellite | SVB_FOR_TWR01_MS01 |
 | RGB | RGB Camera | uav | ANS_DJI_M3M_UAV01_RGB02 |
-| PAR | PAR Sensor | fixed | SVB_MIR_PL03_PAR01 |
-| NDVI | NDVI Sensor | fixed | ANS_FOR_PL01_NDVI01 |
-| PRI | PRI Sensor | fixed | LON_AGR_PL01_PRI01 |
-| HYP | Hyperspectral Sensor | fixed, uav, satellite | GRI_FOR_PL01_HYP01 |
+| PAR | PAR Sensor | fixed | SVB_MIR_TWR03_PAR01 |
+| NDVI | NDVI Sensor | fixed | ANS_FOR_TWR01_NDVI01 |
+| PRI | PRI Sensor | fixed | LON_AGR_TWR01_PRI01 |
+| HYP | Hyperspectral Sensor | fixed, uav, satellite | GRI_FOR_TWR01_HYP01 |
 | TIR | Thermal Camera | fixed, uav, satellite | ANS_DJI_M3M_UAV01_TIR01 |
 | LID | LiDAR | uav, satellite | SVB_DJI_M350_UAV01_LID01 |
 | SAR | Radar (SAR) | satellite | SVB_ESA_S1A_SAR01 |
@@ -714,14 +729,20 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 11.0.0-alpha.31 |
-| Last Deployed | 2025-12-09 |
-| Status | Alpha - V11 Hexagonal Architecture + Standard Vocabularies |
+| Current Version | 12.0.0 |
+| Last Deployed | 2025-12-17 |
+| Status | Stable - V12 Normalized Mount Type Codes |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
 
-### v11.0.0 Features
+### v12.0.0 Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| **Normalized Mount Type Codes** | v12.0.0 | ✅ BREAKING |
+
+### v11.0.0 Features (Inherited)
 
 | Feature | Version | Status |
 |---------|---------|--------|

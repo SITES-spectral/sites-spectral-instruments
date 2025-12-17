@@ -298,7 +298,7 @@ rois:
       - [0, 2847]
     thickness: 7
     generated_date: '2025-06-02'
-    source_image: abisko_ANS_FOR_BL01_PHE01_2023_152_20230601_092630.jpg
+    source_image: abisko_ANS_FOR_BLD01_PHE01_2023_152_20230601_092630.jpg
 
   ROI_01:
     description: "Forest canopy area"

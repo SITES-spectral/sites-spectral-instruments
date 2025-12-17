@@ -36,9 +36,9 @@ The image filename must match the instrument's **normalized name** exactly:
 {STATION}_{ECOSYSTEM}_{PLATFORM}_{TYPE}{NUMBER}.jpg
 
 Examples:
-ANS_FOR_BL01_PHE01.jpg
-LON_AGR_PL01_PHE01.jpg
-SVB_MIR_PL03_PHE01.jpg
+ANS_FOR_BLD01_PHE01.jpg
+LON_AGR_TWR01_PHE01.jpg
+SVB_MIR_TWR03_PHE01.jpg
 ```
 
 ## How to Update a Phenocam Image
@@ -61,8 +61,8 @@ cd /lunarc/nobackup/projects/sitesspec/SITES/Spectral/apps/sites-spectral-instru
 # Replace {station_dir} and {normalized_name} with actual values
 cp /path/to/source/image.jpg public/images/stations/{station_dir}/instruments/{normalized_name}.jpg
 
-# Example for ANS_FOR_BL01_PHE01:
-cp ~/phenocam_images/abisko_sample.jpg public/images/stations/abisko/instruments/ANS_FOR_BL01_PHE01.jpg
+# Example for ANS_FOR_BLD01_PHE01:
+cp ~/phenocam_images/abisko_sample.jpg public/images/stations/abisko/instruments/ANS_FOR_BLD01_PHE01.jpg
 ```
 
 ### Step 3: Update the Manifest (Optional)
@@ -109,10 +109,10 @@ A manifest file tracks all instrument images:
   "failedCount": 10,
   "instruments": [
     {
-      "instrumentId": "ANS_FOR_BL01_PHE01",
+      "instrumentId": "ANS_FOR_BLD01_PHE01",
       "stationAcronym": "ANS",
       "success": true,
-      "sourceFilename": "abisko_ANS_FOR_BL01_PHE01_2025_146_20250526_120848.jpg",
+      "sourceFilename": "abisko_ANS_FOR_BLD01_PHE01_2025_146_20250526_120848.jpg",
       "year": "2025",
       "timestamp": "2025-05-26 12:08:48",
       "imageDate": "2025-05-26",
@@ -176,8 +176,8 @@ update_instrument_image() {
 }
 
 # Update specific instruments
-# update_instrument_image "ANS_FOR_BL01_PHE01"
-# update_instrument_image "LON_AGR_PL01_PHE01"
+# update_instrument_image "ANS_FOR_BLD01_PHE01"
+# update_instrument_image "LON_AGR_TWR01_PHE01"
 
 # Or update all from a list
 # cat instruments.txt | while read inst; do update_instrument_image "$inst"; done
@@ -231,14 +231,14 @@ As of the last manifest generation:
 
 ### Instruments with Images
 
-- ANS_FOR_BL01_PHE01 (Abisko)
-- GRI_FOR_BL01_PHE01 (Grimsö)
-- LON_AGR_PL01_PHE01, PHE02, PHE03 (Lönnstorp)
-- RBD_AGR_PL01_PHE01, PL02_PHE01 (Röbäcksdalen)
-- SKC_CEM_FOR_PL01_PHE01, PL02_PHE01, PL03_PHE01 (Skogaryd)
-- SKC_LAK_PL01_PHE01 (Skogaryd Lake)
-- SKC_MAD_FOR_PL02_PHE01 (Skogaryd)
-- SKC_MAD_WET_PL01_PHE01 (Skogaryd)
+- ANS_FOR_BLD01_PHE01 (Abisko)
+- GRI_FOR_BLD01_PHE01 (Grimsö)
+- LON_AGR_TWR01_PHE01, PHE02, PHE03 (Lönnstorp)
+- RBD_AGR_TWR01_PHE01, TWR02_PHE01 (Röbäcksdalen)
+- SKC_CEM_FOR_TWR01_PHE01, TWR02_PHE01, TWR03_PHE01 (Skogaryd)
+- SKC_LAK_TWR01_PHE01 (Skogaryd Lake)
+- SKC_MAD_FOR_TWR02_PHE01 (Skogaryd)
+- SKC_MAD_WET_TWR01_PHE01 (Skogaryd)
 
 ### Instruments Missing Images
 

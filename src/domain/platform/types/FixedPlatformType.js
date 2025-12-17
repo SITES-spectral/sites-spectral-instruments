@@ -3,12 +3,12 @@
  *
  * Handles fixed/stationary platforms like towers, masts, and permanent installations.
  * Naming convention: {STATION}_{ECOSYSTEM}_{MOUNT_TYPE_CODE}
- * Example: SVB_FOR_PL01, ANS_MIR_BL01, LON_AGR_GL01
+ * Example: SVB_FOR_TWR01, ANS_MIR_BLD01, LON_AGR_GND01
  *
- * Mount Type Codes:
- * - PL: Pole/Tower/Mast (elevated structures)
- * - BL: Building (rooftop or facade mounted)
- * - GL: Ground Level (below 1.5m height)
+ * Mount Type Codes (v12.0.0 - normalized to 3 letters, BREAKING CHANGE):
+ * - TWR: Tower/Mast (elevated structures) - formerly PL
+ * - BLD: Building (rooftop or facade mounted) - formerly BL
+ * - GND: Ground Level (below 1.5m height) - formerly GL
  *
  * @module domain/platform/types/FixedPlatformType
  */
@@ -19,7 +19,7 @@ import { ECOSYSTEM_CODES, MOUNT_TYPE_PREFIXES } from '../Platform.js';
 /**
  * Valid mount type prefixes for fixed platforms
  */
-const FIXED_MOUNT_TYPES = ['PL', 'BL', 'GL'];
+const FIXED_MOUNT_TYPES = ['TWR', 'BLD', 'GND'];
 
 export class FixedPlatformType extends PlatformTypeStrategy {
   /**
@@ -108,7 +108,7 @@ export class FixedPlatformType extends PlatformTypeStrategy {
         type: 'select',
         required: true,
         options: this.getAvailableMountTypes(),
-        helpText: 'Physical mounting structure type (PL=Pole/Tower, BL=Building, GL=Ground Level)'
+        helpText: 'Physical mounting structure type (TWR=Tower/Mast, BLD=Building, GND=Ground Level)'
       },
       {
         name: 'mountTypeCode',
@@ -116,9 +116,9 @@ export class FixedPlatformType extends PlatformTypeStrategy {
         type: 'text',
         required: true,
         readonly: true,
-        pattern: /^(PL|BL|GL)\d{2}$/,
-        placeholder: 'PL01',
-        helpText: 'Auto-generated (e.g., PL01=Pole #1, BL01=Building #1, GL01=Ground Level #1)'
+        pattern: /^(TWR|BLD|GND)\d{2}$/,
+        placeholder: 'TWR01',
+        helpText: 'Auto-generated (e.g., TWR01=Tower #1, BLD01=Building #1, GND01=Ground Level #1)'
       },
       {
         name: 'mountingStructure',

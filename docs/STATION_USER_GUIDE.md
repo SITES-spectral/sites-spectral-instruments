@@ -37,14 +37,14 @@ If you have admin or station user privileges, you can create new platforms direc
 4. **Click Create** to save the new platform
 
 **Important Notes:**
-- Platform normalized names must use your station's acronym (e.g., `ANS_FOR_PL01`)
+- Platform normalized names must use your station's acronym (e.g., `ANS_FOR_TWR01`)
 - UAV platforms auto-generate their normalized name based on vendor and model
 - Instruments cannot be created with generic station fallbacks - all require valid station data
 
 ## Understanding the Data Structure
 
 ### Normalized Names vs Legacy Names
-- **Normalized Names**: New standardized naming convention (e.g., `ANS_FOR_BL01_PHE01`)
+- **Normalized Names**: New standardized naming convention (e.g., `ANS_FOR_BLD01_PHE01`)
   - Format: `[STATION]_[ECOSYSTEM]_[PLATFORM]_[INSTRUMENT]`
   - These are the official identifiers going forward
 - **Legacy Names**: Previous naming conventions still displayed for reference

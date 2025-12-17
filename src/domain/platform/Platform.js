@@ -46,25 +46,29 @@ export const ECOSYSTEM_CODES = [
 
 /**
  * Mount type prefixes - describes physical mounting structure
+ * All codes are now normalized to 3 letters (v12.0.0 - BREAKING CHANGE)
  * @constant {Object}
  */
 export const MOUNT_TYPE_PREFIXES = {
-  PL: {
-    code: 'PL',
-    name: 'Pole/Tower/Mast',
+  TWR: {
+    code: 'TWR',
+    legacyCode: 'PL',
+    name: 'Tower/Mast',
     description: 'Elevated structures such as observation towers, masts, or poles',
     minHeight: 1.5,
     platformTypes: ['fixed']
   },
-  BL: {
-    code: 'BL',
+  BLD: {
+    code: 'BLD',
+    legacyCode: 'BL',
     name: 'Building',
     description: 'Mounted on building rooftops or facades',
     minHeight: null,
     platformTypes: ['fixed']
   },
-  GL: {
-    code: 'GL',
+  GND: {
+    code: 'GND',
+    legacyCode: 'GL',
     name: 'Ground Level',
     description: 'Installations below 1.5m height',
     maxHeight: 1.5,
@@ -100,6 +104,16 @@ export const MOUNT_TYPE_PREFIXES = {
     description: 'Unmanned underwater vehicle position',
     platformTypes: ['uuv']
   }
+};
+
+/**
+ * Legacy code mapping for backward compatibility
+ * @constant {Object}
+ */
+export const LEGACY_MOUNT_TYPE_MAP = {
+  PL: 'TWR',
+  BL: 'BLD',
+  GL: 'GND'
 };
 
 export class Platform {
@@ -259,7 +273,8 @@ export class Platform {
    * @returns {boolean}
    */
   isGroundLevel() {
-    return this.getMountTypePrefix() === 'GL';
+    const prefix = this.getMountTypePrefix();
+    return prefix === 'GND' || prefix === 'GL'; // Support both new and legacy codes
   }
 
   /**
