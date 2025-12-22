@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.0",
-  "description": "SITES Spectral v12.0.0 - Normalized Mount Type Codes + Hexagonal Architecture + Standard Vocabularies",
+  "version": "12.0.1",
+  "description": "SITES Spectral v12.0.1 - Station Acronym API Fix + Normalized Mount Type Codes + Hexagonal Architecture",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

@@ -31,6 +31,11 @@ export class PlatformController {
 
   /**
    * GET /platforms - List all platforms
+   * Supports filtering by:
+   * - station: Station acronym (e.g., 'RBD', 'SVB') - resolves to station_id
+   * - station_id: Numeric station ID (legacy support)
+   * - platform_type: Platform type filter
+   * - ecosystem_code: Ecosystem code filter
    */
   async list(request, url) {
     // Authentication required for read
@@ -46,9 +51,21 @@ export class PlatformController {
     );
     const sortBy = url.searchParams.get('sort_by') || 'normalized_name';
     const sortOrder = url.searchParams.get('sort_order') || 'asc';
-    const stationId = url.searchParams.get('station_id');
-    const platformType = url.searchParams.get('platform_type');
+    const platformType = url.searchParams.get('platform_type') || url.searchParams.get('type');
     const ecosystemCode = url.searchParams.get('ecosystem_code');
+
+    // Support both 'station' (acronym) and 'station_id' (numeric) parameters
+    // v12.0.1: Fix for frontend sending station acronym instead of numeric ID
+    let stationId = url.searchParams.get('station_id');
+    const stationAcronym = url.searchParams.get('station');
+
+    if (!stationId && stationAcronym) {
+      // Resolve station acronym to ID
+      const station = await this.queries.getStation.byAcronym(stationAcronym.toUpperCase());
+      if (station) {
+        stationId = station.id;
+      }
+    }
 
     const result = await this.queries.listPlatforms.execute({
       page,

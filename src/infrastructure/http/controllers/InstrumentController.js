@@ -31,6 +31,12 @@ export class InstrumentController {
 
   /**
    * GET /instruments - List all instruments
+   * Supports filtering by:
+   * - station: Station acronym (e.g., 'RBD', 'SVB') - resolves to station_id
+   * - station_id: Numeric station ID (legacy support)
+   * - platform_id: Numeric platform ID
+   * - instrument_type: Instrument type filter
+   * - status: Status filter
    */
   async list(request, url) {
     // Authentication required for read
@@ -47,9 +53,21 @@ export class InstrumentController {
     const sortBy = url.searchParams.get('sort_by') || 'normalized_name';
     const sortOrder = url.searchParams.get('sort_order') || 'asc';
     const platformId = url.searchParams.get('platform_id');
-    const stationId = url.searchParams.get('station_id');
-    const instrumentType = url.searchParams.get('instrument_type');
+    const instrumentType = url.searchParams.get('instrument_type') || url.searchParams.get('type');
     const status = url.searchParams.get('status');
+
+    // Support both 'station' (acronym) and 'station_id' (numeric) parameters
+    // v12.0.1: Fix for frontend sending station acronym instead of numeric ID
+    let stationId = url.searchParams.get('station_id');
+    const stationAcronym = url.searchParams.get('station');
+
+    if (!stationId && stationAcronym) {
+      // Resolve station acronym to ID
+      const station = await this.queries.getStation.byAcronym(stationAcronym.toUpperCase());
+      if (station) {
+        stationId = station.id;
+      }
+    }
 
     const result = await this.queries.listInstruments.execute({
       page,

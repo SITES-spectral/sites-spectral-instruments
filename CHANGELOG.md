@@ -9,6 +9,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.1] - 2025-12-22
+
+### Critical Bug Fix: Station Acronym API Parameter
+
+**Fixed:** Platforms and instruments not displaying for stations (e.g., Robacksdalen/RBD showed empty).
+
+#### Root Cause
+
+Frontend sends `?station=RBD` (acronym), but controllers expected `?station_id=5` (numeric ID). This mismatch caused station filtering to be ignored, returning empty results.
+
+#### Changes
+
+**PlatformController.js** (`src/infrastructure/http/controllers/PlatformController.js`)
+- Added support for `station` query parameter (station acronym)
+- Resolves acronym to station ID via `getStation.byAcronym()`
+- Maintains backward compatibility with `station_id` parameter
+- Also supports `type` alias for `platform_type`
+
+**InstrumentController.js** (`src/infrastructure/http/controllers/InstrumentController.js`)
+- Added support for `station` query parameter (station acronym)
+- Resolves acronym to station ID via `getStation.byAcronym()`
+- Maintains backward compatibility with `station_id` parameter
+- Also supports `type` alias for `instrument_type`
+
+#### API Parameter Support
+
+| Parameter | Format | Example | Status |
+|-----------|--------|---------|--------|
+| `station` | Acronym | `?station=RBD` | **NEW** (v12.0.1) |
+| `station_id` | Numeric ID | `?station_id=5` | Legacy support |
+| `type` | Type filter | `?type=fixed` | **NEW** alias |
+| `platform_type` | Type filter | `?platform_type=fixed` | Existing |
+| `instrument_type` | Type filter | `?instrument_type=Phenocam` | Existing |
+
+#### Affected Stations
+
+All stations now correctly display platforms and instruments:
+- ANS (Abisko)
+- ASA (Asa)
+- BOL (Bolmen)
+- ERK (Erken)
+- GRI (Grimsö)
+- LON (Lönnstorp)
+- **RBD (Röbäcksdalen)** - Primary report
+- SKC (Skogaryd)
+- SVB (Svartberget)
+
+---
+
 ## [12.0.0] - 2025-12-17
 
 ### BREAKING CHANGE: Normalized Mount Type Codes
