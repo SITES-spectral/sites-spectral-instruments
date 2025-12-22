@@ -9,6 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.2] - 2025-12-22
+
+### Critical Bug Fix: API v3 Routing
+
+**Fixed:** Frontend using `/api/v3/...` endpoints was not being routed to V11 handlers, causing "No platforms found" in the Quick Access section despite correct stats display.
+
+#### Root Cause
+
+The `versionedPaths` array in `api-handler.js` only included `['v10', 'v11', 'latest', 'stable', 'current', 'legacy']` but the frontend's `api.js` uses `v3BasePath = '/api/v3'`. Requests to `/api/v3/platforms?station=RBD` were falling through to legacy handlers that didn't have the station acronym fix from v12.0.1.
+
+#### Changes
+
+**api-handler.js** (`src/api-handler.js`)
+- Added `'v3'` to `versionedPaths` array for frontend backward compatibility
+
+**version-resolver.js** (`src/infrastructure/api/version-resolver.js`)
+- Added `v3: 'v11'` alias mapping so `/api/v3/*` requests are handled by V11 hexagonal architecture
+
+#### API Version Routing (v12.0.2)
+
+| Path | Resolves To | Status |
+|------|-------------|--------|
+| `/api/v3/*` | v11 | **NEW** (v12.0.2) |
+| `/api/v10/*` | v10 | Legacy |
+| `/api/v11/*` | v11 | Current |
+| `/api/latest/*` | v11 | Alias |
+| `/api/stable/*` | v11 | Alias |
+| `/api/current/*` | v11 | Alias |
+
+---
+
 ## [12.0.1] - 2025-12-22
 
 ### Critical Bug Fix: Station Acronym API Parameter

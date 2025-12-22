@@ -66,8 +66,9 @@ export async function handleApiRequest(request, env, ctx) {
   }
 
   // V11 API - Hexagonal Architecture with Version Resolution (PRIMARY)
-  // Supports: /api/v11, /api/v10, /api/latest, /api/stable, /api/current
-  const versionedPaths = ['v10', 'v11', 'latest', 'stable', 'current', 'legacy'];
+  // Supports: /api/v11, /api/v10, /api/v3 (legacy alias), /api/latest, /api/stable, /api/current
+  // v12.0.1: Added v3 support for frontend backward compatibility
+  const versionedPaths = ['v3', 'v10', 'v11', 'latest', 'stable', 'current', 'legacy'];
 
   if (versionedPaths.includes(pathSegments[0])) {
     // Resolve version (handles aliases like /api/latest → v11)

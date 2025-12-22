@@ -25,7 +25,9 @@ const VERSION_CONFIG = {
     latest: 'v11',
     stable: 'v11',
     current: 'v11',
-    legacy: 'v10'
+    legacy: 'v10',
+    // v12.0.1: Map v3 to v11 for frontend backward compatibility
+    v3: 'v11'
   },
   supportedVersions: {
     v11: { status: 'current', description: 'Hexagonal Architecture' },
