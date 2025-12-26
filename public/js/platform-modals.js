@@ -1,36 +1,36 @@
 /**
- * SITES Spectral Platform Modals v8.2.0
+ * SITES Spectral Platform Modals v12.0.16
  * Platform-type-specific modal builders for Fixed, UAV, Satellite, and Mobile platforms
+ *
+ * @module platform-modals
+ * @version 12.0.16
+ * @requires platform-modal-config.js (PlatformModalConfig)
  */
 
 window.PlatformModals = (function() {
     'use strict';
 
     // =========================================================================
-    // CONFIGURATION
+    // CONFIGURATION (Delegated to PlatformModalConfig)
     // =========================================================================
 
-    const CARRIER_TYPES = {
-        'vehicle': { label: 'Vehicle', icon: 'fa-truck', desc: 'Truck, car, ATV for road/trail surveys' },
-        'boat': { label: 'Boat', icon: 'fa-ship', desc: 'Watercraft for lake/coastal surveys' },
-        'rover': { label: 'Rover', icon: 'fa-robot', desc: 'Autonomous/remote-controlled ground robot' },
-        'backpack': { label: 'Backpack', icon: 'fa-hiking', desc: 'Human walking with backpack instruments' },
-        'bicycle': { label: 'Bicycle', icon: 'fa-bicycle', desc: 'Human cycling with mounted/backpack instruments' },
-        'other': { label: 'Other', icon: 'fa-question', desc: 'Custom carrier type' }
+    // Get configuration from PlatformModalConfig or use inline fallbacks
+    const config = window.PlatformModalConfig || {};
+
+    const CARRIER_TYPES = config.CARRIER_TYPES || {
+        'vehicle': { label: 'Vehicle', icon: 'fa-truck', desc: 'Truck, car, ATV' },
+        'boat': { label: 'Boat', icon: 'fa-ship', desc: 'Watercraft' },
+        'backpack': { label: 'Backpack', icon: 'fa-hiking', desc: 'Backpack instruments' },
+        'other': { label: 'Other', icon: 'fa-question', desc: 'Custom carrier' }
     };
 
-    const CARRIER_CODES = {
-        'vehicle': 'VEH',
-        'boat': 'BOT',
-        'rover': 'ROV',
-        'backpack': 'BPK',
-        'bicycle': 'BIC',
-        'other': 'OTH'
+    const CARRIER_CODES = config.CARRIER_CODES || {
+        'vehicle': 'VEH', 'boat': 'BOT', 'backpack': 'BPK', 'other': 'OTH'
     };
 
-    const TERRAIN_OPTIONS = ['road', 'trail', 'offroad', 'water', 'snow', 'sand', 'rocky'];
-    const POWER_TYPES = ['battery', 'fuel', 'human', 'solar', 'hybrid'];
-    const SURVEY_METHODS = ['transect', 'grid', 'opportunistic', 'route', 'manual'];
+    const TERRAIN_OPTIONS = config.TERRAIN_OPTIONS || ['road', 'trail', 'offroad', 'water'];
+    const POWER_TYPES = config.POWER_TYPES || ['battery', 'fuel', 'human', 'solar'];
+    const SURVEY_METHODS = config.SURVEY_METHODS || ['transect', 'grid', 'opportunistic'];
 
     // =========================================================================
     // FIXED PLATFORM MODAL

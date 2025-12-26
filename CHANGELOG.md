@@ -9,6 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.16] - 2025-12-26
+
+### Platform Modal Configuration Extraction (Phase 3.4 Continued)
+
+**Extracted:** Platform modal configuration constants to separate module.
+
+#### Platform Modal Config Module
+
+**Created:** `public/js/platform-modal-config.js` - 198 lines of configuration.
+
+**Configuration provided:**
+- `CARRIER_TYPES` - Mobile platform carrier types with icons
+- `CARRIER_CODES` - Carrier type codes for naming
+- `TERRAIN_OPTIONS` - Terrain types for surveys
+- `POWER_TYPES` - Power source types
+- `SURVEY_METHODS` - Survey method types
+- `PLATFORM_STATUS_OPTIONS` - Platform status options
+- `MOUNTING_STRUCTURES` - Fixed platform mounting structures
+- `SATELLITE_CONSTELLATIONS` - Common satellite systems
+- `SATELLITE_AGENCIES` - Satellite agencies
+- `UAV_MANUFACTURERS` - Common UAV manufacturers
+
+**Helper functions:**
+- `getCarrierCode(carrierType)` - Get carrier code
+- `getCarrierType(carrierType)` - Get carrier type config
+- `getAllCarrierTypes()` - Get all carrier types for dropdowns
+
+**Changes to `public/js/platform-modals.js`:**
+- Updated to use PlatformModalConfig with inline fallbacks
+- Version updated from v8.2.0 to v12.0.16
+
+---
+
 ## [12.0.15] - 2025-12-26
 
 ### Frontend Modularization Summary (Phases 3.4, 5.1, 5.2)
