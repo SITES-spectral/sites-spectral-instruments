@@ -5,7 +5,8 @@
  * Features platform type filtering, pagination, campaigns, and products panels.
  *
  * @module station-dashboard-v3
- * @version 12.0.10
+ * @version 12.0.17
+ * @requires dashboard/station-dashboard-utils.js (StationDashboardUtils)
  * @requires api-v3.js (sitesAPIv3)
  * @requires dashboard/platform-renderer.js (PlatformRenderer)
  * @requires platforms/platform-type-filter.js (PlatformTypeFilter)
@@ -29,67 +30,43 @@
     };
 
     // ========================================
-    // Constants
+    // Utilities (Delegated to StationDashboardUtils)
     // ========================================
 
-    /** Default pagination settings */
-    const DEFAULT_PAGE_SIZE = 20;
+    const utils = global.StationDashboardUtils || {};
 
-    /** Platform type to ecosystem mapping hint */
-    const PLATFORM_TYPE_DEFAULTS = {
+    /** Default pagination settings */
+    const DEFAULT_PAGE_SIZE = utils.DEFAULT_PAGE_SIZE || 20;
+
+    /** Platform type descriptions */
+    const PLATFORM_TYPE_DEFAULTS = utils.PLATFORM_TYPE_DEFAULTS || {
         fixed: 'Fixed observation platform',
         uav: 'Uncrewed Aerial Vehicle',
         satellite: 'Satellite-based remote sensing',
         mobile: 'Mobile measurement platform'
     };
 
-    // ========================================
-    // Utility Functions
-    // ========================================
-
     /**
-     * Escape HTML to prevent XSS
-     * Delegates to centralized security module (v12.0.9)
-     * @param {string} text - Text to escape
-     * @returns {string} Escaped text
+     * Escape HTML - delegates to StationDashboardUtils
      */
     function escapeHtml(text) {
-        // Use global escapeHtml from core/security.js if available
-        if (typeof global.SitesSecurity !== 'undefined') {
-            return global.SitesSecurity.escapeHtml(text);
-        }
-        // Fallback for backwards compatibility
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return utils.escapeHtml ? utils.escapeHtml(text) : (text || '');
     }
 
     /**
-     * Create safe element with textContent
-     * @param {string} tag - HTML tag name
-     * @param {Object} attributes - Element attributes
-     * @param {string} [textContent] - Text content
-     * @returns {HTMLElement}
+     * Create safe element - delegates to StationDashboardUtils
      */
     function createElement(tag, attributes = {}, textContent = null) {
+        if (utils.createElement) {
+            return utils.createElement(tag, attributes, textContent);
+        }
+        // Inline fallback
         const el = document.createElement(tag);
         Object.entries(attributes).forEach(([key, value]) => {
-            if (key === 'className') {
-                el.className = value;
-            } else if (key === 'dataset') {
-                Object.entries(value).forEach(([dataKey, dataValue]) => {
-                    el.dataset[dataKey] = dataValue;
-                });
-            } else if (key.startsWith('on') && typeof value === 'function') {
-                el.addEventListener(key.slice(2).toLowerCase(), value);
-            } else {
-                el.setAttribute(key, value);
-            }
+            if (key === 'className') el.className = value;
+            else el.setAttribute(key, value);
         });
-        if (textContent !== null) {
-            el.textContent = textContent;
-        }
+        if (textContent !== null) el.textContent = textContent;
         return el;
     }
 

@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.17] - 2025-12-26
+
+### Station Dashboard Utilities Extraction (Phase 3.4 Continued)
+
+**Extracted:** Station dashboard utilities, constants, and helpers to separate module.
+
+#### Station Dashboard Utils Module
+
+**Created:** `public/js/dashboard/station-dashboard-utils.js` - 338 lines of utilities.
+
+**Constants provided:**
+- `DEFAULT_PAGE_SIZE` - Default pagination size
+- `PLATFORM_TYPE_DEFAULTS` - Platform type descriptions
+- `INSTRUMENT_CATEGORY_DEFAULTS` - Instrument category configs
+- `STATUS_ICONS` / `STATUS_COLORS` - Status display mappings
+
+**Utilities provided:**
+- `escapeHtml(text)` - XSS prevention (delegates to SitesSecurity)
+- `createElement(tag, attrs, text)` - Safe DOM element creation
+- `darkenColor(color, percent)` / `lightenColor(color, percent)` - Color utilities
+- `detectInstrumentCategory(type)` - Instrument categorization
+- `getInstrumentCategoryConfig(category)` - Category configuration
+- `groupInstrumentsByCategory(instruments)` - Instrument grouping
+- `getStatusIcon(status)` / `getStatusColor(status)` - Status helpers
+- `formatCoordinates(lat, lon)` - Coordinate formatting
+- `formatDate(date)` / `formatDateTime(datetime)` - Date formatting
+
+**Changes to `public/js/station-dashboard.js`:**
+- Updated to use StationDashboardUtils with inline fallbacks
+- Version updated from v12.0.10 to v12.0.17
+- File reduced from 2,668 to 2,645 lines
+
+---
+
 ## [12.0.16] - 2025-12-26
 
 ### Platform Modal Configuration Extraction (Phase 3.4 Continued)
