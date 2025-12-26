@@ -1,0 +1,580 @@
+/**
+ * SITES Spectral - Campaign Manager Styles
+ *
+ * Extracted from campaign-manager.js for better separation of concerns.
+ *
+ * @module css/campaign-manager
+ * @version 12.0.13
+ */
+
+/* =========================================================================
+   Campaign Manager Container
+   ========================================================================= */
+
+.campaign-manager {
+    font-family: var(--font-family, inherit);
+}
+
+/* =========================================================================
+   Campaign Toolbar
+   ========================================================================= */
+
+.campaign-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+.campaign-toolbar-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.campaign-toolbar-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.campaign-filter-select,
+.campaign-sort-select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-sm, 0.375rem);
+    background: var(--bg-primary, #ffffff);
+    color: var(--text-primary, #1e293b);
+    font-size: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    min-width: 140px;
+}
+
+.campaign-filter-select:focus,
+.campaign-sort-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #1e40af);
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.campaign-date-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-sm, 0.375rem);
+    font-size: 0.875rem;
+    color: var(--text-primary, #1e293b);
+}
+
+.campaign-date-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #1e40af);
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.btn-create-campaign {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--primary-color, #1e40af);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm, 0.375rem);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.btn-create-campaign:hover {
+    background: var(--primary-hover, #1e3a8a);
+}
+
+.btn-create-campaign:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* =========================================================================
+   Campaign Grid
+   ========================================================================= */
+
+.campaign-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+/* =========================================================================
+   Campaign Card
+   ========================================================================= */
+
+.campaign-card {
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 0.5rem);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.campaign-card:hover {
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+    border-color: var(--border-hover, #cbd5e1);
+}
+
+.campaign-card:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-color, #1e40af);
+}
+
+.campaign-card-header {
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.campaign-type-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm, 0.375rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+.campaign-card-title-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.campaign-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    margin: 0 0 0.25rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.campaign-card-type {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.campaign-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.campaign-status-badge i {
+    font-size: 0.625rem;
+}
+
+.campaign-card-body {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.campaign-card-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 0.75rem;
+}
+
+.campaign-card-dates i {
+    color: var(--text-muted, #94a3b8);
+    font-size: 0.75rem;
+}
+
+.campaign-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.campaign-meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-tertiary, #f1f5f9);
+    border-radius: var(--radius-sm, 0.375rem);
+    font-size: 0.75rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.campaign-meta-tag i {
+    font-size: 0.625rem;
+    color: var(--text-muted, #94a3b8);
+}
+
+.campaign-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-secondary, #f8fafc);
+}
+
+.campaign-product-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.campaign-product-count i {
+    color: var(--text-muted, #94a3b8);
+}
+
+.campaign-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.campaign-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-sm, 0.375rem);
+    background: var(--bg-primary, #ffffff);
+    color: var(--text-secondary, #64748b);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.campaign-action-btn:hover {
+    background: var(--bg-tertiary, #f1f5f9);
+    color: var(--text-primary, #1e293b);
+    border-color: var(--border-hover, #cbd5e1);
+}
+
+.campaign-action-btn.danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+/* =========================================================================
+   Empty State
+   ========================================================================= */
+
+.campaign-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: var(--bg-primary, #ffffff);
+    border: 1px dashed var(--border-color, #e2e8f0);
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+.campaign-empty-state i {
+    font-size: 3rem;
+    color: var(--text-muted, #94a3b8);
+    margin-bottom: 1rem;
+}
+
+.campaign-empty-state h3 {
+    font-size: 1.125rem;
+    color: var(--text-primary, #1e293b);
+    margin-bottom: 0.5rem;
+}
+
+.campaign-empty-state p {
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 1rem;
+}
+
+/* =========================================================================
+   Loading State
+   ========================================================================= */
+
+.campaign-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+}
+
+.campaign-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color, #e2e8f0);
+    border-top-color: var(--primary-color, #1e40af);
+    border-radius: 50%;
+    animation: campaign-spin 0.8s linear infinite;
+}
+
+@keyframes campaign-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =========================================================================
+   Modal Styles
+   ========================================================================= */
+
+.campaign-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+    animation: campaign-modal-fade-in 0.2s ease;
+}
+
+@keyframes campaign-modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.campaign-modal {
+    background: var(--bg-primary, #ffffff);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: campaign-modal-slide-in 0.2s ease;
+}
+
+@keyframes campaign-modal-slide-in {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.campaign-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.campaign-modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    margin: 0;
+}
+
+.campaign-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary, #64748b);
+    border-radius: var(--radius-sm, 0.375rem);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.campaign-modal-close:hover {
+    background: var(--bg-tertiary, #f1f5f9);
+    color: var(--text-primary, #1e293b);
+}
+
+.campaign-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* =========================================================================
+   Form Styles
+   ========================================================================= */
+
+.campaign-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.campaign-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.campaign-form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #1e293b);
+    margin-bottom: 0.375rem;
+}
+
+.campaign-form-label .required {
+    color: #dc2626;
+}
+
+.campaign-form-input,
+.campaign-form-select,
+.campaign-form-textarea {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-sm, 0.375rem);
+    font-size: 0.875rem;
+    color: var(--text-primary, #1e293b);
+    background: var(--bg-primary, #ffffff);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.campaign-form-input:focus,
+.campaign-form-select:focus,
+.campaign-form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #1e40af);
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.campaign-form-input.error,
+.campaign-form-select.error,
+.campaign-form-textarea.error {
+    border-color: #dc2626;
+}
+
+.campaign-form-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.campaign-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.campaign-form-hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #64748b);
+    margin-top: 0.25rem;
+}
+
+.campaign-form-error {
+    font-size: 0.75rem;
+    color: #dc2626;
+    margin-top: 0.25rem;
+}
+
+/* =========================================================================
+   Modal Footer
+   ========================================================================= */
+
+.campaign-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-secondary, #f8fafc);
+}
+
+.campaign-modal-btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm, 0.375rem);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.campaign-modal-btn.secondary {
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    color: var(--text-primary, #1e293b);
+}
+
+.campaign-modal-btn.secondary:hover {
+    background: var(--bg-tertiary, #f1f5f9);
+}
+
+.campaign-modal-btn.primary {
+    background: var(--primary-color, #1e40af);
+    border: 1px solid var(--primary-color, #1e40af);
+    color: white;
+}
+
+.campaign-modal-btn.primary:hover {
+    background: var(--primary-hover, #1e3a8a);
+}
+
+.campaign-modal-btn.danger {
+    background: #dc2626;
+    border: 1px solid #dc2626;
+    color: white;
+}
+
+.campaign-modal-btn.danger:hover {
+    background: #b91c1c;
+}
+
+.campaign-modal-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* =========================================================================
+   Responsive
+   ========================================================================= */
+
+@media (max-width: 768px) {
+    .campaign-toolbar {
+        flex-direction: column;
+    }
+
+    .campaign-toolbar-left,
+    .campaign-toolbar-right {
+        width: 100%;
+    }
+
+    .campaign-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .campaign-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .campaign-modal {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+}

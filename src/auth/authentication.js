@@ -1,11 +1,17 @@
 // Authentication Module
 // JWT authentication with HMAC-SHA256 signing, user verification, session management
+// v12.0.8: Added rate limiting for brute force protection
 
 import { SignJWT, jwtVerify } from 'jose';
 import { createErrorResponse, createUnauthorizedResponse } from '../utils/responses.js';
 import { logSecurityEvent } from '../utils/logging.js';
 import { verifyPassword } from './password-hasher.js';
 import { createAuthCookie, createLogoutCookie, getTokenFromCookie } from './cookie-utils.js';
+import {
+  authRateLimitMiddleware,
+  recordAuthAttempt,
+  getRateLimitHeaders
+} from '../middleware/auth-rate-limiter.js';
 
 /**
  * Handle authentication endpoints
@@ -25,6 +31,12 @@ export async function handleAuth(method, pathSegments, request, env) {
       }
 
       try {
+        // Check rate limit before processing login
+        const rateLimitResponse = await authRateLimitMiddleware('login', request, env);
+        if (rateLimitResponse) {
+          return rateLimitResponse; // 429 Too Many Requests
+        }
+
         const { username, password } = await request.json();
 
         if (!username || !password) {
@@ -33,10 +45,18 @@ export async function handleAuth(method, pathSegments, request, env) {
 
         const user = await authenticateUser(username, password, env);
         if (!user) {
+          // Record failed attempt for rate limiting
+          const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+          await recordAuthAttempt(clientIP, 'login', false, username, env);
+
           // Log failed authentication attempt
           await logSecurityEvent('FAILED_LOGIN', { username }, request, env);
           return createUnauthorizedResponse();
         }
+
+        // Record successful login (clears rate limit counter)
+        const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+        await recordAuthAttempt(clientIP, 'login', true, username, env);
 
         const token = await generateToken(user, env);
 
@@ -45,6 +65,13 @@ export async function handleAuth(method, pathSegments, request, env) {
 
         // Set httpOnly cookie for secure token storage
         const authCookie = createAuthCookie(token, request);
+
+        // Build response with rate limit headers
+        const headers = new Headers({
+          'Content-Type': 'application/json',
+          'Set-Cookie': authCookie,
+          ...getRateLimitHeaders(request)
+        });
 
         return new Response(JSON.stringify({
           success: true,
@@ -60,10 +87,7 @@ export async function handleAuth(method, pathSegments, request, env) {
           }
         }), {
           status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Set-Cookie': authCookie
-          }
+          headers
         });
 
       } catch (error) {

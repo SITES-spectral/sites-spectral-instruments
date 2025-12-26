@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.7",
-  "description": "SITES Spectral v12.0.5 - Security & Accessibility Fixes (CORS, Password Hashing, Modal Focus Trap)",
+  "version": "12.0.15",
+  "description": "SITES Spectral v12.0.15 - Frontend Modularization Complete",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

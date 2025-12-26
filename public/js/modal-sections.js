@@ -119,15 +119,19 @@ function isStandardValue(value, standardValues) {
 
 /**
  * Escape HTML to prevent XSS
+ * Delegates to centralized security module (v12.0.9)
+ * @deprecated Use window.escapeHtml from core/security.js directly
  */
 function escapeHtml(str) {
+    // Use global escapeHtml from core/security.js if available
+    if (typeof window.SitesSecurity !== 'undefined') {
+        return window.SitesSecurity.escapeHtml(str);
+    }
+    // Fallback for backwards compatibility
     if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 // ============================================================================

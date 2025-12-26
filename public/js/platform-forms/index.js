@@ -64,7 +64,15 @@
     // Utility Functions
     // ========================================
 
+    /**
+     * Escape HTML - delegates to centralized security module (v12.0.9)
+     */
     function escapeHtml(text) {
+        // Use global escapeHtml from core/security.js if available
+        if (typeof window.SitesSecurity !== 'undefined') {
+            return window.SitesSecurity.escapeHtml(text);
+        }
+        // Fallback for backwards compatibility
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;

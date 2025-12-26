@@ -9,6 +9,255 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.15] - 2025-12-26
+
+### Frontend Modularization Summary (Phases 3.4, 5.1, 5.2)
+
+**Consolidation commit** covering all frontend refactoring work from v12.0.8 to v12.0.15.
+
+#### Phase 5.1: Legacy File Archival
+- Archived `station-dashboard-v1.js` (2,866 lines) to `public/js/archived/`
+- Archived `api-v1-original.js` to `public/js/archived/`
+- Archived `dashboard-state.js` to `public/js/archived/`
+- Moved legacy handlers to `src/archived/`
+
+#### Phase 5.2: Security Consolidation
+- Created `public/js/core/security.js` with centralized `escapeHtml()`
+- Updated all modules to use `SitesSecurity.escapeHtml()`
+
+#### Phase 3.4: Frontend Splitting
+
+**Product Browser Modularization:**
+- Created `public/css/product-browser.css` (785 lines)
+- Created `public/js/products/product-utils.js` (290 lines)
+- Reduced `product-browser.js`: 2,252 → 1,418 lines (-37%)
+
+**Campaign Manager Modularization:**
+- Created `public/css/campaign-manager.css` (581 lines)
+- Created `public/js/campaigns/campaign-utils.js` (282 lines)
+- Reduced `campaign-manager.js`: 1,881 → 1,224 lines (-35%)
+
+---
+
+## [12.0.14] - 2025-12-26
+
+### Campaign Manager Modularization (Phase 3.4 Continued)
+
+**Extracted:** Campaign Manager utilities and configuration to separate module.
+
+#### Campaign Utils Module
+
+**Created:** `public/js/campaigns/campaign-utils.js` - 282 lines of shared utilities.
+
+**Utilities provided:**
+- `getCampaignTypeConfig(typeCode)` - Get campaign type configuration
+- `getCampaignStatusConfig(statusCode)` - Get campaign status configuration
+- `getAllCampaignTypes()` - Get all campaign types for dropdown
+- `getAllCampaignStatuses()` - Get all campaign statuses for dropdown
+
+**Configuration constants:**
+- `CAMPAIGN_TYPE_FALLBACKS` - Fallback campaign type icons, colors
+- `CAMPAIGN_STATUS_FALLBACKS` - Fallback status icons, colors, backgrounds
+- `DEFAULT_CAMPAIGN_TYPE` / `DEFAULT_CAMPAIGN_STATUS` - Default configurations
+
+**Changes to `public/js/campaigns/campaign-manager.js`:**
+- Moved 130+ lines of configuration to CampaignUtils
+- Updated helper functions to delegate to CampaignUtils
+- File reduced from 1,353 to 1,224 lines
+- Total reduction from original: 1,881 → 1,224 lines (-35%)
+
+---
+
+## [12.0.13] - 2025-12-26
+
+### Campaign Manager CSS Extraction (Phase 3.4 Continued)
+
+**Extracted:** Campaign Manager CSS to separate stylesheet for better caching and maintainability.
+
+#### Campaign Manager CSS Extraction
+
+**Created:** `public/css/campaign-manager.css` - 581 lines of CSS extracted from JavaScript.
+
+**Changes to `public/js/campaigns/campaign-manager.js`:**
+- Removed embedded CSS string (~540 lines removed)
+- Added `loadStyles()` function that dynamically loads external CSS
+- File reduced from 1,881 lines to 1,353 lines (-28%)
+- Version updated from v9.0.0 to v12.0.13
+
+**Benefits:**
+- CSS loaded via `<link>` tag (browser caching)
+- Reduced JavaScript bundle size
+- Better separation of concerns
+- Easier CSS maintenance and debugging
+
+---
+
+## [12.0.12] - 2025-12-26
+
+### Product Browser Modularization (Phase 3.4 Continued)
+
+**Extracted:** Product Browser utilities and configuration to separate module.
+
+#### Product Utils Module
+
+**Created:** `public/js/products/product-utils.js` - 290 lines of shared utilities.
+
+**Utilities provided:**
+- `formatFileSize(bytes)` - Format bytes to human-readable size
+- `formatDate(date)` - Format date as YYYY-MM-DD
+- `formatDateTime(datetime)` - Format full datetime
+- `escapeHtml(str)` - XSS prevention (delegates to SitesSecurity)
+- `getProductType(type)` - Get product type configuration
+- `getProcessingLevel(level)` - Get processing level configuration
+
+**Configuration constants:**
+- `PRODUCT_TYPES` - Product type icons, colors, backgrounds
+- `PROCESSING_LEVELS` - L0-L3 level configurations
+- `SORT_OPTIONS` - Sort field options
+
+**Changes to `public/js/products/product-browser.js`:**
+- Moved 90+ lines of configuration to ProductUtils
+- Updated utility methods to delegate to ProductUtils
+- File reduced from 1,480 to 1,418 lines
+- Total reduction from original: 2,252 → 1,418 lines (-37%)
+
+---
+
+## [12.0.11] - 2025-12-26
+
+### CSS Extraction (Phase 3.4 Continued)
+
+**Extracted:** Product Browser CSS to separate stylesheet for better caching and maintainability.
+
+#### Product Browser CSS Extraction
+
+**Created:** `public/css/product-browser.css` - 785 lines of CSS extracted from JavaScript.
+
+**Changes to `public/js/products/product-browser.js`:**
+- Removed embedded CSS string (~772 lines removed)
+- Added `loadStyles()` function that dynamically loads external CSS
+- File reduced from 2,252 lines to 1,480 lines (-34%)
+
+**Benefits:**
+- CSS loaded via `<link>` tag (browser caching)
+- Reduced JavaScript bundle size
+- Better separation of concerns
+- Easier CSS maintenance and theming
+- Parallel loading of CSS and JS
+
+---
+
+## [12.0.10] - 2025-12-26
+
+### Frontend Module Extraction (Phase 3.4)
+
+**Added:** Extracted platform rendering utilities into separate module.
+
+#### Platform Renderer Module
+
+**Created:** `public/js/dashboard/platform-renderer.js` - Utility module for platform card rendering.
+
+**Utilities provided:**
+- `darkenColor(color, percent)` - Darken hex colors for gradients
+- `getInstrumentTypeIcon(type)` - Get Font Awesome icon for instrument type
+- `getInstrumentTypeColor(type)` - Get color for instrument type
+- `detectCategory(type)` - Detect instrument category from type string
+- `getCategoryConfigs()` - Get all category configurations
+- `groupByCategory(instruments)` - Group instruments by type category
+- `countByCategory(instruments)` - Count instruments per category
+- `createTextElement(tag, text, className)` - Safe DOM element creation
+- `createIcon(iconClass, color)` - Create Font Awesome icon element
+
+**Updated Files:**
+- `public/js/station-dashboard.js` - Delegates to PlatformRenderer utilities
+- `public/station-dashboard.html` - Includes platform-renderer.js
+- `public/spectral.html` - Includes platform-renderer.js
+
+**Benefits:**
+- Reduced code duplication
+- Better separation of concerns
+- Smaller, focused modules
+- Easier testing and maintenance
+
+---
+
+## [12.0.9] - 2025-12-26
+
+### Code Cleanup (Phase 5)
+
+**Added:** Centralized security utilities and archived legacy files.
+
+#### Phase 5.1: Archive Legacy Files
+
+**Archived to `public/js/archived/`:**
+- `station-dashboard-v1.js` (2,866 lines) - Legacy dashboard
+- `dashboard-state.js` - Unused state module
+- `api-v1-original.js` - Backup of V1 API
+
+**Archived to `src/archived/`:**
+- `analytics.js` (564 lines) - Replaced by hexagonal AnalyticsController
+- `users.js` (391 lines) - Replaced by hexagonal UserController
+- `rois.js` (845 lines) - Replaced by hexagonal ROIController
+
+#### Phase 5.2: Consolidated Security Utilities
+
+**Created:** `public/js/core/security.js` - Centralized XSS prevention utilities.
+
+**Utilities provided:**
+- `escapeHtml(text)` - XSS-safe HTML escaping
+- `sanitizeUrl(url)` - Prevent javascript: protocol injection
+- `createElement(tag, attrs, text)` - Safe DOM element creation
+- `setTextContent(el, text)` - Safe text content setting
+- `createLink(href, text, attrs)` - Safe anchor element creation
+
+**Updated files to use centralized security:**
+- `public/js/modal-sections.js`
+- `public/js/station-dashboard.js`
+- `public/js/platform-forms/index.js`
+
+**Added script to HTML files:**
+- `public/station-dashboard.html`
+- `public/spectral.html`
+
+---
+
+## [12.0.8] - 2025-12-26
+
+### Security Enhancement (P1)
+
+**Added:** Auth rate limiting to prevent brute force attacks.
+
+#### Auth Rate Limiter (Phase 1.4)
+
+**Created:** `src/middleware/auth-rate-limiter.js` - Rate limiting middleware for auth endpoints.
+
+**Rate Limits:**
+- Login: 5 attempts per minute per IP
+- After limit exceeded: 5 minute block
+- Verify/Other: 30 requests per minute per IP
+
+**Features:**
+- Distributed rate limiting using D1 database
+- Sliding window algorithm
+- Client IP tracking (CF-Connecting-IP)
+- 429 Too Many Requests response with Retry-After header
+- Rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
+- Automatic cleanup of old entries (10% of requests)
+- Successful login clears rate limit counter
+
+**Database Migration:**
+- `migrations/0043_auth_rate_limits.sql` - Creates auth_rate_limits table with indexes
+
+**Updated Files:**
+- `src/auth/authentication.js` - Integrated rate limiting in login handler
+
+**Security Benefits:**
+- Protects against brute force password attacks
+- Distributed tracking across Cloudflare edge
+- Graceful degradation (allows requests if rate limit check fails)
+
+---
+
 ## [12.0.7] - 2025-12-26
 
 ### Promise Error Handling (P0 Critical)

@@ -5,8 +5,9 @@
  * Features platform type filtering, pagination, campaigns, and products panels.
  *
  * @module station-dashboard-v3
- * @version 9.0.0
+ * @version 12.0.10
  * @requires api-v3.js (sitesAPIv3)
+ * @requires dashboard/platform-renderer.js (PlatformRenderer)
  * @requires platforms/platform-type-filter.js (PlatformTypeFilter)
  * @requires ui/pagination-controls.js (PaginationControls)
  * @requires core/config-service.js (SitesConfig)
@@ -48,10 +49,16 @@
 
     /**
      * Escape HTML to prevent XSS
+     * Delegates to centralized security module (v12.0.9)
      * @param {string} text - Text to escape
      * @returns {string} Escaped text
      */
     function escapeHtml(text) {
+        // Use global escapeHtml from core/security.js if available
+        if (typeof global.SitesSecurity !== 'undefined') {
+            return global.SitesSecurity.escapeHtml(text);
+        }
+        // Fallback for backwards compatibility
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
@@ -1137,26 +1144,25 @@
 
         /**
          * Darken a hex color by a percentage
+         * Delegates to PlatformRenderer utility (v12.0.9)
          * @private
          * @param {string} color - Hex color (e.g., '#2563eb')
          * @param {number} percent - Percentage to darken (0-100)
          * @returns {string} Darkened hex color
          */
         _darkenColor(color, percent) {
-            // Remove # if present
-            let hex = color.replace('#', '');
-
-            // Convert to RGB
+            // Delegate to extracted PlatformRenderer module
+            if (global.PlatformRenderer?.darkenColor) {
+                return global.PlatformRenderer.darkenColor(color, percent);
+            }
+            // Fallback for backwards compatibility
+            let hex = (color || '#6b7280').replace('#', '');
             let r = parseInt(hex.substring(0, 2), 16);
             let g = parseInt(hex.substring(2, 4), 16);
             let b = parseInt(hex.substring(4, 6), 16);
-
-            // Darken
             r = Math.max(0, Math.floor(r * (1 - percent / 100)));
             g = Math.max(0, Math.floor(g * (1 - percent / 100)));
             b = Math.max(0, Math.floor(b * (1 - percent / 100)));
-
-            // Convert back to hex
             const toHex = (n) => n.toString(16).padStart(2, '0');
             return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
         }
@@ -1430,68 +1436,54 @@
 
         /**
          * Get instrument type icon based on type
+         * Delegates to PlatformRenderer utility (v12.0.9)
          * @private
          * @param {string} instrumentType - Instrument type
          * @returns {string} Font Awesome icon class
          */
         _getInstrumentTypeIcon(instrumentType) {
-            if (!instrumentType) return 'fa-cube';
-
-            const type = instrumentType.toLowerCase();
-
-            // Pattern-based icon matching
-            if (type.includes('phenocam') || type === 'phe') {
-                return 'fa-camera';
-            } else if (type.includes('multispectral') || type.includes('ms sensor') || type.includes('skye')) {
-                return 'fa-satellite-dish';
-            } else if (type.includes('par sensor') || type.includes('par') || type.includes('licor')) {
-                return 'fa-sun';
-            } else if (type.includes('ndvi')) {
-                return 'fa-leaf';
-            } else if (type.includes('pri sensor') || type.includes('pri')) {
-                return 'fa-microscope';
-            } else if (type.includes('hyperspectral')) {
-                return 'fa-rainbow';
-            } else if (type.includes('thermal') || type.includes('infrared')) {
-                return 'fa-temperature-high';
-            } else if (type.includes('lidar') || type.includes('laser')) {
-                return 'fa-crosshairs';
+            // Delegate to extracted PlatformRenderer module
+            if (global.PlatformRenderer?.getInstrumentTypeIcon) {
+                return global.PlatformRenderer.getInstrumentTypeIcon(instrumentType);
             }
-
+            // Fallback
+            if (!instrumentType) return 'fa-cube';
+            const type = instrumentType.toLowerCase();
+            if (type.includes('phenocam')) return 'fa-camera';
+            if (type.includes('multispectral')) return 'fa-satellite-dish';
+            if (type.includes('par')) return 'fa-sun';
+            if (type.includes('ndvi')) return 'fa-leaf';
+            if (type.includes('pri')) return 'fa-microscope';
+            if (type.includes('hyperspectral')) return 'fa-rainbow';
+            if (type.includes('thermal')) return 'fa-temperature-high';
+            if (type.includes('lidar')) return 'fa-crosshairs';
             return 'fa-cube';
         }
 
         /**
          * Get instrument type color based on type
+         * Delegates to PlatformRenderer utility (v12.0.9)
          * @private
          * @param {string} instrumentType - Instrument type
          * @returns {string} Hex color code
          */
         _getInstrumentTypeColor(instrumentType) {
-            if (!instrumentType) return '#6b7280';
-
-            const type = instrumentType.toLowerCase();
-
-            // Pattern-based color matching
-            if (type.includes('phenocam') || type === 'phe') {
-                return '#2563eb';  // Blue
-            } else if (type.includes('multispectral') || type.includes('ms sensor') || type.includes('skye')) {
-                return '#7c3aed';  // Purple
-            } else if (type.includes('par sensor') || type.includes('par') || type.includes('licor')) {
-                return '#f59e0b';  // Amber
-            } else if (type.includes('ndvi')) {
-                return '#059669';  // Green
-            } else if (type.includes('pri sensor') || type.includes('pri')) {
-                return '#ec4899';  // Pink
-            } else if (type.includes('hyperspectral')) {
-                return '#6366f1';  // Indigo
-            } else if (type.includes('thermal') || type.includes('infrared')) {
-                return '#ef4444';  // Red
-            } else if (type.includes('lidar') || type.includes('laser')) {
-                return '#14b8a6';  // Teal
+            // Delegate to extracted PlatformRenderer module
+            if (global.PlatformRenderer?.getInstrumentTypeColor) {
+                return global.PlatformRenderer.getInstrumentTypeColor(instrumentType);
             }
-
-            return '#6b7280';  // Gray default
+            // Fallback
+            if (!instrumentType) return '#6b7280';
+            const type = instrumentType.toLowerCase();
+            if (type.includes('phenocam')) return '#2563eb';
+            if (type.includes('multispectral')) return '#7c3aed';
+            if (type.includes('par')) return '#f59e0b';
+            if (type.includes('ndvi')) return '#059669';
+            if (type.includes('pri')) return '#ec4899';
+            if (type.includes('hyperspectral')) return '#6366f1';
+            if (type.includes('thermal')) return '#ef4444';
+            if (type.includes('lidar')) return '#14b8a6';
+            return '#6b7280';
         }
 
         /**
