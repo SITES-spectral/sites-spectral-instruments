@@ -116,7 +116,19 @@ class SitesExport {
         const instrumentPromises = platforms.map(platform =>
             window.sitesAPI.getInstruments(platform.id)
         );
-        const instrumentArrays = await Promise.all(instrumentPromises);
+        // Use Promise.allSettled to handle partial failures
+        const results = await Promise.allSettled(instrumentPromises);
+        const instrumentArrays = results
+            .filter(r => r.status === 'fulfilled')
+            .map(r => r.value);
+
+        // Log any failures
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                console.error(`Failed to get instruments for platform ${platforms[index]?.id}:`, result.reason);
+            }
+        });
+
         return instrumentArrays.flat();
     }
 
@@ -125,7 +137,19 @@ class SitesExport {
         const roiPromises = instruments.map(instrument =>
             window.sitesAPI.getROIs(instrument.id)
         );
-        const roiArrays = await Promise.all(roiPromises);
+        // Use Promise.allSettled to handle partial failures
+        const results = await Promise.allSettled(roiPromises);
+        const roiArrays = results
+            .filter(r => r.status === 'fulfilled')
+            .map(r => r.value);
+
+        // Log any failures
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                console.error(`Failed to get ROIs for instrument ${instruments[index]?.id}:`, result.reason);
+            }
+        });
+
         return roiArrays.flat();
     }
 
@@ -154,7 +178,19 @@ class SitesExport {
         const roiPromises = instruments.map(instrument =>
             window.sitesAPI.getROIs(instrument.id)
         );
-        const roiArrays = await Promise.all(roiPromises);
+        // Use Promise.allSettled to handle partial failures
+        const results = await Promise.allSettled(roiPromises);
+        const roiArrays = results
+            .filter(r => r.status === 'fulfilled')
+            .map(r => r.value);
+
+        // Log any failures
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                console.error(`Failed to get ROIs for instrument ${instruments[index]?.id}:`, result.reason);
+            }
+        });
+
         return roiArrays.flat();
     }
 
@@ -322,14 +358,37 @@ class SitesExport {
                 this.getStationExportData(id)
             );
 
-            const allStationData = await Promise.all(exportPromises);
+            // Use Promise.allSettled to handle partial failures
+            const results = await Promise.allSettled(exportPromises);
+
+            // Filter successful results and log failures
+            const allStationData = [];
+            const failedIds = [];
+
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled') {
+                    allStationData.push(result.value);
+                } else {
+                    failedIds.push(stationIds[index]);
+                    console.error(`Export failed for station ${stationIds[index]}:`, result.reason);
+                }
+            });
+
+            if (allStationData.length === 0) {
+                throw new Error('All station exports failed');
+            }
+
+            if (failedIds.length > 0) {
+                showNotification(`Warning: ${failedIds.length} station(s) failed to export`, 'warning');
+            }
 
             const batchData = {
                 stations: allStationData,
                 export_metadata: {
                     export_date: new Date().toISOString(),
-                    total_stations: stationIds.length,
-                    station_ids: stationIds
+                    total_stations: allStationData.length,
+                    station_ids: stationIds.filter(id => !failedIds.includes(id)),
+                    failed_station_ids: failedIds
                 }
             };
 

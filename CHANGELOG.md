@@ -9,6 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.7] - 2025-12-26
+
+### Promise Error Handling (P0 Critical)
+
+**Added:** Comprehensive Promise rejection handling to prevent unhandled promise errors.
+
+#### Promise Utilities Module (Phase 6.1)
+
+**Created:** `public/js/core/promise-utils.js` - A comprehensive Promise utilities module.
+
+**Features:**
+- `allSettledValues()` - Execute promises, return values with nulls for failures
+- `safeAll()` - Execute promises, return separate results and errors
+- `safe()` - Wrap async functions to return default value on error
+- `withTimeout()` - Add timeout to any promise
+- `retry()` - Retry async operations with exponential backoff
+- `sequence()` - Execute promises sequentially
+- `pool()` - Execute promises with concurrency limit
+
+#### Updated Files to Use Promise.allSettled
+
+**`public/js/legacy/dashboard-state.js`:**
+- `loadStationData()` now uses Promise.allSettled for loadPlatforms/loadInstruments
+- Logs failures but continues with partial data
+
+**`public/js/station-dashboard.js`:**
+- `_loadStationData()` uses Promise.allSettled for campaigns/products
+- `refresh()` uses Promise.allSettled for campaigns/products
+- Logs failures but continues with available data
+
+**`public/js/export.js`:**
+- `getStationInstruments()` uses Promise.allSettled with partial results
+- `getStationROIs()` uses Promise.allSettled with partial results
+- `getPlatformROIs()` uses Promise.allSettled with partial results
+- `exportMultipleStations()` handles partial failures with warning notification
+
+#### Tests Added (30 tests)
+
+- `tests/unit/promise-utils.test.js`
+- Tests for all utility functions
+- Tests for error handling, concurrency, and edge cases
+
+#### Test Summary
+
+| Test Suite | Tests | Status |
+|------------|-------|--------|
+| Promise Utilities | 30 | PASS |
+| GetStationDashboard | 10 | PASS |
+| CORS Validation | 28 | PASS |
+| Password Hasher | 34 | PASS |
+| Modal Focus Trap | 24 | PASS |
+| Cookie Utilities | 25 | PASS |
+| **Total** | **151** | **ALL PASS** |
+
+---
+
 ## [12.0.6] - 2025-12-26
 
 ### Performance Fix (P0 Critical)

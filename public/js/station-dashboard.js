@@ -416,10 +416,18 @@
 
                 // Load campaigns and products (V3 only)
                 if (global.sitesAPIv3) {
-                    await Promise.all([
+                    // Use Promise.allSettled to handle partial failures gracefully
+                    const results = await Promise.allSettled([
                         this._loadCampaigns(),
                         this._loadProducts()
                     ]);
+
+                    results.forEach((result, index) => {
+                        if (result.status === 'rejected') {
+                            const operation = index === 0 ? '_loadCampaigns' : '_loadProducts';
+                            logger.error(`${operation} failed:`, result.reason);
+                        }
+                    });
                 }
 
                 // Update display
@@ -2536,10 +2544,18 @@
         async refresh() {
             await this._loadPlatformsAndInstruments();
             if (global.sitesAPIv3) {
-                await Promise.all([
+                // Use Promise.allSettled to handle partial failures gracefully
+                const results = await Promise.allSettled([
                     this._loadCampaigns(),
                     this._loadProducts()
                 ]);
+
+                results.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        const operation = index === 0 ? '_loadCampaigns' : '_loadProducts';
+                        logger.error(`refresh ${operation} failed:`, result.reason);
+                    }
+                });
             }
         }
     }

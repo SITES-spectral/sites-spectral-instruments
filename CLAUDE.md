@@ -60,7 +60,7 @@ src/
 
 ---
 
-## Current Version: 12.0.6 - Security & Accessibility Fixes (2025-12-26)
+## Current Version: 12.0.7 - Security & Accessibility Fixes (2025-12-26)
 
 **✅ STATUS: STABLE - V12 Security Hardening**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -71,7 +71,7 @@ src/
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
 
-### What's New in v12.0.6
+### What's New in v12.0.7
 
 **SECURITY HARDENING** - Critical fixes from comprehensive audit:
 
@@ -746,21 +746,21 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 12.0.6 |
+| Current Version | 12.0.7 |
 | Last Deployed | 2025-12-26 |
 | Status | Stable - V12 Security Hardening |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
 
-### v12.0.6 Features
+### v12.0.7 Features
 
 | Feature | Version | Status |
 |---------|---------|--------|
-| **CORS Origin Whitelist** | v12.0.6 | ✅ Active |
-| **PBKDF2 Password Hashing** | v12.0.6 | ✅ Active |
-| **httpOnly JWT Cookies** | v12.0.6 | ✅ Active |
-| **Modal Focus Trap (WCAG)** | v12.0.6 | ✅ Active |
+| **CORS Origin Whitelist** | v12.0.7 | ✅ Active |
+| **PBKDF2 Password Hashing** | v12.0.7 | ✅ Active |
+| **httpOnly JWT Cookies** | v12.0.7 | ✅ Active |
+| **Modal Focus Trap (WCAG)** | v12.0.7 | ✅ Active |
 
 ### v12.0.0 Features
 
@@ -801,14 +801,14 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 | ROI Management | v10.0.0-alpha.13 | ✅ Active |
 | Testing Infrastructure | v10.0.0-alpha.12 | ✅ Active |
 
-### Security Features (v8.5.3-v12.0.6)
+### Security Features (v8.5.3-v12.0.7)
 
 | Feature | Version | Status |
 |---------|---------|--------|
-| **CORS Origin Whitelist** | v12.0.6 | ✅ Active |
-| **PBKDF2 Password Hashing** | v12.0.6 | ✅ Active |
-| **httpOnly JWT Cookies** | v12.0.6 | ✅ Active |
-| **Modal Focus Trap (WCAG 2.4.3)** | v12.0.6 | ✅ Active |
+| **CORS Origin Whitelist** | v12.0.7 | ✅ Active |
+| **PBKDF2 Password Hashing** | v12.0.7 | ✅ Active |
+| **httpOnly JWT Cookies** | v12.0.7 | ✅ Active |
+| **Modal Focus Trap (WCAG 2.4.3)** | v12.0.7 | ✅ Active |
 | JWT HMAC-SHA256 Signing | v8.5.4 | ✅ Active |
 | XSS Prevention (Event Delegation) | v8.5.6 | ✅ Active |
 | XSS Prevention (DOM Methods) | v8.5.6 | ✅ Active |

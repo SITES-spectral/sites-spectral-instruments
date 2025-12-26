@@ -492,10 +492,19 @@ class DashboardState {
 
             const station = this._state.station;
             if (station && station.id) {
-                await Promise.all([
+                // Use Promise.allSettled to ensure both complete even if one fails
+                const results = await Promise.allSettled([
                     this.loadPlatforms(station.id),
                     this.loadInstruments(station.id)
                 ]);
+
+                // Log any failures but continue with partial data
+                results.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        const operation = index === 0 ? 'loadPlatforms' : 'loadInstruments';
+                        console.error(`[DashboardState] ${operation} failed:`, result.reason);
+                    }
+                });
             }
         } finally {
             this.setState({ isLoading: false });
