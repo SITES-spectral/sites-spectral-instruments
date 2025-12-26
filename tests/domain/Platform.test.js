@@ -14,9 +14,9 @@ import {
 describe('Platform Entity', () => {
   const validFixedPlatformProps = {
     id: 1,
-    normalizedName: 'SVB_FOR_PL01',
+    normalizedName: 'SVB_FOR_TWR01',
     displayName: 'Svartberget Forest Platform 1',
-    mountTypeCode: 'PL01',
+    mountTypeCode: 'TWR01',
     stationId: 1,
     stationAcronym: 'SVB',
     platformType: 'fixed',
@@ -51,18 +51,18 @@ describe('Platform Entity', () => {
     });
 
     it('should have mount type prefixes', () => {
-      expect(MOUNT_TYPE_PREFIXES).toHaveProperty('PL');
-      expect(MOUNT_TYPE_PREFIXES).toHaveProperty('BL');
-      expect(MOUNT_TYPE_PREFIXES).toHaveProperty('GL');
+      expect(MOUNT_TYPE_PREFIXES).toHaveProperty('TWR');
+      expect(MOUNT_TYPE_PREFIXES).toHaveProperty('BLD');
+      expect(MOUNT_TYPE_PREFIXES).toHaveProperty('GND');
       expect(MOUNT_TYPE_PREFIXES).toHaveProperty('UAV');
       expect(MOUNT_TYPE_PREFIXES).toHaveProperty('SAT');
     });
 
     it('should have correct mount type structure', () => {
-      const pl = MOUNT_TYPE_PREFIXES.PL;
-      expect(pl.code).toBe('PL');
-      expect(pl.name).toBe('Pole/Tower/Mast');
-      expect(pl.platformTypes).toContain('fixed');
+      const twr = MOUNT_TYPE_PREFIXES.TWR;
+      expect(twr.code).toBe('TWR');
+      expect(twr.name).toBe('Tower/Mast');
+      expect(twr.platformTypes).toContain('fixed');
     });
   });
 
@@ -71,7 +71,7 @@ describe('Platform Entity', () => {
       const platform = new Platform(validFixedPlatformProps);
 
       expect(platform.id).toBe(1);
-      expect(platform.normalizedName).toBe('SVB_FOR_PL01');
+      expect(platform.normalizedName).toBe('SVB_FOR_TWR01');
       expect(platform.platformType).toBe('fixed');
       expect(platform.ecosystemCode).toBe('FOR');
     });
@@ -228,7 +228,7 @@ describe('Platform Entity', () => {
   describe('getMountTypePrefix', () => {
     it('should extract prefix from mount type code', () => {
       const platform = new Platform(validFixedPlatformProps);
-      expect(platform.getMountTypePrefix()).toBe('PL');
+      expect(platform.getMountTypePrefix()).toBe('TWR');
     });
 
     it('should handle UAV mount type', () => {
@@ -250,21 +250,21 @@ describe('Platform Entity', () => {
       const platform = new Platform(validFixedPlatformProps);
       const info = platform.getMountTypeInfo();
 
-      expect(info.code).toBe('PL');
-      expect(info.name).toBe('Pole/Tower/Mast');
+      expect(info.code).toBe('TWR');
+      expect(info.name).toBe('Tower/Mast');
     });
   });
 
   describe('isGroundLevel', () => {
-    it('should return true for GL mount type', () => {
+    it('should return true for GND mount type', () => {
       const platform = new Platform({
         ...validFixedPlatformProps,
-        mountTypeCode: 'GL01'
+        mountTypeCode: 'GND01'
       });
       expect(platform.isGroundLevel()).toBe(true);
     });
 
-    it('should return false for PL mount type', () => {
+    it('should return false for TWR mount type', () => {
       const platform = new Platform(validFixedPlatformProps);
       expect(platform.isGroundLevel()).toBe(false);
     });
@@ -291,10 +291,10 @@ describe('Platform Entity', () => {
       const json = platform.toJSON();
 
       expect(json.id).toBe(1);
-      expect(json.normalized_name).toBe('SVB_FOR_PL01');
+      expect(json.normalized_name).toBe('SVB_FOR_TWR01');
       expect(json.platform_type).toBe('fixed');
       expect(json.ecosystem_code).toBe('FOR');
-      expect(json.mount_type_code).toBe('PL01');
+      expect(json.mount_type_code).toBe('TWR01');
       expect(json.mount_type_info).toBeDefined();
     });
   });
@@ -303,9 +303,9 @@ describe('Platform Entity', () => {
     it('should create platform from database row', () => {
       const row = {
         id: 1,
-        normalized_name: 'SVB_FOR_PL01',
+        normalized_name: 'SVB_FOR_TWR01',
         display_name: 'Test Platform',
-        mount_type_code: 'PL01',
+        mount_type_code: 'TWR01',
         station_id: 1,
         station_acronym: 'SVB',
         platform_type: 'fixed',
@@ -316,16 +316,16 @@ describe('Platform Entity', () => {
       const platform = Platform.fromDatabase(row);
 
       expect(platform.id).toBe(1);
-      expect(platform.normalizedName).toBe('SVB_FOR_PL01');
-      expect(platform.mountTypeCode).toBe('PL01');
+      expect(platform.normalizedName).toBe('SVB_FOR_TWR01');
+      expect(platform.mountTypeCode).toBe('TWR01');
     });
 
     it('should support legacy location_code column', () => {
       const row = {
         id: 1,
-        normalized_name: 'SVB_FOR_PL01',
+        normalized_name: 'SVB_FOR_TWR01',
         display_name: 'Test Platform',
-        location_code: 'PL01', // legacy column
+        location_code: 'TWR01', // legacy column
         station_id: 1,
         station_acronym: 'SVB',
         platform_type: 'fixed',
@@ -333,7 +333,7 @@ describe('Platform Entity', () => {
       };
 
       const platform = Platform.fromDatabase(row);
-      expect(platform.mountTypeCode).toBe('PL01');
+      expect(platform.mountTypeCode).toBe('TWR01');
     });
   });
 });

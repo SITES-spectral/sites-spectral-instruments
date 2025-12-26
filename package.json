@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.17",
-  "description": "SITES Spectral v12.0.17 - Station Dashboard Utilities Extraction",
+  "version": "12.0.18",
+  "description": "SITES Spectral v12.0.18 - Platform Test Fixes and Deprecated Test Cleanup",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

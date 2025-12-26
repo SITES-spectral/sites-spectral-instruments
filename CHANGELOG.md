@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.18] - 2025-12-26
+
+### Test Suite Cleanup and Platform Test Fixes
+
+**Fixed:** Platform.test.js mount type code references to match v12.0.0 breaking change.
+
+#### Platform Test Updates
+- Updated `validFixedPlatformProps.mountTypeCode` from `PL01` to `TWR01`
+- Updated `validFixedPlatformProps.normalizedName` from `SVB_FOR_PL01` to `SVB_FOR_TWR01`
+- Fixed constants test: expects `TWR`, `BLD`, `GND` instead of `PL`, `BL`, `GL`
+- Fixed `getMountTypePrefix` test expectations
+- Fixed `getMountTypeInfo` test assertions
+- Fixed `isGroundLevel` tests: `GL01` → `GND01`
+- Fixed `toJSON` test assertions
+- Fixed `fromDatabase` tests for new naming
+
+#### Deprecated Test Cleanup
+**Removed:** 5 deprecated V3 test files that referenced deleted code:
+- `tests/deprecated/v3-aois.test.js`
+- `tests/deprecated/v3-api-info.test.js`
+- `tests/deprecated/v3-campaigns.test.js`
+- `tests/deprecated/v3-platforms.test.js`
+- `tests/deprecated/v3-products.test.js`
+
+#### Test Results
+- **Before:** 297 passed, 4 failed (Platform tests), 5 file errors
+- **After:** 301 passed, 0 failed, 11 test files (all passing)
+
+---
+
 ## [12.0.17] - 2025-12-26
 
 ### Station Dashboard Utilities Extraction (Phase 3.4 Continued)
