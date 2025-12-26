@@ -400,7 +400,8 @@ class DashboardState {
         this.clearError('station');
 
         try {
-            const response = await fetch(`/api/v2/stations/${acronym}`);
+            // v12.0.4: Use /api/latest for automatic version resolution
+            const response = await fetch(`/api/latest/stations/${acronym}`);
             if (!response.ok) throw new Error('Failed to load station');
 
             const data = await response.json();
@@ -424,7 +425,8 @@ class DashboardState {
         this.clearError('platforms');
 
         try {
-            const response = await fetch(`/api/v2/platforms?station_id=${stationId}`);
+            // v12.0.4: Use /api/latest for automatic version resolution
+            const response = await fetch(`/api/latest/platforms?station_id=${stationId}`);
             if (!response.ok) throw new Error('Failed to load platforms');
 
             const data = await response.json();
@@ -463,7 +465,8 @@ class DashboardState {
         this.clearError('instruments');
 
         try {
-            const response = await fetch(`/api/v2/instruments?station_id=${stationId}`);
+            // v12.0.4: Use /api/latest for automatic version resolution
+            const response = await fetch(`/api/latest/instruments?station_id=${stationId}`);
             if (!response.ok) throw new Error('Failed to load instruments');
 
             const data = await response.json();

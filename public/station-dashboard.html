@@ -21,12 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css?v=12.0.2">
+    <link rel="stylesheet" href="/css/styles.css?v=12.0.5">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=9.0.25">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="12.0.2">
-    <meta name="build-date" content="2025-12-22">
+    <meta name="app-version" content="12.0.5">
+    <meta name="build-date" content="2025-12-26">
 
     <style>
         body {
@@ -3006,7 +3006,7 @@
                         <div class="platform-type-info">
                             <h4>Fixed Platform</h4>
                             <p>Towers, masts, and permanent installations</p>
-                            <small class="naming-hint">SVB_FOR_PL01</small>
+                            <small class="naming-hint">SVB_FOR_TWR01</small>
                         </div>
                     </div>
                     <div class="platform-type-card" onclick="selectPlatformType('uav')" data-type="uav">
@@ -4313,14 +4313,14 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=12.0.2"></script>
+    <script src="/js/utils.js?v=12.0.5"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=8.5.0"></script>
     <script src="/js/core/config-service.js?v=8.5.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=12.0.2"></script>
-    <script src="/js/components.js?v=12.0.2"></script>
+    <script src="/js/api.js?v=12.0.5"></script>
+    <script src="/js/components.js?v=12.0.5"></script>
     <script src="/js/platform-forms/index.js?v=9.0.27"></script>
     <script src="/js/form-components.js?v=5.2.36"></script>
     <!-- Modular Modal Components (v7.0.1) -->
@@ -4341,10 +4341,10 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=12.0.2"></script>
-    <script src="/js/station-dashboard.js?v=12.0.2"></script>
-    <script src="/js/navigation.js?v=12.0.2"></script>
-    <script src="/js/export.js?v=12.0.2"></script>
+    <script src="/js/interactive-map.js?v=12.0.5"></script>
+    <script src="/js/station-dashboard.js?v=12.0.5"></script>
+    <script src="/js/navigation.js?v=12.0.5"></script>
+    <script src="/js/export.js?v=12.0.5"></script>
     <script src="/js/platform-modals.js?v=8.2.0"></script>
     <script src="/js/modal-system.js?v=5.2.36"></script>
     <script src="/js/admin-modals.js?v=5.2.36"></script>
@@ -6450,10 +6450,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Location Code</label>
+                            <label>Mount Type Code</label>
                             <input type="text" id="edit-platform-location-code" value="${platform.location_code || ''}"
                                    class="form-control ${!isAdmin ? 'field-readonly' : ''}" ${!isAdmin ? 'readonly' : ''}
-                                   placeholder="e.g., BL01, PL01">
+                                   placeholder="e.g., TWR01, BLD01, GND01">
                         </div>
 
                         <div class="form-group">
@@ -7106,7 +7106,7 @@
 
                 createForm.innerHTML = `
                     <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; padding: 0.75rem; background-color: #f3f4f6; border-radius: 6px;">
-                        <i class="fas fa-info-circle" style="color: #3b82f6;"></i> <strong>Auto-naming:</strong> The normalized name will be automatically generated based on the platform (e.g., ANS_FOR_BL01_PHE03). This ensures consistent naming across the SITES Spectral network and prevents duplicates.
+                        <i class="fas fa-info-circle" style="color: #3b82f6;"></i> <strong>Auto-naming:</strong> The normalized name will be automatically generated based on the platform (e.g., ANS_FOR_TWR01_PHE03). This ensures consistent naming across the SITES Spectral network and prevents duplicates.
                     </p>
 
                     <!-- SECTION 1: Basic Information (Required Fields) -->
@@ -9558,11 +9558,11 @@
                             <small>Descriptive name for the platform</small>
                         </div>
                         <div class="form-group" id="location-code-group">
-                            <label for="platform-location-code" id="location-code-label">Location Code *</label>
+                            <label for="platform-location-code" id="location-code-label">Mount Type Code *</label>
                             <input type="text" id="platform-location-code" class="form-input" required
-                                   placeholder="e.g., PL01" style="text-transform: uppercase;"
+                                   placeholder="e.g., TWR01" style="text-transform: uppercase;"
                                    oninput="updatePlatformNormalizedName()">
-                            <small id="location-code-help">Unique code within station (e.g., PL01, BL01)</small>
+                            <small id="location-code-help">Mount type: TWR (Tower), BLD (Building), GND (Ground)</small>
                         </div>
                     </div>
                     <div class="form-row">
@@ -9924,9 +9924,9 @@
             if (locationCodeLabel && locationCodeHelp && locationCodeInput) {
                 const fieldConfig = {
                     fixed: {
-                        label: 'Location Code *',
-                        placeholder: 'e.g., PL01, BL01',
-                        help: 'Unique code within station (e.g., PL01 for Platform 01, BL01 for Block 01)'
+                        label: 'Mount Type Code *',
+                        placeholder: 'e.g., TWR01, BLD01, GND01',
+                        help: 'Mount type: TWR (Tower/Mast), BLD (Building), GND (Ground Level)'
                     },
                     uav: {
                         label: 'UAV Number *',
@@ -10109,13 +10109,13 @@
 
             let normalizedName = '';
 
-            // Different naming patterns based on platform type
-            // Fixed:     SVB_FOR_PL01                       (station_ecosystem_location)
-            // UAV:       SVB_DJI_M3M_UAV01                  (station_vendor_model_location)
+            // Different naming patterns based on platform type (v12.0.0 mount type codes)
+            // Fixed:     SVB_FOR_TWR01                      (station_ecosystem_mount_type)
+            // UAV:       SVB_DJI_M3M_UAV01                  (station_vendor_model_mount_type)
             // Satellite: SVB_ESA_S2A_MSI                    (station_agency_satellite_sensor)
-            // Mobile:    SVB_FOR_BPK_MOB01                  (station_ecosystem_carrier_location)
-            // USV:       ANS_LAK_USV01                      (station_ecosystem_location)
-            // UUV:       ANS_LAK_UUV01                      (station_ecosystem_location)
+            // Mobile:    SVB_FOR_BPK_MOB01                  (station_ecosystem_carrier_mount_type)
+            // USV:       ANS_LAK_USV01                      (station_ecosystem_mount_type)
+            // UUV:       ANS_LAK_UUV01                      (station_ecosystem_mount_type)
 
             if (platformType === 'satellite') {
                 // Satellite platforms use: station_agency_satellite_sensor

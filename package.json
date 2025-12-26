@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.2",
-  "description": "SITES Spectral v12.0.2 - API v3 Routing Fix + Station Acronym Support + Hexagonal Architecture",
+  "version": "12.0.5",
+  "description": "SITES Spectral v12.0.5 - Security & Accessibility Fixes (CORS, Password Hashing, Modal Focus Trap)",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
@@ -49,6 +49,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.10.14",
     "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^27.4.0",
     "vitest": "^3.2.4",
     "wrangler": "^4.53.0"
   },

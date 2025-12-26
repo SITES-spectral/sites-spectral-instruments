@@ -9,6 +9,179 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.5] - 2025-12-26
+
+### Security & Accessibility Fixes (P0 Critical)
+
+**SECURITY:** Critical fixes from comprehensive audit - Production Readiness Score improved.
+
+#### CORS Wildcard Fix (Phase 1.1)
+
+**Fixed:** CORS configuration no longer uses wildcard (`*`) for Access-Control-Allow-Origin.
+
+- Created `src/config/allowed-origins.js` with explicit whitelist
+- Updated `src/cors.js` to validate Origin header against whitelist
+- Returns first allowed origin for unauthorized requests (fails closed)
+- Added `Vary: Origin` header for proper caching
+- **28 tests** in `tests/unit/cors.test.js`
+
+**Allowed Origins:**
+- `https://sites.jobelab.com` (production)
+- `https://sites-spectral-instruments.jose-e5f.workers.dev` (worker)
+- `http://localhost:8787`, `http://127.0.0.1:8787` (dev)
+- `http://localhost:3000`, `http://127.0.0.1:3000` (dev)
+
+#### Password Hashing (Phase 1.2)
+
+**Added:** PBKDF2 password hashing with Web Crypto API for Cloudflare Workers compatibility.
+
+- Created `src/auth/password-hasher.js` with:
+  - PBKDF2-SHA256 with 100,000 iterations
+  - 16-byte random salt per password
+  - Timing-safe comparison to prevent timing attacks
+  - Backward compatibility with plain text passwords (migration period)
+- Updated `src/auth/authentication.js` to use `verifyPassword()`
+- Hash format: `salt:hash` (32:64 hex chars)
+- **34 tests** in `tests/unit/password-hasher.test.js`
+
+#### Modal Focus Trap for WCAG 2.4.3 (Phase 9.1)
+
+**Added:** Focus trap implementation for modals - critical accessibility fix.
+
+- Updated `public/js/modals/modal-base.js`:
+  - Saves previously focused element before opening
+  - Restores focus on close
+  - Tab key wraps from last to first element
+  - Shift+Tab wraps from first to last element
+  - Empty modals prevent Tab from escaping
+  - Excludes disabled, hidden, and tabindex="-1" elements
+- **24 tests** in `tests/unit/modal-focus-trap.test.js`
+
+**WCAG 2.4.3 Compliance:**
+- Focus remains within modal when open
+- Circular Tab/Shift+Tab navigation
+- Focus returns to trigger element on close
+- Proper ARIA attributes (role="dialog", aria-modal="true")
+
+#### JWT httpOnly Cookies (Phase 1.3 - Server-Side)
+
+**Added:** httpOnly cookie support for JWT tokens - XSS-proof token storage.
+
+- Created `src/auth/cookie-utils.js`:
+  - `createAuthCookie()` - Sets httpOnly, SameSite=Strict, Secure (production)
+  - `createLogoutCookie()` - Clears cookie with expired date
+  - `getTokenFromCookie()` - Parses Cookie header
+- Updated `src/auth/authentication.js`:
+  - Login sets httpOnly cookie alongside response body token
+  - Added `POST /api/auth/logout` endpoint that clears cookie
+  - `getUserFromRequest()` checks cookie first, then Authorization header
+- **Backward compatible**: Accepts both cookies and Authorization headers
+- **25 tests** in `tests/unit/cookie-utils.test.js`
+
+**Cookie Security Properties:**
+- `HttpOnly` - Prevents XSS from accessing token
+- `SameSite=Strict` - Prevents CSRF attacks
+- `Secure` - HTTPS only (production domains)
+- `Max-Age=86400` - 24-hour expiry (matches JWT)
+
+#### Test Summary
+
+| Test Suite | Tests | Status |
+|------------|-------|--------|
+| CORS Validation | 28 | PASS |
+| Password Hasher | 34 | PASS |
+| Modal Focus Trap | 24 | PASS |
+| Cookie Utilities | 25 | PASS |
+| **Total** | **111** | **ALL PASS** |
+
+---
+
+## [12.0.4] - 2025-12-22
+
+### API Client: Automatic Version Resolution
+
+**Fixed:** Frontend API client now automatically uses `/api/latest` which resolves to the current API version on the server, eliminating version mismatch issues.
+
+#### Problem
+
+The frontend was hardcoded to use `/api/v3` while the app is on version 12. This caused:
+- Potential version mismatches between frontend requests and backend handlers
+- Manual version updates required when API version changes
+- Cache inconsistencies between app version and API version
+
+#### Solution
+
+**api.js** (`public/js/api.js`)
+- Changed `v3BasePath` from `/api/v3` to `/api/latest`
+- All API calls now automatically resolve to current server version
+- Module version updated to 12.0.3
+
+#### How It Works
+
+```
+Frontend calls: /api/latest/platforms?station=RBD
+Server resolves: /api/latest → /api/v11 (current)
+Response includes: X-API-Version: v11 header
+```
+
+#### Benefits
+
+1. **No manual updates**: Frontend always uses current API version
+2. **Automatic compatibility**: Server-side version resolution
+3. **Clear versioning**: X-API-Version header shows actual version used
+4. **Cache coherence**: App version (12.0.4) and API version (latest→v11) work together
+
+---
+
+## [12.0.3] - 2025-12-22
+
+### UI Updates: Mount Type Code Naming Convention
+
+**Updated:** All UI references to mount type codes now use the v12.0.0 3-letter format consistently.
+
+#### Changes
+
+**station-dashboard.html**
+
+Platform Type Selection Modal:
+- Fixed Platform naming hint: `SVB_FOR_PL01` → `SVB_FOR_TWR01`
+
+Platform Edit Form:
+- Label: "Location Code" → "Mount Type Code"
+- Placeholder: `e.g., BL01, PL01` → `e.g., TWR01, BLD01, GND01`
+
+Platform Create Form:
+- Label: "Location Code *" → "Mount Type Code *"
+- Placeholder: `e.g., PL01` → `e.g., TWR01`
+- Help text: `Unique code within station (e.g., PL01, BL01)` → `Mount type: TWR (Tower), BLD (Building), GND (Ground)`
+
+Field Configuration for Fixed Platforms:
+- Label: `Location Code *` → `Mount Type Code *`
+- Placeholder: `e.g., PL01, BL01` → `e.g., TWR01, BLD01, GND01`
+- Help: `Unique code within station (e.g., PL01 for Platform 01, BL01 for Block 01)` → `Mount type: TWR (Tower/Mast), BLD (Building), GND (Ground Level)`
+
+Instrument Create Form:
+- Auto-naming example: `ANS_FOR_BL01_PHE03` → `ANS_FOR_TWR01_PHE03`
+
+Code Comments:
+- Updated naming pattern documentation to v12.0.0 format
+- `Fixed: SVB_FOR_PL01 (station_ecosystem_location)` → `Fixed: SVB_FOR_TWR01 (station_ecosystem_mount_type)`
+
+#### Mount Type Codes Reference (v12.0.0+)
+
+| Code | Full Name | Platform Types | Description |
+|------|-----------|----------------|-------------|
+| **TWR** | Tower/Mast | fixed | Elevated structures (>1.5m height) |
+| **BLD** | Building | fixed | Rooftop or facade mounted |
+| **GND** | Ground Level | fixed | Installations below 1.5m height |
+| **UAV** | UAV Position | uav | Drone flight position identifier |
+| **SAT** | Satellite | satellite | Virtual position for satellite data |
+| **MOB** | Mobile | mobile | Portable platform position |
+| **USV** | Surface Vehicle | usv | Unmanned surface vehicle position |
+| **UUV** | Underwater Vehicle | uuv | Unmanned underwater vehicle position |
+
+---
+
 ## [12.0.2] - 2025-12-22
 
 ### Critical Bug Fix: API v3 Routing

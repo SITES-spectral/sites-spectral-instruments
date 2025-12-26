@@ -2,13 +2,14 @@
 // Hexagonal Architecture with Cloudflare Workers + API Version Aliases
 // Handles both static assets and API routes
 
-import { createCors } from './cors';
+import { createCors, validateCorsOrigin, createCorsErrorResponse } from './cors';
 import { handleApiRequest } from './api-handler';
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const { corsHeaders, handleCors } = createCors();
+    // Pass request to createCors for proper origin validation (security fix v12.0.3)
+    const { corsHeaders, handleCors } = createCors(request);
 
     // HTTPS Enforcement - Redirect HTTP to HTTPS
     // Note: Cloudflare typically handles this at edge, but we ensure it here

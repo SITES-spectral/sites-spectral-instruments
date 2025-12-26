@@ -4,6 +4,8 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { createErrorResponse, createUnauthorizedResponse } from '../utils/responses.js';
 import { logSecurityEvent } from '../utils/logging.js';
+import { verifyPassword } from './password-hasher.js';
+import { createAuthCookie, createLogoutCookie, getTokenFromCookie } from './cookie-utils.js';
 
 /**
  * Handle authentication endpoints
@@ -41,9 +43,12 @@ export async function handleAuth(method, pathSegments, request, env) {
         // Log successful authentication
         await logSecurityEvent('SUCCESSFUL_LOGIN', user, request, env);
 
+        // Set httpOnly cookie for secure token storage
+        const authCookie = createAuthCookie(token, request);
+
         return new Response(JSON.stringify({
           success: true,
-          token,
+          token, // Still return token for backward compatibility during migration
           user: {
             username: user.username,
             role: user.role,
@@ -55,7 +60,10 @@ export async function handleAuth(method, pathSegments, request, env) {
           }
         }), {
           status: 200,
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': authCookie
+          }
         });
 
       } catch (error) {
@@ -97,6 +105,47 @@ export async function handleAuth(method, pathSegments, request, env) {
         return createUnauthorizedResponse();
       }
 
+    case 'logout':
+      if (method !== 'POST') {
+        return createErrorResponse('Method not allowed', 405);
+      }
+
+      try {
+        // Get user for logging (optional - don't fail if not authenticated)
+        const user = await getUserFromRequest(request, env);
+        if (user) {
+          await logSecurityEvent('LOGOUT', user, request, env);
+        }
+
+        // Clear the httpOnly cookie
+        const logoutCookie = createLogoutCookie(request);
+
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Logged out successfully'
+        }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': logoutCookie
+          }
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+        // Still clear the cookie even if there's an error
+        const logoutCookie = createLogoutCookie(request);
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Logged out'
+        }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': logoutCookie
+          }
+        });
+      }
+
     default:
       return createErrorResponse('Authentication endpoint not found', 404);
   }
@@ -124,7 +173,9 @@ export async function authenticateUser(username, password, env) {
     }
 
     // Check admin credentials (original admin)
-    if (credentials.admin?.username === username && credentials.admin?.password === password) {
+    // Uses verifyPassword for secure comparison (supports both hashed and plain text during migration)
+    if (credentials.admin?.username === username &&
+        await verifyPassword(password, credentials.admin?.password)) {
       // Auth successful - admin user
       return {
         username: credentials.admin.username,
@@ -137,7 +188,8 @@ export async function authenticateUser(username, password, env) {
     }
 
     // Check sites-admin credentials (global admin)
-    if (credentials.sites_admin?.username === username && credentials.sites_admin?.password === password) {
+    if (credentials.sites_admin?.username === username &&
+        await verifyPassword(password, credentials.sites_admin?.password)) {
       // Auth successful - sites-admin user
       return {
         username: credentials.sites_admin.username,
@@ -152,7 +204,8 @@ export async function authenticateUser(username, password, env) {
     // Check station-admin credentials
     if (credentials.station_admins) {
       for (const [stationName, adminCreds] of Object.entries(credentials.station_admins)) {
-        if (adminCreds?.username === username && adminCreds?.password === password) {
+        if (adminCreds?.username === username &&
+            await verifyPassword(password, adminCreds?.password)) {
           // Get station data from database to get both acronym and integer ID
           const stationData = await getStationByNormalizedName(stationName, env);
           // Auth successful - station-admin user
@@ -172,7 +225,8 @@ export async function authenticateUser(username, password, env) {
     // Check station credentials (regular station users)
     if (credentials.stations) {
       for (const [stationName, stationCreds] of Object.entries(credentials.stations)) {
-        if (stationCreds?.username === username && stationCreds?.password === password) {
+        if (stationCreds?.username === username &&
+            await verifyPassword(password, stationCreds?.password)) {
           // Get station data from database to get both acronym and integer ID
           const stationData = await getStationByNormalizedName(stationName, env);
           // Auth successful - station user
@@ -240,7 +294,8 @@ export async function generateToken(user, env) {
 }
 
 /**
- * Extract and validate user from request authorization header
+ * Extract and validate user from request
+ * Checks httpOnly cookie first, then falls back to Authorization header
  * Uses proper JWT verification with HMAC-SHA256
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
@@ -248,15 +303,19 @@ export async function generateToken(user, env) {
  */
 export async function getUserFromRequest(request, env) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.warn('Invalid or missing Authorization header');
-      return null;
+    // First, try to get token from httpOnly cookie (preferred method)
+    let token = getTokenFromCookie(request);
+
+    // Fallback to Authorization header for backward compatibility
+    if (!token) {
+      const authHeader = request.headers.get('Authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
     }
 
-    const token = authHeader.substring(7);
     if (!token) {
-      console.warn('Empty token in Authorization header');
+      // No token found in cookie or header
       return null;
     }
 

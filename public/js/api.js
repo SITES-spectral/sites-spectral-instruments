@@ -1,13 +1,13 @@
 /**
  * SITES Spectral Instruments - API Client
  *
- * Unified API client supporting V11 Hexagonal Architecture with:
+ * Unified API client supporting V12 Hexagonal Architecture with:
  * - Semantic version aliases (/api/latest, /api/stable)
  * - Maintenance and calibration timelines
  * - Pagination, platform extensions, AOI spatial queries, campaigns, and products
  *
  * @module api
- * @version 11.0.0-alpha.32
+ * @version 12.0.3
  * @requires core/debug.js (Debug utilities)
  * @requires core/config-service.js (SitesConfig)
  * @requires core/api-config.js (API configuration service)
@@ -140,8 +140,12 @@
              */
             this.latestBasePath = '/api/latest';
 
-            /** V3 API base path (legacy - deprecated) */
-            this.v3BasePath = '/api/v3';
+            /**
+             * V3 API base path - NOW uses /api/latest for automatic version resolution
+             * v12.0.3: Changed from '/api/v3' to '/api/latest' to ensure frontend
+             * always uses the current API version without manual updates
+             */
+            this.v3BasePath = '/api/latest';
 
             /** V10/V11 API base path (explicit version) */
             this.v10BasePath = '/api/v10';

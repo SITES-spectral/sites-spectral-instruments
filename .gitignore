@@ -46,6 +46,11 @@ auth*.json
 auth*.key
 # Note: src/auth/ and src/middleware/auth-* are tracked source code
 
+# Exceptions for password hasher source code (not actual passwords)
+!src/auth/password-hasher.js
+!tests/unit/password-hasher.test.js
+!scripts/hash-password.js
+
 # Deprecated patterns - EXCEPT docs/deprecated which is tracked
 *deprecated*
 *DEPRECATED*

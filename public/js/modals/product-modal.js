@@ -391,9 +391,10 @@ const ProductModal = {
         };
         
         try {
-            const url = productId 
-                ? `/api/v11/products/${productId}`
-                : '/api/v11/products';
+            // v12.0.4: Use /api/latest for automatic version resolution
+            const url = productId
+                ? `/api/latest/products/${productId}`
+                : '/api/latest/products';
             const method = productId ? 'PUT' : 'POST';
             
             const response = await fetch(url, {

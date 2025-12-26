@@ -35,6 +35,7 @@ class ModalBase {
         this.isVisible = false;
         this.saveCallback = null;
         this.cancelCallback = null;
+        this._previouslyFocusedElement = null;
 
         this._init();
     }
@@ -59,6 +60,9 @@ class ModalBase {
             this._handleEscape = this._handleEscape.bind(this);
         }
 
+        // Bind focus trap handler for WCAG 2.4.3 compliance
+        this._handleTabKey = this._handleTabKey.bind(this);
+
         if (this.options.closeOnBackdrop) {
             this.container.addEventListener('click', (e) => {
                 if (e.target === this.container) {
@@ -78,6 +82,9 @@ class ModalBase {
             onComplete = null
         } = animationOptions;
 
+        // Save currently focused element for restoration on close (WCAG 2.4.3)
+        this._previouslyFocusedElement = document.activeElement;
+
         // Prevent body scroll
         document.body.style.overflow = 'hidden';
 
@@ -93,11 +100,9 @@ class ModalBase {
 
         // Set focus to first focusable element
         setTimeout(() => {
-            const firstFocusable = this.container.querySelector(
-                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-            );
-            if (firstFocusable) {
-                firstFocusable.focus();
+            const focusableElements = this._getFocusableElements();
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
             }
         }, duration);
 
@@ -105,6 +110,9 @@ class ModalBase {
         if (this.options.closeOnEscape) {
             document.addEventListener('keydown', this._handleEscape);
         }
+
+        // Bind focus trap for Tab/Shift+Tab (WCAG 2.4.3)
+        document.addEventListener('keydown', this._handleTabKey);
 
         this.isVisible = true;
 
@@ -134,6 +142,11 @@ class ModalBase {
             this.container.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
 
+            // Restore focus to previously focused element (WCAG 2.4.3)
+            if (this._previouslyFocusedElement && typeof this._previouslyFocusedElement.focus === 'function') {
+                this._previouslyFocusedElement.focus();
+            }
+
             if (onComplete) {
                 onComplete();
             }
@@ -143,6 +156,9 @@ class ModalBase {
         if (this.options.closeOnEscape) {
             document.removeEventListener('keydown', this._handleEscape);
         }
+
+        // Unbind focus trap
+        document.removeEventListener('keydown', this._handleTabKey);
 
         this.isVisible = false;
 
@@ -308,6 +324,68 @@ class ModalBase {
     }
 
     /**
+     * Handle Tab key for focus trap (WCAG 2.4.3)
+     * Implements circular Tab/Shift+Tab navigation within modal
+     * @private
+     */
+    _handleTabKey(event) {
+        if (event.key !== 'Tab' || !this.isVisible) {
+            return;
+        }
+
+        const focusableElements = this._getFocusableElements();
+        if (focusableElements.length === 0) {
+            // No focusable elements, prevent Tab from leaving modal
+            event.preventDefault();
+            return;
+        }
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        const activeElement = document.activeElement;
+
+        if (event.shiftKey) {
+            // Shift+Tab: if on first element, wrap to last
+            if (activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            }
+        } else {
+            // Tab: if on last element, wrap to first
+            if (activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
+    }
+
+    /**
+     * Get all focusable elements within the modal
+     * @private
+     * @returns {Array<HTMLElement>} Array of focusable elements
+     */
+    _getFocusableElements() {
+        const focusableSelector = [
+            'button:not([disabled]):not([tabindex="-1"])',
+            'a[href]:not([tabindex="-1"])',
+            'input:not([disabled]):not([type="hidden"]):not([tabindex="-1"])',
+            'select:not([disabled]):not([tabindex="-1"])',
+            'textarea:not([disabled]):not([tabindex="-1"])',
+            '[tabindex]:not([tabindex="-1"]):not([disabled])'
+        ].join(', ');
+
+        // Filter to only visible elements
+        const elements = Array.from(this.container.querySelectorAll(focusableSelector));
+        return elements.filter(el => {
+            // Check if element is visible
+            const style = window.getComputedStyle(el);
+            return style.display !== 'none' &&
+                   style.visibility !== 'hidden' &&
+                   el.offsetParent !== null;
+        });
+    }
+
+    /**
      * Escape HTML to prevent XSS
      * @private
      */
@@ -325,10 +403,16 @@ class ModalBase {
         if (this.options.closeOnEscape) {
             document.removeEventListener('keydown', this._handleEscape);
         }
-        this.container.innerHTML = '';
+        // Remove focus trap handler
+        document.removeEventListener('keydown', this._handleTabKey);
+        // Clear container content safely
+        while (this.container.firstChild) {
+            this.container.removeChild(this.container.firstChild);
+        }
         this.container = null;
         this.saveCallback = null;
         this.cancelCallback = null;
+        this._previouslyFocusedElement = null;
     }
 }
 
