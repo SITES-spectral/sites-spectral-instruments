@@ -46,16 +46,24 @@ export class GetStationDashboard {
     // Get all platforms for this station
     const platforms = await this.platformRepository.findByStationId(station.id);
 
-    // Get all instruments for each platform
-    const platformsWithInstruments = await Promise.all(
-      platforms.map(async (platform) => {
-        const instruments = await this.instrumentRepository.findByPlatformId(platform.id);
-        return {
-          ...platform.toJSON(),
-          instruments: instruments.map(i => i.toJSON())
-        };
-      })
-    );
+    // Get all instruments for this station in a single query (N+1 fix)
+    const allInstruments = await this.instrumentRepository.findByStationId(station.id);
+
+    // Group instruments by platform_id in memory
+    const instrumentsByPlatform = new Map();
+    for (const instrument of allInstruments) {
+      const platformId = instrument.platformId;
+      if (!instrumentsByPlatform.has(platformId)) {
+        instrumentsByPlatform.set(platformId, []);
+      }
+      instrumentsByPlatform.get(platformId).push(instrument.toJSON());
+    }
+
+    // Attach instruments to their platforms
+    const platformsWithInstruments = platforms.map((platform) => ({
+      ...platform.toJSON(),
+      instruments: instrumentsByPlatform.get(platform.id) || []
+    }));
 
     // Calculate statistics
     const stats = this._calculateStats(platformsWithInstruments);

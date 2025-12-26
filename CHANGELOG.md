@@ -9,6 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.6] - 2025-12-26
+
+### Performance Fix (P0 Critical)
+
+**Fixed:** N+1 query in station dashboard causing multiple database queries per platform.
+
+#### N+1 Query Elimination (Phase 2.1)
+
+**Problem:** GetStationDashboard was making N+1 queries (1 for station + 1 for platforms + N for instruments, where N = number of platforms). For a station with 10 platforms, this resulted in 12 database queries.
+
+**Solution:** Replaced per-platform instrument queries with single station-wide query + in-memory grouping.
+
+- **File:** `src/application/queries/GetStationDashboard.js`
+- **Before:** `Promise.all(platforms.map(p => findByPlatformId(p.id)))` (N queries)
+- **After:** `findByStationId(station.id)` + `Map.groupBy(platformId)` (1 query)
+
+**Performance Impact:**
+- Before: 1 + 1 + N queries (e.g., 12 for 10 platforms)
+- After: 3 queries total (constant regardless of platform count)
+- ~75% reduction in database round-trips for typical stations
+
+**Tests Added:**
+- `tests/unit/get-station-dashboard.test.js` (10 tests)
+- Key test: "should NOT call findByPlatformId (N+1 fix verification)"
+- Performance test: "should make exactly 3 database queries regardless of platform count"
+
+#### Test Summary
+
+| Test Suite | Tests | Status |
+|------------|-------|--------|
+| GetStationDashboard | 10 | PASS |
+| CORS Validation | 28 | PASS |
+| Password Hasher | 34 | PASS |
+| Modal Focus Trap | 24 | PASS |
+| Cookie Utilities | 25 | PASS |
+| **Total** | **121** | **ALL PASS** |
+
+---
+
 ## [12.0.5] - 2025-12-26
 
 ### Security & Accessibility Fixes (P0 Critical)

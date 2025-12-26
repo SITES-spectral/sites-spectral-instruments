@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.5",
+  "version": "12.0.6",
   "description": "SITES Spectral v12.0.5 - Security & Accessibility Fixes (CORS, Password Hashing, Modal Focus Trap)",
   "main": "src/worker.js",
   "scripts": {
