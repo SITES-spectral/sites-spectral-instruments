@@ -13,6 +13,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.3.0] - 2025-12-27
+
+### Composition Root Enhancement (Phase 7.5)
+
+This release centralizes all dependency injection wiring in a single Composition Root, following hexagonal architecture best practices.
+
+#### Enhanced Container (`src/container.js`)
+
+**Features:**
+- Environment-based configuration (production, staging, development, test)
+- Centralized port ↔ adapter wiring
+- All 12 repositories properly wired
+- Test container factory with mock dependencies
+
+**Environment Configuration:**
+```javascript
+const EnvironmentConfig = {
+  production: { logLevel: 'info', enableMetrics: true, enableEvents: true },
+  staging: { logLevel: 'debug', enableMetrics: true, enableEvents: true },
+  development: { logLevel: 'debug', enableMetrics: false, enableEvents: true },
+  test: { logLevel: 'error', enableMetrics: false, enableEvents: false }
+};
+```
+
+#### New Adapters
+
+**Logging:**
+- `src/infrastructure/logging/StructuredConsoleLogger.js`
+- JSON structured output for Cloudflare Workers
+- Log levels: debug, info, warn, error
+- Child logger support with context
+
+**Metrics:**
+- `src/infrastructure/metrics/NoOpMetricsAdapter.js`
+- Placeholder for future Cloudflare Analytics integration
+- Counter, gauge, histogram support
+- Timer utility for duration measurement
+
+#### Infrastructure Exports
+
+**Updated:** `src/infrastructure/index.js`
+- Added ROI, Export, Analytics repositories
+- Added InMemoryEventBus export
+- Added StructuredConsoleLogger export
+- Added NoOpMetricsAdapter export
+- Added CloudflareCredentialsAdapter export
+
+#### Container Structure
+
+```
+container = {
+  environment: 'production',
+  config: { logLevel, enableMetrics, enableEvents },
+  ports: { logger, metrics, eventBus, credentials },
+  repositories: { station, platform, instrument, ... },
+  commands: { createStation, updatePlatform, ... },
+  queries: { getStation, listPlatforms, ... }
+}
+```
+
+#### Testing Support
+
+**New Function:** `createTestContainer(overrides)`
+- Creates container with mock dependencies
+- Override specific repositories or ports
+- Automatic mock repository generation
+
+---
+
 ## [13.2.0] - 2025-12-27
 
 ### Dynamic Version Management

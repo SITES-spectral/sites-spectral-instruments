@@ -1,19 +1,19 @@
 {
-  "version": "13.2.0",
+  "version": "13.3.0",
   "buildDate": "2025-12-27",
-  "timestamp": 1766835875160,
+  "timestamp": 1766836317670,
   "files": {
-    "/css/styles.css?v=13.2.0": "13.2.0",
-    "/js/utils.js?v=13.2.0": "13.2.0",
-    "/js/api.js?v=13.2.0": "13.2.0",
-    "/js/components.js?v=13.2.0": "13.2.0",
-    "/js/interactive-map.js?v=13.2.0": "13.2.0",
-    "/js/dashboard.js?v=13.2.0": "13.2.0",
-    "/js/station-dashboard.js?v=13.2.0": "13.2.0",
-    "/js/navigation.js?v=13.2.0": "13.2.0",
-    "/js/export.js?v=13.2.0": "13.2.0",
-    "/js/core/version.js?v=13.2.0": "13.2.0",
-    "/js/core/security.js?v=13.2.0": "13.2.0",
-    "/js/core/promise-utils.js?v=13.2.0": "13.2.0"
+    "/css/styles.css?v=13.3.0": "13.3.0",
+    "/js/utils.js?v=13.3.0": "13.3.0",
+    "/js/api.js?v=13.3.0": "13.3.0",
+    "/js/components.js?v=13.3.0": "13.3.0",
+    "/js/interactive-map.js?v=13.3.0": "13.3.0",
+    "/js/dashboard.js?v=13.3.0": "13.3.0",
+    "/js/station-dashboard.js?v=13.3.0": "13.3.0",
+    "/js/navigation.js?v=13.3.0": "13.3.0",
+    "/js/export.js?v=13.3.0": "13.3.0",
+    "/js/core/version.js?v=13.3.0": "13.3.0",
+    "/js/core/security.js?v=13.3.0": "13.3.0",
+    "/js/core/promise-utils.js?v=13.3.0": "13.3.0"
   }
 }
