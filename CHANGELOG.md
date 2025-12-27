@@ -13,6 +13,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.10.0] - 2025-12-27
+
+### Audit Log Endpoint (Phase 8.3)
+
+This release implements the admin audit log endpoint for viewing activity history.
+
+#### New Endpoint
+
+**GET /api/admin/audit** - List audit logs with filtering and pagination
+
+**Query Parameters:**
+- `station_id` - Filter by station ID
+- `user_id` - Filter by user ID
+- `action` - Filter by action type (CREATE, UPDATE, DELETE, READ)
+- `entity_type` - Filter by entity type (station, platform, instrument, etc.)
+- `start_date` - Filter from date (ISO format)
+- `end_date` - Filter to date (ISO format)
+- `limit` - Results per page (default: 100, max: 500)
+- `offset` - Pagination offset
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "username": "admin",
+        "action": "CREATE",
+        "entity_type": "instrument",
+        "entity_id": 42,
+        "entity_name": "SVB_FOR_TWR01_PHE01",
+        "station_id": 1,
+        "station_acronym": "SVB",
+        "details": {},
+        "ip_address": "192.168.1.1",
+        "created_at": "2025-12-27T14:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 150,
+      "limit": 100,
+      "offset": 0,
+      "has_more": true
+    }
+  }
+}
+```
+
+**Features:**
+- Role-based access (admin only)
+- Automatic logging of audit access
+- Integration with existing D1AdminRepository
+- Proper error handling
+
+---
+
 ## [13.9.0] - 2025-12-27
 
 ### D1 Repository Adapters Complete (Phase 8.2)

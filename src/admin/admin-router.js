@@ -68,8 +68,7 @@ export async function handleAdmin(method, pathSegments, request, env) {
         return createErrorResponse('ROI admin operations should be handled through instruments', 400);
 
       case 'audit':
-        // Future: implement audit log viewing for admin users
-        return createErrorResponse('Audit functionality not yet implemented', 501);
+        return await handleAdminAudit(method, request, env, user);
 
       default:
         return createErrorResponse('Admin resource not found', 404);
@@ -82,6 +81,84 @@ export async function handleAdmin(method, pathSegments, request, env) {
       method: method,
       error_message: error.message
     });
+    return createInternalServerErrorResponse(error);
+  }
+}
+
+/**
+ * Handle admin audit log requests
+ * GET /api/admin/audit - List audit logs with filtering and pagination
+ * @param {string} method - HTTP method
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @param {Object} user - Authenticated admin user
+ * @returns {Response} Audit log response
+ */
+async function handleAdminAudit(method, request, env, user) {
+  if (method !== 'GET') {
+    return createErrorResponse('Method not allowed for audit logs', 405);
+  }
+
+  try {
+    const { D1AdminRepository } = await import('../infrastructure/persistence/d1/D1AdminRepository.js');
+    const adminRepository = new D1AdminRepository(env.DB);
+
+    // Parse query parameters
+    const url = new URL(request.url);
+    const options = {
+      stationId: url.searchParams.get('station_id') ? parseInt(url.searchParams.get('station_id')) : null,
+      userId: url.searchParams.get('user_id') ? parseInt(url.searchParams.get('user_id')) : null,
+      action: url.searchParams.get('action'),
+      entityType: url.searchParams.get('entity_type'),
+      startDate: url.searchParams.get('start_date') ? new Date(url.searchParams.get('start_date')) : null,
+      endDate: url.searchParams.get('end_date') ? new Date(url.searchParams.get('end_date')) : null,
+      limit: Math.min(parseInt(url.searchParams.get('limit')) || 100, 500),
+      offset: parseInt(url.searchParams.get('offset')) || 0
+    };
+
+    const result = await adminRepository.getActivityLogs(options);
+
+    // Log the audit access
+    await logAdminAction(user, 'READ', 'Accessed audit logs', env, {
+      filters: {
+        station_id: options.stationId,
+        user_id: options.userId,
+        action: options.action,
+        entity_type: options.entityType
+      },
+      result_count: result.items.length
+    });
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: {
+        items: result.items.map(item => ({
+          id: item.id,
+          user_id: item.userId,
+          username: item.username,
+          action: item.action,
+          entity_type: item.entityType,
+          entity_id: item.entityId,
+          entity_name: item.entityName,
+          station_id: item.stationId,
+          station_acronym: item.stationAcronym,
+          details: item.details,
+          ip_address: item.ipAddress,
+          created_at: item.createdAt
+        })),
+        pagination: {
+          total: result.total,
+          limit: options.limit,
+          offset: options.offset,
+          has_more: options.offset + result.items.length < result.total
+        }
+      }
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Audit log error:', error);
     return createInternalServerErrorResponse(error);
   }
 }
