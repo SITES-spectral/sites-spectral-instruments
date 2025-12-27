@@ -1,10 +1,18 @@
-# Legacy Documentation (V1-V10)
+# Legacy Documentation
 
-This folder contains archived documentation from SITES Spectral versions 1.x through 10.x.
+This folder contains archived documentation and changelogs from SITES Spectral versions prior to v13.0.0.
 
-**Current Active Version**: V11 (Hexagonal Architecture + Standard Vocabularies)
+**Current Active Version**: v13.0.0+ (Production Ready Codebase)
+
+---
 
 ## Contents
+
+### Changelog Archive
+
+| File | Description |
+|------|-------------|
+| [[CHANGELOG_V11_AND_EARLIER|CHANGELOG_V11_AND_EARLIER.md]] | Complete changelog for v11.x and earlier versions |
 
 ### V1-V10 Archive (`v1-v10/`)
 
@@ -20,29 +28,46 @@ Documentation from pre-V11 versions:
 | `CLAUDE_LEGACY.md` | Historical CLAUDE.md content |
 | `*.md` | Various legacy documentation files |
 
-## Migration Notice
+---
 
-As of V11.0.0, SITES Spectral has migrated to:
+## Version History Summary
 
-1. **Hexagonal Architecture** (Ports & Adapters)
-2. **Single API Version** (V11 only - no V1/V3 backward compatibility)
-3. **Standard Vocabularies** (Darwin Core, ICOS, Copernicus alignment)
-
-### For Current Documentation
-
-See the main `docs/` folder:
-- `VOCABULARY_MAPPING.md` - Darwin Core, ICOS, Copernicus alignment
-- `STATION_USER_GUIDE.md` - End-user guide (updated for V11)
-- `PRODUCTION_SYNC_GUIDE.md` - Deployment procedures
-- `roi/` - ROI system documentation
-
-### For Architecture Documentation
-
-See the main project files:
-- `CLAUDE.md` - Architecture requirements, API reference
-- `CHANGELOG.md` - Version history
+| Version | Period | Key Milestone |
+|---------|--------|---------------|
+| **v13.0.0** | Dec 2025 | Production Ready - 587 tests, Phase 4-6 complete |
+| **v12.0.0** | Dec 2025 | Normalized Mount Type Codes (BREAKING) |
+| **v11.0.0** | Dec 2025 | Hexagonal Architecture + Domain Authorization |
+| **v10.0.0** | Nov-Dec 2025 | ROI Drawing, Admin Panel, Map Integration |
+| **v8.x-v9.x** | Sep-Nov 2025 | UAV Platform, Calibration, Security |
+| **v1.x-v7.x** | Early 2025 | Initial development |
 
 ---
 
-**Archived**: 2025-12-08
-**Archived By**: V11 Migration (Phase 7)
+## Migration History
+
+### v12.0.0 Breaking Changes
+- Mount type codes normalized: `PL` → `TWR`, `BL` → `BLD`, `GL` → `GND`
+- Platform/Instrument `normalized_name` values changed
+
+### v11.0.0 Architecture Migration
+1. **Hexagonal Architecture** (Ports & Adapters)
+2. **CQRS Pattern** (Commands/Queries separation)
+3. **Domain Authorization** (Role-based access control)
+4. **Standard Vocabularies** (Darwin Core, ICOS, Copernicus alignment)
+
+---
+
+## Current Documentation
+
+For current documentation, see the main project:
+
+- [[../../CHANGELOG|CHANGELOG.md]] - Current version history (v12+)
+- [[../../CLAUDE|CLAUDE.md]] - Architecture requirements, API reference
+- [[../VOCABULARY_MAPPING|VOCABULARY_MAPPING.md]] - Standard vocabulary alignment
+- [[../STATION_USER_GUIDE|STATION_USER_GUIDE.md]] - End-user guide
+- [[../PRODUCTION_SYNC_GUIDE|PRODUCTION_SYNC_GUIDE.md]] - Deployment procedures
+
+---
+
+**Last Updated**: 2025-12-27
+**Archived By**: v13.0.0 Release

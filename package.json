@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.23",
-  "description": "SITES Spectral v12.0.23 - Promise Error Handling",
+  "version": "13.0.0",
+  "description": "SITES Spectral v13.0.0 - Production Ready Codebase",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

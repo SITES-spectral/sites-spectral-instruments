@@ -60,32 +60,39 @@ src/
 
 ---
 
-## Current Version: 12.0.7 - Security & Accessibility Fixes (2025-12-26)
+## Current Version: 13.0.0 - Production Ready Codebase (2025-12-27)
 
-**✅ STATUS: STABLE - V12 Security Hardening**
+**✅ STATUS: PRODUCTION READY**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-26
-**🚀 API Version:** V12 (hexagonal + normalized codes)
+**📅 Last Updated:** 2025-12-27
+**🚀 API Version:** V11 (via `/api/latest` alias)
 **🔒 Security Features:** CORS Whitelist, PBKDF2 Password Hashing, httpOnly Cookies, CSRF Protection, Input Sanitization, JWT HMAC-SHA256
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
+**🧪 Test Coverage:** 587 tests across 34 test files
 
-### What's New in v12.0.7
+### What's New in v13.0.0
 
-**SECURITY HARDENING** - Critical fixes from comprehensive audit:
+**PRODUCTION READY** - Major release consolidating v12.x improvements:
 
-| Fix | Description | Tests |
-|-----|-------------|-------|
-| **CORS Whitelist** | Origin validation, no more wildcard | 28 |
-| **Password Hashing** | PBKDF2-SHA256, 100K iterations, random salt | 34 |
-| **httpOnly Cookies** | XSS-proof JWT storage, SameSite=Strict | 25 |
-| **Modal Focus Trap** | WCAG 2.4.3 keyboard navigation | 24 |
+| Phase | Description | Result |
+|-------|-------------|--------|
+| **Phase 4** | Test Coverage | 587 tests, 34 files |
+| **Phase 5** | Code Quality | API version cleanup, centralized utilities |
+| **Phase 6** | Promise Handling | Global error handlers, Promise.allSettled |
 
-**New Files:**
-- `src/config/allowed-origins.js` - CORS whitelist
-- `src/auth/password-hasher.js` - PBKDF2 password hashing
-- `src/auth/cookie-utils.js` - httpOnly cookie handling
+**Documentation Changes:**
+- Changelog split: v12+ in main, v11 and earlier in [[docs/legacy/CHANGELOG_V11_AND_EARLIER|legacy]]
+- Obsidian-compatible markdown with wiki-style links
+- Updated architecture documentation
+
+### v12.0.0 Breaking Change (inherited)
+
+**Mount type codes normalized:**
+- `PL` → `TWR` (Tower/Mast)
+- `BL` → `BLD` (Building)
+- `GL` → `GND` (Ground Level)
 
 ### What's New in v12.0.0
 
@@ -746,14 +753,25 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 12.0.7 |
-| Last Deployed | 2025-12-26 |
-| Status | Stable - V12 Security Hardening |
+| Current Version | 13.0.0 |
+| Last Deployed | 2025-12-27 |
+| Status | Production Ready |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
+| Test Coverage | 587 tests across 34 files |
 
-### v12.0.7 Features
+### v13.0.0 Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| **Production Ready Codebase** | v13.0.0 | ✅ Active |
+| **587 Test Coverage** | v13.0.0 | ✅ Active |
+| **Promise Error Handling** | v13.0.0 | ✅ Active |
+| **API Version Cleanup** | v13.0.0 | ✅ Active |
+| **Legacy Changelog Archived** | v13.0.0 | ✅ Active |
+
+### v12.x Features (Inherited)
 
 | Feature | Version | Status |
 |---------|---------|--------|
@@ -761,11 +779,6 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 | **PBKDF2 Password Hashing** | v12.0.7 | ✅ Active |
 | **httpOnly JWT Cookies** | v12.0.7 | ✅ Active |
 | **Modal Focus Trap (WCAG)** | v12.0.7 | ✅ Active |
-
-### v12.0.0 Features
-
-| Feature | Version | Status |
-|---------|---------|--------|
 | **Normalized Mount Type Codes** | v12.0.0 | ✅ BREAKING |
 
 ### v11.0.0 Features (Inherited)
