@@ -13,6 +13,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.8.0] - 2025-12-27
+
+### Frontend TODOs Complete (Phase 8.1)
+
+This release completes pending frontend functionality.
+
+#### MS Sensor Edit Form Population
+
+**File:** `public/js/ms-sensor-modal.js`
+
+Implemented `populateEditForm()` function to populate the 5-tab MS sensor edit modal:
+- Basic info tab: display_name, instrument_type, sensor_brand, sensor_model, serial, orientation, channels
+- Position tab: latitude, longitude, height, azimuth, nadir, field of view, ecosystem
+- Datalogger tab: cable_length, datalogger_type, programs
+- Calibration tab: dates and notes
+- Notes tab: description, installation_notes
+
+#### UAV Drone Model Dropdown
+
+**File:** `public/js/platform-forms/index.js`
+
+Implemented `updateDroneModels()` using safe DOM methods (no innerHTML):
+- DJI: Multispectral (M3M, P4M), Enterprise (M30T, M300, M350), Consumer (M3P, AIR3)
+- Parrot: Professional (ANAFI, BLUEGRASS), Legacy (SEQUOIA, DISCO-AG)
+- Autel: EVO Series, Enterprise (DRAGONFISH)
+- senseFly: eBee series, Cameras
+- MicaSense: RedEdge-MX, RedEdge-P, Altum-PT, Altum
+- Headwall: Nano-Hyperspec, Micro-Hyperspec, CO2 Mapper
+
+#### Configuration Loader Documentation
+
+**File:** `public/js/modals/example-integration.js`
+
+Updated configuration loaders with clear documentation:
+- Static data approach documented as intentional design choice
+- Performance rationale: avoids API latency for rarely-changing config
+- Migration path documented if dynamic config is needed
+
+---
+
 ## [13.7.0] - 2025-12-27
 
 ### Architecture Visualization (Phase 7.9)

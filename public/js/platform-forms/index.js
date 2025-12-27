@@ -673,8 +673,110 @@
     }
 
     function updateDroneModels() {
-        // TODO: Update model options based on vendor selection
-        console.log('Updating drone models based on vendor');
+        const vendorSelect = document.getElementById('platform-drone-vendor');
+        const modelSelect = document.getElementById('platform-drone-model');
+
+        if (!vendorSelect || !modelSelect) {
+            console.warn('Drone vendor or model select not found');
+            return;
+        }
+
+        const vendor = vendorSelect.value;
+
+        // Define models per vendor (static data - no user input)
+        const modelsByVendor = {
+            DJI: [
+                { group: 'DJI Multispectral', options: [
+                    { value: 'M3M', label: 'M3M - Mavic 3 Multispectral' },
+                    { value: 'P4M', label: 'P4M - Phantom 4 Multispectral' }
+                ]},
+                { group: 'DJI Enterprise', options: [
+                    { value: 'M30T', label: 'M30T - Matrice 30T' },
+                    { value: 'M300', label: 'M300 - Matrice 300 RTK' },
+                    { value: 'M350', label: 'M350 - Matrice 350 RTK' }
+                ]},
+                { group: 'DJI Consumer', options: [
+                    { value: 'M3P', label: 'M3P - Mavic 3 Pro' },
+                    { value: 'AIR3', label: 'AIR3 - Air 3' }
+                ]}
+            ],
+            PARROT: [
+                { group: 'Parrot Professional', options: [
+                    { value: 'ANAFI', label: 'ANAFI - ANAFI Thermal' },
+                    { value: 'ANAFI-USA', label: 'ANAFI-USA - ANAFI USA' },
+                    { value: 'BLUEGRASS', label: 'BLUEGRASS - Bluegrass Fields' }
+                ]},
+                { group: 'Parrot Legacy', options: [
+                    { value: 'SEQUOIA', label: 'SEQUOIA - Sequoia+ Camera' },
+                    { value: 'DISCO-AG', label: 'DISCO-AG - Disco-Pro AG' }
+                ]}
+            ],
+            AUTEL: [
+                { group: 'Autel EVO Series', options: [
+                    { value: 'EVO2', label: 'EVO2 - EVO II Pro' },
+                    { value: 'EVO2-RTK', label: 'EVO2-RTK - EVO II RTK' },
+                    { value: 'EVO-MAX', label: 'EVO-MAX - EVO Max 4T' }
+                ]},
+                { group: 'Autel Enterprise', options: [
+                    { value: 'DRAGONFISH', label: 'DRAGONFISH - Dragonfish' }
+                ]}
+            ],
+            SENSEFLY: [
+                { group: 'senseFly eBee', options: [
+                    { value: 'EBEE-X', label: 'EBEE-X - eBee X' },
+                    { value: 'EBEE-AG', label: 'EBEE-AG - eBee AG' },
+                    { value: 'EBEE-TAC', label: 'EBEE-TAC - eBee TAC' }
+                ]},
+                { group: 'senseFly Cameras', options: [
+                    { value: 'AERIA-X', label: 'AERIA-X - Aeria X' },
+                    { value: 'S110', label: 'S110 - S.O.D.A.' }
+                ]}
+            ],
+            MICASENSE: [
+                { group: 'MicaSense Sensors', options: [
+                    { value: 'REDEDGE-MX', label: 'REDEDGE-MX - RedEdge-MX' },
+                    { value: 'REDEDGE-P', label: 'REDEDGE-P - RedEdge-P' },
+                    { value: 'ALTUM-PT', label: 'ALTUM-PT - Altum-PT' },
+                    { value: 'ALTUM', label: 'ALTUM - Altum' }
+                ]}
+            ],
+            HEADWALL: [
+                { group: 'Headwall Hyperspectral', options: [
+                    { value: 'NANO-HYPER', label: 'NANO-HYPER - Nano-Hyperspec' },
+                    { value: 'MICRO-HYPER', label: 'MICRO-HYPER - Micro-Hyperspec' },
+                    { value: 'CO2', label: 'CO2 - CO2 Mapper' }
+                ]}
+            ],
+            OTHER: [
+                { group: 'Other', options: [
+                    { value: 'CUSTOM', label: 'CUSTOM - Custom/Unknown Model' },
+                    { value: 'PROTOTYPE', label: 'PROTOTYPE - Prototype UAV' }
+                ]}
+            ]
+        };
+
+        // Clear existing options using safe DOM methods
+        while (modelSelect.firstChild) {
+            modelSelect.removeChild(modelSelect.firstChild);
+        }
+
+        // Build options using safe DOM methods
+        const groups = modelsByVendor[vendor] || modelsByVendor.OTHER;
+        groups.forEach(groupData => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = groupData.group;
+
+            groupData.options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.label;
+                optgroup.appendChild(option);
+            });
+
+            modelSelect.appendChild(optgroup);
+        });
+
+        console.log(`Updated drone models for vendor: ${vendor}`);
     }
 
     // ========================================

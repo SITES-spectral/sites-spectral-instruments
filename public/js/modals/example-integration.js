@@ -52,13 +52,12 @@ class ModalConfigLoader {
     /**
      * Load status options from status.yaml
      * @private
+     * @returns {Array} Status options for instruments
+     * @note Uses static data - configuration rarely changes and API call adds latency.
+     *       If dynamic config is needed, create GET /api/config/status endpoint.
      */
     static async _loadStatusOptions() {
-        // TODO: Replace with actual API call
-        // const response = await fetch('/api/config/status');
-        // const statusData = await response.json();
-
-        // Default statuses (fallback)
+        // Static configuration (v13.8.0) - preferred for rarely-changing data
         return [
             { value: 'Active', label: 'Active', description: 'Currently operational' },
             { value: 'Inactive', label: 'Inactive', description: 'Temporarily not in use' },
@@ -72,9 +71,12 @@ class ModalConfigLoader {
     /**
      * Load instrument types from instrument-types.yaml
      * @private
+     * @returns {Array} Instrument type options
+     * @note Uses static data - instrument types are stable and API call adds latency.
+     *       If dynamic config is needed, create GET /api/config/instrument-types endpoint.
      */
     static async _loadInstrumentTypes() {
-        // TODO: Replace with actual API call
+        // Static configuration (v13.8.0) - preferred for rarely-changing data
         return [
             { value: '', label: 'Select type...' },
             { value: 'Phenocam', label: 'Phenocam' },

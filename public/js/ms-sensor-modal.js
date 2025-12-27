@@ -386,8 +386,56 @@ const MSSensorModal = (() => {
      * @param {object} instrumentData - Instrument data
      */
     function populateEditForm(instrumentData) {
-        // TODO: Implement edit form population
-        console.log('Populating edit form with:', instrumentData);
+        if (!instrumentData) {
+            console.warn('No instrument data provided for edit form');
+            return;
+        }
+
+        // Helper to safely set form field value
+        const setFieldValue = (elementId, value) => {
+            const element = document.getElementById(elementId);
+            if (element && value !== null && value !== undefined) {
+                element.value = value;
+            }
+        };
+
+        // Basic info tab
+        setFieldValue('ms-edit-display-name', instrumentData.display_name);
+        setFieldValue('ms-edit-instrument-type', instrumentData.instrument_type);
+        setFieldValue('ms-edit-sensor-brand', instrumentData.sensor_brand);
+        setFieldValue('ms-edit-sensor-model', instrumentData.sensor_model);
+        setFieldValue('ms-edit-sensor-serial', instrumentData.sensor_serial_number);
+        setFieldValue('ms-edit-orientation', instrumentData.orientation);
+        setFieldValue('ms-edit-number-of-channels', instrumentData.number_of_channels);
+
+        // Position tab
+        setFieldValue('ms-edit-latitude', instrumentData.latitude);
+        setFieldValue('ms-edit-longitude', instrumentData.longitude);
+        setFieldValue('ms-edit-height', instrumentData.instrument_height_m);
+        setFieldValue('ms-edit-azimuth', instrumentData.azimuth_degrees);
+        setFieldValue('ms-edit-nadir', instrumentData.degrees_from_nadir);
+        setFieldValue('ms-edit-field-of-view', instrumentData.field_of_view_degrees);
+        setFieldValue('ms-edit-ecosystem-code', instrumentData.ecosystem_code);
+
+        // Datalogger tab
+        setFieldValue('ms-edit-cable-length', instrumentData.cable_length_m);
+        setFieldValue('ms-edit-datalogger-type', instrumentData.datalogger_type);
+        setFieldValue('ms-edit-datalogger-program', instrumentData.datalogger_program_normal);
+        setFieldValue('ms-edit-calibration-program', instrumentData.datalogger_program_calibration);
+
+        // Calibration tab
+        setFieldValue('ms-edit-calibration-date', instrumentData.calibration_date);
+        setFieldValue('ms-edit-deployment-date', instrumentData.deployment_date);
+        setFieldValue('ms-edit-calibration-notes', instrumentData.calibration_notes);
+
+        // Notes tab
+        setFieldValue('ms-edit-description', instrumentData.description);
+        setFieldValue('ms-edit-installation-notes', instrumentData.installation_notes);
+
+        // Update orientation-dependent fields visibility
+        handleOrientationChange();
+
+        console.log('Edit form populated with instrument data:', instrumentData.display_name);
     }
 
     /**
