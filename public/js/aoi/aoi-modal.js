@@ -1,7 +1,8 @@
 // SITES Spectral - AOI Modal
 // Modal for creating, viewing, and editing Areas of Interest
-// Version: 13.17.0
+// Version: 13.19.0
 // CSS extracted to /css/aoi-modal.css
+// WCAG 2.4.3 Compliant with focus trap support
 
 /**
  * AOI Modal Manager
@@ -23,6 +24,9 @@ class AOIModal {
         this.currentAOI = null;
         this.isNew = false;
         this.config = null;
+
+        // WCAG 2.4.3: Focus trap for accessibility
+        this._focusTrap = null;
     }
 
     /**
@@ -162,6 +166,22 @@ class AOIModal {
         // Show modal with animation
         requestAnimationFrame(() => {
             this.modal.classList.add('visible');
+
+            // WCAG 2.4.3: Activate focus trap
+            const container = this.modal.querySelector('.aoi-modal-container') || this.modal;
+            if (window.FocusTrap) {
+                this._focusTrap = new window.FocusTrap(container, {
+                    autoFocus: true,
+                    returnFocus: true
+                });
+                this._focusTrap.activate();
+            } else {
+                // Fallback: basic focus management
+                const firstInput = this.modal.querySelector('input, select, textarea, button');
+                if (firstInput) {
+                    setTimeout(() => firstInput.focus(), 100);
+                }
+            }
         });
     }
 
@@ -679,6 +699,12 @@ class AOIModal {
      */
     close() {
         if (!this.modal) return;
+
+        // WCAG 2.4.3: Deactivate focus trap
+        if (this._focusTrap) {
+            this._focusTrap.deactivate();
+            this._focusTrap = null;
+        }
 
         // Remove escape listener
         if (this.handleEscape) {

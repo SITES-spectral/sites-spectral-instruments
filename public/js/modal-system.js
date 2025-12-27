@@ -1,5 +1,7 @@
-// SITES Spectral v5.0.0 - Enhanced Modal System
+// SITES Spectral v13.19.0 - Enhanced Modal System
 // Unified modal component architecture for admin CRUD operations and improved UX
+// WCAG 2.4.3 Compliant with focus trap support
+// Uses core/focus-trap.js for accessible keyboard navigation
 
 class BaseModal {
     constructor(config) {
@@ -18,6 +20,9 @@ class BaseModal {
 
         this.modal = null;
         this.isOpen = false;
+
+        // Focus trap for WCAG 2.4.3 compliance
+        this._focusTrap = null;
     }
 
     // Check if user has required permissions
@@ -96,10 +101,20 @@ class BaseModal {
         this.isOpen = true;
         document.body.style.overflow = 'hidden';
 
-        // Focus management
-        const firstInput = this.modal.querySelector('input, select, textarea, button');
-        if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
+        // WCAG 2.4.3: Activate focus trap
+        const content = this.modal.querySelector('.sites-modal-content') || this.modal;
+        if (window.FocusTrap) {
+            this._focusTrap = new window.FocusTrap(content, {
+                autoFocus: true,
+                returnFocus: true
+            });
+            this._focusTrap.activate();
+        } else {
+            // Fallback: basic focus management
+            const firstInput = this.modal.querySelector('input, select, textarea, button');
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 100);
+            }
         }
 
         if (this.onOpen) {
@@ -112,6 +127,12 @@ class BaseModal {
     // Close modal
     close() {
         if (!this.modal) return;
+
+        // WCAG 2.4.3: Deactivate focus trap
+        if (this._focusTrap) {
+            this._focusTrap.deactivate();
+            this._focusTrap = null;
+        }
 
         this.modal.classList.remove('show');
         this.isOpen = false;

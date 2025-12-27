@@ -1,11 +1,14 @@
 // SITES Spectral Instruments - UI Components Module
 // Reusable UI components, modals, notifications, and form handlers
+// WCAG 2.4.3 Compliant with focus trap support
 
 class SitesComponents {
     constructor() {
         this.activeModals = new Set();
         this.notificationQueue = [];
         this.toastContainer = null;
+        // Focus traps for WCAG 2.4.3 compliance
+        this._focusTraps = new Map();
         this.init();
     }
 
@@ -317,7 +320,7 @@ class SitesComponents {
         }
     }
 
-    // Modal system
+    // Modal system with WCAG 2.4.3 focus trap
     showModal(modalOrId) {
         // Accept both string ID and element object (like closeModal does)
         const modal = typeof modalOrId === 'string'
@@ -329,10 +332,21 @@ class SitesComponents {
             this.activeModals.add(modal);
             document.body.style.overflow = 'hidden';
 
-            // Focus management
-            const firstFocusable = modal.querySelector('input, select, textarea, button');
-            if (firstFocusable) {
-                setTimeout(() => firstFocusable.focus(), 100);
+            // WCAG 2.4.3: Activate focus trap
+            const content = modal.querySelector('.modal-content, .modal-dialog') || modal;
+            if (window.FocusTrap) {
+                const trap = new window.FocusTrap(content, {
+                    autoFocus: true,
+                    returnFocus: true
+                });
+                trap.activate();
+                this._focusTraps.set(modal, trap);
+            } else {
+                // Fallback: basic focus management
+                const firstFocusable = modal.querySelector('input, select, textarea, button');
+                if (firstFocusable) {
+                    setTimeout(() => firstFocusable.focus(), 100);
+                }
             }
         }
     }
@@ -343,6 +357,13 @@ class SitesComponents {
         }
 
         if (modal) {
+            // WCAG 2.4.3: Deactivate focus trap
+            const trap = this._focusTraps.get(modal);
+            if (trap) {
+                trap.deactivate();
+                this._focusTraps.delete(modal);
+            }
+
             modal.classList.remove('show');
             this.activeModals.delete(modal);
 
@@ -360,6 +381,10 @@ class SitesComponents {
     }
 
     closeAllModals() {
+        // WCAG 2.4.3: Deactivate all focus traps
+        this._focusTraps.forEach(trap => trap.deactivate());
+        this._focusTraps.clear();
+
         this.activeModals.forEach(modal => {
             modal.classList.remove('show');
         });

@@ -13,6 +13,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.19.0] - 2025-12-27
+
+### WCAG 2.4.3 Focus Trap Implementation
+
+Added accessible focus management for all modal dialogs to ensure keyboard-only users cannot Tab outside modal boundaries.
+
+#### New Files
+
+**Focus Trap Utility** (`public/js/core/focus-trap.js`)
+- Reusable WCAG 2.4.3 compliant focus trap class
+- Circular Tab/Shift+Tab navigation within containers
+- Auto-focus first element on activation
+- Return focus to trigger element on deactivation
+- Tracks visible focusable elements dynamically
+- Exported as `window.FocusTrap` and `window.SitesFocusTrap`
+
+#### Updated Modal Systems
+
+**BaseModal** (`modal-system.js`)
+- Added `_focusTrap` property to constructor
+- Activate focus trap on `open()` method
+- Deactivate focus trap on `close()` method
+- Fallback to basic focus management if FocusTrap not available
+
+**SitesComponents** (`components.js`)
+- Added `_focusTraps` Map for multiple modal tracking
+- Focus trap activation in `showModal()`
+- Focus trap cleanup in `closeModal()` and `closeAllModals()`
+
+**AOIModal** (`aoi/aoi-modal.js`)
+- Added `_focusTrap` property to constructor
+- Focus trap activation after modal animation
+- Focus trap cleanup before modal removal
+
+#### WCAG Compliance
+
+- **WCAG 2.4.3**: Focus Order - Focus trapped within modal dialogs
+- **Keyboard Navigation**: Tab cycles through modal elements only
+- **Shift+Tab**: Wraps from first element to last element
+- **Focus Restoration**: Returns focus to trigger on close
+
+#### Technical Details
+
+```javascript
+// FocusTrap class usage
+const trap = new FocusTrap(modalContainer, {
+    autoFocus: true,    // Focus first element on activate
+    returnFocus: true   // Restore focus on deactivate
+});
+trap.activate();
+// ... modal interaction
+trap.deactivate();
+```
+
+---
+
 ## [13.18.0] - 2025-12-27
 
 ### Security Consolidation - escapeHtml Functions
