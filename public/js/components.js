@@ -260,6 +260,15 @@ class SitesComponents {
         const notification = document.createElement('div');
         notification.className = `toast toast-${type}`;
 
+        // WCAG 4.1.3: Add ARIA attributes for screen reader announcements
+        if (type === 'error' || type === 'warning') {
+            notification.setAttribute('role', 'alert');
+            notification.setAttribute('aria-live', 'assertive');
+        } else {
+            notification.setAttribute('role', 'status');
+            notification.setAttribute('aria-live', 'polite');
+        }
+
         const icon = this.getNotificationIcon(type);
 
         notification.innerHTML = `

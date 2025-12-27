@@ -187,7 +187,10 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <!-- Skip Navigation for Accessibility (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="login-container" id="main-content">
         <div class="login-card">
             <div class="login-logo">
                 <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="height: 80px; width: auto;">
@@ -195,7 +198,7 @@
             <h1 class="login-title">Welcome Back</h1>
             <p class="login-subtitle">Sign in to access your SITES Spectral dashboard</p>
             
-            <div class="error-message" id="error-message"></div>
+            <div class="error-message" id="error-message" role="alert" aria-live="assertive"></div>
             
             <form id="login-form">
                 <div class="form-group">

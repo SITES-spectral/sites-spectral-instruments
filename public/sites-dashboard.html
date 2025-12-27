@@ -942,6 +942,9 @@
     </style>
 </head>
 <body>
+    <!-- Skip Navigation for Accessibility (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <div class="dashboard-container">
         <!-- Header -->
         <header class="dashboard-header">
@@ -968,7 +971,7 @@
         </header>
 
         <!-- Main Content -->
-        <main class="dashboard-content">
+        <main class="dashboard-content" id="main-content">
             <!-- Controls and Stats -->
             <div class="dashboard-controls">
                 <div class="dashboard-stats" id="dashboard-stats">
@@ -1026,8 +1029,8 @@
                 </div>
 
             <!-- Error State -->
-            <div id="error-state" class="error-state" style="display: none;">
-                <i class="fas fa-exclamation-triangle"></i>
+            <div id="error-state" class="error-state" style="display: none;" role="alert" aria-live="assertive">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                 <h3>Failed to load stations</h3>
                 <p id="error-message">Please try refreshing the page</p>
                 <button onclick="loadStations()" class="btn btn-primary">

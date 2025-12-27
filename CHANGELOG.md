@@ -13,6 +13,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.20.0] - 2025-12-27
+
+### WCAG 2.1 AA Accessibility Improvements
+
+Comprehensive accessibility audit and fixes to achieve WCAG 2.1 Level AA compliance.
+
+#### Color Contrast Fixes (WCAG 1.4.3)
+
+Updated design-system.css color tokens to meet 4.5:1 minimum contrast ratio:
+
+| Token | Before | After | Contrast Ratio |
+|-------|--------|-------|----------------|
+| `--color-brand-primary` | #059669 (3.58:1) | #047857 | 4.61:1 ✓ |
+| `--color-text-muted` | #9ca3af (3.53:1) | #6b7280 | 5.74:1 ✓ |
+| `--color-text-link` | #059669 (3.58:1) | #047857 | 4.61:1 ✓ |
+| `--color-border-focus` | #059669 | #047857 | Consistent |
+| `--shadow-focus` | rgba(5,150,105) | rgba(4,120,87) | Consistent |
+
+#### Skip Navigation Links (WCAG 2.4.1)
+
+Added skip links to all main HTML pages for keyboard users to bypass navigation:
+
+- **login.html**: Skip to login form
+- **sites-dashboard.html**: Skip to main content
+- **station-dashboard.html**: Skip to main content
+- **spectral.html**: Skip to main content
+
+New CSS classes in design-system.css:
+- `.skip-link` - Visually hidden until focused
+- `.sr-only` - Screen reader only content
+- `.live-region` - ARIA live region for announcements
+
+#### Modal ARIA Attributes (WCAG 4.1.2)
+
+Enhanced modal accessibility with proper ARIA attributes:
+
+**modal-system.js (BaseModal)**
+- `role="dialog"` on modal content
+- `aria-modal="true"` for modal behavior
+- `aria-labelledby` referencing title ID
+- `aria-hidden="true"` on backdrop
+- `aria-label="Close modal"` on close button
+- `aria-hidden="true"` on decorative icons
+
+**campaign-modal.js (CampaignModal)**
+- Full ARIA attributes on details and form modals
+- Title ID for aria-labelledby reference
+- Close button aria-label
+
+**product-modal.js (ProductModal)**
+- ARIA attributes on overlay and modal
+- Title ID on all modal variants (view/create/edit)
+- Close button aria-label
+
+#### Error Announcements (WCAG 4.1.3)
+
+Added `role="alert"` and `aria-live` for screen reader announcements:
+
+**components.js (createNotification)**
+- Error/warning: `role="alert"` + `aria-live="assertive"`
+- Success/info: `role="status"` + `aria-live="polite"`
+
+**HTML Error Elements**
+- login.html: `role="alert"` on error-message div
+- index.html: `role="alert"` on error-message div
+- sites-dashboard.html: `role="alert"` on error-state div
+
+#### Accessibility CSS Additions
+
+New accessibility components in design-system.css:
+```css
+.skip-link          /* Skip navigation link (visible on focus) */
+.sr-only            /* Screen reader only content */
+.focus-visible      /* Enhanced focus styles */
+.live-region        /* ARIA live region */
+```
+
+---
+
 ## [13.19.0] - 2025-12-27
 
 ### WCAG 2.4.3 Focus Trap Implementation

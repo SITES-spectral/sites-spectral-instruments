@@ -141,6 +141,7 @@ const ProductModal = {
         header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #dee2e6; background: linear-gradient(135deg, #28a745, #20c997);';
         
         const title = document.createElement('h3');
+        title.id = 'product-modal-title';
         title.style.cssText = 'margin: 0; color: white; font-size: 1.25rem;';
         title.textContent = 'Create New Product';
         
@@ -172,6 +173,7 @@ const ProductModal = {
         header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #dee2e6; background: linear-gradient(135deg, #ffc107, #fd7e14);';
         
         const title = document.createElement('h3');
+        title.id = 'product-modal-title';
         title.style.cssText = 'margin: 0; color: white; font-size: 1.25rem;';
         title.textContent = 'Edit Product: ' + product.name;
         
@@ -445,6 +447,7 @@ const ProductModal = {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
         overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;';
+        overlay.setAttribute('aria-hidden', 'true');
         overlay.onclick = (e) => {
             if (e.target === overlay) this.close();
         };
@@ -455,6 +458,9 @@ const ProductModal = {
         const modal = document.createElement('div');
         modal.className = 'product-modal';
         modal.style.cssText = 'background: white; border-radius: 8px; width: 90%; max-width: 700px; max-height: 90vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2);';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'product-modal-title');
         return modal;
     },
 
@@ -468,6 +474,7 @@ const ProductModal = {
         const titleArea = document.createElement('div');
         
         const title = document.createElement('h3');
+        title.id = 'product-modal-title';
         title.style.cssText = 'margin: 0; color: white; font-size: 1.25rem;';
         title.textContent = product.name;
         titleArea.appendChild(title);
@@ -488,6 +495,7 @@ const ProductModal = {
     _createCloseButton() {
         const btn = document.createElement('button');
         btn.type = 'button';
+        btn.setAttribute('aria-label', 'Close modal');
         btn.style.cssText = 'background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.25rem; display: flex; align-items: center; justify-content: center;';
         btn.textContent = '×';
         btn.onclick = () => this.close();

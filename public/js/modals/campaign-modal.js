@@ -91,13 +91,17 @@ class CampaignModal {
         // Create overlay
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) CampaignModal.close();
         });
 
-        // Create modal content
+        // Create modal content with ARIA attributes for accessibility
         const modal = document.createElement('div');
         modal.className = 'modal-content modal-campaign modal-lg';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'campaign-modal-title');
         modal.addEventListener('click', (e) => e.stopPropagation());
 
         // Header
@@ -105,17 +109,21 @@ class CampaignModal {
         header.className = 'modal-header';
         
         const headerTitle = document.createElement('h5');
+        headerTitle.id = 'campaign-modal-title';
         const headerIcon = document.createElement('i');
         headerIcon.className = 'fas fa-flag';
+        headerIcon.setAttribute('aria-hidden', 'true');
         headerTitle.appendChild(headerIcon);
         headerTitle.appendChild(document.createTextNode(' Campaign Details'));
         
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';
         closeBtn.className = 'modal-close';
+        closeBtn.setAttribute('aria-label', 'Close modal');
         closeBtn.addEventListener('click', () => CampaignModal.close());
         const closeIcon = document.createElement('i');
         closeIcon.className = 'fas fa-times';
+        closeIcon.setAttribute('aria-hidden', 'true');
         closeBtn.appendChild(closeIcon);
         
         header.appendChild(headerTitle);
@@ -334,31 +342,39 @@ class CampaignModal {
         // Create overlay
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) CampaignModal.close();
         });
 
-        // Create modal content
+        // Create modal content with ARIA attributes for accessibility
         const modal = document.createElement('div');
         modal.className = 'modal-content modal-campaign modal-lg';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'campaign-modal-title');
         modal.addEventListener('click', (e) => e.stopPropagation());
 
         // Header
         const header = document.createElement('div');
         header.className = 'modal-header';
-        
+
         const headerTitle = document.createElement('h5');
+        headerTitle.id = 'campaign-modal-title';
         const headerIcon = document.createElement('i');
         headerIcon.className = 'fas fa-flag';
+        headerIcon.setAttribute('aria-hidden', 'true');
         headerTitle.appendChild(headerIcon);
         headerTitle.appendChild(document.createTextNode(' ' + data.title));
         
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';
         closeBtn.className = 'modal-close';
+        closeBtn.setAttribute('aria-label', 'Close modal');
         closeBtn.addEventListener('click', () => CampaignModal.close());
         const closeIcon = document.createElement('i');
         closeIcon.className = 'fas fa-times';
+        closeIcon.setAttribute('aria-hidden', 'true');
         closeBtn.appendChild(closeIcon);
         
         header.appendChild(headerTitle);

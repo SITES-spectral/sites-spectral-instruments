@@ -45,13 +45,16 @@ class BaseModal {
         modal.id = this.id;
         modal.className = `sites-modal sites-modal-${this.size} sites-modal-${this.type}`;
 
+        // Generate unique IDs for ARIA references
+        const titleId = `${this.id}-title`;
+
         modal.innerHTML = `
-            <div class="sites-modal-backdrop"></div>
-            <div class="sites-modal-content">
+            <div class="sites-modal-backdrop" aria-hidden="true"></div>
+            <div class="sites-modal-content" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
                 <div class="sites-modal-header">
-                    <h3 class="sites-modal-title">${this.title}</h3>
-                    <button class="sites-modal-close" type="button" aria-label="Close">
-                        <i class="fas fa-times"></i>
+                    <h3 class="sites-modal-title" id="${titleId}">${this.title}</h3>
+                    <button class="sites-modal-close" type="button" aria-label="Close modal">
+                        <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="sites-modal-body">
