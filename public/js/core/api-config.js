@@ -143,22 +143,22 @@
 
         /**
          * Get V3 API path (legacy)
-         * @deprecated Use getBasePath() or withVersion('v11') instead
+         * @deprecated Use getBasePath() instead - returns /api/latest for automatic version resolution
          * @returns {string}
          */
         getV3Path() {
-            console.warn('APIConfig.getV3Path() is deprecated. Use getBasePath() or withVersion("v11")');
-            return '/api/v3';
+            console.warn('APIConfig.getV3Path() is deprecated. Use getBasePath() for automatic version resolution');
+            return '/api/latest';
         }
 
         /**
          * Get V10 API path (legacy)
-         * @deprecated Use getBasePath() or withVersion('v11') instead
+         * @deprecated Use getBasePath() instead - returns /api/latest for automatic version resolution
          * @returns {string}
          */
         getV10Path() {
-            console.warn('APIConfig.getV10Path() is deprecated. Use getBasePath() or withVersion("v11")');
-            return '/api/v10';
+            console.warn('APIConfig.getV10Path() is deprecated. Use getBasePath() for automatic version resolution');
+            return '/api/latest';
         }
 
         /**

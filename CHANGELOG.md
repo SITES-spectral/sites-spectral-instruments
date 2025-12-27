@@ -9,6 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.22] - 2025-12-27
+
+### API Version Cleanup (Phase 5)
+
+**Fixed:** Ensure all frontend code uses `/api/latest` for automatic version resolution instead of hardcoded version numbers.
+
+#### Changes
+
+**platform-type-filter.js:**
+- Changed default `apiVersion` from `'v3'` to `'latest'` for automatic version resolution
+- Updated JSDoc to recommend using `'latest'`
+
+**api-config.js:**
+- Updated deprecated `getV3Path()` to return `/api/latest` instead of `/api/v3`
+- Updated deprecated `getV10Path()` to return `/api/latest` instead of `/api/v10`
+- Updated deprecation warnings to recommend `getBasePath()` for automatic version resolution
+
+**config-service.js:**
+- Changed default API version fallback from `'v3'` to `'latest'`
+
+#### Benefits
+- Frontend automatically uses the current API version without code changes
+- Version bumps only require updating `yamls/api/api-versions.yaml`
+- Eliminates manual version updates across frontend files
+- Server-side alias resolution (`/api/latest` -> `/api/v11`) handles version mapping
+
+#### Verified
+- Legacy files already archived in `public/js/archived/`
+- `escapeHtml` functions already delegate to centralized `core/security.js`
+- All 587 tests passing
+
+---
+
 ## [12.0.21] - 2025-12-27
 
 ### Repository Test Coverage (Phase 4.4)

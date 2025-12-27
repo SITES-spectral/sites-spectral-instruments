@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "12.0.21",
-  "description": "SITES Spectral v12.0.21 - Repository Test Coverage",
+  "version": "12.0.22",
+  "description": "SITES Spectral v12.0.22 - API Version Cleanup",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

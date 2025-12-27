@@ -475,10 +475,10 @@
 
         /**
          * Get default API version string
-         * @returns {string}
+         * @returns {string} Returns 'latest' for automatic version resolution
          */
         getDefaultAPIVersion() {
-            return this.configs.apiVersions?.version_selection?.default_version || 'v3';
+            return this.configs.apiVersions?.version_selection?.default_version || 'latest';
         }
 
         /**

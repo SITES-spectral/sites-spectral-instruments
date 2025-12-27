@@ -40,7 +40,7 @@
          * @param {Function} [options.onTypeChange] - Callback when type changes
          * @param {boolean} [options.showCounts=true] - Show count badges
          * @param {boolean} [options.includeInactive=false] - Include inactive platform types
-         * @param {string} [options.apiVersion='v3'] - API version to use
+         * @param {string} [options.apiVersion='latest'] - API version to use (use 'latest' for automatic resolution)
          */
         constructor(containerId, options = {}) {
             this.containerId = containerId;
@@ -51,14 +51,14 @@
                 return;
             }
 
-            // Options with defaults
+            // Options with defaults - use 'latest' for automatic version resolution
             this.options = {
                 showAllOption: true,
                 initialType: 'all',
                 onTypeChange: null,
                 showCounts: true,
                 includeInactive: false,
-                apiVersion: 'v3',
+                apiVersion: 'latest',
                 ...options
             };
 
