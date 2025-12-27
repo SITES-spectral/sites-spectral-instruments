@@ -9,6 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.20] - 2025-12-27
+
+### Controller Test Coverage (Phase 4.3)
+
+**Added:** Comprehensive test coverage for HTTP controllers (infrastructure layer).
+
+#### Controller Tests (3 files, 81 tests)
+
+**StationController.test.js (27 tests):**
+- List stations with pagination (paginated response, query parameters, max limit enforcement)
+- Get station (by numeric ID, by acronym, uppercase normalization, 404 handling)
+- Dashboard (full response, acronym normalization, not found)
+- Create station (valid data, snake_case/camelCase support, JSON validation, error handling)
+- Update station (field updates, not found handling)
+- Delete station (success, not found, cascade protection 409)
+- Request routing (GET/POST/PUT/DELETE mapping, unknown route 404)
+
+**PlatformController.test.js (25 tests):**
+- List platforms with filters (paginated response, station filter, platform_type filter, max limit)
+- Get platform (by numeric ID, by normalized name, uppercase normalization, 404 handling)
+- By station (station ID lookup, response format)
+- By type (type filtering, query execution)
+- Create platform (fixed platform, UAV with auto-instruments, JSON validation, authorization)
+- Update platform (field updates, not found handling)
+- Delete platform (success, not found, cascade protection 409)
+- Request routing (all route patterns)
+
+**InstrumentController.test.js (29 tests):**
+- List instruments with filters (paginated response, platform filter, type filter, status filter, max limit)
+- Get instrument (by numeric ID, by normalized name, with ROI details, 404 handling)
+- By platform (platform ID lookup)
+- By station (station ID lookup)
+- Create instrument (valid data, JSON validation, authorization context)
+- Update instrument (field updates, status changes, spec merging, not found)
+- Delete instrument (success, not found, cascade delete ROIs, ROI protection 409)
+- Request routing (all route patterns)
+
+#### Test Results
+- **Before:** 425 tests
+- **After:** 506 tests (+81 tests)
+- All tests passing
+
+---
+
 ## [12.0.19] - 2025-12-27
 
 ### Application Layer Test Coverage (Phase 4)
