@@ -232,11 +232,8 @@
             }
 
             init() {
-                // Check if already logged in
-                const token = localStorage.getItem('sites_spectral_token');
-                if (token) {
-                    this.verifyTokenAndRedirect(token);
-                }
+                // Check if already logged in via httpOnly cookie
+                this.verifySessionAndRedirect();
 
                 this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
@@ -249,14 +246,12 @@
                 });
             }
 
-            async verifyTokenAndRedirect(token) {
+            async verifySessionAndRedirect() {
                 try {
-                    // Verify token with API
+                    // Verify session via httpOnly cookie (sent automatically with credentials: 'include')
                     const response = await fetch('/api/auth/verify', {
                         method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        credentials: 'include'
                     });
 
                     if (response.ok) {
@@ -268,11 +263,10 @@
                         }
                     }
                 } catch (error) {
-                    console.error('Token verification failed:', error);
+                    console.error('Session verification failed:', error);
                 }
 
-                // Remove invalid token
-                localStorage.removeItem('sites_spectral_token');
+                // Clear stale user info
                 localStorage.removeItem('sites_spectral_user');
             }
 
@@ -291,19 +285,21 @@
                 this.clearError();
 
                 try {
-                    // Real API authentication
+                    // Login - server sets httpOnly cookie automatically
                     const response = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ username, password })
+                        body: JSON.stringify({ username, password }),
+                        credentials: 'include' // Required for httpOnly cookie to be set
                     });
 
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        localStorage.setItem('sites_spectral_token', data.token);
+                        // Token is stored in httpOnly cookie by server
+                        // Only store user info (non-sensitive) for UI purposes
                         localStorage.setItem('sites_spectral_user', JSON.stringify(data.user));
 
                         Utils.showToast('Login successful!', 'success');

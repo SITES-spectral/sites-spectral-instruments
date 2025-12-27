@@ -1091,14 +1091,14 @@
 
             console.log('Creating platform with data:', platformData);
 
-            const token = localStorage.getItem('sites_spectral_token');
+            // Auth via httpOnly cookie
             const response = await fetch('/api/admin/platforms', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(platformData)
+                body: JSON.stringify(platformData),
+                credentials: 'include'
             });
 
             const result = await response.json();

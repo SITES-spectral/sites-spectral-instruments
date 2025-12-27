@@ -1669,15 +1669,14 @@
          * @param {string|number} platformId - Platform ID
          */
         async viewPlatformDetails(platformId) {
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) return;
+            // Auth via httpOnly cookie
 
             try {
                 const response = await fetch(`/api/platforms/${platformId}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
 
                 if (response.ok) {

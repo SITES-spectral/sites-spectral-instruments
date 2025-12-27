@@ -568,9 +568,9 @@ const MSChannelManager = (() => {
      */
     async function loadChannelsFromServer(instrumentId) {
         try {
-            const token = localStorage.getItem('authToken');
+            // Auth via httpOnly cookie
             const response = await fetch(`/api/channels?instrument_id=${instrumentId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
 
             if (!response.ok) {
@@ -595,7 +595,7 @@ const MSChannelManager = (() => {
      */
     async function saveChannelsToServer(instrumentId) {
         try {
-            const token = localStorage.getItem('authToken');
+            // Auth via httpOnly cookie
             const promises = [];
 
             for (const channel of currentChannels) {
@@ -607,10 +607,10 @@ const MSChannelManager = (() => {
                 const promise = fetch('/api/channels', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(channelData)
+                    body: JSON.stringify(channelData),
+                    credentials: 'include'
                 });
 
                 promises.push(promise);

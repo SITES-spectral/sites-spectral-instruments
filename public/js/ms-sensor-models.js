@@ -33,18 +33,15 @@ const MSSensorModels = (() => {
         }
 
         try {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
+            // Auth via httpOnly cookie
 
             console.log('🔄 Fetching sensor models from API...');
             const response = await fetch('/api/sensor-models', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                credentials: 'include'
             });
 
             if (!response.ok) {

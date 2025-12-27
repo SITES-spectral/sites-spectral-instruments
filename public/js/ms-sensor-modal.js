@@ -285,15 +285,14 @@ const MSSensorModal = (() => {
                 saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             }
 
-            // Create instrument
-            const token = localStorage.getItem('authToken');
+            // Create instrument (auth via httpOnly cookie)
             const response = await fetch('/api/instruments', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
+                credentials: 'include'
             });
 
             if (!response.ok) {

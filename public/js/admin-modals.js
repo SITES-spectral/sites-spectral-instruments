@@ -113,7 +113,7 @@ class AdminStationCreateModal extends FormModal {
     }
 
     async handleStationCreation(data) {
-        const token = localStorage.getItem('sites_spectral_token');
+        // Auth via httpOnly cookie
 
         // Prepare station data
         const stationData = {
@@ -131,10 +131,10 @@ class AdminStationCreateModal extends FormModal {
         const response = await fetch('/api/admin/stations', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(stationData)
+            body: JSON.stringify(stationData),
+            credentials: 'include'
         });
 
         const result = await response.json();
@@ -282,9 +282,9 @@ class AdminPlatformCreateModal extends FormModal {
 
     async loadStations() {
         try {
-            const token = localStorage.getItem('sites_spectral_token');
+            // Auth via httpOnly cookie
             const response = await fetch('/api/stations', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -337,7 +337,7 @@ class AdminPlatformCreateModal extends FormModal {
     }
 
     async handlePlatformCreation(data) {
-        const token = localStorage.getItem('sites_spectral_token');
+        // Auth via httpOnly cookie
 
         // Get station acronym for normalized name generation
         const stationSelect = this.modal.querySelector('[name="station_id"]');
@@ -364,9 +364,9 @@ class AdminPlatformCreateModal extends FormModal {
         const response = await fetch('/api/admin/platforms', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify(platformData)
         });
 
@@ -424,11 +424,11 @@ class AdminStationDeleteModal extends BaseModal {
         this.showLoading('Analyzing station dependencies...');
 
         try {
-            const token = localStorage.getItem('sites_spectral_token');
+            // Auth via httpOnly cookie
 
             // Get platforms for this station
             const platformsResponse = await fetch(`/api/platforms?station=${this.stationId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
 
             if (platformsResponse.ok) {
@@ -440,7 +440,7 @@ class AdminStationDeleteModal extends BaseModal {
 
                 for (const platform of platforms) {
                     const instrumentsResponse = await fetch(`/api/instruments?platform=${platform.id}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        credentials: 'include'
                     });
 
                     if (instrumentsResponse.ok) {
@@ -450,7 +450,7 @@ class AdminStationDeleteModal extends BaseModal {
                         // Count ROIs for each instrument
                         for (const instrument of instruments) {
                             const roisResponse = await fetch(`/api/rois?instrument=${instrument.id}`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
+                                credentials: 'include'
                             });
 
                             if (roisResponse.ok) {
@@ -554,12 +554,12 @@ class AdminStationDeleteModal extends BaseModal {
         deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
         try {
-            const token = localStorage.getItem('sites_spectral_token');
+            // Auth via httpOnly cookie
             const url = `/api/admin/stations/${this.stationId}?force_cascade=true${generateBackup ? '&backup=true' : ''}`;
 
             const response = await fetch(url, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
 
             const result = await response.json();

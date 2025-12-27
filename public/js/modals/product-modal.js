@@ -399,13 +399,14 @@ const ProductModal = {
                 : '/api/latest/products';
             const method = productId ? 'PUT' : 'POST';
             
+            // Auth via httpOnly cookie
             const response = await fetch(url, {
                 method,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
             
             if (!response.ok) {

@@ -4,8 +4,11 @@
  * Base API client for SITES Spectral application.
  * Handles authentication, error handling, and request/response interceptors.
  *
+ * Security: Uses httpOnly cookies for JWT token storage instead of localStorage.
+ * Cookies are automatically sent with requests via credentials: 'include'.
+ *
  * @module api/api-client
- * @version 8.0.0
+ * @version 8.1.0
  */
 
 (function(global) {
@@ -19,7 +22,7 @@
             /** @private */
             this.baseUrl = null;
 
-            /** @private */
+            /** @private - Deprecated: tokens now stored in httpOnly cookies */
             this.authToken = null;
 
             /** @private */
@@ -39,8 +42,8 @@
             // Initialize base URL from meta tag or current origin
             this._initializeBaseUrl();
 
-            // Load auth token from localStorage
-            this._loadAuthToken();
+            // Note: Tokens are now stored in httpOnly cookies by the server
+            // No localStorage loading needed - cookies are sent automatically
         }
 
         /**
@@ -60,47 +63,32 @@
         }
 
         /**
-         * Load auth token from localStorage
-         * @private
-         */
-        _loadAuthToken() {
-            try {
-                this.authToken = localStorage.getItem('authToken');
-            } catch (error) {
-                console.warn('Failed to load auth token from localStorage:', error);
-            }
-        }
-
-        /**
-         * Set authentication token
-         * @param {string} token - JWT token
+         * @deprecated Tokens are now stored in httpOnly cookies by the server
+         * This method is kept for backward compatibility but does nothing
+         * @param {string} token - JWT token (ignored)
          */
         setAuthToken(token) {
-            this.authToken = token;
-            try {
-                if (token) {
-                    localStorage.setItem('authToken', token);
-                } else {
-                    localStorage.removeItem('authToken');
-                }
-            } catch (error) {
-                console.warn('Failed to save auth token to localStorage:', error);
-            }
+            // No-op: Tokens are stored in httpOnly cookies by the server
+            // This method is kept for backward compatibility
+            console.warn('setAuthToken is deprecated - tokens are now stored in httpOnly cookies');
         }
 
         /**
-         * Get authentication token
-         * @returns {string|null}
+         * @deprecated Tokens are stored in httpOnly cookies and not accessible from JavaScript
+         * @returns {null} Always returns null for security
          */
         getAuthToken() {
-            return this.authToken;
+            // Tokens are stored in httpOnly cookies and cannot be read from JavaScript
+            return null;
         }
 
         /**
-         * Clear authentication token
+         * Clear authentication - requires server call to clear httpOnly cookie
+         * Use the logout endpoint instead: POST /api/auth/logout
+         * @deprecated Use logout endpoint instead
          */
         clearAuthToken() {
-            this.setAuthToken(null);
+            console.warn('clearAuthToken is deprecated - use POST /api/auth/logout to clear httpOnly cookie');
         }
 
         /**
@@ -136,14 +124,9 @@
          * @returns {Object} Complete headers
          */
         _buildHeaders(customHeaders = {}) {
-            const headers = { ...this.defaultHeaders, ...customHeaders };
-
-            // Add auth token if present
-            if (this.authToken) {
-                headers['Authorization'] = `Bearer ${this.authToken}`;
-            }
-
-            return headers;
+            // Note: Authorization is handled via httpOnly cookies
+            // No need to manually add Authorization header
+            return { ...this.defaultHeaders, ...customHeaders };
         }
 
         /**
@@ -225,12 +208,13 @@
                 // Execute request interceptors
                 config = await this._executeRequestInterceptors(config);
 
-                // Make request
+                // Make request with credentials: 'include' for httpOnly cookie auth
                 const response = await fetch(config.url, {
                     method: config.method,
                     headers: config.headers,
                     body: config.body,
-                    signal: config.signal
+                    signal: config.signal,
+                    credentials: 'include' // Send httpOnly cookies with request
                 });
 
                 // Execute response interceptors

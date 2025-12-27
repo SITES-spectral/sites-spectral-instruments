@@ -13,6 +13,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.22.0] - 2025-12-27
+
+### Security: httpOnly Cookie Authentication Migration
+
+Migrated JWT token storage from localStorage to httpOnly cookies for enhanced security against XSS attacks.
+
+#### Security Improvement
+
+**Before (vulnerable):**
+- JWT stored in `localStorage.getItem('authToken')` / `localStorage.getItem('sites_spectral_token')`
+- Tokens accessible via XSS attacks
+- Manual Authorization header management
+
+**After (secure):**
+- JWT stored in httpOnly cookie (`sites_spectral_auth`)
+- Tokens inaccessible to JavaScript (XSS-proof)
+- Automatic cookie transmission via `credentials: 'include'`
+
+#### Cookie Security Features
+
+| Feature | Value | Purpose |
+|---------|-------|---------|
+| httpOnly | true | Prevents JavaScript access |
+| SameSite | Strict | CSRF protection |
+| Secure | true (production) | HTTPS-only transmission |
+| Max-Age | 86400 (24h) | Matches JWT expiry |
+
+#### Updated Files
+
+**API Client (`public/js/api/api-client.js`)**
+- Version: 8.0.0 → 8.1.0
+- Removed `_loadAuthToken()` localStorage loading
+- Deprecated `setAuthToken()`, `getAuthToken()`, `clearAuthToken()`
+- Added `credentials: 'include'` to all fetch requests
+- Removed manual Authorization header injection
+
+**Login Pages (`public/login.html`, `public/index.html`)**
+- Removed `localStorage.setItem('sites_spectral_token', ...)` on login
+- Updated session verification to use `credentials: 'include'`
+- User info still stored in localStorage (non-sensitive, for UI only)
+
+**Admin Modals (`public/js/admin-modals.js`)**
+- All 5 fetch calls updated to use `credentials: 'include'`
+- Removed Authorization header injection
+
+**MS Sensor Modules**
+- `ms-sensor-modal.js`: Updated instrument creation fetch
+- `ms-channel-manager.js`: Updated channel load/save fetch
+- `ms-sensor-models.js`: Updated sensor model fetch
+
+**Platform & Dashboard**
+- `platform-forms/index.js`: Updated platform creation fetch
+- `station-dashboard.js`: Updated platform details fetch
+- `product-modal.js`: Updated product save fetch
+
+#### Backend Support (Already Implemented)
+
+The backend (`src/auth/authentication.js`, `src/auth/cookie-utils.js`) already supports:
+- Setting httpOnly cookie on login
+- Clearing cookie on logout
+- Reading token from cookie first, with Authorization header fallback
+- This ensures backward compatibility during migration
+
+#### Migration Note
+
+Some HTML files (`station-dashboard.html`, `sites-dashboard.html`, `spectral.html`) still have inline fetch calls using localStorage tokens. These will continue to work during migration due to backend fallback support, but should be updated in a future release for complete security hardening.
+
+---
+
 ## [13.21.0] - 2025-12-27
 
 ### XSS Prevention Enhancements
