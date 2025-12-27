@@ -47,7 +47,7 @@ export class CreateStation {
     }
 
     // Create station entity (validates input)
-    const station = Station.create({
+    const station = new Station({
       acronym: input.acronym,
       displayName: input.displayName,
       description: input.description,

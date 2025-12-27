@@ -9,6 +9,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.19] - 2025-12-27
+
+### Application Layer Test Coverage (Phase 4)
+
+**Added:** Comprehensive test coverage for application layer commands and queries.
+
+#### Command Tests (14 files, 106 tests)
+
+**Station Commands:**
+- CreateStation.test.js - 8 tests (validation, duplicates, optional fields)
+- UpdateStation.test.js - 6 tests (field updates, timestamps, not found)
+- DeleteStation.test.js - 5 tests (cascade protection, platform dependencies)
+
+**Platform Commands:**
+- CreatePlatform.test.js - 11 tests (fixed/UAV, validation, auto-instruments)
+- UpdatePlatform.test.js - 8 tests (field updates, immutable fields)
+- DeletePlatform.test.js - 5 tests (cascade protection, instrument dependencies)
+
+**Instrument Commands:**
+- CreateInstrument.test.js - 10 tests (factory, naming, compatibility)
+- UpdateInstrument.test.js - 7 tests (status methods, spec merging)
+- DeleteInstrument.test.js - 6 tests (ROI checks, cascade option)
+
+**Domain Commands:**
+- CreateAOI.test.js - 7 tests (defaults, mission types, metadata)
+- CreateCampaign.test.js - 9 tests (types, associations, budget)
+- CreateMaintenanceRecord.test.js - 7 tests (entity types, station inheritance)
+- CreateCalibrationRecord.test.js - 5 tests (instrument validation, superseding)
+- CreateProduct.test.js - 12 tests (processing levels, licenses, metadata)
+
+#### Query Tests (3 files, 18 tests)
+
+**Station Queries:**
+- GetStation.test.js - 4 tests (byId, byAcronym, not found)
+- ListStations.test.js - 5 tests (pagination, sorting, empty results)
+- GetStationDashboard.test.js - 9 tests (N+1 fix validation, stats, grouping)
+
+#### Bug Fixes Discovered by Tests
+
+**Fixed:** `src/application/commands/CreateStation.js`
+- Changed `Station.create()` to `new Station()` (Station has no static create method)
+
+**Fixed:** `src/application/commands/CreateInstrument.js`
+- Changed `instrumentTypeRegistry.validatePlatformCompatibility()` to `isCompatibleWithPlatform()`
+- Changed `instrumentTypeRegistry.getTypeCode()` to `getCode()`
+
+#### Test Results
+- **Before:** 301 tests
+- **After:** 425 tests (+124 tests)
+- All tests passing
+
+---
+
 ## [12.0.18] - 2025-12-26
 
 ### Test Suite Cleanup and Platform Test Fixes

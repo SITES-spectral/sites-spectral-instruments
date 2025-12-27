@@ -55,7 +55,7 @@ export class CreateInstrument {
     }
 
     // Check platform compatibility
-    if (!instrumentTypeRegistry.validatePlatformCompatibility(input.instrumentType, platform.platformType)) {
+    if (!instrumentTypeRegistry.isCompatibleWithPlatform(input.instrumentType, platform.platformType)) {
       throw new Error(
         `Instrument type '${input.instrumentType}' is not compatible with platform type '${platform.platformType}'`
       );
@@ -64,7 +64,7 @@ export class CreateInstrument {
     // Generate normalized name if not provided
     let normalizedName = input.normalizedName;
     if (!normalizedName) {
-      const typeCode = instrumentTypeRegistry.getTypeCode(input.instrumentType);
+      const typeCode = instrumentTypeRegistry.getCode(input.instrumentType);
       const nextNumber = await this.instrumentRepository.getNextInstrumentNumber(
         input.platformId,
         typeCode
