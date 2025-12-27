@@ -15,6 +15,15 @@
 const MSSensorModal = (() => {
     'use strict';
 
+    // XSS Prevention: Use centralized escapeHtml with inline fallback
+    const _escapeHtml = (text) => {
+        if (window.SitesSecurity?.escapeHtml) return window.SitesSecurity.escapeHtml(text);
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    };
+
     let currentPlatformId = null;
     let currentSensorModel = null;
     let currentInstrumentId = null; // For edit mode

@@ -1,7 +1,16 @@
-// SITES Spectral v13.19.0 - Enhanced Modal System
+// SITES Spectral v13.20.0 - Enhanced Modal System
 // Unified modal component architecture for admin CRUD operations and improved UX
 // WCAG 2.4.3 Compliant with focus trap support
 // Uses core/focus-trap.js for accessible keyboard navigation
+
+// XSS Prevention: Use centralized escapeHtml with inline fallback
+const _escapeHtml = (text) => {
+    if (window.SitesSecurity?.escapeHtml) return window.SitesSecurity.escapeHtml(text);
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+};
 
 class BaseModal {
     constructor(config) {
@@ -52,7 +61,7 @@ class BaseModal {
             <div class="sites-modal-backdrop" aria-hidden="true"></div>
             <div class="sites-modal-content" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
                 <div class="sites-modal-header">
-                    <h3 class="sites-modal-title" id="${titleId}">${this.title}</h3>
+                    <h3 class="sites-modal-title" id="${titleId}">${_escapeHtml(this.title)}</h3>
                     <button class="sites-modal-close" type="button" aria-label="Close modal">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>

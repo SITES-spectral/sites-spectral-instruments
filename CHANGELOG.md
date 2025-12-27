@@ -13,6 +13,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.21.0] - 2025-12-27
+
+### XSS Prevention Enhancements
+
+Added escapeHtml protection to innerHTML assignments with user-controlled data across multiple frontend files.
+
+#### Updated Files
+
+**modal-system.js**
+- Added `_escapeHtml` helper function with SitesSecurity fallback
+- Modal titles now escaped: `${_escapeHtml(this.title)}`
+- Prevents XSS via malicious modal configuration
+
+**components.js**
+- Notification messages now escaped: `${this.escapeHtml(message)}`
+- Loading text now escaped: `${this.escapeHtml(text)}`
+- Confirm dialog message now escaped: `${this.escapeHtml(message)}`
+
+**form-components.js**
+- Added `_escapeHtml` helper function
+- Option values and labels now escaped in multiselect
+- Tag labels and data-values now escaped
+- Loading/notification messages now escaped
+
+**ms-sensor-modal.js**
+- Added `_escapeHtml` helper function for future use
+
+#### Security Pattern
+
+All files now use the centralized pattern:
+```javascript
+const _escapeHtml = (text) => {
+    if (window.SitesSecurity?.escapeHtml) return window.SitesSecurity.escapeHtml(text);
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+};
+```
+
+#### Already Secured Files
+
+The following files already had proper escapeHtml implementation:
+- `station-dashboard.js` - 20+ calls to `escapeHtml()`
+- `campaign-manager.js` - 30+ calls to `_escapeHtml()`
+- `product-browser.js` - 32+ calls to `escapeHtml()`
+- `dashboard.js` - Using `this.escapeHtml()`
+- `maintenance-timeline.js` - 6 calls to `_escapeHtml()`
+- `calibration-timeline.js` - 7 calls to `_escapeHtml()`
+
+---
+
 ## [13.20.0] - 2025-12-27
 
 ### WCAG 2.1 AA Accessibility Improvements

@@ -1,8 +1,17 @@
 /**
  * Enhanced Form Components Library for SITES Spectral
- * Version: 5.2.34
+ * Version: 5.2.35
  * Purpose: Reusable form components with better UX and validation feedback
  */
+
+// XSS Prevention: Use centralized escapeHtml with inline fallback
+const _escapeHtml = (text) => {
+    if (window.SitesSecurity?.escapeHtml) return window.SitesSecurity.escapeHtml(text);
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+};
 
 /**
  * Enhanced Multiselect Component with Visual Tag Display
@@ -27,8 +36,8 @@ class EnhancedMultiselect {
         <div class="multiselect-dropdown">
           <select multiple class="form-control" style="height: 150px;">
             ${this.options.map(opt => `
-              <option value="${opt.value || opt}" ${this.selectedValues.includes(opt.value || opt) ? 'selected' : ''}>
-                ${opt.label || opt}
+              <option value="${_escapeHtml(opt.value || opt)}" ${this.selectedValues.includes(opt.value || opt) ? 'selected' : ''}>
+                ${_escapeHtml(opt.label || opt)}
               </option>
             `).join('')}
           </select>
@@ -53,8 +62,8 @@ class EnhancedMultiselect {
 
       return `
         <span class="multiselect-tag">
-          ${label}
-          <button type="button" class="tag-remove" data-value="${value}" style="margin-left: 0.5rem; background: none; border: none; color: white; cursor: pointer;">
+          ${_escapeHtml(label)}
+          <button type="button" class="tag-remove" data-value="${_escapeHtml(value)}" style="margin-left: 0.5rem; background: none; border: none; color: white; cursor: pointer;">
             ×
           </button>
         </span>
@@ -174,7 +183,7 @@ class LoadingOverlay {
       overlay.innerHTML = `
         <div style="text-align: center;">
           <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #059669;"></i>
-          <p style="margin-top: 1rem; color: #6b7280; font-weight: 500;">${message}</p>
+          <p style="margin-top: 1rem; color: #6b7280; font-weight: 500;">${_escapeHtml(message)}</p>
         </div>
       `;
       modal.querySelector('.modal-content').appendChild(overlay);
@@ -209,7 +218,7 @@ class EnhancedNotification {
     notification.innerHTML = `
       <div style="display: flex; align-items: center; gap: 0.75rem;">
         <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        <span>${message}</span>
+        <span>${_escapeHtml(message)}</span>
       </div>
     `;
 

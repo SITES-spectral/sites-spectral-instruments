@@ -274,7 +274,7 @@ class SitesComponents {
         notification.innerHTML = `
             <div class="toast-content">
                 <i class="fas ${icon}" style="margin-right: 8px;"></i>
-                <span class="toast-message">${message}</span>
+                <span class="toast-message">${this.escapeHtml(message)}</span>
                 <button class="toast-close" onclick="sitesComponents.removeNotification(this.closest('.toast'))">
                     <i class="fas fa-times"></i>
                 </button>
@@ -411,7 +411,7 @@ class SitesComponents {
             element.innerHTML = `
                 <div class="loading-spinner">
                     <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>
-                    ${text}
+                    ${this.escapeHtml(text)}
                 </div>
             `;
             element.style.opacity = '0.7';
@@ -529,7 +529,7 @@ class SitesComponents {
                     <h3>Confirm Action</h3>
                 </div>
                 <div class="modal-body">
-                    <p>${message}</p>
+                    <p>${this.escapeHtml(message)}</p>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary cancel-btn">Cancel</button>
