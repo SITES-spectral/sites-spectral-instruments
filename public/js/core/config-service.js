@@ -75,13 +75,16 @@
             const loadPromises = Object.entries(this.CONFIG_PATHS).map(async ([key, path]) => {
                 try {
                     this.configs[key] = await loader.get(path);
+                    return { key, status: 'success' };
                 } catch (error) {
                     console.warn(`Failed to load config: ${path}`, error);
                     this.configs[key] = null;
+                    return { key, status: 'failed', error };
                 }
             });
 
-            await Promise.all(loadPromises);
+            // Use Promise.allSettled to ensure all configs are attempted
+            await Promise.allSettled(loadPromises);
         }
 
         /**

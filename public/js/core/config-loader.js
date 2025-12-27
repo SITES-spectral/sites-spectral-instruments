@@ -203,7 +203,15 @@
          */
         async preload(names) {
             const promises = names.map(name => this.get(name));
-            await Promise.all(promises);
+            // Use Promise.allSettled to continue loading even if some configs fail
+            const results = await Promise.allSettled(promises);
+
+            // Log any failures but don't throw - allow partial config loading
+            results.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    console.warn(`Failed to preload config '${names[index]}':`, result.reason);
+                }
+            });
         }
 
         /**

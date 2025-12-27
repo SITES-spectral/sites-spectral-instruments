@@ -9,6 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.23] - 2025-12-27
+
+### Promise Error Handling (Phase 6)
+
+**Fixed:** Improved promise error handling throughout the frontend to prevent unhandled rejections.
+
+#### Changes
+
+**export.js:**
+- Updated `getStationExportData()` to use `Promise.allSettled` for graceful partial failure handling
+- Updated `getPlatformExportData()` to use `Promise.allSettled` with proper error logging
+- Updated `getInstrumentExportData()` to use `Promise.allSettled` with null/empty array defaults
+- Added explicit error messages when primary entity fails to load
+
+**config-loader.js:**
+- Updated `preload()` to use `Promise.allSettled` - config loading continues even if some configs fail
+- Added per-config failure logging for debugging
+
+**config-service.js:**
+- Updated `_loadAllConfigs()` to use `Promise.allSettled` - ensures all configs are attempted
+- Added structured status tracking for each config load
+
+**aoi-manager.js:**
+- Added `.catch()` handler to `handleSave()` promise chain to prevent unhandled rejections
+
+#### Pre-existing Error Handling
+- Global `unhandledrejection` handler in `app.js` (already implemented)
+- `PromiseUtils` module in `promise-utils.js` with `allSettledValues`, `safeAll`, `safe`, `withTimeout`, `retry`, `sequence`, `pool` utilities
+
+#### Benefits
+- Frontend gracefully handles partial API failures
+- Config loading continues even if individual configs fail
+- AOI operations properly log errors instead of silently failing
+- Consistent error handling patterns across the codebase
+
+---
+
 ## [12.0.22] - 2025-12-27
 
 ### API Version Cleanup (Phase 5)

@@ -425,6 +425,9 @@ class AOIManager {
                     if (this.options.onAOIUpdate) {
                         this.options.onAOIUpdate(aoi);
                     }
+                })
+                .catch(error => {
+                    console.error('Failed to refresh AOI after save:', error);
                 });
         }
 

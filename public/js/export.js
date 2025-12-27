@@ -83,12 +83,25 @@ class SitesExport {
 
     // Get comprehensive station data for export
     async getStationExportData(stationId) {
-        const [station, platforms, instruments, rois] = await Promise.all([
+        // Use Promise.allSettled to handle partial failures gracefully
+        const results = await Promise.allSettled([
             this.getStationDetails(stationId),
             window.sitesAPI.getPlatforms(stationId),
             this.getStationInstruments(stationId),
             this.getStationROIs(stationId)
         ]);
+
+        const [station, platforms, instruments, rois] = results.map((result, index) => {
+            if (result.status === 'fulfilled') {
+                return result.value;
+            }
+            console.error(`Export data fetch ${index} failed:`, result.reason);
+            return index === 0 ? null : []; // null for station, empty array for collections
+        });
+
+        if (!station) {
+            throw new Error('Failed to load station details');
+        }
 
         return {
             station: station,
@@ -154,11 +167,24 @@ class SitesExport {
     }
 
     async getPlatformExportData(platformId) {
-        const [platform, instruments, rois] = await Promise.all([
+        // Use Promise.allSettled to handle partial failures gracefully
+        const results = await Promise.allSettled([
             window.sitesAPI.getPlatform(platformId),
             window.sitesAPI.getInstruments(platformId),
             this.getPlatformROIs(platformId)
         ]);
+
+        const [platform, instruments, rois] = results.map((result, index) => {
+            if (result.status === 'fulfilled') {
+                return result.value;
+            }
+            console.error(`Platform export data fetch ${index} failed:`, result.reason);
+            return index === 0 ? null : [];
+        });
+
+        if (!platform) {
+            throw new Error('Failed to load platform details');
+        }
 
         return {
             platform: platform,
@@ -195,10 +221,23 @@ class SitesExport {
     }
 
     async getInstrumentExportData(instrumentId) {
-        const [instrument, rois] = await Promise.all([
+        // Use Promise.allSettled to handle partial failures gracefully
+        const results = await Promise.allSettled([
             window.sitesAPI.getInstrument(instrumentId),
             window.sitesAPI.getROIs(instrumentId)
         ]);
+
+        const [instrument, rois] = results.map((result, index) => {
+            if (result.status === 'fulfilled') {
+                return result.value;
+            }
+            console.error(`Instrument export data fetch ${index} failed:`, result.reason);
+            return index === 0 ? null : [];
+        });
+
+        if (!instrument) {
+            throw new Error('Failed to load instrument details');
+        }
 
         return {
             instrument: instrument,
