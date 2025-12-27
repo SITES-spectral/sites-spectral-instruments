@@ -5,8 +5,11 @@
  * Features platform type filtering, pagination, campaigns, and products panels.
  *
  * @module station-dashboard-v3
- * @version 12.0.17
+ * @version 13.16.0
  * @requires dashboard/station-dashboard-utils.js (StationDashboardUtils)
+ * @requires dashboard/campaign-panel.js (CampaignPanel)
+ * @requires dashboard/product-panel.js (ProductPanel)
+ * @requires dashboard/station-map.js (StationMap)
  * @requires api-v3.js (sitesAPIv3)
  * @requires dashboard/platform-renderer.js (PlatformRenderer)
  * @requires platforms/platform-type-filter.js (PlatformTypeFilter)
@@ -153,8 +156,15 @@
             this.imageManifest = null;
 
             // ---- Map ----
-            /** @type {Object|null} Leaflet map instance */
+            /** @type {StationMap|null} Station map component */
             this.stationMap = null;
+
+            // ---- Extracted Panel Components ----
+            /** @type {CampaignPanel|null} Campaign panel component */
+            this.campaignPanel = null;
+
+            /** @type {ProductPanel|null} Product panel component */
+            this.productPanel = null;
 
             // Initialize
             this._init();
@@ -1511,128 +1521,92 @@
         }
 
         // ========================================
-        // Campaign Rendering
+        // Campaign Rendering (Delegated to CampaignPanel)
         // ========================================
+
+        /**
+         * Initialize campaign panel component
+         * @private
+         */
+        _initCampaignPanel() {
+            if (global.CampaignPanel && !this.campaignPanel) {
+                this.campaignPanel = new global.CampaignPanel({
+                    containerId: 'campaigns-list',
+                    canEdit: this.canEdit,
+                    onCreateClick: () => this.showCreateCampaignModal(),
+                    onViewClick: (id) => this.viewCampaignDetails(id)
+                });
+            }
+        }
 
         /**
          * Render campaigns panel
          * @private
          */
         _renderCampaigns() {
-            const container = document.getElementById('campaigns-list');
-            if (!container) return;
+            // Initialize panel if not already done
+            this._initCampaignPanel();
 
-            if (this.campaigns.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state-small">
-                        <i class="fas fa-calendar-alt"></i>
-                        <p>No campaigns for this station</p>
-                        ${this.canEdit ? `
-                            <button class="btn btn-primary btn-sm" onclick="sitesStationDashboard.showCreateCampaignModal()">
-                                <i class="fas fa-plus"></i> Create Campaign
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-                return;
+            if (this.campaignPanel) {
+                this.campaignPanel.setCanEdit(this.canEdit);
+                this.campaignPanel.setCampaigns(this.campaigns);
+                this.campaignPanel.render();
+            } else {
+                // Fallback: render empty state if CampaignPanel not available
+                const container = document.getElementById('campaigns-list');
+                if (container) {
+                    container.textContent = '';
+                    const msg = document.createElement('p');
+                    msg.textContent = 'Campaign panel loading...';
+                    container.appendChild(msg);
+                }
             }
-
-            container.innerHTML = this.campaigns.map(c => this._createCampaignCardHTML(c)).join('');
         }
+
+        // ========================================
+        // Product Rendering (Delegated to ProductPanel)
+        // ========================================
 
         /**
-         * Create campaign card HTML
+         * Initialize product panel component
          * @private
-         * @param {Object} campaign - Campaign data
-         * @returns {string} HTML string
          */
-        _createCampaignCardHTML(campaign) {
-            const startDate = campaign.start_date ? new Date(campaign.start_date).toLocaleDateString() : 'N/A';
-            const endDate = campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : 'Ongoing';
-            const statusClass = (campaign.status || 'pending').toLowerCase();
-
-            return `
-                <div class="campaign-card" data-campaign-id="${campaign.id}">
-                    <div class="campaign-header">
-                        <h5>${escapeHtml(campaign.name)}</h5>
-                        <span class="campaign-status status-${statusClass}">${campaign.status || 'Pending'}</span>
-                    </div>
-                    <div class="campaign-dates">
-                        <span><i class="fas fa-calendar-day"></i> ${startDate}</span>
-                        <span><i class="fas fa-arrow-right"></i></span>
-                        <span>${endDate}</span>
-                    </div>
-                    ${campaign.description ? `<p class="campaign-description">${escapeHtml(campaign.description)}</p>` : ''}
-                    <div class="campaign-actions">
-                        <button class="btn btn-sm" onclick="sitesStationDashboard.viewCampaignDetails('${campaign.id}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </div>
-                </div>
-            `;
+        _initProductPanel() {
+            if (global.ProductPanel && !this.productPanel) {
+                this.productPanel = new global.ProductPanel({
+                    containerId: 'products-list',
+                    canEdit: this.canEdit,
+                    onViewClick: (id) => this.viewProductDetails(id)
+                });
+            }
         }
-
-        // ========================================
-        // Product Rendering
-        // ========================================
 
         /**
          * Render products panel
          * @private
          */
         _renderProducts() {
-            const container = document.getElementById('products-list');
-            if (!container) return;
+            // Initialize panel if not already done
+            this._initProductPanel();
 
-            if (this.products.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state-small">
-                        <i class="fas fa-box"></i>
-                        <p>No products for this station</p>
-                    </div>
-                `;
-                return;
+            if (this.productPanel) {
+                this.productPanel.setCanEdit(this.canEdit);
+                this.productPanel.setProducts(this.products);
+                this.productPanel.render();
+            } else {
+                // Fallback: render empty state if ProductPanel not available
+                const container = document.getElementById('products-list');
+                if (container) {
+                    container.textContent = '';
+                    const msg = document.createElement('p');
+                    msg.textContent = 'Product panel loading...';
+                    container.appendChild(msg);
+                }
             }
-
-            container.innerHTML = this.products.map(p => this._createProductCardHTML(p)).join('');
-        }
-
-        /**
-         * Create product card HTML
-         * @private
-         * @param {Object} product - Product data
-         * @returns {string} HTML string
-         */
-        _createProductCardHTML(product) {
-            const levelBadge = product.level ? `<span class="product-level">${product.level}</span>` : '';
-            const date = product.created_at ? new Date(product.created_at).toLocaleDateString() : 'N/A';
-
-            return `
-                <div class="product-card" data-product-id="${product.id}">
-                    <div class="product-header">
-                        ${levelBadge}
-                        <h5>${escapeHtml(product.name || product.type || 'Product')}</h5>
-                    </div>
-                    <div class="product-meta">
-                        <span><i class="fas fa-calendar"></i> ${date}</span>
-                        ${product.instrument_name ? `<span><i class="fas fa-camera"></i> ${escapeHtml(product.instrument_name)}</span>` : ''}
-                    </div>
-                    <div class="product-actions">
-                        <button class="btn btn-sm" onclick="sitesStationDashboard.viewProductDetails('${product.id}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        ${product.download_url ? `
-                            <a href="${product.download_url}" class="btn btn-sm btn-success" download>
-                                <i class="fas fa-download"></i> Download
-                            </a>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
         }
 
         // ========================================
-        // Map Management
+        // Map Management (Delegated to StationMap)
         // ========================================
 
         /**
@@ -1640,24 +1614,33 @@
          * @private
          */
         _setupMap() {
-            if (!this.stationData || !global.sitesMap) return;
+            if (!this.stationData) return;
 
-            const mapContainer = document.getElementById('station-map');
-            if (!mapContainer) return;
+            // Use StationMap component if available
+            if (global.StationMap) {
+                if (!this.stationMap || !(this.stationMap instanceof global.StationMap)) {
+                    this.stationMap = new global.StationMap({
+                        containerId: 'station-map'
+                    });
+                }
+                this.stationMap.initialize(this.stationData);
+                this._updateMapMarkers();
+            } else if (global.sitesMap) {
+                // Fallback to direct sitesMap usage
+                const mapContainer = document.getElementById('station-map');
+                if (!mapContainer) return;
 
-            const lat = this.stationData.latitude || 59.8586;
-            const lng = this.stationData.longitude || 17.6389;
+                const lat = this.stationData.latitude || 59.8586;
+                const lng = this.stationData.longitude || 17.6389;
 
-            this.stationMap = global.sitesMap.initializeMap('station-map', {
-                center: [lat, lng],
-                zoom: 12
-            });
+                this.stationMap = global.sitesMap.initializeMap('station-map', {
+                    center: [lat, lng],
+                    zoom: 12
+                });
 
-            // Add station marker
-            global.sitesMap.addStation(this.stationMap, lat, lng, this.stationData);
-
-            // Add platform markers
-            this._updateMapMarkers();
+                global.sitesMap.addStation(this.stationMap, lat, lng, this.stationData);
+                this._updateMapMarkers();
+            }
         }
 
         /**
@@ -1665,14 +1648,16 @@
          * @private
          */
         _updateMapMarkers() {
-            if (!this.stationMap || !global.sitesMap) return;
-
-            const stationCoords = {
-                lat: this.stationData?.latitude || 59.8586,
-                lng: this.stationData?.longitude || 17.6389
-            };
-
-            global.sitesMap.addPlatformMarkers(this.stationMap, this.platforms, stationCoords);
+            if (this.stationMap instanceof global.StationMap) {
+                this.stationMap.updatePlatformMarkers(this.platforms);
+            } else if (this.stationMap && global.sitesMap) {
+                // Fallback for direct Leaflet map
+                const stationCoords = {
+                    lat: this.stationData?.latitude || 59.8586,
+                    lng: this.stationData?.longitude || 17.6389
+                };
+                global.sitesMap.addPlatformMarkers(this.stationMap, this.platforms, stationCoords);
+            }
         }
 
         // ========================================

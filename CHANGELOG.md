@@ -13,6 +13,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.16.0] - 2025-12-27
+
+### Frontend Modularization (Phase 3.4)
+
+This release modularizes the station dashboard, extracting reusable components with XSS-safe DOM rendering.
+
+#### New Dashboard Modules
+
+**Campaign Panel** (`public/js/dashboard/campaign-panel.js`)
+- Extracted from station-dashboard.js
+- Self-contained component with callbacks for create/view actions
+- XSS-safe rendering using createElement and textContent
+- Empty state with conditional create button
+
+**Product Panel** (`public/js/dashboard/product-panel.js`)
+- Extracted from station-dashboard.js
+- Self-contained component with view callback
+- XSS-safe rendering using createElement
+- Product level badges and download links
+
+**Station Map** (`public/js/dashboard/station-map.js`)
+- Extracted from station-dashboard.js
+- Wrapper around sitesMap library
+- Simplified API for station and platform markers
+- Fallback support for direct Leaflet usage
+
+#### Changes
+
+- **station-dashboard.js**: Updated to use extracted panel components
+  - Delegation pattern for campaigns, products, and map
+  - Graceful fallback if components not loaded
+  - Reduced coupling between dashboard and rendering logic
+- **station-dashboard.html**: Added script references for new modules
+- **spectral.html**: Added script references for new modules
+
+---
+
 ## [13.15.0] - 2025-12-27
 
 ### ES6 Module Migration with Vite (Phase 9.5)
