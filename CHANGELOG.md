@@ -13,6 +13,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.23.0] - 2025-12-27
+
+### Security: CSRF Subdomain Spoofing Fix & Security Test Suite
+
+Fixed a critical vulnerability in CSRF origin validation and added comprehensive security test coverage.
+
+#### Security Fix: CSRF Subdomain Spoofing (CVE Prevention)
+
+**Vulnerability**: The `validateRequestOrigin()` function in `src/utils/csrf.js` used `startsWith()` for origin matching, which allowed subdomain spoofing attacks.
+
+**Attack Vector**:
+```
+Attacker registers: https://sites.jobelab.com.attacker.com
+This would match: https://sites.jobelab.com (via startsWith)
+Result: CSRF protection bypassed
+```
+
+**Fix**: Changed from `startsWith()` to exact match using `ALLOWED_ORIGINS.includes(origin)`:
+```javascript
+// Before (vulnerable)
+const isValid = ALLOWED_ORIGINS.some(allowed =>
+    origin === allowed || origin.startsWith(allowed)
+);
+
+// After (secure)
+const isValid = ALLOWED_ORIGINS.includes(origin);
+```
+
+#### New Security Test Suites
+
+**CSRF Protection Tests (`tests/unit/csrf.test.js`)**
+- 45 comprehensive tests covering:
+  - Origin validation (allowed/blocked domains)
+  - Subdomain spoofing prevention
+  - Referer header fallback
+  - CSRF token generation and validation
+  - State-changing method detection
+  - Form submission protection
+  - Security scenario testing
+
+**JWT Authentication Tests (`tests/unit/authentication.test.js`)**
+- 30+ tests covering:
+  - Token generation with HMAC-SHA256
+  - Claim encoding (username, role, station, permissions)
+  - Token expiration handling
+  - Signature validation
+  - Tampered token rejection
+  - Token extraction patterns
+  - Security best practices validation
+
+#### Test Coverage Summary
+
+| Test Suite | Tests | Status |
+|------------|-------|--------|
+| CSRF Protection | 45 | ✅ Pass |
+| JWT Authentication | 30+ | ✅ Pass |
+| Cookie Utilities | 25 | ✅ Pass |
+| CORS Validation | 24 | ✅ Pass |
+| Password Hasher | 20+ | ✅ Pass |
+| **Total Security Tests** | **140+** | ✅ Pass |
+
+---
+
 ## [13.22.0] - 2025-12-27
 
 ### Security: httpOnly Cookie Authentication Migration

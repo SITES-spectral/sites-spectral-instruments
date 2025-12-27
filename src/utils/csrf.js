@@ -16,6 +16,7 @@ const ALLOWED_ORIGINS = [
 /**
  * Validate the origin of a request
  * Checks both Origin and Referer headers against allowed list
+ * SECURITY: Uses exact match only to prevent subdomain spoofing attacks
  * @param {Request} request - The incoming request
  * @returns {Object} Validation result with isValid and origin
  */
@@ -26,9 +27,9 @@ export function validateRequestOrigin(request) {
     // For same-origin requests, Origin might not be set
     // In that case, check Referer
     if (origin) {
-        const isValid = ALLOWED_ORIGINS.some(allowed =>
-            origin === allowed || origin.startsWith(allowed)
-        );
+        // SECURITY: Use exact match only - no startsWith to prevent subdomain spoofing
+        // e.g., "https://sites.jobelab.com.attacker.com" would match with startsWith
+        const isValid = ALLOWED_ORIGINS.includes(origin);
         return { isValid, origin, source: 'origin' };
     }
 
@@ -36,9 +37,8 @@ export function validateRequestOrigin(request) {
         try {
             const refererUrl = new URL(referer);
             const refererOrigin = refererUrl.origin;
-            const isValid = ALLOWED_ORIGINS.some(allowed =>
-                refererOrigin === allowed || refererOrigin.startsWith(allowed)
-            );
+            // SECURITY: Use exact match only
+            const isValid = ALLOWED_ORIGINS.includes(refererOrigin);
             return { isValid, origin: refererOrigin, source: 'referer' };
         } catch (e) {
             return { isValid: false, origin: null, source: 'referer', error: 'Invalid referer URL' };
