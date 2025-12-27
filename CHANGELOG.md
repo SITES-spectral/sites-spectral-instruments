@@ -9,6 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [12.0.21] - 2025-12-27
+
+### Repository Test Coverage (Phase 4.4)
+
+**Added:** Comprehensive test coverage for D1 repository adapters (infrastructure layer).
+
+#### Repository Tests (3 files, 81 tests)
+
+**D1StationRepository.test.js (19 tests):**
+- findById (found, not found)
+- findByAcronym (found, uppercase normalization, invalid input)
+- findAll (default options, pagination, sort whitelist, platform/instrument counts)
+- count (total, null result)
+- save (insert new, update existing, return saved)
+- delete (success, not found)
+
+**D1PlatformRepository.test.js (28 tests):**
+- findById (with instrument count, not found)
+- findByNormalizedName (found, uppercase normalization, invalid input)
+- findByStationId (platforms for station, ordering)
+- findAll (default, stationId filter, platformType filter, ecosystemCode filter, pagination, sort whitelist)
+- count (total, stationId filter, platformType filter, null result)
+- getNextMountTypeCode (no existing, sequential, gaps, ecosystem filter)
+- save (insert, update, legacy location_code)
+- delete (success, not found)
+
+**D1InstrumentRepository.test.js (34 tests):**
+- findById (found, not found)
+- findByIdWithDetails (with platform/station, not found, joins)
+- findByNormalizedName (found, uppercase normalization)
+- findByPlatformId (instruments for platform, ordering)
+- findByStationId (via platform join)
+- findAll (default, platformId/stationId/instrumentType/status filters, pagination, sort whitelist)
+- count (total, filters with join, null result)
+- getNextInstrumentNumber (no existing, sequential, gaps, LIKE pattern)
+- hasROIs (true, false, null)
+- save (insert, update, specifications serialization)
+- delete (success, not found, cascade delete ROIs)
+
+#### Test Results
+- **Before:** 506 tests
+- **After:** 587 tests (+81 tests)
+- All tests passing
+
+---
+
 ## [12.0.20] - 2025-12-27
 
 ### Controller Test Coverage (Phase 4.3)
