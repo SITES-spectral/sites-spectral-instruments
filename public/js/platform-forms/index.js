@@ -455,6 +455,444 @@
     }
 
     // ========================================
+    // MOBILE Platform Form Generator
+    // ========================================
+
+    function generateMobilePlatformForm(stationId) {
+        const config = PLATFORM_CONFIG.mobile;
+        const stationAcronym = getStationAcronym();
+
+        return `
+            <div class="form-section">
+                <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-display-name">Display Name *</label>
+                        <input type="text" id="platform-display-name" class="form-input" required
+                               placeholder="e.g., Backpack Survey Unit 01"
+                               oninput="PlatformForms.updateNormalizedName('mobile')">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-location-code">Platform Number *</label>
+                        <input type="text" id="platform-location-code" class="form-input" required
+                               placeholder="e.g., MOB01" style="text-transform: uppercase;"
+                               oninput="PlatformForms.updateNormalizedName('mobile')">
+                        <small>Unique number within station (e.g., MOB01)</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-ecosystem-code">Ecosystem Code *</label>
+                        <select id="platform-ecosystem-code" class="form-input" onchange="PlatformForms.updateNormalizedName('mobile')">
+                            <option value="FOR">FOR - Forest</option>
+                            <option value="AGR">AGR - Agricultural</option>
+                            <option value="MIR">MIR - Mires</option>
+                            <option value="LAK">LAK - Lake</option>
+                            <option value="WET">WET - Wetland</option>
+                            <option value="GRA">GRA - Grassland</option>
+                            <option value="HEA">HEA - Heathland</option>
+                            <option value="ALP">ALP - Alpine</option>
+                            <option value="GEN">GEN - General</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-carrier-type">Carrier Type *</label>
+                        <select id="platform-carrier-type" class="form-input" onchange="PlatformForms.updateNormalizedName('mobile')">
+                            <option value="VEH">VEH - Vehicle (truck, car, ATV)</option>
+                            <option value="BPK">BPK - Backpack (human walking)</option>
+                            <option value="BIC">BIC - Bicycle (human cycling)</option>
+                            <option value="BOT">BOT - Boat (small watercraft)</option>
+                            <option value="ROV">ROV - Rover (autonomous/RC robot)</option>
+                            <option value="OTH">OTH - Other carrier type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Platform Type</label>
+                        <div class="form-input" style="background: #f3f4f6; cursor: not-allowed; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas ${config.icon}" style="color: ${config.color};"></i>
+                            <span>${config.label}</span>
+                            <span style="margin-left: auto; font-size: 0.75rem; color: #6b7280;">(locked)</span>
+                        </div>
+                    </div>
+                    ${generateStatusField()}
+                </div>
+                <div class="form-group">
+                    <label for="platform-normalized-name">Normalized Name *</label>
+                    <input type="text" id="platform-normalized-name" class="form-input" required readonly
+                           style="background: #f9fafb;">
+                    <small>Auto-generated: ${config.namingPattern} (e.g., ${config.example})</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4><i class="fas fa-cogs"></i> Carrier Specifications</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-carrier-model">Carrier Model</label>
+                        <input type="text" id="platform-carrier-model" class="form-input"
+                               placeholder="e.g., Toyota Hilux, Trek Marlin">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-power-type">Power Source</label>
+                        <select id="platform-power-type" class="form-input">
+                            <option value="">Select power source</option>
+                            <option value="battery">Battery</option>
+                            <option value="vehicle">Vehicle Power</option>
+                            <option value="solar">Solar</option>
+                            <option value="manual">Manual/No Power</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-typical-speed">Typical Speed (km/h)</label>
+                        <input type="number" id="platform-typical-speed" class="form-input" step="0.1"
+                               min="0" max="200" placeholder="Survey speed">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-range">Range (km)</label>
+                        <input type="number" id="platform-range" class="form-input" step="0.1"
+                               min="0" max="1000" placeholder="Operating range">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="platform-runtime">Runtime (hours)</label>
+                    <input type="number" id="platform-runtime" class="form-input" step="0.5"
+                           min="0" max="100" placeholder="Operational runtime">
+                </div>
+            </div>
+
+            ${generateLocationSection()}
+            ${generateDescriptionSection()}
+
+            <input type="hidden" id="platform-station-id" value="${stationId}">
+            <input type="hidden" id="platform-type" value="mobile">
+
+            ${generateFormActions('mobile')}
+        `;
+    }
+
+    // ========================================
+    // USV Platform Form Generator
+    // ========================================
+
+    function generateUSVPlatformForm(stationId) {
+        const config = PLATFORM_CONFIG.usv;
+        const stationAcronym = getStationAcronym();
+
+        return `
+            <div class="form-section">
+                <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-display-name">Display Name *</label>
+                        <input type="text" id="platform-display-name" class="form-input" required
+                               placeholder="e.g., Lake Survey Boat 01"
+                               oninput="PlatformForms.updateNormalizedName('usv')">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-location-code">USV Number *</label>
+                        <input type="text" id="platform-location-code" class="form-input" required
+                               placeholder="e.g., USV01" style="text-transform: uppercase;"
+                               oninput="PlatformForms.updateNormalizedName('usv')">
+                        <small>Unique number within station (e.g., USV01)</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-ecosystem-code">Ecosystem Code *</label>
+                        <select id="platform-ecosystem-code" class="form-input" onchange="PlatformForms.updateNormalizedName('usv')">
+                            <option value="LAK">LAK - Lake (recommended)</option>
+                            <option value="WET">WET - Wetland (recommended)</option>
+                            <option value="MAR">MAR - Marshland (recommended)</option>
+                            <option value="FOR">FOR - Forest</option>
+                            <option value="GEN">GEN - General</option>
+                        </select>
+                        <small>Aquatic ecosystems (LAK, WET, MAR) recommended</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Platform Type</label>
+                        <div class="form-input" style="background: #f3f4f6; cursor: not-allowed; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas ${config.icon}" style="color: ${config.color};"></i>
+                            <span>${config.label}</span>
+                            <span style="margin-left: auto; font-size: 0.75rem; color: #6b7280;">(locked)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    ${generateStatusField()}
+                </div>
+                <div class="form-group">
+                    <label for="platform-normalized-name">Normalized Name *</label>
+                    <input type="text" id="platform-normalized-name" class="form-input" required readonly
+                           style="background: #f9fafb;">
+                    <small>Auto-generated: ${config.namingPattern} (e.g., ${config.example})</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4><i class="fas fa-ship"></i> USV Specifications</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-usv-model">USV Model</label>
+                        <input type="text" id="platform-usv-model" class="form-input"
+                               placeholder="e.g., Clearpath Heron, Q-Boat">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-manufacturer">Manufacturer</label>
+                        <input type="text" id="platform-manufacturer" class="form-input"
+                               placeholder="e.g., Clearpath Robotics">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-hull-type">Hull Type</label>
+                        <select id="platform-hull-type" class="form-input">
+                            <option value="">Select hull type</option>
+                            <option value="monohull">Monohull</option>
+                            <option value="catamaran">Catamaran (dual hull)</option>
+                            <option value="trimaran">Trimaran (triple hull)</option>
+                            <option value="inflatable">Inflatable</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-propulsion-type">Propulsion</label>
+                        <select id="platform-propulsion-type" class="form-input">
+                            <option value="">Select propulsion</option>
+                            <option value="electric">Electric</option>
+                            <option value="gasoline">Gasoline</option>
+                            <option value="hybrid">Hybrid</option>
+                            <option value="solar">Solar Electric</option>
+                            <option value="jet">Water Jet</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-length">Length (m)</label>
+                        <input type="number" id="platform-length" class="form-input" step="0.1"
+                               min="0.1" max="20" placeholder="Overall length">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-max-payload">Max Payload (kg)</label>
+                        <input type="number" id="platform-max-payload" class="form-input"
+                               min="0" max="500" placeholder="Payload capacity">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-max-speed">Max Speed (knots)</label>
+                        <input type="number" id="platform-max-speed" class="form-input" step="0.5"
+                               min="0" max="50" placeholder="Maximum speed">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-endurance">Endurance (hours)</label>
+                        <input type="number" id="platform-endurance" class="form-input" step="0.5"
+                               min="0" max="72" placeholder="Operational endurance">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-navigation-system">Navigation System</label>
+                        <select id="platform-navigation-system" class="form-input">
+                            <option value="">Select navigation</option>
+                            <option value="gps">GPS</option>
+                            <option value="dgps">Differential GPS</option>
+                            <option value="rtk">RTK GPS</option>
+                            <option value="gnss">GNSS Multi-constellation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-control-mode">Control Mode</label>
+                        <select id="platform-control-mode" class="form-input">
+                            <option value="">Select control mode</option>
+                            <option value="autonomous">Fully Autonomous</option>
+                            <option value="supervised">Supervised Autonomy</option>
+                            <option value="remote">Remote Control</option>
+                            <option value="hybrid">Hybrid (Auto + Remote)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            ${generateLocationSection()}
+            ${generateDescriptionSection()}
+
+            <input type="hidden" id="platform-station-id" value="${stationId}">
+            <input type="hidden" id="platform-type" value="usv">
+
+            ${generateFormActions('usv')}
+        `;
+    }
+
+    // ========================================
+    // UUV Platform Form Generator
+    // ========================================
+
+    function generateUUVPlatformForm(stationId) {
+        const config = PLATFORM_CONFIG.uuv;
+        const stationAcronym = getStationAcronym();
+
+        return `
+            <div class="form-section">
+                <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-display-name">Display Name *</label>
+                        <input type="text" id="platform-display-name" class="form-input" required
+                               placeholder="e.g., Lake Bottom Survey ROV 01"
+                               oninput="PlatformForms.updateNormalizedName('uuv')">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-location-code">UUV Number *</label>
+                        <input type="text" id="platform-location-code" class="form-input" required
+                               placeholder="e.g., UUV01" style="text-transform: uppercase;"
+                               oninput="PlatformForms.updateNormalizedName('uuv')">
+                        <small>Unique number within station (e.g., UUV01)</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-ecosystem-code">Ecosystem Code *</label>
+                        <select id="platform-ecosystem-code" class="form-input" onchange="PlatformForms.updateNormalizedName('uuv')">
+                            <option value="LAK">LAK - Lake (recommended)</option>
+                            <option value="WET">WET - Wetland (recommended)</option>
+                            <option value="MAR">MAR - Marshland (recommended)</option>
+                            <option value="FOR">FOR - Forest</option>
+                            <option value="GEN">GEN - General</option>
+                        </select>
+                        <small>Aquatic ecosystems (LAK, WET, MAR) recommended</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-uuv-type">UUV Type *</label>
+                        <select id="platform-uuv-type" class="form-input">
+                            <option value="rov">ROV - Remotely Operated (tethered)</option>
+                            <option value="auv">AUV - Autonomous Underwater</option>
+                            <option value="hybrid">Hybrid - ROV/AUV capable</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Platform Type</label>
+                        <div class="form-input" style="background: #f3f4f6; cursor: not-allowed; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas ${config.icon}" style="color: ${config.color};"></i>
+                            <span>${config.label}</span>
+                            <span style="margin-left: auto; font-size: 0.75rem; color: #6b7280;">(locked)</span>
+                        </div>
+                    </div>
+                    ${generateStatusField()}
+                </div>
+                <div class="form-group">
+                    <label for="platform-normalized-name">Normalized Name *</label>
+                    <input type="text" id="platform-normalized-name" class="form-input" required readonly
+                           style="background: #f9fafb;">
+                    <small>Auto-generated: ${config.namingPattern} (e.g., ${config.example})</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4><i class="fas fa-water"></i> UUV Specifications</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-uuv-model">UUV Model</label>
+                        <input type="text" id="platform-uuv-model" class="form-input"
+                               placeholder="e.g., BlueROV2, REMUS 100">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-manufacturer">Manufacturer</label>
+                        <input type="text" id="platform-manufacturer" class="form-input"
+                               placeholder="e.g., Blue Robotics, Kongsberg">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-max-depth">Max Depth (m)</label>
+                        <input type="number" id="platform-max-depth" class="form-input"
+                               min="1" max="6000" placeholder="Maximum operating depth">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-typical-depth">Typical Depth (m)</label>
+                        <input type="number" id="platform-typical-depth" class="form-input"
+                               min="0" max="1000" placeholder="Typical operating depth">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-propulsion-type">Propulsion</label>
+                        <select id="platform-propulsion-type" class="form-input">
+                            <option value="">Select propulsion</option>
+                            <option value="thruster">Electric Thrusters</option>
+                            <option value="propeller">Propeller</option>
+                            <option value="jet">Water Jet</option>
+                            <option value="buoyancy">Buoyancy-Driven (Glider)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-num-thrusters">Number of Thrusters</label>
+                        <input type="number" id="platform-num-thrusters" class="form-input"
+                               min="1" max="12" placeholder="e.g., 4, 6, 8">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-navigation-system">Navigation System</label>
+                        <select id="platform-navigation-system" class="form-input">
+                            <option value="">Select navigation</option>
+                            <option value="dvl">DVL (Doppler Velocity Log)</option>
+                            <option value="usbl">USBL (Ultra-Short BaseLine)</option>
+                            <option value="ins">INS (Inertial Navigation)</option>
+                            <option value="slam">Visual SLAM</option>
+                            <option value="combined">Combined/Hybrid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-tether-length">Tether Length (m)</label>
+                        <input type="number" id="platform-tether-length" class="form-input"
+                               min="0" max="1000" placeholder="For ROVs (0 for AUVs)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-endurance">Endurance (hours)</label>
+                        <input type="number" id="platform-endurance" class="form-input" step="0.5"
+                               min="0" max="72" placeholder="Operational endurance">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-max-payload">Max Payload (kg)</label>
+                        <input type="number" id="platform-max-payload" class="form-input"
+                               min="0" max="200" placeholder="Additional payload capacity">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform-lighting">Lighting (lumens)</label>
+                        <input type="number" id="platform-lighting" class="form-input"
+                               min="0" max="50000" placeholder="Total lighting capacity">
+                    </div>
+                    <div class="form-group">
+                        <label for="platform-has-manipulator">
+                            <input type="checkbox" id="platform-has-manipulator" style="width: auto; margin-right: 8px;">
+                            Has Manipulator Arm
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            ${generateLocationSection()}
+            ${generateDescriptionSection()}
+
+            <input type="hidden" id="platform-station-id" value="${stationId}">
+            <input type="hidden" id="platform-type" value="uuv">
+
+            ${generateFormActions('uuv')}
+        `;
+    }
+
+    // ========================================
     // Normalized Name Generators (Type-Specific)
     // ========================================
 
@@ -492,6 +930,34 @@
                 const sensor = document.getElementById('platform-sensor')?.value || 'MSI';
                 // Satellite: STATION_AGENCY_SATELLITE_SENSOR (NO ecosystem code!)
                 normalizedName = `${stationAcronym}_${agency}_${satellite}_${sensor}`;
+                break;
+            }
+            case 'mobile': {
+                const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
+                const carrierType = document.getElementById('platform-carrier-type')?.value || 'BPK';
+                const locationCode = document.getElementById('platform-location-code')?.value?.trim().toUpperCase() || '';
+                if (locationCode) {
+                    // Mobile: STATION_ECOSYSTEM_CARRIER_LOCATION
+                    normalizedName = `${stationAcronym}_${ecosystemCode}_${carrierType}_${locationCode}`;
+                }
+                break;
+            }
+            case 'usv': {
+                const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'LAK';
+                const locationCode = document.getElementById('platform-location-code')?.value?.trim().toUpperCase() || '';
+                if (locationCode) {
+                    // USV: STATION_ECOSYSTEM_LOCATION
+                    normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
+                }
+                break;
+            }
+            case 'uuv': {
+                const ecosystemCode = document.getElementById('platform-ecosystem-code')?.value || 'LAK';
+                const locationCode = document.getElementById('platform-location-code')?.value?.trim().toUpperCase() || '';
+                if (locationCode) {
+                    // UUV: STATION_ECOSYSTEM_LOCATION
+                    normalizedName = `${stationAcronym}_${ecosystemCode}_${locationCode}`;
+                }
                 break;
             }
             default:
@@ -571,6 +1037,54 @@
                     platformData.mount_type_code = `${platformData.satellite}_${platformData.sensor}`;
                     // Satellite does NOT use ecosystem_code in naming
                     platformData.ecosystem_code = null;
+                    break;
+                }
+                case 'mobile': {
+                    platformData.ecosystem_code = document.getElementById('platform-ecosystem-code')?.value || 'GEN';
+                    platformData.mount_type_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
+                    platformData.carrier_type = document.getElementById('platform-carrier-type')?.value;
+                    platformData.carrier_model = document.getElementById('platform-carrier-model')?.value?.trim() || null;
+                    platformData.power_type = document.getElementById('platform-power-type')?.value || null;
+                    platformData.typical_speed_kmh = parseFloat(document.getElementById('platform-typical-speed')?.value) || null;
+                    platformData.range_km = parseFloat(document.getElementById('platform-range')?.value) || null;
+                    platformData.runtime_hours = parseFloat(document.getElementById('platform-runtime')?.value) || null;
+                    if (!platformData.mount_type_code) throw new Error('Platform number is required');
+                    if (!platformData.carrier_type) throw new Error('Carrier type is required');
+                    break;
+                }
+                case 'usv': {
+                    platformData.ecosystem_code = document.getElementById('platform-ecosystem-code')?.value || 'LAK';
+                    platformData.mount_type_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
+                    platformData.usv_model = document.getElementById('platform-usv-model')?.value?.trim() || null;
+                    platformData.manufacturer = document.getElementById('platform-manufacturer')?.value?.trim() || null;
+                    platformData.hull_type = document.getElementById('platform-hull-type')?.value || null;
+                    platformData.propulsion_type = document.getElementById('platform-propulsion-type')?.value || null;
+                    platformData.length_m = parseFloat(document.getElementById('platform-length')?.value) || null;
+                    platformData.max_payload_kg = parseFloat(document.getElementById('platform-max-payload')?.value) || null;
+                    platformData.max_speed_knots = parseFloat(document.getElementById('platform-max-speed')?.value) || null;
+                    platformData.endurance_hours = parseFloat(document.getElementById('platform-endurance')?.value) || null;
+                    platformData.navigation_system = document.getElementById('platform-navigation-system')?.value || null;
+                    platformData.control_mode = document.getElementById('platform-control-mode')?.value || null;
+                    if (!platformData.mount_type_code) throw new Error('USV number is required');
+                    break;
+                }
+                case 'uuv': {
+                    platformData.ecosystem_code = document.getElementById('platform-ecosystem-code')?.value || 'LAK';
+                    platformData.mount_type_code = document.getElementById('platform-location-code')?.value?.trim().toUpperCase();
+                    platformData.uuv_type = document.getElementById('platform-uuv-type')?.value || 'rov';
+                    platformData.uuv_model = document.getElementById('platform-uuv-model')?.value?.trim() || null;
+                    platformData.manufacturer = document.getElementById('platform-manufacturer')?.value?.trim() || null;
+                    platformData.max_depth_m = parseFloat(document.getElementById('platform-max-depth')?.value) || null;
+                    platformData.typical_depth_m = parseFloat(document.getElementById('platform-typical-depth')?.value) || null;
+                    platformData.propulsion_type = document.getElementById('platform-propulsion-type')?.value || null;
+                    platformData.num_thrusters = parseInt(document.getElementById('platform-num-thrusters')?.value) || null;
+                    platformData.navigation_system = document.getElementById('platform-navigation-system')?.value || null;
+                    platformData.tether_length_m = parseFloat(document.getElementById('platform-tether-length')?.value) || null;
+                    platformData.endurance_hours = parseFloat(document.getElementById('platform-endurance')?.value) || null;
+                    platformData.max_payload_kg = parseFloat(document.getElementById('platform-max-payload')?.value) || null;
+                    platformData.lighting_lumens = parseInt(document.getElementById('platform-lighting')?.value) || null;
+                    platformData.has_manipulator = document.getElementById('platform-has-manipulator')?.checked || false;
+                    if (!platformData.mount_type_code) throw new Error('UUV number is required');
                     break;
                 }
             }
@@ -655,6 +1169,15 @@
                 break;
             case 'satellite':
                 form.innerHTML = generateSatellitePlatformForm(stationId);
+                break;
+            case 'mobile':
+                form.innerHTML = generateMobilePlatformForm(stationId);
+                break;
+            case 'usv':
+                form.innerHTML = generateUSVPlatformForm(stationId);
+                break;
+            case 'uuv':
+                form.innerHTML = generateUUVPlatformForm(stationId);
                 break;
             default:
                 console.error('Form generator not implemented for:', platformType);

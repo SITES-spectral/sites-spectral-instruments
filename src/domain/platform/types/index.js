@@ -11,12 +11,18 @@ import { PlatformTypeStrategy } from './PlatformTypeStrategy.js';
 import { FixedPlatformType } from './FixedPlatformType.js';
 import { UAVPlatformType } from './UAVPlatformType.js';
 import { SatellitePlatformType } from './SatellitePlatformType.js';
+import { MobilePlatformType } from './MobilePlatformType.js';
+import { USVPlatformType } from './USVPlatformType.js';
+import { UUVPlatformType } from './UUVPlatformType.js';
 
 // Export individual strategies
 export { PlatformTypeStrategy } from './PlatformTypeStrategy.js';
 export { FixedPlatformType } from './FixedPlatformType.js';
 export { UAVPlatformType, UAV_SPECIFICATIONS } from './UAVPlatformType.js';
 export { SatellitePlatformType, SATELLITE_SPECIFICATIONS } from './SatellitePlatformType.js';
+export { MobilePlatformType, MOBILE_CARRIER_TYPES } from './MobilePlatformType.js';
+export { USVPlatformType, USV_HULL_TYPES, USV_PROPULSION_TYPES } from './USVPlatformType.js';
+export { UUVPlatformType, UUV_TYPES, UUV_PROPULSION_TYPES, UUV_NAVIGATION_SYSTEMS } from './UUVPlatformType.js';
 
 /**
  * Platform Type Registry
@@ -32,6 +38,9 @@ class PlatformTypeRegistry {
     this.register(new FixedPlatformType());
     this.register(new UAVPlatformType());
     this.register(new SatellitePlatformType());
+    this.register(new MobilePlatformType());
+    this.register(new USVPlatformType());
+    this.register(new UUVPlatformType());
   }
 
   /**

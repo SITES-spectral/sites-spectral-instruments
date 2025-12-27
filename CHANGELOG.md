@@ -13,6 +13,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.11.0] - 2025-12-27
+
+### Complete Platform Types (Phase 8.4)
+
+This release implements full support for Mobile, USV, and UUV platform types.
+
+#### New Platform Type Strategies
+
+**MobilePlatformType** (`src/domain/platform/types/MobilePlatformType.js`)
+- Naming pattern: `{STATION}_{ECOSYSTEM}_{CARRIER}_{MOUNT_TYPE_CODE}`
+- Example: `SVB_FOR_BPK_MOB01`
+- Carrier types: VEH (Vehicle), BPK (Backpack), BIC (Bicycle), BOT (Boat), ROV (Rover), OTH (Other)
+- Fields: carrier_type, carrier_model, power_type, typical_speed_kmh, range_km, runtime_hours
+
+**USVPlatformType** (`src/domain/platform/types/USVPlatformType.js`)
+- Naming pattern: `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE_CODE}`
+- Example: `ANS_LAK_USV01`
+- Hull types: monohull, catamaran, trimaran, inflatable
+- Propulsion: electric, gasoline, hybrid, solar, jet
+- Fields: usv_model, manufacturer, hull_type, propulsion_type, length_m, max_payload_kg, max_speed_knots, endurance_hours, navigation_system, control_mode
+
+**UUVPlatformType** (`src/domain/platform/types/UUVPlatformType.js`)
+- Naming pattern: `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE_CODE}`
+- Example: `ANS_LAK_UUV01`
+- UUV types: rov (tethered), auv (autonomous), hybrid
+- Navigation: DVL, USBL, INS, Visual SLAM, Combined
+- Fields: uuv_type, uuv_model, manufacturer, max_depth_m, typical_depth_m, propulsion_type, num_thrusters, tether_length_m, lighting_lumens, has_manipulator
+
+#### Frontend Form Generators
+
+Added complete form generators for all three new platform types:
+- `generateMobilePlatformForm()` - Carrier specifications section
+- `generateUSVPlatformForm()` - USV specifications with hull and propulsion options
+- `generateUUVPlatformForm()` - UUV specifications with depth ratings and ROV/AUV options
+
+#### Platform Type Registry
+
+Updated `src/domain/platform/types/index.js` to register all 6 platform types:
+- Fixed (active)
+- UAV (active)
+- Satellite (active)
+- Mobile (new)
+- USV (new)
+- UUV (new)
+
+#### Architecture Compliance
+
+All new platform types follow SOLID principles and Hexagonal Architecture:
+- **Single Responsibility**: Each strategy handles one platform type
+- **Open/Closed**: New types added without modifying existing code
+- **Liskov Substitution**: All strategies implement PlatformTypeStrategy interface
+- **Dependency Inversion**: Domain depends on abstractions, not concretions
+
+---
+
 ## [13.10.0] - 2025-12-27
 
 ### Audit Log Endpoint (Phase 8.3)

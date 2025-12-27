@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "13.10.0",
-  "description": "SITES Spectral v13.10.0 - Stations & Instruments Registry with Audit Log Endpoint",
+  "version": "13.11.0",
+  "description": "SITES Spectral v13.11.0 - Stations & Instruments Registry with Complete Platform Types",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
