@@ -13,6 +13,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.1.0] - 2025-12-27
+
+### Advanced Architecture Patterns (Phase 7)
+
+This release introduces foundational architecture patterns for event-driven design, observability, and security.
+
+#### Domain Events Infrastructure (Phase 7.1)
+
+**New Files:**
+- `src/domain/shared/events/DomainEvent.js` - Base class for all domain events
+- `src/domain/shared/events/StationEvents.js` - StationCreated, StationUpdated, StationDeleted
+- `src/domain/shared/events/InstrumentEvents.js` - InstrumentCalibrated, MaintenanceCompleted, InstrumentStatusChanged
+- `src/domain/shared/events/ROIEvents.js` - ROIModified, ROIMarkedLegacy, TimeseriesBroken
+- `src/domain/shared/ports/EventPublisherPort.js` - Port interface for event publishing
+- `src/infrastructure/events/InMemoryEventBus.js` - In-memory event bus adapter
+
+#### Observability Ports (Phase 7.2)
+
+**New Files:**
+- `src/domain/shared/ports/MetricsPort.js` - Counter, gauge, histogram abstractions
+- `src/domain/shared/ports/LoggingPort.js` - Structured logging interface
+
+#### Security Ports (Phase 7.3)
+
+**New Files:**
+- `src/domain/shared/ports/SecurityPort.js` - Authentication/authorization port
+- Includes `Principal` class for representing authenticated users
+- Includes `AuthenticationError` and `AuthorizationError` custom exceptions
+
+#### Architectural Decision Records (Phase 7.8)
+
+**New Files:**
+- `docs/adr/README.md` - ADR index and documentation
+- `docs/adr/template.md` - Template for new ADRs
+- `docs/adr/ADR-001-hexagonal-architecture.md` - Hexagonal Architecture adoption
+- `docs/adr/ADR-002-cqrs-pattern.md` - CQRS for read/write separation
+- `docs/adr/ADR-003-legacy-roi-system.md` - Legacy ROI system preservation
+- `docs/adr/ADR-004-domain-events.md` - Domain events for audit trail
+- `docs/adr/ADR-005-security-ports.md` - Security ports pattern
+
+#### Benefits
+
+- **Decoupling**: Business logic separated from infrastructure concerns
+- **Testability**: Mock ports for isolated testing
+- **Extensibility**: Add new event listeners, metrics adapters without modifying core
+- **Documentation**: ADRs capture architectural decisions and rationale
+
+---
+
 ## [13.0.0] - 2025-12-27
 
 ### Major Release - Production Ready Codebase

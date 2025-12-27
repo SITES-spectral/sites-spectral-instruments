@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "13.0.0",
-  "description": "SITES Spectral v13.0.0 - Production Ready Codebase",
+  "version": "13.1.0",
+  "description": "SITES Spectral v13.1.0 - Advanced Architecture Patterns",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
