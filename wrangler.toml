@@ -15,9 +15,9 @@ account_id = "e5f93ed83288202d33cf9c7b18068f64"
 # Database Schema: v12 (36 migrations) - ROI Legacy System + Hexagonal Architecture
 
 # Static Assets Configuration
-# v11.0.0: Hexagonal Architecture + API Version Aliases
+# v13.14.0: Vanilla JS frontend with design system
 [assets]
-directory = "public-v10"
+directory = "public"
 binding = "ASSETS"
 
 [[d1_databases]]
