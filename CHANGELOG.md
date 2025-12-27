@@ -13,6 +13,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.2.0] - 2025-12-27
+
+### Dynamic Version Management
+
+This release eliminates hardcoded version strings throughout the codebase with a centralized, build-time version management system.
+
+#### Centralized Version Module
+
+**New Files:**
+- `src/version/index.js` - Auto-generated version module (single source of truth)
+- `public/js/core/version.js` - Frontend version utility with caching
+
+#### Version API Endpoint
+
+**New Endpoint:** `GET /api/version`
+- Returns application and API version info
+- No authentication required (public endpoint)
+- Cached for 60 seconds
+
+```json
+{
+  "app": {
+    "version": "13.2.0",
+    "major": 13,
+    "minor": 2,
+    "patch": 0,
+    "buildDate": "2025-12-27",
+    "buildTimestamp": 1766835731246
+  },
+  "api": {
+    "current": "v11",
+    "aliases": { "latest": "v11", "stable": "v11" },
+    "supported": ["v11", "v10"]
+  }
+}
+```
+
+#### Build Script Enhancements
+
+**Updated:** `scripts/build.js`
+- Auto-generates `src/version/index.js` from package.json
+- Updates all HTML files with cache-busting version params
+- Generates `public/version-manifest.json` for frontend cache control
+- Updates package.json description with version
+
+#### Frontend Version Utility
+
+**Features:**
+- `SitesVersion.getVersion()` - Async fetch with caching
+- `SitesVersion.getVersionSync()` - Sync access from cache/meta tag
+- `SitesVersion.versionUrl(url)` - Cache-busting URL generation
+- `SitesVersion.displayVersion(selector)` - Auto-update UI elements
+- `SitesVersion.hasVersionChanged()` - Detect version updates
+
+#### Benefits
+
+- **Single Source of Truth**: package.json is the only place to update version
+- **Build-Time Generation**: No runtime file reads or hardcoded strings
+- **Cache Busting**: All assets automatically versioned
+- **API Access**: Frontend can fetch version info dynamically
+- **Zero Hardcoding**: Version propagates automatically on build
+
+---
+
 ## [13.1.0] - 2025-12-27
 
 ### Advanced Architecture Patterns (Phase 7)

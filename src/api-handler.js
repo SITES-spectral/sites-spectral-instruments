@@ -21,7 +21,8 @@ import {
   resolveAPIVersion,
   addVersionHeaders,
   createUnsupportedVersionResponse,
-  getVersionInfo
+  getVersionInfo,
+  getAppVersionInfo
 } from './infrastructure/api/version-resolver.js';
 
 // V11 Hexagonal Controllers for Analytics and Export
@@ -156,6 +157,10 @@ export async function handleApiRequest(request, env, ctx) {
       case 'health':
         return await handleHealth(env);
 
+      // === VERSION INFO ===
+      case 'version':
+        return handleVersion();
+
       default:
         return createNotFoundResponse();
     }
@@ -237,4 +242,35 @@ async function handleHealth(env) {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+}
+
+/**
+ * Version info endpoint
+ * Returns application and API version information
+ * No authentication required - public endpoint
+ *
+ * @returns {Response} Version info response
+ */
+function handleVersion() {
+  const versionData = getAppVersionInfo();
+
+  return new Response(JSON.stringify({
+    ...versionData,
+    timestamp: new Date().toISOString(),
+    environment: 'production',
+    architecture: 'hexagonal',
+    documentation: {
+      changelog: '/docs/CHANGELOG.md',
+      api: '/api/health',
+      recommendation: 'Use /api/latest for automatic version resolution'
+    }
+  }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-App-Version': versionData.app.version,
+      'X-API-Version': versionData.api.current,
+      'Cache-Control': 'public, max-age=60'
+    }
+  });
 }

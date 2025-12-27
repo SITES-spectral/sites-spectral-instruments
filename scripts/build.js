@@ -2,12 +2,14 @@
 
 /**
  * Build Script for SITES Spectral Stations & Instruments
- * 
+ *
  * This script:
- * 1. Reads the current version from VERSION file
- * 2. Updates all HTML files with version parameters for cache busting
- * 3. Updates meta tags with version and build date
- * 
+ * 1. Reads the current version from package.json (single source of truth)
+ * 2. Updates the centralized version module (src/version/index.js)
+ * 3. Updates all HTML files with version parameters for cache busting
+ * 4. Updates meta tags with version and build date
+ * 5. Generates version manifest for frontend cache busting
+ *
  * Usage: node scripts/build.js [--bump-version]
  */
 
@@ -19,8 +21,9 @@ class BuildManager {
         this.rootDir = path.resolve(__dirname, '..');
         this.version = null;
         this.buildDate = new Date().toISOString().split('T')[0];
+        this.buildTimestamp = Date.now();
         this.shouldBumpVersion = process.argv.includes('--bump-version');
-        
+
         this.htmlFiles = [
             'public/index.html',
             'public/login.html',
@@ -28,7 +31,7 @@ class BuildManager {
             'public/sites-dashboard.html',
             'public/spectral.html'
         ];
-        
+
         this.jsFiles = [
             'utils.js',
             'api.js',
@@ -37,7 +40,10 @@ class BuildManager {
             'dashboard.js',
             'station-dashboard.js',
             'navigation.js',
-            'export.js'
+            'export.js',
+            'core/version.js',
+            'core/security.js',
+            'core/promise-utils.js'
         ];
     }
     
@@ -124,32 +130,137 @@ class BuildManager {
         const manifest = {
             version: this.version,
             buildDate: this.buildDate,
-            timestamp: Date.now(),
+            timestamp: this.buildTimestamp,
             files: {}
         };
-        
+
         // Add CSS files
         manifest.files[`/css/styles.css?v=${this.version}`] = this.version;
-        
+
         // Add JS files
         this.jsFiles.forEach(jsFile => {
             manifest.files[`/js/${jsFile}?v=${this.version}`] = this.version;
         });
-        
+
         const manifestPath = path.join(this.rootDir, 'public', 'version-manifest.json');
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
         console.log(`Generated version manifest: public/version-manifest.json`);
     }
-    
+
+    /**
+     * Update the centralized version module (src/version/index.js)
+     * This is the single source of truth for the backend
+     */
+    updateVersionModule() {
+        const versionModulePath = path.join(this.rootDir, 'src', 'version', 'index.js');
+
+        const versionModuleContent = `/**
+ * SITES Spectral - Centralized Version Management
+ *
+ * Single source of truth for application version.
+ * This file is auto-generated during build from package.json.
+ * DO NOT EDIT MANUALLY - run 'npm run build' to update.
+ *
+ * @module version
+ * @generated ${this.buildDate}
+ * @see scripts/build.js
+ */
+
+// Version info is injected at build time
+// DO NOT EDIT - this is auto-generated
+export const VERSION = '${this.version}';
+export const BUILD_DATE = '${this.buildDate}';
+export const BUILD_TIMESTAMP = ${this.buildTimestamp};
+
+/**
+ * Version information object
+ */
+export const VersionInfo = {
+  version: VERSION,
+  major: parseInt(VERSION.split('.')[0], 10),
+  minor: parseInt(VERSION.split('.')[1], 10),
+  patch: parseInt(VERSION.split('.')[2], 10),
+  buildDate: BUILD_DATE,
+  buildTimestamp: BUILD_TIMESTAMP,
+
+  /**
+   * Get full version string with build info
+   * @returns {string} e.g., "13.2.0 (2025-12-27)"
+   */
+  getFullVersion() {
+    return \`\${this.version} (\${this.buildDate})\`;
+  },
+
+  /**
+   * Get semantic version string
+   * @returns {string} e.g., "13.2.0"
+   */
+  getSemanticVersion() {
+    return this.version;
+  },
+
+  /**
+   * Add version query param to URL for cache busting
+   * @param {string} url - The URL to version
+   * @returns {string} URL with version query param
+   */
+  versionUrl(url) {
+    const separator = url.includes('?') ? '&' : '?';
+    return \`\${url}\${separator}v=\${this.version}\`;
+  },
+
+  /**
+   * Get version as JSON (for API responses)
+   * @returns {Object} Version info object
+   */
+  toJSON() {
+    return {
+      version: this.version,
+      major: this.major,
+      minor: this.minor,
+      patch: this.patch,
+      buildDate: this.buildDate,
+      buildTimestamp: this.buildTimestamp
+    };
+  }
+};
+
+export default VersionInfo;
+`;
+
+        fs.writeFileSync(versionModulePath, versionModuleContent);
+        console.log(`Updated version module: src/version/index.js`);
+    }
+
+    /**
+     * Update package.json description with version
+     */
+    updatePackageDescription() {
+        const packagePath = path.join(this.rootDir, 'package.json');
+        const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+
+        // Update description to include version
+        const baseDescription = 'SITES Spectral';
+        const versionSuffix = this.version.includes('alpha') || this.version.includes('beta')
+            ? this.version
+            : `v${this.version}`;
+        packageData.description = `${baseDescription} ${versionSuffix} - Stations & Instruments Registry`;
+
+        fs.writeFileSync(packagePath, JSON.stringify(packageData, null, 2) + '\n');
+        console.log(`Updated package.json description`);
+    }
+
     run() {
         console.log('🏗️  Building SITES Spectral Stations & Instruments...');
         console.log('');
-        
+
         this.readVersion();
         this.bumpVersion();
+        this.updateVersionModule();
+        this.updatePackageDescription();
         this.updateHtmlFiles();
         this.generateCacheBustManifest();
-        
+
         console.log('');
         console.log('✅ Build completed successfully!');
         console.log(`📦 Version: ${this.version}`);

@@ -8,18 +8,19 @@
  * - Header-based version selection: X-API-Version
  *
  * @module infrastructure/api/version-resolver
- * @version 11.0.0-alpha.33
  */
 
+import VersionInfo from '../../version/index.js';
+
 /**
- * Version configuration loaded from YAML
- * In Cloudflare Workers, we embed this as a static config
- * Update this when changing yamls/api/api-versions.yaml
+ * Version configuration
+ * API version (v11, v10) is separate from application version (13.2.0)
+ * API version = contract version, App version = release version
  */
 const VERSION_CONFIG = {
   current: {
     version: 'v11',
-    versionNumber: '11.0.0-alpha.33'
+    versionNumber: VersionInfo.version  // Dynamic from centralized version
   },
   aliases: {
     latest: 'v11',
@@ -218,3 +219,24 @@ export function getVersionInfo() {
     default: VERSION_CONFIG.defaultVersion
   };
 }
+
+/**
+ * Get full application version info
+ * Includes both API version and application version
+ *
+ * @returns {Object}
+ */
+export function getAppVersionInfo() {
+  return {
+    app: VersionInfo.toJSON(),
+    api: {
+      current: VERSION_CONFIG.current.version,
+      versionNumber: VERSION_CONFIG.current.versionNumber,
+      aliases: VERSION_CONFIG.aliases,
+      supported: Object.keys(VERSION_CONFIG.supportedVersions)
+    }
+  };
+}
+
+// Re-export VersionInfo for direct access
+export { VersionInfo };
