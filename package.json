@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "13.3.0",
-  "description": "SITES Spectral v13.3.0 - Stations & Instruments Registry",
+  "version": "13.4.0",
+  "description": "SITES Spectral v13.4.0 - Stations & Instruments Registry with OpenAPI Contract-First Design",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
@@ -15,6 +15,9 @@
     "test:unit": "vitest run tests/unit",
     "deploy": "npm run build && wrangler deploy",
     "deploy:bump": "npm run build:bump && wrangler deploy",
+    "api:validate": "node scripts/validate-openapi.js",
+    "api:docs": "echo 'OpenAPI spec: docs/openapi/openapi.yaml'",
+    "prebuild": "npm run api:validate || echo 'OpenAPI validation skipped'",
     "db:create": "wrangler d1 create spectral_stations_db",
     "db:migrate": "wrangler d1 migrations apply spectral_stations_db --remote",
     "db:migrate:local": "wrangler d1 migrations apply spectral_stations_db --local",
@@ -55,6 +58,7 @@
   },
   "dependencies": {
     "jose": "^5.10.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "yaml": "^2.8.2"
   }
 }

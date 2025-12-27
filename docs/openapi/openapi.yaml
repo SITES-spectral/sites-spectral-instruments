@@ -1,0 +1,2106 @@
+openapi: 3.0.3
+info:
+  title: SITES Spectral Instruments API
+  description: |
+    API for managing SITES Spectral stations, platforms, instruments, and data products.
+
+    ## Architecture
+    Built on Hexagonal Architecture (Ports & Adapters) with CQRS pattern.
+
+    ## Authentication
+    JWT-based authentication with HMAC-SHA256 signing. Tokens are passed via:
+    - HTTP-only cookies (preferred)
+    - Authorization header (Bearer token)
+
+    ## Versioning
+    API supports semantic versioning with aliases:
+    - `/api/v11` - Current version
+    - `/api/latest` - Points to latest stable version
+    - `/api/stable` - Points to stable production version
+    - `/api/current` - Alias for latest
+
+    ## Standards Alignment
+    - Darwin Core (biodiversity data)
+    - ICOS (carbon observation)
+    - Copernicus (Earth observation)
+  version: 13.4.0
+  contact:
+    name: SITES Spectral Support
+    url: https://www.fieldsites.se/
+  license:
+    name: CC-BY-4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+
+servers:
+  - url: https://sites.jobelab.com/api/v11
+    description: Production API
+  - url: https://sites-spectral-instruments.jose-e5f.workers.dev/api/v11
+    description: Cloudflare Workers API
+  - url: http://localhost:8787/api/v11
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: Login, logout, and token verification
+  - name: Stations
+    description: Research station management
+  - name: Platforms
+    description: Observation platform management (Fixed, UAV, Satellite)
+  - name: Instruments
+    description: Scientific instrument management
+  - name: Maintenance
+    description: Maintenance record management
+  - name: Calibrations
+    description: Calibration record management
+  - name: ROIs
+    description: Regions of Interest management
+  - name: AOIs
+    description: Areas of Interest management (GeoJSON/KML)
+  - name: Campaigns
+    description: Field campaign management
+  - name: Products
+    description: Data product management
+  - name: Users
+    description: User management (admin only)
+  - name: Analytics
+    description: Analytics and statistics
+  - name: Export
+    description: Data export functionality
+  - name: Admin
+    description: Administration endpoints
+  - name: System
+    description: Health checks and system info
+
+security:
+  - BearerAuth: []
+  - CookieAuth: []
+
+paths:
+  # ============================================
+  # AUTHENTICATION ENDPOINTS
+  # ============================================
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      description: Login with username and password. Returns JWT token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: HTTP-only authentication cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/verify:
+    get:
+      tags: [Authentication]
+      summary: Verify token
+      description: Verify current authentication token and return user info.
+      responses:
+        '200':
+          description: Token valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      description: Alias for /auth/verify - returns current user info.
+      responses:
+        '200':
+          description: User info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout
+      description: Invalidate current session and clear authentication cookie.
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  # ============================================
+  # STATION ENDPOINTS
+  # ============================================
+  /stations:
+    get:
+      tags: [Stations]
+      summary: List all stations
+      description: Get paginated list of research stations.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortOrderParam'
+      responses:
+        '200':
+          description: Station list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Stations]
+      summary: Create station
+      description: Create a new research station. Requires admin role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationCreate'
+      responses:
+        '201':
+          description: Station created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /stations/{id}:
+    get:
+      tags: [Stations]
+      summary: Get station
+      description: Get station by ID or acronym.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            oneOf:
+              - type: integer
+                description: Numeric ID
+              - type: string
+                description: Station acronym (e.g., SVB, ANS)
+      responses:
+        '200':
+          description: Station details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Stations]
+      summary: Update station
+      description: Update station details. Requires admin role.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationUpdate'
+      responses:
+        '200':
+          description: Station updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Stations]
+      summary: Delete station
+      description: Delete station. Requires admin role with delete permission.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Station deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /stations/{acronym}/dashboard:
+    get:
+      tags: [Stations]
+      summary: Get station dashboard
+      description: Get comprehensive dashboard data for a station including platforms, instruments, and recent activity.
+      parameters:
+        - name: acronym
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SVB
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationDashboardResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================
+  # PLATFORM ENDPOINTS
+  # ============================================
+  /platforms:
+    get:
+      tags: [Platforms]
+      summary: List all platforms
+      description: Get paginated list of observation platforms.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station
+          in: query
+          schema:
+            type: string
+          description: Filter by station acronym (e.g., SVB)
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by station ID (legacy)
+        - name: platform_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/PlatformType'
+        - name: ecosystem_code
+          in: query
+          schema:
+            $ref: '#/components/schemas/EcosystemCode'
+      responses:
+        '200':
+          description: Platform list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListResponse'
+    post:
+      tags: [Platforms]
+      summary: Create platform
+      description: Create a new observation platform. UAV platforms auto-create instruments.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformCreate'
+      responses:
+        '201':
+          description: Platform created (with auto-created instruments for UAV)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /platforms/{id}:
+    get:
+      tags: [Platforms]
+      summary: Get platform
+      description: Get platform by ID or normalized name.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            oneOf:
+              - type: integer
+              - type: string
+      responses:
+        '200':
+          description: Platform details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Platforms]
+      summary: Update platform
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformUpdate'
+      responses:
+        '200':
+          description: Platform updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformResponse'
+    delete:
+      tags: [Platforms]
+      summary: Delete platform
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Platform deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /platforms/station/{stationId}:
+    get:
+      tags: [Platforms]
+      summary: Get platforms by station
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Platform list for station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListResponse'
+
+  /platforms/type/{type}:
+    get:
+      tags: [Platforms]
+      summary: Get platforms by type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/PlatformType'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Platform list by type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformListResponse'
+
+  # ============================================
+  # INSTRUMENT ENDPOINTS
+  # ============================================
+  /instruments:
+    get:
+      tags: [Instruments]
+      summary: List all instruments
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station
+          in: query
+          schema:
+            type: string
+          description: Filter by station acronym
+        - name: platform_id
+          in: query
+          schema:
+            type: integer
+        - name: instrument_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/InstrumentType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/Status'
+      responses:
+        '200':
+          description: Instrument list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentListResponse'
+    post:
+      tags: [Instruments]
+      summary: Create instrument
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstrumentCreate'
+      responses:
+        '201':
+          description: Instrument created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+
+  /instruments/{id}:
+    get:
+      tags: [Instruments]
+      summary: Get instrument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            oneOf:
+              - type: integer
+              - type: string
+      responses:
+        '200':
+          description: Instrument details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Instruments]
+      summary: Update instrument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstrumentUpdate'
+      responses:
+        '200':
+          description: Instrument updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+    delete:
+      tags: [Instruments]
+      summary: Delete instrument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cascade
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Delete related records (calibrations, ROIs, etc.)
+      responses:
+        '200':
+          description: Instrument deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /instruments/{id}/details:
+    get:
+      tags: [Instruments]
+      summary: Get instrument with full details
+      description: Get instrument with all related data (calibrations, ROIs, maintenance).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Instrument with full details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentDetailsResponse'
+
+  /instruments/platform/{platformId}:
+    get:
+      tags: [Instruments]
+      summary: Get instruments by platform
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Instruments for platform
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentListResponse'
+
+  /instruments/station/{stationId}:
+    get:
+      tags: [Instruments]
+      summary: Get instruments by station
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Instruments for station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentListResponse'
+
+  # ============================================
+  # MAINTENANCE ENDPOINTS
+  # ============================================
+  /maintenance:
+    get:
+      tags: [Maintenance]
+      summary: List maintenance records
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Maintenance record list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceListResponse'
+    post:
+      tags: [Maintenance]
+      summary: Create maintenance record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceCreate'
+      responses:
+        '201':
+          description: Maintenance record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceResponse'
+
+  /maintenance/timeline:
+    get:
+      tags: [Maintenance]
+      summary: Get maintenance timeline
+      description: Get timeline of maintenance activities for an entity.
+      parameters:
+        - name: entity_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [platform, instrument]
+        - name: entity_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Maintenance timeline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceTimelineResponse'
+
+  /maintenance/pending:
+    get:
+      tags: [Maintenance]
+      summary: Get pending maintenance
+      responses:
+        '200':
+          description: Pending maintenance records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceListResponse'
+
+  /maintenance/overdue:
+    get:
+      tags: [Maintenance]
+      summary: Get overdue maintenance
+      responses:
+        '200':
+          description: Overdue maintenance records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceListResponse'
+
+  /maintenance/{id}:
+    get:
+      tags: [Maintenance]
+      summary: Get maintenance record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Maintenance record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceResponse'
+    put:
+      tags: [Maintenance]
+      summary: Update maintenance record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceUpdate'
+      responses:
+        '200':
+          description: Maintenance record updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceResponse'
+    delete:
+      tags: [Maintenance]
+      summary: Delete maintenance record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Maintenance record deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /maintenance/{id}/complete:
+    post:
+      tags: [Maintenance]
+      summary: Complete maintenance
+      description: Mark a maintenance task as completed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                completion_notes:
+                  type: string
+      responses:
+        '200':
+          description: Maintenance completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceResponse'
+
+  # ============================================
+  # CALIBRATION ENDPOINTS
+  # ============================================
+  /calibrations:
+    get:
+      tags: [Calibrations]
+      summary: List calibration records
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Calibration record list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationListResponse'
+    post:
+      tags: [Calibrations]
+      summary: Create calibration record
+      description: Create calibration record (multispectral/hyperspectral instruments only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalibrationCreate'
+      responses:
+        '201':
+          description: Calibration record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationResponse'
+
+  /calibrations/timeline:
+    get:
+      tags: [Calibrations]
+      summary: Get calibration timeline
+      parameters:
+        - name: instrument_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calibration timeline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationTimelineResponse'
+
+  /calibrations/current:
+    get:
+      tags: [Calibrations]
+      summary: Get current calibration
+      parameters:
+        - name: instrument_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Current calibration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationResponse'
+
+  /calibrations/expired:
+    get:
+      tags: [Calibrations]
+      summary: Get expired calibrations
+      responses:
+        '200':
+          description: Expired calibrations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationListResponse'
+
+  /calibrations/expiring:
+    get:
+      tags: [Calibrations]
+      summary: Get expiring calibrations
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+          description: Days until expiration
+      responses:
+        '200':
+          description: Expiring calibrations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationListResponse'
+
+  /calibrations/{id}:
+    get:
+      tags: [Calibrations]
+      summary: Get calibration record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calibration record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationResponse'
+    put:
+      tags: [Calibrations]
+      summary: Update calibration record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalibrationUpdate'
+      responses:
+        '200':
+          description: Calibration record updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationResponse'
+    delete:
+      tags: [Calibrations]
+      summary: Delete calibration record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calibration record deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /calibrations/{id}/expire:
+    post:
+      tags: [Calibrations]
+      summary: Expire calibration
+      description: Mark a calibration as expired.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calibration expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationResponse'
+
+  # ============================================
+  # ROI ENDPOINTS
+  # ============================================
+  /rois:
+    get:
+      tags: [ROIs]
+      summary: List ROIs
+      parameters:
+        - name: instrument_id
+          in: query
+          schema:
+            type: integer
+        - name: include_legacy
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: ROI list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ROIListResponse'
+    post:
+      tags: [ROIs]
+      summary: Create ROI
+      description: Create a new Region of Interest. Station users create new ROIs; legacy system marks old as replaced.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ROICreate'
+      responses:
+        '201':
+          description: ROI created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ROIResponse'
+
+  /rois/{id}:
+    get:
+      tags: [ROIs]
+      summary: Get ROI
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ROI details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ROIResponse'
+    put:
+      tags: [ROIs]
+      summary: Update ROI
+      description: Update ROI. Super admins can override with warning.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ROIUpdate'
+      responses:
+        '200':
+          description: ROI updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ROIResponse'
+    delete:
+      tags: [ROIs]
+      summary: Delete ROI
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ROI deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  # ============================================
+  # SYSTEM ENDPOINTS
+  # ============================================
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: System unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /info:
+    get:
+      tags: [System]
+      summary: API information
+      security: []
+      responses:
+        '200':
+          description: API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token in Authorization header
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: sites_spectral_auth
+      description: HTTP-only authentication cookie
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for pagination
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+      description: Items per page (max 100)
+    SortByParam:
+      name: sort_by
+      in: query
+      schema:
+        type: string
+      description: Field to sort by
+    SortOrderParam:
+      name: sort_order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+      description: Sort direction
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict - cannot perform operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # ============================================
+    # COMMON TYPES
+    # ============================================
+    PlatformType:
+      type: string
+      enum: [fixed, uav, satellite, mobile, usv, uuv]
+      description: |
+        Platform type:
+        - fixed: Towers, masts, permanent installations
+        - uav: Unmanned Aerial Vehicles (drones)
+        - satellite: Earth observation satellites
+        - mobile: Portable sensors (coming soon)
+        - usv: Unmanned Surface Vehicles (coming soon)
+        - uuv: Unmanned Underwater Vehicles (coming soon)
+
+    MountTypeCode:
+      type: string
+      enum: [TWR, BLD, GND, UAV, SAT, MOB, USV, UUV]
+      description: |
+        Mount type code (v12.0.0+):
+        - TWR: Tower/Mast (>1.5m height)
+        - BLD: Building (rooftop/facade)
+        - GND: Ground Level (<1.5m)
+        - UAV: UAV Position
+        - SAT: Satellite
+        - MOB: Mobile
+        - USV: Surface Vehicle
+        - UUV: Underwater Vehicle
+
+    EcosystemCode:
+      type: string
+      enum: [FOR, AGR, GRA, HEA, MIR, ALP, LAK, CON, WET, DEC, MAR, PEA]
+      description: |
+        Ecosystem code:
+        - FOR: Forest
+        - AGR: Arable Land
+        - GRA: Grassland
+        - HEA: Heathland
+        - MIR: Mires
+        - ALP: Alpine Forest
+        - LAK: Lake
+        - CON: Coniferous Forest
+        - WET: Wetland
+        - DEC: Deciduous Forest
+        - MAR: Marshland
+        - PEA: Peatland
+
+    InstrumentType:
+      type: string
+      enum: [phenocam, multispectral, par, ndvi, pri, hyperspectral, rgb, thermal, lidar, sar]
+      description: Instrument type
+
+    Status:
+      type: string
+      enum: [Active, Inactive, Maintenance, Decommissioned]
+      description: Entity status
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    # ============================================
+    # ERROR RESPONSE
+    # ============================================
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Error message
+
+    DeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        deleted:
+          type: boolean
+          example: true
+
+    # ============================================
+    # AUTHENTICATION SCHEMAS
+    # ============================================
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: svartberget-admin
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        token:
+          type: string
+          description: JWT token (for backward compatibility)
+        user:
+          $ref: '#/components/schemas/User'
+
+    VerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        valid:
+          type: boolean
+          example: true
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        role:
+          type: string
+          enum: [admin, station-admin, station, readonly]
+        station_id:
+          type: integer
+          nullable: true
+        station_acronym:
+          type: string
+          nullable: true
+        station_normalized_name:
+          type: string
+          nullable: true
+        edit_privileges:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [read, write, edit, delete, admin]
+
+    # ============================================
+    # STATION SCHEMAS
+    # ============================================
+    Station:
+      type: object
+      properties:
+        id:
+          type: integer
+        acronym:
+          type: string
+          example: SVB
+        normalized_name:
+          type: string
+          example: svartberget
+        display_name:
+          type: string
+          example: Svartberget Research Station
+        description:
+          type: string
+        latitude:
+          type: number
+          format: float
+          example: 64.2561
+        longitude:
+          type: number
+          format: float
+          example: 19.7745
+        elevation_m:
+          type: number
+        status:
+          $ref: '#/components/schemas/Status'
+        country:
+          type: string
+          example: SE
+        website_url:
+          type: string
+          format: uri
+        contact_email:
+          type: string
+          format: email
+        dwc_location_id:
+          type: string
+          description: Darwin Core location identifier
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    StationCreate:
+      type: object
+      required: [acronym, display_name]
+      properties:
+        acronym:
+          type: string
+          minLength: 2
+          maxLength: 10
+        display_name:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        website_url:
+          type: string
+          format: uri
+        contact_email:
+          type: string
+          format: email
+
+    StationUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        website_url:
+          type: string
+          format: uri
+        contact_email:
+          type: string
+          format: email
+
+    StationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Station'
+
+    StationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Station'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    StationDashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            station:
+              $ref: '#/components/schemas/Station'
+            platforms:
+              type: array
+              items:
+                $ref: '#/components/schemas/Platform'
+            instruments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Instrument'
+            statistics:
+              type: object
+              properties:
+                platform_count:
+                  type: integer
+                instrument_count:
+                  type: integer
+                active_instruments:
+                  type: integer
+
+    # ============================================
+    # PLATFORM SCHEMAS
+    # ============================================
+    Platform:
+      type: object
+      properties:
+        id:
+          type: integer
+        station_id:
+          type: integer
+        normalized_name:
+          type: string
+          example: SVB_FOR_TWR01
+        display_name:
+          type: string
+        platform_type:
+          $ref: '#/components/schemas/PlatformType'
+        ecosystem_code:
+          $ref: '#/components/schemas/EcosystemCode'
+        mount_type_code:
+          $ref: '#/components/schemas/MountTypeCode'
+        description:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        status:
+          $ref: '#/components/schemas/Status'
+        vendor:
+          type: string
+          description: UAV vendor (DJI, MicaSense, etc.)
+        model:
+          type: string
+          description: UAV model (M3M, P4M, etc.)
+        agency:
+          type: string
+          description: Satellite agency (ESA, NASA, etc.)
+        satellite:
+          type: string
+          description: Satellite name (S2A, Landsat-9, etc.)
+        sensor:
+          type: string
+          description: Satellite sensor (MSI, OLI, etc.)
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PlatformCreate:
+      type: object
+      required: [station_id, platform_type]
+      properties:
+        station_id:
+          type: integer
+        platform_type:
+          $ref: '#/components/schemas/PlatformType'
+        ecosystem_code:
+          $ref: '#/components/schemas/EcosystemCode'
+        mount_type_code:
+          $ref: '#/components/schemas/MountTypeCode'
+        display_name:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        vendor:
+          type: string
+        model:
+          type: string
+        agency:
+          type: string
+        satellite:
+          type: string
+        sensor:
+          type: string
+
+    PlatformUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        status:
+          $ref: '#/components/schemas/Status'
+
+    PlatformResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Platform'
+
+    PlatformListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Platform'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    PlatformCreateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            platform:
+              $ref: '#/components/schemas/Platform'
+            instruments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Instrument'
+              description: Auto-created instruments (for UAV platforms)
+
+    # ============================================
+    # INSTRUMENT SCHEMAS
+    # ============================================
+    Instrument:
+      type: object
+      properties:
+        id:
+          type: integer
+        platform_id:
+          type: integer
+        normalized_name:
+          type: string
+          example: SVB_FOR_TWR01_PHE01
+        display_name:
+          type: string
+        instrument_type:
+          $ref: '#/components/schemas/InstrumentType'
+        status:
+          $ref: '#/components/schemas/Status'
+        measurement_status:
+          type: string
+        description:
+          type: string
+        specifications:
+          type: object
+          description: Type-specific specifications
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    InstrumentCreate:
+      type: object
+      required: [platform_id, instrument_type]
+      properties:
+        platform_id:
+          type: integer
+        instrument_type:
+          $ref: '#/components/schemas/InstrumentType'
+        normalized_name:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        specifications:
+          type: object
+
+    InstrumentUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        measurement_status:
+          type: string
+        specifications:
+          type: object
+
+    InstrumentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Instrument'
+
+    InstrumentListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instrument'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    InstrumentDetailsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Instrument'
+            - type: object
+              properties:
+                calibrations:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Calibration'
+                rois:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ROI'
+                maintenance:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Maintenance'
+
+    # ============================================
+    # MAINTENANCE SCHEMAS
+    # ============================================
+    Maintenance:
+      type: object
+      properties:
+        id:
+          type: integer
+        entity_type:
+          type: string
+          enum: [platform, instrument]
+        entity_id:
+          type: integer
+        maintenance_type:
+          type: string
+        description:
+          type: string
+        scheduled_date:
+          type: string
+          format: date
+        completed_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed, overdue]
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    MaintenanceCreate:
+      type: object
+      required: [entity_type, entity_id, maintenance_type]
+      properties:
+        entity_type:
+          type: string
+          enum: [platform, instrument]
+        entity_id:
+          type: integer
+        maintenance_type:
+          type: string
+        description:
+          type: string
+        scheduled_date:
+          type: string
+          format: date
+        notes:
+          type: string
+
+    MaintenanceUpdate:
+      type: object
+      properties:
+        maintenance_type:
+          type: string
+        description:
+          type: string
+        scheduled_date:
+          type: string
+          format: date
+        status:
+          type: string
+        notes:
+          type: string
+
+    MaintenanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Maintenance'
+
+    MaintenanceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Maintenance'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    MaintenanceTimelineResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            entity_type:
+              type: string
+            entity_id:
+              type: integer
+            timeline:
+              type: array
+              items:
+                $ref: '#/components/schemas/Maintenance'
+
+    # ============================================
+    # CALIBRATION SCHEMAS
+    # ============================================
+    Calibration:
+      type: object
+      properties:
+        id:
+          type: integer
+        instrument_id:
+          type: integer
+        calibration_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [current, expired, superseded]
+        calibrator:
+          type: string
+        panel_serial_number:
+          type: string
+        quality_score:
+          type: number
+        cloud_cover:
+          type: string
+        solar_elevation:
+          type: number
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CalibrationCreate:
+      type: object
+      required: [instrument_id, calibration_date]
+      properties:
+        instrument_id:
+          type: integer
+        calibration_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+        calibrator:
+          type: string
+        panel_serial_number:
+          type: string
+        quality_score:
+          type: number
+        cloud_cover:
+          type: string
+        solar_elevation:
+          type: number
+        notes:
+          type: string
+
+    CalibrationUpdate:
+      type: object
+      properties:
+        calibration_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+        calibrator:
+          type: string
+        panel_serial_number:
+          type: string
+        quality_score:
+          type: number
+        notes:
+          type: string
+
+    CalibrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Calibration'
+
+    CalibrationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Calibration'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    CalibrationTimelineResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            instrument_id:
+              type: integer
+            current:
+              $ref: '#/components/schemas/Calibration'
+            timeline:
+              type: array
+              items:
+                $ref: '#/components/schemas/Calibration'
+
+    # ============================================
+    # ROI SCHEMAS
+    # ============================================
+    ROI:
+      type: object
+      properties:
+        id:
+          type: integer
+        instrument_id:
+          type: integer
+        roi_name:
+          type: string
+          example: ROI_01
+        polygon_points:
+          type: string
+          description: JSON array of [x, y] coordinates
+        color:
+          type: string
+          example: '#FF5733'
+        description:
+          type: string
+        vegetation_type:
+          type: string
+        is_legacy:
+          type: boolean
+        legacy_date:
+          type: string
+          format: date-time
+        replaced_by_roi_id:
+          type: integer
+        timeseries_broken:
+          type: boolean
+        legacy_reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    ROICreate:
+      type: object
+      required: [instrument_id, polygon_points]
+      properties:
+        instrument_id:
+          type: integer
+        roi_name:
+          type: string
+        polygon_points:
+          type: string
+        color:
+          type: string
+        description:
+          type: string
+        vegetation_type:
+          type: string
+
+    ROIUpdate:
+      type: object
+      properties:
+        polygon_points:
+          type: string
+        color:
+          type: string
+        description:
+          type: string
+        vegetation_type:
+          type: string
+        is_legacy:
+          type: boolean
+        legacy_reason:
+          type: string
+
+    ROIResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/ROI'
+
+    ROIListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ROI'
+
+    # ============================================
+    # SYSTEM SCHEMAS
+    # ============================================
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        database:
+          type: string
+          enum: [connected, disconnected]
+        architecture:
+          type: string
+          example: hexagonal
+        api:
+          type: object
+          properties:
+            current:
+              type: string
+            aliases:
+              type: object
+            supported:
+              type: array
+              items:
+                type: string
+        features:
+          type: array
+          items:
+            type: string
+
+    InfoResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        architecture:
+          type: string
+        description:
+          type: string
+        patterns:
+          type: array
+          items:
+            type: string
+        standards:
+          type: object
+        endpoints:
+          type: object
+        mountTypeCodes:
+          type: object
+        processingLevels:
+          type: object
+        qualityControlLevels:
+          type: object

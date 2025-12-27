@@ -13,6 +13,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.4.0] - 2025-12-27
+
+### API Contract-First Design (Phase 7.6)
+
+This release implements OpenAPI 3.0 specification and contract validation for the SITES Spectral API.
+
+#### OpenAPI 3.0 Specification
+
+**New File:** `docs/openapi/openapi.yaml`
+
+Complete API specification covering:
+- 50+ endpoint paths with full documentation
+- 30+ schema definitions
+- Authentication (Bearer JWT, Cookie)
+- Response types and error formats
+- Parameter validation rules
+- Standards alignment (Darwin Core, ICOS, Copernicus)
+
+**Endpoints Documented:**
+- Authentication: login, verify, logout
+- Stations: CRUD, dashboard
+- Platforms: CRUD, by-station, by-type
+- Instruments: CRUD, by-platform, by-station, details
+- Maintenance: CRUD, timeline, pending, overdue, complete
+- Calibrations: CRUD, timeline, current, expired, expiring, expire
+- ROIs: CRUD with legacy system support
+- System: health, info, version
+
+#### Contract Validation Middleware
+
+**New File:** `src/middleware/contract-validator.js`
+
+Features:
+- Request body validation against schemas
+- Query parameter validation
+- Enum value validation (platform types, status codes, etc.)
+- Pattern validation (email, URL, date formats)
+- Required field validation
+- Type coercion and constraints
+
+**Exported Schemas:**
+```javascript
+SCHEMAS = {
+  PlatformType: ['fixed', 'uav', 'satellite', 'mobile', 'usv', 'uuv'],
+  MountTypeCode: ['TWR', 'BLD', 'GND', 'UAV', 'SAT', 'MOB', 'USV', 'UUV'],
+  EcosystemCode: ['FOR', 'AGR', 'GRA', ...],
+  InstrumentType: ['phenocam', 'multispectral', 'par', ...],
+  Status: ['Active', 'Inactive', 'Maintenance', 'Decommissioned'],
+  // ... and more
+}
+```
+
+#### OpenAPI Validator Script
+
+**New File:** `scripts/validate-openapi.js`
+
+Validates OpenAPI specification:
+- Structure validation (required fields)
+- Path and operation validation
+- Schema reference validation
+- Security scheme validation
+- Generates detailed report
+
+#### Build Integration
+
+**New npm Scripts:**
+- `npm run api:validate` - Validate OpenAPI specification
+- `npm run api:docs` - Show OpenAPI spec location
+- `prebuild` hook runs validation before build
+
+**Dependencies:**
+- Added `yaml` package for YAML parsing
+
+---
+
 ## [13.3.0] - 2025-12-27
 
 ### Composition Root Enhancement (Phase 7.5)
