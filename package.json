@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "13.13.0",
-  "description": "SITES Spectral v13.13.0 - Mobile Responsive Enhancements",
+  "version": "13.14.0",
+  "description": "SITES Spectral v13.14.0 - Formal Design System with Design Tokens",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

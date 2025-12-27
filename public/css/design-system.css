@@ -1,0 +1,509 @@
+/**
+ * SITES Spectral Design System
+ * Version: 13.14.0
+ *
+ * This file defines the formal design tokens and system for SITES Spectral.
+ * All design decisions should reference these tokens for consistency.
+ *
+ * Naming Convention: BEM (Block__Element--Modifier)
+ * Token Structure: --{category}-{property}-{variant}
+ *
+ * Table of Contents:
+ * 1. Color Palette
+ * 2. Typography
+ * 3. Spacing Scale
+ * 4. Layout
+ * 5. Shadows & Elevation
+ * 6. Borders & Radii
+ * 7. Transitions
+ * 8. Z-Index Scale
+ * 9. Component Tokens
+ */
+
+:root {
+    /* ==========================================================================
+       1. COLOR PALETTE
+       ========================================================================== */
+
+    /* Brand Colors */
+    --color-brand-primary: #059669;      /* Emerald 600 - Main brand */
+    --color-brand-primary-light: #10b981; /* Emerald 500 - Hover/active */
+    --color-brand-primary-dark: #064e3b;  /* Emerald 900 - Dark variant */
+    --color-brand-primary-bg: #d1fae5;    /* Emerald 100 - Light background */
+
+    /* Semantic Colors */
+    --color-success: #10b981;             /* Emerald 500 */
+    --color-success-light: #d1fae5;       /* Emerald 100 */
+    --color-success-dark: #065f46;        /* Emerald 800 */
+
+    --color-warning: #f59e0b;             /* Amber 500 */
+    --color-warning-light: #fef3c7;       /* Amber 100 */
+    --color-warning-dark: #92400e;        /* Amber 800 */
+
+    --color-error: #ef4444;               /* Red 500 */
+    --color-error-light: #fee2e2;         /* Red 100 */
+    --color-error-dark: #991b1b;          /* Red 800 */
+
+    --color-info: #3b82f6;                /* Blue 500 */
+    --color-info-light: #dbeafe;          /* Blue 100 */
+    --color-info-dark: #1e40af;           /* Blue 800 */
+
+    /* Neutral Colors (Gray Scale) */
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+
+    /* Background Colors */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f8fafc;
+    --color-bg-tertiary: #f1f5f9;
+    --color-bg-inverse: #1f2937;
+
+    /* Text Colors */
+    --color-text-primary: #1f2937;        /* Gray 800 */
+    --color-text-secondary: #6b7280;      /* Gray 500 */
+    --color-text-muted: #9ca3af;          /* Gray 400 */
+    --color-text-inverse: #ffffff;
+    --color-text-link: #059669;
+    --color-text-link-hover: #047857;
+
+    /* Border Colors */
+    --color-border: #e5e7eb;              /* Gray 200 */
+    --color-border-hover: #d1d5db;        /* Gray 300 */
+    --color-border-focus: #059669;
+
+    /* ==========================================================================
+       2. TYPOGRAPHY
+       ========================================================================== */
+
+    /* Font Families */
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', Menlo, Monaco, 'Courier New', monospace;
+
+    /* Font Sizes (Modular Scale: 1.25) */
+    --font-size-xs: 0.75rem;     /* 12px */
+    --font-size-sm: 0.875rem;    /* 14px */
+    --font-size-base: 1rem;      /* 16px */
+    --font-size-md: 1.125rem;    /* 18px */
+    --font-size-lg: 1.25rem;     /* 20px */
+    --font-size-xl: 1.5rem;      /* 24px */
+    --font-size-2xl: 1.875rem;   /* 30px */
+    --font-size-3xl: 2.25rem;    /* 36px */
+    --font-size-4xl: 3rem;       /* 48px */
+
+    /* Font Weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Line Heights */
+    --line-height-none: 1;
+    --line-height-tight: 1.25;
+    --line-height-snug: 1.375;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.625;
+    --line-height-loose: 2;
+
+    /* Letter Spacing */
+    --letter-spacing-tighter: -0.05em;
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.025em;
+    --letter-spacing-wider: 0.05em;
+    --letter-spacing-widest: 0.1em;
+
+    /* ==========================================================================
+       3. SPACING SCALE
+       ========================================================================== */
+
+    /* Base unit: 4px (0.25rem) */
+    --space-0: 0;
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-7: 1.75rem;   /* 28px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+    --space-20: 5rem;     /* 80px */
+    --space-24: 6rem;     /* 96px */
+
+    /* ==========================================================================
+       4. LAYOUT
+       ========================================================================== */
+
+    /* Container Widths */
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1200px;
+    --container-2xl: 1400px;
+
+    /* Grid */
+    --grid-gap-sm: var(--space-4);
+    --grid-gap-md: var(--space-6);
+    --grid-gap-lg: var(--space-8);
+
+    /* ==========================================================================
+       5. SHADOWS & ELEVATION
+       ========================================================================== */
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+    /* Focus Ring */
+    --shadow-focus: 0 0 0 3px rgba(5, 150, 105, 0.3);
+
+    /* ==========================================================================
+       6. BORDERS & RADII
+       ========================================================================== */
+
+    /* Border Widths */
+    --border-width-none: 0;
+    --border-width-thin: 1px;
+    --border-width-medium: 2px;
+    --border-width-thick: 4px;
+
+    /* Border Radius */
+    --radius-none: 0;
+    --radius-sm: 0.25rem;    /* 4px */
+    --radius-md: 0.375rem;   /* 6px */
+    --radius-lg: 0.5rem;     /* 8px */
+    --radius-xl: 0.75rem;    /* 12px */
+    --radius-2xl: 1rem;      /* 16px */
+    --radius-full: 9999px;   /* Pill/Circle */
+
+    /* ==========================================================================
+       7. TRANSITIONS
+       ========================================================================== */
+
+    /* Durations */
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 500ms;
+
+    /* Easing Functions */
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Common Transitions */
+    --transition-colors: color var(--duration-fast) var(--ease-in-out),
+                         background-color var(--duration-fast) var(--ease-in-out),
+                         border-color var(--duration-fast) var(--ease-in-out);
+    --transition-transform: transform var(--duration-normal) var(--ease-out);
+    --transition-opacity: opacity var(--duration-normal) var(--ease-in-out);
+    --transition-all: all var(--duration-normal) var(--ease-in-out);
+
+    /* ==========================================================================
+       8. Z-INDEX SCALE
+       ========================================================================== */
+
+    --z-index-behind: -1;
+    --z-index-base: 0;
+    --z-index-dropdown: 100;
+    --z-index-sticky: 200;
+    --z-index-fixed: 300;
+    --z-index-modal-backdrop: 400;
+    --z-index-modal: 500;
+    --z-index-popover: 600;
+    --z-index-tooltip: 700;
+    --z-index-toast: 800;
+    --z-index-max: 9999;
+
+    /* ==========================================================================
+       9. COMPONENT TOKENS
+       ========================================================================== */
+
+    /* Buttons */
+    --btn-padding-x: var(--space-4);
+    --btn-padding-y: var(--space-3);
+    --btn-padding-x-sm: var(--space-3);
+    --btn-padding-y-sm: var(--space-2);
+    --btn-padding-x-lg: var(--space-6);
+    --btn-padding-y-lg: var(--space-4);
+    --btn-border-radius: var(--radius-lg);
+    --btn-font-weight: var(--font-weight-semibold);
+    --btn-min-height: 44px;      /* WCAG touch target */
+    --btn-min-width: 44px;       /* WCAG touch target */
+
+    /* Form Inputs */
+    --input-padding-x: var(--space-3);
+    --input-padding-y: var(--space-3);
+    --input-border-radius: var(--radius-lg);
+    --input-border-width: var(--border-width-thin);
+    --input-border-color: var(--color-border);
+    --input-border-color-focus: var(--color-brand-primary);
+    --input-min-height: 44px;    /* WCAG touch target */
+
+    /* Cards */
+    --card-padding: var(--space-6);
+    --card-border-radius: var(--radius-2xl);
+    --card-shadow: var(--shadow-md);
+    --card-bg: var(--color-bg-primary);
+
+    /* Modals */
+    --modal-padding: var(--space-6);
+    --modal-border-radius: var(--radius-2xl);
+    --modal-shadow: var(--shadow-2xl);
+    --modal-max-height: 90vh;
+    --modal-backdrop-bg: rgba(0, 0, 0, 0.5);
+
+    /* Badges */
+    --badge-padding-x: var(--space-3);
+    --badge-padding-y: var(--space-1);
+    --badge-border-radius: var(--radius-full);
+    --badge-font-size: var(--font-size-xs);
+    --badge-font-weight: var(--font-weight-semibold);
+
+    /* Tables */
+    --table-cell-padding-x: var(--space-4);
+    --table-cell-padding-y: var(--space-3);
+    --table-border-color: var(--color-border);
+    --table-header-bg: var(--color-bg-tertiary);
+    --table-row-hover-bg: var(--color-bg-secondary);
+    --table-stripe-bg: var(--color-bg-secondary);
+
+    /* Navigation */
+    --nav-height: 64px;
+    --nav-height-mobile: 56px;
+    --nav-padding-x: var(--space-6);
+    --nav-item-padding: var(--space-4);
+
+    /* Toasts */
+    --toast-padding: var(--space-4);
+    --toast-border-radius: var(--radius-lg);
+    --toast-shadow: var(--shadow-lg);
+    --toast-min-width: 300px;
+    --toast-max-width: 500px;
+}
+
+/* ==========================================================================
+   DARK MODE SUPPORT
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Override colors for dark mode */
+        --color-bg-primary: #1f2937;
+        --color-bg-secondary: #111827;
+        --color-bg-tertiary: #374151;
+        --color-bg-inverse: #ffffff;
+
+        --color-text-primary: #f9fafb;
+        --color-text-secondary: #d1d5db;
+        --color-text-muted: #9ca3af;
+        --color-text-inverse: #1f2937;
+
+        --color-border: #374151;
+        --color-border-hover: #4b5563;
+
+        --card-bg: #1f2937;
+        --table-header-bg: #374151;
+        --table-row-hover-bg: #374151;
+        --table-stripe-bg: #111827;
+    }
+}
+
+/* ==========================================================================
+   UTILITY CLASSES (BEM Convention)
+   ========================================================================== */
+
+/* Typography Utilities */
+.text--xs { font-size: var(--font-size-xs); }
+.text--sm { font-size: var(--font-size-sm); }
+.text--base { font-size: var(--font-size-base); }
+.text--md { font-size: var(--font-size-md); }
+.text--lg { font-size: var(--font-size-lg); }
+.text--xl { font-size: var(--font-size-xl); }
+.text--2xl { font-size: var(--font-size-2xl); }
+.text--3xl { font-size: var(--font-size-3xl); }
+
+.font--light { font-weight: var(--font-weight-light); }
+.font--normal { font-weight: var(--font-weight-normal); }
+.font--medium { font-weight: var(--font-weight-medium); }
+.font--semibold { font-weight: var(--font-weight-semibold); }
+.font--bold { font-weight: var(--font-weight-bold); }
+
+.text--primary { color: var(--color-text-primary); }
+.text--secondary { color: var(--color-text-secondary); }
+.text--muted { color: var(--color-text-muted); }
+.text--success { color: var(--color-success); }
+.text--warning { color: var(--color-warning); }
+.text--error { color: var(--color-error); }
+.text--info { color: var(--color-info); }
+
+/* Spacing Utilities */
+.m-0 { margin: var(--space-0); }
+.m-1 { margin: var(--space-1); }
+.m-2 { margin: var(--space-2); }
+.m-3 { margin: var(--space-3); }
+.m-4 { margin: var(--space-4); }
+.m-5 { margin: var(--space-5); }
+.m-6 { margin: var(--space-6); }
+.m-8 { margin: var(--space-8); }
+
+.p-0 { padding: var(--space-0); }
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+.p-8 { padding: var(--space-8); }
+
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+.gap-8 { gap: var(--space-8); }
+
+/* Border Radius Utilities */
+.rounded--none { border-radius: var(--radius-none); }
+.rounded--sm { border-radius: var(--radius-sm); }
+.rounded--md { border-radius: var(--radius-md); }
+.rounded--lg { border-radius: var(--radius-lg); }
+.rounded--xl { border-radius: var(--radius-xl); }
+.rounded--2xl { border-radius: var(--radius-2xl); }
+.rounded--full { border-radius: var(--radius-full); }
+
+/* Shadow Utilities */
+.shadow--xs { box-shadow: var(--shadow-xs); }
+.shadow--sm { box-shadow: var(--shadow-sm); }
+.shadow--md { box-shadow: var(--shadow-md); }
+.shadow--lg { box-shadow: var(--shadow-lg); }
+.shadow--xl { box-shadow: var(--shadow-xl); }
+.shadow--2xl { box-shadow: var(--shadow-2xl); }
+.shadow--none { box-shadow: none; }
+
+/* Focus Ring */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+
+/* ==========================================================================
+   COMPONENT BLOCKS (BEM Convention)
+   ========================================================================== */
+
+/* Card Block */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--card-shadow);
+    padding: var(--card-padding);
+}
+
+.card__header {
+    margin-bottom: var(--space-4);
+}
+
+.card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.card__body {
+    color: var(--color-text-secondary);
+}
+
+.card__footer {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: var(--border-width-thin) solid var(--color-border);
+}
+
+.card--hover:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    transition: var(--transition-all);
+}
+
+/* Badge Block */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--badge-padding-y) var(--badge-padding-x);
+    font-size: var(--badge-font-size);
+    font-weight: var(--badge-font-weight);
+    border-radius: var(--badge-border-radius);
+    white-space: nowrap;
+}
+
+.badge--success {
+    background: var(--color-success-light);
+    color: var(--color-success-dark);
+}
+
+.badge--warning {
+    background: var(--color-warning-light);
+    color: var(--color-warning-dark);
+}
+
+.badge--error {
+    background: var(--color-error-light);
+    color: var(--color-error-dark);
+}
+
+.badge--info {
+    background: var(--color-info-light);
+    color: var(--color-info-dark);
+}
+
+.badge--neutral {
+    background: var(--color-gray-100);
+    color: var(--color-gray-700);
+}
+
+/* Status Indicator Block */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.status-indicator__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+}
+
+.status-indicator--active .status-indicator__dot {
+    background: var(--color-success);
+}
+
+.status-indicator--inactive .status-indicator__dot {
+    background: var(--color-gray-400);
+}
+
+.status-indicator--maintenance .status-indicator__dot {
+    background: var(--color-warning);
+}
+
+.status-indicator--error .status-indicator__dot {
+    background: var(--color-error);
+}

@@ -13,6 +13,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.14.0] - 2025-12-27
+
+### Formal Design System (Phase 9.4)
+
+This release introduces a formal design system with centralized design tokens for consistent styling across the application.
+
+#### New File
+
+**CSS Design Tokens** (`public/css/design-system.css`)
+- Comprehensive design token foundation
+
+#### Design Token Categories
+
+**1. Color Palette**
+- Brand colors (primary, primary-light, primary-dark, primary-bg)
+- Semantic colors (success, warning, error, info) with light/dark variants
+- Neutral gray scale (50-900)
+- Background, text, and border color tokens
+
+**2. Typography**
+- Font families (sans-serif, monospace)
+- Font sizes (modular scale 1.25): xs through 4xl
+- Font weights: light through bold
+- Line heights and letter spacing
+
+**3. Spacing Scale**
+- Base unit: 4px (0.25rem)
+- Scale: space-0 through space-24
+- Consistent padding/margin utilities
+
+**4. Shadows & Elevation**
+- xs through 2xl shadow tokens
+- Focus ring shadow for accessibility
+
+**5. Borders & Radii**
+- Border widths (none, thin, medium, thick)
+- Border radius (none through full)
+
+**6. Transitions**
+- Duration tokens (fast, normal, slow, slower)
+- Easing functions (in, out, in-out, bounce)
+- Common transition presets
+
+**7. Z-Index Scale**
+- Structured layering (behind, base, dropdown, sticky, fixed, modal, popover, tooltip, toast, max)
+
+**8. Component Tokens**
+- Buttons: padding, radius, min-height
+- Inputs: padding, border, focus states
+- Cards: padding, shadow, background
+- Modals: padding, max-height, backdrop
+- Badges, tables, navigation, toasts
+
+#### Dark Mode Support
+
+- Automatic dark mode via `prefers-color-scheme: dark`
+- Overridden background, text, and border colors
+
+#### BEM Utility Classes
+
+- Typography utilities (.text--xs, .font--bold, etc.)
+- Spacing utilities (.m-4, .p-6, .gap-3, etc.)
+- Border radius utilities (.rounded--lg, .rounded--full, etc.)
+- Shadow utilities (.shadow--md, .shadow--lg, etc.)
+- Focus ring (.focus-ring)
+
+#### BEM Component Blocks
+
+- Card block (.card, .card__header, .card__body, .card__footer, .card--hover)
+- Badge block (.badge, .badge--success, .badge--warning, etc.)
+- Status indicator block (.status-indicator, .status-indicator--active, etc.)
+
+#### Integration
+
+- Added as first stylesheet to: index.html, login.html, sites-dashboard.html, station-dashboard.html, spectral.html
+- Provides foundation for all other stylesheets
+
+---
+
 ## [13.13.0] - 2025-12-27
 
 ### Mobile Responsive Enhancements (Phase 9.3)
