@@ -4457,19 +4457,10 @@
 
         async function loadStationData() {
             try {
-                // Get auth token
-                const token = localStorage.getItem('sites_spectral_token');
-                if (!token) {
-                    window.location.href = '/';
-                    return;
-                }
-
-                // Load station data from API
+                // Load station data via httpOnly cookie
                 const response = await fetch(`/api/stations/${stationAcronym}`, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -4478,7 +4469,6 @@
                     await showStationData();
                 } else if (response.status === 401) {
                     // Token expired, redirect to login
-                    localStorage.removeItem('sites_spectral_token');
                     localStorage.removeItem('sites_spectral_user');
                     window.location.href = '/';
                 } else if (response.status === 404) {
@@ -4944,9 +4934,8 @@
         // Load instrument image asynchronously after card is created
         async function loadInstrumentImage(instrumentId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}/latest-image`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
@@ -5038,9 +5027,8 @@
             timestampEl.textContent = 'Loading timestamp...';
 
             // Fetch additional metadata
-            const token = localStorage.getItem('sites_spectral_token');
             fetch(`/api/instruments/${instrumentId}/latest-image`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             })
             .then(response => response.json())
             .then(data => {
@@ -5343,18 +5331,12 @@
 
         // ROI Management Functions
         async function loadROICards(instrumentId, instrumentNormalizedName) {
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) return;
-
             const roiContainer = document.getElementById(`roi-cards-${instrumentId}`);
             if (!roiContainer) return;
 
             try {
                 const response = await fetch(`/api/rois?instrument=${instrumentNormalizedName}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -5436,15 +5418,9 @@
         }
 
         async function showROIDetails(roiId) {
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) return;
-
             try {
                 const response = await fetch(`/api/rois/${roiId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -5580,11 +5556,8 @@
 
         async function editROI(roiId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/rois/${roiId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error('Failed to fetch ROI');
@@ -5784,7 +5757,6 @@
 
         async function saveROIChanges(roiId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const instrumentId = document.getElementById('edit-roi-instrument-id').value;
                 const roiName = document.getElementById('edit-roi-name').value.trim();
 
@@ -5808,9 +5780,9 @@
                 const response = await fetch(`/api/rois/${roiId}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(roiData)
                 });
 
@@ -5842,13 +5814,9 @@
             }
 
             try {
-                const token = localStorage.getItem('sites_spectral_token');
-
                 const response = await fetch(`/api/rois/${roiId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
@@ -5871,15 +5839,9 @@
         }
 
         async function showPlatformDetails(platformId) {
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) return;
-
             try {
                 const response = await fetch(`/api/platforms/${platformId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -5984,15 +5946,9 @@
         }
 
         async function showInstrumentDetails(instrumentId) {
-            const token = localStorage.getItem('sites_spectral_token');
-            if (!token) return;
-
             try {
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -6293,20 +6249,10 @@
                 exportBtn.classList.add('loading');
                 exportBtn.innerHTML = '<i class="fas fa-spinner"></i> Exporting...';
 
-                // Get auth token
-                const token = localStorage.getItem('sites_spectral_token');
-                if (!token) {
-                    showExportError('Authentication required');
-                    return;
-                }
-
-                // Make API call to export endpoint
+                // Make API call to export endpoint via httpOnly cookie
                 const response = await fetch(`/api/export/station/${stationAcronym}`, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -6392,11 +6338,8 @@
         // Edit Functions
         async function editPlatform(platformId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/platforms/${platformId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error('Failed to fetch platform');
@@ -6411,11 +6354,8 @@
 
         async function editInstrument(instrumentId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error('Failed to fetch instrument');
@@ -6878,8 +6818,6 @@
 
         async function savePlatformChanges(platformId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
-
                 const platformData = {
                     display_name: document.getElementById('edit-platform-name').value,
                     location_code: document.getElementById('edit-platform-location-code').value,
@@ -6897,9 +6835,9 @@
                 const response = await fetch(`/api/platforms/${platformId}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(platformData)
                 });
 
@@ -6921,11 +6859,8 @@
 
                 // Reopen the platform detail modal with fresh data
                 // This ensures users see their changes immediately
-                // Token already declared at line 5168
                 const refreshResponse = await fetch(`/api/platforms/${platformId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (refreshResponse.ok) {
@@ -6942,8 +6877,6 @@
 
         async function saveInstrumentChanges(instrumentId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
-
                 // Helper function to get value from select or "other" input
                 function getSelectOrOtherValue(selectId, otherId) {
                     const selectValue = document.getElementById(selectId)?.value;
@@ -7027,9 +6960,9 @@
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(instrumentData)
                 });
 
@@ -7052,9 +6985,7 @@
                 // Reopen the instrument detail modal with fresh data
                 // This ensures users see their changes immediately
                 const refreshResponse = await fetch(`/api/instruments/${instrumentId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (refreshResponse.ok) {
@@ -7084,11 +7015,8 @@
         // Helper functions to refresh detail modals after successful edits
         async function refreshPlatformDetailModal(platformId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/platforms/${platformId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
                 if (response.ok) {
                     const updatedPlatform = await response.json();
@@ -7101,11 +7029,8 @@
 
         async function refreshInstrumentDetailModal(instrumentId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
                 if (response.ok) {
                     const updatedInstrument = await response.json();
@@ -7357,13 +7282,12 @@
                     degrees_from_nadir: degreesFromNadir ? parseFloat(degreesFromNadir) : null
                 };
 
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/instruments', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(instrumentData)
                 });
 
@@ -7446,14 +7370,10 @@
                 deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
                 const backup = document.getElementById('backup-instrument').checked;
-                const token = localStorage.getItem('sites_spectral_token');
 
                 const response = await fetch(`/api/instruments/${instrumentId}?backup=${backup}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -7599,13 +7519,12 @@
                     alpha: alpha
                 };
 
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/rois', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(roiData)
                 });
 
@@ -7686,14 +7605,10 @@
                 deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
                 const backup = document.getElementById('backup-roi').checked;
-                const token = localStorage.getItem('sites_spectral_token');
 
                 const response = await fetch(`/api/rois/${roiId}?backup=${backup}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -7800,11 +7715,8 @@
         // Refresh platform modal content
         async function refreshPlatformModal(platformId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/platforms/${platformId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -7812,9 +7724,7 @@
 
                     // Get updated instruments for this platform
                     const instrumentsResponse = await fetch(`/api/instruments?station=${stationAcronym}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        credentials: 'include'
                     });
 
                     if (instrumentsResponse.ok) {
@@ -7833,11 +7743,8 @@
         // Enhanced refresh for instrument modal
         async function refreshInstrumentModal(instrumentId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -8047,13 +7954,12 @@
                     throw new Error('Display name, acronym, and normalized name are required');
                 }
 
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/admin/stations', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(stationData)
                 });
 
@@ -8152,7 +8058,6 @@
 
         async function analyzeDependencies(type, id) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const endpoint = type === 'station' ? `/api/stations/${id}` : `/api/platforms/${id}`;
 
                 // This would need to be enhanced to get dependency counts
@@ -8185,15 +8090,12 @@
                 deleteBtn.disabled = true;
 
                 const generateBackup = document.getElementById('generate-backup').checked;
-                const token = localStorage.getItem('sites_spectral_token');
 
                 const url = `/api/admin/stations/${stationId}?force_cascade=true${generateBackup ? '&backup=true' : ''}`;
 
                 const response = await fetch(url, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -8411,7 +8313,6 @@
             if (!specs) {
                 return null;
             }
-            const token = localStorage.getItem('sites_spectral_token');
 
             // Generate instrument normalized name
             const instrumentType = specs.instrument_type === 'hyperspectral' ? 'HYP' : 'MS';
@@ -8441,9 +8342,9 @@
                 const response = await fetch('/api/admin/instruments', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(instrumentData)
                 });
 
@@ -8468,8 +8369,6 @@
 
         // Function to create channels for UAV instrument
         async function createUAVInstrumentChannels(instrumentId, channels) {
-            const token = localStorage.getItem('sites_spectral_token');
-
             for (let i = 0; i < channels.length; i++) {
                 const channel = channels[i];
                 const channelData = {
@@ -8485,9 +8384,9 @@
                     await fetch('/api/admin/instrument-channels', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
+                            'Content-Type': 'application/json'
                         },
+                        credentials: 'include',
                         body: JSON.stringify(channelData)
                     });
                 } catch (error) {
@@ -8675,9 +8574,9 @@
                 const response = await fetch(`/api/platforms/${platformId}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('sites_spectral_token')}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(updateData)
                 });
 
@@ -9504,9 +9403,9 @@
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('sites_spectral_token')}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(updateData)
                 });
 
@@ -10204,13 +10103,12 @@
                     throw new Error('Location code is required for non-satellite platforms');
                 }
 
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/admin/platforms', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(platformData)
                 });
 
@@ -10383,15 +10281,12 @@
                 deleteBtn.disabled = true;
 
                 const generateBackup = document.getElementById('generate-backup').checked;
-                const token = localStorage.getItem('sites_spectral_token');
 
                 const url = `/api/admin/platforms/${platformId}?force_cascade=true${generateBackup ? '&backup=true' : ''}`;
 
                 const response = await fetch(url, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -10460,12 +10355,8 @@
         async function addROI(instrumentId) {
             try {
                 // Fetch instrument details to get normalized name
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -10815,12 +10706,8 @@
         // Fetch next available ROI name
         async function fetchNextROIName(instrumentId) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}/rois`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -10872,9 +10759,8 @@
 
             // Check for duplicates
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch(`/api/instruments/${instrumentId}/rois`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -10942,13 +10828,12 @@
             };
 
             try {
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/rois', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(roiData)
                 });
 
@@ -11157,13 +11042,12 @@
                 };
 
                 try {
-                    const token = localStorage.getItem('sites_spectral_token');
                     const response = await fetch('/api/rois', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
                         },
+                        credentials: 'include',
                         body: JSON.stringify(payload)
                     });
 

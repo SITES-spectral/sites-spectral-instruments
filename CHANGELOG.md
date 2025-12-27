@@ -13,6 +13,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.24.0] - 2025-12-27
+
+### Security: Complete HTML httpOnly Cookie Migration
+
+Completed the migration of all inline fetch calls in HTML files from localStorage token authentication to httpOnly cookie authentication using `credentials: 'include'`.
+
+#### Files Migrated
+
+| File | Locations Updated | Description |
+|------|-------------------|-------------|
+| `spectral.html` | 4 | Auth check, station loading, logout handler |
+| `sites-dashboard.html` | 7 | Auth verify, stations, users, analytics, CRUD |
+| `station-dashboard.html` | 44 | Full dashboard, platforms, instruments, ROIs |
+| **Total** | **55** | All inline fetch calls migrated |
+
+#### Migration Pattern
+
+**Before (vulnerable to XSS):**
+```javascript
+const token = localStorage.getItem('sites_spectral_token');
+const response = await fetch('/api/endpoint', {
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+});
+```
+
+**After (secure httpOnly cookies):**
+```javascript
+const response = await fetch('/api/endpoint', {
+    credentials: 'include'
+});
+```
+
+#### Logout Handler Update
+
+All logout handlers now call the server logout endpoint to clear the httpOnly cookie:
+```javascript
+async function logout() {
+    try {
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (e) {
+        console.error('Logout error:', e);
+    }
+    localStorage.removeItem('sites_spectral_user');
+    window.location.href = '/';
+}
+```
+
+#### Security Benefits
+
+- **XSS Protection**: Tokens no longer accessible via `document.cookie` or JavaScript
+- **Automatic Transmission**: Browser handles cookie on all same-origin requests
+- **Consistent Auth**: All endpoints use same cookie-based authentication
+- **Clean Logout**: Server-side cookie clearing ensures complete session termination
+
+---
+
 ## [13.23.0] - 2025-12-27
 
 ### Security: CSRF Subdomain Spoofing Fix & Security Test Suite

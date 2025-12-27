@@ -1166,18 +1166,9 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Verify authentication
-                const token = localStorage.getItem('sites_spectral_token');
-                if (!token) {
-                    window.location.href = '/';
-                    return;
-                }
-
-                // Get user info
+                // Verify authentication via httpOnly cookie
                 const userResponse = await fetch('/api/auth/verify', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!userResponse.ok) {
@@ -1222,13 +1213,9 @@
                 document.getElementById('error-state').style.display = 'none';
                 document.getElementById('stations-grid').style.display = 'none';
 
-                const token = localStorage.getItem('sites_spectral_token');
-
-                // Load stations
+                // Load stations via httpOnly cookie
                 const stationsResponse = await fetch('/api/stations', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!stationsResponse.ok) {
@@ -1380,8 +1367,16 @@
             document.getElementById('error-message').textContent = message;
         }
 
-        function logout() {
-            localStorage.removeItem('sites_spectral_token');
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (e) {
+                console.error('Logout error:', e);
+            }
+            localStorage.removeItem('sites_spectral_user');
             window.location.href = '/';
         }
 
@@ -1519,13 +1514,12 @@
                     throw new Error('Display name, acronym, and normalized name are required');
                 }
 
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/stations', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(stationData)
                 });
 
@@ -1653,15 +1647,12 @@
                 deleteBtn.disabled = true;
 
                 const generateBackup = document.getElementById('generate-backup').checked;
-                const token = localStorage.getItem('sites_spectral_token');
 
                 const url = `/api/stations/${stationId}?force_cascade=true${generateBackup ? '&backup=true' : ''}`;
 
                 const response = await fetch(url, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -1783,9 +1774,8 @@
                 document.getElementById('users-loading').style.display = 'flex';
                 document.getElementById('users-list').style.display = 'none';
 
-                const token = localStorage.getItem('sites_spectral_token');
                 const response = await fetch('/api/users/list', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
@@ -1873,14 +1863,12 @@
 
         async function analyzeRoleChange(username, currentRole, station) {
             try {
-                const token = localStorage.getItem('sites_spectral_token');
-
                 const response = await fetch('/api/users/analyze-role-change', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
                         username: username,
                         current_role: currentRole,
@@ -2003,11 +1991,9 @@
                 document.getElementById('analytics-loading').style.display = 'flex';
                 document.getElementById('analytics-content').style.display = 'none';
 
-                const token = localStorage.getItem('sites_spectral_token');
-
-                // Load system overview
+                // Load system overview via httpOnly cookie
                 const overviewResponse = await fetch('/api/analytics/overview', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include'
                 });
 
                 if (!overviewResponse.ok) {
@@ -2016,9 +2002,9 @@
 
                 const overview = await overviewResponse.json();
 
-                // Load station analytics
+                // Load station analytics via httpOnly cookie
                 const stationsResponse = await fetch('/api/analytics/stations', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include'
                 });
 
                 const stationsData = stationsResponse.ok ? await stationsResponse.json() : { stations: [] };

@@ -1186,19 +1186,15 @@
             }
 
             /**
-             * Check authentication status
+             * Check authentication status via httpOnly cookie
              */
             async function checkAuth() {
-                const token = localStorage.getItem('sites_spectral_token');
-                if (!token) return null;
-
                 try {
                     const response = await fetch('/api/auth/verify', {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        credentials: 'include'
                     });
 
                     if (!response.ok) {
-                        localStorage.removeItem('sites_spectral_token');
                         localStorage.removeItem('sites_spectral_user');
                         return null;
                     }
@@ -1216,9 +1212,8 @@
              */
             async function loadStation(acronym) {
                 try {
-                    const token = localStorage.getItem('sites_spectral_token');
                     const response = await fetch(`/api/stations?acronym=${acronym}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        credentials: 'include'
                     });
 
                     if (!response.ok) throw new Error('Failed to load station');
@@ -1332,10 +1327,9 @@
                 const loadingEl = document.getElementById('platforms-loading');
 
                 try {
-                    const token = localStorage.getItem('sites_spectral_token');
                     // v12.0.4: Use /api/latest for automatic version resolution
                     const response = await fetch(`/api/latest/platforms?station_id=${stationId}&include_instruments=true`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        credentials: 'include'
                     });
 
                     if (!response.ok) throw new Error('Failed to load platforms');
@@ -1555,9 +1549,16 @@
              * Setup event listeners
              */
             function setupEventListeners() {
-                // Logout button
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    localStorage.removeItem('sites_spectral_token');
+                // Logout button - call server to clear httpOnly cookie
+                document.getElementById('logout-btn').addEventListener('click', async () => {
+                    try {
+                        await fetch('/api/auth/logout', {
+                            method: 'POST',
+                            credentials: 'include'
+                        });
+                    } catch (e) {
+                        console.error('Logout error:', e);
+                    }
                     localStorage.removeItem('sites_spectral_user');
                     window.location.href = '/';
                 });
