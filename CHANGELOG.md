@@ -13,6 +13,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.18.0] - 2025-12-27
+
+### Security Consolidation - escapeHtml Functions
+
+Consolidated 24 duplicate `escapeHtml` implementations across the codebase to use the central `core/security.js` module.
+
+#### Changes
+
+All implementations now delegate to `SitesSecurity.escapeHtml` with a compact inline fallback:
+
+**Files Updated (20 files):**
+- `campaigns/campaign-manager.js` - Class method
+- `components.js` - Utility method
+- `dashboard.js` - Class method
+- `instruments/*/` - All modal and card files (12 files)
+- `modals/modal-base.js` - Base class method
+- `modals/form-field.js` - Static method
+- `modals/sections/` - Timeline and shared sections (3 files)
+- `platforms/platform-type-filter.js` - Class method
+- `utils/toast.js` - Class method
+
+#### Pattern Applied
+
+```javascript
+// Before: Inline implementation (6-12 lines)
+_escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        // ... more replacements
+}
+
+// After: Delegation with fallback (1 line)
+_escapeHtml(str) {
+    return global.SitesSecurity?.escapeHtml?.(str) ?? (str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]) : '');
+}
+```
+
+#### Benefits
+
+- **Single Source of Truth**: All XSS protection logic in `core/security.js`
+- **Consistent Behavior**: Same escaping algorithm everywhere
+- **Backward Compatible**: Fallback if security.js not loaded
+- **Reduced Code**: ~200 lines removed across codebase
+
+---
+
 ## [13.17.0] - 2025-12-27
 
 ### CSS Extraction - AOI Modal

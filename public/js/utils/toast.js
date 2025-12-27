@@ -463,11 +463,10 @@
          * @private
          * @param {string} text - Text to escape
          * @returns {string} Escaped text
+         * @see core/security.js - Delegates to central implementation
          */
         _escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+            return window.SitesSecurity?.escapeHtml?.(text) ?? (text ? String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]) : '');
         }
     }
 

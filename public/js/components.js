@@ -551,9 +551,8 @@ class SitesComponents {
     }
 
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        // Delegate to central security module
+        return window.SitesSecurity?.escapeHtml?.(text) ?? (text ? String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]) : '');
     }
 
     debounce(func, wait) {

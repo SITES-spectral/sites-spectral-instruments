@@ -471,12 +471,9 @@ class SitesDashboard {
         }
     }
 
-    // Utility functions
+    // Utility functions - delegate to central security module
     escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return window.SitesSecurity?.escapeHtml?.(text) ?? (text ? String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]) : '');
     }
 
     debounce(func, wait) {

@@ -412,12 +412,10 @@ class CalibrationTimelineSection {
     /**
      * Escape HTML to prevent XSS
      * @private
+     * @see core/security.js - Delegates to central implementation
      */
     static _escapeHtml(str) {
-        if (!str) return '';
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+        return window.SitesSecurity?.escapeHtml?.(str) ?? (str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]) : '');
     }
 
     /**

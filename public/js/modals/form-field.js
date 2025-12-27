@@ -459,15 +459,10 @@ class FormField {
     /**
      * Escape HTML to prevent XSS
      * @private
+     * @see core/security.js - Delegates to central implementation
      */
     static _escapeHtml(str) {
-        if (str == null) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        return window.SitesSecurity?.escapeHtml?.(str) ?? (str != null ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]) : '');
     }
 }
 
