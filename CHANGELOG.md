@@ -13,6 +13,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.15.0] - 2025-12-27
+
+### ES6 Module Migration with Vite (Phase 9.5)
+
+This release introduces ES6 module support using Vite as the build tool, enabling modern JavaScript features and better code organization.
+
+#### Build System
+
+**Vite Configuration** (`vite.config.js`)
+- Multi-entry build (main, login, dashboard)
+- Manual chunking for better caching:
+  - `core.bundle.js` - Security, utilities, configuration
+  - `api.bundle.js` - API client with V3Response
+  - `components.bundle.js` - Toast, Modal, Skeleton
+- Path aliases: @, @core, @api, @components, @utils
+- Source maps for debugging
+- ES2020 target for modern browsers
+- Manifest generation for asset tracking
+
+#### New ES6 Modules
+
+**Core Modules** (`src/frontend/core/`)
+- `security.js` - XSS-safe DOM utilities (escapeHtml, sanitizeUrl, createElement)
+- `utils.js` - Utility functions (debounce, throttle, formatDate, etc.)
+- `config.js` - Application configuration (PLATFORM_TYPES, INSTRUMENT_TYPES, STATUS_CONFIG)
+
+**Component Modules** (`src/frontend/components/`)
+- `toast.js` - Toast notification system using safe DOM methods
+- `modal.js` - Modal dialog with focus trap (WCAG 2.4.3 compliant)
+- `skeleton.js` - Skeleton loading components
+
+**API Module** (`src/frontend/api/`)
+- `client.js` - Full API client with authentication
+  - V3Response class for pagination support
+  - Station, Platform, Instrument, Campaign, Product APIs
+  - Maintenance and Calibration timeline APIs
+  - Spatial queries (bbox, near)
+
+**Entry Points** (`src/frontend/`)
+- `main.js` - Main application entry
+- `login.js` - Login page entry (minimal bundle)
+- `dashboard.js` - Dashboard entry (full bundle)
+
+#### Backward Compatibility
+
+- Global namespace `window.SitesSpectral` for gradual migration
+- Existing IIFE scripts continue to work
+- ES6 modules load alongside existing scripts
+
+#### Build Output
+
+```
+public/dist/
+├── main.bundle.js           (~1 KB gzip)
+├── login.bundle.js          (~0.9 KB gzip)
+├── dashboard.bundle.js      (~1 KB gzip)
+└── chunks/
+    ├── core.bundle.js       (~2.5 KB gzip)
+    ├── api.bundle.js        (~2.6 KB gzip)
+    └── components.bundle.js (~3 KB gzip)
+```
+
+#### NPM Scripts
+
+- `npm run dev:frontend` - Vite development server
+- `npm run build:frontend` - Build ES6 bundles
+- `npm run deploy` - Build all and deploy (includes frontend)
+
+#### HTML Updates
+
+All HTML files updated to include ES6 module bundles:
+- `index.html` - login.bundle.js
+- `login.html` - login.bundle.js
+- `sites-dashboard.html` - dashboard.bundle.js
+- `station-dashboard.html` - dashboard.bundle.js
+- `spectral.html` - main.bundle.js
+
+#### Benefits
+
+1. **Tree Shaking**: Unused code automatically removed
+2. **Code Splitting**: Shared code in separate chunks
+3. **Smaller Bundles**: ~28 KB total (vs ~50 KB unoptimized)
+4. **Better Caching**: Stable chunk names with content hashing option
+5. **Modern Syntax**: ES6 imports/exports, async/await
+6. **Type Safety**: JSDoc annotations for IDE support
+7. **Explicit Dependencies**: Clear import graph
+
+---
+
 ## [13.14.0] - 2025-12-27
 
 ### Formal Design System (Phase 9.4)
