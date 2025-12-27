@@ -13,6 +13,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.13.0] - 2025-12-27
+
+### Mobile Responsive Enhancements (Phase 9.3)
+
+This release adds comprehensive mobile responsiveness improvements for better user experience on tablets and mobile devices.
+
+#### New File
+
+**CSS Styles** (`public/css/mobile-enhancements.css`)
+- Comprehensive mobile responsiveness stylesheet
+
+#### Touch Target Sizing (WCAG 2.5.5)
+
+- Minimum 44x44px touch targets for all buttons
+- Enhanced form input sizing for mobile
+- Larger tap areas for icon-only buttons
+- Touch-friendly checkbox and radio inputs
+
+#### Breakpoints
+
+- **1024px (Tablet Landscape)**: Dashboard layout adjustments, 2-column grids, horizontal table scroll
+- **768px (Mobile)**: Single column layouts, stacked form actions, horizontal tab scroll
+- **480px (Small Mobile)**: Compact cards, stacked button groups
+
+#### Modal Improvements
+
+- `max-height: 90vh` / `90dvh` for modal content
+- Sticky modal headers during scroll
+- Bottom-drawer style modals on mobile
+- Safe area insets for notched devices (iPhone X+)
+
+#### Hamburger Navigation
+
+- Mobile navigation toggle with animated icon
+- Full-screen overlay navigation menu
+- Smooth open/close transitions
+
+#### Touch-Friendly Interactions
+
+- Disabled hover effects on touch devices
+- Active state feedback on touch
+- Smooth scrolling for scrollable areas
+- Landscape orientation optimizations
+
+#### Safe Area Insets
+
+- Support for devices with notches (iPhone X+)
+- Proper padding for dashboard header
+- Modal bottom padding for safe areas
+
+#### Integration
+
+- Added to all HTML files: index.html, login.html, sites-dashboard.html, station-dashboard.html, spectral.html
+
+---
+
 ## [13.12.0] - 2025-12-27
 
 ### Skeleton Screen Components (Phase 9.2)

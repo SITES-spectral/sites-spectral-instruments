@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "13.12.0",
-  "description": "SITES Spectral v13.12.0 - Skeleton Screen Components for Improved Loading Experience",
+  "version": "13.13.0",
+  "description": "SITES Spectral v13.13.0 - Mobile Responsive Enhancements",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",
