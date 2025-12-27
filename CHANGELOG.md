@@ -13,6 +13,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.17.0] - 2025-12-27
+
+### CSS Extraction - AOI Modal
+
+Separation of concerns: extracted inline CSS from AOI modal JavaScript to external stylesheet.
+
+#### New Files
+
+**AOI Modal Stylesheet** (`public/css/aoi-modal.css`)
+- Extracted ~270 lines of CSS from aoi-modal.js
+- Complete modal styling including overlay, container, form elements
+- Responsive breakpoints for mobile (≤900px)
+- Proper CSS organization with sections
+
+#### Changes
+
+- **aoi-modal.js**: Reduced from 1,008 to 715 lines
+  - Removed inline CSS injection
+  - Now loads external stylesheet via `<link>` element
+  - Version-tagged stylesheet URL for cache busting
+
+#### Code Quality
+
+- **instrument-manager.js**: Reviewed (923 lines)
+  - Already well-structured with proper patterns
+  - Uses ConfigLoader for YAML-based configuration
+  - Event-driven architecture with proper encapsulation
+  - No refactoring needed
+
+---
+
 ## [13.16.0] - 2025-12-27
 
 ### Frontend Modularization (Phase 3.4)
