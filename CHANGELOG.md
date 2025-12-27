@@ -13,6 +13,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.9.0] - 2025-12-27
+
+### D1 Repository Adapters Complete (Phase 8.2)
+
+This release completes the D1 repository adapters to fully implement all port methods.
+
+#### D1MaintenanceRepository
+
+Added 10 missing methods:
+- `findByEntity(entityType, entityId)` - Find records by entity type and ID
+- `findByStatus(status)` - Find by maintenance status
+- `findByType(maintenanceType)` - Find by maintenance type
+- `findScheduled()` - Find all scheduled maintenance
+- `findByDateRange(startDate, endDate)` - Find within date range
+- `findNextScheduled(entityType, entityId)` - Get next scheduled maintenance
+- `findLastCompleted(entityType, entityId)` - Get last completed maintenance
+- `countByEntity(entityType, entityId)` - Count records for entity
+- `existsById(id)` - Check if record exists
+- `getStatistics(entityType, entityId)` - Get maintenance statistics
+
+#### D1CalibrationRepository
+
+Added 11 missing methods:
+- `findByStationId(stationId)` - Find all calibrations for a station
+- `findByType(calibrationType)` - Find by calibration type
+- `findByStatus(status)` - Find by status
+- `findExpiringSoon(days)` - Alias for findExpiringWithin
+- `findByDateRange(startDate, endDate)` - Find within date range
+- `findByLaboratory(laboratory)` - Find by laboratory name
+- `findByCertificateNumber(certificateNumber)` - Find by certificate
+- `findLastCalibration(instrumentId)` - Get most recent calibration
+- `countByInstrumentId(instrumentId)` - Count calibrations for instrument
+- `existsById(id)` - Check if record exists
+- `supersedeOldCalibrations(instrumentId, newId)` - Mark old calibrations superseded
+
+---
+
 ## [13.8.0] - 2025-12-27
 
 ### Frontend TODOs Complete (Phase 8.1)

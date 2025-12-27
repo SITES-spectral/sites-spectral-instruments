@@ -170,6 +170,152 @@ export class D1MaintenanceRepository extends MaintenanceRepository {
     return results.results.map(row => this.mapToEntity(row));
   }
 
+  async findByEntity(entityType, entityId) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE entity_type = ? AND entity_id = ?
+        ORDER BY scheduled_date DESC
+      `)
+      .bind(entityType, entityId)
+      .all();
+
+    return results.results.map(row => this.mapToEntity(row));
+  }
+
+  async findByStatus(status) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE status = ?
+        ORDER BY scheduled_date DESC
+      `)
+      .bind(status)
+      .all();
+
+    return results.results.map(row => this.mapToEntity(row));
+  }
+
+  async findByType(maintenanceType) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE type = ?
+        ORDER BY scheduled_date DESC
+      `)
+      .bind(maintenanceType)
+      .all();
+
+    return results.results.map(row => this.mapToEntity(row));
+  }
+
+  async findScheduled() {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE status = 'scheduled'
+        ORDER BY scheduled_date ASC
+      `)
+      .all();
+
+    return results.results.map(row => this.mapToEntity(row));
+  }
+
+  async findByDateRange(startDate, endDate) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE scheduled_date >= ? AND scheduled_date <= ?
+        ORDER BY scheduled_date ASC
+      `)
+      .bind(startDate, endDate)
+      .all();
+
+    return results.results.map(row => this.mapToEntity(row));
+  }
+
+  async findNextScheduled(entityType, entityId) {
+    const today = new Date().toISOString().split('T')[0];
+    const result = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE entity_type = ? AND entity_id = ?
+          AND status = 'scheduled'
+          AND scheduled_date >= ?
+        ORDER BY scheduled_date ASC
+        LIMIT 1
+      `)
+      .bind(entityType, entityId, today)
+      .first();
+
+    return result ? this.mapToEntity(result) : null;
+  }
+
+  async findLastCompleted(entityType, entityId) {
+    const result = await this.db
+      .prepare(`
+        SELECT * FROM maintenance_records
+        WHERE entity_type = ? AND entity_id = ?
+          AND status = 'completed'
+        ORDER BY completed_date DESC
+        LIMIT 1
+      `)
+      .bind(entityType, entityId)
+      .first();
+
+    return result ? this.mapToEntity(result) : null;
+  }
+
+  async countByEntity(entityType, entityId) {
+    const result = await this.db
+      .prepare(`
+        SELECT COUNT(*) as count FROM maintenance_records
+        WHERE entity_type = ? AND entity_id = ?
+      `)
+      .bind(entityType, entityId)
+      .first();
+
+    return result?.count || 0;
+  }
+
+  async existsById(id) {
+    const result = await this.db
+      .prepare('SELECT 1 FROM maintenance_records WHERE id = ?')
+      .bind(id)
+      .first();
+
+    return !!result;
+  }
+
+  async getStatistics(entityType, entityId) {
+    const results = await this.db
+      .prepare(`
+        SELECT
+          status,
+          COUNT(*) as count
+        FROM maintenance_records
+        WHERE entity_type = ? AND entity_id = ?
+        GROUP BY status
+      `)
+      .bind(entityType, entityId)
+      .all();
+
+    const stats = {
+      total: 0,
+      scheduled: 0,
+      in_progress: 0,
+      completed: 0,
+      cancelled: 0
+    };
+
+    results.results.forEach(row => {
+      stats[row.status] = row.count;
+      stats.total += row.count;
+    });
+
+    return stats;
+  }
+
   async save(record) {
     if (record.id) {
       return await this.update(record);

@@ -245,6 +245,137 @@ export class D1CalibrationRepository extends CalibrationRepository {
     return results.results.map(row => CalibrationRecord.fromRow(row));
   }
 
+  async findByStationId(stationId) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE station_id = ?
+        ORDER BY calibration_date DESC
+      `)
+      .bind(stationId)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findByType(calibrationType) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE calibration_type = ?
+        ORDER BY calibration_date DESC
+      `)
+      .bind(calibrationType)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findByStatus(status) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE status = ?
+        ORDER BY calibration_date DESC
+      `)
+      .bind(status)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findExpiringSoon(daysUntilExpiration = 30) {
+    return this.findExpiringWithin(daysUntilExpiration);
+  }
+
+  async findByDateRange(startDate, endDate) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE calibration_date >= ? AND calibration_date <= ?
+        ORDER BY calibration_date ASC
+      `)
+      .bind(startDate, endDate)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findByLaboratory(laboratory) {
+    const results = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE laboratory LIKE ?
+        ORDER BY calibration_date DESC
+      `)
+      .bind(`%${laboratory}%`)
+      .all();
+
+    return results.results.map(row => CalibrationRecord.fromRow(row));
+  }
+
+  async findByCertificateNumber(certificateNumber) {
+    const result = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE certificate_number = ?
+      `)
+      .bind(certificateNumber)
+      .first();
+
+    return result ? CalibrationRecord.fromRow(result) : null;
+  }
+
+  async findLastCalibration(instrumentId) {
+    const result = await this.db
+      .prepare(`
+        SELECT * FROM calibration_records
+        WHERE instrument_id = ?
+        ORDER BY calibration_date DESC
+        LIMIT 1
+      `)
+      .bind(instrumentId)
+      .first();
+
+    return result ? CalibrationRecord.fromRow(result) : null;
+  }
+
+  async countByInstrumentId(instrumentId) {
+    const result = await this.db
+      .prepare(`
+        SELECT COUNT(*) as count FROM calibration_records
+        WHERE instrument_id = ?
+      `)
+      .bind(instrumentId)
+      .first();
+
+    return result?.count || 0;
+  }
+
+  async existsById(id) {
+    const result = await this.db
+      .prepare('SELECT 1 FROM calibration_records WHERE id = ?')
+      .bind(id)
+      .first();
+
+    return !!result;
+  }
+
+  async supersedeOldCalibrations(instrumentId, newCalibrationId) {
+    const result = await this.db
+      .prepare(`
+        UPDATE calibration_records
+        SET status = 'superseded', updated_at = ?
+        WHERE instrument_id = ?
+          AND id != ?
+          AND status = 'valid'
+      `)
+      .bind(new Date().toISOString(), instrumentId, newCalibrationId)
+      .run();
+
+    return result.meta.changes || 0;
+  }
+
   async save(record) {
     if (record.id) {
       return await this.update(record);
