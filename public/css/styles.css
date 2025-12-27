@@ -2842,3 +2842,240 @@ body {
         padding: 16px;
     }
 }
+
+/* ============================================
+   Cookie Consent Banner (v13.25.0)
+   GDPR-compliant cookie consent
+   ============================================ */
+
+.cookie-consent-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+    color: white;
+    padding: 0;
+    z-index: 10000;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.cookie-consent-banner.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.cookie-consent-banner.hide {
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.cookie-consent-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.cookie-consent-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.cookie-consent-text {
+    flex: 1;
+    min-width: 280px;
+}
+
+.cookie-consent-text h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.cookie-consent-text p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    opacity: 0.95;
+}
+
+.cookie-consent-links {
+    font-size: 0.85rem !important;
+    margin-bottom: 0 !important;
+}
+
+.cookie-consent-links a {
+    color: #a7f3d0;
+    text-decoration: none;
+}
+
+.cookie-consent-links a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+.cookie-consent-links .separator {
+    margin: 0 8px;
+    opacity: 0.6;
+}
+
+.cookie-consent-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.cookie-consent-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.cookie-consent-btn:hover {
+    transform: translateY(-1px);
+}
+
+.cookie-consent-btn:active {
+    transform: translateY(0);
+}
+
+.cookie-consent-btn-primary {
+    background: white;
+    color: #047857;
+}
+
+.cookie-consent-btn-primary:hover {
+    background: #f0fdf4;
+}
+
+.cookie-consent-btn-secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cookie-consent-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 768px) {
+    .cookie-consent-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 16px;
+    }
+
+    .cookie-consent-text {
+        min-width: 100%;
+    }
+
+    .cookie-consent-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   Site Footer (v13.25.0)
+   Legal links and attribution
+   ============================================ */
+
+.site-footer {
+    background: #1f2937;
+    color: #9ca3af;
+    padding: 30px 20px;
+    margin-top: auto;
+}
+
+.site-footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-footer-brand img {
+    height: 32px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.site-footer-brand span {
+    font-size: 0.9rem;
+    color: #d1d5db;
+}
+
+.site-footer-links {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.site-footer-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+.site-footer-links a:hover {
+    color: #059669;
+}
+
+.site-footer-links a i {
+    margin-right: 6px;
+}
+
+.site-footer-copyright {
+    width: 100%;
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid #374151;
+    font-size: 0.8rem;
+}
+
+.site-footer-copyright a {
+    color: #059669;
+    text-decoration: none;
+}
+
+.site-footer-copyright a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .site-footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .site-footer-links {
+        gap: 16px;
+    }
+}

@@ -13,6 +13,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.25.0] - 2025-12-27
+
+### Added: Privacy Policy, Terms of Service & GDPR Compliance
+
+Implemented comprehensive legal compliance framework with privacy policy, terms of service, and cookie consent banner.
+
+#### New Pages
+
+| Page | Description |
+|------|-------------|
+| `/privacy-policy.html` | GDPR-compliant privacy policy with data protection details |
+| `/terms-of-service.html` | Terms of service with FAIR data and CC-BY-4.0 licensing |
+
+#### Privacy Policy Highlights
+
+- **Data Controller**: SITES Spectral Thematic Center, Lund University
+- **Legal Basis**: Legitimate interest (Art. 6(1)(f)) and public task (Art. 6(1)(e))
+- **GDPR Rights**: Access, rectification, erasure, restriction, portability, objection
+- **Data Security**: httpOnly cookies, HTTPS, CSRF protection, input sanitization
+- **Essential Cookies Only**: No tracking or analytics cookies
+- **Supervisory Authority**: Integritetsskyddsmyndigheten (IMY), Sweden
+
+#### Terms of Service Highlights
+
+- **Mission Statement**: Support SITES stations, FAIR data principles, Open Science
+- **Data License**: CC-BY-4.0 for instrument metadata
+- **FAIR Principles**: Findable, Accessible, Interoperable, Reusable
+- **Acceptable Use**: Research purposes, station management, collaboration
+- **Institutional Framework**: Lund University, Swedish Infrastructure for Ecosystem Science
+
+#### Cookie Consent Banner
+
+New GDPR-compliant cookie consent component:
+
+- **Location**: `/js/core/cookie-consent.js`
+- **Features**:
+  - Auto-shows on first visit
+  - Stores consent in localStorage with version tracking
+  - Links to Privacy Policy and Terms of Service
+  - Accept button dismisses banner
+  - "Learn More" opens Privacy Policy
+  - Safe DOM construction (no innerHTML)
+
+#### Site Footer
+
+Added consistent footer across all pages with:
+
+- SITES Spectral branding
+- Links to Privacy Policy, Terms of Service, SITES, Lund University
+- Copyright notice referencing SITES and Lund University
+
+#### Files Modified
+
+| File | Changes |
+|------|---------|
+| `public/privacy-policy.html` | New - Complete GDPR privacy policy |
+| `public/terms-of-service.html` | New - Terms of service with FAIR/Open Science |
+| `public/js/core/cookie-consent.js` | New - Cookie consent manager |
+| `public/css/styles.css` | Added cookie consent banner and footer styles |
+| `public/index.html` | Added footer and cookie consent |
+| `public/login.html` | Added footer and cookie consent |
+| `public/spectral.html` | Added footer and cookie consent |
+| `public/sites-dashboard.html` | Added footer and cookie consent |
+| `public/station-dashboard.html` | Added footer and cookie consent |
+
+#### Institutional References
+
+- **SITES**: [Swedish Infrastructure for Ecosystem Science](https://fieldsites.se)
+- **Lund University**: Host institution for SITES Spectral Thematic Center
+- **IMY**: Swedish Authority for Privacy Protection (supervisory authority)
+
+---
+
 ## [13.24.0] - 2025-12-27
 
 ### Security: Complete HTML httpOnly Cookie Migration

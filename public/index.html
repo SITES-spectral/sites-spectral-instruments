@@ -19,11 +19,11 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=13.16.0">
+    <link rel="stylesheet" href="/css/styles.css?v=13.25.0">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="13.16.0">
+    <meta name="app-version" content="13.25.0">
     <meta name="build-date" content="2025-12-27">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
@@ -218,7 +218,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=13.16.0"></script>
+    <script src="/js/utils.js?v=13.25.0"></script>
     <script>
         class LoginManager {
             constructor() {
@@ -369,5 +369,20 @@
             new LoginManager();
         });
     </script>
+
+    <!-- Cookie Consent (GDPR Compliance) -->
+    <script src="/js/core/cookie-consent.js?v=13.25.0"></script>
+
+    <!-- Site Footer -->
+    <footer class="site-footer" style="position: fixed; bottom: 0; left: 0; right: 0; padding: 15px 20px; z-index: 1;">
+        <div class="site-footer-content" style="flex-wrap: nowrap; gap: 15px;">
+            <div class="site-footer-links" style="gap: 15px;">
+                <a href="/privacy-policy.html"><i class="fas fa-shield-alt"></i>Privacy</a>
+                <a href="/terms-of-service.html"><i class="fas fa-file-contract"></i>Terms</a>
+                <a href="https://fieldsites.se" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i>SITES</a>
+            </div>
+            <span style="font-size: 0.75rem; opacity: 0.7;">&copy; 2025 SITES Spectral, Lund University</span>
+        </div>
+    </footer>
 </body>
 </html>
