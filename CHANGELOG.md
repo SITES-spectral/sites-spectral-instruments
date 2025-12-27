@@ -13,6 +13,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.6.0] - 2025-12-27
+
+### Architectural Decision Records (Phase 7.8)
+
+This release adds formal ADRs to document the architectural decisions made during the refactoring effort.
+
+#### New ADRs
+
+**ADR-006: OpenAPI Contract-First Design**
+
+Documents the adoption of OpenAPI 3.0 for API specification:
+- Central specification as single source of truth
+- Contract validation middleware for request validation
+- Build-time spec validation in CI/CD
+- Coverage: 33 paths, 51 operations, 49 schemas
+
+**ADR-007: Port Versioning Strategy**
+
+Documents the port versioning strategy for safe evolution:
+- Version metadata and VersionedPort base class
+- Port registry for version discovery
+- Adapter migration factory for backward compatibility
+- Multi-hop migration support
+
+#### Updated Documentation
+
+- Updated `docs/adr/README.md` with ADR-006 and ADR-007 in index
+- Total ADRs now: 7 (ADR-001 through ADR-007)
+
+#### ADR Coverage
+
+| ADR | Topic | Status |
+|-----|-------|--------|
+| ADR-001 | Hexagonal Architecture Adoption | Accepted |
+| ADR-002 | CQRS for Read/Write Separation | Accepted |
+| ADR-003 | Legacy ROI System Preservation | Accepted |
+| ADR-004 | Domain Events for Audit Trail | Accepted |
+| ADR-005 | Security Ports Pattern | Accepted |
+| ADR-006 | OpenAPI Contract-First Design | Accepted |
+| ADR-007 | Port Versioning Strategy | Accepted |
+
+---
+
 ## [13.5.0] - 2025-12-27
 
 ### Port Versioning Strategy (Phase 7.7)
