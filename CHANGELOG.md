@@ -13,6 +13,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.12.0] - 2025-12-27
+
+### Skeleton Screen Components (Phase 9.2)
+
+This release adds skeleton loading screen components for improved perceived performance during data loading. The skeleton screens provide content-shaped placeholders with shimmer/pulse animations.
+
+#### New Files
+
+**CSS Styles** (`public/css/skeleton.css`)
+- Shimmer animation for standard motion preferences
+- Pulse animation for reduced-motion accessibility (WCAG compliant)
+- Dark mode support via `prefers-color-scheme: dark`
+- Component patterns: station cards, platform cards, table rows, instrument items, stat cards, charts, modals
+
+**JavaScript Utilities** (`public/js/core/skeleton.js`)
+- XSS-safe implementation using DOM methods (no innerHTML)
+- Factory methods for skeleton elements:
+  - `Skeleton.text()` - Text line placeholders
+  - `Skeleton.avatar()` - Circular avatar placeholders
+  - `Skeleton.image()` - Image placeholders with aspect ratio
+  - `Skeleton.button()` - Button placeholders
+  - `Skeleton.block()` - Custom block placeholders
+  - `Skeleton.stationCard()` - Complete station card skeleton
+  - `Skeleton.platformCard()` - Platform card with instruments
+  - `Skeleton.tableRow()` - Table row skeleton
+  - `Skeleton.instrumentItem()` - Instrument list item skeleton
+  - `Skeleton.statCard()` - Statistics card skeleton
+  - `Skeleton.chart()` - Chart placeholder skeleton
+  - `Skeleton.formField()` - Form field skeleton
+  - `Skeleton.modalForm()` - Complete modal form skeleton
+  - `Skeleton.showIn()` - Replace container with skeleton, returns restore function
+  - `Skeleton.repeat()` - Create multiple skeleton elements
+  - `Skeleton.stationList()` - Multiple station card skeletons
+  - `Skeleton.platformList()` - Multiple platform card skeletons
+  - `Skeleton.table()` - Table skeleton with rows
+  - `Skeleton.statsGrid()` - Grid of stat cards
+  - `Skeleton.instrumentList()` - List of instrument items
+
+#### Integration
+
+- Added skeleton.css to station-dashboard.html and sites-dashboard.html
+- Added skeleton.js to station-dashboard.html and sites-dashboard.html
+- Version parameter added for cache-busting (v13.12.0)
+
+#### Accessibility
+
+- Respects `prefers-reduced-motion` media query
+- Uses subtle pulse animation instead of shimmer for motion-sensitive users
+- High enough contrast for visibility
+- Non-blocking loading indicators
+
+---
+
 ## [13.11.0] - 2025-12-27
 
 ### Complete Platform Types (Phase 8.4)
