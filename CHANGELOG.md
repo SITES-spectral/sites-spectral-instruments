@@ -13,6 +13,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.7.0] - 2025-12-27
+
+### Architecture Visualization (Phase 7.9)
+
+This release adds comprehensive architecture visualization documentation for developers.
+
+#### New Documentation
+
+**New File:** `docs/ARCHITECTURE_VISUALIZATION.md`
+
+Visual representations of the SITES Spectral architecture including:
+
+1. **Clean Architecture Rings**
+   - Ring 1: Domain (Entities, Value Objects, Ports)
+   - Ring 2: Application (Commands, Queries)
+   - Ring 3: Interface Adapters (Controllers, Repositories)
+   - Ring 4: Frameworks & Drivers (Cloudflare Workers, D1)
+
+2. **Hexagonal Architecture Diagram**
+   - Driving side (HTTP, Admin Console, CLI)
+   - Inbound Ports (Use Cases)
+   - Domain Core (Entities, Ports)
+   - Outbound Ports (Repository interfaces)
+   - Driven side (D1, EventBus, Metrics)
+
+3. **Component Inventory**
+   - 12 domain modules
+   - 33 commands, 26+ queries
+   - 13 controllers, 12 D1 repositories
+
+4. **Data Flow Diagrams**
+   - Read operation (Query) sequence
+   - Write operation (Command) sequence
+   - Dashboard aggregation pattern
+
+5. **Additional Sections**
+   - Directory structure reference
+   - Port-Adapter mapping table
+   - Platform Type Strategy pattern
+   - CQRS pattern visualization
+   - Key design decisions with ADR links
+
+#### Updated Documentation
+
+- Added architecture docs to CLAUDE.md Documentation Index
+- Links to ADRs, OpenAPI spec, and port versioning docs
+
+---
+
 ## [13.6.0] - 2025-12-27
 
 ### Architectural Decision Records (Phase 7.8)

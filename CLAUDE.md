@@ -637,6 +637,10 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Version history and release notes |
+| `docs/ARCHITECTURE_VISUALIZATION.md` | Clean Architecture rings, Hexagonal diagrams |
+| `docs/PORT_VERSIONING.md` | Port versioning strategy |
+| `docs/openapi/openapi.yaml` | OpenAPI 3.0 specification |
+| `docs/adr/README.md` | Architectural Decision Records index |
 | `docs/VOCABULARY_MAPPING.md` | Darwin Core, ICOS, Copernicus alignment |
 | `docs/STATION_USER_GUIDE.md` | End-user guide |
 | `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
