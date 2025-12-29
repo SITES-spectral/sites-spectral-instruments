@@ -1,7 +1,7 @@
 # SITES Spectral Vocabulary Mapping
 
-**Version**: 11.0.0
-**Last Updated**: 2025-12-08
+**Version**: 13.26.0
+**Last Updated**: 2025-12-29
 **Standard Alignment**: Darwin Core, ICOS, ESA Copernicus, SITES
 
 ---
@@ -130,17 +130,21 @@ SITES Spectral instruments mapped to ICOS measurement objectives:
 
 ### Instrument Type Codes
 
-| Code | Full Name | Category | Primary Products |
-|------|-----------|----------|------------------|
-| PHE | Phenocam | Optical RGB | GCC, RCC, BCC, EVI |
-| MS | Multispectral | Optical multispectral | NDVI, EVI, NDWI |
-| PAR | PAR Sensor | Radiation | PPFD, DLI |
-| NDVI | NDVI Sensor | Vegetation index | NDVI, SR |
-| PRI | PRI Sensor | Photochemistry | PRI, LUE |
-| HYP | Hyperspectral | Imaging spectrometer | Full spectrum |
-| LID | LiDAR | Active optical | 3D structure, LAI |
-| THM | Thermal | Thermal infrared | LST, ET |
-| RAD | Radiometer | Broadband radiation | SW, LW flux |
+> **Source of Truth (v13.26.0+)**: `yamls/instruments/instrument-types.yaml`
+> Instrument types are defined in YAML and generated to JavaScript at build time.
+
+| Code | Full Name | Category | Platforms | Primary Products |
+|------|-----------|----------|-----------|------------------|
+| PHE | Phenocam | imaging | fixed, uav | GCC, RCC, BCC, GRVI |
+| MS | Multispectral Sensor | spectral | fixed, uav, satellite | NDVI, EVI, NDWI |
+| RGB | RGB Camera | imaging | uav | Orthomosaics, RGB imagery |
+| PAR | PAR Sensor | radiation | fixed | PPFD, DLI |
+| NDVI | NDVI Sensor | spectral | fixed | NDVI, SR |
+| PRI | PRI Sensor | spectral | fixed | PRI, LUE |
+| HYP | Hyperspectral Sensor | spectral | fixed, uav, satellite | Full spectrum |
+| TIR | Thermal Camera | thermal | fixed, uav, satellite | LST, ET |
+| LID | LiDAR | structural | uav, satellite | 3D structure, LAI |
+| SAR | Radar (SAR) | microwave | satellite | Backscatter, InSAR |
 
 ---
 

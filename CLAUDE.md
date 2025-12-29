@@ -60,17 +60,34 @@ src/
 
 ---
 
-## Current Version: 13.0.0 - Production Ready Codebase (2025-12-27)
+## Current Version: 13.26.0 - Config-Driven Instrument Types (2025-12-29)
 
 **✅ STATUS: PRODUCTION READY**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-27
+**📅 Last Updated:** 2025-12-29
 **🚀 API Version:** V11 (via `/api/latest` alias)
 **🔒 Security Features:** CORS Whitelist, PBKDF2 Password Hashing, httpOnly Cookies, CSRF Protection, Input Sanitization, JWT HMAC-SHA256
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
-**🧪 Test Coverage:** 587 tests across 34 test files
+**🧪 Test Coverage:** 653 tests across 36 test files
+
+### What's New in v13.26.0
+
+**Config-Driven Instrument Types** - Instrument type definitions moved from hardcoded JS to YAML configuration with build-time code generation:
+
+| Component | Description |
+|-----------|-------------|
+| **Source of Truth** | `yamls/instruments/instrument-types.yaml` |
+| **Build Step** | `generateInstrumentTypesModule()` in `scripts/build.js` |
+| **Generated Module** | `src/domain/instrument/instrument-types.generated.js` |
+| **Registry Import** | `InstrumentTypeRegistry.js` imports from generated module |
+
+**Benefits:**
+- Single source of truth in YAML
+- Edit config without changing source code
+- Build-time generation (no runtime YAML parsing)
+- Consistent with platform types pattern
 
 ### What's New in v13.0.0
 
@@ -666,14 +683,34 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 
 ---
 
-## YAML Configuration System (v8.5.0)
+## YAML Configuration System (v8.5.0+)
 
 All hardcoded configurations have been moved to YAML files:
+
+### Backend Configuration (Build-Time Generation)
+
+| Config File | Purpose | Generated Module |
+|-------------|---------|------------------|
+| `yamls/instruments/instrument-types.yaml` | Instrument types, categories, field schemas | `src/domain/instrument/instrument-types.generated.js` |
+
+**Build-Time Code Generation (v13.26.0+):**
+
+```
+yamls/instruments/instrument-types.yaml
+        ↓ npm run build (generateInstrumentTypesModule)
+src/domain/instrument/instrument-types.generated.js
+        ↓ import
+InstrumentTypeRegistry.js
+```
+
+The generated module exports `INSTRUMENT_TYPES` and `CATEGORIES` which are imported by the registry.
+
+### Frontend Configuration (Runtime Loading)
 
 | Config File | Purpose |
 |-------------|---------|
 | `yamls/ui/platform-types.yaml` | Platform icons, colors, gradients |
-| `yamls/ui/instrument-types.yaml` | Instrument icons, colors, patterns |
+| `yamls/ui/instrument-types.yaml` | Instrument icons, colors, patterns (UI only) |
 | `yamls/ui/status-indicators.yaml` | Status codes with styling |
 | `yamls/ui/sensor-orientations.yaml` | Sensor orientations |
 | `yamls/sensors/uav-sensors.yaml` | UAV sensor specifications |
@@ -757,20 +794,29 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 13.0.0 |
-| Last Deployed | 2025-12-27 |
+| Current Version | 13.26.0 |
+| Last Deployed | 2025-12-29 |
 | Status | Production Ready |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
-| Test Coverage | 587 tests across 34 files |
+| Test Coverage | 653 tests across 36 files |
 
-### v13.0.0 Features
+### v13.26.0 Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| **Config-Driven Instrument Types** | v13.26.0 | ✅ Active |
+| **YAML-to-JS Build Generation** | v13.26.0 | ✅ Active |
+| **10 Instrument Types in YAML** | v13.26.0 | ✅ Active |
+| **6 Categories in YAML** | v13.26.0 | ✅ Active |
+
+### v13.0.0 Features (Inherited)
 
 | Feature | Version | Status |
 |---------|---------|--------|
 | **Production Ready Codebase** | v13.0.0 | ✅ Active |
-| **587 Test Coverage** | v13.0.0 | ✅ Active |
+| **653 Test Coverage** | v13.0.0 | ✅ Active |
 | **Promise Error Handling** | v13.0.0 | ✅ Active |
 | **API Version Cleanup** | v13.0.0 | ✅ Active |
 | **Legacy Changelog Archived** | v13.0.0 | ✅ Active |
