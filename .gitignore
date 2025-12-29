@@ -227,6 +227,9 @@ migrations/001[01]_*.sql
 public/images/generated/
 public/css/generated/
 
+# Auto-generated from YAML at build time
+src/domain/instrument/instrument-types.generated.js
+
 # User uploads (sensitive content)
 uploads/
 user-data/

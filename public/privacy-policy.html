@@ -303,13 +303,34 @@
                 <li>Activity logs for audit purposes</li>
             </ul>
 
-            <h3>4.4 Cookies</h3>
-            <p>We use essential cookies for:</p>
+            <h3>4.4 Cookies - Essential Only</h3>
+
+            <div class="info-box">
+                <h4><i class="fas fa-cookie"></i> Minimal Cookie Policy</h4>
+                <p>We use <strong>only ONE essential cookie</strong> for authentication. Under GDPR, strictly necessary
+                cookies do not require consent, which is why we do not display a cookie consent banner.</p>
+            </div>
+
+            <p><strong>Cookie used:</strong></p>
             <ul>
-                <li><strong>Authentication:</strong> Secure session management using httpOnly cookies</li>
-                <li><strong>Security:</strong> CSRF protection and session validation</li>
+                <li><strong>sites_spectral_auth</strong> - Authentication session cookie (httpOnly, Secure, SameSite=Strict)</li>
             </ul>
-            <p>We do not use tracking cookies, analytics cookies, or third-party advertising cookies.</p>
+
+            <p><strong>Cookie security features:</strong></p>
+            <ul>
+                <li><strong>httpOnly:</strong> Cannot be accessed by JavaScript (prevents XSS attacks)</li>
+                <li><strong>Secure:</strong> Only transmitted over HTTPS</li>
+                <li><strong>SameSite=Strict:</strong> Prevents CSRF attacks</li>
+                <li><strong>Expires:</strong> 24 hours (session-based)</li>
+            </ul>
+
+            <p><strong>We do NOT use:</strong></p>
+            <ul>
+                <li>Tracking cookies</li>
+                <li>Analytics cookies</li>
+                <li>Third-party cookies</li>
+                <li>Advertising cookies</li>
+            </ul>
 
             <h2>5. Legal Basis for Processing (GDPR Article 6)</h2>
             <p>We process your data under the following legal bases:</p>

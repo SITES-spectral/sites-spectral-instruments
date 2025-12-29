@@ -13,6 +13,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.26.0] - 2025-12-29
+
+### Architecture: Config-Driven Instrument Types
+
+Migrated hardcoded instrument type definitions from `InstrumentTypeRegistry.js` to YAML configuration, following the established config-driven pattern used for platform types.
+
+#### What Changed
+
+| Before | After |
+|--------|-------|
+| Instrument types hardcoded in JS | Defined in `yamls/instruments/instrument-types.yaml` |
+| ~140 lines of inline config | Build-time generation from YAML |
+| Manual sync needed for changes | Single source of truth in YAML |
+
+#### Implementation
+
+**Build-Time Code Generation:**
+
+```
+yamls/instruments/instrument-types.yaml
+        ↓ (npm run build)
+src/domain/instrument/instrument-types.generated.js
+        ↓ (import)
+InstrumentTypeRegistry.js
+```
+
+**New Build Step:**
+- Added `generateInstrumentTypesModule()` to `scripts/build.js`
+- Reads YAML config with `js-yaml` (existing dependency)
+- Generates ES module with `INSTRUMENT_TYPES` and `CATEGORIES` exports
+- Logs count of types and categories during build
+
+#### YAML Configuration Structure
+
+```yaml
+instrument_types:
+  phenocam:
+    name: "Phenocam"
+    description: "Digital camera for repeat photography..."
+    icon: "camera"
+    color: "#3b82f6"
+    code: "PHE"
+    category: "imaging"
+    platforms: [fixed, uav]
+    help_text: "Standard digital cameras..."
+    fieldSchema:
+      camera_brand: { type: string, required: false }
+      interval_minutes: { type: number, min: 1, max: 1440 }
+
+categories:
+  imaging: { name: "Imaging", icon: "image", color: "#3b82f6" }
+  spectral: { name: "Spectral", icon: "rainbow", color: "#8b5cf6" }
+```
+
+#### Instrument Types (10 total)
+
+| Type | Code | Category | Platforms |
+|------|------|----------|-----------|
+| Phenocam | PHE | imaging | fixed, uav |
+| Multispectral Sensor | MS | spectral | fixed, uav, satellite |
+| PAR Sensor | PAR | radiation | fixed |
+| NDVI Sensor | NDVI | spectral | fixed |
+| PRI Sensor | PRI | spectral | fixed |
+| Hyperspectral Sensor | HYP | spectral | fixed, uav, satellite |
+| Thermal Camera | TIR | thermal | fixed, uav, satellite |
+| LiDAR | LID | structural | uav, satellite |
+| Radar (SAR) | SAR | microwave | satellite |
+| RGB Camera | RGB | imaging | uav |
+
+#### Categories (6 total)
+
+| Category | Icon | Color |
+|----------|------|-------|
+| imaging | image | #3b82f6 |
+| spectral | rainbow | #8b5cf6 |
+| radiation | sun | #f59e0b |
+| thermal | fire | #ef4444 |
+| structural | cubes | #14b8a6 |
+| microwave | broadcast-tower | #6366f1 |
+
+#### Files Modified
+
+| File | Change |
+|------|--------|
+| `yamls/instruments/instrument-types.yaml` | Added `fieldSchema` to all types, added `rgb_camera` |
+| `scripts/build.js` | Added `generateInstrumentTypesModule()` method |
+| `src/domain/instrument/InstrumentTypeRegistry.js` | Import from generated module |
+| `src/domain/instrument/instrument-types.generated.js` | NEW - auto-generated |
+| `.gitignore` | Added generated file exclusion |
+
+#### Benefits
+
+- **Single Source of Truth**: All instrument type config in one YAML file
+- **Easy Modification**: Edit YAML, run build, deploy
+- **Validation Schemas**: `fieldSchema` in YAML drives frontend/backend validation
+- **Consistency**: Same pattern as platform types YAML config
+- **No Runtime Overhead**: Code generation at build time, not runtime YAML parsing
+
+#### Migration Notes
+
+- No database changes required
+- No API changes required
+- All 653 tests pass
+- Backward compatible - registry interface unchanged
+
+---
+
 ## [13.25.0] - 2025-12-27
 
 ### Added: Privacy Policy, Terms of Service & GDPR Compliance

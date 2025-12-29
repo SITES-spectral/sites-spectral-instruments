@@ -2,14 +2,21 @@
  * Instrument Type Registry
  *
  * Configuration-driven registry for instrument types.
- * Loads type definitions from YAML configuration files.
+ * Loads type definitions from YAML configuration (via build-time generation).
  *
  * Unlike platform types (Strategy pattern with code-based behavior),
  * instrument types use a Registry pattern because they only differ
  * in data schema, not behavior.
  *
  * @module domain/instrument/InstrumentTypeRegistry
+ * @see yamls/instruments/instrument-types.yaml - Source of truth
+ * @see scripts/build.js - Generates instrument-types.generated.js
  */
+
+import {
+  INSTRUMENT_TYPES,
+  CATEGORIES
+} from './instrument-types.generated.js';
 
 /**
  * @typedef {Object} InstrumentTypeConfig
@@ -23,165 +30,6 @@
  * @property {string} [helpText] - Help text for UI
  * @property {Object} [fieldSchema] - Type-specific field definitions
  */
-
-/**
- * Default instrument type configurations
- * These are used if YAML config is not available
- */
-const DEFAULT_INSTRUMENT_TYPES = {
-  phenocam: {
-    name: 'Phenocam',
-    description: 'Digital camera for repeat photography and phenology monitoring',
-    icon: 'camera',
-    color: '#3b82f6',
-    code: 'PHE',
-    category: 'imaging',
-    platforms: ['fixed', 'uav'],
-    fieldSchema: {
-      camera_brand: { type: 'string', required: false },
-      camera_model: { type: 'string', required: false },
-      resolution: { type: 'string', required: false },
-      interval_minutes: { type: 'number', required: false, min: 1, max: 1440 }
-    }
-  },
-  multispectral: {
-    name: 'Multispectral Sensor',
-    description: 'Sensor capturing discrete spectral bands',
-    icon: 'layer-group',
-    color: '#8b5cf6',
-    code: 'MS',
-    category: 'spectral',
-    platforms: ['fixed', 'uav', 'satellite'],
-    fieldSchema: {
-      number_of_channels: { type: 'number', required: false, min: 2, max: 50 },
-      spectral_range: { type: 'string', required: false },
-      orientation: { type: 'string', required: false }
-    }
-  },
-  par_sensor: {
-    name: 'PAR Sensor',
-    description: 'Photosynthetically Active Radiation sensor (400-700 nm)',
-    icon: 'sun',
-    color: '#f59e0b',
-    code: 'PAR',
-    category: 'radiation',
-    platforms: ['fixed'],
-    fieldSchema: {
-      spectral_range: { type: 'string', required: false, default: '400-700 nm' },
-      calibration_coefficient: { type: 'number', required: false }
-    }
-  },
-  ndvi_sensor: {
-    name: 'NDVI Sensor',
-    description: 'Dedicated sensor for NDVI measurements',
-    icon: 'leaf',
-    color: '#22c55e',
-    code: 'NDVI',
-    category: 'spectral',
-    platforms: ['fixed'],
-    fieldSchema: {
-      red_wavelength_nm: { type: 'number', required: false, default: 650 },
-      nir_wavelength_nm: { type: 'number', required: false, default: 850 }
-    }
-  },
-  pri_sensor: {
-    name: 'PRI Sensor',
-    description: 'Photochemical Reflectance Index sensor',
-    icon: 'microscope',
-    color: '#06b6d4',
-    code: 'PRI',
-    category: 'spectral',
-    platforms: ['fixed'],
-    fieldSchema: {
-      band1_wavelength_nm: { type: 'number', required: false, default: 531 },
-      band2_wavelength_nm: { type: 'number', required: false, default: 570 }
-    }
-  },
-  hyperspectral: {
-    name: 'Hyperspectral Sensor',
-    description: 'Imaging spectrometer with continuous spectral bands',
-    icon: 'rainbow',
-    color: '#ec4899',
-    code: 'HYP',
-    category: 'spectral',
-    platforms: ['fixed', 'uav', 'satellite'],
-    fieldSchema: {
-      spectral_range_start_nm: { type: 'number', required: false },
-      spectral_range_end_nm: { type: 'number', required: false },
-      spectral_resolution_nm: { type: 'number', required: false },
-      number_of_bands: { type: 'number', required: false }
-    }
-  },
-  thermal: {
-    name: 'Thermal Camera',
-    description: 'Infrared camera for surface temperature measurement',
-    icon: 'temperature-high',
-    color: '#ef4444',
-    code: 'TIR',
-    category: 'thermal',
-    platforms: ['fixed', 'uav', 'satellite'],
-    fieldSchema: {
-      temperature_range_min: { type: 'number', required: false },
-      temperature_range_max: { type: 'number', required: false },
-      resolution: { type: 'string', required: false }
-    }
-  },
-  lidar: {
-    name: 'LiDAR',
-    description: 'Light Detection and Ranging for 3D structure',
-    icon: 'wave-square',
-    color: '#14b8a6',
-    code: 'LID',
-    category: 'structural',
-    platforms: ['uav', 'satellite'],
-    fieldSchema: {
-      wavelength_nm: { type: 'number', required: false },
-      pulse_rate: { type: 'string', required: false },
-      range_m: { type: 'number', required: false }
-    }
-  },
-  radar: {
-    name: 'Radar (SAR)',
-    description: 'Synthetic Aperture Radar for all-weather observation',
-    icon: 'satellite-dish',
-    color: '#6366f1',
-    code: 'SAR',
-    category: 'microwave',
-    platforms: ['satellite'],
-    fieldSchema: {
-      band: { type: 'string', required: false, enum: ['X', 'C', 'S', 'L', 'P'] },
-      polarization: { type: 'string', required: false },
-      resolution_m: { type: 'number', required: false }
-    }
-  },
-  rgb_camera: {
-    name: 'RGB Camera',
-    description: 'Aerial RGB camera for high-resolution visible imaging',
-    icon: 'video',
-    color: '#0ea5e9',
-    code: 'RGB',
-    category: 'imaging',
-    platforms: ['uav'],
-    fieldSchema: {
-      resolution_mp: { type: 'number', required: false },
-      sensor_size: { type: 'string', required: false },
-      focal_length_mm: { type: 'number', required: false },
-      fov_degrees: { type: 'number', required: false }
-    }
-  }
-};
-
-/**
- * Category definitions
- */
-const CATEGORIES = {
-  imaging: { name: 'Imaging', icon: 'image', color: '#3b82f6' },
-  spectral: { name: 'Spectral', icon: 'rainbow', color: '#8b5cf6' },
-  radiation: { name: 'Radiation', icon: 'sun', color: '#f59e0b' },
-  thermal: { name: 'Thermal', icon: 'fire', color: '#ef4444' },
-  structural: { name: 'Structural', icon: 'cubes', color: '#14b8a6' },
-  microwave: { name: 'Microwave', icon: 'broadcast-tower', color: '#6366f1' }
-};
 
 /**
  * Instrument Type Registry
@@ -199,10 +47,10 @@ export class InstrumentTypeRegistry {
     this._categories = new Map();
     this._codeToKey = new Map();
 
-    // Load default types
-    this._loadTypes(config || DEFAULT_INSTRUMENT_TYPES);
+    // Load types from generated module (YAML source of truth)
+    this._loadTypes(config || INSTRUMENT_TYPES);
 
-    // Load categories
+    // Load categories from generated module
     Object.entries(CATEGORIES).forEach(([key, cat]) => {
       this._categories.set(key, cat);
     });
