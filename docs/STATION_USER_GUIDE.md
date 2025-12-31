@@ -197,7 +197,7 @@ We especially encourage you to review and update:
 If you need to add new platforms or instruments to your station:
 
 **Contact:** SITES Spectral Thematic Center
-**Email:** jose.beltran@nateko.lu.se
+**Email:** jose.beltran@mgeo.lu.se
 **Subject:** New Platform/Instrument Request - [Your Station Name]
 
 Please include:
@@ -210,14 +210,14 @@ Please include:
 For login issues, system problems, or questions about using the database:
 
 **Contact:** SITES Spectral Thematic Center
-**Email:** jose.beltran@nateko.lu.se
+**Email:** jose.beltran@mgeo.lu.se
 **Subject:** Database Support - [Your Station Name]
 
 ### For Data Questions
 For questions about data interpretation, field protocols, or research coordination:
 
 **Contact:** SITES Spectral Thematic Center
-**Email:** jose.beltran@nateko.lu.se
+**Email:** jose.beltran@mgeo.lu.se
 
 ## System Features
 
