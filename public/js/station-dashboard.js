@@ -295,16 +295,26 @@
         async _verifyAccess() {
             logger.log('Verifying access...');
 
-            // Check V1 API first (backward compatible), then V3
-            const api = global.sitesAPI || global.sitesAPIv3;
+            // Use V1 API for authentication (has verifyAuth method)
+            const api = global.sitesAPI;
 
-            if (!api?.isAuthenticated()) {
+            // Verify authentication with server (async)
+            // This sends the httpOnly cookie and validates the session
+            if (api?.verifyAuth) {
+                const isAuth = await api.verifyAuth();
+                if (!isAuth) {
+                    logger.warn('User not authenticated, redirecting to login');
+                    global.location.href = '/login.html';
+                    return;
+                }
+            } else if (!api?.isAuthenticated()) {
+                // Fallback for older API without verifyAuth
                 logger.warn('User not authenticated, redirecting to login');
                 global.location.href = '/login.html';
                 return;
             }
 
-            // Get user from V1 API (storage)
+            // Get user from V1 API (storage - now populated by verifyAuth)
             this.currentUser = global.sitesAPI?.getUser() || null;
             logger.log('Current user:', this.currentUser);
             logger.log('Requesting station:', this.stationAcronym);

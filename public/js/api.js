@@ -304,7 +304,10 @@
             try {
                 logger.log(`V3 Request: ${config.method || 'GET'} ${url}`);
 
-                const response = await fetch(url, config);
+                const response = await fetch(url, {
+                    ...config,
+                    credentials: 'include'  // Send httpOnly cookie with request
+                });
                 clearTimeout(timeoutId);
 
                 if (!response.ok) {
@@ -359,7 +362,10 @@
             try {
                 logger.log(`API Request: ${config.method || 'GET'} ${url}`);
 
-                const response = await fetch(url, config);
+                const response = await fetch(url, {
+                    ...config,
+                    credentials: 'include'  // Send httpOnly cookie with request
+                });
                 clearTimeout(timeoutId);
 
                 // Log version info from headers

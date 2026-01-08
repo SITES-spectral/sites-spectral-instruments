@@ -44,8 +44,10 @@ class SitesDashboard {
             throw new Error('API module not loaded');
         }
 
-        // Verify authentication
-        if (!window.sitesAPI.isAuthenticated()) {
+        // Verify authentication with server (async)
+        // This sends the httpOnly cookie and validates the session
+        const isAuth = await window.sitesAPI.verifyAuth();
+        if (!isAuth) {
             window.location.href = '/login.html';
             return;
         }

@@ -13,6 +13,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [14.0.0] - 2026-01-08
+
+### BREAKING: Authentication Rewrite
+
+Complete rewrite of the client-side authentication flow to properly work with httpOnly cookies.
+
+#### Root Cause of Previous Issues
+
+The v13.27.0 and v13.28.0 login loops were caused by:
+1. Backend correctly set httpOnly cookie with JWT token
+2. Token was (correctly) removed from response body for security
+3. `isAuthenticated()` checked localStorage for token → always NULL
+4. Dashboards redirected to login → cookie still valid → infinite loop
+
+#### Solution
+
+Changed authentication verification from synchronous localStorage check to async server verification.
+
+#### Changes
+
+**`public/js/legacy/api-v1.js`:**
+- Added `verifyAuth()` async method that calls `/api/auth/verify` with `credentials: 'include'`
+- Simplified `isAuthenticated()` to only check if user data exists (set by login or verifyAuth)
+
+**`public/js/api.js`:**
+- Added `credentials: 'include'` to `_fetchV3()` method
+- Added `credentials: 'include'` to `_fetchLatest()` method
+
+**`public/js/dashboard.js`:**
+- Changed `verifyAccess()` to use `await sitesAPI.verifyAuth()` instead of `isAuthenticated()`
+
+**`public/js/station-dashboard.js`:**
+- Changed `_verifyAccess()` to use `await sitesAPI.verifyAuth()` instead of `isAuthenticated()`
+
+#### Authentication Flow (New)
+
+```
+1. User visits dashboard
+2. Dashboard calls await sitesAPI.verifyAuth()
+3. verifyAuth() sends GET /api/auth/verify with credentials: 'include'
+4. Server extracts JWT from httpOnly cookie
+5. Server validates JWT and returns user data
+6. verifyAuth() stores user in localStorage and returns true
+7. Dashboard renders with authenticated user
+```
+
+#### Breaking Changes
+
+- `isAuthenticated()` now only checks localStorage user data, not token
+- All authentication verification should use `await verifyAuth()` on page load
+- All fetch calls now include `credentials: 'include'`
+
+---
+
 ## [13.28.0] - 2026-01-08
 
 ### Security: Comprehensive Auth Flow Fixes

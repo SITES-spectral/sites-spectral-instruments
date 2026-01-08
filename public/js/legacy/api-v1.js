@@ -45,17 +45,37 @@ class SitesSpectralAPI {
         localStorage.removeItem(this.userKey);
     }
 
-    // Check if user is authenticated
-    // Note: With httpOnly cookies, we can't check the token directly
-    // Instead, check if user data exists (set after successful login/verify)
+    // Check if user is authenticated (synchronous check of cached state)
+    // Note: With httpOnly cookies, token is not accessible from JS
+    // Use verifyAuth() for server-side verification
     isAuthenticated() {
-        // First check if we have user data in localStorage
-        const user = this.getUser();
-        if (user) {
-            return true;
+        return this.getUser() !== null;
+    }
+
+    // Verify authentication with server (async)
+    // This should be called on page load before checking isAuthenticated()
+    // Returns true if authenticated, false otherwise
+    async verifyAuth() {
+        try {
+            const response = await fetch('/api/auth/verify', {
+                method: 'GET',
+                credentials: 'include'  // Send httpOnly cookie
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.valid && data.user) {
+                    this.setUser(data.user);
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.warn('Auth verification failed:', error);
         }
-        // Fallback to token check for backward compatibility
-        return !!this.getToken();
+
+        // Clear local state on verification failure
+        this.clearAuth();
+        return false;
     }
 
     // Check if user has admin role
