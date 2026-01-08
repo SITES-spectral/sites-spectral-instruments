@@ -13,6 +13,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.27.0] - 2026-01-08
+
+### Fixed: Authentication Loop Bugs (Critical)
+
+Fixed critical bugs where users would get stuck in infinite redirect loops during logout and login flows.
+
+#### Root Cause
+
+The httpOnly cookie migration (v13.22.0) introduced secure cookie-based authentication, but several components were not fully updated:
+
+1. **Logout Loop**: `api-v1.js` logout didn't clear the server-side httpOnly cookie
+2. **Login Loop**: `isAuthenticated()` checked localStorage token (empty with httpOnly cookies), causing dashboards to redirect to `/` which auto-redirected back
+3. **Redirect Target**: Multiple files redirected to `/` instead of `/login.html`, causing auto-login loops
+
+#### Changes
+
+**JavaScript Files:**
+
+| File | Change |
+|------|--------|
+| `public/js/legacy/api-v1.js` | `logout()` calls `POST /api/auth/logout` to clear httpOnly cookie |
+| `public/js/legacy/api-v1.js` | `login()` uses `credentials: 'include'` for httpOnly cookie |
+| `public/js/legacy/api-v1.js` | `fetchWithAuth()` uses `credentials: 'include'` |
+| `public/js/legacy/api-v1.js` | `isAuthenticated()` checks user data, not just token |
+| `public/js/legacy/api-v1.js` | `handleApiError()` redirects to `/login.html` |
+| `public/js/api.js` | `_handleV3Error()` redirects to `/login.html` on 401 |
+| `public/js/dashboard.js` | `verifyAccess()`, `redirectBasedOnRole()`, `logout()` → `/login.html` |
+| `public/js/station-dashboard.js` | `_logout()` and global `logout()` → `/login.html` |
+| `public/js/core/app.js` | `_loadAuthState()` verifies session via API |
+| `src/frontend/api/client.js` | `handleApiError()` redirects to `/login.html` |
+
+**HTML Files (inline scripts):**
+
+| File | Change |
+|------|--------|
+| `public/station-dashboard.html` | Inline `logout()` now uses `sitesAPI.logout()` |
+| `public/station-dashboard.html` | 3x 401 handlers redirect to `/login.html` |
+| `public/sites-dashboard.html` | Auth verify fail → `/login.html` |
+| `public/sites-dashboard.html` | Non-admin redirect → `/login.html` |
+| `public/sites-dashboard.html` | `logout()` → `/login.html` |
+| `public/spectral.html` | Logout handler → `/login.html` |
+
+#### Security Notes
+
+- httpOnly cookies are now properly cleared on logout
+- All API requests include credentials for consistent cookie handling
+- Session verification happens server-side, not client-side
+- `isAuthenticated()` works correctly with httpOnly cookie authentication
+
+---
+
 ## [13.26.0] - 2025-12-29
 
 ### Architecture: Config-Driven Instrument Types

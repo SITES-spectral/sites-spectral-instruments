@@ -46,7 +46,15 @@ class SitesSpectralAPI {
     }
 
     // Check if user is authenticated
+    // Note: With httpOnly cookies, we can't check the token directly
+    // Instead, check if user data exists (set after successful login/verify)
     isAuthenticated() {
+        // First check if we have user data in localStorage
+        const user = this.getUser();
+        if (user) {
+            return true;
+        }
+        // Fallback to token check for backward compatibility
         return !!this.getToken();
     }
 
@@ -79,7 +87,7 @@ class SitesSpectralAPI {
         if (response && response.status === 401) {
             console.warn('Authentication expired, redirecting to login');
             this.clearAuth();
-            window.location.href = '/';
+            window.location.href = '/login.html';
             return;
         }
 
@@ -140,6 +148,7 @@ class SitesSpectralAPI {
         const config = {
             ...options,
             signal: controller.signal,
+            credentials: 'include', // Send httpOnly cookie with request
             headers: {
                 ...this.getAuthHeaders(),
                 ...(options.headers || {})
@@ -169,6 +178,7 @@ class SitesSpectralAPI {
         const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: this.defaultHeaders,
+            credentials: 'include', // Required for httpOnly cookie to be set by server
             body: JSON.stringify({ username, password })
         });
 
@@ -178,7 +188,11 @@ class SitesSpectralAPI {
         }
 
         const data = await response.json();
-        this.setToken(data.token);
+        // Token is now stored in httpOnly cookie by server
+        // Keep local token for backward compatibility during migration
+        if (data.token) {
+            this.setToken(data.token);
+        }
         this.setUser(data.user);
 
         return data;
@@ -200,8 +214,23 @@ class SitesSpectralAPI {
     }
 
     async logout() {
+        try {
+            // Call logout endpoint to clear httpOnly cookie on server
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include', // Send httpOnly cookie with request
+                headers: this.defaultHeaders
+            });
+        } catch (error) {
+            console.warn('Logout API call failed:', error);
+            // Continue with local cleanup even if API call fails
+        }
+
+        // Clear local state
         this.clearAuth();
-        window.location.href = '/';
+
+        // Redirect to login page (not root, to avoid auto-redirect loop)
+        window.location.href = '/login.html';
     }
 
     // Station methods with enhanced error handling

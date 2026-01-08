@@ -46,7 +46,7 @@ class SitesDashboard {
 
         // Verify authentication
         if (!window.sitesAPI.isAuthenticated()) {
-            window.location.href = '/';
+            window.location.href = '/login.html';
             return;
         }
 
@@ -66,7 +66,7 @@ class SitesDashboard {
         if (user?.role === 'station' && user?.station_acronym) {
             window.location.href = `/station.html?station=${user.station_acronym}`;
         } else {
-            window.location.href = '/';
+            window.location.href = '/login.html';
         }
     }
 
@@ -499,7 +499,7 @@ class SitesDashboard {
             console.error('Logout error:', error);
             // Force logout even if API call fails
             window.sitesAPI.clearAuth();
-            window.location.href = '/';
+            window.location.href = '/login.html';
         }
     }
 }

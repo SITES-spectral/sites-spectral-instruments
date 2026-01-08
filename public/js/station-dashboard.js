@@ -2451,7 +2451,7 @@
             } catch (error) {
                 logger.error('Logout error:', error);
                 global.sitesAPI?.clearAuth();
-                global.location.href = '/';
+                global.location.href = '/login.html';
             }
         }
 
@@ -2588,9 +2588,10 @@
     global.logout = function() {
         if (global.sitesStationDashboard) {
             return global.sitesStationDashboard._logout();
+        } else if (global.sitesAPI) {
+            return global.sitesAPI.logout();
         } else {
-            global.sitesAPI?.clearAuth();
-            global.location.href = '/';
+            global.location.href = '/login.html';
         }
     };
 

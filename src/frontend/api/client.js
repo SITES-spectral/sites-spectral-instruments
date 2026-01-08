@@ -219,7 +219,7 @@ async function handleApiError(response) {
     // Handle 401 by redirecting to login
     if (response.status === 401) {
         clearAuthToken();
-        window.location.href = '/';
+        window.location.href = '/login.html';
         return;
     }
 

@@ -60,7 +60,7 @@ src/
 
 ---
 
-## Current Version: 13.26.0 - Config-Driven Instrument Types (2025-12-29)
+## Current Version: 13.27.0 - Config-Driven Instrument Types (2025-12-29)
 
 **✅ STATUS: PRODUCTION READY**
 **🌐 Production URL:** https://sites.jobelab.com
@@ -72,7 +72,7 @@ src/
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
 **🧪 Test Coverage:** 653 tests across 36 test files
 
-### What's New in v13.26.0
+### What's New in v13.27.0
 
 **Config-Driven Instrument Types** - Instrument type definitions moved from hardcoded JS to YAML configuration with build-time code generation:
 
@@ -693,7 +693,7 @@ All hardcoded configurations have been moved to YAML files:
 |-------------|---------|------------------|
 | `yamls/instruments/instrument-types.yaml` | Instrument types, categories, field schemas | `src/domain/instrument/instrument-types.generated.js` |
 
-**Build-Time Code Generation (v13.26.0+):**
+**Build-Time Code Generation (v13.27.0+):**
 
 ```
 yamls/instruments/instrument-types.yaml
@@ -794,7 +794,7 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 13.26.0 |
+| Current Version | 13.27.0 |
 | Last Deployed | 2025-12-29 |
 | Status | Production Ready |
 | Environment | Cloudflare Workers + D1 Database |
@@ -802,14 +802,14 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 | Coming Soon | Mobile, USV, UUV |
 | Test Coverage | 653 tests across 36 files |
 
-### v13.26.0 Features
+### v13.27.0 Features
 
 | Feature | Version | Status |
 |---------|---------|--------|
-| **Config-Driven Instrument Types** | v13.26.0 | ✅ Active |
-| **YAML-to-JS Build Generation** | v13.26.0 | ✅ Active |
-| **10 Instrument Types in YAML** | v13.26.0 | ✅ Active |
-| **6 Categories in YAML** | v13.26.0 | ✅ Active |
+| **Config-Driven Instrument Types** | v13.27.0 | ✅ Active |
+| **YAML-to-JS Build Generation** | v13.27.0 | ✅ Active |
+| **10 Instrument Types in YAML** | v13.27.0 | ✅ Active |
+| **6 Categories in YAML** | v13.27.0 | ✅ Active |
 
 ### v13.0.0 Features (Inherited)
 

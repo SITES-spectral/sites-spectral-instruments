@@ -19,13 +19,13 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=13.26.0">
+    <link rel="stylesheet" href="/css/styles.css?v=13.27.0">
     <link rel="stylesheet" href="/css/skeleton.css?v=13.15.0">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="13.26.0">
-    <meta name="build-date" content="2025-12-29">
+    <meta name="app-version" content="13.27.0">
+    <meta name="build-date" content="2026-01-08">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
     <script type="module" src="/dist/dashboard.bundle.js"></script>
@@ -1152,13 +1152,13 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/core/skeleton.js?v=13.12.0"></script>
-    <script src="/js/utils.js?v=13.26.0"></script>
-    <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=13.26.0"></script>
-    <script src="/js/components.js?v=13.26.0"></script>
-    <script src="/js/dashboard.js?v=13.26.0"></script>
-    <script src="/js/navigation.js?v=13.26.0"></script>
+    <script src="/js/core/skeleton.js?v=13.27.0"></script>
+    <script src="/js/utils.js?v=13.27.0"></script>
+    <script src="/js/legacy/api-v1.js?v=13.27.0"></script>
+    <script src="/js/api.js?v=13.27.0"></script>
+    <script src="/js/components.js?v=13.27.0"></script>
+    <script src="/js/dashboard.js?v=13.27.0"></script>
+    <script src="/js/navigation.js?v=13.27.0"></script>
     <script>
         let currentUser = null;
         let stations = [];
@@ -1172,19 +1172,25 @@
                 });
 
                 if (!userResponse.ok) {
-                    window.location.href = '/';
+                    // Clear any stale user data and redirect to login
+                    localStorage.removeItem('sites_spectral_user');
+                    localStorage.removeItem('sites_spectral_token');
+                    window.location.href = '/login.html';
                     return;
                 }
 
                 const userData = await userResponse.json();
                 currentUser = userData.user;
 
+                // Store user data for isAuthenticated() checks
+                localStorage.setItem('sites_spectral_user', JSON.stringify(currentUser));
+
                 // Only admin users can access dashboard
                 if (currentUser.role !== 'admin') {
                     if (currentUser.role === 'station' && currentUser.station_acronym) {
                         window.location.href = `/station-dashboard.html?station=${currentUser.station_acronym}`;
                     } else {
-                        window.location.href = '/';
+                        window.location.href = '/login.html';
                     }
                     return;
                 }
@@ -1377,7 +1383,8 @@
                 console.error('Logout error:', e);
             }
             localStorage.removeItem('sites_spectral_user');
-            window.location.href = '/';
+            localStorage.removeItem('sites_spectral_token');
+            window.location.href = '/login.html';
         }
 
         // ============================================

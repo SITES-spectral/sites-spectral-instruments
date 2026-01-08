@@ -113,32 +113,34 @@
 
         /**
          * Load authentication state
+         * Uses httpOnly cookie (sent automatically) instead of localStorage token
          * @private
          * @returns {Promise<void>}
          */
         async _loadAuthState() {
-            const token = APIClient.getAuthToken();
-
-            if (!token) {
-                AppState.set('isAuthenticated', false);
-                AppState.set('user', null);
-                AppState.set('role', null);
-                return;
-            }
-
             try {
-                // Verify token and get user info
+                // Verify session via httpOnly cookie (sent automatically with credentials: 'include')
+                // Note: APIClient.getAuthToken() returns null for httpOnly cookies - this is expected
                 const userInfo = await APIClient.get('/api/auth/verify');
 
-                AppState.set('isAuthenticated', true);
-                AppState.set('user', userInfo.user);
-                AppState.set('role', userInfo.user.role);
-                AppState.set('permissions', userInfo.permissions || []);
+                if (userInfo && userInfo.user) {
+                    AppState.set('isAuthenticated', true);
+                    AppState.set('user', userInfo.user);
+                    AppState.set('role', userInfo.user.role);
+                    AppState.set('permissions', userInfo.permissions || userInfo.user.permissions || []);
+                } else {
+                    // Server responded but no valid user
+                    AppState.set('isAuthenticated', false);
+                    AppState.set('user', null);
+                    AppState.set('role', null);
+                }
 
             } catch (error) {
-                console.warn('Failed to verify auth token:', error);
-                // Clear invalid token
-                APIClient.clearAuthToken();
+                // Session invalid or expired - this is normal for unauthenticated users
+                // Only log if it's an unexpected error (not 401)
+                if (error.status !== 401) {
+                    console.warn('Failed to verify auth session:', error);
+                }
                 AppState.set('isAuthenticated', false);
                 AppState.set('user', null);
                 AppState.set('role', null);

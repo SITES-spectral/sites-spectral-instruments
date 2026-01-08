@@ -415,7 +415,7 @@
                 if (this._baseAPI) {
                     this._baseAPI.clearAuth();
                 }
-                global.location.href = '/';
+                global.location.href = '/login.html';
                 return;
             }
 

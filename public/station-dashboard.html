@@ -22,14 +22,14 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=13.26.0">
+    <link rel="stylesheet" href="/css/styles.css?v=13.27.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=13.15.0">
     <link rel="stylesheet" href="/css/skeleton.css?v=13.15.0">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="13.26.0">
-    <meta name="build-date" content="2025-12-29">
+    <meta name="app-version" content="13.27.0">
+    <meta name="build-date" content="2026-01-08">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
     <script type="module" src="/dist/dashboard.bundle.js"></script>
@@ -4322,23 +4322,23 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=13.26.0"></script>
+    <script src="/js/utils.js?v=13.27.0"></script>
     <!-- Security Utilities (v12.0.9) - XSS prevention -->
-    <script src="/js/core/security.js?v=13.26.0"></script>
+    <script src="/js/core/security.js?v=13.27.0"></script>
     <!-- Configuration System (v8.5.0) -->
-    <script src="/js/core/config-loader.js?v=8.5.0"></script>
-    <script src="/js/core/config-service.js?v=8.5.0"></script>
+    <script src="/js/core/config-loader.js?v=13.27.0"></script>
+    <script src="/js/core/config-service.js?v=13.27.0"></script>
     <!-- Skeleton Loading Components (v13.12.0) -->
-    <script src="/js/core/skeleton.js?v=13.12.0"></script>
+    <script src="/js/core/skeleton.js?v=13.27.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
-    <script src="/js/legacy/api-v1.js?v=9.0.2"></script>
-    <script src="/js/api.js?v=13.26.0"></script>
-    <script src="/js/components.js?v=13.26.0"></script>
-    <script src="/js/platform-forms/index.js?v=9.0.27"></script>
-    <script src="/js/form-components.js?v=5.2.36"></script>
+    <script src="/js/legacy/api-v1.js?v=13.27.0"></script>
+    <script src="/js/api.js?v=13.27.0"></script>
+    <script src="/js/components.js?v=13.27.0"></script>
+    <script src="/js/platform-forms/index.js?v=13.27.0"></script>
+    <script src="/js/form-components.js?v=13.27.0"></script>
     <!-- Modular Modal Components (v7.0.1) -->
-    <script src="/js/modal-sections.js?v=7.0.1"></script>
-    <script src="/js/instrument-modals.js?v=7.0.1"></script>
+    <script src="/js/modal-sections.js?v=13.27.0"></script>
+    <script src="/js/instrument-modals.js?v=13.27.0"></script>
     <!-- Enhanced Instrument Modal Modules (v11.0.0-alpha.35) -->
     <script src="/js/instruments/instrument-manager.js?v=11.0.0-alpha.35"></script>
     <script src="/js/instruments/phenocam/phenocam-modal.js?v=11.0.0-alpha.35"></script>
@@ -4354,24 +4354,24 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=13.26.0"></script>
+    <script src="/js/interactive-map.js?v=13.27.0"></script>
     <!-- Dashboard modules (v13.16.0) -->
-    <script src="/js/dashboard/platform-renderer.js?v=13.16.0"></script>
-    <script src="/js/dashboard/campaign-panel.js?v=13.16.0"></script>
-    <script src="/js/dashboard/product-panel.js?v=13.16.0"></script>
-    <script src="/js/dashboard/station-map.js?v=13.16.0"></script>
-    <script src="/js/station-dashboard.js?v=13.26.0"></script>
-    <script src="/js/navigation.js?v=13.26.0"></script>
-    <script src="/js/export.js?v=13.26.0"></script>
-    <script src="/js/platform-modals.js?v=8.2.0"></script>
-    <script src="/js/modal-system.js?v=5.2.36"></script>
-    <script src="/js/admin-modals.js?v=5.2.36"></script>
+    <script src="/js/dashboard/platform-renderer.js?v=13.27.0"></script>
+    <script src="/js/dashboard/campaign-panel.js?v=13.27.0"></script>
+    <script src="/js/dashboard/product-panel.js?v=13.27.0"></script>
+    <script src="/js/dashboard/station-map.js?v=13.27.0"></script>
+    <script src="/js/station-dashboard.js?v=13.27.0"></script>
+    <script src="/js/navigation.js?v=13.27.0"></script>
+    <script src="/js/export.js?v=13.27.0"></script>
+    <script src="/js/platform-modals.js?v=13.27.0"></script>
+    <script src="/js/modal-system.js?v=13.27.0"></script>
+    <script src="/js/admin-modals.js?v=13.27.0"></script>
 
     <!-- MS Sensor Modules (v6.1.0) -->
-    <script src="/js/ms-validation.js?v=6.1.0"></script>
-    <script src="/js/ms-sensor-models.js?v=6.1.0"></script>
-    <script src="/js/ms-channel-manager.js?v=6.1.0"></script>
-    <script src="/js/ms-sensor-modal.js?v=6.1.0"></script>
+    <script src="/js/ms-validation.js?v=13.27.0"></script>
+    <script src="/js/ms-sensor-models.js?v=13.27.0"></script>
+    <script src="/js/ms-channel-manager.js?v=13.27.0"></script>
+    <script src="/js/ms-sensor-modal.js?v=13.27.0"></script>
 
     <script>
         let currentUser = null;
@@ -4470,7 +4470,8 @@
                 } else if (response.status === 401) {
                     // Token expired, redirect to login
                     localStorage.removeItem('sites_spectral_user');
-                    window.location.href = '/';
+                    localStorage.removeItem('sites_spectral_token');
+                    window.location.href = '/login.html';
                 } else if (response.status === 404) {
                     showError('Station not found');
                 } else if (response.status === 403) {
@@ -4552,14 +4553,16 @@
         }
 
         function logout() {
-            try {
+            // Use the proper logout flow via sitesAPI which clears httpOnly cookie
+            if (window.sitesStationDashboard) {
+                window.sitesStationDashboard._logout();
+            } else if (window.sitesAPI) {
+                window.sitesAPI.logout();
+            } else {
+                // Fallback: clear local state and redirect
                 localStorage.removeItem('sites_spectral_token');
                 localStorage.removeItem('sites_spectral_user');
-                window.location.href = '/';
-            } catch (error) {
-                console.error('Error during logout:', error);
-                // Force redirect even if localStorage fails
-                window.location.href = '/';
+                window.location.href = '/login.html';
             }
         }
 
