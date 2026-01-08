@@ -299,8 +299,8 @@
             const api = global.sitesAPI || global.sitesAPIv3;
 
             if (!api?.isAuthenticated()) {
-                logger.warn('User not authenticated, redirecting to home');
-                global.location.href = '/';
+                logger.warn('User not authenticated, redirecting to login');
+                global.location.href = '/login.html';
                 return;
             }
 
@@ -313,7 +313,7 @@
             if (this.currentUser?.role === 'station' &&
                 this.currentUser.station_acronym !== this.stationAcronym) {
                 logger.warn(`Station user can only access their own station`);
-                global.location.href = `/station.html?station=${this.currentUser.station_acronym}`;
+                global.location.href = `/station-dashboard.html?station=${this.currentUser.station_acronym}`;
                 return;
             }
 
@@ -333,9 +333,9 @@
          */
         _redirectToAppropriateLocation() {
             if (this.currentUser?.role === 'admin') {
-                global.location.href = '/dashboard.html';
+                global.location.href = '/sites-dashboard.html';
             } else {
-                global.location.href = '/';
+                global.location.href = '/login.html';
             }
         }
 
@@ -694,7 +694,7 @@
             const backBtn = document.getElementById('back-to-dashboard');
             if (backBtn && this.currentUser?.role === 'admin') {
                 backBtn.addEventListener('click', () => {
-                    global.location.href = '/dashboard.html';
+                    global.location.href = '/sites-dashboard.html';
                 });
             }
 

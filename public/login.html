@@ -350,20 +350,29 @@
             redirectUser(user) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect');
-                
+
+                // SECURITY: Validate redirect URL to prevent open redirect attacks
+                // Only allow relative URLs starting with / and not containing protocol handlers
+                const isValidRedirect = redirect &&
+                    redirect.startsWith('/') &&
+                    !redirect.startsWith('//') &&
+                    !redirect.toLowerCase().includes('javascript:') &&
+                    !redirect.toLowerCase().includes('data:') &&
+                    !redirect.toLowerCase().includes('vbscript:');
+
                 // Determine redirect URL based on user role
-                let targetUrl = '/';
-                
+                let targetUrl = '/login.html';
+
                 if (user.role === 'admin') {
-                    targetUrl = redirect || '/sites-dashboard.html';
+                    targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
                 } else if (user.role === 'station' && user.station_acronym) {
                     // Always use station-dashboard.html for station users with their station
-                    targetUrl = redirect || `/station-dashboard.html?station=${user.station_acronym}`;
+                    targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
                 } else {
                     // Non-admin users cannot access dashboard, redirect to login
-                    targetUrl = redirect || '/';
+                    targetUrl = isValidRedirect ? redirect : '/login.html';
                 }
-                
+
                 window.location.href = targetUrl;
             }
             

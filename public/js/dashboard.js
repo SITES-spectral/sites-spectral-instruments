@@ -64,7 +64,7 @@ class SitesDashboard {
     redirectBasedOnRole() {
         const user = window.sitesAPI.getUser();
         if (user?.role === 'station' && user?.station_acronym) {
-            window.location.href = `/station.html?station=${user.station_acronym}`;
+            window.location.href = `/station-dashboard.html?station=${user.station_acronym}`;
         } else {
             window.location.href = '/login.html';
         }
@@ -387,7 +387,7 @@ class SitesDashboard {
     // Station actions
     viewStation(acronym) {
         if (acronym) {
-            window.location.href = `/station.html?station=${acronym}`;
+            window.location.href = `/station-dashboard.html?station=${acronym}`;
         }
     }
 

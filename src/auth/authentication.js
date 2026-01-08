@@ -73,9 +73,10 @@ export async function handleAuth(method, pathSegments, request, env) {
           ...getRateLimitHeaders(request)
         });
 
+        // Note: Token is NOT returned in response body for security (httpOnly cookie only)
+        // Frontend uses credentials: 'include' for all API requests
         return new Response(JSON.stringify({
           success: true,
-          token, // Still return token for backward compatibility during migration
           user: {
             username: user.username,
             role: user.role,

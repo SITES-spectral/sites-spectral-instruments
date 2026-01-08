@@ -209,11 +209,11 @@ class SitesNavigation {
     }
 
     goToDashboard() {
-        this.navigateTo('/dashboard.html', true);
+        this.navigateTo('/sites-dashboard.html', true);
     }
 
     goToStation(stationAcronym) {
-        this.navigateTo(`/station.html?station=${stationAcronym}`, true);
+        this.navigateTo(`/station-dashboard.html?station=${stationAcronym}`, true);
     }
 
     goToLogin() {

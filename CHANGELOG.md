@@ -13,6 +13,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [13.28.0] - 2026-01-08
+
+### Security: Comprehensive Auth Flow Fixes
+
+This release addresses multiple security vulnerabilities and broken references identified during a comprehensive security audit of the authentication flow.
+
+#### Security Fixes
+
+| Vulnerability | Fix |
+|---------------|-----|
+| **Open Redirect** | Login redirect parameter now validated (only relative URLs starting with `/`, no protocol handlers) |
+| **Token in Response Body** | Removed token from login response (httpOnly cookie only) |
+| **AOI Auth Bypass** | Fixed AOI modules using wrong localStorage key; now uses `credentials: 'include'` |
+
+#### Broken Page References Fixed
+
+| File | Before | After |
+|------|--------|-------|
+| `dashboard.js` | `/station.html` | `/station-dashboard.html` |
+| `navigation.js` | `/dashboard.html` | `/sites-dashboard.html` |
+| `navigation.js` | `/station.html` | `/station-dashboard.html` |
+| `station-dashboard.js` | `/station.html` | `/station-dashboard.html` |
+| `station-dashboard.js` | `/dashboard.html` | `/sites-dashboard.html` |
+
+#### Redirect Fixes
+
+Fixed remaining redirects to `/` that should go to appropriate pages:
+
+| File | Context | Redirect |
+|------|---------|----------|
+| `station-dashboard.js` | Not authenticated | → `/login.html` |
+| `station-dashboard.js` | Non-admin redirect | → `/login.html` |
+| `station-dashboard.html` | 401 export error | → `/login.html` |
+| `station-dashboard.html` | Station deleted | → `/sites-dashboard.html` |
+
+#### AOI Module Updates
+
+| File | Change |
+|------|--------|
+| `aoi-modal.js` | Removed `localStorage.getItem('token')`; uses `credentials: 'include'` |
+| `aoi-manager.js` | Removed token from localStorage; uses `credentials: 'include'` |
+
+#### Backend Changes
+
+| File | Change |
+|------|--------|
+| `authentication.js` | Removed `token` field from login response body |
+| `authentication.js` | Added comment documenting httpOnly-only token delivery |
+
+---
+
 ## [13.27.0] - 2026-01-08
 
 ### Fixed: Authentication Loop Bugs (Critical)

@@ -6295,7 +6295,7 @@
                     // Token expired, redirect to login
                     localStorage.removeItem('sites_spectral_token');
                     localStorage.removeItem('sites_spectral_user');
-                    window.location.href = '/';
+                    window.location.href = '/login.html';
                 } else if (response.status === 403) {
                     showExportError('Access denied to export this station data');
                 } else if (response.status === 404) {
@@ -8116,9 +8116,9 @@
                 showNotification(`Station "${stationName}" deleted successfully`, 'success');
                 closeDeleteStationModal();
 
-                // Redirect to stations list or reload
+                // Redirect to admin dashboard after station deletion
                 setTimeout(() => {
-                    window.location.href = '/';
+                    window.location.href = '/sites-dashboard.html';
                 }, 1000);
 
             } catch (error) {

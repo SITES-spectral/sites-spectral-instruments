@@ -576,9 +576,9 @@ class AOIModal {
 
                 const response = await fetch(endpoint, {
                     method,
+                    credentials: 'include',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
@@ -661,9 +661,7 @@ class AOIModal {
             } else {
                 const response = await fetch(`/api/aois/${this.currentAOI.id}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
