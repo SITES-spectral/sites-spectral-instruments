@@ -19,11 +19,11 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=14.0.0">
+    <link rel="stylesheet" href="/css/styles.css?v=14.0.1">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="14.0.0">
+    <meta name="app-version" content="14.0.1">
     <meta name="build-date" content="2026-01-08">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
@@ -218,7 +218,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=14.0.0"></script>
+    <script src="/js/utils.js?v=14.0.1"></script>
     <script>
         class LoginManager {
             constructor() {
@@ -323,21 +323,35 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect');
 
-                // Determine redirect URL based on user role
-                let targetUrl = '/';
+                // SECURITY: Validate redirect URL to prevent open redirect attacks
+                const isValidRedirect = redirect &&
+                    redirect.startsWith('/') &&
+                    !redirect.startsWith('//') &&
+                    !redirect.toLowerCase().includes('javascript:') &&
+                    !redirect.toLowerCase().includes('data:') &&
+                    !redirect.toLowerCase().includes('vbscript:');
 
-                if (user.role === 'admin') {
-                    targetUrl = redirect || '/sites-dashboard.html';
-                } else if (user.role === 'station' && user.station_acronym) {
-                    // Always use station-dashboard.html for station users with their station
-                    targetUrl = redirect || `/station-dashboard.html?station=${user.station_acronym}`;
-                } else if (user.role === 'readonly') {
-                    // Readonly users go to sites dashboard to see all stations
-                    targetUrl = redirect || '/sites-dashboard.html';
-                } else {
-                    // Fallback to sites dashboard for any other case
-                    targetUrl = redirect || '/sites-dashboard.html';
+                // Determine redirect URL based on user role
+                // Valid roles: admin, sites-admin, station-admin, station, readonly
+                let targetUrl = '/sites-dashboard.html';
+
+                // Global admins (admin or sites-admin)
+                if (user.role === 'admin' || user.role === 'sites-admin') {
+                    targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
                 }
+                // Station-specific admin with assigned station
+                else if (user.role === 'station-admin' && user.station_acronym) {
+                    targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
+                }
+                // Regular station user with assigned station
+                else if (user.role === 'station' && user.station_acronym) {
+                    targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
+                }
+                // Read-only users view all stations
+                else if (user.role === 'readonly') {
+                    targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
+                }
+                // Fallback: sites-dashboard (safe default)
 
                 window.location.href = targetUrl;
             }

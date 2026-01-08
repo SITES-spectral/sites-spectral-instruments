@@ -13,6 +13,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [14.0.1] - 2026-01-08
+
+### Fixed: Complete Role Matching in Redirect Logic
+
+Critical fix for infinite login loops caused by incomplete role matching in `redirectUser()` functions.
+
+#### Root Cause
+
+The `redirectUser()` function in `login.html` only handled `admin` and `station` roles, with a default redirect to `/login.html`. Users with `sites-admin`, `station-admin`, or `readonly` roles fell through to this default, creating an infinite loop.
+
+#### Changes
+
+**`public/login.html` (lines 350-387):**
+- Changed default redirect from `/login.html` to `/sites-dashboard.html` (safe fallback)
+- Added handling for `sites-admin` role (global admin)
+- Added handling for `station-admin` role (station-specific admin)
+- Added handling for `readonly` role
+- Added open redirect protection (validates redirect parameter)
+
+**`public/index.html` (lines 322-357):**
+- Same role matching improvements as login.html
+- Added security validation for redirect parameter
+
+**`public/js/dashboard.js` (lines 66-87):**
+- Fixed `redirectBasedOnRole()` to handle all roles
+- Added `station-admin` handling
+- `readonly` users can now stay on sites-dashboard
+
+**`public/js/legacy/api-v1.js` (lines 81-104):**
+- Updated `isAdmin()` to include `sites-admin` role
+- Added `isStationAdmin()` helper method
+- Added `canEdit()` helper for permission checks
+
+#### Valid Roles (from `src/domain/authorization/Role.js`)
+
+| Role | Description | Redirect Target |
+|------|-------------|-----------------|
+| `admin` | Legacy global admin | `/sites-dashboard.html` |
+| `sites-admin` | New global admin standard | `/sites-dashboard.html` |
+| `station-admin` | Station-specific admin | `/station-dashboard.html?station={acronym}` |
+| `station` | Regular station user | `/station-dashboard.html?station={acronym}` |
+| `readonly` | Read-only access | `/sites-dashboard.html` |
+
+#### Testing Checklist
+
+- [ ] Login with `admin` role -> sites-dashboard
+- [ ] Login with `sites-admin` role -> sites-dashboard
+- [ ] Login with `station-admin` role -> station-dashboard with station param
+- [ ] Login with `station` role -> station-dashboard with station param
+- [ ] Login with `readonly` role -> sites-dashboard
+- [ ] Unknown role -> sites-dashboard (safe fallback)
+- [ ] Logout clears httpOnly cookie
+- [ ] Session expiry redirects to login
+
+---
+
 ## [14.0.0] - 2026-01-08
 
 ### BREAKING: Authentication Rewrite

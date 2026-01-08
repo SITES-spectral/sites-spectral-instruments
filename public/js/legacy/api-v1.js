@@ -78,16 +78,29 @@ class SitesSpectralAPI {
         return false;
     }
 
-    // Check if user has admin role
+    // Check if user has global admin role (admin or sites-admin)
     isAdmin() {
         const user = this.getUser();
-        return user && user.role === 'admin';
+        return user && (user.role === 'admin' || user.role === 'sites-admin');
+    }
+
+    // Check if user has station-admin role
+    isStationAdmin() {
+        const user = this.getUser();
+        return user && user.role === 'station-admin';
     }
 
     // Check if user has station role
     isStationUser() {
         const user = this.getUser();
         return user && user.role === 'station';
+    }
+
+    // Check if user has any edit permission (admin, sites-admin, station-admin, or station)
+    canEdit() {
+        const user = this.getUser();
+        if (!user) return false;
+        return ['admin', 'sites-admin', 'station-admin', 'station'].includes(user.role);
     }
 
     // Get authenticated headers

@@ -65,9 +65,23 @@ class SitesDashboard {
 
     redirectBasedOnRole() {
         const user = window.sitesAPI.getUser();
-        if (user?.role === 'station' && user?.station_acronym) {
+        // Valid roles: admin, sites-admin, station-admin, station, readonly
+
+        // Station-admin with assigned station
+        if (user?.role === 'station-admin' && user?.station_acronym) {
             window.location.href = `/station-dashboard.html?station=${user.station_acronym}`;
-        } else {
+        }
+        // Regular station user with assigned station
+        else if (user?.role === 'station' && user?.station_acronym) {
+            window.location.href = `/station-dashboard.html?station=${user.station_acronym}`;
+        }
+        // Readonly users can view sites-dashboard
+        else if (user?.role === 'readonly') {
+            // Stay on sites-dashboard (readonly access allowed)
+            return;
+        }
+        // Invalid/unknown role - redirect to login
+        else {
             window.location.href = '/login.html';
         }
     }
