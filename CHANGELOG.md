@@ -13,6 +13,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [14.0.2] - 2026-01-08
+
+### Chore: Production Release Stabilization
+
+Final deployment of v14.0.1 authentication fixes with updated build artifacts.
+
+#### Summary
+
+This release finalizes the v14.0.1 authentication loop fix and ensures all build artifacts are properly versioned for cache-busting.
+
+#### Changes from v14.0.1
+
+- All HTML files updated with `?v=14.0.2` query parameters
+- Version manifest regenerated with new timestamp
+- Production deployment verified at https://sites-spectral-instruments.jose-e5f.workers.dev
+
+#### Authentication Fix Recap (from v14.0.1)
+
+| Role | Redirect Target |
+|------|-----------------|
+| `admin` | `/sites-dashboard.html` |
+| `sites-admin` | `/sites-dashboard.html` |
+| `station-admin` | `/station-dashboard.html?station={acronym}` |
+| `station` | `/station-dashboard.html?station={acronym}` |
+| `readonly` | `/sites-dashboard.html` |
+| (fallback) | `/sites-dashboard.html` |
+
+---
+
 ## [14.0.1] - 2026-01-08
 
 ### Fixed: Complete Role Matching in Redirect Logic
