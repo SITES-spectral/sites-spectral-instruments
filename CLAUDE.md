@@ -60,19 +60,57 @@ src/
 
 ---
 
-## Current Version: 13.27.0 - Config-Driven Instrument Types (2025-12-29)
+## Current Version: 14.0.3 - Duplicate Platform Prevention (2026-01-09)
 
 **✅ STATUS: PRODUCTION READY**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2025-12-29
+**📅 Last Updated:** 2026-01-09
 **🚀 API Version:** V11 (via `/api/latest` alias)
-**🔒 Security Features:** CORS Whitelist, PBKDF2 Password Hashing, httpOnly Cookies, CSRF Protection, Input Sanitization, JWT HMAC-SHA256
+**🔒 Security Features:** CORS Whitelist, PBKDF2 Password Hashing, httpOnly Cookies, CSRF Protection, Input Sanitization, JWT HMAC-SHA256, XSS-Safe DOM Methods
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
 **🧪 Test Coverage:** 653 tests across 36 test files
 
-### What's New in v13.27.0
+### What's New in v14.0.3
+
+**Duplicate Platform Prevention Dialog** - User-friendly confirmation when creating platforms that conflict with existing ones:
+
+| Component | Description |
+|-----------|-------------|
+| **Conflict Detection** | Backend returns HTTP 409 with conflict details and suggestions |
+| **Confirmation Dialog** | Frontend shows modal with conflict info and suggested alternative |
+| **XSS-Safe Implementation** | Uses `createElement`/`textContent` (no innerHTML) |
+| **All Platform Types** | Works for Fixed, UAV, Satellite, Mobile, USV, UUV |
+
+**User Flow:**
+1. User tries to create platform with duplicate name/code
+2. Modal dialog shows: "Similar Platform Exists"
+3. Displays conflict details and suggested alternative
+4. User chooses "Use Suggestion" (auto-retry) or "Cancel" (manual edit)
+
+### What's New in v14.0.1
+
+**Complete Role Matching in Redirect Logic** - Fixed infinite login loops for all user roles:
+
+| Role | Redirect Target |
+|------|-----------------|
+| `admin` | `/sites-dashboard.html` |
+| `sites-admin` | `/sites-dashboard.html` |
+| `station-admin` | `/station-dashboard.html?station={acronym}` |
+| `station` | `/station-dashboard.html?station={acronym}` |
+| `readonly` | `/sites-dashboard.html` |
+| (fallback) | `/sites-dashboard.html` (safe default) |
+
+**Root Cause Fixed:** The `redirectUser()` function previously only handled `admin` and `station` roles, with default redirect to `/login.html` causing infinite loops for other roles.
+
+**Files Updated:**
+- `public/login.html` - Complete role matching
+- `public/index.html` - Complete role matching + redirect validation
+- `public/js/dashboard.js` - `redirectBasedOnRole()` handles all roles
+- `public/js/legacy/api-v1.js` - `isAdmin()` includes `sites-admin`, added `isStationAdmin()`, `canEdit()`
+
+### What's New in v13.26.0
 
 **Config-Driven Instrument Types** - Instrument type definitions moved from hardcoded JS to YAML configuration with build-time code generation:
 
@@ -649,7 +687,14 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 
 ## Documentation Index
 
-### V11 Documentation (Active)
+### V14 Documentation (Active)
+
+| Document | Purpose |
+|----------|---------|
+| `docs/security/AUTHENTICATION_v14.md` | httpOnly cookie auth, role redirect logic |
+| `docs/PLATFORM_DUPLICATE_PREVENTION.md` | Duplicate platform prevention dialog |
+
+### V11+ Documentation (Active)
 
 | Document | Purpose |
 |----------|---------|
@@ -663,6 +708,8 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 | `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
 | `docs/roi/ROI_README.md` | ROI system documentation |
 | `docs/PRODUCTION_SYNC_GUIDE.md` | Deployment procedures |
+| `docs/security/AUTHORIZATION_ARCHITECTURE_DIAGRAM.md` | Authorization flow diagrams |
+| `docs/security/AUTHORIZATION_SECURITY_ANALYSIS.md` | Security analysis documentation |
 
 ### Legacy Documentation (V1-V10)
 
@@ -794,22 +841,32 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 |----------|-------|
 | Production URL | https://sites.jobelab.com |
 | Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 13.27.0 |
-| Last Deployed | 2025-12-29 |
+| Current Version | 14.0.3 |
+| Last Deployed | 2026-01-09 |
 | Status | Production Ready |
 | Environment | Cloudflare Workers + D1 Database |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
 | Test Coverage | 653 tests across 36 files |
 
-### v13.27.0 Features
+### v14.0.x Features
 
 | Feature | Version | Status |
 |---------|---------|--------|
-| **Config-Driven Instrument Types** | v13.27.0 | ✅ Active |
-| **YAML-to-JS Build Generation** | v13.27.0 | ✅ Active |
-| **10 Instrument Types in YAML** | v13.27.0 | ✅ Active |
-| **6 Categories in YAML** | v13.27.0 | ✅ Active |
+| **Duplicate Platform Prevention Dialog** | v14.0.3 | ✅ Active |
+| **httpOnly Cookie Authentication** | v14.0.0 | ✅ Active |
+| **Centralized Auth Verification** | v14.0.0 | ✅ Active |
+| **Complete Role Redirect Logic** | v14.0.1 | ✅ Active |
+| **5-Role Support (admin, sites-admin, station-admin, station, readonly)** | v14.0.1 | ✅ Active |
+
+### v13.26.0 Features (Inherited)
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| **Config-Driven Instrument Types** | v13.26.0 | ✅ Active |
+| **YAML-to-JS Build Generation** | v13.26.0 | ✅ Active |
+| **10 Instrument Types in YAML** | v13.26.0 | ✅ Active |
+| **6 Categories in YAML** | v13.26.0 | ✅ Active |
 
 ### v13.0.0 Features (Inherited)
 
