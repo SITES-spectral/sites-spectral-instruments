@@ -1104,7 +1104,11 @@
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.error || 'Failed to create platform');
+                const error = new Error(result.error || 'Failed to create platform');
+                error.status = response.status;
+                error.conflicts = result.conflicts;
+                error.suggestions = result.suggestions;
+                throw error;
             }
 
             // For UAV platforms, auto-create instrument
@@ -1128,6 +1132,13 @@
 
         } catch (error) {
             console.error('Platform creation error:', error);
+
+            // Handle 409 Conflict (duplicate platform detected)
+            if (error.status === 409 && error.conflicts) {
+                showDuplicateConfirmDialog(error.conflicts, error.suggestions, platformType);
+                return;
+            }
+
             showNotification(error.message, 'error');
         } finally {
             if (saveBtn) {
@@ -1135,6 +1146,157 @@
                 saveBtn.disabled = false;
             }
         }
+    }
+
+    // ========================================
+    // Duplicate Conflict Dialog
+    // ========================================
+
+    /**
+     * Show confirmation dialog when duplicate platform is detected
+     * Uses safe DOM methods to prevent XSS vulnerabilities
+     * @param {Array} conflicts - Array of {field, value} conflict objects
+     * @param {Object} suggestions - Object with normalized_name and mount_type_code suggestions
+     * @param {string} platformType - Type of platform being created
+     */
+    function showDuplicateConfirmDialog(conflicts, suggestions, platformType) {
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay duplicate-conflict-modal';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'modal-content';
+        modal.style.cssText = 'background: white; border-radius: 12px; padding: 24px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);';
+
+        // Header
+        const header = document.createElement('div');
+        header.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 16px;';
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-triangle';
+        icon.style.cssText = 'color: #f59e0b; font-size: 24px;';
+
+        const title = document.createElement('h3');
+        title.style.cssText = 'margin: 0; color: #1a1a1a; font-size: 1.25rem;';
+        title.textContent = 'Similar Platform Exists';
+
+        header.appendChild(icon);
+        header.appendChild(title);
+
+        // Body
+        const body = document.createElement('div');
+        body.style.cssText = 'margin-bottom: 20px;';
+
+        const description = document.createElement('p');
+        description.style.cssText = 'color: #666; margin-bottom: 12px;';
+        description.textContent = 'A platform with similar values already exists:';
+        body.appendChild(description);
+
+        // Conflict list
+        const conflictBox = document.createElement('div');
+        conflictBox.style.cssText = 'background: #fef3c7; border: 1px solid #f59e0b; padding: 12px; border-radius: 8px; margin-bottom: 16px;';
+
+        if (conflicts && conflicts.length > 0) {
+            conflicts.forEach(conflict => {
+                const conflictItem = document.createElement('div');
+                conflictItem.style.cssText = 'font-family: monospace; color: #92400e;';
+                conflictItem.textContent = conflict.field + ': "' + conflict.value + '"';
+                conflictBox.appendChild(conflictItem);
+            });
+        }
+        body.appendChild(conflictBox);
+
+        // Suggestions
+        if (suggestions && (suggestions.normalized_name || suggestions.mount_type_code)) {
+            const suggestionLabel = document.createElement('p');
+            suggestionLabel.style.cssText = 'color: #666; margin-bottom: 8px; font-weight: 500;';
+            suggestionLabel.textContent = 'Suggested alternative:';
+            body.appendChild(suggestionLabel);
+
+            const suggestionBox = document.createElement('div');
+            suggestionBox.style.cssText = 'background: #ecfdf5; border: 1px solid #059669; padding: 12px; border-radius: 8px; margin-bottom: 16px;';
+
+            if (suggestions.normalized_name) {
+                const nameSuggestion = document.createElement('div');
+                nameSuggestion.style.cssText = 'font-family: monospace; color: #047857; font-weight: 600;';
+                nameSuggestion.textContent = suggestions.normalized_name;
+                suggestionBox.appendChild(nameSuggestion);
+            }
+
+            if (suggestions.mount_type_code) {
+                const codeSuggestion = document.createElement('div');
+                codeSuggestion.style.cssText = 'font-family: monospace; color: #047857; font-size: 0.9em;';
+                codeSuggestion.textContent = 'Mount Code: ' + suggestions.mount_type_code;
+                suggestionBox.appendChild(codeSuggestion);
+            }
+
+            body.appendChild(suggestionBox);
+        }
+
+        const question = document.createElement('p');
+        question.style.cssText = 'color: #374151; margin-bottom: 0;';
+        question.textContent = 'Would you like to use the suggested name instead?';
+        body.appendChild(question);
+
+        // Footer with buttons
+        const footer = document.createElement('div');
+        footer.style.cssText = 'display: flex; gap: 12px; justify-content: flex-end;';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.style.cssText = 'padding: 10px 20px; border-radius: 8px; border: 1px solid #d1d5db; background: white; cursor: pointer;';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = () => overlay.remove();
+
+        const useSuggestionBtn = document.createElement('button');
+        useSuggestionBtn.className = 'btn btn-primary';
+        useSuggestionBtn.style.cssText = 'padding: 10px 20px; border-radius: 8px; border: none; background: #059669; color: white; cursor: pointer; font-weight: 500;';
+        useSuggestionBtn.textContent = 'Use Suggestion';
+        useSuggestionBtn.onclick = async () => {
+            overlay.remove();
+
+            // Update form with suggested values
+            if (suggestions) {
+                if (suggestions.mount_type_code) {
+                    const mountCodeInput = document.getElementById('platform-location-code');
+                    if (mountCodeInput) {
+                        mountCodeInput.value = suggestions.mount_type_code;
+                    }
+                }
+            }
+
+            // Show info and retry save
+            showNotification('Using suggested name, saving...', 'info');
+
+            // Small delay to let user see the notification
+            setTimeout(() => {
+                savePlatform(platformType);
+            }, 500);
+        };
+
+        footer.appendChild(cancelBtn);
+        footer.appendChild(useSuggestionBtn);
+
+        // Assemble modal
+        modal.appendChild(header);
+        modal.appendChild(body);
+        modal.appendChild(footer);
+        overlay.appendChild(modal);
+
+        // Close on overlay click (but not modal click)
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        };
+
+        // Add to page
+        document.body.appendChild(overlay);
+
+        // Focus the cancel button for accessibility
+        cancelBtn.focus();
     }
 
     // ========================================

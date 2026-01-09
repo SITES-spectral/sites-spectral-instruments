@@ -13,6 +13,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [14.0.3] - 2026-01-09
+
+### Feature: Duplicate Platform Prevention Dialog
+
+Added user-friendly confirmation dialog when creating a platform that would conflict with an existing one.
+
+#### Problem Solved
+
+Previously, users could accidentally create duplicate UAV platforms (e.g., 7 ANS_DJI_M3M_UAV platforms were created). The backend already detected duplicates and returned HTTP 409 with suggestions, but the frontend just showed a generic error toast.
+
+#### Changes
+
+**`public/js/platform-forms/index.js`:**
+- Enhanced error handling to capture HTTP status, conflicts, and suggestions from API response
+- Added 409 conflict detection in catch block
+- Added `showDuplicateConfirmDialog()` function using safe DOM methods (no innerHTML/XSS risk)
+
+#### User Experience
+
+When creating a platform that conflicts with an existing one:
+1. A modal dialog appears showing the conflict details
+2. The suggested alternative name is displayed
+3. User can choose "Use Suggestion" to auto-fill and retry, or "Cancel" to modify manually
+
+#### Security
+
+- All text content uses `textContent` or `createTextNode` to prevent XSS
+- No innerHTML used in the dialog
+
+---
+
 ## [14.0.2] - 2026-01-08
 
 ### Chore: Production Release Stabilization
