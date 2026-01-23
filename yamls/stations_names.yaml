@@ -1,6 +1,8 @@
 'Abisko': {'normalized_station_name': 'abisko', 'station_acronym': 'ANS', 'station_name': 'Abisko'}
+'Alnarp': {'normalized_station_name': 'alnarp', 'station_acronym': 'ALN', 'station_name': 'Alnarp'}
 'Asa': {'normalized_station_name': 'asa', 'station_acronym': 'ASA', 'station_name': 'Asa'}
 'Grimsö': {'normalized_station_name': 'grimso', 'station_acronym': 'GRI', 'station_name': 'Grimsö'}
+'Hyltemossa': {'normalized_station_name': 'hyltemossa', 'station_acronym': 'HYL', 'station_name': 'Hyltemossa'}
 'Lonnstorp': {'normalized_station_name': 'lonnstorp', 'station_acronym': 'LON', 'station_name': 'Lönnstorp'}
 'Robacksdalen': {'normalized_station_name': 'robacksdalen', 'station_acronym': 'RBD', 'station_name': 'Röbäcksdalen'}
 'Skogaryd': {'normalized_station_name': 'skogaryd', 'station_acronym': 'SKC', 'station_name': 'Skogaryd'}

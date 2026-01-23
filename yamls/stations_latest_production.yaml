@@ -2122,3 +2122,267 @@ stations:
         epsg: epsg:4326
         latitude_dd: 64.24433725317064
         longitude_dd: 19.76638029816108
+
+  # ============================================================================
+  # Alnarp (ALN) - Added 2026-01-23
+  # 4 platforms: 2 SITES Spectral/MGeo, 2 ICOS
+  # ============================================================================
+  alnarp:
+    id: ALN
+    normalized_name: alnarp
+    display_name: Alnarp
+    acronym: ALN
+    status: Active
+    country: Sweden
+    description: Alnarp Research Station - SLU campus. 5 platforms (2 SITES Spectral/MGeo, 2 MGeo Perennial Crops, 1 Satellite) with phenocams, multispectral, UAV, satellite
+    sites_member: true
+    sites_thematic_programs:
+      - SITES Spectral
+    icos_member: false
+    platforms:
+      # Platform 1: SITES Spectral / MGeo - Fixed Tower
+      ALN_AGR_TWR01:
+        id: ALN_AGR_TWR01
+        normalized_name: ALN_AGR_TWR01
+        display_name: Alnarp Agricultural Tower 01 (SITES Spectral)
+        location_code: TWR01
+        platform_type: fixed
+        mounting_structure: Tower
+        status: Planned
+        ecosystem_code: AGR
+        operation_programs:
+          - SITES
+          - SITES Spectral
+        managing_institution: Lund University
+        managing_department: Department of Earth and Environmental Sciences (MGeo)
+        thematic_program: SITES Spectral Thematic Program
+        description: Fixed tower managed by MGeo/Lund University for SITES Spectral - PLACEHOLDER coordinates and specs TBD
+        instruments:
+          phenocams:
+            ALN_AGR_TWR01_PHE01:
+              id: ALN_AGR_TWR01_PHE01
+              normalized_name: ALN_AGR_TWR01_PHE01
+              display_name: Alnarp Agricultural Phenocam 01
+              instrument_type: phenocam
+              ecosystem_code: AGR
+              instrument_number: PHE01
+              status: Planned
+              description: Phenocam for agricultural vegetation monitoring - PLACEHOLDER camera specs TBD
+          multispectral:
+            ALN_AGR_TWR01_MS01:
+              id: ALN_AGR_TWR01_MS01
+              normalized_name: ALN_AGR_TWR01_MS01
+              display_name: Alnarp Tower Multispectral Sensor 01
+              instrument_type: multispectral
+              ecosystem_code: AGR
+              instrument_number: MS01
+              status: Planned
+              description: Fixed multispectral sensor for continuous vegetation monitoring - PLACEHOLDER sensor specs TBD
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: null  # PLACEHOLDER
+            longitude_dd: null  # PLACEHOLDER
+
+      # Platform 2: SITES Spectral / MGeo - UAV (DJI M3M)
+      ALN_DJI_M3M_UAV01:
+        id: ALN_DJI_M3M_UAV01
+        normalized_name: ALN_DJI_M3M_UAV01
+        display_name: Alnarp DJI Mavic 3 Multispectral (SITES Spectral)
+        location_code: UAV01
+        platform_type: uav
+        status: Active
+        ecosystem_code: AGR
+        operation_programs:
+          - SITES
+          - SITES Spectral
+        managing_institution: Lund University
+        managing_department: Department of Earth and Environmental Sciences (MGeo)
+        thematic_program: SITES Spectral Thematic Program
+        description: DJI Mavic 3 Multispectral UAV - test flights 2023-05-21, operational for agricultural monitoring
+        instruments:
+          multispectral:
+            ALN_DJI_M3M_UAV01_MS01:
+              id: ALN_DJI_M3M_UAV01_MS01
+              normalized_name: ALN_DJI_M3M_UAV01_MS01
+              display_name: Alnarp M3M Multispectral Sensor
+              instrument_type: multispectral
+              ecosystem_code: AGR
+              instrument_number: MS01
+              status: Active
+              description: DJI M3M integrated 4-band multispectral sensor (Green 560nm, Red 650nm, Red Edge 730nm, NIR 860nm)
+          rgb:
+            ALN_DJI_M3M_UAV01_RGB01:
+              id: ALN_DJI_M3M_UAV01_RGB01
+              normalized_name: ALN_DJI_M3M_UAV01_RGB01
+              display_name: Alnarp M3M RGB Camera
+              instrument_type: rgb_camera
+              ecosystem_code: AGR
+              instrument_number: RGB01
+              status: Active
+              description: DJI M3M integrated 20MP RGB camera (4/3 CMOS, Hasselblad)
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: 55.6594
+            longitude_dd: 13.0822
+
+      # Platform 3: MGeo Perennial Crops - Tower 01
+      ALN_AGR_TWR02:
+        id: ALN_AGR_TWR02
+        normalized_name: ALN_AGR_TWR02
+        display_name: Alnarp Perennial Crops Tower 01
+        location_code: TWR02
+        platform_type: fixed
+        mounting_structure: Tower
+        status: Planned
+        ecosystem_code: AGR
+        operation_programs:
+          - MGeo
+          - Perennial Crops
+        managing_institution: null  # PLACEHOLDER: Institution TBD
+        managing_department: null  # PLACEHOLDER: Department TBD
+        thematic_program: Perennial Crops Project
+        description: MGeo Perennial Crops project tower at Alnarp - PLACEHOLDER all details TBD
+        instruments: {}
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: null  # PLACEHOLDER
+            longitude_dd: null  # PLACEHOLDER
+
+      # Platform 4: MGeo Perennial Crops - Tower 02
+      ALN_AGR_TWR03:
+        id: ALN_AGR_TWR03
+        normalized_name: ALN_AGR_TWR03
+        display_name: Alnarp Perennial Crops Tower 02
+        location_code: TWR03
+        platform_type: fixed
+        mounting_structure: Tower
+        status: Planned
+        ecosystem_code: AGR
+        operation_programs:
+          - MGeo
+          - Perennial Crops
+        managing_institution: null  # PLACEHOLDER: Institution TBD
+        managing_department: null  # PLACEHOLDER: Department TBD
+        thematic_program: Perennial Crops Project
+        description: MGeo Perennial Crops project second tower at Alnarp - PLACEHOLDER all details TBD
+        instruments: {}
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: null  # PLACEHOLDER
+            longitude_dd: null  # PLACEHOLDER
+
+      # Platform 5: Satellite - Sentinel-2A
+      ALN_ESA_S2A_SAT01:
+        id: ALN_ESA_S2A_SAT01
+        normalized_name: ALN_ESA_S2A_SAT01
+        display_name: Alnarp Sentinel-2A
+        location_code: SAT01
+        platform_type: satellite
+        status: Active
+        ecosystem_code: AGR
+        operation_programs:
+          - SITES
+          - SITES Spectral
+          - Copernicus
+        managing_institution: Lund University
+        managing_department: Department of Earth and Environmental Sciences (MGeo)
+        thematic_program: SITES Spectral Thematic Program
+        description: ESA Sentinel-2A MSI imagery for Alnarp agricultural upscaling and validation
+        instruments:
+          multispectral:
+            ALN_ESA_S2A_SAT01_MSI01:
+              id: ALN_ESA_S2A_SAT01_MSI01
+              normalized_name: ALN_ESA_S2A_SAT01_MSI01
+              display_name: Alnarp Sentinel-2A MSI
+              instrument_type: multispectral
+              ecosystem_code: AGR
+              instrument_number: MSI01
+              status: Active
+              description: ESA Sentinel-2A Multispectral Instrument (MSI) - 13 spectral bands, 10m-60m resolution, 5-day revisit
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: 55.6594
+            longitude_dd: 13.0822
+
+    geolocation:
+      point:
+        epsg: epsg:4326
+        latitude_dd: 55.6594
+        longitude_dd: 13.0822
+
+  # ============================================================================
+  # Hyltemossa (HYL) - Added 2026-01-23
+  # ICOS Class 1 station with SITES Spectral integration
+  # ============================================================================
+  hyltemossa:
+    id: HYL
+    normalized_name: hyltemossa
+    display_name: Hyltemossa
+    acronym: HYL
+    status: Active
+    country: Sweden
+    description: Hyltemossa ICOS Class 1 station - Mixed coniferous forest. Fully managed by ICOS Sweden. SITES Spectral provides spectral/phenocam/UAV data processing support
+    sites_member: true
+    sites_thematic_programs:
+      - SITES Spectral
+    icos_member: true
+    icos_class: Class 1
+    platforms:
+      # Platform 1: ICOS main flux tower
+      HYL_FOR_TWR01:
+        id: HYL_FOR_TWR01
+        normalized_name: HYL_FOR_TWR01
+        display_name: Hyltemossa Flux Tower (ICOS)
+        location_code: TWR01
+        platform_type: fixed
+        mounting_structure: Tower
+        status: Planned
+        ecosystem_code: FOR
+        operation_programs:
+          - ICOS
+          - ICOS Sweden
+          - SITES Spectral
+        managing_institution: null  # PLACEHOLDER: Institution TBD
+        thematic_program: ICOS Sweden
+        description: Hyltemossa main flux tower - ICOS Class 1 station - PLACEHOLDER all details TBD
+        instruments: {}
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: 56.0976  # PLACEHOLDER
+            longitude_dd: 13.4189  # PLACEHOLDER
+
+      # Platform 2: ICOS tower (SITES Spectral processing support)
+      HYL_FOR_TWR02:
+        id: HYL_FOR_TWR02
+        normalized_name: HYL_FOR_TWR02
+        display_name: Hyltemossa ICOS Tower 02
+        location_code: TWR02
+        platform_type: fixed
+        mounting_structure: Tower
+        status: Planned
+        ecosystem_code: FOR
+        operation_programs:
+          - ICOS
+          - ICOS Sweden
+        managing_institution: null  # PLACEHOLDER: Institution TBD
+        managing_department: null  # PLACEHOLDER: Department TBD
+        thematic_program: ICOS Sweden
+        description: Hyltemossa ICOS tower - SITES Spectral provides data processing support - PLACEHOLDER all details TBD
+        instruments: {}
+        geolocation:
+          point:
+            epsg: epsg:4326
+            latitude_dd: null  # PLACEHOLDER
+            longitude_dd: null  # PLACEHOLDER
+
+    geolocation:
+      point:
+        epsg: epsg:4326
+        latitude_dd: 56.0976
+        longitude_dd: 13.4189

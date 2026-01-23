@@ -13,6 +13,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [14.1.0] - 2026-01-23
+
+### Feature: Alnarp & Hyltemossa Stations with Management Tracking
+
+Added two new SITES stations and enhanced platform management tracking to easily identify SITES member stations and their institutional affiliations.
+
+#### New Stations
+
+| Station | Acronym | SITES Member | ICOS Member | Platforms |
+|---------|---------|--------------|-------------|-----------|
+| **Alnarp** | ALN | Yes | No | 5 (2 SITES Spectral/MGeo, 2 MGeo Perennial Crops, 1 Satellite) |
+| **Hyltemossa** | HYL | Yes | Yes (Class 1) | 2 (fully ICOS, SITES Spectral processing support) |
+
+#### New Schema Fields
+
+**Stations Table:**
+- `sites_member` (BOOLEAN) - Easy filtering of SITES member stations
+- `sites_thematic_programs` (TEXT) - Programs like "SITES Spectral, SITES Water"
+- `icos_member` (BOOLEAN) - ICOS membership flag
+- `icos_class` (TEXT) - "Class 1", "Class 2", or "Associated"
+
+**Platforms Table:**
+- `managing_institution` (TEXT) - e.g., "Lund University", "SLU"
+- `managing_department` (TEXT) - e.g., "Department of Earth and Environmental Sciences (MGeo)"
+- `contact_email` (TEXT) - Primary contact for platform
+- `thematic_program` (TEXT) - e.g., "SITES Spectral Thematic Program", "ICOS Sweden"
+
+#### Platform Summary
+
+**Alnarp (ALN) - 5 platforms:**
+| Platform | Type | Manager | Instruments | Status |
+|----------|------|---------|-------------|--------|
+| ALN_AGR_TWR01 | Fixed Tower | MGeo/Lund University (SITES Spectral) | PHE01, MS01 | Planned |
+| ALN_DJI_M3M_UAV01 | UAV | MGeo/Lund University (SITES Spectral) | MS01, RGB01 | Active |
+| ALN_ESA_S2A_SAT01 | Satellite | MGeo/Lund University (SITES Spectral) | MSI01 | Active |
+| ALN_AGR_TWR02 | Fixed Tower | MGeo (Perennial Crops) | (TBD) | Planned |
+| ALN_AGR_TWR03 | Fixed Tower | MGeo (Perennial Crops) | (TBD) | Planned |
+
+**Hyltemossa (HYL) - 2 platforms (fully ICOS managed, SITES Spectral processing support):**
+| Platform | Type | Manager | Status |
+|----------|------|---------|--------|
+| HYL_FOR_TWR01 | Fixed Tower | ICOS Sweden | Planned |
+| HYL_FOR_TWR02 | Fixed Tower | ICOS Sweden | Planned |
+
+#### Useful Queries
+
+```sql
+-- Count all SITES member stations
+SELECT COUNT(*) FROM stations WHERE sites_member = true;
+
+-- List SITES Spectral platforms with management info
+SELECT s.acronym, p.normalized_name, p.managing_institution, p.managing_department
+FROM platforms p
+JOIN stations s ON p.station_id = s.id
+WHERE p.thematic_program LIKE '%SITES Spectral%';
+
+-- Find platforms needing management info (placeholders)
+SELECT normalized_name, display_name FROM platforms WHERE managing_institution IS NULL;
+```
+
+#### Files Changed
+
+- **Migration**: `migrations/0044_alnarp_hyltemossa_management_tracking.sql`
+- **YAML**: `yamls/stations_names.yaml` - Added ALN, HYL entries
+- **YAML**: `yamls/stations_latest_production.yaml` - Full station configurations
+
+---
+
 ## [14.0.3] - 2026-01-09
 
 ### Feature: Duplicate Platform Prevention Dialog

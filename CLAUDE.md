@@ -60,17 +60,42 @@ src/
 
 ---
 
-## Current Version: 14.0.3 - Duplicate Platform Prevention (2026-01-09)
+## Current Version: 14.1.0 - Alnarp & Hyltemossa Stations (2026-01-23)
 
 **✅ STATUS: PRODUCTION READY**
 **🌐 Production URL:** https://sites.jobelab.com
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2026-01-09
+**📅 Last Updated:** 2026-01-23
 **🚀 API Version:** V11 (via `/api/latest` alias)
 **🔒 Security Features:** CORS Whitelist, PBKDF2 Password Hashing, httpOnly Cookies, CSRF Protection, Input Sanitization, JWT HMAC-SHA256, XSS-Safe DOM Methods
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
 **🧪 Test Coverage:** 653 tests across 36 test files
+**📍 Stations:** 9 SITES member stations (7 original + ALN, HYL)
+
+### What's New in v14.1.0
+
+**Alnarp & Hyltemossa Stations with Management Tracking** - Added two new SITES stations with enhanced platform management tracking:
+
+| Station | Acronym | Platforms | Notes |
+|---------|---------|-----------|-------|
+| Alnarp | ALN | 5 (2 SITES Spectral, 2 Perennial Crops, 1 Sat) | MGeo managed |
+| Hyltemossa | HYL | 2 (fully ICOS) | SITES Spectral processing support |
+
+**New Schema Fields:**
+- `stations.sites_member` - Boolean for SITES membership filtering
+- `stations.icos_member` / `icos_class` - ICOS membership tracking
+- `platforms.managing_institution` / `managing_department` - Institutional ownership
+- `platforms.thematic_program` - Program affiliation (SITES Spectral, ICOS Sweden, etc.)
+
+**Alnarp Platforms (ALN):**
+| Platform | Type | Manager | Instruments |
+|----------|------|---------|-------------|
+| ALN_AGR_TWR01 | Fixed Tower | SITES Spectral/MGeo | PHE01, MS01 |
+| ALN_DJI_M3M_UAV01 | UAV | SITES Spectral/MGeo | MS01, RGB01 |
+| ALN_ESA_S2A_SAT01 | Satellite | SITES Spectral/MGeo | MSI01 |
+| ALN_AGR_TWR02 | Fixed Tower | Perennial Crops | (placeholder) |
+| ALN_AGR_TWR03 | Fixed Tower | Perennial Crops | (placeholder) |
 
 ### What's New in v14.0.3
 
