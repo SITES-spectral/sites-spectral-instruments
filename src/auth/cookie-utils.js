@@ -21,6 +21,7 @@ function isSecureContext(request) {
   const url = new URL(request.url);
   // Production domains are always HTTPS
   if (url.hostname === 'sites.jobelab.com' ||
+      url.hostname === 'sitesspectral.work' ||
       url.hostname.endsWith('.workers.dev')) {
     return true;
   }

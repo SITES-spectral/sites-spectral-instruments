@@ -1232,10 +1232,10 @@
                 }
 
                 const stationsData = await stationsResponse.json();
-                stations = stationsData.stations || [];
+                stations = stationsData.data || stationsData.stations || [];
 
                 // Load platform and instrument counts
-                const countsData = await loadCounts(token);
+                const countsData = await loadCounts();
 
                 // Update UI
                 updateDashboardStats(countsData);
@@ -1251,7 +1251,7 @@
             }
         }
 
-        async function loadCounts(token) {
+        async function loadCounts() {
             try {
                 // Return counts from stations array (each station has platform_count and instrument_count)
                 const stationsCount = stations.length;

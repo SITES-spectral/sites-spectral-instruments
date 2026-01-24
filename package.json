@@ -1,7 +1,7 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "14.1.0",
-  "description": "SITES Spectral v14.1.0 - Stations & Instruments Registry",
+  "version": "14.2.0",
+  "description": "SITES Spectral v14.2.0 - Stations & Instruments Registry",
   "main": "src/worker.js",
   "scripts": {
     "dev": "wrangler dev --local --persist-to=.wrangler/state",

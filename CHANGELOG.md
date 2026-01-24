@@ -13,6 +13,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [14.2.0] - 2026-01-24
+
+### Feature: New Production Domain & Database Authentication
+
+Deployed to new production domain `sitesspectral.work` with Cloudflare account under `jose.beltran@mgeo.lu.se`. Migrated from Cloudflare Secrets-based authentication to database-based user authentication.
+
+#### New Production Infrastructure
+
+| Component | Value |
+|-----------|-------|
+| **Primary Domain** | https://sitesspectral.work |
+| **Worker URL** | https://sites-spectral-instruments.jose-beltran.workers.dev |
+| **Cloudflare Account** | jose.beltran@mgeo.lu.se (MGeo/Lund University) |
+| **D1 Database** | spectral_stations_db (29a77ad6-c5ff-4088-af08-478df12159b4) |
+| **R2 Bucket** | sites-spectral-docs |
+
+#### Authentication Changes
+
+- **Database-based users**: User credentials now stored in D1 `users` table instead of Cloudflare Secrets
+- **PBKDF2 password hashing**: 100,000 iterations, SHA-256, 16-byte random salt
+- **httpOnly cookies**: JWT tokens stored in secure cookies (not exposed to JavaScript)
+- **Cookie security attributes**: `HttpOnly; SameSite=Strict; Secure; Max-Age=86400`
+- **Rate limiting**: 5 login attempts per minute per IP with 5-minute lockout
+
+#### Frontend Fixes
+
+- Fixed `ReferenceError: token is not defined` in sites-dashboard by removing unused token parameter
+- Updated stations API response handling (`data` vs `stations` field)
+- Added `sitesspectral.work` to known secure contexts for cookie handling
+
+#### Files Changed
+
+- `src/auth/authentication.js` - Database-based user authentication
+- `src/auth/cookie-utils.js` - Added sitesspectral.work to secure contexts
+- `public/sites-dashboard.html` - Fixed token reference and API response handling
+- `wrangler.toml` - Updated account_id, database_id, routes for new domain
+
+---
+
 ## [14.1.0] - 2026-01-23
 
 ### Feature: Alnarp & Hyltemossa Stations with Management Tracking

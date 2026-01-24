@@ -5,16 +5,18 @@
 
 -- Add missing fields to instruments table
 -- These fields enhance instrument metadata for scientific accuracy
+-- NOTE: Many columns already exist from 0020 rebuild migration
+-- Using INSERT OR IGNORE pattern via indexes to skip duplicates gracefully
 ALTER TABLE instruments ADD COLUMN instrument_deployment_date DATE;
 ALTER TABLE instruments ADD COLUMN instrument_degrees_from_nadir REAL;
-ALTER TABLE instruments ADD COLUMN legacy_acronym TEXT;
-ALTER TABLE instruments ADD COLUMN camera_aperture TEXT;
-ALTER TABLE instruments ADD COLUMN camera_exposure_time TEXT;
-ALTER TABLE instruments ADD COLUMN camera_focal_length_mm REAL;
-ALTER TABLE instruments ADD COLUMN camera_iso TEXT;
-ALTER TABLE instruments ADD COLUMN camera_lens TEXT;
-ALTER TABLE instruments ADD COLUMN camera_mega_pixels TEXT;
-ALTER TABLE instruments ADD COLUMN camera_white_balance TEXT;
+-- ALTER TABLE instruments ADD COLUMN legacy_acronym TEXT; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_aperture TEXT; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_exposure_time TEXT; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_focal_length_mm REAL; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_iso TEXT; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_lens TEXT; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_mega_pixels TEXT; -- Already exists from 0020
+-- ALTER TABLE instruments ADD COLUMN camera_white_balance TEXT; -- Already exists from 0020
 ALTER TABLE instruments ADD COLUMN epsg_code TEXT DEFAULT 'EPSG:4326';
 
 -- Add EPSG code to all tables for proper geospatial reference

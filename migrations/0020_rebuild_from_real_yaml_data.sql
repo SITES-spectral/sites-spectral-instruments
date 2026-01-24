@@ -2,15 +2,25 @@
 -- Generated: 2025-09-19T04:12:01.222Z
 -- Source: stations.yaml, ecosystems.yaml, status.yaml
 
--- Create tables first
-CREATE TABLE IF NOT EXISTS ecosystems (
+-- Drop all tables to fix conflicts with previous migrations (0012, 0013)
+DROP TABLE IF EXISTS activity_log;
+DROP TABLE IF EXISTS user_sessions;
+DROP TABLE IF EXISTS user_field_permissions;
+DROP TABLE IF EXISTS instruments;
+DROP TABLE IF EXISTS platforms;
+DROP TABLE IF EXISTS stations;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS ecosystems;
+
+-- Create tables
+CREATE TABLE ecosystems (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     description TEXT
 );
 
-CREATE TABLE IF NOT EXISTS stations (
+CREATE TABLE stations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     normalized_name TEXT UNIQUE NOT NULL,
     display_name TEXT NOT NULL,
@@ -25,7 +35,7 @@ CREATE TABLE IF NOT EXISTS stations (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS platforms (
+CREATE TABLE platforms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     station_id INTEGER NOT NULL,
     normalized_name TEXT NOT NULL,
@@ -43,7 +53,7 @@ CREATE TABLE IF NOT EXISTS platforms (
     FOREIGN KEY (station_id) REFERENCES stations (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS instruments (
+CREATE TABLE instruments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     platform_id INTEGER NOT NULL,
     normalized_name TEXT NOT NULL,
@@ -75,7 +85,7 @@ CREATE TABLE IF NOT EXISTS instruments (
     FOREIGN KEY (platform_id) REFERENCES platforms (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
@@ -90,7 +100,7 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (station_id) REFERENCES stations (id)
 );
 
-CREATE TABLE IF NOT EXISTS user_field_permissions (
+CREATE TABLE user_field_permissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_role TEXT NOT NULL,
     permission_type TEXT NOT NULL,
@@ -101,7 +111,7 @@ CREATE TABLE IF NOT EXISTS user_field_permissions (
     FOREIGN KEY (station_id) REFERENCES stations (id)
 );
 
-CREATE TABLE IF NOT EXISTS user_sessions (
+CREATE TABLE user_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     session_token TEXT UNIQUE NOT NULL,
@@ -110,7 +120,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS activity_log (
+CREATE TABLE activity_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     action TEXT NOT NULL,

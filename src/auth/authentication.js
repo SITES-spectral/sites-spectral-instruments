@@ -177,7 +177,7 @@ export async function handleAuth(method, pathSegments, request, env) {
 }
 
 /**
- * Authenticate user with username and password
+ * Authenticate user with username and password using database users table
  * @param {string} username - Username
  * @param {string} password - Password
  * @param {Object} env - Environment variables and bindings
@@ -190,86 +190,55 @@ export async function authenticateUser(username, password, env) {
   }
 
   try {
-    // Load credentials from secure file
-    const credentials = await loadCredentials(env);
-    if (!credentials) {
-      console.error('Failed to load credentials file');
+    // Query user from database
+    const user = await env.DB.prepare(`
+      SELECT u.id, u.username, u.email, u.password_hash, u.role, u.full_name,
+             u.organization, u.active, u.station_id,
+             s.acronym as station_acronym, s.normalized_name as station_normalized_name
+      FROM users u
+      LEFT JOIN stations s ON u.station_id = s.id
+      WHERE u.username = ? AND u.active = 1
+    `).bind(username).first();
+
+    if (!user) {
+      console.warn(`User not found or inactive: ${username}`);
       return null;
     }
 
-    // Check admin credentials (original admin)
-    // Uses verifyPassword for secure comparison (supports both hashed and plain text during migration)
-    if (credentials.admin?.username === username &&
-        await verifyPassword(password, credentials.admin?.password)) {
-      // Auth successful - admin user
-      return {
-        username: credentials.admin.username,
-        role: credentials.admin.role,
-        station_acronym: null,
-        station_normalized_name: null,
-        edit_privileges: true,
-        permissions: ['read', 'write', 'edit', 'delete', 'admin']
-      };
+    // Verify password using secure comparison
+    const passwordValid = await verifyPassword(password, user.password_hash);
+    if (!passwordValid) {
+      console.warn(`Invalid password for user: ${username}`);
+      return null;
     }
 
-    // Check sites-admin credentials (global admin)
-    if (credentials.sites_admin?.username === username &&
-        await verifyPassword(password, credentials.sites_admin?.password)) {
-      // Auth successful - sites-admin user
-      return {
-        username: credentials.sites_admin.username,
-        role: 'admin',
-        station_acronym: null,
-        station_normalized_name: null,
-        edit_privileges: true,
-        permissions: credentials.sites_admin.permissions || ['read', 'write', 'edit', 'delete', 'admin']
-      };
-    }
+    // Determine permissions based on role
+    const rolePermissions = {
+      'admin': ['read', 'write', 'edit', 'delete', 'admin'],
+      'sites-admin': ['read', 'write', 'edit', 'delete', 'admin'],
+      'station-admin': ['read', 'write', 'edit', 'delete'],
+      'station': ['read'],
+      'readonly': ['read']
+    };
 
-    // Check station-admin credentials
-    if (credentials.station_admins) {
-      for (const [stationName, adminCreds] of Object.entries(credentials.station_admins)) {
-        if (adminCreds?.username === username &&
-            await verifyPassword(password, adminCreds?.password)) {
-          // Get station data from database to get both acronym and integer ID
-          const stationData = await getStationByNormalizedName(stationName, env);
-          // Auth successful - station-admin user
-          return {
-            username: adminCreds.username,
-            role: adminCreds.role || 'station-admin',
-            station_id: stationData?.id || null,
-            station_acronym: stationData?.acronym || adminCreds.station_id,
-            station_normalized_name: stationName,
-            edit_privileges: true,
-            permissions: adminCreds.permissions || ['read', 'write', 'edit', 'delete']
-          };
-        }
-      }
-    }
+    const permissions = rolePermissions[user.role] || ['read'];
+    const editPrivileges = ['admin', 'sites-admin', 'station-admin'].includes(user.role);
 
-    // Check station credentials (regular station users)
-    if (credentials.stations) {
-      for (const [stationName, stationCreds] of Object.entries(credentials.stations)) {
-        if (stationCreds?.username === username &&
-            await verifyPassword(password, stationCreds?.password)) {
-          // Get station data from database to get both acronym and integer ID
-          const stationData = await getStationByNormalizedName(stationName, env);
-          // Auth successful - station user
-          return {
-            username: stationCreds.username,
-            role: stationCreds.role,
-            station_id: stationData?.id || null, // Use integer ID from database
-            station_acronym: stationData?.acronym || null,
-            station_normalized_name: stationName,
-            edit_privileges: stationCreds.edit_privileges || false,
-            permissions: stationCreds.permissions || ['read']
-          };
-        }
-      }
-    }
+    // Return authenticated user object
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      full_name: user.full_name,
+      organization: user.organization,
+      station_id: user.station_id,
+      station_acronym: user.station_acronym,
+      station_normalized_name: user.station_normalized_name,
+      edit_privileges: editPrivileges,
+      permissions: permissions
+    };
 
-    console.warn(`Authentication failed for username: ${username}`);
-    return null;
   } catch (error) {
     console.error('Authentication error:', error);
     return null;
@@ -284,15 +253,14 @@ export async function authenticateUser(username, password, env) {
  */
 export async function generateToken(user, env) {
   try {
-    // Load JWT secret from credentials
-    const credentials = await loadCredentials(env);
-    if (!credentials?.jwt_secret) {
-      console.error('JWT secret not found in credentials');
+    // Get JWT secret directly from environment
+    if (!env.JWT_SECRET) {
+      console.error('JWT_SECRET not found in environment');
       throw new Error('JWT secret not available');
     }
 
     // Create secret key for HMAC-SHA256
-    const secret = new TextEncoder().encode(credentials.jwt_secret);
+    const secret = new TextEncoder().encode(env.JWT_SECRET);
 
     // Build JWT with proper signing using jose library
     const jwt = await new SignJWT({

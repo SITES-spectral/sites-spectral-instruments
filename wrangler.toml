@@ -4,7 +4,7 @@ compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 preview_urls = true
-account_id = "e5f93ed83288202d33cf9c7b18068f64"
+account_id = "15e8e176e26c65981300ddc97093f58d"
 
 # GitHub integration
 # Enable auto-deployment from GitHub when commits are pushed to main branch
@@ -23,7 +23,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "spectral_stations_db"
-database_id = "2a6e433a-db6e-4b75-bba3-eb7e59363e1d"
+database_id = "29a77ad6-c5ff-4088-af08-478df12159b4"
 
 # R2 Object Storage for Sensor Documentation
 [[r2_buckets]]
@@ -33,9 +33,17 @@ binding = "DOCS_BUCKET"
 [vars]
 ENVIRONMENT = "production"
 APP_NAME = "SITES Spectral Stations & Instruments"
-APP_VERSION = "11.0.0-alpha.33"
+APP_VERSION = "14.2.0"
 USE_CLOUDFLARE_SECRETS = "true"
 
 # Custom domain routing
-# Accessible at: sites.jobelab.com (configured in Cloudflare dashboard)
-# Workers.dev subdomain: sites-spectral-instruments.jose-e5f.workers.dev
+# Accessible at: sitesspectral.work
+# Workers.dev subdomain: sites-spectral-instruments.jose-beltran.workers.dev
+
+[[routes]]
+pattern = "sitesspectral.work/*"
+zone_id = "98a6b8637a4cc674eea24819d8f72b07"
+
+[[routes]]
+pattern = "sitesspectral.work"
+zone_id = "98a6b8637a4cc674eea24819d8f72b07"
