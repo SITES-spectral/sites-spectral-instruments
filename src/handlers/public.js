@@ -184,11 +184,11 @@ async function getPublicHealth(env) {
  */
 async function getPublicMetrics(env) {
   try {
-    // Get platform counts by type
+    // Get platform counts by mount type (v15.0.1: fixed column name)
     const platformsByType = await env.DB.prepare(`
-      SELECT platform_type, COUNT(*) as count
+      SELECT mount_type_code as platform_type, COUNT(*) as count
       FROM platforms
-      GROUP BY platform_type
+      GROUP BY mount_type_code
     `).all();
 
     // Get instrument counts by type
@@ -278,13 +278,13 @@ async function getPublicStationDetails(stationId, env) {
     }
 
     // Get platform summary (no sensitive details)
+    // v15.0.1: Fixed column names to match actual schema
     const platforms = await env.DB.prepare(`
       SELECT
         p.id,
         p.normalized_name,
         p.display_name,
-        p.platform_type,
-        p.ecosystem_code,
+        p.mount_type_code,
         p.status,
         (SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count
       FROM platforms p
@@ -312,9 +312,8 @@ async function getPublicStationDetails(stationId, env) {
       },
       platforms: platforms.results.map(p => ({
         ...p,
-        instruments: instrumentSummary.results.find(
-          i => i.instrument_type === p.platform_type
-        )?.count || 0
+        platform_type: p.mount_type_code, // Map to expected field name
+        instruments: p.instrument_count
       })),
       instrument_summary: Object.fromEntries(
         instrumentSummary.results.map(r => [r.instrument_type, r.count])

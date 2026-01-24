@@ -86,7 +86,7 @@ export async function handleStationExport(stationId, user, env) {
         p.id as platform_id,
         p.normalized_name as platform_normalized_name,
         p.display_name as platform_name,
-        p.location_code as platform_location_code,
+        p.mount_type_code as platform_mount_type_code,
         p.mounting_structure as platform_mounting_structure,
         p.platform_height_m as platform_height,
         p.status as platform_status,
@@ -186,7 +186,7 @@ function generateStationCSV(rows, station, user) {
     'station_country', 'station_latitude', 'station_longitude', 'station_elevation', 'station_description',
 
     // Platform fields
-    'platform_id', 'platform_normalized_name', 'platform_name', 'platform_location_code',
+    'platform_id', 'platform_normalized_name', 'platform_name', 'platform_mount_type_code',
     'platform_mounting_structure', 'platform_height', 'platform_status',
     'platform_latitude', 'platform_longitude', 'platform_deployment_date', 'platform_description', 'platform_operation_programs',
 
@@ -244,7 +244,7 @@ function generateStationCSV(rows, station, user) {
       row.platform_id || '',
       escapeCSVField(row.platform_normalized_name || ''),
       escapeCSVField(row.platform_name || ''),
-      escapeCSVField(row.platform_location_code || ''),
+      escapeCSVField(row.platform_mount_type_code || ''),
       escapeCSVField(row.platform_mounting_structure || ''),
       row.platform_height || '',
       escapeCSVField(row.platform_status || ''),
