@@ -21,6 +21,7 @@ ADRs are short documents that describe architectural decisions made during the p
 | [[ADR-005-security-ports\|ADR-005]] | Security Ports Pattern | Accepted | 2025-12 |
 | [[ADR-006-openapi-contract-first\|ADR-006]] | OpenAPI Contract-First Design | Accepted | 2025-12 |
 | [[ADR-007-port-versioning\|ADR-007]] | Port Versioning Strategy | Accepted | 2025-12 |
+| [[ADR-008-v15-audit-remediation\|ADR-008]] | v15.0.0 Audit Remediation Plan | Proposed | 2026-01 |
 
 ## ADR Template
 
