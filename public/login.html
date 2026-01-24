@@ -18,13 +18,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=14.1.0">
-    <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
+    <link rel="stylesheet" href="/css/design-system.css?v=14.2.0">
+    <link rel="stylesheet" href="/css/styles.css?v=14.2.0">
+    <link rel="stylesheet" href="/css/mobile-enhancements.css?v=14.2.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="14.1.0">
-    <meta name="build-date" content="2026-01-23">
+    <meta name="app-version" content="14.2.0">
+    <meta name="build-date" content="2026-01-24">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
     <script type="module" src="/dist/login.bundle.js"></script>
@@ -244,7 +244,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=14.1.0"></script>
+    <script src="/js/utils.js?v=14.2.0"></script>
     <script>
         class LoginManager {
             constructor() {
@@ -274,30 +274,23 @@
             }
 
             async verifySessionAndRedirect() {
-                console.log('[LOGIN] verifySessionAndRedirect: Starting session check');
                 try {
-                    // Use credentials: 'include' to send httpOnly cookie
                     const response = await fetch('/api/auth/verify', {
                         method: 'GET',
                         credentials: 'include'
                     });
 
-                    console.log('[LOGIN] verifySessionAndRedirect: Response status', response.status);
-
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('[LOGIN] verifySessionAndRedirect: Response data', JSON.stringify(data));
                         if (data.valid && data.user) {
-                            console.log('[LOGIN] verifySessionAndRedirect: Valid session, redirecting user', data.user.role);
                             this.redirectUser(data.user);
                             return;
                         }
                     }
                 } catch (error) {
-                    console.error('[LOGIN] Session verification failed:', error);
+                    // Session verification failed, stay on login page
                 }
 
-                console.log('[LOGIN] verifySessionAndRedirect: No valid session, staying on login page');
                 // Clear any stale user info (session is managed by httpOnly cookie)
                 localStorage.removeItem('sites_spectral_user');
             }
@@ -354,13 +347,10 @@
             }
             
             redirectUser(user) {
-                console.log('[LOGIN] redirectUser: Called with user', JSON.stringify(user));
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect');
-                console.log('[LOGIN] redirectUser: redirect param =', redirect);
 
                 // SECURITY: Validate redirect URL to prevent open redirect attacks
-                // Only allow relative URLs starting with / and not containing protocol handlers
                 const isValidRedirect = redirect &&
                     redirect.startsWith('/') &&
                     !redirect.startsWith('//') &&
@@ -369,35 +359,18 @@
                     !redirect.toLowerCase().includes('vbscript:');
 
                 // Determine redirect URL based on user role
-                // Valid roles: admin, sites-admin, station-admin, station, readonly
-                // Default to sites-dashboard (NOT login.html to avoid infinite loop)
                 let targetUrl = '/sites-dashboard.html';
 
-                // Global admins (admin or sites-admin)
                 if (user.role === 'admin' || user.role === 'sites-admin') {
                     targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
-                    console.log('[LOGIN] redirectUser: admin/sites-admin, target =', targetUrl);
-                }
-                // Station-specific admin with assigned station
-                else if (user.role === 'station-admin' && user.station_acronym) {
+                } else if (user.role === 'station-admin' && user.station_acronym) {
                     targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
-                    console.log('[LOGIN] redirectUser: station-admin, target =', targetUrl);
-                }
-                // Regular station user with assigned station
-                else if (user.role === 'station' && user.station_acronym) {
+                } else if (user.role === 'station' && user.station_acronym) {
                     targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
-                    console.log('[LOGIN] redirectUser: station user, target =', targetUrl);
-                }
-                // Read-only users view all stations
-                else if (user.role === 'readonly') {
+                } else if (user.role === 'readonly') {
                     targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
-                    console.log('[LOGIN] redirectUser: readonly, target =', targetUrl);
-                } else {
-                    console.log('[LOGIN] redirectUser: UNKNOWN ROLE, using default', user.role);
                 }
-                // Fallback: sites-dashboard (safe default)
 
-                console.log('[LOGIN] redirectUser: Final redirect to', targetUrl);
                 window.location.href = targetUrl;
             }
             

@@ -523,19 +523,7 @@ class SitesDashboard {
 // Global instance
 window.sitesDashboard = new SitesDashboard();
 
-// Global convenience functions for backward compatibility
+// Global loadStations function for inline scripts
 function loadStations() {
     return window.sitesDashboard.loadStations();
-}
-
-function showCreateStationModal() {
-    return window.sitesDashboard.showCreateStationModal();
-}
-
-function saveNewStation() {
-    return window.sitesDashboard.saveNewStation();
-}
-
-function showDeleteStationModal(stationId, stationName) {
-    return window.sitesDashboard.showDeleteStationModal(stationId, stationName);
 }

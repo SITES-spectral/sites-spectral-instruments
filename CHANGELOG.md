@@ -37,9 +37,24 @@ Deployed to new production domain `sitesspectral.work` with Cloudflare account u
 - **Cookie security attributes**: `HttpOnly; SameSite=Strict; Secure; Max-Age=86400`
 - **Rate limiting**: 5 login attempts per minute per IP with 5-minute lockout
 
+#### CORS & Security Updates
+
+- Added `sitesspectral.work` to CORS allowed origins (`src/config/allowed-origins.js`)
+- Added `sitesspectral.work` to CSRF allowed origins (`src/utils/csrf.js`)
+- Updated both production domains in whitelist: `sitesspectral.work` (new) and `sites.jobelab.com` (legacy)
+
+#### Frontend Refactoring (No Backward Compatibility)
+
+- **Removed duplicate auth code**: sites-dashboard.html inline script no longer duplicates auth verification
+- **Consolidated API usage**: All auth now handled via `window.sitesAPI` from dashboard.js
+- **Removed optional chaining fallbacks**: Direct calls to `sitesAPI.isAdmin()`, `sitesAPI.logout()` without fallbacks
+- **Cleaned up debug logging**: Removed console.log statements from login.html
+- **Removed redundant global functions**: dashboard.js no longer exports duplicate convenience functions
+
 #### Frontend Fixes
 
 - Fixed `ReferenceError: token is not defined` in sites-dashboard by removing unused token parameter
+- Fixed `showDeleteStationModal()` to use `sitesAPI.isAdmin()` instead of undefined `currentUser`
 - Updated stations API response handling (`data` vs `stations` field)
 - Added `sitesspectral.work` to known secure contexts for cookie handling
 
@@ -47,7 +62,11 @@ Deployed to new production domain `sitesspectral.work` with Cloudflare account u
 
 - `src/auth/authentication.js` - Database-based user authentication
 - `src/auth/cookie-utils.js` - Added sitesspectral.work to secure contexts
-- `public/sites-dashboard.html` - Fixed token reference and API response handling
+- `src/config/allowed-origins.js` - Added sitesspectral.work to CORS whitelist
+- `src/utils/csrf.js` - Added sitesspectral.work to CSRF allowed origins
+- `public/sites-dashboard.html` - Refactored to remove duplicate code, use sitesAPI directly
+- `public/login.html` - Cleaned up debug logging, streamlined redirect logic
+- `public/js/dashboard.js` - Removed duplicate global convenience functions
 - `wrangler.toml` - Updated account_id, database_id, routes for new domain
 
 ---

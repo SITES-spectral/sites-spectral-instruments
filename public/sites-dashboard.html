@@ -18,14 +18,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=14.1.0">
-    <link rel="stylesheet" href="/css/skeleton.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
+    <link rel="stylesheet" href="/css/design-system.css?v=14.2.0">
+    <link rel="stylesheet" href="/css/styles.css?v=14.2.0">
+    <link rel="stylesheet" href="/css/skeleton.css?v=14.2.0">
+    <link rel="stylesheet" href="/css/mobile-enhancements.css?v=14.2.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="14.1.0">
-    <meta name="build-date" content="2026-01-23">
+    <meta name="app-version" content="14.2.0">
+    <meta name="build-date" content="2026-01-24">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
     <script type="module" src="/dist/dashboard.bundle.js"></script>
@@ -1152,268 +1152,49 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="/js/core/skeleton.js?v=13.27.0"></script>
-    <script src="/js/utils.js?v=14.1.0"></script>
-    <script src="/js/legacy/api-v1.js?v=13.27.0"></script>
-    <script src="/js/api.js?v=14.1.0"></script>
-    <script src="/js/components.js?v=14.1.0"></script>
-    <script src="/js/dashboard.js?v=14.1.0"></script>
-    <script src="/js/navigation.js?v=14.1.0"></script>
+    <script src="/js/core/skeleton.js?v=14.2.0"></script>
+    <script src="/js/utils.js?v=14.2.0"></script>
+    <script src="/js/legacy/api-v1.js?v=14.2.0"></script>
+    <script src="/js/api.js?v=14.2.0"></script>
+    <script src="/js/components.js?v=14.2.0"></script>
+    <script src="/js/dashboard.js?v=14.2.0"></script>
+    <script src="/js/navigation.js?v=14.2.0"></script>
     <script>
-        let currentUser = null;
-        let stations = [];
+        // ============================================
+        // SITES DASHBOARD - Helper Functions
+        // Auth and data loading handled by dashboard.js via sitesAPI
+        // ============================================
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('[SITES-DASHBOARD] DOMContentLoaded: Starting initialization');
-            try {
-                // Verify authentication via httpOnly cookie
-                console.log('[SITES-DASHBOARD] Calling /api/auth/verify');
-                const userResponse = await fetch('/api/auth/verify', {
-                    credentials: 'include'
-                });
-
-                console.log('[SITES-DASHBOARD] auth/verify response status:', userResponse.status);
-
-                if (!userResponse.ok) {
-                    console.log('[SITES-DASHBOARD] auth/verify NOT OK, redirecting to login');
-                    // Clear any stale user data and redirect to login
-                    localStorage.removeItem('sites_spectral_user');
-                    localStorage.removeItem('sites_spectral_token');
-                    window.location.href = '/login.html';
-                    return;
-                }
-
-                const userData = await userResponse.json();
-                console.log('[SITES-DASHBOARD] auth/verify response:', JSON.stringify(userData));
-                currentUser = userData.user;
-
-                if (!currentUser) {
-                    console.log('[SITES-DASHBOARD] No user in response, redirecting to login');
-                    window.location.href = '/login.html';
-                    return;
-                }
-
-                console.log('[SITES-DASHBOARD] User role:', currentUser.role, 'station_acronym:', currentUser.station_acronym);
-
-                // Store user data for isAuthenticated() checks
-                localStorage.setItem('sites_spectral_user', JSON.stringify(currentUser));
-
-                // Roles that can access sites-dashboard: admin, sites-admin, readonly
-                // Station users should go to their station dashboard
-                const allowedRoles = ['admin', 'sites-admin', 'readonly'];
-                console.log('[SITES-DASHBOARD] Checking role. Allowed:', allowedRoles, 'Current:', currentUser.role);
-                if (!allowedRoles.includes(currentUser.role)) {
-                    console.log('[SITES-DASHBOARD] Role NOT in allowed list');
-                    if ((currentUser.role === 'station' || currentUser.role === 'station-admin') && currentUser.station_acronym) {
-                        console.log('[SITES-DASHBOARD] Station user, redirecting to station dashboard');
-                        window.location.href = `/station-dashboard.html?station=${currentUser.station_acronym}`;
-                    } else {
-                        console.log('[SITES-DASHBOARD] Unknown role or no station_acronym, redirecting to login');
-                        // Unknown role - redirect to login
-                        window.location.href = '/login.html';
-                    }
-                    return;
-                }
-                console.log('[SITES-DASHBOARD] Role check passed, continuing initialization');
-
-                // Update user display
-                document.getElementById('user-name').textContent = currentUser.username;
-                document.getElementById('user-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
-
-                // Show admin controls if admin or sites-admin
-                if (currentUser.role === 'admin' || currentUser.role === 'sites-admin') {
-                    document.getElementById('admin-controls').style.display = 'flex';
-                }
-
-                // Load stations
-                await loadStations();
-
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showError('Failed to initialize dashboard');
-            }
-        });
-
-        async function loadStations() {
-            console.log('[SITES-DASHBOARD] loadStations: Starting');
-            try {
-                document.getElementById('loading-state').style.display = 'flex';
-                document.getElementById('error-state').style.display = 'none';
-                document.getElementById('stations-grid').style.display = 'none';
-
-                // Load stations via httpOnly cookie
-                console.log('[SITES-DASHBOARD] loadStations: Fetching /api/stations');
-                const stationsResponse = await fetch('/api/stations', {
-                    credentials: 'include'
-                });
-
-                console.log('[SITES-DASHBOARD] loadStations: Response status', stationsResponse.status);
-
-                if (!stationsResponse.ok) {
-                    console.error('[SITES-DASHBOARD] loadStations: Response not OK');
-                    throw new Error('Failed to fetch stations');
-                }
-
-                const stationsData = await stationsResponse.json();
-                console.log('[SITES-DASHBOARD] loadStations: Got data, count:', (stationsData.data || stationsData.stations || []).length);
-                stations = stationsData.data || stationsData.stations || [];
-
-                // Load platform and instrument counts
-                const countsData = await loadCounts();
-                console.log('[SITES-DASHBOARD] loadStations: Counts loaded', countsData);
-
-                // Update UI
-                updateDashboardStats(countsData);
-                renderStationsGrid();
-
-                // Show stations grid
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('stations-grid').style.display = 'grid';
-
-            } catch (error) {
-                console.error('Failed to load stations:', error);
-                showError(error.message);
-            }
-        }
-
-        async function loadCounts() {
-            try {
-                // Return counts from stations array (each station has platform_count and instrument_count)
-                const stationsCount = stations.length;
-
-                // Sum platforms and instruments from all stations
-                let platformsCount = stations.reduce((sum, s) => sum + (s.platform_count || 0), 0);
-                let instrumentsCount = stations.reduce((sum, s) => sum + (s.instrument_count || 0), 0);
-
-                return {
-                    stations: stationsCount,
-                    platforms: platformsCount,
-                    instruments: instrumentsCount
-                };
-            } catch (error) {
-                return { stations: stations.length, platforms: '-', instruments: '-' };
-            }
-        }
-
-        function updateDashboardStats(counts) {
-            document.getElementById('stations-count').textContent = counts.stations;
-            document.getElementById('platforms-count').textContent = counts.platforms;
-            document.getElementById('instruments-count').textContent = counts.instruments;
-        }
-
-        function renderStationsGrid() {
-            const grid = document.getElementById('stations-grid');
-
-            if (stations.length === 0) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: #6b7280;">
-                        <i class="fas fa-satellite-dish" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                        <h3>No stations found</h3>
-                        <p>Get started by creating your first research station.</p>
-                        ${currentUser?.role === 'admin' ? `
-                            <button onclick="showCreateStationModal()" class="btn btn-primary" style="margin-top: 1rem;">
-                                <i class="fas fa-plus"></i>
-                                Create First Station
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = stations.map(station => createStationCard(station)).join('');
-        }
-
-        function createStationCard(station) {
-            const isAdmin = currentUser?.role === 'admin';
-            const coordinates = station.latitude && station.longitude
-                ? `${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}`
-                : 'No coordinates';
-
-            return `
-                <div class="station-card" onclick="navigateToStation('${station.acronym}')">
-                    <div class="station-card-header">
-                        <div class="station-title">
-                            <h3>${station.display_name}</h3>
-                            <span class="station-acronym">${station.acronym}</span>
-                        </div>
-                        <p class="station-meta">${station.country || 'Sweden'}</p>
-
-                        ${isAdmin ? `
-                            <div class="admin-station-controls">
-                                <button onclick="event.stopPropagation(); editStation('${station.id}', '${station.display_name}')"
-                                        class="admin-edit-btn" title="Edit Station">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="event.stopPropagation(); showDeleteStationModal('${station.id}', '${station.display_name}')"
-                                        class="admin-delete-btn" title="Delete Station">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="station-card-body">
-                        ${station.description ? `
-                            <p class="station-description">${station.description}</p>
-                        ` : ''}
-
-                        <div class="station-stats">
-                            <div class="station-stat">
-                                <span class="station-stat-value">${station.platform_count || 0}</span>
-                                <span class="station-stat-label">Platforms</span>
-                            </div>
-                            <div class="station-stat">
-                                <span class="station-stat-value">${station.instrument_count || 0}</span>
-                                <span class="station-stat-label">Instruments</span>
-                            </div>
-                            <div class="station-stat">
-                                <span class="station-stat-value status-${(station.status || 'active').toLowerCase()}">
-                                    ${station.status || 'Active'}
-                                </span>
-                                <span class="station-stat-label">Status</span>
-                            </div>
-                        </div>
-
-                        <div class="station-location">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${coordinates}</span>
-                            ${station.elevation_m ? `<span>• ${station.elevation_m}m elevation</span>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
+        // Navigation helper
         function navigateToStation(acronym) {
             window.location.href = `/station-dashboard.html?station=${acronym}`;
         }
 
-        function editStation(stationId, stationName) {
-            // For now, navigate to the station - edit functionality could be added here
-            showNotification(`Edit functionality for "${stationName}" coming soon`, 'info');
-        }
-
+        // Error display helper
         function showError(message) {
-            document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('error-state').style.display = 'block';
-            document.getElementById('stations-grid').style.display = 'none';
-            document.getElementById('error-message').textContent = message;
+            const loadingEl = document.getElementById('loading-state');
+            const errorEl = document.getElementById('error-state');
+            const gridEl = document.getElementById('stations-grid');
+            const errorMsgEl = document.getElementById('error-message');
+
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'block';
+            if (gridEl) gridEl.style.display = 'none';
+            if (errorMsgEl) errorMsgEl.textContent = message;
         }
 
+        // Logout function
         async function logout() {
-            try {
-                await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-            } catch (e) {
-                console.error('Logout error:', e);
+            await window.sitesAPI.logout();
+        }
+
+        // Edit station placeholder
+        function editStation(stationId, stationName) {
+            if (typeof showNotification === 'function') {
+                showNotification(`Edit functionality for "${stationName}" coming soon`, 'info');
+            } else {
+                alert(`Edit functionality for "${stationName}" coming soon`);
             }
-            localStorage.removeItem('sites_spectral_user');
-            localStorage.removeItem('sites_spectral_token');
-            window.location.href = '/login.html';
         }
 
         // ============================================
@@ -1422,7 +1203,7 @@
 
         // Station Creation Functions (Admin Only)
         function showCreateStationModal() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (!window.sitesAPI.isAdmin()) {
                 showNotification('Admin privileges required', 'error');
                 return;
             }
@@ -1602,7 +1383,7 @@
 
         // Station Deletion Functions (Admin Only)
         function showDeleteStationModal(stationId, stationName) {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (!window.sitesAPI.isAdmin()) {
                 showNotification('Admin privileges required', 'error');
                 return;
             }
