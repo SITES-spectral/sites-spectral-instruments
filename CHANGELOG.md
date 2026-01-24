@@ -13,6 +13,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.0.1] - 2026-01-24
+
+### Fixed: Critical Handler Wiring (Audit P0 Fixes)
+
+Addresses critical findings from Jobelab Agent Team audit (ADR-008).
+
+#### API Handlers Wired
+
+| Handler | Path | Issue |
+|---------|------|-------|
+| `handleMagicLinks` | `/api/magic-links/*` | Was NOT wired (API-001) |
+| `handlePublicApi` | `/api/public/*` | Was NOT wired (API-002) |
+
+#### Security Fix
+
+- **SEC-001**: CSRF origins now synchronized with CORS configuration
+- Removed hardcoded origins from `src/utils/csrf.js`
+- Now imports `isAllowedOrigin` from `src/config/allowed-origins.js`
+- Supports dynamic subdomain matching for `*.sitesspectral.work`
+
+#### Files Modified
+
+- `src/api-handler.js` - Added imports and routing for magic-links and public handlers
+- `src/utils/csrf.js` - Synchronized with CORS config via centralized import
+
+---
+
 ## [15.0.0] - 2026-01-24
 
 ### Feature: Subdomain Architecture with Cloudflare Access

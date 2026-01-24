@@ -1,9 +1,15 @@
-// SITES Spectral API Handler v11.0.0-alpha.42
+// SITES Spectral API Handler v15.0.0
 // V11 API (Hexagonal Architecture) - Primary API with full feature support
 // Supports semantic aliases: /api/latest, /api/stable, /api/current
 // SECURITY: CSRF protection, input sanitization, JWT HMAC-SHA256
+//
+// v15.0.0: Added magic-links and public API handlers for subdomain architecture
 
 import { handleAuth, getUserFromRequest } from './auth/authentication.js';
+
+// v15.0.0: Magic Links and Public API handlers
+import { handleMagicLinks } from './handlers/magic-links.js';
+import { handlePublicApi } from './handlers/public.js';
 import { logApiRequest } from './utils/logging.js';
 import { csrfProtect, createCSRFErrorResponse } from './utils/csrf.js';
 import {
@@ -55,6 +61,13 @@ export async function handleApiRequest(request, env, ctx) {
 
   const method = request.method;
   const resource = pathSegments[0];
+
+  // v15.0.0: Public API endpoints - NO authentication required
+  // Handle these BEFORE CSRF check since they're public read-only endpoints
+  if (resource === 'public') {
+    const publicPathSegments = pathSegments.slice(1); // Remove 'public' prefix
+    return await handlePublicApi(method, publicPathSegments, request, env);
+  }
 
   // SECURITY: CSRF Protection for state-changing requests
   // Skip CSRF check for auth endpoints (login needs to work without existing session)
@@ -112,6 +125,11 @@ export async function handleApiRequest(request, env, ctx) {
       // === ADMIN PANEL ===
       case 'admin':
         return await handleAdmin(method, pathSegments, request, env);
+
+      // === MAGIC LINKS (v15.0.0) ===
+      // Passwordless authentication for station internal users
+      case 'magic-links':
+        return await handleMagicLinks(method, pathSegments.slice(1), request, env);
 
       // === CORE ENTITIES - Route to V11 Router ===
       case 'stations':

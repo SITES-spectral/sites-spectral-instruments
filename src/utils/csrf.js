@@ -1,24 +1,16 @@
 // CSRF Protection Utilities
 // Provides CSRF token generation, validation, and request origin checking
 // SECURITY: Protects against Cross-Site Request Forgery attacks
+//
+// v15.0.0: Synchronized with CORS allowed origins (SEC-001 audit fix)
 
-/**
- * Allowed origins for CSRF validation
- * These are the legitimate domains that can make requests to the API
- */
-const ALLOWED_ORIGINS = [
-    'https://sitesspectral.work',  // MGeo/Lund University production
-    'https://sites.jobelab.com',
-    'https://sites-spectral-instruments.jose-beltran.workers.dev',
-    'https://sites-spectral-instruments.jose-e5f.workers.dev',
-    'http://localhost:8787',  // Local development
-    'http://127.0.0.1:8787'   // Local development
-];
+import { isAllowedOrigin } from '../config/allowed-origins.js';
 
 /**
  * Validate the origin of a request
  * Checks both Origin and Referer headers against allowed list
- * SECURITY: Uses exact match only to prevent subdomain spoofing attacks
+ * SECURITY: Uses centralized isAllowedOrigin from config/allowed-origins.js
+ * v15.0.0: Synchronized with CORS configuration for consistency
  * @param {Request} request - The incoming request
  * @returns {Object} Validation result with isValid and origin
  */
@@ -29,9 +21,11 @@ export function validateRequestOrigin(request) {
     // For same-origin requests, Origin might not be set
     // In that case, check Referer
     if (origin) {
-        // SECURITY: Use exact match only - no startsWith to prevent subdomain spoofing
-        // e.g., "https://sites.jobelab.com.attacker.com" would match with startsWith
-        const isValid = ALLOWED_ORIGINS.includes(origin);
+        // v15.0.0: Use centralized isAllowedOrigin which supports:
+        // - Static list of allowed origins
+        // - Dynamic subdomain matching for *.sitesspectral.work
+        // - Workers.dev subdomains for development
+        const isValid = isAllowedOrigin(origin);
         return { isValid, origin, source: 'origin' };
     }
 
@@ -39,8 +33,8 @@ export function validateRequestOrigin(request) {
         try {
             const refererUrl = new URL(referer);
             const refererOrigin = refererUrl.origin;
-            // SECURITY: Use exact match only
-            const isValid = ALLOWED_ORIGINS.includes(refererOrigin);
+            // v15.0.0: Use centralized isAllowedOrigin
+            const isValid = isAllowedOrigin(refererOrigin);
             return { isValid, origin: refererOrigin, source: 'referer' };
         } catch (e) {
             return { isValid: false, origin: null, source: 'referer', error: 'Invalid referer URL' };
