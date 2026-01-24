@@ -743,14 +743,23 @@ const guardedSubmit = RateLimit.submissionGuard.guard(
 
 ## Documentation Index
 
-### V14 Documentation (Active)
+### V15 Documentation (Current)
+
+| Document | Purpose |
+|----------|---------|
+| `docs/architecture/SUBDOMAIN_ARCHITECTURE.md` | Subdomain portal architecture overview |
+| `docs/security/CLOUDFLARE_ACCESS_INTEGRATION.md` | CF Access JWT verification setup |
+| `docs/MAGIC_LINK_SYSTEM.md` | Magic link token system |
+| `docs/UAV_PILOT_SYSTEM.md` | UAV pilot and mission management |
+
+### V14 Documentation (Inherited)
 
 | Document | Purpose |
 |----------|---------|
 | `docs/security/AUTHENTICATION_v14.md` | httpOnly cookie auth, role redirect logic |
 | `docs/PLATFORM_DUPLICATE_PREVENTION.md` | Duplicate platform prevention dialog |
 
-### V11+ Documentation (Active)
+### V11+ Documentation (Inherited)
 
 | Document | Purpose |
 |----------|---------|
@@ -895,17 +904,33 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 
 | Property | Value |
 |----------|-------|
-| Production URL | https://sites.jobelab.com |
-| Worker URL | https://sites-spectral-instruments.jose-e5f.workers.dev |
-| Current Version | 14.0.3 |
-| Last Deployed | 2026-01-09 |
+| Public Portal | https://sitesspectral.work |
+| Admin Portal | https://admin.sitesspectral.work |
+| Station Portals | https://{station}.sitesspectral.work |
+| Worker URL | https://sites-spectral-instruments.jose-beltran.workers.dev |
+| Current Version | 15.0.0 |
+| Last Deployed | 2026-01-24 |
 | Status | Production Ready |
-| Environment | Cloudflare Workers + D1 Database |
+| Environment | Cloudflare Workers + D1 Database + CF Access |
+| Authentication | Cloudflare Access OTP, Magic Links, httpOnly Cookies |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
 | Test Coverage | 653 tests across 36 files |
 
-### v14.0.x Features
+### v15.0.0 Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| **Subdomain Portal Architecture** | v15.0.0 | ✅ Active |
+| **Cloudflare Access JWT Auth** | v15.0.0 | ✅ Active |
+| **Magic Link System** | v15.0.0 | ✅ Active |
+| **UAV Pilot Management** | v15.0.0 | ✅ Active |
+| **UAV Mission Planning** | v15.0.0 | ✅ Active |
+| **Flight Log System** | v15.0.0 | ✅ Active |
+| **New Roles (uav-pilot, station-internal)** | v15.0.0 | ✅ Active |
+| **Public API Endpoints** | v15.0.0 | ✅ Active |
+
+### v14.0.x Features (Inherited)
 
 | Feature | Version | Status |
 |---------|---------|--------|
@@ -996,32 +1021,64 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 
 ---
 
-## SITES Spectral Agents Team
+## Jobelab Agent Teams (129 agents)
 
-Specialized AI agents are available for domain-specific tasks. The central repository is at:
-`/home/jobelund/agents-teams/sites-spectral-agents-team/`
+Specialized AI agents are available for domain-specific tasks.
 
-Agents are typically symlinked to `.claude/agents/` in each project for easy access.
+### Repository Locations
+
+| Repository | Path | Agents |
+|------------|------|--------|
+| **Jobelab Agents Management** | `~/jobelab-agents-management/` | 129 total |
+| **SITES Spectral Agents** | `.claude/agents/` (symlinked) | Project-specific |
+| **Full Agent Matrix** | `.claude/AGENTS_MATRIX.md` | Complete team overview |
+| **Cross-Team Coordinator** | `.claude/conductor.md` | @conductor |
+
+### Team Hierarchy
+
+```
+@conductor (Coach - cross-team coordination)
+    ├── Jobelab-Exclusive (25 agents) - Leadership, business, operations
+    ├── Helix (87 agents) - Technical Core
+    │   ├── Watershed (15): @river, @brook, @eddy, @shield, @misty
+    │   ├── Spectral (18): @prism, @aurora, @spectrum, @lumen, @photon
+    │   ├── Terrestrial (51): @terra, @verdant, @sentinel, @cascade, @hexi
+    │   └── Aerospace (3): @sora, @uspace, @flightops
+    ├── SITES Spectral (Context) - Uses Helix with SITES domain
+    └── BEAT (17 agents) - Automotive
+```
 
 ### Key Agents for Instruments Registry
 
 | Agent | Invoke | Best For |
 |-------|--------|----------|
-| **Luna** | `@luna` | Visual design, UI/UX for station interface |
-| **River** | `@river` | UX flow design, user journeys |
-| **Shield** | `@shield` | Security, CSRF, XSS prevention, JWT |
-| **Cascade** | `@cascade` | Backend architecture, Cloudflare Workers |
-| **Quarry** | `@quarry` | D1 database schema, SQL migrations |
+| **Conductor** | `@conductor` | Cross-team coordination, complex tasks |
 | **Hexi** | `@hexi` | Hexagonal architecture, SOLID principles |
+| **Cascade** | `@cascade` | Backend architecture, Cloudflare Workers |
+| **Shield** | `@shield` | Security, CSRF, XSS prevention, JWT |
+| **Quarry** | `@quarry` | D1 database schema, SQL migrations |
 | **Forge** | `@forge` | Cross-app ecosystem development |
-| **Pebble** | `@pebble` | Testing, QA, test automation |
-| **Misty** | `@misty` | DevOps, Cloudflare deployment |
+| **Terra** | `@terra` | Earth observation, GEE, Copernicus |
+| **Verdant** | `@verdant` | Vegetation phenology, TIMESAT |
+| **Marina** | `@marina` | Scientific validation (MANDATORY) |
 
-### Usage
-```markdown
-@hexi, review the hexagonal architecture implementation
-@shield, audit the input sanitization framework
+### Quick Invocation
+
+```bash
+# Cross-team coordination
+@conductor "Build biodiversity monitoring platform"
+
+# Technical work
+@cascade "Build data pipeline"
+@hexi "Architecture review"
+@shield "Security audit"
+
+# Scientific validation
+@marina "Validate scientific claims"
 ```
 
 ### Full Documentation
-See `/home/jobelund/agents-teams/sites-spectral-agents-team/AGENTS.md` for complete agent descriptions and recommended combinations.
+- Full matrix: `.claude/AGENTS_MATRIX.md`
+- Conductor: `.claude/conductor.md`
+- SITES agents: `.claude/AGENTS.md`
+- Jobelab management: `.claude/jobelab-agents-management/`
