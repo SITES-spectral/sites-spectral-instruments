@@ -260,7 +260,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '11.0.0-alpha.1',
+      version: '14.2.0',
       architecture: 'hexagonal',
       database: 'connected',
       stats: {
@@ -291,7 +291,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '11.0.0-alpha.1',
+      version: '14.2.0',
       architecture: 'hexagonal',
       database: 'disconnected',
       error: error.message
@@ -308,7 +308,7 @@ async function handleHealth(env, container) {
 function handleInfo() {
   return new Response(JSON.stringify({
     name: 'SITES Spectral Instruments API',
-    version: '11.0.0-alpha.1',
+    version: '14.2.0',
     architecture: 'hexagonal',
     description: 'V11 Hexagonal Architecture API with Darwin Core, ICOS, Copernicus vocabulary alignment',
     patterns: [
