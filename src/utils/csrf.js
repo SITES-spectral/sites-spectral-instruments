@@ -7,7 +7,9 @@
  * These are the legitimate domains that can make requests to the API
  */
 const ALLOWED_ORIGINS = [
+    'https://sitesspectral.work',  // MGeo/Lund University production
     'https://sites.jobelab.com',
+    'https://sites-spectral-instruments.jose-beltran.workers.dev',
     'https://sites-spectral-instruments.jose-e5f.workers.dev',
     'http://localhost:8787',  // Local development
     'http://127.0.0.1:8787'   // Local development

@@ -2,10 +2,14 @@
 // Only these origins can make cross-origin requests to the API
 
 export const ALLOWED_ORIGINS = [
-  // Production
+  // Production - MGeo/Lund University account
+  'https://sitesspectral.work',
+
+  // Production - Legacy jobelab account
   'https://sites.jobelab.com',
 
   // Cloudflare Workers dev URLs
+  'https://sites-spectral-instruments.jose-beltran.workers.dev',
   'https://sites-spectral-instruments.jose-e5f.workers.dev',
 
   // Local development

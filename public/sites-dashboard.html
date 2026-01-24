@@ -1165,13 +1165,18 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[SITES-DASHBOARD] DOMContentLoaded: Starting initialization');
             try {
                 // Verify authentication via httpOnly cookie
+                console.log('[SITES-DASHBOARD] Calling /api/auth/verify');
                 const userResponse = await fetch('/api/auth/verify', {
                     credentials: 'include'
                 });
 
+                console.log('[SITES-DASHBOARD] auth/verify response status:', userResponse.status);
+
                 if (!userResponse.ok) {
+                    console.log('[SITES-DASHBOARD] auth/verify NOT OK, redirecting to login');
                     // Clear any stale user data and redirect to login
                     localStorage.removeItem('sites_spectral_user');
                     localStorage.removeItem('sites_spectral_token');
@@ -1180,7 +1185,16 @@
                 }
 
                 const userData = await userResponse.json();
+                console.log('[SITES-DASHBOARD] auth/verify response:', JSON.stringify(userData));
                 currentUser = userData.user;
+
+                if (!currentUser) {
+                    console.log('[SITES-DASHBOARD] No user in response, redirecting to login');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                console.log('[SITES-DASHBOARD] User role:', currentUser.role, 'station_acronym:', currentUser.station_acronym);
 
                 // Store user data for isAuthenticated() checks
                 localStorage.setItem('sites_spectral_user', JSON.stringify(currentUser));
@@ -1188,15 +1202,20 @@
                 // Roles that can access sites-dashboard: admin, sites-admin, readonly
                 // Station users should go to their station dashboard
                 const allowedRoles = ['admin', 'sites-admin', 'readonly'];
+                console.log('[SITES-DASHBOARD] Checking role. Allowed:', allowedRoles, 'Current:', currentUser.role);
                 if (!allowedRoles.includes(currentUser.role)) {
+                    console.log('[SITES-DASHBOARD] Role NOT in allowed list');
                     if ((currentUser.role === 'station' || currentUser.role === 'station-admin') && currentUser.station_acronym) {
+                        console.log('[SITES-DASHBOARD] Station user, redirecting to station dashboard');
                         window.location.href = `/station-dashboard.html?station=${currentUser.station_acronym}`;
                     } else {
+                        console.log('[SITES-DASHBOARD] Unknown role or no station_acronym, redirecting to login');
                         // Unknown role - redirect to login
                         window.location.href = '/login.html';
                     }
                     return;
                 }
+                console.log('[SITES-DASHBOARD] Role check passed, continuing initialization');
 
                 // Update user display
                 document.getElementById('user-name').textContent = currentUser.username;
@@ -1217,25 +1236,32 @@
         });
 
         async function loadStations() {
+            console.log('[SITES-DASHBOARD] loadStations: Starting');
             try {
                 document.getElementById('loading-state').style.display = 'flex';
                 document.getElementById('error-state').style.display = 'none';
                 document.getElementById('stations-grid').style.display = 'none';
 
                 // Load stations via httpOnly cookie
+                console.log('[SITES-DASHBOARD] loadStations: Fetching /api/stations');
                 const stationsResponse = await fetch('/api/stations', {
                     credentials: 'include'
                 });
 
+                console.log('[SITES-DASHBOARD] loadStations: Response status', stationsResponse.status);
+
                 if (!stationsResponse.ok) {
+                    console.error('[SITES-DASHBOARD] loadStations: Response not OK');
                     throw new Error('Failed to fetch stations');
                 }
 
                 const stationsData = await stationsResponse.json();
+                console.log('[SITES-DASHBOARD] loadStations: Got data, count:', (stationsData.data || stationsData.stations || []).length);
                 stations = stationsData.data || stationsData.stations || [];
 
                 // Load platform and instrument counts
                 const countsData = await loadCounts();
+                console.log('[SITES-DASHBOARD] loadStations: Counts loaded', countsData);
 
                 // Update UI
                 updateDashboardStats(countsData);

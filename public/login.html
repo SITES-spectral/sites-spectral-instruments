@@ -274,6 +274,7 @@
             }
 
             async verifySessionAndRedirect() {
+                console.log('[LOGIN] verifySessionAndRedirect: Starting session check');
                 try {
                     // Use credentials: 'include' to send httpOnly cookie
                     const response = await fetch('/api/auth/verify', {
@@ -281,17 +282,22 @@
                         credentials: 'include'
                     });
 
+                    console.log('[LOGIN] verifySessionAndRedirect: Response status', response.status);
+
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.valid) {
+                        console.log('[LOGIN] verifySessionAndRedirect: Response data', JSON.stringify(data));
+                        if (data.valid && data.user) {
+                            console.log('[LOGIN] verifySessionAndRedirect: Valid session, redirecting user', data.user.role);
                             this.redirectUser(data.user);
                             return;
                         }
                     }
                 } catch (error) {
-                    console.error('Session verification failed:', error);
+                    console.error('[LOGIN] Session verification failed:', error);
                 }
 
+                console.log('[LOGIN] verifySessionAndRedirect: No valid session, staying on login page');
                 // Clear any stale user info (session is managed by httpOnly cookie)
                 localStorage.removeItem('sites_spectral_user');
             }
@@ -348,8 +354,10 @@
             }
             
             redirectUser(user) {
+                console.log('[LOGIN] redirectUser: Called with user', JSON.stringify(user));
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect');
+                console.log('[LOGIN] redirectUser: redirect param =', redirect);
 
                 // SECURITY: Validate redirect URL to prevent open redirect attacks
                 // Only allow relative URLs starting with / and not containing protocol handlers
@@ -368,21 +376,28 @@
                 // Global admins (admin or sites-admin)
                 if (user.role === 'admin' || user.role === 'sites-admin') {
                     targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
+                    console.log('[LOGIN] redirectUser: admin/sites-admin, target =', targetUrl);
                 }
                 // Station-specific admin with assigned station
                 else if (user.role === 'station-admin' && user.station_acronym) {
                     targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
+                    console.log('[LOGIN] redirectUser: station-admin, target =', targetUrl);
                 }
                 // Regular station user with assigned station
                 else if (user.role === 'station' && user.station_acronym) {
                     targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
+                    console.log('[LOGIN] redirectUser: station user, target =', targetUrl);
                 }
                 // Read-only users view all stations
                 else if (user.role === 'readonly') {
                     targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
+                    console.log('[LOGIN] redirectUser: readonly, target =', targetUrl);
+                } else {
+                    console.log('[LOGIN] redirectUser: UNKNOWN ROLE, using default', user.role);
                 }
                 // Fallback: sites-dashboard (safe default)
 
+                console.log('[LOGIN] redirectUser: Final redirect to', targetUrl);
                 window.location.href = targetUrl;
             }
             
