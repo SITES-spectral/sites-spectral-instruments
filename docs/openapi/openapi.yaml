@@ -19,11 +19,23 @@ info:
     - `/api/stable` - Points to stable production version
     - `/api/current` - Alias for latest
 
+    ## Authentication (v15.0.0+)
+    Multiple authentication methods supported:
+    - **Cloudflare Access JWT** - Passwordless via email OTP (primary)
+    - **HTTP-only cookies** - Legacy session-based auth (fallback)
+    - **Magic Links** - Time-limited tokens for station internal users
+
+    ## Subdomain Architecture (v15.0.0+)
+    Portal-based access via subdomains:
+    - `sitesspectral.work` - Public dashboard (no auth)
+    - `admin.sitesspectral.work` - Global admin portal (CF Access)
+    - `{station}.sitesspectral.work` - Station portals (CF Access/Magic Link)
+
     ## Standards Alignment
     - Darwin Core (biodiversity data)
     - ICOS (carbon observation)
     - Copernicus (Earth observation)
-  version: 13.4.0
+  version: 15.0.1
   contact:
     name: SITES Spectral Support
     url: https://www.fieldsites.se/
@@ -32,9 +44,13 @@ info:
     url: https://creativecommons.org/licenses/by/4.0/
 
 servers:
+  - url: https://sitesspectral.work/api/v11
+    description: Production API (v15.0.0+)
+  - url: https://admin.sitesspectral.work/api/v11
+    description: Admin Portal API
   - url: https://sites.jobelab.com/api/v11
-    description: Production API
-  - url: https://sites-spectral-instruments.jose-e5f.workers.dev/api/v11
+    description: Legacy Production API
+  - url: https://sites-spectral-instruments.jose-beltran.workers.dev/api/v11
     description: Cloudflare Workers API
   - url: http://localhost:8787/api/v11
     description: Local development
@@ -42,6 +58,10 @@ servers:
 tags:
   - name: Authentication
     description: Login, logout, and token verification
+  - name: Magic Links
+    description: Passwordless authentication via time-limited tokens (v15.0.0+)
+  - name: Public API
+    description: No-authentication endpoints for public dashboard (v15.0.0+)
   - name: Stations
     description: Research station management
   - name: Platforms
@@ -159,6 +179,227 @@ paths:
                   message:
                     type: string
                     example: Logged out successfully
+
+  # ============================================
+  # MAGIC LINKS ENDPOINTS (v15.0.0+)
+  # ============================================
+  /magic-links/create:
+    post:
+      tags: [Magic Links]
+      summary: Create magic link
+      description: |
+        Create a time-limited, single-use authentication token for station internal users.
+        Requires admin or station-admin role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MagicLinkCreate'
+      responses:
+        '201':
+          description: Magic link created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagicLinkCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /magic-links/validate:
+    get:
+      tags: [Magic Links]
+      summary: Validate magic link
+      description: Validate a magic link token and create a session if valid.
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The magic link token
+      responses:
+        '200':
+          description: Token valid, session created
+          headers:
+            Set-Cookie:
+              description: HTTP-only authentication cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagicLinkValidateResponse'
+        '400':
+          description: Token expired, revoked, or already used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Token not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /magic-links/revoke:
+    post:
+      tags: [Magic Links]
+      summary: Revoke magic link
+      description: Revoke a magic link token. Requires admin or station-admin role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token_id]
+              properties:
+                token_id:
+                  type: integer
+                  description: ID of the token to revoke
+                reason:
+                  type: string
+                  description: Optional reason for revocation
+      responses:
+        '200':
+          description: Token revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /magic-links/list:
+    get:
+      tags: [Magic Links]
+      summary: List magic links
+      description: |
+        List magic link tokens. Admins see all tokens, station-admins see only their station's tokens.
+      parameters:
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by station ID
+        - name: include_revoked
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Include revoked tokens
+        - name: include_expired
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Include expired tokens
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Token list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagicLinkListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================
+  # PUBLIC API ENDPOINTS (v15.0.0+)
+  # No authentication required
+  # ============================================
+  /public/health:
+    get:
+      tags: [Public API]
+      summary: Public health check
+      description: Public system health status with database connectivity and counts.
+      security: []
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicHealthResponse'
+        '503':
+          description: System unhealthy
+
+  /public/stations:
+    get:
+      tags: [Public API]
+      summary: List public stations
+      description: Get public information about all SITES research stations.
+      security: []
+      parameters:
+        - name: sites_member
+          in: query
+          schema:
+            type: boolean
+          description: Filter to SITES member stations only
+      responses:
+        '200':
+          description: Station list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicStationsResponse'
+
+  /public/station/{id}:
+    get:
+      tags: [Public API]
+      summary: Get public station details
+      description: Get public details for a specific station including platforms and instrument summary.
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            oneOf:
+              - type: integer
+              - type: string
+          description: Station ID or acronym
+      responses:
+        '200':
+          description: Station details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicStationDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /public/metrics:
+    get:
+      tags: [Public API]
+      summary: Get public metrics
+      description: Get aggregated metrics about platforms and instruments.
+      security: []
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicMetricsResponse'
 
   # ============================================
   # STATION ENDPOINTS
@@ -2104,3 +2345,250 @@ components:
           type: object
         qualityControlLevels:
           type: object
+
+    # ============================================
+    # MAGIC LINKS SCHEMAS (v15.0.0+)
+    # ============================================
+    MagicLinkCreate:
+      type: object
+      required: [station_id]
+      properties:
+        station_id:
+          type: integer
+          description: Station to grant access to
+        label:
+          type: string
+          description: Optional label for identification
+        role:
+          type: string
+          enum: [station-internal, readonly]
+          default: station-internal
+          description: Role for the magic link user
+        expiry_hours:
+          type: integer
+          minimum: 1
+          maximum: 168
+          default: 168
+          description: Token expiry in hours (max 7 days)
+        single_use:
+          type: boolean
+          default: false
+          description: If true, token can only be used once
+
+    MagicLinkCreateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+          description: The magic link token (only returned once)
+        token_id:
+          type: integer
+          description: Token ID for management
+        expires_at:
+          type: string
+          format: date-time
+        magic_link_url:
+          type: string
+          format: uri
+          description: Full URL for the magic link
+
+    MagicLinkValidateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+        station:
+          type: object
+          properties:
+            id:
+              type: integer
+            acronym:
+              type: string
+            display_name:
+              type: string
+
+    MagicLink:
+      type: object
+      properties:
+        id:
+          type: integer
+        station_id:
+          type: integer
+        station_acronym:
+          type: string
+        label:
+          type: string
+        role:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        single_use:
+          type: boolean
+        used_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoked_reason:
+          type: string
+          nullable: true
+        created_by:
+          type: string
+
+    MagicLinkListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MagicLink'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================
+    # PUBLIC API SCHEMAS (v15.0.0+)
+    # ============================================
+    PublicHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        database:
+          type: string
+          enum: [connected, disconnected]
+        version:
+          type: string
+        counts:
+          type: object
+          properties:
+            stations:
+              type: integer
+            platforms:
+              type: integer
+            instruments:
+              type: integer
+
+    PublicStation:
+      type: object
+      properties:
+        id:
+          type: integer
+        acronym:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        elevation_m:
+          type: number
+          nullable: true
+        status:
+          type: string
+        country:
+          type: string
+        sites_member:
+          type: boolean
+        icos_member:
+          type: boolean
+        icos_class:
+          type: string
+          nullable: true
+        platform_count:
+          type: integer
+        instrument_count:
+          type: integer
+        portal_url:
+          type: string
+          format: uri
+        operational_status:
+          type: string
+          enum: [operational, pending, offline, unknown]
+
+    PublicStationsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        count:
+          type: integer
+        stations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicStation'
+
+    PublicStationDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        station:
+          $ref: '#/components/schemas/PublicStation'
+        platforms:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              normalized_name:
+                type: string
+              display_name:
+                type: string
+              mount_type_code:
+                type: string
+              status:
+                type: string
+              instrument_count:
+                type: integer
+        instrument_summary:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of instruments by type
+
+    PublicMetricsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          properties:
+            platforms_by_type:
+              type: object
+              additionalProperties:
+                type: integer
+            instruments_by_type:
+              type: object
+              additionalProperties:
+                type: integer
+            stations_by_status:
+              type: object
+              additionalProperties:
+                type: integer
+            active_instruments:
+              type: integer
