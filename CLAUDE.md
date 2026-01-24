@@ -60,18 +60,49 @@ src/
 
 ---
 
-## Current Version: 14.1.0 - Alnarp & Hyltemossa Stations (2026-01-23)
+## Current Version: 15.0.0 - Subdomain Architecture with Cloudflare Access (2026-01-24)
+
+> **Architecture Credit**: This subdomain-based architecture design is based on
+> architectural knowledge shared by **Flights for Biodiversity Sweden AB**
+> (https://github.com/flightsforbiodiversity).
 
 **✅ STATUS: PRODUCTION READY**
-**🌐 Production URL:** https://sites.jobelab.com
-**🔗 Worker URL:** https://sites-spectral-instruments.jose-e5f.workers.dev
-**📅 Last Updated:** 2026-01-23
+**🌐 Public Portal:** https://sitesspectral.work
+**🔐 Admin Portal:** https://admin.sitesspectral.work
+**📍 Station Portals:** https://{station}.sitesspectral.work
+**🔗 Worker URL:** https://sites-spectral-instruments.jose-beltran.workers.dev
+**📅 Last Updated:** 2026-01-24
 **🚀 API Version:** V11 (via `/api/latest` alias)
-**🔒 Security Features:** CORS Whitelist, PBKDF2 Password Hashing, httpOnly Cookies, CSRF Protection, Input Sanitization, JWT HMAC-SHA256, XSS-Safe DOM Methods
+**🔒 Auth Methods:** Cloudflare Access OTP, Magic Links, httpOnly Cookies
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
 **🧪 Test Coverage:** 653 tests across 36 test files
 **📍 Stations:** 9 SITES member stations (7 original + ALN, HYL)
+
+### What's New in v15.0.0
+
+**Subdomain-Based Portal Architecture** - Migration from single-domain to subdomain-based architecture with Cloudflare Access authentication:
+
+| Portal | Domain | Authentication |
+|--------|--------|----------------|
+| Public | `sitesspectral.work` | None (public dashboard) |
+| Admin | `admin.sitesspectral.work` | CF Access OTP |
+| Station | `{station}.sitesspectral.work` | CF Access / Magic Link |
+
+**New Authentication Methods:**
+- **Cloudflare Access JWT**: Passwordless email OTP
+- **Magic Links**: Time-limited tokens for internal users
+- **Dual-Auth**: CF Access priority, falls back to legacy cookies
+
+**New Roles:**
+- `uav-pilot` - UAV operators with mission/flight logging
+- `station-internal` - Internal read-only via magic link
+
+**UAV Management System:**
+- Pilot registry with certifications
+- Mission planning and execution
+- Flight logging with telemetry
+- Battery inventory tracking
 
 ### What's New in v14.1.0
 

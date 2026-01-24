@@ -10,9 +10,13 @@ account_id = "15e8e176e26c65981300ddc97093f58d"
 # Enable auto-deployment from GitHub when commits are pushed to main branch
 
 # Project metadata
-# Version: 11.0.0-alpha.33
-# Release: 2025-12-09
-# Database Schema: v12 (36 migrations) - ROI Legacy System + Hexagonal Architecture
+# Version: 15.0.0
+# Release: 2026-01-24
+# Database Schema: v15 (45 migrations) - Subdomain Architecture + Cloudflare Access
+#
+# Architecture Credit: This subdomain-based architecture design is based on
+# architectural knowledge shared by Flights for Biodiversity Sweden AB
+# (https://github.com/flightsforbiodiversity)
 
 # Static Assets Configuration
 # v13.14.0: Vanilla JS frontend with design system
@@ -33,13 +37,29 @@ binding = "DOCS_BUCKET"
 [vars]
 ENVIRONMENT = "production"
 APP_NAME = "SITES Spectral Stations & Instruments"
-APP_VERSION = "14.2.0"
+APP_VERSION = "15.0.0"
 USE_CLOUDFLARE_SECRETS = "true"
 
-# Custom domain routing
-# Accessible at: sitesspectral.work
+# Cloudflare Access team domain for JWT verification
+CF_ACCESS_TEAM_DOMAIN = "sitesspectral.cloudflareaccess.com"
+
+# ==============================================================================
+# Custom Domain Routing (v15.0.0 - Subdomain Architecture)
+# ==============================================================================
+#
+# Portal Architecture:
+# - sitesspectral.work           → Public dashboard (no auth)
+# - admin.sitesspectral.work     → Admin portal (CF Access required)
+# - {station}.sitesspectral.work → Station portals (CF Access required)
+#
+# Examples:
+# - svartberget.sitesspectral.work → Svartberget station portal
+# - abisko.sitesspectral.work      → Abisko station portal
+# - lonnstorp.sitesspectral.work   → Lonnstorp station portal
+#
 # Workers.dev subdomain: sites-spectral-instruments.jose-beltran.workers.dev
 
+# Root domain routes
 [[routes]]
 pattern = "sitesspectral.work/*"
 zone_id = "98a6b8637a4cc674eea24819d8f72b07"
@@ -47,3 +67,50 @@ zone_id = "98a6b8637a4cc674eea24819d8f72b07"
 [[routes]]
 pattern = "sitesspectral.work"
 zone_id = "98a6b8637a4cc674eea24819d8f72b07"
+
+# Wildcard subdomain routes (admin, station portals)
+[[routes]]
+pattern = "*.sitesspectral.work/*"
+zone_id = "98a6b8637a4cc674eea24819d8f72b07"
+
+[[routes]]
+pattern = "*.sitesspectral.work"
+zone_id = "98a6b8637a4cc674eea24819d8f72b07"
+
+# ==============================================================================
+# Environment-specific Configuration
+# ==============================================================================
+
+# Development environment
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Staging environment
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+# ==============================================================================
+# Notes on DNS Configuration
+# ==============================================================================
+#
+# Required DNS records (configure in Cloudflare Dashboard):
+#
+# Type  | Name      | Target                                          | Proxied
+# ------|-----------|------------------------------------------------|--------
+# CNAME | @         | sites-spectral-instruments.jose-e5f.workers.dev | Yes
+# CNAME | admin     | sites-spectral-instruments.jose-e5f.workers.dev | Yes
+# CNAME | *         | sites-spectral-instruments.jose-e5f.workers.dev | Yes
+#
+# Note: Wildcard CNAME requires Cloudflare Pro plan or higher for SSL coverage.
+# Alternative: Create individual CNAME records for each station subdomain.
+#
+# Required Cloudflare Access Applications:
+#
+# 1. Admin Portal (admin.sitesspectral.work)
+#    - Policies: Allow specific email addresses (jose.beltran@mgeo.lu.se, lars.eklundh@nateko.lu.se)
+#    - Session duration: 24 hours
+#
+# 2. Station Wildcard (*.sitesspectral.work)
+#    - Policies: Allow station admin emails + UAV pilot groups
+#    - Session duration: 24 hours
+#    - Bypass rules: Exclude public assets (/api/public/*, /css/*, /js/*, etc.)

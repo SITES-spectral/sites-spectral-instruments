@@ -1,6 +1,10 @@
 // Authentication Module
 // JWT authentication with HMAC-SHA256 signing, user verification, session management
-// v12.0.8: Added rate limiting for brute force protection
+// v15.0.0: Added Cloudflare Access JWT verification for subdomain architecture
+//
+// Architecture Credit: This subdomain-based architecture design is based on
+// architectural knowledge shared by Flights for Biodiversity Sweden AB
+// (https://github.com/flightsforbiodiversity)
 
 import { SignJWT, jwtVerify } from 'jose';
 import { createErrorResponse, createUnauthorizedResponse } from '../utils/responses.js';
@@ -12,6 +16,7 @@ import {
   recordAuthAttempt,
   getRateLimitHeaders
 } from '../middleware/auth-rate-limiter.js';
+import { CloudflareAccessAdapter } from '../infrastructure/auth/CloudflareAccessAdapter.js';
 
 /**
  * Handle authentication endpoints
@@ -218,6 +223,8 @@ export async function authenticateUser(username, password, env) {
       'sites-admin': ['read', 'write', 'edit', 'delete', 'admin'],
       'station-admin': ['read', 'write', 'edit', 'delete'],
       'station': ['read'],
+      'uav-pilot': ['read', 'flight-log'],
+      'station-internal': ['read'],
       'readonly': ['read']
     };
 
@@ -288,13 +295,79 @@ export async function generateToken(user, env) {
 
 /**
  * Extract and validate user from request
- * Checks httpOnly cookie first, then falls back to Authorization header
- * Uses proper JWT verification with HMAC-SHA256
+ *
+ * Authentication priority (v15.0.0):
+ * 1. Cloudflare Access JWT (Cf-Access-Jwt-Assertion header)
+ * 2. Request context (cfAccessUser set by worker)
+ * 3. httpOnly cookie (legacy password auth)
+ * 4. Authorization header (legacy API access)
+ *
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Object|null} User object or null if invalid
  */
 export async function getUserFromRequest(request, env) {
+  try {
+    // Priority 1: Check for Cloudflare Access JWT (passwordless auth)
+    const cfAccessUser = await getUserFromCFAccess(request, env);
+    if (cfAccessUser) {
+      return cfAccessUser;
+    }
+
+    // Priority 2: Check request context (set by worker subdomain routing)
+    if (request.cfAccessUser) {
+      return request.cfAccessUser;
+    }
+
+    // Priority 3-4: Legacy authentication (cookie or Bearer token)
+    return await getUserFromLegacyAuth(request, env);
+
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return null;
+  }
+}
+
+/**
+ * Get user from Cloudflare Access JWT
+ *
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Object|null} User object or null if not CF Access auth
+ */
+async function getUserFromCFAccess(request, env) {
+  try {
+    // Check for CF Access JWT header
+    const cfAccessJwt = request.headers.get('Cf-Access-Jwt-Assertion');
+    if (!cfAccessJwt) {
+      return null;
+    }
+
+    // Use CloudflareAccessAdapter to verify and map user
+    const cfAdapter = new CloudflareAccessAdapter(env);
+    const user = await cfAdapter.verifyAccessToken(request);
+
+    if (user) {
+      // Add auth provider for tracking
+      user.auth_provider = 'cloudflare_access';
+    }
+
+    return user;
+
+  } catch (error) {
+    console.error('CF Access verification error:', error);
+    return null;
+  }
+}
+
+/**
+ * Get user from legacy authentication (cookie or Bearer token)
+ *
+ * @param {Request} request - The request object
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Object|null} User object or null if invalid
+ */
+async function getUserFromLegacyAuth(request, env) {
   try {
     // First, try to get token from httpOnly cookie (preferred method)
     let token = getTokenFromCookie(request);
@@ -332,6 +405,9 @@ export async function getUserFromRequest(request, env) {
       return null;
     }
 
+    // Determine auth provider from payload
+    const authProvider = payload.auth_provider || 'database';
+
     // Token validated successfully
     return {
       username: payload.username,
@@ -340,7 +416,9 @@ export async function getUserFromRequest(request, env) {
       station_normalized_name: payload.station_normalized_name,
       station_id: payload.station_id,
       edit_privileges: payload.edit_privileges,
-      permissions: payload.permissions
+      permissions: payload.permissions,
+      auth_provider: authProvider,
+      magic_link_id: payload.magic_link_id
     };
   } catch (error) {
     // Handle specific JWT errors

@@ -13,6 +13,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.0.0] - 2026-01-24
+
+### Feature: Subdomain Architecture with Cloudflare Access
+
+> **Architecture Credit**: This subdomain-based architecture design is based on
+> architectural knowledge shared by **Flights for Biodiversity Sweden AB**
+> (https://github.com/flightsforbiodiversity).
+
+Migration from single-domain to subdomain-based architecture with Cloudflare Access authentication.
+
+#### Portal Architecture
+
+| Portal | Domain | Authentication | Purpose |
+|--------|--------|----------------|---------|
+| **Public** | `sitesspectral.work` | None | Public dashboard, status |
+| **Admin** | `admin.sitesspectral.work` | CF Access OTP | Global admin access |
+| **Station** | `{station}.sitesspectral.work` | CF Access / Magic Link | Station-specific access |
+
+#### New Authentication Methods
+
+- **Cloudflare Access JWT**: Passwordless authentication via email OTP
+- **Magic Links**: Time-limited, single-use tokens for station internal users
+- **Dual-Auth Support**: CF Access takes priority, falls back to legacy httpOnly cookies
+
+#### New User Roles
+
+| Role | Permissions | Use Case |
+|------|-------------|----------|
+| `uav-pilot` | read, flight-log | UAV operators with mission logging |
+| `station-internal` | read | Internal users via magic link |
+
+#### UAV Management System
+
+- **Pilot Registry**: Track certifications, insurance, authorized stations
+- **Mission Planning**: Plan, approve, and execute UAV missions
+- **Flight Logging**: Record individual flights with telemetry data
+- **Battery Tracking**: Manage battery inventory and health
+
+#### New Files
+
+| File | Purpose |
+|------|---------|
+| `src/infrastructure/auth/CloudflareAccessAdapter.js` | CF Access JWT verification |
+| `src/handlers/magic-links.js` | Magic link CRUD operations |
+| `src/handlers/public.js` | Public API endpoints (no auth) |
+| `src/domain/uav/Pilot.js` | UAV pilot entity |
+| `src/domain/uav/Mission.js` | Mission planning entity |
+| `src/domain/uav/FlightLog.js` | Flight log entity |
+| `migrations/0045_subdomain_auth_uav_missions.sql` | Schema changes |
+
+#### Modified Files
+
+| File | Changes |
+|------|---------|
+| `src/worker.js` | Subdomain detection and portal routing |
+| `src/auth/authentication.js` | Dual-auth with CF Access priority |
+| `src/domain/authorization/Role.js` | Added `uav-pilot`, `station-internal` roles |
+| `src/config/allowed-origins.js` | Dynamic subdomain CORS support |
+| `wrangler.toml` | Wildcard subdomain routes |
+
+#### Documentation
+
+- `docs/architecture/SUBDOMAIN_ARCHITECTURE.md` - Architecture overview
+- `docs/security/CLOUDFLARE_ACCESS_INTEGRATION.md` - CF Access setup
+- `docs/MAGIC_LINK_SYSTEM.md` - Magic link implementation
+- `docs/UAV_PILOT_SYSTEM.md` - UAV pilot and mission management
+
+#### Database Migration (0045)
+
+New tables:
+- `magic_link_tokens` - Token storage and lifecycle
+- `uav_pilots` - Pilot registry with certifications
+- `uav_missions` - Mission planning and execution
+- `mission_pilots` - Pilot-mission assignments
+- `uav_flight_logs` - Individual flight records
+- `uav_batteries` - Battery inventory
+
+New columns on `users`:
+- `auth_provider` - 'database', 'cloudflare_access', or 'magic_link'
+- `cf_access_email` - Email from CF Access identity
+- `cf_access_identity_id` - CF Access subject ID
+- `last_cf_access_login` - Last CF Access login timestamp
+
+---
+
 ## [14.2.0] - 2026-01-24
 
 ### Feature: New Production Domain & Database Authentication

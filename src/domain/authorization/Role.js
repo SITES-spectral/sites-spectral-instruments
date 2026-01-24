@@ -3,7 +3,11 @@
  * Represents user's authorization role with type-safe constants
  *
  * @module domain/authorization/Role
- * @version 11.0.0-alpha.30
+ * @version 15.0.0
+ *
+ * Architecture Credit: This subdomain-based architecture design is based on
+ * architectural knowledge shared by Flights for Biodiversity Sweden AB
+ * (https://github.com/flightsforbiodiversity)
  */
 
 export class Role {
@@ -12,6 +16,8 @@ export class Role {
   static SITES_ADMIN = 'sites-admin';      // New global admin standard
   static STATION_ADMIN = 'station-admin';  // Station-specific admin
   static STATION_USER = 'station';         // Regular station user
+  static UAV_PILOT = 'uav-pilot';          // UAV pilot with mission/flight logging
+  static STATION_INTERNAL = 'station-internal'; // Internal read-only via magic link
   static READONLY = 'readonly';            // Read-only access
 
   // Global admin usernames (explicit whitelist)
@@ -37,6 +43,8 @@ export class Role {
       Role.SITES_ADMIN,
       Role.STATION_ADMIN,
       Role.STATION_USER,
+      Role.UAV_PILOT,
+      Role.STATION_INTERNAL,
       Role.READONLY
     ];
     if (!validRoles.includes(value)) {
@@ -73,7 +81,39 @@ export class Role {
    * @returns {boolean}
    */
   isReadOnly() {
-    return this.value === Role.READONLY;
+    return this.value === Role.READONLY || this.value === Role.STATION_INTERNAL;
+  }
+
+  /**
+   * Check if this role represents a UAV pilot
+   * @returns {boolean}
+   */
+  isUAVPilot() {
+    return this.value === Role.UAV_PILOT;
+  }
+
+  /**
+   * Check if this role represents a station internal user
+   * @returns {boolean}
+   */
+  isStationInternal() {
+    return this.value === Role.STATION_INTERNAL;
+  }
+
+  /**
+   * Check if this role can access flight logs
+   * @returns {boolean}
+   */
+  canAccessFlightLogs() {
+    return this.isGlobalAdmin() || this.isStationAdmin() || this.isUAVPilot();
+  }
+
+  /**
+   * Check if this role can create flight logs
+   * @returns {boolean}
+   */
+  canCreateFlightLogs() {
+    return this.isGlobalAdmin() || this.isUAVPilot();
   }
 
   /**
