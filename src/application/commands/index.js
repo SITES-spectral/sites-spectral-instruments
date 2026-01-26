@@ -53,3 +53,32 @@ export { CreateCalibrationRecord } from './CreateCalibrationRecord.js';
 export { UpdateCalibrationRecord } from './UpdateCalibrationRecord.js';
 export { DeleteCalibrationRecord } from './DeleteCalibrationRecord.js';
 export { ExpireCalibrationRecord } from './ExpireCalibrationRecord.js';
+
+// UAV commands (V15 - Pilot, Mission, FlightLog, Battery)
+export {
+  // Pilot commands
+  CreatePilot,
+  UpdatePilot,
+  DeletePilot,
+  AuthorizePilotForStation,
+  // Mission commands
+  CreateMission,
+  UpdateMission,
+  DeleteMission,
+  ApproveMission,
+  StartMission,
+  CompleteMission,
+  AbortMission,
+  AssignPilotToMission,
+  // Flight Log commands
+  CreateFlightLog,
+  UpdateFlightLog,
+  DeleteFlightLog,
+  ReportFlightIncident,
+  // Battery commands
+  CreateBattery,
+  UpdateBattery,
+  DeleteBattery,
+  RecordBatteryHealthCheck,
+  RetireBattery
+} from './uav/index.js';

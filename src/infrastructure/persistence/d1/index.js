@@ -16,3 +16,9 @@ export { D1ProductRepository } from './D1ProductRepository.js';
 export { D1ROIRepository } from './D1ROIRepository.js';
 export { D1AnalyticsRepository } from './D1AnalyticsRepository.js';
 export { D1ExportRepository } from './D1ExportRepository.js';
+
+// UAV Domain Repositories (v15.0.0)
+export { D1PilotRepository } from './D1PilotRepository.js';
+export { D1MissionRepository } from './D1MissionRepository.js';
+export { D1FlightLogRepository } from './D1FlightLogRepository.js';
+export { D1BatteryRepository } from './D1BatteryRepository.js';

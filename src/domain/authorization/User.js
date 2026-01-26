@@ -3,7 +3,7 @@
  * Represents an authenticated user with role and station context
  *
  * @module domain/authorization/User
- * @version 11.0.0-alpha.30
+ * @version 15.1.0
  */
 
 import { Role } from './Role.js';
@@ -95,6 +95,14 @@ export class User {
    */
   isReadOnly() {
     return this.role.isReadOnly();
+  }
+
+  /**
+   * Check if user is a UAV pilot
+   * @returns {boolean}
+   */
+  isUAVPilot() {
+    return this.role.isUAVPilot();
   }
 
   /**

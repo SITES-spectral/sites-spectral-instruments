@@ -5,7 +5,7 @@
  * Connects domain ports to infrastructure adapters.
  *
  * @module container
- * @version 13.3.0
+ * @version 15.1.0
  */
 
 // ===== INFRASTRUCTURE ADAPTERS =====
@@ -23,6 +23,11 @@ import {
   D1AnalyticsRepository,
   D1MaintenanceRepository,
   D1CalibrationRepository,
+  // UAV Domain Adapters (v15.0.0)
+  D1PilotRepository,
+  D1MissionRepository,
+  D1FlightLogRepository,
+  D1BatteryRepository,
   // Event Adapters
   InMemoryEventBus,
   // Logging Adapters
@@ -75,6 +80,28 @@ import {
   UpdateCalibrationRecord,
   DeleteCalibrationRecord,
   ExpireCalibrationRecord,
+  // UAV Commands (v15.0.0)
+  CreatePilot,
+  UpdatePilot,
+  DeletePilot,
+  AuthorizePilotForStation,
+  CreateMission,
+  UpdateMission,
+  DeleteMission,
+  ApproveMission,
+  StartMission,
+  CompleteMission,
+  AbortMission,
+  AssignPilotToMission,
+  CreateFlightLog,
+  UpdateFlightLog,
+  DeleteFlightLog,
+  ReportFlightIncident,
+  CreateBattery,
+  UpdateBattery,
+  DeleteBattery,
+  RecordBatteryHealthCheck,
+  RetireBattery,
   // Station Queries
   GetStation,
   ListStations,
@@ -107,7 +134,23 @@ import {
   GetCalibrationRecord,
   ListCalibrationRecords,
   GetCalibrationTimeline,
-  GetCurrentCalibration
+  GetCurrentCalibration,
+  // UAV Queries (v15.0.0)
+  GetPilot,
+  ListPilots,
+  GetPilotsWithExpiringCredentials,
+  GetMission,
+  ListMissions,
+  GetMissionPilots,
+  GetPendingMissions,
+  GetFlightLog,
+  ListFlightLogs,
+  GetFlightLogsByMission,
+  GetPilotStatistics,
+  GetBattery,
+  ListBatteries,
+  GetBatteriesNeedingHealthCheck,
+  GetBatteryStatistics
 } from './application/index.js';
 
 /**
@@ -196,7 +239,12 @@ function createRepositories(db) {
     // Supporting
     admin: new D1AdminRepository(db),
     analytics: new D1AnalyticsRepository(db),
-    export: new D1ExportRepository(db)
+    export: new D1ExportRepository(db),
+    // UAV Domain (v15.0.0)
+    pilot: new D1PilotRepository(db),
+    mission: new D1MissionRepository(db),
+    flightLog: new D1FlightLogRepository(db),
+    battery: new D1BatteryRepository(db)
   };
 }
 
@@ -247,7 +295,32 @@ function createCommands(deps) {
     createCalibrationRecord: new CreateCalibrationRecord(deps),
     updateCalibrationRecord: new UpdateCalibrationRecord(deps),
     deleteCalibrationRecord: new DeleteCalibrationRecord(deps),
-    expireCalibrationRecord: new ExpireCalibrationRecord(deps)
+    expireCalibrationRecord: new ExpireCalibrationRecord(deps),
+    // UAV Pilot (v15.0.0)
+    createPilot: new CreatePilot(deps),
+    updatePilot: new UpdatePilot(deps),
+    deletePilot: new DeletePilot(deps),
+    authorizePilotForStation: new AuthorizePilotForStation(deps),
+    // UAV Mission (v15.0.0)
+    createMission: new CreateMission(deps),
+    updateMission: new UpdateMission(deps),
+    deleteMission: new DeleteMission(deps),
+    approveMission: new ApproveMission(deps),
+    startMission: new StartMission(deps),
+    completeMission: new CompleteMission(deps),
+    abortMission: new AbortMission(deps),
+    assignPilotToMission: new AssignPilotToMission(deps),
+    // UAV Flight Log (v15.0.0)
+    createFlightLog: new CreateFlightLog(deps),
+    updateFlightLog: new UpdateFlightLog(deps),
+    deleteFlightLog: new DeleteFlightLog(deps),
+    reportFlightIncident: new ReportFlightIncident(deps),
+    // UAV Battery (v15.0.0)
+    createBattery: new CreateBattery(deps),
+    updateBattery: new UpdateBattery(deps),
+    deleteBattery: new DeleteBattery(deps),
+    recordBatteryHealthCheck: new RecordBatteryHealthCheck(deps),
+    retireBattery: new RetireBattery(deps)
   };
 }
 
@@ -292,7 +365,26 @@ function createQueries(deps, adminRepository) {
     getCalibrationRecord: new GetCalibrationRecord(deps),
     listCalibrationRecords: new ListCalibrationRecords(deps),
     getCalibrationTimeline: new GetCalibrationTimeline(deps),
-    getCurrentCalibration: new GetCurrentCalibration(deps)
+    getCurrentCalibration: new GetCurrentCalibration(deps),
+    // UAV Pilot Queries (v15.0.0)
+    getPilot: new GetPilot(deps),
+    listPilots: new ListPilots(deps),
+    getPilotsWithExpiringCredentials: new GetPilotsWithExpiringCredentials(deps),
+    // UAV Mission Queries (v15.0.0)
+    getMission: new GetMission(deps),
+    listMissions: new ListMissions(deps),
+    getMissionPilots: new GetMissionPilots(deps),
+    getPendingMissions: new GetPendingMissions(deps),
+    // UAV Flight Log Queries (v15.0.0)
+    getFlightLog: new GetFlightLog(deps),
+    listFlightLogs: new ListFlightLogs(deps),
+    getFlightLogsByMission: new GetFlightLogsByMission(deps),
+    getPilotStatistics: new GetPilotStatistics(deps),
+    // UAV Battery Queries (v15.0.0)
+    getBattery: new GetBattery(deps),
+    listBatteries: new ListBatteries(deps),
+    getBatteriesNeedingHealthCheck: new GetBatteriesNeedingHealthCheck(deps),
+    getBatteryStatistics: new GetBatteryStatistics(deps)
   };
 }
 
@@ -329,6 +421,11 @@ export function createContainer(env) {
     calibrationRepository: repositories.calibration,
     analyticsRepository: repositories.analytics,
     exportRepository: repositories.export,
+    // UAV Domain Repositories (v15.0.0)
+    pilotRepository: repositories.pilot,
+    missionRepository: repositories.mission,
+    flightLogRepository: repositories.flightLog,
+    batteryRepository: repositories.battery,
     // Ports
     logger: ports.logger,
     metrics: ports.metrics,
@@ -385,7 +482,12 @@ export function createTestContainer(overrides = {}) {
     calibration: overrides.calibrationRepository || createMockRepository(),
     admin: overrides.adminRepository || createMockRepository(),
     analytics: overrides.analyticsRepository || createMockRepository(),
-    export: overrides.exportRepository || createMockRepository()
+    export: overrides.exportRepository || createMockRepository(),
+    // UAV Domain (v15.0.0)
+    pilot: overrides.pilotRepository || createMockRepository(),
+    mission: overrides.missionRepository || createMockRepository(),
+    flightLog: overrides.flightLogRepository || createMockRepository(),
+    battery: overrides.batteryRepository || createMockRepository()
   };
 
   // Create mock ports
@@ -408,6 +510,11 @@ export function createTestContainer(overrides = {}) {
     calibrationRepository: mockRepositories.calibration,
     analyticsRepository: mockRepositories.analytics,
     exportRepository: mockRepositories.export,
+    // UAV Domain (v15.0.0)
+    pilotRepository: mockRepositories.pilot,
+    missionRepository: mockRepositories.mission,
+    flightLogRepository: mockRepositories.flightLog,
+    batteryRepository: mockRepositories.battery,
     logger: mockPorts.logger,
     metrics: mockPorts.metrics,
     eventBus: mockPorts.eventBus

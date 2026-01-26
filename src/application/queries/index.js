@@ -47,3 +47,26 @@ export { GetCalibrationRecord } from './GetCalibrationRecord.js';
 export { ListCalibrationRecords } from './ListCalibrationRecords.js';
 export { GetCalibrationTimeline } from './GetCalibrationTimeline.js';
 export { GetCurrentCalibration } from './GetCurrentCalibration.js';
+
+// UAV queries (V15 - Pilot, Mission, FlightLog, Battery)
+export {
+  // Pilot queries
+  GetPilot,
+  ListPilots,
+  GetPilotsWithExpiringCredentials,
+  // Mission queries
+  GetMission,
+  ListMissions,
+  GetMissionPilots,
+  GetPendingMissions,
+  // Flight Log queries
+  GetFlightLog,
+  ListFlightLogs,
+  GetFlightLogsByMission,
+  GetPilotStatistics,
+  // Battery queries
+  GetBattery,
+  ListBatteries,
+  GetBatteriesNeedingHealthCheck,
+  GetBatteryStatistics
+} from './uav/index.js';

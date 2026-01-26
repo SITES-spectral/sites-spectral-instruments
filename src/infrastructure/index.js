@@ -20,7 +20,12 @@ export {
   D1ProductRepository,
   D1ROIRepository,
   D1ExportRepository,
-  D1AnalyticsRepository
+  D1AnalyticsRepository,
+  // UAV Domain Repositories (v15.0.0)
+  D1PilotRepository,
+  D1MissionRepository,
+  D1FlightLogRepository,
+  D1BatteryRepository
 } from './persistence/d1/index.js';
 
 // Maintenance Persistence (V11)

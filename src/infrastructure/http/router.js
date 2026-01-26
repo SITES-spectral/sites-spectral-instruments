@@ -21,7 +21,8 @@ import {
   ROIController,
   UserController,
   AnalyticsController,
-  ExportController
+  ExportController,
+  UAVController
 } from './controllers/index.js';
 import { createNotFoundResponse, createInternalServerErrorResponse } from '../../utils/responses.js';
 import { handleAuth } from '../../auth/authentication.js';
@@ -52,7 +53,9 @@ export function createRouter(env) {
     maintenance: new MaintenanceController(container, env),
     calibrations: new CalibrationController(container, env),
     rois: new ROIController(env.DB, env),
-    users: new UserController(env, container.repositories?.stations)
+    users: new UserController(env, container.repositories?.stations),
+    // UAV Domain (v15.0.0)
+    uav: new UAVController(container, env)
   };
 
   return {
@@ -126,6 +129,11 @@ export function createRouter(env) {
           case 'export':
             // Export - V11 hexagonal architecture (v11.0.0-alpha.42)
             return await ExportController.handle(request, env, request.method, ['export', ...resourcePath]);
+
+          case 'uav':
+            // UAV Domain - V15 hexagonal architecture (v15.0.0)
+            // Routes: pilots, missions, flight-logs, batteries
+            return await controllers.uav.handle(request, resourcePath, url);
 
           default:
             return createNotFoundResponse(`Unknown resource: ${resource}`);
@@ -260,7 +268,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '14.2.0',
+      version: '15.1.0',
       architecture: 'hexagonal',
       database: 'connected',
       stats: {
@@ -280,7 +288,11 @@ async function handleHealth(env, container) {
         'calibration-timeline',
         'darwin-core-vocabulary',
         'icos-station-types',
-        'copernicus-processing-levels'
+        'copernicus-processing-levels',
+        'uav-pilot-management',
+        'uav-mission-planning',
+        'uav-flight-logs',
+        'uav-battery-inventory'
       ]
     }), {
       status: 200,
@@ -291,7 +303,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '14.2.0',
+      version: '15.1.0',
       architecture: 'hexagonal',
       database: 'disconnected',
       error: error.message
@@ -308,9 +320,9 @@ async function handleHealth(env, container) {
 function handleInfo() {
   return new Response(JSON.stringify({
     name: 'SITES Spectral Instruments API',
-    version: '14.2.0',
+    version: '15.1.0',
     architecture: 'hexagonal',
-    description: 'V11 Hexagonal Architecture API with Darwin Core, ICOS, Copernicus vocabulary alignment',
+    description: 'V15 Hexagonal Architecture API with Darwin Core, ICOS, Copernicus vocabulary alignment and UAV domain',
     patterns: [
       'Hexagonal (Ports & Adapters)',
       'CQRS (Command Query Responsibility Segregation)',
@@ -417,6 +429,57 @@ function handleInfo() {
         expire: 'POST /api/v11/calibrations/:id/expire',
         update: 'PUT /api/v11/calibrations/:id',
         delete: 'DELETE /api/v11/calibrations/:id'
+      },
+      uav: {
+        pilots: {
+          list: 'GET /api/v11/uav/pilots',
+          get: 'GET /api/v11/uav/pilots/:id',
+          byStation: 'GET /api/v11/uav/pilots/station/:stationId',
+          expiringCredentials: 'GET /api/v11/uav/pilots/expiring?days=30',
+          create: 'POST /api/v11/uav/pilots',
+          authorize: 'POST /api/v11/uav/pilots/:id/authorize/:stationId',
+          update: 'PUT /api/v11/uav/pilots/:id',
+          delete: 'DELETE /api/v11/uav/pilots/:id'
+        },
+        missions: {
+          list: 'GET /api/v11/uav/missions',
+          get: 'GET /api/v11/uav/missions/:id',
+          byStation: 'GET /api/v11/uav/missions/station/:stationId',
+          pending: 'GET /api/v11/uav/missions/pending',
+          byStatus: 'GET /api/v11/uav/missions/status/:status',
+          create: 'POST /api/v11/uav/missions',
+          approve: 'POST /api/v11/uav/missions/:id/approve',
+          start: 'POST /api/v11/uav/missions/:id/start',
+          complete: 'POST /api/v11/uav/missions/:id/complete',
+          abort: 'POST /api/v11/uav/missions/:id/abort',
+          assignPilot: 'POST /api/v11/uav/missions/:id/pilots/:pilotId',
+          removePilot: 'DELETE /api/v11/uav/missions/:id/pilots/:pilotId',
+          update: 'PUT /api/v11/uav/missions/:id',
+          delete: 'DELETE /api/v11/uav/missions/:id'
+        },
+        flightLogs: {
+          list: 'GET /api/v11/uav/flight-logs',
+          get: 'GET /api/v11/uav/flight-logs/:id',
+          byMission: 'GET /api/v11/uav/flight-logs/mission/:missionId',
+          byPilot: 'GET /api/v11/uav/flight-logs/pilot/:pilotId',
+          statistics: 'GET /api/v11/uav/flight-logs/pilot/:pilotId/statistics',
+          create: 'POST /api/v11/uav/flight-logs',
+          reportIncident: 'POST /api/v11/uav/flight-logs/:id/incident',
+          update: 'PUT /api/v11/uav/flight-logs/:id',
+          delete: 'DELETE /api/v11/uav/flight-logs/:id'
+        },
+        batteries: {
+          list: 'GET /api/v11/uav/batteries',
+          get: 'GET /api/v11/uav/batteries/:id',
+          byStation: 'GET /api/v11/uav/batteries/station/:stationId',
+          needingHealthCheck: 'GET /api/v11/uav/batteries/needs-health-check',
+          statistics: 'GET /api/v11/uav/batteries/station/:stationId/statistics',
+          create: 'POST /api/v11/uav/batteries',
+          healthCheck: 'POST /api/v11/uav/batteries/:id/health-check',
+          retire: 'POST /api/v11/uav/batteries/:id/retire',
+          update: 'PUT /api/v11/uav/batteries/:id',
+          delete: 'DELETE /api/v11/uav/batteries/:id'
+        }
       }
     },
     mountTypeCodes: {

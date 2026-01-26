@@ -5,7 +5,7 @@
  * Uses Strategy pattern to delegate to appropriate policy based on user role
  *
  * @module domain/authorization/AuthorizationService
- * @version 11.0.0-alpha.30
+ * @version 15.1.0
  */
 
 import { User } from './User.js';
@@ -16,6 +16,7 @@ import { User } from './User.js';
  * Roles:
  * - globalAdmin: Full CRUD on everything including deleting stations
  * - stationAdmin: CRUD on their station's resources (no station delete)
+ * - uavPilot: UAV pilots with mission/flight logging (v15.0.0)
  * - stationUser: READ-ONLY access to their station
  * - readonly: READ-ONLY access to all stations
  */
@@ -30,7 +31,12 @@ const PERMISSION_MATRIX = {
     products: ['read', 'write', 'delete', 'admin'],
     users: ['read', 'write', 'delete', 'admin'],
     admin: ['read', 'write', 'delete', 'admin'],
-    export: ['read']
+    export: ['read'],
+    // UAV Domain (v15.0.0)
+    uavPilots: ['read', 'write', 'delete', 'admin'],
+    uavMissions: ['read', 'write', 'delete', 'admin'],
+    uavFlightLogs: ['read', 'write', 'delete', 'admin'],
+    uavBatteries: ['read', 'write', 'delete', 'admin']
   },
   stationAdmin: {
     // Station admins can READ station info but NOT modify or delete stations
@@ -45,7 +51,30 @@ const PERMISSION_MATRIX = {
     // No user management or admin panel access
     users: [],
     admin: [],
-    export: ['read']
+    export: ['read'],
+    // UAV Domain - station-scoped write access (v15.0.0)
+    uavPilots: ['read'],
+    uavMissions: ['read', 'write', 'delete'],
+    uavFlightLogs: ['read', 'write', 'delete'],
+    uavBatteries: ['read', 'write', 'delete']
+  },
+  // UAV Pilots can log flights and read missions (v15.0.0)
+  uavPilot: {
+    stations: ['read'],
+    platforms: ['read'],
+    instruments: ['read'],
+    rois: ['read'],
+    aois: ['read'],
+    campaigns: ['read'],
+    products: ['read'],
+    users: [],
+    admin: [],
+    export: ['read'],
+    // UAV Domain - pilots can read their info, read assigned missions, create flight logs
+    uavPilots: ['read'],
+    uavMissions: ['read'],
+    uavFlightLogs: ['read', 'write'],
+    uavBatteries: ['read']
   },
   // Regular station users (e.g., 'svartberget') are READ-ONLY
   stationUser: {
@@ -58,7 +87,12 @@ const PERMISSION_MATRIX = {
     products: ['read'],
     users: [],
     admin: [],
-    export: ['read']
+    export: ['read'],
+    // UAV Domain - read only (v15.0.0)
+    uavPilots: ['read'],
+    uavMissions: ['read'],
+    uavFlightLogs: ['read'],
+    uavBatteries: ['read']
   },
   readonly: {
     stations: ['read'],
@@ -70,7 +104,12 @@ const PERMISSION_MATRIX = {
     products: ['read'],
     users: [],
     admin: [],
-    export: ['read']
+    export: ['read'],
+    // UAV Domain - read only (v15.0.0)
+    uavPilots: ['read'],
+    uavMissions: ['read'],
+    uavFlightLogs: ['read'],
+    uavBatteries: ['read']
   }
 };
 
@@ -96,6 +135,9 @@ export class AuthorizationService {
     }
     if (user.isStationAdmin()) {
       return 'stationAdmin';
+    }
+    if (user.isUAVPilot()) {
+      return 'uavPilot';
     }
     if (user.isStationUser()) {
       return 'stationUser';

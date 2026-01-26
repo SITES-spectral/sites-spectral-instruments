@@ -13,6 +13,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.2.0] - 2026-01-26
+
+### Feature: UAV Pilot Domain Implementation (v15.2.0)
+
+Complete implementation of the UAV Pilot Domain following Hexagonal Architecture and CQRS patterns.
+
+> **Architecture Credit**: This subdomain-based architecture design is based on architectural knowledge shared by **Flights for Biodiversity Sweden AB** (https://github.com/flightsforbiodiversity).
+
+#### New Domain Entities
+
+| Entity | Description | Key Features |
+|--------|-------------|--------------|
+| **Battery** | UAV battery lifecycle management | Health monitoring, cycle tracking, retirement workflow |
+
+#### New Repositories (D1 Adapters)
+
+| Repository | Methods |
+|------------|---------|
+| **D1PilotRepository** | `findById`, `findByEmail`, `findByStationAuthorization`, `findWithExpiringCertificates`, `save`, `delete`, `authorizeForStation` |
+| **D1MissionRepository** | `findById`, `findByMissionCode`, `findByStationId`, `findByStatus`, `findPendingApproval`, `save`, `delete`, `addPilotToMission`, `removePilotFromMission` |
+| **D1FlightLogRepository** | `findById`, `findByMissionId`, `findByPilotId`, `findWithIncidents`, `getPilotStatistics`, `save`, `delete` |
+| **D1BatteryRepository** | `findById`, `findBySerialNumber`, `findByStationId`, `findNeedingHealthCheck`, `getStationStatistics`, `save`, `delete`, `recordHealthCheck`, `retire` |
+
+#### New Commands (21 total)
+
+| Domain | Commands |
+|--------|----------|
+| **Pilot** | `CreatePilot`, `UpdatePilot`, `DeletePilot`, `AuthorizePilotForStation` |
+| **Mission** | `CreateMission`, `UpdateMission`, `DeleteMission`, `ApproveMission`, `StartMission`, `CompleteMission`, `AbortMission`, `AssignPilotToMission` |
+| **Flight Log** | `CreateFlightLog`, `UpdateFlightLog`, `DeleteFlightLog`, `ReportFlightIncident` |
+| **Battery** | `CreateBattery`, `UpdateBattery`, `DeleteBattery`, `RecordBatteryHealthCheck`, `RetireBattery` |
+
+#### New Queries (16 total)
+
+| Domain | Queries |
+|--------|---------|
+| **Pilot** | `GetPilot`, `ListPilots`, `GetPilotsWithExpiringCredentials` |
+| **Mission** | `GetMission`, `ListMissions`, `GetMissionPilots`, `GetPendingMissions` |
+| **Flight Log** | `GetFlightLog`, `ListFlightLogs`, `GetFlightLogsByMission`, `GetPilotStatistics` |
+| **Battery** | `GetBattery`, `ListBatteries`, `GetBatteriesNeedingHealthCheck`, `GetBatteryStatistics` |
+
+#### New Controller
+
+- **UAVController** - Comprehensive HTTP controller handling all UAV routes (~900 lines)
+
+#### API Endpoints
+
+| Resource | Base Path | Operations |
+|----------|-----------|------------|
+| **Pilots** | `/api/v11/uav/pilots` | CRUD + authorize + expiring credentials |
+| **Missions** | `/api/v11/uav/missions` | CRUD + approve/start/complete/abort + pilot assignment |
+| **Flight Logs** | `/api/v11/uav/flight-logs` | CRUD + incident reporting + statistics |
+| **Batteries** | `/api/v11/uav/batteries` | CRUD + health check + retire + statistics |
+
+#### Authorization Updates
+
+| Role | Pilots | Missions | Flight Logs | Batteries |
+|------|--------|----------|-------------|-----------|
+| **globalAdmin** | full | full | full | full |
+| **stationAdmin** | read | write (station) | write (station) | write (station) |
+| **uavPilot** | read | read | write (own) | read |
+| **stationUser** | read | read | read | read |
+| **readonly** | read | read | read | read |
+
+#### Files Created
+
+```
+src/domain/uav/Battery.js
+src/infrastructure/persistence/d1/D1PilotRepository.js
+src/infrastructure/persistence/d1/D1MissionRepository.js
+src/infrastructure/persistence/d1/D1FlightLogRepository.js
+src/infrastructure/persistence/d1/D1BatteryRepository.js
+src/infrastructure/http/controllers/UAVController.js
+src/application/commands/uav/*.js (21 files)
+src/application/queries/uav/*.js (16 files)
+```
+
+#### Files Updated
+
+- `src/container.js` - UAV dependency wiring
+- `src/infrastructure/http/router.js` - UAV routes + API documentation
+- `src/domain/authorization/AuthorizationService.js` - UAV permission matrix
+- `src/domain/authorization/User.js` - `isUAVPilot()` method
+- `src/application/index.js` - UAV exports
+- `src/infrastructure/index.js` - UAV repository exports
+
+---
+
 ## [15.1.0] - 2026-01-26
 
 ### Database Migration: Mount Type Code Normalization (Migration 0046)

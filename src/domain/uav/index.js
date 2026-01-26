@@ -12,3 +12,4 @@
 export { Pilot, CERTIFICATE_TYPES, PILOT_STATUSES } from './Pilot.js';
 export { Mission, MISSION_STATUSES, FLIGHT_PATTERNS } from './Mission.js';
 export { FlightLog, INCIDENT_SEVERITIES } from './FlightLog.js';
+export { Battery, BATTERY_STATUSES, BATTERY_CHEMISTRIES } from './Battery.js';

@@ -1,5 +1,5 @@
 /**
- * Application Layer (V11 Architecture)
+ * Application Layer (V15 Architecture)
  *
  * Use cases following CQRS pattern (Command Query Responsibility Segregation).
  * This layer orchestrates domain logic and coordinates with infrastructure.
@@ -8,6 +8,7 @@
  * Queries: Read-only operations (Get, List)
  *
  * V11: Adds AOI, Campaign, Product domains with full CQRS support.
+ * V15: Adds UAV Pilot domain (pilots, missions, flight logs, batteries).
  *
  * @module application
  */
@@ -53,7 +54,29 @@ export {
   CreateCalibrationRecord,
   UpdateCalibrationRecord,
   DeleteCalibrationRecord,
-  ExpireCalibrationRecord
+  ExpireCalibrationRecord,
+  // UAV Commands (V15)
+  CreatePilot,
+  UpdatePilot,
+  DeletePilot,
+  AuthorizePilotForStation,
+  CreateMission,
+  UpdateMission,
+  DeleteMission,
+  ApproveMission,
+  StartMission,
+  CompleteMission,
+  AbortMission,
+  AssignPilotToMission,
+  CreateFlightLog,
+  UpdateFlightLog,
+  DeleteFlightLog,
+  ReportFlightIncident,
+  CreateBattery,
+  UpdateBattery,
+  DeleteBattery,
+  RecordBatteryHealthCheck,
+  RetireBattery
 } from './commands/index.js';
 
 // Queries (Read operations)
@@ -90,5 +113,21 @@ export {
   GetCalibrationRecord,
   ListCalibrationRecords,
   GetCalibrationTimeline,
-  GetCurrentCalibration
+  GetCurrentCalibration,
+  // UAV Queries (V15)
+  GetPilot,
+  ListPilots,
+  GetPilotsWithExpiringCredentials,
+  GetMission,
+  ListMissions,
+  GetMissionPilots,
+  GetPendingMissions,
+  GetFlightLog,
+  ListFlightLogs,
+  GetFlightLogsByMission,
+  GetPilotStatistics,
+  GetBattery,
+  ListBatteries,
+  GetBatteriesNeedingHealthCheck,
+  GetBatteryStatistics
 } from './queries/index.js';

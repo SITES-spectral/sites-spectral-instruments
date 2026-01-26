@@ -25,3 +25,6 @@ export { ROIController } from './ROIController.js';
 export { UserController } from './UserController.js';
 export { AnalyticsController } from './AnalyticsController.js';
 export { ExportController } from './ExportController.js';
+
+// V15 UAV Domain controller
+export { UAVController } from './UAVController.js';
