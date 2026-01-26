@@ -14,7 +14,7 @@
 // DO NOT EDIT - this is auto-generated
 export const VERSION = '15.0.2';
 export const BUILD_DATE = '2026-01-26';
-export const BUILD_TIMESTAMP = 1769434974358;
+export const BUILD_TIMESTAMP = 1769435841122;
 
 /**
  * Version information object

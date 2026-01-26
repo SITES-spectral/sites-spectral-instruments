@@ -1008,7 +1008,38 @@
 
             formatLabel(str) {
                 if (!str) return 'Unknown';
-                // Convert snake_case or camelCase to Title Case
+
+                // Platform mount type codes
+                const platformTypes = {
+                    'TWR': 'Tower, Mast or Pole (TWR)',
+                    'BLD': 'Building (BLD)',
+                    'GND': 'Ground Level (GND)',
+                    'UAV': 'UAV/Drone (UAV)',
+                    'SAT': 'Satellite (SAT)',
+                    'MOB': 'Mobile (MOB)',
+                    'USV': 'Surface Vehicle (USV)',
+                    'UUV': 'Underwater Vehicle (UUV)'
+                };
+
+                // Instrument type codes
+                const instrumentTypes = {
+                    'Phenocam': 'Phenocam (PHE)',
+                    'Multispectral': 'Multispectral Sensor (MS)',
+                    'PAR': 'PAR Sensor',
+                    'NDVI': 'NDVI Sensor',
+                    'PRI': 'PRI Sensor',
+                    'Hyperspectral': 'Hyperspectral (HYP)',
+                    'Thermal': 'Thermal Camera (TIR)',
+                    'RGB': 'RGB Camera',
+                    'LiDAR': 'LiDAR (LID)',
+                    'SAR': 'SAR Radar'
+                };
+
+                // Check for known codes first
+                if (platformTypes[str]) return platformTypes[str];
+                if (instrumentTypes[str]) return instrumentTypes[str];
+
+                // Default: Convert snake_case or camelCase to Title Case
                 return String(str)
                     .replace(/_/g, ' ')
                     .replace(/([a-z])([A-Z])/g, '$1 $2')
