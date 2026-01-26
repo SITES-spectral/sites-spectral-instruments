@@ -22,13 +22,13 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=15.2.0">
+    <link rel="stylesheet" href="/css/styles.css?v=15.3.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=13.15.0">
     <link rel="stylesheet" href="/css/skeleton.css?v=13.15.0">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="15.2.0">
+    <meta name="app-version" content="15.3.0">
     <meta name="build-date" content="2026-01-26">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
@@ -2707,6 +2707,392 @@
             }
         }
 
+        /* ========================================
+           UAV Operations Section Styles (v15.2.0)
+           ======================================== */
+
+        .uav-operations-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        /* UAV Tabs */
+        .uav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .uav-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .uav-tab:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .uav-tab.active {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .uav-tab.active .tab-count {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .uav-tab i {
+            font-size: 1rem;
+        }
+
+        /* UAV Panels */
+        .uav-panel {
+            display: none;
+        }
+
+        .uav-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .uav-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .uav-filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .uav-filter-row .form-select,
+        .uav-filter-row .form-control {
+            max-width: 200px;
+        }
+
+        /* UAV Overview Grid */
+        .uav-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .uav-overview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* UAV Cards */
+        .uav-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .uav-card-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .uav-card-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .uav-card-header h4 i {
+            color: #059669;
+        }
+
+        .uav-card-body {
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* UAV List Items */
+        .uav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .uav-list-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .uav-list-item:hover {
+            border-color: #059669;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
+        }
+
+        .uav-list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .uav-list-item-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        .uav-list-item-subtitle {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .uav-list-item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .uav-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .uav-meta-item i {
+            color: #059669;
+            font-size: 0.75rem;
+        }
+
+        /* UAV Status Badges */
+        .uav-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .uav-status.planning {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .uav-status.approved {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .uav-status.in_progress, .uav-status.in-progress {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .uav-status.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .uav-status.aborted {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .uav-status.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .uav-status.inactive {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .uav-status.good {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .uav-status.fair {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .uav-status.poor {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .uav-status.retired {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* UAV Empty State */
+        .uav-empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #9ca3af;
+        }
+
+        .uav-empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .uav-empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* UAV Loading State */
+        .uav-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .uav-loading i {
+            margin-right: 0.5rem;
+        }
+
+        /* Pilot Card Specific */
+        .pilot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .pilot-info {
+            flex: 1;
+        }
+
+        .pilot-certifications {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .cert-badge {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .cert-badge.expiring {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .cert-badge.expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Battery Health Indicator */
+        .battery-health {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .battery-health-bar {
+            width: 60px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .battery-health-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .battery-health-fill.good {
+            background: #10b981;
+        }
+
+        .battery-health-fill.fair {
+            background: #f59e0b;
+        }
+
+        .battery-health-fill.poor {
+            background: #ef4444;
+        }
+
+        /* Mission Timeline */
+        .mission-timeline {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .mission-timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .mission-timeline-item i {
+            font-size: 0.75rem;
+        }
+
     </style>
 </head>
 <body>
@@ -2888,6 +3274,170 @@
                 <div class="loading-card">
                     <div class="spinner"></div>
                     <span>Loading platforms...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- UAV Operations Section (v15.2.0) -->
+        <div class="container uav-operations-section" id="uav-operations-section" style="display: none; margin-top: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-helicopter"></i> UAV Operations
+                </h2>
+                <div id="uav-admin-controls" style="display: none;">
+                    <button onclick="showCreatePilotModal()" class="btn btn-success btn-sm" title="Register New Pilot">
+                        <i class="fas fa-plus"></i> <i class="fas fa-user-tie"></i> Pilot
+                    </button>
+                    <button onclick="showCreateMissionModal()" class="btn btn-primary btn-sm" title="Plan New Mission" style="margin-left: 0.5rem;">
+                        <i class="fas fa-plus"></i> <i class="fas fa-route"></i> Mission
+                    </button>
+                </div>
+            </div>
+
+            <!-- UAV Operations Tabs -->
+            <div class="uav-tabs" id="uav-tabs">
+                <button class="uav-tab active" data-tab="overview" onclick="switchUAVTab('overview')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="tab-label">Overview</span>
+                </button>
+                <button class="uav-tab" data-tab="missions" onclick="switchUAVTab('missions')">
+                    <i class="fas fa-route"></i>
+                    <span class="tab-label">Missions</span>
+                    <span class="tab-count" id="uav-missions-count">0</span>
+                </button>
+                <button class="uav-tab" data-tab="flights" onclick="switchUAVTab('flights')">
+                    <i class="fas fa-plane-departure"></i>
+                    <span class="tab-label">Flight Logs</span>
+                    <span class="tab-count" id="uav-flights-count">0</span>
+                </button>
+                <button class="uav-tab" data-tab="pilots" onclick="switchUAVTab('pilots')">
+                    <i class="fas fa-user-tie"></i>
+                    <span class="tab-label">Pilots</span>
+                    <span class="tab-count" id="uav-pilots-count">0</span>
+                </button>
+                <button class="uav-tab" data-tab="batteries" onclick="switchUAVTab('batteries')">
+                    <i class="fas fa-battery-three-quarters"></i>
+                    <span class="tab-label">Batteries</span>
+                    <span class="tab-count" id="uav-batteries-count">0</span>
+                </button>
+            </div>
+
+            <!-- UAV Tab Content -->
+            <div class="uav-tab-content" id="uav-tab-content">
+                <!-- Overview Tab -->
+                <div class="uav-panel active" id="uav-overview-panel">
+                    <div class="uav-overview-grid">
+                        <!-- Active Missions Card -->
+                        <div class="uav-card">
+                            <div class="uav-card-header">
+                                <h4><i class="fas fa-route"></i> Active Missions</h4>
+                            </div>
+                            <div class="uav-card-body" id="active-missions-list">
+                                <div class="uav-empty-state">
+                                    <i class="fas fa-route"></i>
+                                    <p>No active missions</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Flights Card -->
+                        <div class="uav-card">
+                            <div class="uav-card-header">
+                                <h4><i class="fas fa-plane-departure"></i> Recent Flights</h4>
+                            </div>
+                            <div class="uav-card-body" id="recent-flights-list">
+                                <div class="uav-empty-state">
+                                    <i class="fas fa-plane-departure"></i>
+                                    <p>No recent flights</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Authorized Pilots Card -->
+                        <div class="uav-card">
+                            <div class="uav-card-header">
+                                <h4><i class="fas fa-user-tie"></i> Authorized Pilots</h4>
+                            </div>
+                            <div class="uav-card-body" id="authorized-pilots-list">
+                                <div class="uav-empty-state">
+                                    <i class="fas fa-user-tie"></i>
+                                    <p>No pilots authorized</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Battery Status Card -->
+                        <div class="uav-card">
+                            <div class="uav-card-header">
+                                <h4><i class="fas fa-battery-three-quarters"></i> Battery Status</h4>
+                            </div>
+                            <div class="uav-card-body" id="battery-status-list">
+                                <div class="uav-empty-state">
+                                    <i class="fas fa-battery-empty"></i>
+                                    <p>No batteries registered</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Missions Tab -->
+                <div class="uav-panel" id="uav-missions-panel">
+                    <div class="uav-panel-header">
+                        <div class="uav-filter-row">
+                            <select id="mission-status-filter" class="form-select" onchange="filterMissions()">
+                                <option value="">All Statuses</option>
+                                <option value="planning">Planning</option>
+                                <option value="approved">Approved</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="aborted">Aborted</option>
+                            </select>
+                            <input type="date" id="mission-date-filter" class="form-control" onchange="filterMissions()">
+                        </div>
+                    </div>
+                    <div class="uav-list" id="missions-list">
+                        <div class="uav-loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading missions...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flight Logs Tab -->
+                <div class="uav-panel" id="uav-flights-panel">
+                    <div class="uav-panel-header">
+                        <button onclick="showCreateFlightLogModal()" class="btn btn-success btn-sm" id="create-flight-btn" style="display: none;">
+                            <i class="fas fa-plus"></i> Log Flight
+                        </button>
+                    </div>
+                    <div class="uav-list" id="flight-logs-list">
+                        <div class="uav-loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading flight logs...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pilots Tab -->
+                <div class="uav-panel" id="uav-pilots-panel">
+                    <div class="uav-list" id="pilots-list">
+                        <div class="uav-loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading pilots...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batteries Tab -->
+                <div class="uav-panel" id="uav-batteries-panel">
+                    <div class="uav-panel-header">
+                        <button onclick="showCreateBatteryModal()" class="btn btn-success btn-sm" id="create-battery-btn" style="display: none;">
+                            <i class="fas fa-plus"></i> Register Battery
+                        </button>
+                    </div>
+                    <div class="uav-list" id="batteries-list">
+                        <div class="uav-loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading batteries...
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -4322,9 +4872,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=15.2.0"></script>
+    <script src="/js/utils.js?v=15.3.0"></script>
     <!-- Security Utilities (v12.0.9) - XSS prevention -->
-    <script src="/js/core/security.js?v=15.2.0"></script>
+    <script src="/js/core/security.js?v=15.3.0"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=13.27.0"></script>
     <script src="/js/core/config-service.js?v=13.27.0"></script>
@@ -4332,8 +4882,8 @@
     <script src="/js/core/skeleton.js?v=13.27.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=13.27.0"></script>
-    <script src="/js/api.js?v=15.2.0"></script>
-    <script src="/js/components.js?v=15.2.0"></script>
+    <script src="/js/api.js?v=15.3.0"></script>
+    <script src="/js/components.js?v=15.3.0"></script>
     <script src="/js/platform-forms/index.js?v=13.27.0"></script>
     <script src="/js/form-components.js?v=13.27.0"></script>
     <!-- Modular Modal Components (v7.0.1) -->
@@ -4354,15 +4904,15 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=15.2.0"></script>
+    <script src="/js/interactive-map.js?v=15.3.0"></script>
     <!-- Dashboard modules (v13.16.0) -->
     <script src="/js/dashboard/platform-renderer.js?v=13.27.0"></script>
     <script src="/js/dashboard/campaign-panel.js?v=13.27.0"></script>
     <script src="/js/dashboard/product-panel.js?v=13.27.0"></script>
     <script src="/js/dashboard/station-map.js?v=13.27.0"></script>
-    <script src="/js/station-dashboard.js?v=15.2.0"></script>
-    <script src="/js/navigation.js?v=15.2.0"></script>
-    <script src="/js/export.js?v=15.2.0"></script>
+    <script src="/js/station-dashboard.js?v=15.3.0"></script>
+    <script src="/js/navigation.js?v=15.3.0"></script>
+    <script src="/js/export.js?v=15.3.0"></script>
     <script src="/js/platform-modals.js?v=13.27.0"></script>
     <script src="/js/modal-system.js?v=13.27.0"></script>
     <script src="/js/admin-modals.js?v=13.27.0"></script>
@@ -11120,6 +11670,600 @@
                     }
                 });
             }
+        });
+
+        // ========================================
+        // UAV Operations JavaScript (v15.2.0)
+        // XSS-Safe Implementation using DOM APIs
+        // ========================================
+
+        // UAV State Management
+        let uavData = {
+            pilots: [],
+            missions: [],
+            flightLogs: [],
+            batteries: []
+        };
+        let currentUAVTab = 'overview';
+
+        // Helper to create icon element safely
+        function createIcon(iconClass) {
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            return icon;
+        }
+
+        // Helper to create meta item safely
+        function createMetaItem(iconClass, text) {
+            const item = document.createElement('span');
+            item.className = 'uav-meta-item';
+            item.appendChild(createIcon(iconClass));
+            const textNode = document.createTextNode(' ' + text);
+            item.appendChild(textNode);
+            return item;
+        }
+
+        // Initialize UAV Operations Section
+        async function initUAVOperations() {
+            if (!stationData || !stationData.id) return;
+
+            // Show UAV section if station has UAV platforms
+            const hasUAVPlatforms = stationData.platforms?.some(p => p.platform_type === 'uav');
+            const uavSection = document.getElementById('uav-operations-section');
+
+            if (hasUAVPlatforms || canManageUAV()) {
+                uavSection.style.display = 'block';
+                await loadUAVData();
+                showUAVAdminControls();
+            }
+        }
+
+        // Check if user can manage UAV operations
+        function canManageUAV() {
+            if (!currentUser) return false;
+            const role = currentUser.role;
+            return role === 'admin' || role === 'sites-admin' || role === 'station-admin' || role === 'uav-pilot';
+        }
+
+        // Show admin controls based on role
+        function showUAVAdminControls() {
+            const adminControls = document.getElementById('uav-admin-controls');
+            const createFlightBtn = document.getElementById('create-flight-btn');
+            const createBatteryBtn = document.getElementById('create-battery-btn');
+
+            if (canManageUAV()) {
+                adminControls.style.display = 'flex';
+                if (createFlightBtn) createFlightBtn.style.display = 'inline-flex';
+                if (createBatteryBtn) createBatteryBtn.style.display = 'inline-flex';
+            }
+        }
+
+        // Load all UAV data for the station
+        async function loadUAVData() {
+            try {
+                const stationId = stationData.id;
+
+                // Load data in parallel
+                const [pilotsRes, missionsRes, batteryRes] = await Promise.allSettled([
+                    fetch(`/api/v11/uav/pilots?station_id=${encodeURIComponent(stationId)}`, { credentials: 'include' }),
+                    fetch(`/api/v11/uav/missions?station_id=${encodeURIComponent(stationId)}`, { credentials: 'include' }),
+                    fetch(`/api/v11/uav/batteries?station_id=${encodeURIComponent(stationId)}`, { credentials: 'include' })
+                ]);
+
+                // Process pilots
+                if (pilotsRes.status === 'fulfilled' && pilotsRes.value.ok) {
+                    const data = await pilotsRes.value.json();
+                    uavData.pilots = data.pilots || data.data || [];
+                }
+
+                // Process missions
+                if (missionsRes.status === 'fulfilled' && missionsRes.value.ok) {
+                    const data = await missionsRes.value.json();
+                    uavData.missions = data.missions || data.data || [];
+                }
+
+                // Process batteries
+                if (batteryRes.status === 'fulfilled' && batteryRes.value.ok) {
+                    const data = await batteryRes.value.json();
+                    uavData.batteries = data.batteries || data.data || [];
+                }
+
+                // Load flight logs for active missions
+                if (uavData.missions.length > 0) {
+                    const activeMissions = uavData.missions.filter(m =>
+                        ['in_progress', 'completed'].includes(m.status)
+                    );
+                    for (const mission of activeMissions.slice(0, 5)) {
+                        const flightRes = await fetch(`/api/v11/uav/flight-logs?mission_id=${encodeURIComponent(mission.id)}`, { credentials: 'include' });
+                        if (flightRes.ok) {
+                            const flightData = await flightRes.json();
+                            const logs = flightData.flight_logs || flightData.data || [];
+                            uavData.flightLogs.push(...logs);
+                        }
+                    }
+                }
+
+                // Update UI
+                updateUAVCounts();
+                renderCurrentUAVTab();
+
+            } catch (error) {
+                console.error('Error loading UAV data:', error);
+            }
+        }
+
+        // Update UAV tab counts
+        function updateUAVCounts() {
+            document.getElementById('uav-pilots-count').textContent = uavData.pilots.length;
+            document.getElementById('uav-missions-count').textContent = uavData.missions.length;
+            document.getElementById('uav-flights-count').textContent = uavData.flightLogs.length;
+            document.getElementById('uav-batteries-count').textContent = uavData.batteries.length;
+        }
+
+        // Switch UAV tab
+        function switchUAVTab(tabName) {
+            currentUAVTab = tabName;
+
+            // Update tab buttons
+            document.querySelectorAll('.uav-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+
+            // Update panels
+            document.querySelectorAll('.uav-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            const targetPanel = document.getElementById('uav-' + tabName + '-panel');
+            if (targetPanel) targetPanel.classList.add('active');
+
+            // Render tab content
+            renderCurrentUAVTab();
+        }
+
+        // Render current UAV tab content
+        function renderCurrentUAVTab() {
+            switch (currentUAVTab) {
+                case 'overview':
+                    renderUAVOverview();
+                    break;
+                case 'missions':
+                    renderMissionsList();
+                    break;
+                case 'flights':
+                    renderFlightLogsList();
+                    break;
+                case 'pilots':
+                    renderPilotsList();
+                    break;
+                case 'batteries':
+                    renderBatteriesList();
+                    break;
+            }
+        }
+
+        // Create empty state element
+        function createEmptyState(iconClass, message) {
+            const div = document.createElement('div');
+            div.className = 'uav-empty-state';
+            div.appendChild(createIcon(iconClass));
+            const p = document.createElement('p');
+            p.textContent = message;
+            div.appendChild(p);
+            return div;
+        }
+
+        // Render UAV Overview
+        function renderUAVOverview() {
+            // Active Missions
+            const activeMissions = uavData.missions.filter(m =>
+                ['planning', 'approved', 'in_progress'].includes(m.status)
+            );
+            const activeMissionsContainer = document.getElementById('active-missions-list');
+            activeMissionsContainer.textContent = '';
+            if (activeMissions.length === 0) {
+                activeMissionsContainer.appendChild(createEmptyState('fas fa-route', 'No active missions'));
+            } else {
+                activeMissions.slice(0, 3).forEach(mission => {
+                    activeMissionsContainer.appendChild(createMissionCard(mission, true));
+                });
+            }
+
+            // Recent Flights
+            const recentFlights = uavData.flightLogs.slice(0, 3);
+            const recentFlightsContainer = document.getElementById('recent-flights-list');
+            recentFlightsContainer.textContent = '';
+            if (recentFlights.length === 0) {
+                recentFlightsContainer.appendChild(createEmptyState('fas fa-plane-departure', 'No recent flights'));
+            } else {
+                recentFlights.forEach(flight => {
+                    recentFlightsContainer.appendChild(createFlightCard(flight, true));
+                });
+            }
+
+            // Authorized Pilots
+            const authorizedPilots = uavData.pilots.filter(p => p.status === 'active');
+            const pilotsContainer = document.getElementById('authorized-pilots-list');
+            pilotsContainer.textContent = '';
+            if (authorizedPilots.length === 0) {
+                pilotsContainer.appendChild(createEmptyState('fas fa-user-tie', 'No pilots authorized'));
+            } else {
+                authorizedPilots.slice(0, 4).forEach(pilot => {
+                    pilotsContainer.appendChild(createPilotCard(pilot, true));
+                });
+            }
+
+            // Battery Status
+            const activeBatteries = uavData.batteries.filter(b => b.status !== 'retired');
+            const batteriesContainer = document.getElementById('battery-status-list');
+            batteriesContainer.textContent = '';
+            if (activeBatteries.length === 0) {
+                batteriesContainer.appendChild(createEmptyState('fas fa-battery-empty', 'No batteries registered'));
+            } else {
+                activeBatteries.slice(0, 4).forEach(battery => {
+                    batteriesContainer.appendChild(createBatteryCard(battery, true));
+                });
+            }
+        }
+
+        // Render Missions List
+        function renderMissionsList() {
+            const statusFilter = document.getElementById('mission-status-filter').value;
+            const dateFilter = document.getElementById('mission-date-filter').value;
+
+            let filteredMissions = [...uavData.missions];
+
+            if (statusFilter) {
+                filteredMissions = filteredMissions.filter(m => m.status === statusFilter);
+            }
+
+            if (dateFilter) {
+                filteredMissions = filteredMissions.filter(m =>
+                    m.planned_date && m.planned_date.startsWith(dateFilter)
+                );
+            }
+
+            const container = document.getElementById('missions-list');
+            container.textContent = '';
+            if (filteredMissions.length === 0) {
+                container.appendChild(createEmptyState('fas fa-route', 'No missions found'));
+            } else {
+                filteredMissions.forEach(mission => {
+                    container.appendChild(createMissionCard(mission));
+                });
+            }
+        }
+
+        // Render Flight Logs List
+        function renderFlightLogsList() {
+            const container = document.getElementById('flight-logs-list');
+            container.textContent = '';
+            if (uavData.flightLogs.length === 0) {
+                container.appendChild(createEmptyState('fas fa-plane-departure', 'No flight logs found'));
+            } else {
+                uavData.flightLogs.forEach(flight => {
+                    container.appendChild(createFlightCard(flight));
+                });
+            }
+        }
+
+        // Render Pilots List
+        function renderPilotsList() {
+            const container = document.getElementById('pilots-list');
+            container.textContent = '';
+            if (uavData.pilots.length === 0) {
+                container.appendChild(createEmptyState('fas fa-user-tie', 'No pilots found'));
+            } else {
+                uavData.pilots.forEach(pilot => {
+                    container.appendChild(createPilotCard(pilot));
+                });
+            }
+        }
+
+        // Render Batteries List
+        function renderBatteriesList() {
+            const container = document.getElementById('batteries-list');
+            container.textContent = '';
+            if (uavData.batteries.length === 0) {
+                container.appendChild(createEmptyState('fas fa-battery-empty', 'No batteries found'));
+            } else {
+                uavData.batteries.forEach(battery => {
+                    container.appendChild(createBatteryCard(battery));
+                });
+            }
+        }
+
+        // Create Mission Card (XSS-safe DOM construction)
+        function createMissionCard(mission, compact) {
+            const statusClass = (mission.status || 'planning').replace('_', '-');
+            const plannedDate = mission.planned_date ? new Date(mission.planned_date).toLocaleDateString() : 'TBD';
+
+            const card = document.createElement('div');
+            card.className = 'uav-list-item';
+            card.addEventListener('click', () => showMissionDetails(mission.id));
+
+            const header = document.createElement('div');
+            header.className = 'uav-list-item-header';
+
+            const titleDiv = document.createElement('div');
+            const title = document.createElement('div');
+            title.className = 'uav-list-item-title';
+            title.textContent = mission.mission_code || ('Mission #' + mission.id);
+            titleDiv.appendChild(title);
+
+            if (!compact) {
+                const subtitle = document.createElement('div');
+                subtitle.className = 'uav-list-item-subtitle';
+                subtitle.textContent = mission.mission_type || 'Survey';
+                titleDiv.appendChild(subtitle);
+            }
+
+            const status = document.createElement('span');
+            status.className = 'uav-status ' + statusClass;
+            status.textContent = (mission.status || 'planning').replace('_', ' ');
+
+            header.appendChild(titleDiv);
+            header.appendChild(status);
+            card.appendChild(header);
+
+            if (!compact) {
+                const meta = document.createElement('div');
+                meta.className = 'uav-list-item-meta';
+                meta.appendChild(createMetaItem('fas fa-calendar', plannedDate));
+
+                if (mission.pilot_name) {
+                    meta.appendChild(createMetaItem('fas fa-user', mission.pilot_name));
+                }
+
+                card.appendChild(meta);
+            }
+
+            return card;
+        }
+
+        // Create Flight Card (XSS-safe DOM construction)
+        function createFlightCard(flight, compact) {
+            const flightDate = flight.takeoff_time ? new Date(flight.takeoff_time).toLocaleDateString() : 'Unknown';
+            const duration = flight.flight_duration_minutes ? (flight.flight_duration_minutes + ' min') : 'N/A';
+
+            const card = document.createElement('div');
+            card.className = 'uav-list-item';
+            card.addEventListener('click', () => showFlightDetails(flight.id));
+
+            const header = document.createElement('div');
+            header.className = 'uav-list-item-header';
+
+            const titleDiv = document.createElement('div');
+            const title = document.createElement('div');
+            title.className = 'uav-list-item-title';
+            title.textContent = 'Flight #' + (flight.flight_number || flight.id);
+            titleDiv.appendChild(title);
+
+            if (!compact) {
+                const subtitle = document.createElement('div');
+                subtitle.className = 'uav-list-item-subtitle';
+                subtitle.textContent = 'Mission: ' + (flight.mission_code || flight.mission_id);
+                titleDiv.appendChild(subtitle);
+            }
+
+            header.appendChild(titleDiv);
+
+            if (flight.has_incident) {
+                const incident = document.createElement('span');
+                incident.className = 'uav-status aborted';
+                incident.textContent = 'Incident';
+                header.appendChild(incident);
+            }
+
+            card.appendChild(header);
+
+            if (!compact) {
+                const meta = document.createElement('div');
+                meta.className = 'uav-list-item-meta';
+                meta.appendChild(createMetaItem('fas fa-calendar', flightDate));
+                meta.appendChild(createMetaItem('fas fa-clock', duration));
+                card.appendChild(meta);
+            }
+
+            return card;
+        }
+
+        // Create Pilot Card (XSS-safe DOM construction)
+        function createPilotCard(pilot, compact) {
+            const card = document.createElement('div');
+            card.className = 'uav-list-item';
+            card.style.display = 'flex';
+            card.style.alignItems = 'center';
+            card.style.gap = '1rem';
+            card.addEventListener('click', () => showPilotDetails(pilot.id));
+
+            // Avatar with initials
+            const avatar = document.createElement('div');
+            avatar.className = 'pilot-avatar';
+            const initials = ((pilot.first_name || '').charAt(0) + (pilot.last_name || '').charAt(0)).toUpperCase();
+            avatar.textContent = initials || '?';
+            card.appendChild(avatar);
+
+            // Info section
+            const info = document.createElement('div');
+            info.className = 'pilot-info';
+
+            const name = document.createElement('div');
+            name.className = 'uav-list-item-title';
+            const fullName = ((pilot.first_name || '') + ' ' + (pilot.last_name || '')).trim();
+            name.textContent = fullName || 'Unknown Pilot';
+            info.appendChild(name);
+
+            if (!compact && pilot.email) {
+                const email = document.createElement('div');
+                email.className = 'uav-list-item-subtitle';
+                email.textContent = pilot.email;
+                info.appendChild(email);
+            }
+
+            // Certifications
+            if (pilot.certification_type) {
+                const certs = document.createElement('div');
+                certs.className = 'pilot-certifications';
+                const certBadge = document.createElement('span');
+                certBadge.className = 'cert-badge';
+                certBadge.textContent = pilot.certification_type;
+
+                // Check if cert is expiring
+                if (pilot.certification_expiry) {
+                    const expiry = new Date(pilot.certification_expiry);
+                    const now = new Date();
+                    const daysUntilExpiry = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+                    if (daysUntilExpiry < 0) {
+                        certBadge.classList.add('expired');
+                    } else if (daysUntilExpiry < 30) {
+                        certBadge.classList.add('expiring');
+                    }
+                }
+
+                certs.appendChild(certBadge);
+                info.appendChild(certs);
+            }
+
+            card.appendChild(info);
+
+            // Status
+            const status = document.createElement('span');
+            status.className = 'uav-status ' + (pilot.status || 'inactive');
+            status.textContent = pilot.status || 'inactive';
+            card.appendChild(status);
+
+            return card;
+        }
+
+        // Create Battery Card (XSS-safe DOM construction)
+        function createBatteryCard(battery, compact) {
+            const healthPercent = battery.health_percentage || 100;
+            const healthClass = healthPercent >= 80 ? 'good' : healthPercent >= 50 ? 'fair' : 'poor';
+
+            const card = document.createElement('div');
+            card.className = 'uav-list-item';
+            card.addEventListener('click', () => showBatteryDetails(battery.id));
+
+            const header = document.createElement('div');
+            header.className = 'uav-list-item-header';
+
+            const titleDiv = document.createElement('div');
+            const title = document.createElement('div');
+            title.className = 'uav-list-item-title';
+            title.textContent = battery.serial_number || ('Battery #' + battery.id);
+            titleDiv.appendChild(title);
+
+            if (!compact) {
+                const subtitle = document.createElement('div');
+                subtitle.className = 'uav-list-item-subtitle';
+                const mfgModel = ((battery.manufacturer || '') + ' ' + (battery.model || '')).trim();
+                subtitle.textContent = mfgModel || 'Unknown';
+                titleDiv.appendChild(subtitle);
+            }
+
+            header.appendChild(titleDiv);
+
+            // Health indicator
+            const healthDiv = document.createElement('div');
+            healthDiv.className = 'battery-health';
+
+            const healthBar = document.createElement('div');
+            healthBar.className = 'battery-health-bar';
+            const healthFill = document.createElement('div');
+            healthFill.className = 'battery-health-fill ' + healthClass;
+            healthFill.style.width = healthPercent + '%';
+            healthBar.appendChild(healthFill);
+            healthDiv.appendChild(healthBar);
+
+            const healthStatus = document.createElement('span');
+            healthStatus.className = 'uav-status ' + healthClass;
+            healthStatus.textContent = healthPercent + '%';
+            healthDiv.appendChild(healthStatus);
+
+            header.appendChild(healthDiv);
+            card.appendChild(header);
+
+            if (!compact) {
+                const meta = document.createElement('div');
+                meta.className = 'uav-list-item-meta';
+                meta.appendChild(createMetaItem('fas fa-sync', (battery.cycle_count || 0) + ' cycles'));
+
+                if (battery.last_health_check) {
+                    const checkDate = new Date(battery.last_health_check).toLocaleDateString();
+                    meta.appendChild(createMetaItem('fas fa-calendar-check', 'Last check: ' + checkDate));
+                }
+
+                card.appendChild(meta);
+            }
+
+            return card;
+        }
+
+        // Filter missions
+        function filterMissions() {
+            renderMissionsList();
+        }
+
+        // Show details modals (placeholder - would open detailed modal)
+        function showMissionDetails(missionId) {
+            const mission = uavData.missions.find(m => m.id === missionId);
+            if (!mission) return;
+            alert('Mission Details: ' + (mission.mission_code || mission.id) +
+                  '\nStatus: ' + mission.status +
+                  '\nType: ' + (mission.mission_type || 'Survey'));
+        }
+
+        function showFlightDetails(flightId) {
+            const flight = uavData.flightLogs.find(f => f.id === flightId);
+            if (!flight) return;
+            alert('Flight Details: #' + (flight.flight_number || flight.id) +
+                  '\nDuration: ' + (flight.flight_duration_minutes || 'N/A') + ' min');
+        }
+
+        function showPilotDetails(pilotId) {
+            const pilot = uavData.pilots.find(p => p.id === pilotId);
+            if (!pilot) return;
+            alert('Pilot Details: ' + (pilot.first_name || '') + ' ' + (pilot.last_name || '') +
+                  '\nCertification: ' + (pilot.certification_type || 'N/A'));
+        }
+
+        function showBatteryDetails(batteryId) {
+            const battery = uavData.batteries.find(b => b.id === batteryId);
+            if (!battery) return;
+            alert('Battery Details: ' + (battery.serial_number || battery.id) +
+                  '\nHealth: ' + (battery.health_percentage || 100) + '%' +
+                  '\nCycles: ' + (battery.cycle_count || 0));
+        }
+
+        // Create modals (placeholder functions)
+        function showCreatePilotModal() {
+            alert('Create Pilot functionality coming soon!\n\nThis will allow you to register new UAV pilots with their certifications and station authorizations.');
+        }
+
+        function showCreateMissionModal() {
+            alert('Create Mission functionality coming soon!\n\nThis will allow you to plan new UAV missions with AOI selection, flight parameters, and pilot assignment.');
+        }
+
+        function showCreateFlightLogModal() {
+            alert('Create Flight Log functionality coming soon!\n\nThis will allow pilots to log individual flights with telemetry data and incident reporting.');
+        }
+
+        function showCreateBatteryModal() {
+            alert('Register Battery functionality coming soon!\n\nThis will allow you to register new batteries with manufacturer details and track their lifecycle.');
+        }
+
+        // Initialize UAV operations after station data loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for station data to be available, then init UAV
+            const checkStationData = setInterval(function() {
+                if (stationData && stationData.id) {
+                    clearInterval(checkStationData);
+                    initUAVOperations();
+                }
+            }, 500);
+
+            // Timeout after 10 seconds
+            setTimeout(function() { clearInterval(checkStationData); }, 10000);
         });
     </script>
 

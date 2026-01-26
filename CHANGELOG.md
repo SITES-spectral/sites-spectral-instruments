@@ -13,6 +13,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.3.0] - 2026-01-26
+
+### Feature: UAV Operations Frontend (v15.3.0)
+
+Added comprehensive UAV Operations management UI to the station dashboard with XSS-safe DOM construction.
+
+#### New UI Components
+
+| Component | Description |
+|-----------|-------------|
+| **UAV Operations Section** | New collapsible section in station dashboard for UAV management |
+| **UAV Tabs** | Overview, Missions, Flight Logs, Pilots, Batteries navigation |
+| **Overview Dashboard** | 4-card grid showing active missions, recent flights, authorized pilots, battery status |
+| **Mission List** | Filterable list with status and date filters |
+| **Flight Logs List** | Chronological flight log display with duration and incident badges |
+| **Pilots List** | Pilot cards with avatar, certifications, and expiry warnings |
+| **Batteries List** | Battery cards with visual health indicators and cycle counts |
+
+#### Features
+
+- **Tab-based Navigation**: Switch between Overview, Missions, Flights, Pilots, and Batteries views
+- **Real-time Counts**: Badge counts on each tab showing data totals
+- **Role-based Controls**: Admin buttons shown only for authorized users (admin, sites-admin, station-admin, uav-pilot)
+- **Mission Filtering**: Filter missions by status (planning, approved, in_progress, completed, aborted) and date
+- **Certification Expiry Warnings**: Visual badges for expiring (<30 days) and expired certifications
+- **Battery Health Visualization**: Health bar with color coding (good: >80%, fair: 50-80%, poor: <50%)
+- **XSS-Safe Implementation**: All user data rendered via `textContent` and `createElement` (no innerHTML with user data)
+
+#### CSS Additions (~400 lines)
+
+- `.uav-operations-section` - Main container styling
+- `.uav-tabs` / `.uav-tab` - Tab navigation with active states
+- `.uav-panel` - Tab content panels
+- `.uav-card` - Overview dashboard cards
+- `.uav-list-item` - List item cards with hover effects
+- `.uav-status.*` - Status badges (planning, approved, in_progress, completed, aborted, active, inactive, good, fair, poor, retired)
+- `.pilot-avatar` / `.pilot-certifications` - Pilot-specific styling
+- `.battery-health` / `.battery-health-bar` - Battery health visualization
+- `.uav-empty-state` / `.uav-loading` - Empty and loading states
+
+#### JavaScript Additions (~600 lines)
+
+- **State Management**: `uavData` object holding pilots, missions, flightLogs, batteries
+- **Data Loading**: `loadUAVData()` fetches all UAV data for station via Promise.allSettled
+- **Tab Switching**: `switchUAVTab()` with panel visibility management
+- **Rendering Functions**: XSS-safe card creation using DOM APIs
+  - `createMissionCard()` - Mission list items
+  - `createFlightCard()` - Flight log list items
+  - `createPilotCard()` - Pilot cards with avatar and certs
+  - `createBatteryCard()` - Battery cards with health bar
+- **Helper Functions**: `createIcon()`, `createMetaItem()`, `createEmptyState()`
+- **Authorization**: `canManageUAV()` checks user role for admin controls
+- **Initialization**: Auto-init when station data loads (500ms polling with 10s timeout)
+
+#### Files Updated
+
+- `public/station-dashboard.html` - Added UAV Operations section, CSS styles, and JavaScript
+
+---
+
 ## [15.2.0] - 2026-01-26
 
 ### Feature: UAV Pilot Domain Implementation (v15.2.0)
