@@ -13,6 +13,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.1.0] - 2026-01-26
+
+### Database Migration: Mount Type Code Normalization (Migration 0046)
+
+Comprehensive migration normalizing all mount type codes from legacy 2-letter to standard 3-letter format with legacy name tracking.
+
+#### Mount Type Code Changes
+
+| Legacy Code | New Code | Description |
+|-------------|----------|-------------|
+| `PL` | `TWR` | Tower/Mast (standard aviation abbreviation) |
+| `BL` | `BLD` | Building (common abbreviation) |
+| `GL` | `GND` | Ground Level (standard abbreviation) |
+
+#### Migration Details
+
+| Metric | Value |
+|--------|-------|
+| **Queries Executed** | 27 |
+| **Rows Read** | 916 |
+| **Rows Written** | 256 |
+| **Platforms Updated** | All with legacy codes |
+| **Instruments Updated** | All with legacy codes |
+
+#### New Features
+
+- **`platforms.legacy_names`**: JSON array column tracking historical names
+  - Example: `["SVB_FOR_PL01"]` preserves original name after transformation
+  - Enables rollback capability
+  - Provides audit trail
+
+#### Example Transformations
+
+| Entity | Before | After | Legacy Names |
+|--------|--------|-------|--------------|
+| **Platform** | `SVB_FOR_PL01` | `SVB_FOR_TWR01` | `["SVB_FOR_PL01"]` |
+| **Platform** | `ANS_FOR_BL01` | `ANS_FOR_BLD01` | `["ANS_FOR_BL01"]` |
+| **Instrument** | `SVB_FOR_PL01_PHE01` | `SVB_FOR_TWR01_PHE01` | (via platform) |
+
+#### Files Added
+
+- `migrations/0046_normalize_mount_types_add_legacy_names.sql` - Main migration
+- `migrations/0046_rollback.sql` - Rollback script
+- `migrations/0046_test_migration.sql` - Test suite
+- `migrations/0046_README.md` - Technical documentation
+- `migrations/0046_EXECUTION_GUIDE.md` - Deployment instructions
+
+#### Consistency Achieved
+
+| System | Mount Type Codes | Status |
+|--------|-----------------|--------|
+| **webapp-instruments** | TWR, BLD, GND | ✅ Updated |
+| **phenocams** | TWR, BLD, GND | ✅ Already normalized |
+| **mspectral** | TWR, BLD, GND | ✅ Already normalized |
+
+---
+
 ## [15.0.3] - 2026-01-26
 
 ### Feature: Station Portal with Platform Type Navigation
