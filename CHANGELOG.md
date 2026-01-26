@@ -13,6 +13,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.0.3] - 2026-01-26
+
+### Feature: Station Portal with Platform Type Navigation
+
+Enhanced station portal with client-side routing for platform type organization.
+
+#### Navigation Tabs
+
+| Route | View | Platforms Shown |
+|-------|------|-----------------|
+| `/` | All Platforms | All station platforms |
+| `/fixed` | Fixed | TWR (Tower), BLD (Building), GND (Ground) |
+| `/uav` | UAV | UAV platforms |
+| `/satellite` | Satellite | SAT platforms |
+| `/mobile` | Mobile | MOB, USV, UUV platforms |
+
+#### Features
+
+- **Client-Side Routing**: URL-based navigation without page reload
+- **Browser History Support**: Back/forward navigation works correctly
+- **Dynamic Tab Display**: Only shows tabs for platform types that exist
+- **Platform Counts**: Badge showing number of platforms per type
+- **Sticky Navigation**: Tabs stay visible when scrolling
+- **XSS-Safe DOM**: All rendering uses createElement/textContent
+
+#### Station Portal Components
+
+| Component | Description |
+|-----------|-------------|
+| **Station Header** | Station badge, name, status, network link |
+| **Navigation Tabs** | Platform type filter with counts |
+| **Station Info Card** | Location, membership, coordinates with mini-map |
+| **Stats Row** | Platform, instrument, and active counts |
+| **Platform Cards** | Filtered by current view with instrument summary |
+
+#### Files Modified
+
+- `public/station-portal.html` - Added navigation tabs and routing
+- `public/public-dashboard.html` - Version update
+- `public/index.html` - Version update
+
+---
+
 ## [15.0.2] - 2026-01-26
 
 ### Feature: Public Dashboard

@@ -125,6 +125,66 @@
             font-size: 8px;
         }
 
+        /* Navigation Tabs */
+        .nav-tabs {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tabs-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: #047857;
+            background: #f0fdf4;
+        }
+
+        .nav-tab.active {
+            color: #047857;
+            border-bottom-color: #047857;
+        }
+
+        .nav-tab i {
+            font-size: 16px;
+        }
+
+        .nav-tab .count {
+            background: #e5e7eb;
+            color: #6b7280;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-tab.active .count {
+            background: #d1fae5;
+            color: #047857;
+        }
+
         /* Container */
         .container {
             max-width: 1400px;
@@ -506,9 +566,48 @@
             platforms: [],
             instruments: {},
             map: null,
+            currentView: 'all', // 'all', 'fixed', 'uav', 'satellite', 'mobile'
+
+            // Platform type mapping: mount_type_code prefix -> view category
+            // Note: mount_type_code may have numeric suffix (e.g., PL01, BL01)
+            platformTypeMap: {
+                // Legacy codes (with possible numeric suffix)
+                'PL': 'fixed',   // Pole/Tower (legacy)
+                'BL': 'fixed',   // Building (legacy)
+                'GL': 'fixed',   // Ground Level (legacy)
+                // Normalized codes (v12.0.0+)
+                'TWR': 'fixed',  // Tower
+                'BLD': 'fixed',  // Building
+                'GND': 'fixed',  // Ground
+                'UAV': 'uav',
+                'SAT': 'satellite',
+                'MOB': 'mobile',
+                'USV': 'mobile',  // Surface vehicles grouped with mobile for now
+                'UUV': 'mobile'   // Underwater vehicles grouped with mobile for now
+            },
+
+            // Extract category from mount_type_code (handles numeric suffixes like PL01, UAV02)
+            getCategoryFromMountType(mountTypeCode) {
+                if (!mountTypeCode) return 'fixed';
+
+                // Try exact match first
+                if (this.platformTypeMap[mountTypeCode]) {
+                    return this.platformTypeMap[mountTypeCode];
+                }
+
+                // Try prefix matching (PL01 -> PL, UAV02 -> UAV)
+                const prefix = mountTypeCode.replace(/[0-9]+$/, '');
+                if (this.platformTypeMap[prefix]) {
+                    return this.platformTypeMap[prefix];
+                }
+
+                // Default to fixed for unknown types
+                return 'fixed';
+            },
 
             async init() {
                 const stationAcronym = this.getStationFromSubdomain();
+                this.currentView = this.getViewFromPath();
 
                 if (!stationAcronym) {
                     this.showError('Invalid Station', 'Could not determine station from URL.');
@@ -544,6 +643,42 @@
                 return null;
             },
 
+            getViewFromPath() {
+                const path = window.location.pathname.toLowerCase();
+                if (path.startsWith('/fixed')) return 'fixed';
+                if (path.startsWith('/uav')) return 'uav';
+                if (path.startsWith('/satellite')) return 'satellite';
+                if (path.startsWith('/mobile')) return 'mobile';
+                return 'all';
+            },
+
+            navigateTo(view) {
+                const basePath = view === 'all' ? '/' : '/' + view;
+                window.history.pushState({ view }, '', basePath);
+                this.currentView = view;
+                this.render();
+            },
+
+            getFilteredPlatforms() {
+                if (this.currentView === 'all') {
+                    return this.platforms;
+                }
+                return this.platforms.filter(p => {
+                    const category = this.getCategoryFromMountType(p.mount_type_code);
+                    return category === this.currentView;
+                });
+            },
+
+            getPlatformCounts() {
+                const counts = { all: 0, fixed: 0, uav: 0, satellite: 0, mobile: 0 };
+                this.platforms.forEach(p => {
+                    counts.all++;
+                    const category = this.getCategoryFromMountType(p.mount_type_code);
+                    counts[category]++;
+                });
+                return counts;
+            },
+
             async loadStationData(acronym) {
                 const response = await fetch('/api/public/station/' + encodeURIComponent(acronym.toLowerCase()));
                 const data = await response.json();
@@ -576,6 +711,9 @@
 
                 // Header
                 app.appendChild(this.createHeader());
+
+                // Navigation Tabs
+                app.appendChild(this.createNavTabs());
 
                 // Container
                 const container = document.createElement('div');
@@ -657,6 +795,55 @@
                 header.appendChild(content);
 
                 return header;
+            },
+
+            createNavTabs() {
+                const nav = document.createElement('nav');
+                nav.className = 'nav-tabs';
+
+                const inner = document.createElement('div');
+                inner.className = 'nav-tabs-inner';
+
+                const counts = this.getPlatformCounts();
+
+                const tabs = [
+                    { id: 'all', icon: 'fa-th-large', label: 'All Platforms', count: counts.all },
+                    { id: 'fixed', icon: 'fa-tower-observation', label: 'Fixed', count: counts.fixed },
+                    { id: 'uav', icon: 'fa-crosshairs', label: 'UAV', count: counts.uav },
+                    { id: 'satellite', icon: 'fa-satellite', label: 'Satellite', count: counts.satellite },
+                    { id: 'mobile', icon: 'fa-truck', label: 'Mobile', count: counts.mobile }
+                ];
+
+                const self = this;
+                tabs.forEach(tab => {
+                    // Only show tabs that have platforms (or 'all' always)
+                    if (tab.count === 0 && tab.id !== 'all') return;
+
+                    const tabEl = document.createElement('a');
+                    tabEl.className = 'nav-tab' + (this.currentView === tab.id ? ' active' : '');
+                    tabEl.href = tab.id === 'all' ? '/' : '/' + tab.id;
+
+                    tabEl.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        self.navigateTo(tab.id);
+                    });
+
+                    const icon = document.createElement('i');
+                    icon.className = 'fas ' + tab.icon;
+                    tabEl.appendChild(icon);
+
+                    tabEl.appendChild(document.createTextNode(' ' + tab.label));
+
+                    const countBadge = document.createElement('span');
+                    countBadge.className = 'count';
+                    countBadge.textContent = String(tab.count);
+                    tabEl.appendChild(countBadge);
+
+                    inner.appendChild(tabEl);
+                });
+
+                nav.appendChild(inner);
+                return nav;
             },
 
             createInfoCard() {
@@ -759,9 +946,9 @@
 
                 const h2 = document.createElement('h2');
                 const h2Icon = document.createElement('i');
-                h2Icon.className = 'fas fa-cubes';
+                h2Icon.className = 'fas ' + this.getViewIcon(this.currentView);
                 h2.appendChild(h2Icon);
-                h2.appendChild(document.createTextNode(' Platforms & Instruments'));
+                h2.appendChild(document.createTextNode(' ' + this.getViewTitle(this.currentView)));
                 header.appendChild(h2);
 
                 section.appendChild(header);
@@ -769,13 +956,17 @@
                 const grid = document.createElement('div');
                 grid.className = 'platforms-grid';
 
-                if (this.platforms.length === 0) {
+                const filteredPlatforms = this.getFilteredPlatforms();
+
+                if (filteredPlatforms.length === 0) {
                     const empty = document.createElement('p');
                     empty.style.cssText = 'padding: 20px; color: #6b7280; text-align: center;';
-                    empty.textContent = 'No platforms registered for this station.';
+                    empty.textContent = this.currentView === 'all'
+                        ? 'No platforms registered for this station.'
+                        : 'No ' + this.currentView + ' platforms at this station.';
                     grid.appendChild(empty);
                 } else {
-                    this.platforms.forEach(platform => {
+                    filteredPlatforms.forEach(platform => {
                         grid.appendChild(this.createPlatformCard(platform));
                     });
                 }
@@ -900,7 +1091,7 @@
 
                 const p2 = document.createElement('p');
                 p2.style.cssText = 'margin-top: 8px; font-size: 12px;';
-                p2.textContent = 'Version 15.0.2';
+                p2.textContent = 'Version 15.0.3';
                 footer.appendChild(p2);
 
                 return footer;
@@ -995,11 +1186,40 @@
                     'BLD': 'Building',
                     'GND': 'Ground',
                     'UAV': 'UAV',
-                    'SAT': 'Satellite'
+                    'SAT': 'Satellite',
+                    'MOB': 'Mobile'
                 };
                 return types[code] || code || 'Fixed';
+            },
+
+            getViewIcon(view) {
+                const icons = {
+                    'all': 'fa-cubes',
+                    'fixed': 'fa-tower-observation',
+                    'uav': 'fa-crosshairs',
+                    'satellite': 'fa-satellite',
+                    'mobile': 'fa-truck'
+                };
+                return icons[view] || 'fa-cubes';
+            },
+
+            getViewTitle(view) {
+                const titles = {
+                    'all': 'Platforms & Instruments',
+                    'fixed': 'Fixed Platforms (Towers, Buildings, Ground)',
+                    'uav': 'UAV Platforms',
+                    'satellite': 'Satellite Platforms',
+                    'mobile': 'Mobile Platforms'
+                };
+                return titles[view] || 'Platforms';
             }
         };
+
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', function(e) {
+            StationPortal.currentView = StationPortal.getViewFromPath();
+            StationPortal.render();
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
