@@ -256,8 +256,8 @@ async function handleStaticAssets(request, env, corsHeaders, portalType = 'publi
       default: '/sites-dashboard.html'
     },
     station: {
-      '/': '/station-dashboard.html',
-      default: '/station-dashboard.html'
+      '/': '/station-portal.html',
+      default: '/station-portal.html'
     }
   };
 
@@ -267,6 +267,7 @@ async function handleStaticAssets(request, env, corsHeaders, portalType = 'publi
     '/instruments.html',
     '/export.html',
     '/station-dashboard.html',
+    '/station-portal.html',
     '/sites-dashboard.html',
     '/public-dashboard.html',
     '/instrument.html',

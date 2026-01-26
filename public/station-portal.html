@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Portal - SITES Spectral</title>
+    <meta name="description" content="SITES Spectral Station Portal">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="anonymous"/>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .station-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-badge.operational {
+            background: rgba(16, 185, 129, 0.2);
+            color: #d1fae5;
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fef3c7;
+        }
+
+        .status-badge i {
+            font-size: 8px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* Station Info Card */
+        .station-info-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            min-height: 300px;
+        }
+
+        @media (max-width: 900px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-content {
+            padding: 24px;
+        }
+
+        .info-content h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-content h2 i {
+            color: #047857;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .mini-map {
+            background: #e5e7eb;
+            min-height: 300px;
+        }
+
+        #station-map {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 24px;
+            color: #047857;
+            margin-bottom: 8px;
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .stat-card p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Platforms Section */
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header h2 i {
+            color: #047857;
+        }
+
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .platform-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .platform-card:hover {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border-color: #047857;
+        }
+
+        .platform-header {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .platform-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .platform-id {
+            font-size: 12px;
+            color: #6b7280;
+            font-family: monospace;
+        }
+
+        .platform-body {
+            padding: 16px;
+        }
+
+        .platform-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .platform-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .platform-meta-item i {
+            color: #047857;
+        }
+
+        .instruments-list {
+            border-top: 1px solid #f3f4f6;
+            padding-top: 12px;
+        }
+
+        .instruments-list h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .instrument-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .instrument-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .instrument-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instrument-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .instrument-icon.phenocam { background: #dbeafe; color: #2563eb; }
+        .instrument-icon.multispectral { background: #fef3c7; color: #d97706; }
+        .instrument-icon.par { background: #fce7f3; color: #db2777; }
+        .instrument-icon.ndvi { background: #d1fae5; color: #047857; }
+        .instrument-icon.default { background: #e5e7eb; color: #6b7280; }
+
+        .instrument-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .instrument-type {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .instrument-status {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .instrument-status.active {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .instrument-status.inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px 20px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #047857;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: #6b7280;
+        }
+
+        .loading i {
+            font-size: 32px;
+            margin-bottom: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error */
+        .error-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .error-container i {
+            font-size: 48px;
+            color: #ef4444;
+            margin-bottom: 16px;
+        }
+
+        .error-container h2 {
+            font-size: 24px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .error-container p {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .error-container a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #047857;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .error-container a:hover {
+            background: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Loading station portal...</p>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="anonymous"></script>
+
+    <script>
+        // Station Portal - XSS-Safe DOM Methods
+        const StationPortal = {
+            station: null,
+            platforms: [],
+            instruments: {},
+            map: null,
+
+            async init() {
+                const stationAcronym = this.getStationFromSubdomain();
+
+                if (!stationAcronym) {
+                    this.showError('Invalid Station', 'Could not determine station from URL.');
+                    return;
+                }
+
+                try {
+                    await this.loadStationData(stationAcronym);
+                    await this.loadInstruments(stationAcronym);
+                    this.render();
+                } catch (error) {
+                    console.error('Failed to load station:', error);
+                    this.showError('Station Not Found', 'The requested station could not be loaded.');
+                }
+            },
+
+            getStationFromSubdomain() {
+                const host = window.location.hostname;
+                const parts = host.split('.');
+
+                // {station}.sitesspectral.work
+                if (parts.length === 3 && parts[1] === 'sitesspectral' && parts[2] === 'work') {
+                    return parts[0].toUpperCase();
+                }
+
+                // For testing: check URL param
+                const params = new URLSearchParams(window.location.search);
+                const stationParam = params.get('station');
+                if (stationParam) {
+                    return stationParam.toUpperCase();
+                }
+
+                return null;
+            },
+
+            async loadStationData(acronym) {
+                const response = await fetch('/api/public/station/' + encodeURIComponent(acronym.toLowerCase()));
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error('Station not found');
+                }
+
+                this.station = data.station;
+                this.platforms = data.platforms || [];
+            },
+
+            async loadInstruments(acronym) {
+                // Load instruments for each platform
+                for (const platform of this.platforms) {
+                    try {
+                        const response = await fetch('/api/public/station/' + encodeURIComponent(acronym.toLowerCase()));
+                        // For now, we'll use instrument_count from platforms
+                        // Full instrument data would need authenticated API
+                        this.instruments[platform.id] = [];
+                    } catch (e) {
+                        console.warn('Could not load instruments for platform:', platform.id);
+                    }
+                }
+            },
+
+            render() {
+                const app = document.getElementById('app');
+                this.clearElement(app);
+
+                // Header
+                app.appendChild(this.createHeader());
+
+                // Container
+                const container = document.createElement('div');
+                container.className = 'container';
+
+                // Station Info Card
+                container.appendChild(this.createInfoCard());
+
+                // Stats Row
+                container.appendChild(this.createStatsRow());
+
+                // Platforms Section
+                container.appendChild(this.createPlatformsSection());
+
+                app.appendChild(container);
+
+                // Footer
+                app.appendChild(this.createFooter());
+
+                // Initialize map after DOM is ready
+                setTimeout(() => this.initMap(), 100);
+
+                // Update page title
+                document.title = this.station.display_name + ' - SITES Spectral';
+            },
+
+            createHeader() {
+                const header = document.createElement('div');
+                header.className = 'header';
+
+                const content = document.createElement('div');
+                content.className = 'header-content';
+
+                // Title section
+                const titleSection = document.createElement('div');
+                titleSection.className = 'header-title';
+
+                const badge = document.createElement('div');
+                badge.className = 'station-badge';
+                badge.textContent = this.station.acronym || '?';
+                titleSection.appendChild(badge);
+
+                const titleText = document.createElement('div');
+                const h1 = document.createElement('h1');
+                h1.textContent = this.station.display_name || 'Unknown Station';
+                titleText.appendChild(h1);
+
+                const subtitle = document.createElement('p');
+                subtitle.textContent = this.station.description || 'SITES Research Station';
+                titleText.appendChild(subtitle);
+
+                titleSection.appendChild(titleText);
+                content.appendChild(titleSection);
+
+                // Actions section
+                const actions = document.createElement('div');
+                actions.className = 'header-actions';
+
+                // Status badge
+                const status = document.createElement('div');
+                status.className = 'status-badge ' + (this.station.operational_status || 'operational');
+                const statusIcon = document.createElement('i');
+                statusIcon.className = 'fas fa-circle';
+                status.appendChild(statusIcon);
+                status.appendChild(document.createTextNode(' ' + this.formatStatus(this.station.operational_status)));
+                actions.appendChild(status);
+
+                // Network link
+                const networkLink = document.createElement('a');
+                networkLink.className = 'header-btn';
+                networkLink.href = 'https://sitesspectral.work';
+                const networkIcon = document.createElement('i');
+                networkIcon.className = 'fas fa-globe';
+                networkLink.appendChild(networkIcon);
+                networkLink.appendChild(document.createTextNode(' Network'));
+                actions.appendChild(networkLink);
+
+                content.appendChild(actions);
+                header.appendChild(content);
+
+                return header;
+            },
+
+            createInfoCard() {
+                const card = document.createElement('div');
+                card.className = 'station-info-card';
+
+                const grid = document.createElement('div');
+                grid.className = 'info-grid';
+
+                // Info content
+                const infoContent = document.createElement('div');
+                infoContent.className = 'info-content';
+
+                const h2 = document.createElement('h2');
+                const h2Icon = document.createElement('i');
+                h2Icon.className = 'fas fa-info-circle';
+                h2.appendChild(h2Icon);
+                h2.appendChild(document.createTextNode(' Station Information'));
+                infoContent.appendChild(h2);
+
+                const infoItems = [
+                    ['Country', this.station.country || 'Sweden'],
+                    ['Latitude', this.station.latitude ? this.station.latitude.toFixed(6) + '°' : '-'],
+                    ['Longitude', this.station.longitude ? this.station.longitude.toFixed(6) + '°' : '-'],
+                    ['Elevation', this.station.elevation_m ? this.station.elevation_m + ' m' : '-'],
+                    ['Status', this.station.status || 'Active'],
+                    ['SITES Member', this.station.sites_member ? 'Yes' : 'No'],
+                    ['ICOS Member', this.station.icos_member ? 'Yes (' + (this.station.icos_class || 'N/A') + ')' : 'No']
+                ];
+
+                infoItems.forEach(([label, value]) => {
+                    const item = document.createElement('div');
+                    item.className = 'info-item';
+
+                    const labelEl = document.createElement('span');
+                    labelEl.className = 'info-label';
+                    labelEl.textContent = label;
+                    item.appendChild(labelEl);
+
+                    const valueEl = document.createElement('span');
+                    valueEl.className = 'info-value';
+                    valueEl.textContent = value;
+                    item.appendChild(valueEl);
+
+                    infoContent.appendChild(item);
+                });
+
+                grid.appendChild(infoContent);
+
+                // Mini map
+                const mapContainer = document.createElement('div');
+                mapContainer.className = 'mini-map';
+                const mapDiv = document.createElement('div');
+                mapDiv.id = 'station-map';
+                mapContainer.appendChild(mapDiv);
+                grid.appendChild(mapContainer);
+
+                card.appendChild(grid);
+                return card;
+            },
+
+            createStatsRow() {
+                const row = document.createElement('div');
+                row.className = 'stats-row';
+
+                const stats = [
+                    ['fa-cube', this.platforms.length, 'Platforms'],
+                    ['fa-camera', this.getTotalInstruments(), 'Instruments'],
+                    ['fa-check-circle', this.getActiveCount(), 'Active']
+                ];
+
+                stats.forEach(([icon, value, label]) => {
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+
+                    const iconEl = document.createElement('i');
+                    iconEl.className = 'fas ' + icon;
+                    card.appendChild(iconEl);
+
+                    const h3 = document.createElement('h3');
+                    h3.textContent = String(value);
+                    card.appendChild(h3);
+
+                    const p = document.createElement('p');
+                    p.textContent = label;
+                    card.appendChild(p);
+
+                    row.appendChild(card);
+                });
+
+                return row;
+            },
+
+            createPlatformsSection() {
+                const section = document.createElement('div');
+                section.className = 'section';
+
+                const header = document.createElement('div');
+                header.className = 'section-header';
+
+                const h2 = document.createElement('h2');
+                const h2Icon = document.createElement('i');
+                h2Icon.className = 'fas fa-cubes';
+                h2.appendChild(h2Icon);
+                h2.appendChild(document.createTextNode(' Platforms & Instruments'));
+                header.appendChild(h2);
+
+                section.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'platforms-grid';
+
+                if (this.platforms.length === 0) {
+                    const empty = document.createElement('p');
+                    empty.style.cssText = 'padding: 20px; color: #6b7280; text-align: center;';
+                    empty.textContent = 'No platforms registered for this station.';
+                    grid.appendChild(empty);
+                } else {
+                    this.platforms.forEach(platform => {
+                        grid.appendChild(this.createPlatformCard(platform));
+                    });
+                }
+
+                section.appendChild(grid);
+                return section;
+            },
+
+            createPlatformCard(platform) {
+                const card = document.createElement('div');
+                card.className = 'platform-card';
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'platform-header';
+
+                const name = document.createElement('div');
+                name.className = 'platform-name';
+                name.textContent = platform.display_name || platform.normalized_name;
+                header.appendChild(name);
+
+                const id = document.createElement('div');
+                id.className = 'platform-id';
+                id.textContent = platform.normalized_name;
+                header.appendChild(id);
+
+                card.appendChild(header);
+
+                // Body
+                const body = document.createElement('div');
+                body.className = 'platform-body';
+
+                // Meta info
+                const meta = document.createElement('div');
+                meta.className = 'platform-meta';
+
+                const typeItem = document.createElement('div');
+                typeItem.className = 'platform-meta-item';
+                const typeIcon = document.createElement('i');
+                typeIcon.className = 'fas fa-tower-observation';
+                typeItem.appendChild(typeIcon);
+                typeItem.appendChild(document.createTextNode(' ' + this.formatMountType(platform.mount_type_code)));
+                meta.appendChild(typeItem);
+
+                const statusItem = document.createElement('div');
+                statusItem.className = 'platform-meta-item';
+                const statusIcon = document.createElement('i');
+                statusIcon.className = 'fas fa-circle';
+                statusIcon.style.color = platform.status === 'Active' ? '#10b981' : '#6b7280';
+                statusItem.appendChild(statusIcon);
+                statusItem.appendChild(document.createTextNode(' ' + (platform.status || 'Unknown')));
+                meta.appendChild(statusItem);
+
+                body.appendChild(meta);
+
+                // Instruments summary
+                const instruments = document.createElement('div');
+                instruments.className = 'instruments-list';
+
+                const instHeader = document.createElement('h4');
+                instHeader.textContent = 'Instruments (' + (platform.instrument_count || 0) + ')';
+                instruments.appendChild(instHeader);
+
+                // Placeholder for instruments (would need auth API for full data)
+                if (platform.instrument_count > 0) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'instrument-item';
+
+                    const info = document.createElement('div');
+                    info.className = 'instrument-info';
+
+                    const icon = document.createElement('div');
+                    icon.className = 'instrument-icon default';
+                    const iconI = document.createElement('i');
+                    iconI.className = 'fas fa-camera';
+                    icon.appendChild(iconI);
+                    info.appendChild(icon);
+
+                    const text = document.createElement('div');
+                    const nameEl = document.createElement('div');
+                    nameEl.className = 'instrument-name';
+                    nameEl.textContent = platform.instrument_count + ' instrument(s)';
+                    text.appendChild(nameEl);
+
+                    const typeEl = document.createElement('div');
+                    typeEl.className = 'instrument-type';
+                    typeEl.textContent = 'Login to view details';
+                    text.appendChild(typeEl);
+
+                    info.appendChild(text);
+                    placeholder.appendChild(info);
+                    instruments.appendChild(placeholder);
+                } else {
+                    const empty = document.createElement('p');
+                    empty.style.cssText = 'font-size: 13px; color: #9ca3af;';
+                    empty.textContent = 'No instruments registered';
+                    instruments.appendChild(empty);
+                }
+
+                body.appendChild(instruments);
+                card.appendChild(body);
+
+                return card;
+            },
+
+            createFooter() {
+                const footer = document.createElement('div');
+                footer.className = 'footer';
+
+                const p1 = document.createElement('p');
+                const strong = document.createElement('strong');
+                strong.textContent = 'SITES Spectral';
+                p1.appendChild(strong);
+                p1.appendChild(document.createTextNode(' is part of the '));
+                const link = document.createElement('a');
+                link.href = 'https://www.fieldsites.se/';
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.textContent = 'Swedish Infrastructure for Ecosystem Science (SITES)';
+                p1.appendChild(link);
+                footer.appendChild(p1);
+
+                const p2 = document.createElement('p');
+                p2.style.cssText = 'margin-top: 8px; font-size: 12px;';
+                p2.textContent = 'Version 15.0.2';
+                footer.appendChild(p2);
+
+                return footer;
+            },
+
+            initMap() {
+                if (!this.station.latitude || !this.station.longitude) return;
+
+                try {
+                    this.map = L.map('station-map').setView(
+                        [this.station.latitude, this.station.longitude],
+                        12
+                    );
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap',
+                        maxZoom: 18
+                    }).addTo(this.map);
+
+                    // Add marker
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="width:32px;height:32px;background:#047857;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:10px;">' + (this.station.acronym || '?').substring(0, 3) + '</div>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
+
+                    L.marker([this.station.latitude, this.station.longitude], { icon })
+                        .addTo(this.map);
+                } catch (e) {
+                    console.error('Map init error:', e);
+                }
+            },
+
+            showError(title, message) {
+                const app = document.getElementById('app');
+                this.clearElement(app);
+
+                const container = document.createElement('div');
+                container.className = 'error-container';
+
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-exclamation-circle';
+                container.appendChild(icon);
+
+                const h2 = document.createElement('h2');
+                h2.textContent = title;
+                container.appendChild(h2);
+
+                const p = document.createElement('p');
+                p.textContent = message;
+                container.appendChild(p);
+
+                const link = document.createElement('a');
+                link.href = 'https://sitesspectral.work';
+                const linkIcon = document.createElement('i');
+                linkIcon.className = 'fas fa-arrow-left';
+                link.appendChild(linkIcon);
+                link.appendChild(document.createTextNode(' Back to Network'));
+                container.appendChild(link);
+
+                app.appendChild(container);
+            },
+
+            // Helpers
+            clearElement(el) {
+                while (el.firstChild) {
+                    el.removeChild(el.firstChild);
+                }
+            },
+
+            getTotalInstruments() {
+                return this.platforms.reduce((sum, p) => sum + (p.instrument_count || 0), 0);
+            },
+
+            getActiveCount() {
+                return this.platforms.filter(p => p.status === 'Active').length;
+            },
+
+            formatStatus(status) {
+                const statuses = {
+                    'operational': 'Operational',
+                    'pending': 'Pending',
+                    'offline': 'Offline'
+                };
+                return statuses[status] || 'Unknown';
+            },
+
+            formatMountType(code) {
+                const types = {
+                    'TWR': 'Tower',
+                    'BLD': 'Building',
+                    'GND': 'Ground',
+                    'UAV': 'UAV',
+                    'SAT': 'Satellite'
+                };
+                return types[code] || code || 'Fixed';
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            StationPortal.init();
+        });
+    </script>
+</body>
+</html>
