@@ -13,6 +13,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.0] - 2026-01-26
+
+### Feature: Comprehensive System Documentation (v15.6.0)
+
+Complete documentation overhaul with enterprise-grade technical and user documentation.
+
+#### New Documentation Files
+
+| Document | Description |
+|----------|-------------|
+| `docs/SYSTEM_ARCHITECTURE.md` | Complete system architecture with diagrams |
+| `docs/API_REFERENCE.md` | Full API endpoint reference (100+ endpoints) |
+| `docs/DATABASE_SCHEMA.md` | Database tables, relationships, indexes |
+| `docs/DEPLOYMENT_GUIDE.md` | Deployment procedures and CI/CD |
+| `docs/USER_GUIDE_ADMIN.md` | Admin portal user guide |
+| `docs/USER_GUIDE_STATION_ADMIN.md` | Station admin user guide |
+| `docs/USER_GUIDE_UAV_PILOT.md` | UAV pilot operations guide |
+
+#### Documentation Coverage
+
+| Category | Content |
+|----------|---------|
+| **Architecture** | Hexagonal Architecture, CQRS, DI patterns |
+| **API** | All endpoints with request/response examples |
+| **Database** | 20+ tables with schemas, triggers, indexes |
+| **Deployment** | Cloudflare Workers, D1, wrangler setup |
+| **Users** | Role-based guides for admin, station, UAV pilot |
+
+#### Key Sections
+
+**System Architecture:**
+- Hexagonal Architecture diagrams
+- CQRS pattern explanation
+- Domain model visualization
+- Security architecture
+- Infrastructure overview
+
+**API Reference:**
+- Authentication methods
+- All CRUD endpoints
+- UAV endpoints (pilots, missions, flights, batteries)
+- Error handling
+- Rate limiting
+
+**Database Schema:**
+- Core tables (stations, platforms, instruments)
+- UAV tables (pilots, missions, flight_logs, batteries)
+- User management tables
+- Indexes and triggers
+- Migration history
+
+**User Guides:**
+- Step-by-step workflows
+- Role-specific instructions
+- Troubleshooting sections
+- Best practices
+
+---
+
 ## [15.5.0] - 2026-01-26
 
 ### Feature: Metrics, UAV Tests, and OpenAPI Documentation (v15.5.0)
