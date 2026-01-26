@@ -125,8 +125,8 @@ src/
 | ALN_AGR_TWR01 | Fixed Tower | SITES Spectral/MGeo | PHE01, MS01 |
 | ALN_DJI_M3M_UAV01 | UAV | SITES Spectral/MGeo | MS01, RGB01 |
 | ALN_ESA_S2A_SAT01 | Satellite | SITES Spectral/MGeo | MSI01 |
-| ALN_AGR_TWR02 | Fixed Tower | Perennial Crops | (placeholder) |
-| ALN_AGR_TWR03 | Fixed Tower | Perennial Crops | (placeholder) |
+| ALN_AGR_TWR02 | Fixed Tower | ICOS Sweden | (placeholder - awaiting ICOS data) |
+| ALN_AGR_TWR03 | Fixed Tower | ICOS Sweden | (placeholder - awaiting ICOS data) |
 
 ### What's New in v14.0.3
 

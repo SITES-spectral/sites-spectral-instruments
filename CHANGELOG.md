@@ -13,6 +13,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.4.0] - 2026-01-26
+
+### Security: Remove Plain Text Password Fallback (v15.4.0)
+
+**BREAKING CHANGE**: Plain text password authentication is no longer supported.
+
+#### Security Fix
+
+- **Removed plain text password fallback** in `src/auth/password-hasher.js`
+- All passwords MUST now be in hashed format (`salt:hash`)
+- Passwords not in the proper format will be rejected with a warning log
+- This eliminates a potential security risk where legacy plain text passwords could still authenticate
+
+#### Impact
+
+- Users with unhashed passwords will need password reset
+- All new passwords are automatically hashed with PBKDF2-SHA256
+- 100,000 iterations with 16-byte random salt
+
+#### Documentation Fix
+
+- **Corrected Alnarp platform documentation** in CLAUDE.md
+- ALN_AGR_TWR02 and ALN_AGR_TWR03 are ICOS Sweden platforms (not Perennial Crops)
+- Clarified these are placeholders awaiting ICOS Sweden data
+
+#### Files Updated
+
+- `src/auth/password-hasher.js` - Security hardening
+- `CLAUDE.md` - Documentation correction
+
+---
+
 ## [15.3.0] - 2026-01-26
 
 ### Feature: UAV Operations Frontend (v15.3.0)

@@ -69,16 +69,16 @@ describe('Password Hasher', () => {
       expect(result).toBe(false);
     });
 
-    it('should return true for correct plain text password (legacy support)', async () => {
-      // Plain text passwords don't contain ':'
+    it('should reject plain text passwords (v15.4.0 security hardening)', async () => {
+      // Plain text passwords don't contain ':' and are no longer supported
       const plainPassword = 'legacy-plain-password';
       const result = await verifyPassword(plainPassword, plainPassword);
-      expect(result).toBe(true);
+      expect(result).toBe(false); // Must be rejected - plain text no longer allowed
     });
 
-    it('should return false for incorrect plain text password', async () => {
-      const result = await verifyPassword('wrong', 'correct');
-      expect(result).toBe(false);
+    it('should reject passwords not in salt:hash format', async () => {
+      const result = await verifyPassword('wrong', 'not-a-hash');
+      expect(result).toBe(false); // Must be rejected - invalid hash format
     });
 
     it('should return false for empty password', async () => {

@@ -107,12 +107,12 @@ export async function verifyPassword(password, storedHash) {
     return false;
   }
 
-  // Handle plain text passwords during migration period
-  // TODO: Remove this fallback after all passwords are hashed
+  // All passwords must be in hashed format (salt:hash)
+  // Plain text password support was removed in v15.4.0 for security
   if (!storedHash.includes(':')) {
-    // This is a plain text password (legacy)
-    // Use timing-safe comparison for plain text
-    return timingSafeEqual(password, storedHash);
+    // Invalid format - not a properly hashed password
+    console.warn('Password verification failed: invalid hash format (not salt:hash)');
+    return false;
   }
 
   try {
