@@ -129,7 +129,6 @@
         .stat-icon.stations { background: #d1fae5; color: #047857; }
         .stat-icon.platforms { background: #dbeafe; color: #2563eb; }
         .stat-icon.instruments { background: #fef3c7; color: #d97706; }
-        .stat-icon.active { background: #dcfce7; color: #16a34a; }
 
         .stat-content h3 {
             font-size: 28px;
@@ -287,53 +286,6 @@
 
         .badge.sites { background: #d1fae5; color: #047857; }
         .badge.icos { background: #dbeafe; color: #2563eb; }
-
-        /* Metrics Panel */
-        .metrics-section {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-            margin-top: 24px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            padding: 20px;
-        }
-
-        .metric-group h4 {
-            font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
-        }
-
-        .metric-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .metric-item:last-child {
-            border-bottom: none;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            color: #374151;
-        }
-
-        .metric-value {
-            font-weight: 600;
-            font-size: 14px;
-            color: #111827;
-        }
 
         /* Footer */
         .footer {
@@ -515,15 +467,6 @@
                     <p>Instruments</p>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon active">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 id="active-count">-</h3>
-                    <p>Active Instruments</p>
-                </div>
-            </div>
         </div>
 
         <!-- Main Content -->
@@ -553,18 +496,6 @@
             </div>
         </div>
 
-        <!-- Metrics Section -->
-        <div class="metrics-section">
-            <div class="section-header">
-                <h2><i class="fas fa-chart-bar"></i> Network Metrics</h2>
-            </div>
-            <div class="metrics-grid" id="metrics-grid">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading metrics...
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="footer">
@@ -595,8 +526,7 @@
                 this.initMap();
                 await Promise.all([
                     this.loadHealth(),
-                    this.loadStations(),
-                    this.loadMetrics()
+                    this.loadStations()
                 ]);
             },
 
@@ -921,129 +851,6 @@
                     return url;
                 }
                 return '#';
-            },
-
-            async loadMetrics() {
-                const metricsEl = document.getElementById('metrics-grid');
-
-                try {
-                    const response = await fetch('/api/public/metrics');
-                    const data = await response.json();
-
-                    if (!data.success || !data.metrics) {
-                        throw new Error('Invalid response');
-                    }
-
-                    // Update active instruments count
-                    document.getElementById('active-count').textContent = String(data.metrics.active_instruments || 0);
-
-                    this.renderMetrics(data.metrics);
-
-                } catch (error) {
-                    console.error('Failed to load metrics:', error);
-                    this.showError(metricsEl, 'Failed to load metrics.');
-                }
-            },
-
-            renderMetrics(metrics) {
-                const metricsEl = document.getElementById('metrics-grid');
-
-                // Clear existing content
-                while (metricsEl.firstChild) {
-                    metricsEl.removeChild(metricsEl.firstChild);
-                }
-
-                const platformTypes = metrics.platforms_by_type || {};
-                const instrumentTypes = metrics.instruments_by_type || {};
-                const stationStatuses = metrics.stations_by_status || {};
-
-                // Platforms by Type
-                const platformGroup = this.createMetricGroup('Platforms by Type', platformTypes);
-                metricsEl.appendChild(platformGroup);
-
-                // Instruments by Type
-                const instrumentGroup = this.createMetricGroup('Instruments by Type', instrumentTypes);
-                metricsEl.appendChild(instrumentGroup);
-
-                // Stations by Status
-                const statusGroup = this.createMetricGroup('Stations by Status', stationStatuses);
-                metricsEl.appendChild(statusGroup);
-            },
-
-            createMetricGroup(title, data) {
-                const group = document.createElement('div');
-                group.className = 'metric-group';
-
-                const h4 = document.createElement('h4');
-                h4.textContent = title;
-                group.appendChild(h4);
-
-                const entries = Object.entries(data);
-                if (entries.length === 0) {
-                    const p = document.createElement('p');
-                    p.style.cssText = 'color: #6b7280; font-size: 14px;';
-                    p.textContent = 'No data';
-                    group.appendChild(p);
-                } else {
-                    entries.forEach(([key, value]) => {
-                        const item = document.createElement('div');
-                        item.className = 'metric-item';
-
-                        const label = document.createElement('span');
-                        label.className = 'metric-label';
-                        label.textContent = this.formatLabel(key);
-                        item.appendChild(label);
-
-                        const val = document.createElement('span');
-                        val.className = 'metric-value';
-                        val.textContent = String(value);
-                        item.appendChild(val);
-
-                        group.appendChild(item);
-                    });
-                }
-
-                return group;
-            },
-
-            formatLabel(str) {
-                if (!str) return 'Unknown';
-
-                // Platform mount type codes
-                const platformTypes = {
-                    'TWR': 'Tower, Mast or Pole (TWR)',
-                    'BLD': 'Building (BLD)',
-                    'GND': 'Ground Level (GND)',
-                    'UAV': 'UAV/Drone (UAV)',
-                    'SAT': 'Satellite (SAT)',
-                    'MOB': 'Mobile (MOB)',
-                    'USV': 'Surface Vehicle (USV)',
-                    'UUV': 'Underwater Vehicle (UUV)'
-                };
-
-                // Instrument type codes
-                const instrumentTypes = {
-                    'Phenocam': 'Phenocam (PHE)',
-                    'Multispectral': 'Multispectral Sensor (MS)',
-                    'PAR': 'PAR Sensor',
-                    'NDVI': 'NDVI Sensor',
-                    'PRI': 'PRI Sensor',
-                    'Hyperspectral': 'Hyperspectral (HYP)',
-                    'Thermal': 'Thermal Camera (TIR)',
-                    'RGB': 'RGB Camera',
-                    'LiDAR': 'LiDAR (LID)',
-                    'SAR': 'SAR Radar'
-                };
-
-                // Check for known codes first
-                if (platformTypes[str]) return platformTypes[str];
-                if (instrumentTypes[str]) return instrumentTypes[str];
-
-                // Default: Convert snake_case or camelCase to Title Case
-                return String(str)
-                    .replace(/_/g, ' ')
-                    .replace(/([a-z])([A-Z])/g, '$1 $2')
-                    .replace(/\b\w/g, c => c.toUpperCase());
             }
         };
 
