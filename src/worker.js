@@ -1,4 +1,4 @@
-// SITES Spectral Stations & Instruments - Main Worker v15.0.0
+// SITES Spectral Stations & Instruments - Main Worker v15.0.2
 // Hexagonal Architecture with Cloudflare Workers + Subdomain Routing
 // Handles both static assets and API routes with Cloudflare Access authentication
 //

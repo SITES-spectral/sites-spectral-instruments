@@ -13,6 +13,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.0.2] - 2026-01-26
+
+### Feature: Public Dashboard
+
+Interactive public-facing dashboard for the SITES Spectral network.
+
+#### Dashboard Components
+
+| Component | Description |
+|-----------|-------------|
+| **Station Map** | Leaflet-based interactive map with custom markers |
+| **Stats Overview** | Station, platform, instrument, and active counts |
+| **Station List** | Clickable station list with SITES/ICOS badges |
+| **Network Metrics** | Platform/instrument types, station statuses |
+
+#### Features
+
+- **XSS-Safe Implementation**: All DOM manipulation uses `createElement`/`textContent`
+- **Real-time Health Status**: Displays system operational status from `/api/public/health`
+- **Station Popups**: Detailed station info with platform/instrument counts
+- **Portal Links**: Direct links to station subdomains
+- **Responsive Design**: Works on desktop and mobile
+
+#### Endpoints Used
+
+- `GET /api/public/health` - System health and counts
+- `GET /api/public/stations` - Station list with coordinates
+- `GET /api/public/metrics` - Network-wide metrics
+
+#### Files Added
+
+- `public/public-dashboard.html` - Complete public dashboard
+
+---
+
 ## [15.0.1] - 2026-01-24
 
 ### Fixed: Critical Handler Wiring (Audit P0 Fixes)
