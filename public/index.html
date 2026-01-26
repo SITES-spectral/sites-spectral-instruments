@@ -3,397 +3,1023 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SITES Spectral</title>
-    <meta name="description" content="Login to SITES Spectral Stations & Instruments Management System">
+    <title>SITES Spectral - Public Dashboard</title>
+    <meta name="description" content="SITES Spectral Network - Swedish Infrastructure for Ecosystem Science monitoring stations and instruments">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/images/SITES_favicon.png">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="anonymous"/>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=15.0.2">
-    <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
-
-    <!-- Version Meta -->
-    <meta name="app-version" content="15.0.2">
-    <meta name="build-date" content="2026-01-26">
-
-    <!-- ES6 Module Bundle (Migration Phase) -->
-    <script type="module" src="/dist/login.bundle.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
-            padding: 20px;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-logo {
-            font-size: 3rem;
-            color: #059669;
-            margin-bottom: 10px;
-        }
-
-        .login-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .login-subtitle {
-            color: #666;
-            margin-bottom: 32px;
-            font-size: 0.95rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #059669;
-            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.5;
         }
 
-        .form-input.error {
-            border-color: #ef4444;
-        }
-
-        .login-btn {
-            width: 100%;
-            background: #059669;
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
             color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 24px 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title i {
+            font-size: 28px;
+            opacity: 0.9;
+        }
+
+        .header h1 {
+            font-size: 24px;
             font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-bottom: 20px;
+            margin-bottom: 4px;
         }
 
-        .login-btn:hover:not(:disabled) {
-            background: #064e3b;
+        .header p {
+            font-size: 14px;
+            opacity: 0.85;
         }
 
-        .login-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
-        .login-btn .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
+        .header-badge i {
+            color: #10b981;
         }
 
-        .login-btn.loading .spinner {
-            display: inline-block;
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px;
         }
 
-        .error-message {
-            background: #fee2e2;
-            color: #dc2626;
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.stations { background: #d1fae5; color: #047857; }
+        .stat-icon.platforms { background: #dbeafe; color: #2563eb; }
+        .stat-icon.instruments { background: #fef3c7; color: #d97706; }
+        .stat-icon.active { background: #dcfce7; color: #16a34a; }
+
+        .stat-content h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1;
+        }
+
+        .stat-content p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Map Container */
+        .map-section {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header h2 i {
+            color: #047857;
+        }
+
+        .map-container {
+            height: 500px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Station List */
+        .station-list-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            display: flex;
+            flex-direction: column;
+            max-height: 580px;
+        }
+
+        .station-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .station-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: none;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid transparent;
         }
 
-        .error-message.show {
+        .station-item:hover {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+        }
+
+        .station-item.active {
+            background: #d1fae5;
+            border-color: #047857;
+        }
+
+        .station-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .station-marker.operational { background: #10b981; }
+        .station-marker.pending { background: #f59e0b; }
+        .station-marker.offline { background: #6b7280; }
+
+        .station-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .station-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .station-meta {
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .station-badges {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.sites { background: #d1fae5; color: #047857; }
+        .badge.icos { background: #dbeafe; color: #2563eb; }
+
+        /* Metrics Panel */
+        .metrics-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+            margin-top: 24px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .metric-group h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px 20px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #047857;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Leaflet Popup Custom */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        .popup-content {
+            min-width: 200px;
+        }
+
+        .popup-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .popup-content .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .popup-content .status-dot.operational { background: #10b981; }
+        .popup-content .status-dot.pending { background: #f59e0b; }
+        .popup-content .status-dot.offline { background: #6b7280; }
+
+        .popup-content p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .popup-stats {
+            display: flex;
+            gap: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .popup-stat {
+            text-align: center;
+        }
+
+        .popup-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #047857;
+        }
+
+        .popup-stat-label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .popup-link {
             display: block;
+            text-align: center;
+            margin-top: 12px;
+            padding: 8px;
+            background: #047857;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+
+        .popup-link:hover {
+            background: #065f46;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .loading i {
+            margin-right: 8px;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
+            from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 30px 20px;
-            }
+        /* Error State */
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-            .login-title {
-                font-size: 1.5rem;
-            }
+        /* Hide admin link on public page */
+        .admin-link {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .admin-link a {
+            color: rgba(255, 255, 255, 0.9);
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
-                <img src="/images/SITES_spectral_LOGO.png" alt="SITES Spectral" style="height: 80px; width: auto;">
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <i class="fas fa-satellite-dish"></i>
+                <div>
+                    <h1>SITES Spectral Network</h1>
+                    <p>Swedish Infrastructure for Ecosystem Science</p>
+                </div>
             </div>
-            <h1 class="login-title">Welcome</h1>
-            <p class="login-subtitle">Sign in to access SITES Spectral</p>
-
-            <div class="error-message" id="error-message" role="alert" aria-live="assertive"></div>
-
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        class="form-input"
-                        placeholder="Enter your username"
-                        required
-                        autocomplete="username"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-input"
-                        placeholder="Enter your password"
-                        required
-                        autocomplete="current-password"
-                    >
-                </div>
-
-                <button type="submit" class="login-btn" id="login-btn">
-                    <div class="spinner"></div>
-                    <span>Sign In</span>
-                </button>
-            </form>
+            <div class="header-badge">
+                <i class="fas fa-circle"></i>
+                <span id="health-status">Checking status...</span>
+            </div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toast-container"></div>
+    <div class="container">
+        <!-- Stats Overview -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stations">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="station-count">-</h3>
+                    <p>Research Stations</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon platforms">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="platform-count">-</h3>
+                    <p>Platforms</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon instruments">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="instrument-count">-</h3>
+                    <p>Instruments</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="active-count">-</h3>
+                    <p>Active Instruments</p>
+                </div>
+            </div>
+        </div>
 
-    <!-- Scripts -->
-    <script src="/js/utils.js?v=15.0.2"></script>
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Map Section -->
+            <div class="map-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Station Network Map</h2>
+                    <span class="admin-link"><a href="/login.html">Admin Login</a></span>
+                </div>
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- Station List -->
+            <div class="station-list-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Stations</h2>
+                </div>
+                <div class="station-list" id="station-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        Loading stations...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Section -->
+        <div class="metrics-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> Network Metrics</h2>
+            </div>
+            <div class="metrics-grid" id="metrics-grid">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    Loading metrics...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>
+            <strong>SITES Spectral</strong> is part of the
+            <a href="https://www.fieldsites.se/" target="_blank" rel="noopener">Swedish Infrastructure for Ecosystem Science (SITES)</a>
+        </p>
+        <p style="margin-top: 8px; font-size: 12px;">
+            Version 15.0.1 |
+            <a href="/terms-of-service.html">Terms</a> |
+            <a href="/privacy-policy.html">Privacy</a>
+        </p>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="anonymous"></script>
+
     <script>
-        class LoginManager {
-            constructor() {
-                this.form = document.getElementById('login-form');
-                this.usernameInput = document.getElementById('username');
-                this.passwordInput = document.getElementById('password');
-                this.submitBtn = document.getElementById('login-btn');
-                this.errorMessage = document.getElementById('error-message');
+        // Public Dashboard Application - XSS-Safe DOM Methods
+        const PublicDashboard = {
+            map: null,
+            markers: [],
+            stations: [],
 
-                this.init();
-            }
+            async init() {
+                this.initMap();
+                await Promise.all([
+                    this.loadHealth(),
+                    this.loadStations(),
+                    this.loadMetrics()
+                ]);
+            },
 
-            init() {
-                // Check if already logged in via httpOnly cookie
-                this.verifySessionAndRedirect();
+            initMap() {
+                // Initialize map centered on Sweden
+                this.map = L.map('map').setView([62.5, 17.5], 5);
 
-                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18
+                }).addTo(this.map);
+            },
 
-                // Clear error message when user starts typing
-                [this.usernameInput, this.passwordInput].forEach(input => {
-                    input.addEventListener('input', () => {
-                        this.clearError();
-                        input.classList.remove('error');
-                    });
-                });
-            }
-
-            async verifySessionAndRedirect() {
+            async loadHealth() {
                 try {
-                    // Verify session via httpOnly cookie (sent automatically with credentials: 'include')
-                    const response = await fetch('/api/auth/verify', {
-                        method: 'GET',
-                        credentials: 'include'
-                    });
+                    const response = await fetch('/api/public/health');
+                    const data = await response.json();
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.valid && data.user) {
-                            localStorage.setItem('sites_spectral_user', JSON.stringify(data.user));
-                            this.redirectUser(data.user);
-                            return;
-                        }
+                    const statusEl = document.getElementById('health-status');
+                    // Clear existing content
+                    while (statusEl.firstChild) {
+                        statusEl.removeChild(statusEl.firstChild);
+                    }
+
+                    const icon = document.createElement('i');
+                    icon.className = 'fas';
+
+                    if (data.status === 'healthy') {
+                        icon.classList.add('fa-check-circle');
+                        icon.style.color = '#10b981';
+                        statusEl.appendChild(icon);
+                        statusEl.appendChild(document.createTextNode(' System Operational'));
+                    } else {
+                        icon.classList.add('fa-exclamation-triangle');
+                        icon.style.color = '#f59e0b';
+                        statusEl.appendChild(icon);
+                        statusEl.appendChild(document.createTextNode(' ' + String(data.status || 'Unknown')));
+                    }
+
+                    // Update counts from health endpoint
+                    if (data.counts) {
+                        document.getElementById('station-count').textContent = String(data.counts.stations || 0);
+                        document.getElementById('platform-count').textContent = String(data.counts.platforms || 0);
+                        document.getElementById('instrument-count').textContent = String(data.counts.instruments || 0);
                     }
                 } catch (error) {
-                    console.error('Session verification failed:', error);
+                    console.error('Failed to load health:', error);
+                    const statusEl = document.getElementById('health-status');
+                    while (statusEl.firstChild) {
+                        statusEl.removeChild(statusEl.firstChild);
+                    }
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-times-circle';
+                    icon.style.color = '#ef4444';
+                    statusEl.appendChild(icon);
+                    statusEl.appendChild(document.createTextNode(' Connection Error'));
+                }
+            },
+
+            async loadStations() {
+                const listEl = document.getElementById('station-list');
+
+                try {
+                    const response = await fetch('/api/public/stations');
+                    const data = await response.json();
+
+                    if (!data.success || !data.stations) {
+                        throw new Error('Invalid response');
+                    }
+
+                    this.stations = data.stations;
+                    this.renderStationList(data.stations);
+                    this.addMarkersToMap(data.stations);
+
+                } catch (error) {
+                    console.error('Failed to load stations:', error);
+                    this.showError(listEl, 'Failed to load stations. Please try again later.');
+                }
+            },
+
+            showError(container, message) {
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-exclamation-circle';
+                errorDiv.appendChild(icon);
+                errorDiv.appendChild(document.createTextNode(' ' + message));
+
+                container.appendChild(errorDiv);
+            },
+
+            renderStationList(stations) {
+                const listEl = document.getElementById('station-list');
+
+                // Clear existing content
+                while (listEl.firstChild) {
+                    listEl.removeChild(listEl.firstChild);
                 }
 
-                // Clear stale user info
-                localStorage.removeItem('sites_spectral_user');
-            }
-
-            async handleSubmit(e) {
-                e.preventDefault();
-
-                const username = this.usernameInput.value.trim();
-                const password = this.passwordInput.value;
-
-                if (!username || !password) {
-                    this.showError('Please enter both username and password');
+                if (stations.length === 0) {
+                    const p = document.createElement('p');
+                    p.style.cssText = 'padding: 16px; color: #6b7280;';
+                    p.textContent = 'No stations available.';
+                    listEl.appendChild(p);
                     return;
                 }
 
-                this.setLoading(true);
-                this.clearError();
+                stations.forEach(station => {
+                    const item = this.createStationItem(station);
+                    listEl.appendChild(item);
+                });
+            },
 
-                try {
-                    // Login - server sets httpOnly cookie automatically
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ username, password }),
-                        credentials: 'include' // Required for httpOnly cookie to be set
+            createStationItem(station) {
+                const item = document.createElement('div');
+                item.className = 'station-item';
+                item.dataset.id = String(station.id || '');
+                item.dataset.lat = String(station.latitude || '');
+                item.dataset.lng = String(station.longitude || '');
+
+                // Station marker
+                const marker = document.createElement('div');
+                marker.className = 'station-marker ' + (station.operational_status || 'operational');
+                marker.textContent = (station.acronym || '??').substring(0, 3);
+                item.appendChild(marker);
+
+                // Station info
+                const info = document.createElement('div');
+                info.className = 'station-info';
+
+                const name = document.createElement('div');
+                name.className = 'station-name';
+                name.textContent = station.display_name || station.acronym || 'Unknown';
+                info.appendChild(name);
+
+                const meta = document.createElement('div');
+                meta.className = 'station-meta';
+
+                const platformSpan = document.createElement('span');
+                const platformIcon = document.createElement('i');
+                platformIcon.className = 'fas fa-cube';
+                platformSpan.appendChild(platformIcon);
+                platformSpan.appendChild(document.createTextNode(' ' + String(station.platform_count || 0)));
+                meta.appendChild(platformSpan);
+
+                const instrumentSpan = document.createElement('span');
+                const instrumentIcon = document.createElement('i');
+                instrumentIcon.className = 'fas fa-camera';
+                instrumentSpan.appendChild(instrumentIcon);
+                instrumentSpan.appendChild(document.createTextNode(' ' + String(station.instrument_count || 0)));
+                meta.appendChild(instrumentSpan);
+
+                info.appendChild(meta);
+                item.appendChild(info);
+
+                // Badges
+                const badges = document.createElement('div');
+                badges.className = 'station-badges';
+
+                if (station.sites_member) {
+                    const sitesBadge = document.createElement('span');
+                    sitesBadge.className = 'badge sites';
+                    sitesBadge.textContent = 'SITES';
+                    badges.appendChild(sitesBadge);
+                }
+
+                if (station.icos_member) {
+                    const icosBadge = document.createElement('span');
+                    icosBadge.className = 'badge icos';
+                    icosBadge.textContent = 'ICOS';
+                    badges.appendChild(icosBadge);
+                }
+
+                item.appendChild(badges);
+
+                // Click handler
+                item.addEventListener('click', () => {
+                    const lat = parseFloat(item.dataset.lat);
+                    const lng = parseFloat(item.dataset.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        this.map.setView([lat, lng], 10);
+                        // Find and open popup
+                        this.markers.forEach(m => {
+                            if (m.getLatLng().lat === lat && m.getLatLng().lng === lng) {
+                                m.openPopup();
+                            }
+                        });
+                    }
+                    // Highlight selected
+                    document.querySelectorAll('.station-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
+
+                return item;
+            },
+
+            addMarkersToMap(stations) {
+                // Clear existing markers
+                this.markers.forEach(m => this.map.removeLayer(m));
+                this.markers = [];
+
+                stations.forEach(station => {
+                    if (!station.latitude || !station.longitude) return;
+
+                    const statusColor = {
+                        'operational': '#10b981',
+                        'pending': '#f59e0b',
+                        'offline': '#6b7280'
+                    }[station.operational_status] || '#10b981';
+
+                    // Create custom icon using safe string (no user content)
+                    const acronym = (station.acronym || '?').substring(0, 3).replace(/[^A-Za-z0-9]/g, '');
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="width:32px;height:32px;background:' + statusColor + ';border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:10px;">' + acronym + '</div>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                        popupAnchor: [0, -16]
                     });
 
+                    const marker = L.marker([station.latitude, station.longitude], { icon })
+                        .addTo(this.map);
+
+                    // Build popup using DOM methods
+                    marker.bindPopup(() => this.createPopupContent(station));
+
+                    this.markers.push(marker);
+                });
+
+                // Fit map to markers if we have any
+                if (this.markers.length > 0) {
+                    const group = new L.featureGroup(this.markers);
+                    this.map.fitBounds(group.getBounds().pad(0.1));
+                }
+            },
+
+            createPopupContent(station) {
+                const container = document.createElement('div');
+                container.className = 'popup-content';
+
+                // Header
+                const h3 = document.createElement('h3');
+                const statusDot = document.createElement('span');
+                statusDot.className = 'status-dot ' + (station.operational_status || 'operational');
+                h3.appendChild(statusDot);
+                h3.appendChild(document.createTextNode(' ' + (station.display_name || station.acronym || 'Unknown')));
+                container.appendChild(h3);
+
+                // Description
+                const desc = document.createElement('p');
+                desc.textContent = station.description || 'Research station';
+                container.appendChild(desc);
+
+                // Location
+                const loc = document.createElement('p');
+                loc.style.fontSize = '12px';
+                const locIcon = document.createElement('i');
+                locIcon.className = 'fas fa-map-marker-alt';
+                loc.appendChild(locIcon);
+                let locText = ' ' + (station.latitude?.toFixed(4) || '?') + ', ' + (station.longitude?.toFixed(4) || '?');
+                if (station.elevation_m) {
+                    locText += ' | ' + station.elevation_m + 'm';
+                }
+                loc.appendChild(document.createTextNode(locText));
+                container.appendChild(loc);
+
+                // Stats
+                const stats = document.createElement('div');
+                stats.className = 'popup-stats';
+
+                const platformStat = document.createElement('div');
+                platformStat.className = 'popup-stat';
+                const platformValue = document.createElement('div');
+                platformValue.className = 'popup-stat-value';
+                platformValue.textContent = String(station.platform_count || 0);
+                platformStat.appendChild(platformValue);
+                const platformLabel = document.createElement('div');
+                platformLabel.className = 'popup-stat-label';
+                platformLabel.textContent = 'Platforms';
+                platformStat.appendChild(platformLabel);
+                stats.appendChild(platformStat);
+
+                const instrumentStat = document.createElement('div');
+                instrumentStat.className = 'popup-stat';
+                const instrumentValue = document.createElement('div');
+                instrumentValue.className = 'popup-stat-value';
+                instrumentValue.textContent = String(station.instrument_count || 0);
+                instrumentStat.appendChild(instrumentValue);
+                const instrumentLabel = document.createElement('div');
+                instrumentLabel.className = 'popup-stat-label';
+                instrumentLabel.textContent = 'Instruments';
+                instrumentStat.appendChild(instrumentLabel);
+                stats.appendChild(instrumentStat);
+
+                container.appendChild(stats);
+
+                // Portal link - sanitize URL
+                const portalUrl = this.sanitizeUrl(station.portal_url || ('https://' + (station.acronym || 'unknown').toLowerCase() + '.sitesspectral.work'));
+                const link = document.createElement('a');
+                link.className = 'popup-link';
+                link.href = portalUrl;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                const linkIcon = document.createElement('i');
+                linkIcon.className = 'fas fa-external-link-alt';
+                link.appendChild(linkIcon);
+                link.appendChild(document.createTextNode(' View Station Portal'));
+                container.appendChild(link);
+
+                return container;
+            },
+
+            sanitizeUrl(url) {
+                if (!url) return '#';
+                // Only allow http/https protocols
+                if (url.startsWith('https://') || url.startsWith('http://')) {
+                    return url;
+                }
+                return '#';
+            },
+
+            async loadMetrics() {
+                const metricsEl = document.getElementById('metrics-grid');
+
+                try {
+                    const response = await fetch('/api/public/metrics');
                     const data = await response.json();
 
-                    if (response.ok && data.success) {
-                        // Token is stored in httpOnly cookie by server
-                        // Only store user info (non-sensitive) for UI purposes
-                        localStorage.setItem('sites_spectral_user', JSON.stringify(data.user));
-
-                        Utils.showToast('Login successful!', 'success');
-
-                        setTimeout(() => {
-                            this.redirectUser(data.user);
-                        }, 1000);
-                    } else {
-                        this.showError(data.error || 'Login failed');
+                    if (!data.success || !data.metrics) {
+                        throw new Error('Invalid response');
                     }
 
+                    // Update active instruments count
+                    document.getElementById('active-count').textContent = String(data.metrics.active_instruments || 0);
+
+                    this.renderMetrics(data.metrics);
+
                 } catch (error) {
-                    console.error('Login error:', error);
-                    this.showError('Login failed. Please check your connection and try again.');
-                } finally {
-                    this.setLoading(false);
+                    console.error('Failed to load metrics:', error);
+                    this.showError(metricsEl, 'Failed to load metrics.');
                 }
-            }
+            },
 
-            redirectUser(user) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const redirect = urlParams.get('redirect');
+            renderMetrics(metrics) {
+                const metricsEl = document.getElementById('metrics-grid');
 
-                // SECURITY: Validate redirect URL to prevent open redirect attacks
-                const isValidRedirect = redirect &&
-                    redirect.startsWith('/') &&
-                    !redirect.startsWith('//') &&
-                    !redirect.toLowerCase().includes('javascript:') &&
-                    !redirect.toLowerCase().includes('data:') &&
-                    !redirect.toLowerCase().includes('vbscript:');
-
-                // Determine redirect URL based on user role
-                // Valid roles: admin, sites-admin, station-admin, station, readonly
-                let targetUrl = '/sites-dashboard.html';
-
-                // Global admins (admin or sites-admin)
-                if (user.role === 'admin' || user.role === 'sites-admin') {
-                    targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
+                // Clear existing content
+                while (metricsEl.firstChild) {
+                    metricsEl.removeChild(metricsEl.firstChild);
                 }
-                // Station-specific admin with assigned station
-                else if (user.role === 'station-admin' && user.station_acronym) {
-                    targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
-                }
-                // Regular station user with assigned station
-                else if (user.role === 'station' && user.station_acronym) {
-                    targetUrl = isValidRedirect ? redirect : `/station-dashboard.html?station=${user.station_acronym}`;
-                }
-                // Read-only users view all stations
-                else if (user.role === 'readonly') {
-                    targetUrl = isValidRedirect ? redirect : '/sites-dashboard.html';
-                }
-                // Fallback: sites-dashboard (safe default)
 
-                window.location.href = targetUrl;
-            }
+                const platformTypes = metrics.platforms_by_type || {};
+                const instrumentTypes = metrics.instruments_by_type || {};
+                const stationStatuses = metrics.stations_by_status || {};
 
-            setLoading(loading) {
-                this.submitBtn.disabled = loading;
-                if (loading) {
-                    this.submitBtn.classList.add('loading');
+                // Platforms by Type
+                const platformGroup = this.createMetricGroup('Platforms by Type', platformTypes);
+                metricsEl.appendChild(platformGroup);
+
+                // Instruments by Type
+                const instrumentGroup = this.createMetricGroup('Instruments by Type', instrumentTypes);
+                metricsEl.appendChild(instrumentGroup);
+
+                // Stations by Status
+                const statusGroup = this.createMetricGroup('Stations by Status', stationStatuses);
+                metricsEl.appendChild(statusGroup);
+            },
+
+            createMetricGroup(title, data) {
+                const group = document.createElement('div');
+                group.className = 'metric-group';
+
+                const h4 = document.createElement('h4');
+                h4.textContent = title;
+                group.appendChild(h4);
+
+                const entries = Object.entries(data);
+                if (entries.length === 0) {
+                    const p = document.createElement('p');
+                    p.style.cssText = 'color: #6b7280; font-size: 14px;';
+                    p.textContent = 'No data';
+                    group.appendChild(p);
                 } else {
-                    this.submitBtn.classList.remove('loading');
+                    entries.forEach(([key, value]) => {
+                        const item = document.createElement('div');
+                        item.className = 'metric-item';
+
+                        const label = document.createElement('span');
+                        label.className = 'metric-label';
+                        label.textContent = this.formatLabel(key);
+                        item.appendChild(label);
+
+                        const val = document.createElement('span');
+                        val.className = 'metric-value';
+                        val.textContent = String(value);
+                        item.appendChild(val);
+
+                        group.appendChild(item);
+                    });
                 }
-            }
 
-            showError(message) {
-                this.errorMessage.textContent = message;
-                this.errorMessage.classList.add('show');
-                this.usernameInput.classList.add('error');
-                this.passwordInput.classList.add('error');
-            }
+                return group;
+            },
 
-            clearError() {
-                this.errorMessage.classList.remove('show');
-                this.errorMessage.textContent = '';
+            formatLabel(str) {
+                if (!str) return 'Unknown';
+                // Convert snake_case or camelCase to Title Case
+                return String(str)
+                    .replace(/_/g, ' ')
+                    .replace(/([a-z])([A-Z])/g, '$1 $2')
+                    .replace(/\b\w/g, c => c.toUpperCase());
             }
-        }
+        };
 
-        // Initialize login manager when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            new LoginManager();
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            PublicDashboard.init();
         });
     </script>
-
-    <!-- Site Footer -->
-    <footer class="site-footer" style="position: fixed; bottom: 0; left: 0; right: 0; padding: 15px 20px; z-index: 1;">
-        <div class="site-footer-content" style="flex-wrap: nowrap; gap: 15px;">
-            <div class="site-footer-links" style="gap: 15px;">
-                <a href="/privacy-policy.html"><i class="fas fa-shield-alt"></i>Privacy</a>
-                <a href="/terms-of-service.html"><i class="fas fa-file-contract"></i>Terms</a>
-                <a href="https://fieldsites.se" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i>SITES</a>
-            </div>
-            <span style="font-size: 0.75rem; opacity: 0.7;">&copy; 2025 SITES Spectral, Lund University</span>
-        </div>
-    </footer>
 </body>
 </html>
