@@ -268,7 +268,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '15.1.0',
+      version: '15.6.0',
       architecture: 'hexagonal',
       database: 'connected',
       stats: {
@@ -303,7 +303,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '15.1.0',
+      version: '15.6.0',
       architecture: 'hexagonal',
       database: 'disconnected',
       error: error.message
