@@ -345,8 +345,41 @@ permissions: ['read', 'flight-log']
 
 ---
 
+## Testing
+
+### Domain Entity Tests (v15.5.0+)
+
+Comprehensive unit tests for all UAV domain entities:
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `tests/unit/domain/uav/pilot.test.js` | 24 | Validation, certification, authorization |
+| `tests/unit/domain/uav/mission.test.js` | 25 | Lifecycle, state transitions, approval |
+| `tests/unit/domain/uav/flight-log.test.js` | 26 | Duration, battery, incidents |
+| `tests/unit/domain/uav/battery.test.js` | 27 | Health, status, lifecycle |
+
+Run tests:
+```bash
+npm run test:unit -- tests/unit/domain/uav/
+```
+
+---
+
+## OpenAPI Specification
+
+Full API documentation available in `docs/openapi/openapi.yaml`:
+
+- **Tags**: UAV Pilots, UAV Missions, UAV Flights, UAV Batteries
+- **Schemas**: Complete request/response schemas with validation
+- **Endpoints**: 25+ UAV-related endpoints documented
+
+View interactive docs at: `https://sitesspectral.work/api/docs`
+
+---
+
 ## Related Documentation
 
 - [[SUBDOMAIN_ARCHITECTURE]] - Overall architecture overview
 - [[CLOUDFLARE_ACCESS_INTEGRATION]] - Pilot authentication
 - [[MAGIC_LINK_SYSTEM]] - Alternative access method
+- `docs/openapi/openapi.yaml` - Full OpenAPI 3.0 specification

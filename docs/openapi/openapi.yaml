@@ -90,6 +90,14 @@ tags:
     description: Administration endpoints
   - name: System
     description: Health checks and system info
+  - name: UAV Pilots
+    description: UAV pilot registration and certification management (v15.0.0+)
+  - name: UAV Missions
+    description: UAV mission planning and execution workflow (v15.0.0+)
+  - name: UAV Flights
+    description: UAV flight logging and telemetry (v15.0.0+)
+  - name: UAV Batteries
+    description: UAV battery inventory and health tracking (v15.0.0+)
 
 security:
   - BearerAuth: []
@@ -1309,6 +1317,644 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeleteResponse'
+
+  # ============================================
+  # UAV PILOT ENDPOINTS (v15.0.0+)
+  # ============================================
+  /uav/pilots:
+    get:
+      tags: [UAV Pilots]
+      summary: List UAV pilots
+      description: Get all registered UAV pilots. Filter by station or certification status.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by authorized station
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, suspended, pending_verification]
+          description: Filter by pilot status
+      responses:
+        '200':
+          description: Pilot list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PilotListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [UAV Pilots]
+      summary: Register new pilot
+      description: Register a new UAV pilot. Requires admin or station-admin role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PilotCreate'
+      responses:
+        '201':
+          description: Pilot registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PilotResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /uav/pilots/{id}:
+    get:
+      tags: [UAV Pilots]
+      summary: Get pilot details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pilot details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PilotResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [UAV Pilots]
+      summary: Update pilot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PilotUpdate'
+      responses:
+        '200':
+          description: Pilot updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PilotResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [UAV Pilots]
+      summary: Deactivate pilot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pilot deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /uav/pilots/{id}/authorize/{stationId}:
+    post:
+      tags: [UAV Pilots]
+      summary: Authorize pilot for station
+      description: Add station to pilot's authorized stations list.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Authorization added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PilotResponse'
+
+  /uav/pilots/{id}/flights:
+    get:
+      tags: [UAV Pilots]
+      summary: Get pilot's flight history
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Flight history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightLogListResponse'
+
+  # ============================================
+  # UAV MISSION ENDPOINTS (v15.0.0+)
+  # ============================================
+  /uav/missions:
+    get:
+      tags: [UAV Missions]
+      summary: List missions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/MissionStatus'
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Mission list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionListResponse'
+    post:
+      tags: [UAV Missions]
+      summary: Create mission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionCreate'
+      responses:
+        '201':
+          description: Mission created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /uav/missions/{id}:
+    get:
+      tags: [UAV Missions]
+      summary: Get mission details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Mission details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [UAV Missions]
+      summary: Update mission
+      description: Update mission details. Only allowed for draft/planned missions.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionUpdate'
+      responses:
+        '200':
+          description: Mission updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+
+  /uav/missions/{id}/approve:
+    post:
+      tags: [UAV Missions]
+      summary: Approve mission
+      description: Approve a planned mission. Requires station-admin or higher role.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+                  description: Approval notes
+      responses:
+        '200':
+          description: Mission approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+        '400':
+          description: Mission cannot be approved (wrong status)
+
+  /uav/missions/{id}/start:
+    post:
+      tags: [UAV Missions]
+      summary: Start mission execution
+      description: Mark mission as in progress. Only allowed for approved missions.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weather_conditions:
+                  $ref: '#/components/schemas/WeatherConditions'
+      responses:
+        '200':
+          description: Mission started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+
+  /uav/missions/{id}/complete:
+    post:
+      tags: [UAV Missions]
+      summary: Complete mission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                images_captured:
+                  type: integer
+                data_collected_gb:
+                  type: number
+                coverage_achieved_percent:
+                  type: number
+                quality_score:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+      responses:
+        '200':
+          description: Mission completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+
+  /uav/missions/{id}/abort:
+    post:
+      tags: [UAV Missions]
+      summary: Abort mission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Reason for aborting
+      responses:
+        '200':
+          description: Mission aborted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+
+  # ============================================
+  # UAV FLIGHT LOG ENDPOINTS (v15.0.0+)
+  # ============================================
+  /uav/flights:
+    get:
+      tags: [UAV Flights]
+      summary: List flight logs
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: mission_id
+          in: query
+          schema:
+            type: integer
+        - name: pilot_id
+          in: query
+          schema:
+            type: integer
+        - name: has_incident
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Flight log list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightLogListResponse'
+    post:
+      tags: [UAV Flights]
+      summary: Log new flight
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightLogCreate'
+      responses:
+        '201':
+          description: Flight logged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightLogResponse'
+
+  /uav/flights/{id}:
+    get:
+      tags: [UAV Flights]
+      summary: Get flight details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Flight details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightLogResponse'
+    put:
+      tags: [UAV Flights]
+      summary: Update flight log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightLogUpdate'
+      responses:
+        '200':
+          description: Flight updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightLogResponse'
+
+  /uav/flights/{id}/incident:
+    post:
+      tags: [UAV Flights]
+      summary: Report incident
+      description: Report an incident that occurred during the flight.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description, severity]
+              properties:
+                description:
+                  type: string
+                severity:
+                  type: string
+                  enum: [minor, moderate, major, critical]
+      responses:
+        '200':
+          description: Incident reported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightLogResponse'
+
+  # ============================================
+  # UAV BATTERY ENDPOINTS (v15.0.0+)
+  # ============================================
+  /uav/batteries:
+    get:
+      tags: [UAV Batteries]
+      summary: List batteries
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/BatteryStatus'
+        - name: needs_health_check
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Battery list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryListResponse'
+    post:
+      tags: [UAV Batteries]
+      summary: Register battery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatteryCreate'
+      responses:
+        '201':
+          description: Battery registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryResponse'
+
+  /uav/batteries/{id}:
+    get:
+      tags: [UAV Batteries]
+      summary: Get battery details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Battery details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryResponse'
+    put:
+      tags: [UAV Batteries]
+      summary: Update battery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatteryUpdate'
+      responses:
+        '200':
+          description: Battery updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryResponse'
+
+  /uav/batteries/{id}/health-check:
+    post:
+      tags: [UAV Batteries]
+      summary: Record health check
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [health_percent]
+              properties:
+                health_percent:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                internal_resistance_mohm:
+                  type: number
+      responses:
+        '200':
+          description: Health check recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryResponse'
+
+  /uav/batteries/{id}/retire:
+    post:
+      tags: [UAV Batteries]
+      summary: Retire battery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Battery retired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryResponse'
 
   # ============================================
   # SYSTEM ENDPOINTS
@@ -2592,3 +3238,768 @@ components:
                 type: integer
             active_instruments:
               type: integer
+
+    # ============================================
+    # UAV PILOT SCHEMAS (v15.0.0+)
+    # ============================================
+    PilotStatus:
+      type: string
+      enum: [active, inactive, suspended, pending_verification]
+      description: Pilot status
+
+    CertificateType:
+      type: string
+      enum: ['A1/A3', 'A2', 'STS-01', 'STS-02', 'national']
+      description: Swedish Transport Agency certificate type
+
+    Pilot:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+          description: Linked user account ID
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        organization:
+          type: string
+        pilot_certificate_number:
+          type: string
+        certificate_type:
+          $ref: '#/components/schemas/CertificateType'
+        certificate_issued_date:
+          type: string
+          format: date
+        certificate_expiry_date:
+          type: string
+          format: date
+        insurance_provider:
+          type: string
+        insurance_policy_number:
+          type: string
+        insurance_expiry_date:
+          type: string
+          format: date
+        flight_hours_total:
+          type: number
+        flight_hours_sites_spectral:
+          type: number
+        last_flight_date:
+          type: string
+          format: date
+        authorized_stations:
+          type: array
+          items:
+            type: integer
+        status:
+          $ref: '#/components/schemas/PilotStatus'
+        notes:
+          type: string
+        can_fly:
+          type: boolean
+          description: Computed - all requirements met
+        certificate_valid:
+          type: boolean
+          description: Computed - certificate not expired
+        insurance_valid:
+          type: boolean
+          description: Computed - insurance not expired
+        days_until_certificate_expiry:
+          type: integer
+          nullable: true
+        days_until_insurance_expiry:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PilotCreate:
+      type: object
+      required: [full_name, email]
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        organization:
+          type: string
+        pilot_certificate_number:
+          type: string
+        certificate_type:
+          $ref: '#/components/schemas/CertificateType'
+        certificate_issued_date:
+          type: string
+          format: date
+        certificate_expiry_date:
+          type: string
+          format: date
+        insurance_provider:
+          type: string
+        insurance_policy_number:
+          type: string
+        insurance_expiry_date:
+          type: string
+          format: date
+        authorized_stations:
+          type: array
+          items:
+            type: integer
+        status:
+          $ref: '#/components/schemas/PilotStatus'
+
+    PilotUpdate:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        organization:
+          type: string
+        pilot_certificate_number:
+          type: string
+        certificate_type:
+          $ref: '#/components/schemas/CertificateType'
+        certificate_issued_date:
+          type: string
+          format: date
+        certificate_expiry_date:
+          type: string
+          format: date
+        insurance_provider:
+          type: string
+        insurance_policy_number:
+          type: string
+        insurance_expiry_date:
+          type: string
+          format: date
+        authorized_stations:
+          type: array
+          items:
+            type: integer
+        status:
+          $ref: '#/components/schemas/PilotStatus'
+
+    PilotResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Pilot'
+
+    PilotListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pilot'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================
+    # UAV MISSION SCHEMAS (v15.0.0+)
+    # ============================================
+    MissionStatus:
+      type: string
+      enum: [draft, planned, approved, in_progress, completed, aborted, cancelled]
+      description: Mission lifecycle status
+
+    FlightPattern:
+      type: string
+      enum: [grid, crosshatch, perimeter, point_of_interest, custom]
+      description: Flight pattern type
+
+    WeatherConditions:
+      type: object
+      properties:
+        temperature_c:
+          type: number
+        humidity_percent:
+          type: number
+        wind_speed_ms:
+          type: number
+        wind_direction:
+          type: string
+        cloud_cover:
+          type: string
+          enum: [clear, scattered, broken, overcast, intermittent]
+        visibility_km:
+          type: number
+        precipitation:
+          type: boolean
+
+    Mission:
+      type: object
+      properties:
+        id:
+          type: integer
+        mission_code:
+          type: string
+          description: Auto-generated code (e.g., SVB_2026-01-26_001)
+        display_name:
+          type: string
+        station_id:
+          type: integer
+        platform_id:
+          type: integer
+        station_acronym:
+          type: string
+        planned_date:
+          type: string
+          format: date
+        planned_start_time:
+          type: string
+        planned_end_time:
+          type: string
+        planned_area_hectares:
+          type: number
+        planned_altitude_m:
+          type: number
+        planned_flight_pattern:
+          $ref: '#/components/schemas/FlightPattern'
+        planned_overlap_side:
+          type: integer
+          description: Side overlap percentage
+        planned_overlap_front:
+          type: integer
+          description: Front overlap percentage
+        objectives:
+          type: array
+          items:
+            type: string
+        target_products:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/MissionStatus'
+        actual_start_time:
+          type: string
+          format: date-time
+        actual_end_time:
+          type: string
+          format: date-time
+        weather_conditions:
+          $ref: '#/components/schemas/WeatherConditions'
+        weather_source:
+          type: string
+        flight_area_geojson:
+          type: object
+          description: GeoJSON polygon of flight area
+        approved_by_user_id:
+          type: integer
+        approved_at:
+          type: string
+          format: date-time
+        approval_notes:
+          type: string
+        data_collected_gb:
+          type: number
+        images_captured:
+          type: integer
+        coverage_achieved_percent:
+          type: number
+        quality_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        notes:
+          type: string
+        is_planning:
+          type: boolean
+          description: Computed - in draft/planned state
+        is_approved:
+          type: boolean
+          description: Computed - has been approved
+        is_active:
+          type: boolean
+          description: Computed - approved or in_progress
+        can_start:
+          type: boolean
+          description: Computed - can be started
+        actual_duration_minutes:
+          type: integer
+          nullable: true
+          description: Computed - actual duration
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MissionCreate:
+      type: object
+      required: [station_id, planned_date]
+      properties:
+        station_id:
+          type: integer
+        platform_id:
+          type: integer
+        display_name:
+          type: string
+        planned_date:
+          type: string
+          format: date
+        planned_start_time:
+          type: string
+        planned_end_time:
+          type: string
+        planned_area_hectares:
+          type: number
+        planned_altitude_m:
+          type: number
+        planned_flight_pattern:
+          $ref: '#/components/schemas/FlightPattern'
+        planned_overlap_side:
+          type: integer
+        planned_overlap_front:
+          type: integer
+        objectives:
+          type: array
+          items:
+            type: string
+        target_products:
+          type: array
+          items:
+            type: string
+        flight_area_geojson:
+          type: object
+
+    MissionUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+        planned_date:
+          type: string
+          format: date
+        planned_start_time:
+          type: string
+        planned_end_time:
+          type: string
+        planned_area_hectares:
+          type: number
+        planned_altitude_m:
+          type: number
+        planned_flight_pattern:
+          $ref: '#/components/schemas/FlightPattern'
+        planned_overlap_side:
+          type: integer
+        planned_overlap_front:
+          type: integer
+        objectives:
+          type: array
+          items:
+            type: string
+        target_products:
+          type: array
+          items:
+            type: string
+        flight_area_geojson:
+          type: object
+        notes:
+          type: string
+
+    MissionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Mission'
+
+    MissionListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mission'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================
+    # UAV FLIGHT LOG SCHEMAS (v15.0.0+)
+    # ============================================
+    IncidentSeverity:
+      type: string
+      enum: [minor, moderate, major, critical]
+      description: Incident severity level
+
+    FlightLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        mission_id:
+          type: integer
+        pilot_id:
+          type: integer
+        platform_id:
+          type: integer
+        flight_number:
+          type: integer
+          description: Flight number within mission
+        takeoff_time:
+          type: string
+          format: date-time
+        landing_time:
+          type: string
+          format: date-time
+        flight_duration_seconds:
+          type: integer
+        takeoff_latitude:
+          type: number
+        takeoff_longitude:
+          type: number
+        takeoff_altitude_m:
+          type: number
+        max_altitude_agl_m:
+          type: number
+          description: Maximum altitude above ground level
+        max_distance_m:
+          type: number
+          description: Maximum distance from takeoff point
+        total_distance_m:
+          type: number
+          description: Total distance flown
+        average_speed_ms:
+          type: number
+        battery_id:
+          type: integer
+        battery_start_percent:
+          type: integer
+        battery_end_percent:
+          type: integer
+        images_captured:
+          type: integer
+        data_size_mb:
+          type: number
+        telemetry_file_path:
+          type: string
+        telemetry_file_hash:
+          type: string
+        had_incident:
+          type: boolean
+        incident_description:
+          type: string
+        incident_severity:
+          $ref: '#/components/schemas/IncidentSeverity'
+        notes:
+          type: string
+        formatted_duration:
+          type: string
+          description: Computed - HH:MM:SS format
+        battery_usage:
+          type: integer
+          nullable: true
+          description: Computed - percentage used
+        data_rate_mb_per_min:
+          type: number
+          nullable: true
+          description: Computed - data rate
+        has_severe_incident:
+          type: boolean
+          description: Computed - major or critical incident
+        pilot_name:
+          type: string
+          description: From join
+        platform_name:
+          type: string
+          description: From join
+        mission_code:
+          type: string
+          description: From join
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    FlightLogCreate:
+      type: object
+      required: [mission_id, pilot_id, platform_id, takeoff_time, landing_time]
+      properties:
+        mission_id:
+          type: integer
+        pilot_id:
+          type: integer
+        platform_id:
+          type: integer
+        takeoff_time:
+          type: string
+          format: date-time
+        landing_time:
+          type: string
+          format: date-time
+        takeoff_latitude:
+          type: number
+        takeoff_longitude:
+          type: number
+        takeoff_altitude_m:
+          type: number
+        max_altitude_agl_m:
+          type: number
+        max_distance_m:
+          type: number
+        total_distance_m:
+          type: number
+        average_speed_ms:
+          type: number
+        battery_id:
+          type: integer
+        battery_start_percent:
+          type: integer
+        battery_end_percent:
+          type: integer
+        images_captured:
+          type: integer
+        data_size_mb:
+          type: number
+        telemetry_file_path:
+          type: string
+        telemetry_file_hash:
+          type: string
+        notes:
+          type: string
+
+    FlightLogUpdate:
+      type: object
+      properties:
+        takeoff_time:
+          type: string
+          format: date-time
+        landing_time:
+          type: string
+          format: date-time
+        max_altitude_agl_m:
+          type: number
+        max_distance_m:
+          type: number
+        total_distance_m:
+          type: number
+        average_speed_ms:
+          type: number
+        images_captured:
+          type: integer
+        data_size_mb:
+          type: number
+        telemetry_file_path:
+          type: string
+        notes:
+          type: string
+
+    FlightLogResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/FlightLog'
+
+    FlightLogListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlightLog'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================
+    # UAV BATTERY SCHEMAS (v15.0.0+)
+    # ============================================
+    BatteryStatus:
+      type: string
+      enum: [available, in_use, charging, storage, maintenance, retired, damaged]
+      description: Battery status
+
+    BatteryChemistry:
+      type: string
+      enum: [LiPo, LiHV, LiIon, other]
+      description: Battery chemistry type
+
+    Battery:
+      type: object
+      properties:
+        id:
+          type: integer
+        serial_number:
+          type: string
+        display_name:
+          type: string
+        manufacturer:
+          type: string
+        model:
+          type: string
+        capacity_mah:
+          type: integer
+        cell_count:
+          type: integer
+        chemistry:
+          $ref: '#/components/schemas/BatteryChemistry'
+        station_id:
+          type: integer
+        platform_id:
+          type: integer
+        station_acronym:
+          type: string
+          description: From join
+        platform_name:
+          type: string
+          description: From join
+        purchase_date:
+          type: string
+          format: date
+        first_use_date:
+          type: string
+          format: date
+        last_use_date:
+          type: string
+          format: date
+        cycle_count:
+          type: integer
+        health_percent:
+          type: number
+          minimum: 0
+          maximum: 100
+        internal_resistance_mohm:
+          type: number
+        last_health_check_date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/BatteryStatus'
+        storage_voltage_v:
+          type: number
+        notes:
+          type: string
+        is_available:
+          type: boolean
+          description: Computed
+        is_retired:
+          type: boolean
+          description: Computed
+        needs_health_check:
+          type: boolean
+          description: Computed - older than 30 days
+        has_low_health:
+          type: boolean
+          description: Computed - below 80%
+        age_days:
+          type: integer
+          nullable: true
+          description: Computed
+        days_since_last_use:
+          type: integer
+          nullable: true
+          description: Computed
+        cell_configuration:
+          type: string
+          nullable: true
+          description: Computed - e.g., "4S"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BatteryCreate:
+      type: object
+      required: [serial_number]
+      properties:
+        serial_number:
+          type: string
+        display_name:
+          type: string
+        manufacturer:
+          type: string
+        model:
+          type: string
+        capacity_mah:
+          type: integer
+        cell_count:
+          type: integer
+        chemistry:
+          $ref: '#/components/schemas/BatteryChemistry'
+        station_id:
+          type: integer
+        platform_id:
+          type: integer
+        purchase_date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/BatteryStatus'
+
+    BatteryUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+        manufacturer:
+          type: string
+        model:
+          type: string
+        capacity_mah:
+          type: integer
+        cell_count:
+          type: integer
+        chemistry:
+          $ref: '#/components/schemas/BatteryChemistry'
+        station_id:
+          type: integer
+        platform_id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/BatteryStatus'
+        notes:
+          type: string
+
+    BatteryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Battery'
+
+    BatteryListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Battery'
+        meta:
+          $ref: '#/components/schemas/Pagination'

@@ -13,6 +13,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.5.0] - 2026-01-26
+
+### Feature: Metrics, UAV Tests, and OpenAPI Documentation (v15.5.0)
+
+Comprehensive infrastructure improvements including metrics collection, domain entity tests, and API documentation.
+
+#### Cloudflare Analytics Adapter
+
+New `CloudflareAnalyticsAdapter` replacing `NoOpMetricsAdapter` for production metrics:
+
+| Feature | Description |
+|---------|-------------|
+| **Counter Metrics** | Increment counters with labels |
+| **Gauge Metrics** | Set gauge values with labels |
+| **Histogram Metrics** | Record observations for percentile analysis |
+| **Request Tracking** | Automatic HTTP request metrics |
+| **Timer Utilities** | `startTimer()` and `timeOperation()` for duration tracking |
+| **Analytics Engine** | Integrates with Cloudflare Analytics Engine when available |
+| **Local Buffering** | Falls back to in-memory buffer when Analytics Engine unavailable |
+
+**Files Added:**
+- `src/infrastructure/metrics/CloudflareAnalyticsAdapter.js`
+- `tests/unit/infrastructure/metrics/cloudflare-analytics.test.js`
+
+#### UAV Domain Entity Tests (102 tests)
+
+Comprehensive unit tests for all UAV domain entities:
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `pilot.test.js` | 24 | Validation, certification, insurance, authorization |
+| `mission.test.js` | 25 | Lifecycle, state transitions, approval workflow |
+| `flight-log.test.js` | 27 | Duration calculation, battery tracking, incidents |
+| `battery.test.js` | 26 | Health monitoring, status transitions, lifecycle |
+
+**Files Added:**
+- `tests/unit/domain/uav/pilot.test.js`
+- `tests/unit/domain/uav/mission.test.js`
+- `tests/unit/domain/uav/flight-log.test.js`
+- `tests/unit/domain/uav/battery.test.js`
+
+#### OpenAPI 3.0 UAV Specification
+
+Full API documentation for UAV endpoints in `docs/openapi/openapi.yaml`:
+
+| Section | Endpoints | Schemas |
+|---------|-----------|---------|
+| **UAV Pilots** | 5 endpoints | Pilot, PilotCreate, PilotUpdate, PilotResponse |
+| **UAV Missions** | 8 endpoints | Mission, MissionCreate, MissionStatus, WeatherConditions |
+| **UAV Flights** | 5 endpoints | FlightLog, FlightLogCreate, IncidentSeverity |
+| **UAV Batteries** | 5 endpoints | Battery, BatteryCreate, BatteryStatus, BatteryChemistry |
+
+**Tags Added:** UAV Pilots, UAV Missions, UAV Flights, UAV Batteries
+
+#### Documentation Updates
+
+- Updated `docs/UAV_PILOT_SYSTEM.md` with testing and OpenAPI sections
+- Added test coverage information
+- Added API documentation references
+
+#### Test Results
+
+- **Total Tests**: 1084 (up from 917)
+- **New Tests**: 167 tests added
+- **All Tests Pass**: ✅
+
+---
+
 ## [15.4.0] - 2026-01-26
 
 ### Security: Remove Plain Text Password Fallback (v15.4.0)
