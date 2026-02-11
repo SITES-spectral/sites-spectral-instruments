@@ -19,9 +19,10 @@ const COOKIE_MAX_AGE = 86400; // 24 hours (matches JWT expiry)
  */
 function isSecureContext(request) {
   const url = new URL(request.url);
-  // Production domains are always HTTPS
+  // Production domains are always HTTPS (including all subdomains)
   if (url.hostname === 'sites.jobelab.com' ||
       url.hostname === 'sitesspectral.work' ||
+      url.hostname.endsWith('.sitesspectral.work') ||
       url.hostname.endsWith('.workers.dev')) {
     return true;
   }
@@ -45,7 +46,8 @@ export function createAuthCookie(token, request) {
     'Path=/',
     `Max-Age=${COOKIE_MAX_AGE}`,
     'HttpOnly',
-    'SameSite=Strict'
+    'SameSite=Lax',
+    'Domain=.sitesspectral.work'
   ];
 
   if (secure) {
@@ -67,7 +69,8 @@ export function createLogoutCookie(request) {
     'Path=/',
     'Max-Age=0',
     'HttpOnly',
-    'SameSite=Strict',
+    'SameSite=Lax',
+    'Domain=.sitesspectral.work',
     'Expires=Thu, 01 Jan 1970 00:00:00 GMT'
   ];
 

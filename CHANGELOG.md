@@ -13,6 +13,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.1] - 2026-02-11
+
+### Security Fix: Cross-Subdomain Authentication (v15.6.1)
+
+**Critical fix for authentication on subdomain architecture (sitesspectral.work)**
+
+#### Root Cause
+
+Authentication cookies were not shared across subdomains, causing infinite login loops when navigating between:
+- `sitesspectral.work` (public portal)
+- `admin.sitesspectral.work` (admin portal)
+- `{station}.sitesspectral.work` (station portals)
+
+#### Changes
+
+| File | Change | Impact |
+|------|--------|--------|
+| `src/auth/cookie-utils.js` | Added `Domain=.sitesspectral.work` | Cookies now shared across all subdomains |
+| `src/auth/cookie-utils.js` | Changed `SameSite=Strict` → `SameSite=Lax` | Allows cross-subdomain navigation |
+| `src/auth/cookie-utils.js` | Updated `isSecureContext()` to recognize `*.sitesspectral.work` | Secure flag set correctly on all subdomains |
+
+#### Technical Details
+
+**Before (broken):**
+```
+Set-Cookie: sites_spectral_auth=<token>; Path=/; HttpOnly; SameSite=Strict; Secure
+```
+
+**After (fixed):**
+```
+Set-Cookie: sites_spectral_auth=<token>; Path=/; HttpOnly; SameSite=Lax; Domain=.sitesspectral.work; Secure
+```
+
+#### Security Considerations
+
+- `SameSite=Lax` still protects against CSRF for POST/PUT/DELETE requests
+- `Domain=.sitesspectral.work` limits cookie scope to the production domain only
+- `HttpOnly` and `Secure` flags remain in place
+
+---
+
 ## [15.6.0] - 2026-01-26
 
 ### Feature: Comprehensive System Documentation (v15.6.0)
