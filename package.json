@@ -1,6 +1,6 @@
 {
   "name": "sites-spectral-stations-instruments",
-  "version": "15.6.1",
+  "version": "15.6.2",
   "description": "SITES Spectral v15.6.1 - Stations & Instruments Registry",
   "main": "src/worker.js",
   "scripts": {

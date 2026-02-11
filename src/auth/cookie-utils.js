@@ -5,8 +5,15 @@
  * Security features:
  * - httpOnly: Prevents XSS attacks from accessing the token
  * - Secure: Only sent over HTTPS (in production)
- * - SameSite=Strict: Prevents CSRF attacks
+ * - SameSite=Lax: Allows cross-subdomain authentication (v15.0.0)
+ *   CSRF protection is maintained via Origin/Referer validation in csrf.js
+ * - Domain=.sitesspectral.work: Shared across all station subdomains
  * - Max-Age: Token expires with JWT (24 hours)
+ *
+ * v15.0.0: Changed from SameSite=Strict to SameSite=Lax to support
+ * cross-subdomain authentication (admin.sitesspectral.work,
+ * svartberget.sitesspectral.work, etc.). CSRF protection is maintained
+ * via the Origin/Referer header validation in src/utils/csrf.js.
  */
 
 const COOKIE_NAME = 'sites_spectral_auth';

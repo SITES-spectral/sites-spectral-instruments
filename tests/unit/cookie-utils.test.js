@@ -40,11 +40,13 @@ describe('Cookie Utilities', () => {
       expect(cookie).toContain('HttpOnly');
     });
 
-    it('should create cookie with SameSite=Strict', () => {
+    it('should create cookie with SameSite=Lax for cross-subdomain auth', () => {
+      // v15.0.0: Changed from Strict to Lax to support cross-subdomain authentication
+      // (e.g., admin.sitesspectral.work, svartberget.sitesspectral.work)
       const request = createMockRequest();
       const cookie = createAuthCookie('test-token', request);
 
-      expect(cookie).toContain('SameSite=Strict');
+      expect(cookie).toContain('SameSite=Lax');
     });
 
     it('should create cookie with Path=/', () => {
@@ -130,11 +132,12 @@ describe('Cookie Utilities', () => {
       expect(cookie).toContain('HttpOnly');
     });
 
-    it('should include SameSite=Strict', () => {
+    it('should include SameSite=Lax for cross-subdomain auth', () => {
+      // v15.0.0: Changed from Strict to Lax to support cross-subdomain authentication
       const request = createMockRequest();
       const cookie = createLogoutCookie(request);
 
-      expect(cookie).toContain('SameSite=Strict');
+      expect(cookie).toContain('SameSite=Lax');
     });
   });
 
@@ -210,13 +213,16 @@ describe('Cookie Utilities', () => {
       expect(cookie).toContain('HttpOnly');
     });
 
-    it('should always use SameSite=Strict for CSRF protection', () => {
+    it('should use SameSite=Lax for cross-subdomain CSRF protection', () => {
+      // v15.0.0: SameSite=Lax is required for cross-subdomain authentication
+      // CSRF protection is maintained via Origin/Referer header validation
+      // in src/utils/csrf.js (SEC-001 audit compliance)
       const request = createMockRequest();
       const cookie = createAuthCookie('token', request);
 
-      // Must be Strict, not Lax or None
-      expect(cookie).toContain('SameSite=Strict');
-      expect(cookie).not.toContain('SameSite=Lax');
+      // Must be Lax for cross-subdomain auth, not Strict or None
+      expect(cookie).toContain('SameSite=Lax');
+      expect(cookie).not.toContain('SameSite=Strict');
       expect(cookie).not.toContain('SameSite=None');
     });
 
