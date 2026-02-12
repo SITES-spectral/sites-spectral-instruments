@@ -15,6 +15,18 @@ import {
   createNotFoundResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody,
+  parseSorting
+} from './ControllerUtils.js';
+
+// Allowed sort fields for products
+const PRODUCT_SORT_FIELDS = [
+  'product_name', 'name', 'product_date', 'processing_level',
+  'quality_score', 'created_at', 'updated_at', 'type', 'product_type'
+];
 
 /**
  * Product Controller
@@ -40,11 +52,15 @@ export class ProductController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '25', 10),
-      100
-    );
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
+
+    // Validate sorting
+    const { sortBy, sortOrder } = parseSorting(url, PRODUCT_SORT_FIELDS, 'product_date');
+
     const instrumentId = url.searchParams.get('instrument_id');
     const campaignId = url.searchParams.get('campaign_id');
     const type = url.searchParams.get('type');
@@ -55,8 +71,6 @@ export class ProductController {
     const endDate = url.searchParams.get('end_date');
     const keyword = url.searchParams.get('keyword');
     const isPublic = url.searchParams.get('is_public');
-    const sortBy = url.searchParams.get('sort_by') || 'product_date';
-    const sortOrder = url.searchParams.get('sort_order') || 'desc';
 
     const result = await this.queries.listProducts.execute({
       page,

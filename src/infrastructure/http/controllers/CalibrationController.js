@@ -11,6 +11,11 @@
 
 import { jsonResponse, errorResponse, notFoundResponse } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody
+} from './ControllerUtils.js';
 
 export class CalibrationController {
   /**
@@ -37,6 +42,12 @@ export class CalibrationController {
 
     try {
       const url = new URL(request.url);
+
+      // Validate pagination
+      const paginationResult = parsePagination(url);
+      if (!paginationResult.valid) return paginationResult.error;
+
+      const { limit, offset } = paginationResult.pagination;
       const filters = {
         instrumentId: url.searchParams.get('instrument_id'),
         channelId: url.searchParams.get('channel_id'),
@@ -44,8 +55,8 @@ export class CalibrationController {
         status: url.searchParams.get('status'),
         startDate: url.searchParams.get('start_date'),
         endDate: url.searchParams.get('end_date'),
-        limit: parseInt(url.searchParams.get('limit')) || 50,
-        offset: parseInt(url.searchParams.get('offset')) || 0
+        limit,
+        offset
       };
 
       // Remove null values

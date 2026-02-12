@@ -27,6 +27,10 @@ import {
   sanitizeJSON,
   ROI_SCHEMA
 } from '../../../utils/validation.js';
+import {
+  parsePagination,
+  parsePathId
+} from './ControllerUtils.js';
 
 /**
  * Super admin roles that can directly edit ROIs
@@ -64,11 +68,11 @@ export class ROIController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '50', 10),
-      100
-    );
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
     const instrumentId = url.searchParams.get('instrument_id') || url.searchParams.get('instrument');
     const stationId = url.searchParams.get('station_id') || url.searchParams.get('station');
     const includeLegacy = url.searchParams.get('include_legacy') === 'true';

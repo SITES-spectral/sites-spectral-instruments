@@ -19,6 +19,12 @@ import {
   createForbiddenResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody,
+  parseFlexibleId
+} from './ControllerUtils.js';
 
 /**
  * UAV Controller - handles pilots, missions, flight logs, and batteries
@@ -47,8 +53,11 @@ export class UAVController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '25', 10), 100);
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
     const status = url.searchParams.get('status');
     const stationId = url.searchParams.get('station_id');
 
@@ -74,7 +83,11 @@ export class UAVController {
     );
     if (response) return response;
 
-    const pilot = await this.queries.getPilot.byId(parseInt(id, 10));
+    // Validate ID
+    const idResult = parsePathId(id, 'pilot_id');
+    if (!idResult.valid) return idResult.error;
+
+    const pilot = await this.queries.getPilot.byId(idResult.value);
     if (!pilot) {
       return createNotFoundResponse(`Pilot ${id} not found`);
     }
@@ -91,15 +104,12 @@ export class UAVController {
     );
     if (response) return response;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Validate request body
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
 
     try {
-      const pilot = await this.commands.createPilot.execute(body);
+      const pilot = await this.commands.createPilot.execute(bodyResult.body);
       return createSuccessResponse({ data: pilot.toJSON() }, 201);
     } catch (error) {
       return createErrorResponse(error.message, 400);
@@ -213,8 +223,11 @@ export class UAVController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '25', 10), 100);
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
     const stationId = url.searchParams.get('station_id');
     const status = url.searchParams.get('status');
 
@@ -525,8 +538,11 @@ export class UAVController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '25', 10), 100);
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
     const missionId = url.searchParams.get('mission_id');
     const pilotId = url.searchParams.get('pilot_id');
     const platformId = url.searchParams.get('platform_id');
@@ -718,8 +734,11 @@ export class UAVController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '25', 10), 100);
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
     const stationId = url.searchParams.get('station_id');
     const status = url.searchParams.get('status');
 

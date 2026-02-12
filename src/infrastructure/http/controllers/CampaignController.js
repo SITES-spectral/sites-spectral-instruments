@@ -15,6 +15,19 @@ import {
   createNotFoundResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody,
+  parseSorting
+} from './ControllerUtils.js';
+
+// Allowed sort fields for campaigns
+const CAMPAIGN_SORT_FIELDS = [
+  'campaign_name', 'name', 'status', 'campaign_type',
+  'planned_start_datetime', 'planned_end_datetime',
+  'created_at', 'updated_at'
+];
 
 /**
  * Campaign Controller
@@ -40,11 +53,15 @@ export class CampaignController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '25', 10),
-      100
-    );
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
+
+    // Validate sorting
+    const { sortBy, sortOrder } = parseSorting(url, CAMPAIGN_SORT_FIELDS, 'planned_start_datetime');
+
     const stationId = url.searchParams.get('station_id');
     const platformId = url.searchParams.get('platform_id');
     const status = url.searchParams.get('status');
@@ -52,8 +69,6 @@ export class CampaignController {
     const coordinatorId = url.searchParams.get('coordinator_id');
     const startDate = url.searchParams.get('start_date');
     const endDate = url.searchParams.get('end_date');
-    const sortBy = url.searchParams.get('sort_by') || 'planned_start_datetime';
-    const sortOrder = url.searchParams.get('sort_order') || 'desc';
 
     const result = await this.queries.listCampaigns.execute({
       page,

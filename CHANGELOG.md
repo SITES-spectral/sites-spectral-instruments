@@ -13,6 +13,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.9] - 2026-02-12
+
+### API Validation Extension (v15.6.9)
+
+Extended centralized API validation utilities to all remaining controllers, completing the security hardening from the 2026-02-11 audit.
+
+#### Controllers Updated with Validation
+
+| Controller | Validation Added |
+|------------|------------------|
+| **UAVController** | `parsePagination`, `parsePathId`, `parseRequestBody` |
+| **CampaignController** | `parsePagination`, `parseSorting` with whitelist |
+| **ProductController** | `parsePagination`, `parseSorting` with whitelist |
+| **AOIController** | `parsePagination` |
+| **ROIController** | `parsePagination` |
+| **CalibrationController** | `parsePagination` |
+| **MaintenanceController** | `parsePagination` |
+
+#### Sort Field Whitelists
+
+Each controller now has explicit whitelists for sortable fields to prevent SQL injection:
+
+```javascript
+// CampaignController
+const CAMPAIGN_SORT_FIELDS = [
+  'campaign_name', 'name', 'status', 'campaign_type',
+  'planned_start_datetime', 'planned_end_datetime',
+  'created_at', 'updated_at'
+];
+
+// ProductController
+const PRODUCT_SORT_FIELDS = [
+  'product_name', 'name', 'product_date', 'processing_level',
+  'quality_score', 'created_at', 'updated_at', 'type', 'product_type'
+];
+```
+
+#### P2 Security Tests Added
+
+New test files for P2 security features:
+
+- `tests/unit/magic-link-p2-security.test.js` - 21 tests for ML-005/ML-006
+- `tests/unit/pilot-status-audit.test.js` - 18 tests for UAV-005
+
+**Test Coverage**: 1268 tests across 52 files
+
+#### Files Modified
+
+- `src/infrastructure/http/controllers/UAVController.js`
+- `src/infrastructure/http/controllers/CampaignController.js`
+- `src/infrastructure/http/controllers/ProductController.js`
+- `src/infrastructure/http/controllers/AOIController.js`
+- `src/infrastructure/http/controllers/ROIController.js`
+- `src/infrastructure/http/controllers/CalibrationController.js`
+- `src/infrastructure/http/controllers/MaintenanceController.js`
+
+---
+
 ## [15.6.8] - 2026-02-12
 
 ### P2 Security Enhancements (v15.6.8)

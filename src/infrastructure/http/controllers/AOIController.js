@@ -15,6 +15,11 @@ import {
   createNotFoundResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody
+} from './ControllerUtils.js';
 
 /**
  * AOI Controller
@@ -40,11 +45,11 @@ export class AOIController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '25', 10),
-      100
-    );
+    // Validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    const { page, limit } = paginationResult.pagination;
     const stationId = url.searchParams.get('station_id');
     const ecosystemCode = url.searchParams.get('ecosystem_code');
     const geometryType = url.searchParams.get('geometry_type');
