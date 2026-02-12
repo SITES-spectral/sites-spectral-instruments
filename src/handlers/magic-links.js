@@ -154,6 +154,9 @@ function validateMagicLinkInput(body) {
   // Optional: send_email (default true if recipient_email provided)
   sanitized.send_email = body.send_email !== false; // Default to true
 
+  // Optional: ip_pinning (default false) - ML-006
+  sanitized.ip_pinning_enabled = body.ip_pinning === true || body.ip_pinning === 'true' || body.ip_pinning === 1;
+
   return {
     valid: errors.length === 0,
     errors,
@@ -258,7 +261,8 @@ async function createMagicLink(request, env) {
       role,
       recipient_email,
       recipient_name,
-      send_email
+      send_email,
+      ip_pinning_enabled
     } = validation.sanitized;
 
     // Station admins can only create links for their own station
@@ -273,12 +277,12 @@ async function createMagicLink(request, env) {
     // Calculate expiry
     const expiresAt = new Date(Date.now() + expires_in_days * 24 * 60 * 60 * 1000);
 
-    // Insert into database
+    // Insert into database (including ip_pinning_enabled for ML-006)
     const result = await env.DB.prepare(`
       INSERT INTO magic_link_tokens (
         token, token_hash, station_id, created_by_user_id,
-        label, description, role, expires_at, single_use
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        label, description, role, expires_at, single_use, ip_pinning_enabled
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       token.substring(0, 8) + '...', // Store truncated token for display only
       tokenHash,
@@ -288,7 +292,8 @@ async function createMagicLink(request, env) {
       description || null,
       role,
       expiresAt.toISOString(),
-      single_use ? 1 : 0
+      single_use ? 1 : 0,
+      ip_pinning_enabled ? 1 : 0
     ).run();
 
     // Get station acronym for URL
@@ -390,10 +395,43 @@ async function createMagicLink(request, env) {
 }
 
 /**
+ * Log magic link usage to audit trail (ML-005)
+ *
+ * @param {Object} env - Environment bindings
+ * @param {number} tokenId - Magic link token ID
+ * @param {string} clientIP - Client IP address
+ * @param {string} userAgent - Client user agent
+ * @param {boolean} success - Whether the validation succeeded
+ * @param {string|null} failureReason - Reason for failure if not successful
+ * @param {string|null} sessionJwtHash - Hash of issued JWT (for session correlation)
+ */
+async function logMagicLinkUsage(env, tokenId, clientIP, userAgent, success, failureReason = null, sessionJwtHash = null) {
+  try {
+    await env.DB.prepare(`
+      INSERT INTO magic_link_usage_log (
+        token_id, client_ip, user_agent, session_jwt_hash, success, failure_reason
+      ) VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(
+      tokenId,
+      clientIP,
+      userAgent,
+      sessionJwtHash,
+      success ? 1 : 0,
+      failureReason
+    ).run();
+  } catch (error) {
+    // Log error but don't fail the request
+    console.error('Failed to log magic link usage:', error);
+  }
+}
+
+/**
  * Validate a magic link and issue a session
  *
  * ML-001: Rate limiting applied (10 per minute)
  * ML-003: JWT_SECRET validation
+ * ML-005: Multi-use token audit trail
+ * ML-006: IP pinning validation
  *
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
@@ -414,11 +452,13 @@ async function validateMagicLink(request, env) {
 
   const url = new URL(request.url);
   const token = url.searchParams.get('token');
+  const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const userAgent = request.headers.get('User-Agent') || 'unknown';
 
   if (!token) {
     // Record failed attempt for rate limiting
     await recordAuthAttempt(
-      request.headers.get('CF-Connecting-IP') || 'unknown',
+      clientIP,
       'magic_link_validate',
       false,
       'no_token',
@@ -431,7 +471,7 @@ async function validateMagicLink(request, env) {
     // Hash the provided token
     const tokenHash = await hashToken(token);
 
-    // Look up the token
+    // Look up the token (including IP pinning and use count fields)
     const magicLink = await env.DB.prepare(`
       SELECT ml.*, s.acronym as station_acronym, s.normalized_name as station_normalized_name
       FROM magic_link_tokens ml
@@ -446,31 +486,63 @@ async function validateMagicLink(request, env) {
 
     // Check if revoked
     if (magicLink.revoked_at) {
+      await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'revoked');
       await logSecurityEvent('MAGIC_LINK_REVOKED_USE_ATTEMPT', { token_id: magicLink.id }, request, env);
       return createUnauthorizedResponse('This magic link has been revoked');
     }
 
     // Check if expired
     if (new Date(magicLink.expires_at) < new Date()) {
+      await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'expired');
       await logSecurityEvent('MAGIC_LINK_EXPIRED_USE_ATTEMPT', { token_id: magicLink.id }, request, env);
       return createUnauthorizedResponse('This magic link has expired');
     }
 
     // Check if single-use and already used
     if (magicLink.single_use && magicLink.used_at) {
+      await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'already_used');
       await logSecurityEvent('MAGIC_LINK_REUSE_ATTEMPT', { token_id: magicLink.id }, request, env);
       return createUnauthorizedResponse('This magic link has already been used');
     }
 
-    // Mark as used
-    const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
-    const userAgent = request.headers.get('User-Agent') || 'unknown';
+    // ML-006: IP pinning validation for multi-use tokens
+    if (!magicLink.single_use && magicLink.ip_pinning_enabled && magicLink.first_use_ip) {
+      if (magicLink.first_use_ip !== clientIP) {
+        await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'ip_mismatch');
+        await logSecurityEvent('MAGIC_LINK_IP_MISMATCH', {
+          token_id: magicLink.id,
+          expected_ip: magicLink.first_use_ip,
+          actual_ip: clientIP
+        }, request, env);
+        return createUnauthorizedResponse('This magic link is locked to a different IP address');
+      }
+    }
 
-    await env.DB.prepare(`
-      UPDATE magic_link_tokens
-      SET used_at = CURRENT_TIMESTAMP, used_by_ip = ?, used_by_user_agent = ?
-      WHERE id = ?
-    `).bind(clientIP, userAgent, magicLink.id).run();
+    // Update token: mark as used, increment use count, and capture first use IP
+    const isFirstUse = !magicLink.used_at;
+    const newUseCount = (magicLink.use_count || 0) + 1;
+
+    if (isFirstUse) {
+      // First use - set used_at and first_use_ip
+      await env.DB.prepare(`
+        UPDATE magic_link_tokens
+        SET used_at = CURRENT_TIMESTAMP,
+            used_by_ip = ?,
+            used_by_user_agent = ?,
+            first_use_ip = ?,
+            use_count = ?
+        WHERE id = ?
+      `).bind(clientIP, userAgent, clientIP, newUseCount, magicLink.id).run();
+    } else {
+      // Subsequent use - just update used_by fields and increment count
+      await env.DB.prepare(`
+        UPDATE magic_link_tokens
+        SET used_by_ip = ?,
+            used_by_user_agent = ?,
+            use_count = ?
+        WHERE id = ?
+      `).bind(clientIP, userAgent, newUseCount, magicLink.id).run();
+    }
 
     // Create a session for this magic link user
     const sessionUser = {
@@ -498,11 +570,17 @@ async function validateMagicLink(request, env) {
       .setSubject(sessionUser.username)
       .sign(secret);
 
+    // ML-005: Log successful use to audit trail with JWT hash for session correlation
+    const jwtHash = await hashToken(jwt);
+    await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, true, null, jwtHash.substring(0, 32));
+
     // Log successful use
     await logSecurityEvent('MAGIC_LINK_USED', {
       token_id: magicLink.id,
       station_id: magicLink.station_id,
-      role: magicLink.role
+      role: magicLink.role,
+      use_count: newUseCount,
+      is_first_use: isFirstUse
     }, request, env);
 
     // Set auth cookie

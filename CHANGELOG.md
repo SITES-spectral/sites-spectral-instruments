@@ -13,6 +13,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.8] - 2026-02-12
+
+### P2 Security Enhancements (v15.6.8)
+
+Defense-in-depth security improvements from the 2026-02-11 comprehensive security audit.
+
+#### Multi-Use Token Audit Trail (ML-005)
+
+**New Table**: `magic_link_usage_log`
+
+Every use of a multi-use magic link is now logged to an audit trail:
+
+| Field | Purpose |
+|-------|---------|
+| `token_id` | Reference to magic link token |
+| `client_ip` | Client IP at time of use |
+| `user_agent` | Browser user agent |
+| `session_jwt_hash` | Hash of issued JWT (for session correlation) |
+| `success` | Whether validation succeeded |
+| `failure_reason` | 'expired', 'revoked', 'ip_mismatch', 'already_used' |
+
+**Fields Added to `magic_link_tokens`**:
+- `use_count` - Number of times multi-use token has been validated
+- `first_use_ip` - IP address captured on first use
+
+#### IP Pinning for Magic Links (ML-006)
+
+Optional IP pinning for multi-use tokens. When enabled, the token is locked to the IP address that first uses it.
+
+**Fields Added**:
+- `ip_pinning_enabled` - Whether to enforce IP matching
+- `first_use_ip` - Captured on first use, validated on subsequent uses
+
+**Usage**:
+```json
+POST /api/v11/magic-links/create
+{
+  "station_id": 1,
+  "single_use": false,
+  "ip_pinning": true
+}
+```
+
+#### Pilot Status Audit Trail (UAV-005)
+
+**New Table**: `pilot_status_audit`
+
+Tracks all pilot status changes for compliance:
+
+| Field | Purpose |
+|-------|---------|
+| `pilot_id` | Reference to pilot |
+| `changed_by_user_id` | User who made the change |
+| `previous_status` | Status before change |
+| `new_status` | Status after change |
+| `reason` | Optional reason for change |
+| `client_ip`, `user_agent` | Request metadata |
+
+**Command Updated**: `UpdatePilot.js`
+- Now logs status changes to audit trail
+- Added authorization check (UAV-004)
+
+#### Migration
+
+**New File**: `migrations/0047_magic_link_usage_audit.sql`
+
+Run `npm run db:migrate` to apply.
+
+---
+
 ## [15.6.7] - 2026-02-12
 
 ### Security Hardening & API Validation Integration (v15.6.7)
