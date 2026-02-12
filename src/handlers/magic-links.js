@@ -18,6 +18,9 @@ import { createErrorResponse, createUnauthorizedResponse, createForbiddenRespons
 import { logSecurityEvent } from '../utils/logging.js';
 import { createAuthCookie } from '../auth/cookie-utils.js';
 import { SignJWT } from 'jose';
+import { authRateLimitMiddleware, recordAuthAttempt } from '../middleware/auth-rate-limiter.js';
+import { sanitizeString, sanitizeInteger, sanitizeEnum } from '../utils/validation.js';
+import { sendMagicLinkEmail } from '../services/email-service.js';
 
 /**
  * Default expiry duration for magic links (7 days in milliseconds)
@@ -50,6 +53,112 @@ async function hashToken(token) {
   return Array.from(new Uint8Array(hashBuffer), byte =>
     byte.toString(16).padStart(2, '0')
   ).join('');
+}
+
+/**
+ * Validate magic link creation input (ML-002)
+ *
+ * @param {Object} body - Request body
+ * @returns {Object} { valid: boolean, errors: string[], sanitized: Object }
+ */
+function validateMagicLinkInput(body) {
+  const errors = [];
+  const sanitized = {};
+
+  // Body must be an object (not array, not null)
+  if (body === null || Array.isArray(body) || typeof body !== 'object') {
+    return { valid: false, errors: ['Request body must be an object'], sanitized: {} };
+  }
+
+  // Required: station_id
+  const stationId = sanitizeInteger(body.station_id, { min: 1 });
+  if (!stationId) {
+    errors.push('station_id is required and must be a positive integer');
+  } else {
+    sanitized.station_id = stationId;
+  }
+
+  // Optional: label (max 200 chars)
+  if (body.label !== undefined && body.label !== null && body.label !== '') {
+    const label = sanitizeString(body.label, { maxLength: 200 });
+    if (label === null && body.label) {
+      errors.push('label must be a valid string (max 200 characters)');
+    } else {
+      sanitized.label = label;
+    }
+  }
+
+  // Optional: description (max 1000 chars)
+  if (body.description !== undefined && body.description !== null && body.description !== '') {
+    const desc = sanitizeString(body.description, { maxLength: 1000 });
+    if (desc === null && body.description) {
+      errors.push('description must be a valid string (max 1000 characters)');
+    } else {
+      sanitized.description = desc;
+    }
+  }
+
+  // Optional: expires_in_days (1-365)
+  if (body.expires_in_days !== undefined) {
+    const days = sanitizeInteger(body.expires_in_days, { min: 1, max: 365 });
+    if (days === null) {
+      errors.push('expires_in_days must be between 1 and 365');
+    } else {
+      sanitized.expires_in_days = days;
+    }
+  } else {
+    sanitized.expires_in_days = 7; // default
+  }
+
+  // Optional: single_use (boolean)
+  sanitized.single_use = body.single_use === true || body.single_use === 'true' || body.single_use === 1;
+
+  // Optional: role (readonly or station-internal)
+  if (body.role !== undefined) {
+    const role = sanitizeEnum(body.role, ['readonly', 'station-internal']);
+    if (!role) {
+      errors.push('role must be "readonly" or "station-internal"');
+    } else {
+      sanitized.role = role;
+    }
+  } else {
+    sanitized.role = 'readonly'; // default
+  }
+
+  // Optional: recipient_email (for sending magic link via email)
+  if (body.recipient_email !== undefined && body.recipient_email !== null && body.recipient_email !== '') {
+    const email = sanitizeString(body.recipient_email, { maxLength: 254 });
+    if (email) {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        errors.push('recipient_email must be a valid email address');
+      } else {
+        sanitized.recipient_email = email.toLowerCase();
+      }
+    } else {
+      errors.push('recipient_email must be a valid string');
+    }
+  }
+
+  // Optional: recipient_name (for email personalization)
+  if (body.recipient_name !== undefined && body.recipient_name !== null && body.recipient_name !== '') {
+    const name = sanitizeString(body.recipient_name, { maxLength: 100 });
+    if (name === null && body.recipient_name) {
+      errors.push('recipient_name must be a valid string (max 100 characters)');
+    } else {
+      sanitized.recipient_name = name;
+    }
+  }
+
+  // Optional: send_email (default true if recipient_email provided)
+  sanitized.send_email = body.send_email !== false; // Default to true
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    sanitized
+  };
 }
 
 /**
@@ -98,11 +207,27 @@ export async function handleMagicLinks(method, pathSegments, request, env) {
  * Create a new magic link
  * Only station admins and global admins can create magic links
  *
+ * ML-001: Rate limiting applied (5 per hour)
+ * ML-002: Input validation with sanitization
+ * ML-003: JWT_SECRET validation
+ *
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Promise<Response>}
  */
 async function createMagicLink(request, env) {
+  // ML-001: Apply rate limiting
+  const rateLimitResponse = await authRateLimitMiddleware('magic_link_create', request, env);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
+  // ML-003: Validate JWT_SECRET is configured
+  if (!env.JWT_SECRET) {
+    console.error('CRITICAL: JWT_SECRET not configured');
+    return createErrorResponse('Authentication service unavailable', 500);
+  }
+
   // Authenticate user
   const user = await getUserFromRequest(request, env);
   if (!user) {
@@ -117,29 +242,28 @@ async function createMagicLink(request, env) {
 
   try {
     const body = await request.json();
+
+    // ML-002: Validate and sanitize input
+    const validation = validateMagicLinkInput(body);
+    if (!validation.valid) {
+      return createErrorResponse(`Validation failed: ${validation.errors.join(', ')}`, 400);
+    }
+
     const {
       station_id,
       label,
       description,
-      expires_in_days = 7,
-      single_use = false,
-      role = 'readonly'
-    } = body;
-
-    // Validate station_id
-    if (!station_id) {
-      return createErrorResponse('station_id is required', 400);
-    }
+      expires_in_days,
+      single_use,
+      role,
+      recipient_email,
+      recipient_name,
+      send_email
+    } = validation.sanitized;
 
     // Station admins can only create links for their own station
     if (user.role === 'station-admin' && user.station_id !== station_id) {
       return createForbiddenResponse('You can only create magic links for your own station');
-    }
-
-    // Validate role
-    const allowedRoles = ['readonly', 'station-internal'];
-    if (!allowedRoles.includes(role)) {
-      return createErrorResponse(`Invalid role. Must be one of: ${allowedRoles.join(', ')}`, 400);
     }
 
     // Generate token
@@ -182,24 +306,79 @@ async function createMagicLink(request, env) {
       creator_username: user.username,
       station_id,
       token_id: result.lastRowId,
-      expires_at: expiresAt.toISOString()
+      expires_at: expiresAt.toISOString(),
+      recipient_email: recipient_email || null
     }, request, env);
 
-    return new Response(JSON.stringify({
+    // Send email if recipient_email is provided and send_email is true
+    let emailResult = null;
+    if (recipient_email && send_email) {
+      // Get station display name
+      const stationDetails = await env.DB.prepare(`
+        SELECT display_name FROM stations WHERE id = ?
+      `).bind(station_id).first();
+
+      emailResult = await sendMagicLinkEmail({
+        recipientEmail: recipient_email,
+        recipientName: recipient_name,
+        magicLinkUrl,
+        stationName: stationDetails?.display_name || station?.acronym || 'Unknown Station',
+        stationAcronym: station?.acronym || 'UNKNOWN',
+        expiresAt: expiresAt.toISOString(),
+        label,
+        createdBy: user.username
+      }, env);
+
+      // Log email sending result
+      await logSecurityEvent(
+        emailResult.success ? 'MAGIC_LINK_EMAIL_SENT' : 'MAGIC_LINK_EMAIL_FAILED',
+        {
+          token_id: result.lastRowId,
+          recipient_email,
+          error: emailResult.error || null
+        },
+        request,
+        env
+      );
+    }
+
+    // Build response - only include token/URL if email was NOT sent successfully
+    // This ensures the link is either emailed OR returned, not both (security best practice)
+    const response = {
       success: true,
       magic_link: {
         id: result.lastRowId,
-        token: token, // Only returned once at creation
-        url: magicLinkUrl,
         station_id,
         station_acronym: station?.acronym,
         label,
         role,
         expires_at: expiresAt.toISOString(),
         single_use
-      },
-      message: 'Magic link created. Share this URL securely - it cannot be retrieved again.'
-    }), {
+      }
+    };
+
+    if (recipient_email && send_email) {
+      // Email was requested
+      if (emailResult?.success) {
+        response.message = `Magic link sent successfully to ${recipient_email}`;
+        response.email_sent = true;
+        // Don't include token/URL in response when email is sent (security)
+      } else {
+        // Email failed - return token so admin can share manually
+        response.magic_link.token = token;
+        response.magic_link.url = magicLinkUrl;
+        response.message = `Magic link created but email failed to send. Share this URL securely: ${emailResult?.error || 'Unknown error'}`;
+        response.email_sent = false;
+        response.email_error = emailResult?.error;
+      }
+    } else {
+      // No email requested - return token for manual sharing
+      response.magic_link.token = token;
+      response.magic_link.url = magicLinkUrl;
+      response.message = 'Magic link created. Share this URL securely - it cannot be retrieved again.';
+    }
+
+    return new Response(JSON.stringify(response), {
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -213,15 +392,38 @@ async function createMagicLink(request, env) {
 /**
  * Validate a magic link and issue a session
  *
+ * ML-001: Rate limiting applied (10 per minute)
+ * ML-003: JWT_SECRET validation
+ *
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Promise<Response>}
  */
 async function validateMagicLink(request, env) {
+  // ML-001: Apply rate limiting to prevent brute force
+  const rateLimitResponse = await authRateLimitMiddleware('magic_link_validate', request, env);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
+  // ML-003: Validate JWT_SECRET is configured
+  if (!env.JWT_SECRET) {
+    console.error('CRITICAL: JWT_SECRET not configured');
+    return createErrorResponse('Authentication service unavailable', 500);
+  }
+
   const url = new URL(request.url);
   const token = url.searchParams.get('token');
 
   if (!token) {
+    // Record failed attempt for rate limiting
+    await recordAuthAttempt(
+      request.headers.get('CF-Connecting-IP') || 'unknown',
+      'magic_link_validate',
+      false,
+      'no_token',
+      env
+    );
     return createErrorResponse('Token is required', 400);
   }
 

@@ -77,11 +77,12 @@ export class Role {
   }
 
   /**
-   * Check if this role represents read-only access
+   * Check if this role represents read-only access (global)
+   * Note: station-internal is NOT included here - it has station-scoped read
    * @returns {boolean}
    */
   isReadOnly() {
-    return this.value === Role.READONLY || this.value === Role.STATION_INTERNAL;
+    return this.value === Role.READONLY;
   }
 
   /**

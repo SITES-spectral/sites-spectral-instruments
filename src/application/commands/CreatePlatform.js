@@ -121,8 +121,21 @@ export class CreatePlatform {
       sensor: input.sensor
     });
 
-    // Save platform
-    const savedPlatform = await this.platformRepository.save(platform);
+    // Save platform - handle UNIQUE constraint (race condition protection)
+    let savedPlatform;
+    try {
+      savedPlatform = await this.platformRepository.save(platform);
+    } catch (error) {
+      // TOCTOU Race Condition: Another request may have created the same platform
+      // between our existence check and save. Handle UNIQUE constraint gracefully.
+      if (error.message && error.message.includes('UNIQUE constraint')) {
+        throw new Error(
+          `Platform '${normalizedName}' already exists (concurrent creation detected). ` +
+          `Please try again.`
+        );
+      }
+      throw error;
+    }
 
     // Auto-create instruments if applicable (e.g., UAV platforms)
     const createdInstruments = [];
@@ -141,8 +154,20 @@ export class CreatePlatform {
             platformId: savedPlatform.id
           }
         );
-        const savedInstrument = await this.instrumentRepository.save(instrument);
-        createdInstruments.push(savedInstrument);
+        try {
+          const savedInstrument = await this.instrumentRepository.save(instrument);
+          createdInstruments.push(savedInstrument);
+        } catch (error) {
+          // Log but don't fail platform creation for auto-instrument race conditions
+          if (error.message && error.message.includes('UNIQUE constraint')) {
+            console.warn(
+              `Auto-instrument creation skipped for ${instrumentData.normalizedName}: ` +
+              `already exists (concurrent creation detected)`
+            );
+          } else {
+            throw error;
+          }
+        }
       }
     }
 

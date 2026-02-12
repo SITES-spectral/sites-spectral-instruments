@@ -13,6 +13,368 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.7] - 2026-02-12
+
+### Security Hardening & API Validation Integration (v15.6.7)
+
+Complete P1 security fixes with centralized API validation utilities integrated into controllers.
+
+### Magic Link Email Delivery
+
+Magic links can now be sent directly to recipients via email.
+
+#### New Email Service
+
+**New File**: `src/services/email-service.js`
+
+| Function | Purpose |
+|----------|---------|
+| `sendEmail()` | Generic email sending via MailChannels API |
+| `sendMagicLinkEmail()` | Formatted magic link email with SITES branding |
+
+**Features**:
+- MailChannels integration (free for Cloudflare Workers)
+- Professional HTML email template with SITES Spectral branding
+- Auto-generated plain text fallback
+- Email validation and sanitization
+- Configurable via environment variables (`EMAIL_FROM`, `EMAIL_FROM_NAME`)
+- Testable with `DISABLE_EMAIL=true` for development
+
+#### Magic Links Handler Updates
+
+**File**: `src/handlers/magic-links.js`
+
+| Change | Details |
+|--------|---------|
+| New fields | `recipient_email`, `recipient_name`, `send_email` |
+| Auto-send | Email sent automatically when `recipient_email` provided |
+| Security | Token/URL not returned in response when email sent successfully |
+| Fallback | Token returned if email fails, allowing manual sharing |
+
+**API Usage**:
+```json
+POST /api/v11/magic-links/create
+{
+  "station_id": 1,
+  "recipient_email": "researcher@university.se",
+  "recipient_name": "Dr. Smith",
+  "label": "Field campaign access",
+  "expires_in_days": 14,
+  "role": "station-internal"
+}
+```
+
+**Response (email sent)**:
+```json
+{
+  "success": true,
+  "email_sent": true,
+  "message": "Magic link sent successfully to researcher@university.se",
+  "magic_link": {
+    "id": 123,
+    "station_acronym": "SVB",
+    "expires_at": "2026-02-26T12:00:00Z"
+  }
+}
+```
+
+#### DNS Configuration Required
+
+For email delivery to work, add these DNS records to `sitesspectral.work`:
+
+| Type | Name | Value |
+|------|------|-------|
+| TXT | `_mailchannels` | `v=mc1 cfid=sites-spectral-instruments.jose-beltran.workers.dev` |
+| TXT | `@` | `v=spf1 include:relay.mailchannels.net -all` |
+
+#### Test Coverage
+
+| Test File | Tests Added |
+|-----------|-------------|
+| `tests/services/email-service.test.js` | 15 tests |
+
+**Total tests**: 1238 (up from 1223, +15 email tests)
+
+#### UAV Authorization Integration
+
+Integrated `UAVAuthorizationService` into application commands for runtime enforcement:
+
+| Command | Authorization Check | Audit Issue |
+|---------|--------------------|----|
+| `ApproveMission.js` | `canApproveMission(user, mission)` | UAV-001 |
+| `CreateFlightLog.js` | `canCreateFlightLog(user, mission, pilotId)` | UAV-002 |
+| `CreateBattery.js` | `canModifyBattery(user, battery)` | UAV-003 |
+| `UpdateBattery.js` | `canModifyBattery(user, battery)` | UAV-003 |
+| `CreatePilot.js` | `canManagePilot(user, pilot)` | UAV-004 |
+
+**Authorization Rules Enforced**:
+- Mission approval: Only global admins and station admins for the mission's station
+- Flight log creation: Pilot must be assigned to mission, user must be the pilot or admin
+- Battery management: Only global admins and station admins can modify battery inventory
+- Pilot management: Station admins can manage pilots authorized for their station
+
+**Pilot Authorization Enhancement**:
+Updated `canManagePilot()` to support pilots with multiple `authorized_stations` (not just single `station_id`).
+
+#### Controller API Validation Integration
+
+Integrated centralized API validation utilities into all core controllers.
+
+**New File**: `src/infrastructure/http/controllers/ControllerUtils.js`
+
+| Utility | Purpose |
+|---------|---------|
+| `parsePagination(url)` | Validates and sanitizes page/limit params |
+| `parsePathId(id, paramName)` | Validates numeric path IDs |
+| `parseRequestBody(request)` | Validates request size and body type |
+| `parseSorting(url, allowedFields, default)` | Validates and sanitizes sort params |
+| `parseFlexibleId(id)` | Handles IDs that could be numeric or string |
+
+**Controllers Updated**:
+
+| Controller | Methods Updated |
+|------------|----------------|
+| `StationController.js` | list, get, create, update, delete |
+| `PlatformController.js` | list, byStation, byType, get, create, update, delete |
+| `InstrumentController.js` | list, byPlatform, byStation, get, create, update, delete |
+
+**Security Improvements**:
+- Sort field injection prevention via whitelist validation
+- Consistent error responses for malformed IDs
+- Request body size limits enforced
+- Invalid pagination rejected (page=0, -1, NaN)
+
+---
+
+## [15.6.5] - 2026-02-11
+
+### Security Hardening: P1 Security Fixes (v15.6.5)
+
+Complete P1 security improvements from the 2026-02-11 comprehensive security audit.
+
+#### UAV Domain Authorization (UAV-001 through UAV-004)
+
+**New File**: `src/domain/uav/authorization/UAVAuthorizationService.js`
+
+| Issue | Implementation | Methods |
+|-------|---------------|---------|
+| **UAV-001** | Mission approval authorization | `canApproveMission(user, mission)` |
+| **UAV-002** | Flight log pilot validation | `canCreateFlightLog(user, mission, pilotId)` |
+| **UAV-003** | Station-scoped battery access | `canAccessBattery()`, `canModifyBattery()` |
+| **UAV-004** | CRUD authorization logic | `canManagePilot()`, `canManageMission()` |
+
+**Authorization Rules**:
+- Global admins: Full access to all operations
+- Station admins: Scoped to their station only
+- UAV pilots: Can create flight logs only for themselves when assigned to mission
+- Station users: Read-only access to own station's batteries
+- Readonly: No UAV access (denied by hasAccessToStation)
+
+**Helper Methods**:
+- `canViewMission(user, mission)` - More permissive view access
+- `getStationScope(user)` - Returns `{all: true}` or `{stationIds: [1, 2]}`
+- `filterByStationScope(user, entities)` - Filters entity list by user's access
+
+#### API Edge Case Validation
+
+**New File**: `src/utils/api-validation.js`
+
+| Function | Purpose |
+|----------|---------|
+| `validatePagination()` | Rejects page=0, -1, NaN, Infinity; caps limit at 100 |
+| `sanitizePaginationParams()` | Parses string params to integers with defaults |
+| `validateId()` | Rejects non-numeric, negative, float, >MAX_SAFE_INTEGER |
+| `validateRequestBody()` | Rejects null, array, primitives |
+| `validateRequestSize()` | Enforces 1MB limit by default |
+| `validateApiRequest()` | Combined middleware for all validations |
+| `validateAndParseBody()` | Async body parsing with validation |
+| `validatePathId()` | Path parameter ID validation with error response |
+
+**Defaults**:
+- `PAGINATION_DEFAULTS`: page=1, limit=25, maxLimit=100
+- `SIZE_LIMITS`: maxRequestSize=1MB (1048576 bytes)
+
+#### User Entity Enhancement
+
+**File**: `src/domain/authorization/User.js`
+
+| Change | Details |
+|--------|---------|
+| Added `pilotId` / `pilot_id` | Support for UAV pilot ID in JWT payload |
+| Both camelCase and snake_case | Matches existing pattern for JWT flexibility |
+
+#### Test Coverage
+
+| Test File | Tests Added | Coverage |
+|-----------|-------------|----------|
+| `tests/domain/uav-authorization.test.js` | 38 tests | UAV-001 through UAV-004 |
+| `tests/unit/api-edge-cases.test.js` | 39 tests | All edge cases |
+
+**Total tests**: 1223 (up from 1146, +77 new security tests)
+
+---
+
+## [15.6.4] - 2026-02-11
+
+### Security Hardening: Race Condition Prevention (v15.6.4)
+
+TOCTOU (Time-of-Check, Time-of-Use) race condition prevention in entity creation commands.
+
+#### RACE-001: CreateInstrument TOCTOU Fix
+
+**Issue**: Race condition between existence check and save could allow duplicate instruments.
+
+| File | Change |
+|------|--------|
+| `src/application/commands/CreateInstrument.js` | Added UNIQUE constraint error handling |
+| `src/application/commands/CreateInstrument.js` | Returns user-friendly "concurrent creation detected" message |
+
+**How it works**:
+1. Database has UNIQUE constraint on `instruments.normalized_name`
+2. If concurrent request creates same instrument first, UNIQUE constraint fails
+3. Error is caught and converted to helpful message: "already exists (concurrent creation detected)"
+
+#### RACE-002: CreatePlatform TOCTOU Fix
+
+**Issue**: Race condition between existence check and save could allow duplicate platforms.
+
+| File | Change |
+|------|--------|
+| `src/application/commands/CreatePlatform.js` | Added UNIQUE constraint error handling |
+| `src/application/commands/CreatePlatform.js` | Returns user-friendly "concurrent creation detected" message |
+| `src/application/commands/CreatePlatform.js` | Auto-instrument creation gracefully skips on race condition |
+
+**How it works**:
+1. Database has UNIQUE constraint on `platforms.normalized_name`
+2. If concurrent request creates same platform first, UNIQUE constraint fails
+3. Error is caught and converted to helpful message: "already exists (concurrent creation detected)"
+4. For UAV auto-instruments, race conditions are logged and skipped (platform still created)
+
+#### Test Coverage
+
+| Test File | Tests Added |
+|-----------|-------------|
+| `tests/application/race-conditions.test.js` | 10 new tests |
+
+**Total tests**: 1146 (up from 1136)
+
+### Documentation: OpenAPI Spec Alignment (v15.6.4)
+
+Fixed OpenAPI spec to match implementation and documented previously undocumented endpoints.
+
+#### API-DOC-001: Flight Logs Endpoint Path Fix
+
+**Issue**: OpenAPI spec used `/uav/flights` but implementation uses `/uav/flight-logs`.
+
+| Change | Details |
+|--------|---------|
+| Path fix | `/uav/flights` → `/uav/flight-logs` |
+| Tag fix | `UAV Flights` → `UAV Flight Logs` |
+
+#### API-DOC-002: New Endpoint Documentation
+
+Added OpenAPI documentation for previously undocumented domains:
+
+| Domain | Endpoints Added | Description |
+|--------|-----------------|-------------|
+| **AOIs** | 8 endpoints | Areas of Interest (GeoJSON/KML import/export) |
+| **Campaigns** | 8 endpoints | Field campaign management |
+| **Products** | 10 endpoints | Data product registration (L0-L3) |
+
+**New Schemas**: `AOI`, `Campaign`, `Product` with Create/Update/Response variants.
+
+**OpenAPI Version**: Updated to 15.6.4
+
+---
+
+## [15.6.3] - 2026-02-11
+
+### Security Hardening: P0 Security Fixes (v15.6.3)
+
+Critical security fixes identified in the 2026-02-11 comprehensive security audit.
+
+#### AUTH-001: Station-Internal Role Authorization Fix
+
+**Issue**: station-internal users fell through to readonly (global read access) instead of station-scoped access.
+
+| File | Change |
+|------|--------|
+| `src/domain/authorization/Role.js` | Fixed `isReadOnly()` to NOT include station-internal |
+| `src/domain/authorization/User.js` | Added `isStationInternal()` method |
+| `src/domain/authorization/AuthorizationService.js` | Added `stationInternal` permission set |
+| `src/domain/authorization/AuthorizationService.js` | Added `isStationInternal()` check in `#getPermissionSetKey()` |
+
+**Impact**: station-internal users now correctly see only their own station's data.
+
+**Tests Added**: 27 new tests in `tests/domain/station-internal-authorization.test.js`
+
+#### ML-001: Magic Link Rate Limiting
+
+**Issue**: No rate limiting on magic link create/validate endpoints allowed brute force and DoS attacks.
+
+| Endpoint | Rate Limit |
+|----------|------------|
+| `POST /api/v11/magic-links/create` | 5 per hour per IP |
+| `GET /api/v11/magic-links/validate` | 10 per minute per IP |
+
+| File | Change |
+|------|--------|
+| `src/middleware/auth-rate-limiter.js` | Added `magic_link_create` and `magic_link_validate` rate limits |
+| `src/handlers/magic-links.js` | Applied rate limiting middleware to create/validate |
+
+#### ML-002: Magic Link Input Validation
+
+**Issue**: No input validation on magic link creation allowed injection and DoS via large payloads.
+
+| Validation | Constraint |
+|------------|------------|
+| `station_id` | Required, positive integer |
+| `label` | Optional, max 200 characters |
+| `description` | Optional, max 1000 characters |
+| `expires_in_days` | 1-365 (default 7) |
+| `role` | `readonly` or `station-internal` only |
+
+| File | Change |
+|------|--------|
+| `src/handlers/magic-links.js` | Added `validateMagicLinkInput()` helper |
+| `src/handlers/magic-links.js` | Applied validation before processing |
+
+**Tests Added**: 25 new tests in `tests/unit/magic-links-security.test.js`
+
+#### ML-003: JWT_SECRET Validation
+
+**Issue**: Missing JWT_SECRET could cause cryptographic bypass.
+
+| File | Change |
+|------|--------|
+| `src/handlers/magic-links.js` | Added JWT_SECRET presence validation |
+| `src/handlers/magic-links.js` | Returns 500 with "Authentication service unavailable" if missing |
+
+#### Test Coverage
+
+| Component | Tests Added |
+|-----------|-------------|
+| Station-Internal Authorization | 27 |
+| Magic Links Security | 25 |
+| **Total New Tests** | **52** |
+
+**Total Test Suite**: 1136 tests passing
+
+---
+
+## [15.6.2] - 2026-02-11
+
+### Maintenance: Cookie Test Fixes (v15.6.2)
+
+Minor test maintenance to align with v15.6.1 cookie changes.
+
+#### Changes
+
+- Fixed cookie-utils tests to expect `SameSite=Lax` (not `Strict`)
+- Updated test comments to document v15.0.0 cross-subdomain architecture
+
+---
+
 ## [15.6.1] - 2026-02-11
 
 ### Security Fix: Cross-Subdomain Authentication (v15.6.1)

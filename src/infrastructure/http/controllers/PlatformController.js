@@ -4,8 +4,10 @@
  * HTTP controller for platform endpoints.
  * Maps HTTP requests to application use cases.
  * v11.0.0-alpha.34: Added authentication and authorization middleware
+ * v15.6.6: Integrated API validation utilities
  *
  * @module infrastructure/http/controllers/PlatformController
+ * @see docs/audits/2026-02-11-COMPREHENSIVE-SECURITY-AUDIT.md
  */
 
 import {
@@ -14,6 +16,13 @@ import {
   createNotFoundResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody,
+  parseSorting,
+  parseFlexibleId
+} from './ControllerUtils.js';
 
 /**
  * Platform Controller
@@ -44,13 +53,14 @@ export class PlatformController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '25', 10),
-      100
-    );
-    const sortBy = url.searchParams.get('sort_by') || 'normalized_name';
-    const sortOrder = url.searchParams.get('sort_order') || 'asc';
+    // Parse and validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    // Parse and validate sorting
+    const allowedSortFields = ['normalized_name', 'display_name', 'platform_type', 'created_at'];
+    const { sortBy, sortOrder } = parseSorting(url, allowedSortFields, 'normalized_name');
+
     const platformType = url.searchParams.get('platform_type') || url.searchParams.get('type');
     const ecosystemCode = url.searchParams.get('ecosystem_code');
 
@@ -68,8 +78,8 @@ export class PlatformController {
     }
 
     const result = await this.queries.listPlatforms.execute({
-      page,
-      limit,
+      page: paginationResult.pagination.page,
+      limit: paginationResult.pagination.limit,
       sortBy,
       sortOrder,
       stationId: stationId ? parseInt(stationId, 10) : undefined,
@@ -93,9 +103,11 @@ export class PlatformController {
     );
     if (response) return response;
 
-    const platforms = await this.queries.listPlatforms.byStationId(
-      parseInt(stationId, 10)
-    );
+    // Parse and validate station ID
+    const idResult = parsePathId(stationId, 'station_id');
+    if (!idResult.valid) return idResult.error;
+
+    const platforms = await this.queries.listPlatforms.byStationId(idResult.value);
 
     return createSuccessResponse({
       data: platforms.map(p => p.toJSON())
@@ -112,10 +124,14 @@ export class PlatformController {
     );
     if (response) return response;
 
+    // Parse and validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
     const result = await this.queries.listPlatforms.execute({
       platformType,
-      page: parseInt(url.searchParams.get('page') || '1', 10),
-      limit: Math.min(parseInt(url.searchParams.get('limit') || '25', 10), 100)
+      page: paginationResult.pagination.page,
+      limit: paginationResult.pagination.limit
     });
 
     return createSuccessResponse({
@@ -134,13 +150,14 @@ export class PlatformController {
     );
     if (response) return response;
 
+    // Parse flexible ID (numeric or normalized name)
+    const idResult = parseFlexibleId(id);
     let platform;
 
-    // Check if ID is numeric or normalized name
-    if (/^\d+$/.test(id)) {
-      platform = await this.queries.getPlatform.byId(parseInt(id, 10));
+    if (idResult.isNumeric) {
+      platform = await this.queries.getPlatform.byId(idResult.numericValue);
     } else {
-      platform = await this.queries.getPlatform.byNormalizedName(id.toUpperCase());
+      platform = await this.queries.getPlatform.byNormalizedName(idResult.stringValue.toUpperCase());
     }
 
     if (!platform) {
@@ -155,12 +172,10 @@ export class PlatformController {
    * Requires write permission on platforms resource
    */
   async create(request) {
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Parse and validate request body first
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
+    const body = bodyResult.body;
 
     // Get station ID for authorization context
     const stationId = body.station_id || body.stationId;
@@ -206,8 +221,12 @@ export class PlatformController {
    * Requires write permission on platforms resource
    */
   async update(request, id) {
+    // Parse and validate path ID
+    const idResult = parsePathId(id, 'platform_id');
+    if (!idResult.valid) return idResult.error;
+
     // First get the platform to determine its station
-    let platform = await this.queries.getPlatform.byId(parseInt(id, 10));
+    let platform = await this.queries.getPlatform.byId(idResult.value);
     if (!platform) {
       return createNotFoundResponse(`Platform '${id}' not found`);
     }
@@ -218,16 +237,14 @@ export class PlatformController {
     );
     if (response) return response;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Parse and validate request body
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
+    const body = bodyResult.body;
 
     try {
       const updatedPlatform = await this.commands.updatePlatform.execute({
-        id: parseInt(id, 10),
+        id: idResult.value,
         displayName: body.display_name || body.displayName,
         description: body.description,
         latitude: body.latitude,
@@ -249,8 +266,12 @@ export class PlatformController {
    * Requires delete permission on platforms resource
    */
   async delete(request, id) {
+    // Parse and validate path ID
+    const idResult = parsePathId(id, 'platform_id');
+    if (!idResult.valid) return idResult.error;
+
     // First get the platform to determine its station
-    let platform = await this.queries.getPlatform.byId(parseInt(id, 10));
+    let platform = await this.queries.getPlatform.byId(idResult.value);
     if (!platform) {
       return createNotFoundResponse(`Platform '${id}' not found`);
     }
@@ -262,7 +283,7 @@ export class PlatformController {
     if (response) return response;
 
     try {
-      await this.commands.deletePlatform.execute(parseInt(id, 10));
+      await this.commands.deletePlatform.execute(idResult.value);
       return createSuccessResponse({ deleted: true });
     } catch (error) {
       if (error.message.includes('not found')) {

@@ -4,8 +4,10 @@
  * HTTP controller for instrument endpoints.
  * Maps HTTP requests to application use cases.
  * v11.0.0-alpha.34: Added authentication and authorization middleware
+ * v15.6.6: Integrated API validation utilities
  *
  * @module infrastructure/http/controllers/InstrumentController
+ * @see docs/audits/2026-02-11-COMPREHENSIVE-SECURITY-AUDIT.md
  */
 
 import {
@@ -14,6 +16,13 @@ import {
   createNotFoundResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody,
+  parseSorting,
+  parseFlexibleId
+} from './ControllerUtils.js';
 
 /**
  * Instrument Controller
@@ -45,13 +54,14 @@ export class InstrumentController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '25', 10),
-      100
-    );
-    const sortBy = url.searchParams.get('sort_by') || 'normalized_name';
-    const sortOrder = url.searchParams.get('sort_order') || 'asc';
+    // Parse and validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    // Parse and validate sorting
+    const allowedSortFields = ['normalized_name', 'display_name', 'instrument_type', 'status', 'created_at'];
+    const { sortBy, sortOrder } = parseSorting(url, allowedSortFields, 'normalized_name');
+
     const platformId = url.searchParams.get('platform_id');
     const instrumentType = url.searchParams.get('instrument_type') || url.searchParams.get('type');
     const status = url.searchParams.get('status');
@@ -70,8 +80,8 @@ export class InstrumentController {
     }
 
     const result = await this.queries.listInstruments.execute({
-      page,
-      limit,
+      page: paginationResult.pagination.page,
+      limit: paginationResult.pagination.limit,
       sortBy,
       sortOrder,
       platformId: platformId ? parseInt(platformId, 10) : undefined,
@@ -96,9 +106,11 @@ export class InstrumentController {
     );
     if (response) return response;
 
-    const instruments = await this.queries.listInstruments.byPlatformId(
-      parseInt(platformId, 10)
-    );
+    // Parse and validate platform ID
+    const idResult = parsePathId(platformId, 'platform_id');
+    if (!idResult.valid) return idResult.error;
+
+    const instruments = await this.queries.listInstruments.byPlatformId(idResult.value);
 
     return createSuccessResponse({
       data: instruments.map(i => i.toJSON())
@@ -115,9 +127,11 @@ export class InstrumentController {
     );
     if (response) return response;
 
-    const instruments = await this.queries.listInstruments.byStationId(
-      parseInt(stationId, 10)
-    );
+    // Parse and validate station ID
+    const idResult = parsePathId(stationId, 'station_id');
+    if (!idResult.valid) return idResult.error;
+
+    const instruments = await this.queries.listInstruments.byStationId(idResult.value);
 
     return createSuccessResponse({
       data: instruments.map(i => i.toJSON())
@@ -134,14 +148,16 @@ export class InstrumentController {
     );
     if (response) return response;
 
+    // Parse flexible ID (numeric or normalized name)
+    const idResult = parseFlexibleId(id);
     let instrument;
 
-    if (/^\d+$/.test(id)) {
+    if (idResult.isNumeric) {
       instrument = withDetails
-        ? await this.queries.getInstrument.withDetails(parseInt(id, 10))
-        : await this.queries.getInstrument.byId(parseInt(id, 10));
+        ? await this.queries.getInstrument.withDetails(idResult.numericValue)
+        : await this.queries.getInstrument.byId(idResult.numericValue);
     } else {
-      instrument = await this.queries.getInstrument.byNormalizedName(id.toUpperCase());
+      instrument = await this.queries.getInstrument.byNormalizedName(idResult.stringValue.toUpperCase());
     }
 
     if (!instrument) {
@@ -158,12 +174,10 @@ export class InstrumentController {
    * Requires write permission on instruments resource
    */
   async create(request) {
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Parse and validate request body
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
+    const body = bodyResult.body;
 
     // Get platform to determine station for authorization
     const platformId = body.platform_id || body.platformId;
@@ -200,8 +214,12 @@ export class InstrumentController {
    * Requires write permission on instruments resource
    */
   async update(request, id) {
+    // Parse and validate path ID
+    const idResult = parsePathId(id, 'instrument_id');
+    if (!idResult.valid) return idResult.error;
+
     // First get the instrument to determine its station
-    let instrument = await this.queries.getInstrument.byId(parseInt(id, 10));
+    let instrument = await this.queries.getInstrument.byId(idResult.value);
     if (!instrument) {
       return createNotFoundResponse(`Instrument '${id}' not found`);
     }
@@ -218,16 +236,14 @@ export class InstrumentController {
     );
     if (response) return response;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Parse and validate request body
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
+    const body = bodyResult.body;
 
     try {
       const updatedInstrument = await this.commands.updateInstrument.execute({
-        id: parseInt(id, 10),
+        id: idResult.value,
         displayName: body.display_name || body.displayName,
         description: body.description,
         status: body.status,
@@ -249,8 +265,12 @@ export class InstrumentController {
    * Requires delete permission on instruments resource
    */
   async delete(request, id, url) {
+    // Parse and validate path ID
+    const idResult = parsePathId(id, 'instrument_id');
+    if (!idResult.valid) return idResult.error;
+
     // First get the instrument to determine its station
-    let instrument = await this.queries.getInstrument.byId(parseInt(id, 10));
+    let instrument = await this.queries.getInstrument.byId(idResult.value);
     if (!instrument) {
       return createNotFoundResponse(`Instrument '${id}' not found`);
     }
@@ -270,7 +290,7 @@ export class InstrumentController {
     const cascade = url.searchParams.get('cascade') === 'true';
 
     try {
-      await this.commands.deleteInstrument.execute(parseInt(id, 10), { cascade });
+      await this.commands.deleteInstrument.execute(idResult.value, { cascade });
       return createSuccessResponse({ deleted: true });
     } catch (error) {
       if (error.message.includes('not found')) {

@@ -2,11 +2,15 @@
  * Create Flight Log Command
  *
  * Application layer command for creating a new flight log entry.
+ * Includes authorization check (UAV-002) to ensure only authorized users
+ * can create flight logs for missions they're assigned to.
  *
  * @module application/commands/uav/CreateFlightLog
+ * @see docs/audits/2026-02-11-COMPREHENSIVE-SECURITY-AUDIT.md (UAV-002)
  */
 
 import { FlightLog } from '../../../domain/uav/index.js';
+import { UAVAuthorizationService } from '../../../domain/uav/authorization/UAVAuthorizationService.js';
 
 /**
  * Create Flight Log Command
@@ -14,19 +18,25 @@ import { FlightLog } from '../../../domain/uav/index.js';
 export class CreateFlightLog {
   /**
    * @param {Object} dependencies
+   * @param {Object} dependencies.flightLogRepository - Flight log repository
+   * @param {Object} dependencies.missionRepository - Mission repository
+   * @param {Object} dependencies.pilotRepository - Pilot repository
+   * @param {UAVAuthorizationService} [dependencies.authorizationService] - Authorization service
    */
-  constructor({ flightLogRepository, missionRepository, pilotRepository }) {
+  constructor({ flightLogRepository, missionRepository, pilotRepository, authorizationService = null }) {
     this.flightLogRepository = flightLogRepository;
     this.missionRepository = missionRepository;
     this.pilotRepository = pilotRepository;
+    this.authorizationService = authorizationService || new UAVAuthorizationService();
   }
 
   /**
    * Execute the create flight log command
    *
    * @param {Object} input - Flight log data
+   * @param {import('../../../domain/authorization/User.js').User} [input.user] - Authenticated user (required for authorization)
    * @returns {Promise<FlightLog>} Created flight log
-   * @throws {Error} If validation fails
+   * @throws {Error} If validation fails or user unauthorized
    */
   async execute(input) {
     // Verify mission exists and is in progress
@@ -43,6 +53,18 @@ export class CreateFlightLog {
     const pilot = await this.pilotRepository.findById(input.pilot_id);
     if (!pilot) {
       throw new Error(`Pilot ${input.pilot_id} not found`);
+    }
+
+    // UAV-002: Authorization check - pilot must be assigned and user must have access
+    if (input.user) {
+      if (!this.authorizationService.canCreateFlightLog(input.user, mission, input.pilot_id)) {
+        throw new Error(
+          `Unauthorized: User '${input.user.username}' cannot create flight logs ` +
+          `for pilot ${input.pilot_id} on mission ${input.mission_id}. ` +
+          `The pilot must be assigned to the mission, and the user must either be ` +
+          `the pilot themselves, a station admin, or a global admin.`
+        );
+      }
     }
 
     // Get next flight number

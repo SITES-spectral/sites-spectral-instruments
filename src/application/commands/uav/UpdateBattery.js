@@ -2,11 +2,15 @@
  * Update Battery Command
  *
  * Application layer command for updating an existing UAV battery.
+ * Includes authorization check (UAV-003) to ensure only authorized users
+ * can modify batteries at their station.
  *
  * @module application/commands/uav/UpdateBattery
+ * @see docs/audits/2026-02-11-COMPREHENSIVE-SECURITY-AUDIT.md (UAV-003)
  */
 
 import { Battery } from '../../../domain/uav/index.js';
+import { UAVAuthorizationService } from '../../../domain/uav/authorization/UAVAuthorizationService.js';
 
 /**
  * Update Battery Command
@@ -14,9 +18,12 @@ import { Battery } from '../../../domain/uav/index.js';
 export class UpdateBattery {
   /**
    * @param {Object} dependencies
+   * @param {Object} dependencies.batteryRepository - Battery repository
+   * @param {UAVAuthorizationService} [dependencies.authorizationService] - Authorization service
    */
-  constructor({ batteryRepository }) {
+  constructor({ batteryRepository, authorizationService = null }) {
     this.batteryRepository = batteryRepository;
+    this.authorizationService = authorizationService || new UAVAuthorizationService();
   }
 
   /**
@@ -24,13 +31,25 @@ export class UpdateBattery {
    *
    * @param {Object} input - Updated battery data
    * @param {number} input.id - Battery ID
+   * @param {import('../../../domain/authorization/User.js').User} [input.user] - Authenticated user (required for authorization)
    * @returns {Promise<Battery>} Updated battery
-   * @throws {Error} If battery not found
+   * @throws {Error} If battery not found or user unauthorized
    */
   async execute(input) {
     const existing = await this.batteryRepository.findById(input.id);
     if (!existing) {
       throw new Error(`Battery ${input.id} not found`);
+    }
+
+    // UAV-003: Authorization check - user must have modify access to the battery's station
+    if (input.user) {
+      if (!this.authorizationService.canModifyBattery(input.user, existing)) {
+        throw new Error(
+          `Unauthorized: User '${input.user.username}' cannot modify battery ${input.id}. ` +
+          `Only global admins and station admins for station ${existing.station_id} ` +
+          `can modify battery records.`
+        );
+      }
     }
 
     // Create updated battery entity

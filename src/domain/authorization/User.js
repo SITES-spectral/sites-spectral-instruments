@@ -17,6 +17,7 @@ export class User {
    * @param {number|null} params.stationId - Station ID (integer)
    * @param {string|null} params.stationAcronym - Station acronym (e.g., 'SVB')
    * @param {string|null} params.stationNormalizedName - Station normalized name (e.g., 'svartberget')
+   * @param {number|null} params.pilotId - UAV pilot ID (for uav-pilot role)
    * @param {string[]|null} params.permissions - Permission array
    */
   constructor({
@@ -28,6 +29,8 @@ export class User {
     station_acronym = null,
     stationNormalizedName = null,
     station_normalized_name = null,
+    pilotId = null,
+    pilot_id = null,
     permissions = []
   }) {
     this.username = username;
@@ -37,6 +40,7 @@ export class User {
     this.stationId = stationId || station_id;
     this.stationAcronym = stationAcronym || station_acronym;
     this.stationNormalizedName = stationNormalizedName || station_normalized_name;
+    this.pilotId = pilotId || pilot_id;
     this.permissions = permissions || [];
   }
 
@@ -103,6 +107,14 @@ export class User {
    */
   isUAVPilot() {
     return this.role.isUAVPilot();
+  }
+
+  /**
+   * Check if user is station-internal (magic link with station-scoped read-only)
+   * @returns {boolean}
+   */
+  isStationInternal() {
+    return this.role.isStationInternal();
   }
 
   /**

@@ -2,11 +2,15 @@
  * Create Pilot Command
  *
  * Application layer command for creating a new UAV pilot.
+ * Includes authorization check (UAV-004) to ensure only authorized users
+ * can create pilots.
  *
  * @module application/commands/uav/CreatePilot
+ * @see docs/audits/2026-02-11-COMPREHENSIVE-SECURITY-AUDIT.md (UAV-004)
  */
 
 import { Pilot } from '../../../domain/uav/index.js';
+import { UAVAuthorizationService } from '../../../domain/uav/authorization/UAVAuthorizationService.js';
 
 /**
  * Create Pilot Command
@@ -15,19 +19,32 @@ export class CreatePilot {
   /**
    * @param {Object} dependencies
    * @param {import('../../../infrastructure/persistence/d1/D1PilotRepository.js').D1PilotRepository} dependencies.pilotRepository
+   * @param {UAVAuthorizationService} [dependencies.authorizationService] - Authorization service
    */
-  constructor({ pilotRepository }) {
+  constructor({ pilotRepository, authorizationService = null }) {
     this.pilotRepository = pilotRepository;
+    this.authorizationService = authorizationService || new UAVAuthorizationService();
   }
 
   /**
    * Execute the create pilot command
    *
    * @param {Object} input - Pilot data
+   * @param {import('../../../domain/authorization/User.js').User} [input.user] - Authenticated user (required for authorization)
    * @returns {Promise<Pilot>} Created pilot
-   * @throws {Error} If email already exists or validation fails
+   * @throws {Error} If email already exists, user unauthorized, or validation fails
    */
   async execute(input) {
+    // UAV-004: Authorization check - only admins can create pilots
+    if (input.user) {
+      if (!this.authorizationService.canManagePilot(input.user, null)) {
+        throw new Error(
+          `Unauthorized: User '${input.user.username}' cannot create pilots. ` +
+          `Only global admins and station admins can manage pilot records.`
+        );
+      }
+    }
+
     // Check if email already exists
     const existing = await this.pilotRepository.findByEmail(input.email);
     if (existing) {

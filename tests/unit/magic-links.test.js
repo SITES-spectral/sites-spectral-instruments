@@ -31,7 +31,14 @@ vi.mock('../../src/auth/cookie-utils.js', () => ({
   createAuthCookie: vi.fn(() => 'auth=mock-jwt; HttpOnly; Secure')
 }));
 
+// Mock rate limiting middleware (ML-001 tests)
+vi.mock('../../src/middleware/auth-rate-limiter.js', () => ({
+  authRateLimitMiddleware: vi.fn().mockResolvedValue(null), // Allow all requests by default
+  recordAuthAttempt: vi.fn()
+}));
+
 import { getUserFromRequest } from '../../src/auth/authentication.js';
+import { authRateLimitMiddleware } from '../../src/middleware/auth-rate-limiter.js';
 import { logSecurityEvent } from '../../src/utils/logging.js';
 
 // Mock user data
@@ -416,7 +423,8 @@ describe('Magic Links Handler', () => {
 
       expect(response.status).toBe(400);
       const body = await response.json();
-      expect(body.error).toContain('Invalid role');
+      // ML-002: Updated error message format from input validation
+      expect(body.error).toMatch(/role must be|Invalid role/);
     });
 
     it('should accept valid roles', async () => {

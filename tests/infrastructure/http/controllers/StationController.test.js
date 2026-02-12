@@ -91,7 +91,8 @@ describe('StationController', () => {
       const url = {
         searchParams: {
           get: (key) => {
-            const params = { page: '2', limit: '10', sort_by: 'displayName', sort_order: 'desc' };
+            // Use valid snake_case sort fields per API validation
+            const params = { page: '2', limit: '10', sort_by: 'display_name', sort_order: 'desc' };
             return params[key];
           }
         }
@@ -102,7 +103,7 @@ describe('StationController', () => {
       expect(mockContainer.queries.listStations.execute).toHaveBeenCalledWith({
         page: 2,
         limit: 10,
-        sortBy: 'displayName',
+        sortBy: 'display_name',
         sortOrder: 'desc'
       });
     });

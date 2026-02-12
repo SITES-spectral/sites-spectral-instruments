@@ -88,7 +88,19 @@ export class CreateInstrument {
       specifications: input.specifications || {}
     });
 
-    // Save and return
-    return await this.instrumentRepository.save(instrument);
+    // Save and return - handle UNIQUE constraint (race condition protection)
+    try {
+      return await this.instrumentRepository.save(instrument);
+    } catch (error) {
+      // TOCTOU Race Condition: Another request may have created the same instrument
+      // between our existence check and save. Handle UNIQUE constraint gracefully.
+      if (error.message && error.message.includes('UNIQUE constraint')) {
+        throw new Error(
+          `Instrument '${normalizedName}' already exists (concurrent creation detected). ` +
+          `Please try again.`
+        );
+      }
+      throw error;
+    }
   }
 }

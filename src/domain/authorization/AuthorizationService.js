@@ -76,7 +76,7 @@ const PERMISSION_MATRIX = {
     uavFlightLogs: ['read', 'write'],
     uavBatteries: ['read']
   },
-  // Regular station users (e.g., 'svartberget') are READ-ONLY
+  // Regular station users (e.g., 'svartberget') are READ-ONLY at their station
   stationUser: {
     stations: ['read'],
     platforms: ['read'],
@@ -94,6 +94,26 @@ const PERMISSION_MATRIX = {
     uavFlightLogs: ['read'],
     uavBatteries: ['read']
   },
+  // Station-internal users (via magic link) have station-scoped read-only access (v15.6.3)
+  // CRITICAL: This is NOT global read - data is filtered to their station only
+  stationInternal: {
+    stations: ['read'],
+    platforms: ['read'],
+    instruments: ['read'],
+    rois: ['read'],
+    aois: ['read'],
+    campaigns: ['read'],
+    products: ['read'],
+    users: [],
+    admin: [],
+    export: ['read'],
+    // UAV Domain - read only, station-scoped
+    uavPilots: ['read'],
+    uavMissions: ['read'],
+    uavFlightLogs: ['read'],
+    uavBatteries: ['read']
+  },
+  // Global readonly users can view ALL stations (not station-scoped)
   readonly: {
     stations: ['read'],
     platforms: ['read'],
@@ -141,6 +161,10 @@ export class AuthorizationService {
     }
     if (user.isStationUser()) {
       return 'stationUser';
+    }
+    // AUTH-001 fix: station-internal gets station-scoped read (not global readonly)
+    if (user.isStationInternal()) {
+      return 'stationInternal';
     }
     return 'readonly';
   }

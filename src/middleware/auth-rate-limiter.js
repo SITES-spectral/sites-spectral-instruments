@@ -25,6 +25,17 @@ const RATE_LIMITS = {
     maxAttempts: 30,
     windowMs: 60 * 1000, // 1 minute
     blockDurationMs: 60 * 1000 // 1 minute after limit exceeded
+  },
+  // ML-001: Rate limiting for magic link endpoints (v15.6.3)
+  magic_link_create: {
+    maxAttempts: 5,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    blockDurationMs: 60 * 60 * 1000 // 1 hour after limit exceeded
+  },
+  magic_link_validate: {
+    maxAttempts: 10,
+    windowMs: 60 * 1000, // 1 minute
+    blockDurationMs: 5 * 60 * 1000 // 5 minutes after limit exceeded
   }
 };
 

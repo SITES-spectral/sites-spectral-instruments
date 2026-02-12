@@ -4,8 +4,10 @@
  * HTTP controller for station endpoints.
  * Maps HTTP requests to application use cases.
  * v11.0.0-alpha.34: Added authentication and authorization middleware
+ * v15.6.6: Integrated API validation utilities
  *
  * @module infrastructure/http/controllers/StationController
+ * @see docs/audits/2026-02-11-COMPREHENSIVE-SECURITY-AUDIT.md
  */
 
 import {
@@ -14,6 +16,13 @@ import {
   createNotFoundResponse
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
+import {
+  parsePagination,
+  parsePathId,
+  parseRequestBody,
+  parseSorting,
+  parseFlexibleId
+} from './ControllerUtils.js';
 
 /**
  * Station Controller
@@ -39,17 +48,17 @@ export class StationController {
     );
     if (response) return response;
 
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = Math.min(
-      parseInt(url.searchParams.get('limit') || '25', 10),
-      100
-    );
-    const sortBy = url.searchParams.get('sort_by') || 'acronym';
-    const sortOrder = url.searchParams.get('sort_order') || 'asc';
+    // Parse and validate pagination
+    const paginationResult = parsePagination(url);
+    if (!paginationResult.valid) return paginationResult.error;
+
+    // Parse and validate sorting
+    const allowedSortFields = ['acronym', 'display_name', 'created_at', 'updated_at'];
+    const { sortBy, sortOrder } = parseSorting(url, allowedSortFields, 'acronym');
 
     const result = await this.queries.listStations.execute({
-      page,
-      limit,
+      page: paginationResult.pagination.page,
+      limit: paginationResult.pagination.limit,
       sortBy,
       sortOrder
     });
@@ -70,13 +79,14 @@ export class StationController {
     );
     if (response) return response;
 
+    // Parse flexible ID (numeric or acronym)
+    const idResult = parseFlexibleId(id);
     let station;
 
-    // Check if ID is numeric or acronym
-    if (/^\d+$/.test(id)) {
-      station = await this.queries.getStation.byId(parseInt(id, 10));
+    if (idResult.isNumeric) {
+      station = await this.queries.getStation.byId(idResult.numericValue);
     } else {
-      station = await this.queries.getStation.byAcronym(id.toUpperCase());
+      station = await this.queries.getStation.byAcronym(idResult.stringValue.toUpperCase());
     }
 
     if (!station) {
@@ -116,12 +126,10 @@ export class StationController {
     );
     if (response) return response;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Parse and validate request body
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
+    const body = bodyResult.body;
 
     try {
       const station = await this.commands.createStation.execute({
@@ -151,16 +159,18 @@ export class StationController {
     );
     if (response) return response;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return createErrorResponse('Invalid JSON in request body', 400);
-    }
+    // Parse and validate path ID
+    const idResult = parsePathId(id, 'station_id');
+    if (!idResult.valid) return idResult.error;
+
+    // Parse and validate request body
+    const bodyResult = await parseRequestBody(request);
+    if (!bodyResult.valid) return bodyResult.error;
+    const body = bodyResult.body;
 
     try {
       const station = await this.commands.updateStation.execute({
-        id: parseInt(id, 10),
+        id: idResult.value,
         displayName: body.display_name || body.displayName,
         description: body.description,
         latitude: body.latitude,
@@ -189,8 +199,12 @@ export class StationController {
     );
     if (response) return response;
 
+    // Parse and validate path ID
+    const idResult = parsePathId(id, 'station_id');
+    if (!idResult.valid) return idResult.error;
+
     try {
-      await this.commands.deleteStation.execute(parseInt(id, 10));
+      await this.commands.deleteStation.execute(idResult.value);
       return createSuccessResponse({ deleted: true });
     } catch (error) {
       if (error.message.includes('not found')) {
