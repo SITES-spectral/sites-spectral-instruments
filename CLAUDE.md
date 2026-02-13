@@ -60,7 +60,7 @@ src/
 
 ---
 
-## Current Version: 15.0.0 - Subdomain Architecture with Cloudflare Access (2026-01-24)
+## Current Version: 15.6.10 - Security Audit Complete (2026-02-13)
 
 > **Architecture Credit**: This subdomain-based architecture design is based on
 > architectural knowledge shared by **Flights for Biodiversity Sweden AB**
@@ -71,13 +71,31 @@ src/
 **🔐 Admin Portal:** https://admin.sitesspectral.work
 **📍 Station Portals:** https://{station}.sitesspectral.work
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-beltran.workers.dev
-**📅 Last Updated:** 2026-01-24
+**📅 Last Updated:** 2026-02-13
 **🚀 API Version:** V11 (via `/api/latest` alias)
 **🔒 Auth Methods:** Cloudflare Access OTP, Magic Links, httpOnly Cookies
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
 **📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
-**🧪 Test Coverage:** 653 tests across 36 test files
+**🧪 Test Coverage:** 1268 tests across 52 test files
 **📍 Stations:** 9 SITES member stations (7 original + ALN, HYL)
+**🔒 Security Audit:** All P0/P1/P2 items complete (2026-02-11 audit)
+
+### What's New in v15.6.10
+
+**Security Audit Complete** - All remediation items from the 2026-02-11 comprehensive security audit have been implemented:
+
+| Priority | Items | Description |
+|----------|-------|-------------|
+| **P0** | 5 items | Cookie security, magic link validation, race conditions |
+| **P1** | 6 items | UAV authorization, API validation, pilot audit trail |
+| **P2** | 2 items | Multi-use token audit trail, IP pinning |
+
+**New Security Features:**
+- Centralized API validation with sort field whitelists
+- Magic link audit trail (`magic_link_usage_log` table)
+- IP pinning for multi-use magic links
+- Pilot status audit trail for compliance
+- UAV authorization domain service
 
 ### What's New in v15.0.0
 
@@ -908,14 +926,28 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 | Admin Portal | https://admin.sitesspectral.work |
 | Station Portals | https://{station}.sitesspectral.work |
 | Worker URL | https://sites-spectral-instruments.jose-beltran.workers.dev |
-| Current Version | 15.0.0 |
-| Last Deployed | 2026-01-24 |
+| Current Version | 15.6.10 |
+| Last Deployed | 2026-02-13 |
 | Status | Production Ready |
 | Environment | Cloudflare Workers + D1 Database + CF Access |
 | Authentication | Cloudflare Access OTP, Magic Links, httpOnly Cookies |
 | Active Platform Types | Fixed, UAV, Satellite |
 | Coming Soon | Mobile, USV, UUV |
-| Test Coverage | 653 tests across 36 files |
+| Test Coverage | 1268 tests across 52 files |
+| Security Audit | All P0/P1/P2 items complete (2026-02-11) |
+
+### v15.6.x Security Features
+
+| Feature | Version | Status |
+|---------|---------|--------|
+| **Centralized API Validation** | v15.6.6 | ✅ Active |
+| **Sort Field Whitelists** | v15.6.9 | ✅ Active |
+| **Magic Link Audit Trail** | v15.6.8 | ✅ Active |
+| **IP Pinning for Magic Links** | v15.6.8 | ✅ Active |
+| **Pilot Status Audit Trail** | v15.6.8 | ✅ Active |
+| **UAV Authorization Service** | v15.6.7 | ✅ Active |
+| **Email Service (MailChannels)** | v15.6.6 | ✅ Active |
+| **Request Body Validation** | v15.6.6 | ✅ Active |
 
 ### v15.0.0 Features
 

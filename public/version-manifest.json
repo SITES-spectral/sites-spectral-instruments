@@ -1,19 +1,19 @@
 {
-  "version": "15.6.9",
+  "version": "15.6.10",
   "buildDate": "2026-02-12",
-  "timestamp": 1770933600000,
+  "timestamp": 1770932465997,
   "files": {
-    "/css/styles.css?v=15.6.9": "15.6.9",
-    "/js/utils.js?v=15.6.9": "15.6.9",
-    "/js/api.js?v=15.6.9": "15.6.9",
-    "/js/components.js?v=15.6.9": "15.6.9",
-    "/js/interactive-map.js?v=15.6.9": "15.6.9",
-    "/js/dashboard.js?v=15.6.9": "15.6.9",
-    "/js/station-dashboard.js?v=15.6.9": "15.6.9",
-    "/js/navigation.js?v=15.6.9": "15.6.9",
-    "/js/export.js?v=15.6.9": "15.6.9",
-    "/js/core/version.js?v=15.6.9": "15.6.9",
-    "/js/core/security.js?v=15.6.9": "15.6.9",
-    "/js/core/promise-utils.js?v=15.6.9": "15.6.9"
+    "/css/styles.css?v=15.6.10": "15.6.10",
+    "/js/utils.js?v=15.6.10": "15.6.10",
+    "/js/api.js?v=15.6.10": "15.6.10",
+    "/js/components.js?v=15.6.10": "15.6.10",
+    "/js/interactive-map.js?v=15.6.10": "15.6.10",
+    "/js/dashboard.js?v=15.6.10": "15.6.10",
+    "/js/station-dashboard.js?v=15.6.10": "15.6.10",
+    "/js/navigation.js?v=15.6.10": "15.6.10",
+    "/js/export.js?v=15.6.10": "15.6.10",
+    "/js/core/version.js?v=15.6.10": "15.6.10",
+    "/js/core/security.js?v=15.6.10": "15.6.10",
+    "/js/core/promise-utils.js?v=15.6.10": "15.6.10"
   }
 }

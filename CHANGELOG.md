@@ -13,6 +13,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.10] - 2026-02-13
+
+### Security Audit Complete - Documentation Release
+
+This release marks the completion of all security remediation items from the 2026-02-11 comprehensive security audit. All P0, P1, and P2 items have been implemented, tested, and deployed.
+
+#### Security Audit Summary
+
+| Priority | ID | Description | Status |
+|----------|-----|-------------|--------|
+| **P0** | AUTH-001 | Cross-subdomain cookie security | ✅ Complete |
+| **P0** | ML-001 | Single-use token enforcement | ✅ Complete |
+| **P0** | ML-002 | Token expiration check | ✅ Complete |
+| **P0** | ML-003 | Revocation status check | ✅ Complete |
+| **P0** | RACE-001 | Race condition prevention | ✅ Complete |
+| **P1** | UAV-001 | UAV authorization service | ✅ Complete |
+| **P1** | UAV-002 | Mission approval authorization | ✅ Complete |
+| **P1** | UAV-003 | Flight log authorization | ✅ Complete |
+| **P1** | UAV-004 | Battery management authorization | ✅ Complete |
+| **P1** | UAV-005 | Pilot status audit trail | ✅ Complete |
+| **P1** | API-001 | Centralized API validation | ✅ Complete |
+| **P2** | ML-005 | Multi-use token audit trail | ✅ Complete |
+| **P2** | ML-006 | IP pinning for magic links | ✅ Complete |
+
+#### Test Coverage Summary
+
+| Category | Tests | Files |
+|----------|-------|-------|
+| Unit Tests | 892 | 38 |
+| Integration Tests | 376 | 14 |
+| **Total** | **1268** | **52** |
+
+#### Architecture Compliance
+
+All code follows:
+- **SOLID Principles** - Single responsibility, dependency inversion
+- **Hexagonal Architecture** - Ports & adapters pattern
+- **Clean Code** - No console.log in production, proper error handling
+- **Security Best Practices** - Input validation, CSRF protection, XSS prevention
+
+#### Database Schema Additions (v15.6.x)
+
+**New Tables:**
+- `magic_link_usage_log` - Audit trail for magic link usage
+- `pilot_status_audit` - Compliance tracking for pilot status changes
+
+**New Columns:**
+- `magic_link_tokens.first_use_ip` - IP pinning support
+- `magic_link_tokens.ip_pinning_enabled` - IP pinning flag
+- `magic_link_tokens.use_count` - Usage tracking
+
+#### Files Added/Modified in v15.6.x Series
+
+**New Files:**
+- `src/services/email-service.js` - MailChannels email integration
+- `src/domain/uav/UAVAuthorizationService.js` - UAV authorization domain service
+- `src/infrastructure/http/controllers/ControllerUtils.js` - Shared validation utilities
+- `src/utils/api-validation.js` - Centralized API validation
+- `migrations/0047_magic_link_usage_audit.sql` - Audit tables
+- `tests/unit/magic-link-p2-security.test.js` - P2 security tests
+- `tests/unit/pilot-status-audit.test.js` - Pilot audit tests
+
+**Modified Controllers:**
+- All 10 HTTP controllers updated with centralized validation
+- Sort field whitelists added to prevent SQL injection
+- Request body validation with size limits
+
+---
+
 ## [15.6.9] - 2026-02-12
 
 ### API Validation Extension (v15.6.9)
