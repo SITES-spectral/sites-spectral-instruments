@@ -60,7 +60,7 @@ src/
 
 ---
 
-## Current Version: 15.6.10 - Security Audit Complete (2026-02-13)
+## Current Version: 15.6.11 - Session Persistence for CF Access (2026-02-16)
 
 > **Architecture Credit**: This subdomain-based architecture design is based on
 > architectural knowledge shared by **Flights for Biodiversity Sweden AB**
@@ -71,7 +71,7 @@ src/
 **🔐 Admin Portal:** https://admin.sitesspectral.work
 **📍 Station Portals:** https://{station}.sitesspectral.work
 **🔗 Worker URL:** https://sites-spectral-instruments.jose-beltran.workers.dev
-**📅 Last Updated:** 2026-02-13
+**📅 Last Updated:** 2026-02-16
 **🚀 API Version:** V11 (via `/api/latest` alias)
 **🔒 Auth Methods:** Cloudflare Access OTP, Magic Links, httpOnly Cookies
 **♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
@@ -79,6 +79,41 @@ src/
 **🧪 Test Coverage:** 1268 tests across 52 test files
 **📍 Stations:** 9 SITES member stations (7 original + ALN, HYL)
 **🔒 Security Audit:** All P0/P1/P2 items complete (2026-02-11 audit)
+
+### What's New in v15.6.11
+
+**Session Persistence for CF Access Users (SEC-007)** - Fixed session persistence so admin users don't need to re-authenticate via OTP when CF Access JWT expires.
+
+**Problem Solved:**
+- Previously, CF Access authentication only relied on short-lived CF Access JWTs
+- When JWT expired (based on CF Access policy), users had to re-enter OTP
+- This caused friction for admins making multiple updates
+
+**Solution Implemented:**
+- When CF Access authentication succeeds, an internal session cookie is now issued
+- Cookie persists for 24 hours across all subdomains (`Domain=.sitesspectral.work`)
+- Uses the same httpOnly secure cookie mechanism as password and magic link auth
+- Backward compatible with existing authentication flows
+
+**Authentication Session Flow:**
+
+| Auth Method | Initial Auth | Session Persistence |
+|-------------|--------------|---------------------|
+| CF Access OTP | Email OTP | Internal cookie (24h) |
+| Password | Password | Internal cookie (24h) |
+| Magic Link | Email link | Internal cookie (24h) |
+
+**Technical Implementation:**
+```javascript
+// In worker.js - Issue session cookie for CF Access users
+if (user && user.auth_provider === 'cloudflare_access') {
+  const existingCookie = getTokenFromCookie(request);
+  if (!existingCookie) {
+    const internalToken = await generateToken(user, env);
+    response.headers.set('Set-Cookie', createAuthCookie(internalToken, request));
+  }
+}
+```
 
 ### What's New in v15.6.10
 
@@ -926,8 +961,8 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 | Admin Portal | https://admin.sitesspectral.work |
 | Station Portals | https://{station}.sitesspectral.work |
 | Worker URL | https://sites-spectral-instruments.jose-beltran.workers.dev |
-| Current Version | 15.6.10 |
-| Last Deployed | 2026-02-13 |
+| Current Version | 15.6.11 |
+| Last Deployed | 2026-02-16 |
 | Status | Production Ready |
 | Environment | Cloudflare Workers + D1 Database + CF Access |
 | Authentication | Cloudflare Access OTP, Magic Links, httpOnly Cookies |
@@ -940,6 +975,7 @@ See `docs/VOCABULARY_MAPPING.md` for complete documentation.
 
 | Feature | Version | Status |
 |---------|---------|--------|
+| **CF Access Session Persistence** | v15.6.11 | ✅ Active |
 | **Centralized API Validation** | v15.6.6 | ✅ Active |
 | **Sort Field Whitelists** | v15.6.9 | ✅ Active |
 | **Magic Link Audit Trail** | v15.6.8 | ✅ Active |
