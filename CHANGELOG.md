@@ -13,6 +13,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.7.0] - 2026-02-16
+
+### Added - Database Audit & Data Migration
+
+#### Comprehensive Audit
+Conducted full audit of production database against legacy YAML configuration files, identifying and resolving critical gaps in platforms, instruments, and ROIs.
+
+See: [`docs/audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md`](docs/audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md)
+
+#### New Stations (3)
+
+| Acronym | Name | Type | ICOS Class | Coordinates |
+|---------|------|------|------------|-------------|
+| **ALN** | Alnarp | Guest (SITES) | - | 55.6594°N, 13.0822°E |
+| **HYL** | Hyltemossa | Guest (ICOS) | Class 1 | 56.0976°N, 13.4189°E |
+| **NOR** | Norunda | Guest (ICOS) | Class 1 | 60.0864°N, 17.4794°E |
+
+#### New Platforms (8)
+
+| Station | Platform | Type | Status |
+|---------|----------|------|--------|
+| SVB | SVB_FOR_TWR02 | Fixed (Tripod) | Active |
+| SVB | SVB_FOR_TWR03 | Fixed (Tripod) | Active |
+| SVB | SVB_MIR_TWR04 | Fixed (Pole) | Active |
+| ALN | ALN_AGR_TWR01 | Fixed (Tower) | Planned |
+| ALN | ALN_DJI_M3M_UAV01 | **UAV** | Active |
+| ALN | ALN_ESA_S2A_SAT01 | **Satellite** | Active |
+| HYL | HYL_FOR_TWR01 | Fixed (Tower) | Planned |
+| NOR | NOR_FOR_TWR01 | Fixed (Tower, 102m) | Planned |
+
+#### New Instruments (4)
+
+| Platform | Instrument | Type | Status |
+|----------|------------|------|--------|
+| SVB_FOR_TWR02 | SVB_FOR_TWR02_PHE01 | Phenocam | Active |
+| ALN_DJI_M3M_UAV01 | ALN_DJI_M3M_UAV01_MS01 | Multispectral | Active |
+| ALN_DJI_M3M_UAV01 | ALN_DJI_M3M_UAV01_RGB01 | RGB Camera | Active |
+| ALN_ESA_S2A_SAT01 | ALN_ESA_S2A_SAT01_MSI01 | Multispectral | Active |
+
+#### ROIs Migration (40)
+
+Migrated all ROI definitions from phenocams configuration to production database:
+
+| Station | Instruments | ROIs |
+|---------|-------------|------|
+| ANS | 1 | 4 |
+| GRI | 1 | 2 |
+| LON | 3 | 11 |
+| RBD | 2 | 4 |
+| SKC | 9 | 11 |
+| SVB | 5 | 8 |
+
+#### Database Totals (Post-Migration)
+
+| Entity | Count |
+|--------|-------|
+| Stations | 12 |
+| Platforms | 30 |
+| Instruments | 29 |
+| ROIs | 40 |
+
+#### Migrations Applied
+
+- `0047_add_svb_missing_platforms.sql` - SVB platforms and instrument
+- `0048_add_phenocam_rois.sql` - All ROI definitions
+- `0049_add_guest_stations.sql` - ALN, HYL, NOR stations with platforms
+
+#### Files Modified
+
+- `package.json` - Version 15.7.0
+- `src/version/index.js` - Version 15.7.0
+- `yamls/stations_latest_production.yaml` - Added NOR station, updated changelog
+- `apps/phenocams/config/stations.yaml` - Added SVB_FOR_TWR02_PHE01, SVB_MIR_TWR03_PHE01
+- `docs/audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md` - New audit document
+
+---
+
 ## [15.6.11] - 2026-02-16
 
 ### Fixed - Session Persistence for CF Access Users (SEC-007)

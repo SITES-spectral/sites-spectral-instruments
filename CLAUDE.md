@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Current Version: 15.6.11
+## Current Version: 15.7.0
 
 | Property | Value |
 |----------|-------|
@@ -13,9 +13,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **Public Portal** | https://sitesspectral.work |
 | **Last Updated** | 2026-02-16 |
 | **Test Coverage** | 1268 tests |
+| **Stations** | 12 (9 SITES + 3 Guest) |
+| **Platforms** | 30 |
+| **Instruments** | 29 |
+| **ROIs** | 40 |
 
 ### Recent Changes
 
+- **v15.7.0**: Database audit, 3 guest stations (ALN, HYL, NOR), 40 ROIs migrated ([docs](docs/audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md))
 - **v15.6.11**: CF Access session persistence ([docs](docs/security/SESSION_PERSISTENCE.md))
 - **v15.6.10**: Security audit complete (P0/P1/P2)
 - **v15.0.0**: Subdomain architecture ([docs](docs/architecture/SUBDOMAIN_ARCHITECTURE.md))

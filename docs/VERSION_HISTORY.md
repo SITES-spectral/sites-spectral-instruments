@@ -1,9 +1,48 @@
 # Version History
 
-> **Current Version**: 15.6.11
+> **Current Version**: 15.7.0
 > **Last Updated**: 2026-02-16
 
 For detailed changelog with all versions, see [CHANGELOG.md](../CHANGELOG.md).
+
+---
+
+## v15.7.0 - Database Audit & Guest Stations (2026-02-16)
+
+**Comprehensive Database Audit & Data Migration**
+
+Conducted full audit of production database against legacy YAML, identifying and resolving all critical gaps.
+
+### New Guest Stations (3)
+
+| Acronym | Name | Type | ICOS Class |
+|---------|------|------|------------|
+| **ALN** | Alnarp | SITES Guest | - |
+| **HYL** | Hyltemossa | ICOS Guest | Class 1 |
+| **NOR** | Norunda | ICOS Guest | Class 1 |
+
+### Database Additions
+
+| Category | Added | Total |
+|----------|-------|-------|
+| Stations | +3 | 12 |
+| Platforms | +8 | 30 |
+| Instruments | +4 | 29 |
+| ROIs | +40 | 40 |
+
+### Platform Types Added
+
+- **UAV**: ALN_DJI_M3M_UAV01 (DJI Mavic 3 Multispectral)
+- **Satellite**: ALN_ESA_S2A_SAT01 (Sentinel-2A)
+- **Fixed**: SVB below-canopy platforms, HYL/NOR flux towers
+
+### Migrations
+
+- `0047_add_svb_missing_platforms.sql`
+- `0048_add_phenocam_rois.sql`
+- `0049_add_guest_stations.sql`
+
+See: [Audit Report](./audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md)
 
 ---
 
