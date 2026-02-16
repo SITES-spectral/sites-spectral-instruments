@@ -13,6 +13,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.11] - 2026-02-16
+
+### Fixed - Session Persistence for CF Access Users (SEC-007)
+
+**Problem**: Users authenticating via Cloudflare Access OTP needed to re-authorize when CF Access JWT expired (typically hours to 24 hours based on Access Policy). This created friction for admin users who had to repeatedly enter OTP codes.
+
+**Solution**: When CF Access authentication succeeds, an internal session cookie is now automatically issued. This provides:
+
+- **Persistent 24-hour sessions**: Session persists regardless of CF Access JWT expiration
+- **Cross-subdomain support**: Cookie shared via `Domain=.sitesspectral.work`
+- **Seamless experience**: No OTP re-verification required within session lifetime
+- **Backward compatible**: Doesn't affect password-based or magic link authentication
+
+#### Technical Implementation
+
+```javascript
+// In worker.js - Issue session cookie for CF Access users
+if (user && user.auth_provider === 'cloudflare_access') {
+  const existingCookie = getTokenFromCookie(request);
+  if (!existingCookie) {
+    const internalToken = await generateToken(user, env);
+    response.headers.set('Set-Cookie', createAuthCookie(internalToken, request));
+  }
+}
+```
+
+#### Authentication Flow (Updated)
+
+| Auth Method | Initial Auth | Session Persistence |
+|-------------|--------------|---------------------|
+| CF Access OTP | Email OTP | Internal cookie (24h) |
+| Password | Password | Internal cookie (24h) |
+| Magic Link | Email link | Internal cookie (24h) |
+
+#### Files Modified
+
+- `src/worker.js` - Added session cookie issuance for CF Access users
+- `package.json` - Version 15.6.11
+- `src/version/index.js` - Version 15.6.11
+
+---
+
 ## [15.6.10] - 2026-02-13
 
 ### Security Audit Complete - Documentation Release

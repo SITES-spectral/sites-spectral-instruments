@@ -1,14 +1,20 @@
-// SITES Spectral Stations & Instruments - Main Worker v15.0.2
+// SITES Spectral Stations & Instruments - Main Worker v15.6.11
 // Hexagonal Architecture with Cloudflare Workers + Subdomain Routing
 // Handles both static assets and API routes with Cloudflare Access authentication
 //
 // Architecture Credit: This subdomain-based architecture design is based on
 // architectural knowledge shared by Flights for Biodiversity Sweden AB
 // (https://github.com/flightsforbiodiversity)
+//
+// v15.6.11: Added persistent session cookie for CF Access users (SEC-007)
+// When CF Access authentication succeeds, an internal session cookie is issued
+// to provide persistent authentication without requiring OTP re-verification
 
 import { createCors, validateCorsOrigin, createCorsErrorResponse } from './cors';
 import { handleApiRequest } from './api-handler';
 import { CloudflareAccessAdapter } from './infrastructure/auth/CloudflareAccessAdapter.js';
+import { generateToken } from './auth/authentication.js';
+import { createAuthCookie, getTokenFromCookie } from './auth/cookie-utils.js';
 
 /**
  * Get subdomain from Host header
@@ -211,6 +217,24 @@ export default {
       response.headers.set('X-Portal-Type', portalType);
       if (subdomain) {
         response.headers.set('X-Subdomain', subdomain);
+      }
+
+      // v15.6.11 (SEC-007): Issue persistent session cookie for CF Access users
+      // This prevents requiring OTP re-authentication when CF Access JWT expires
+      // The internal session cookie lasts 24 hours and is shared across subdomains
+      if (user && user.auth_provider === 'cloudflare_access') {
+        const existingCookie = getTokenFromCookie(request);
+        if (!existingCookie) {
+          try {
+            // Generate internal JWT for persistent session
+            const internalToken = await generateToken(user, env);
+            const authCookie = createAuthCookie(internalToken, request);
+            response.headers.set('Set-Cookie', authCookie);
+          } catch (cookieError) {
+            // Don't fail the request if cookie generation fails
+            console.warn('Failed to create session cookie for CF Access user:', cookieError);
+          }
+        }
       }
 
       return response;
