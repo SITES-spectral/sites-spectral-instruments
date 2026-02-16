@@ -2,419 +2,111 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Note**: For detailed version history and legacy documentation, see [CLAUDE_LEGACY.md](./CLAUDE_LEGACY.md)
+---
+
+## Current Version: 15.6.11
+
+| Property | Value |
+|----------|-------|
+| **Status** | Production Ready |
+| **Admin Portal** | https://admin.sitesspectral.work |
+| **Public Portal** | https://sitesspectral.work |
+| **Last Updated** | 2026-02-16 |
+| **Test Coverage** | 1268 tests |
+
+### Recent Changes
+
+- **v15.6.11**: CF Access session persistence ([docs](docs/security/SESSION_PERSISTENCE.md))
+- **v15.6.10**: Security audit complete (P0/P1/P2)
+- **v15.0.0**: Subdomain architecture ([docs](docs/architecture/SUBDOMAIN_ARCHITECTURE.md))
+
+See: [Version History](docs/VERSION_HISTORY.md) | [Feature Matrix](docs/FEATURE_MATRIX.md) | [CHANGELOG](CHANGELOG.md)
 
 ---
 
-## ARCHITECTURE REQUIREMENTS (MANDATORY)
+## Architecture Requirements
 
-**All new code MUST follow SOLID principles and Hexagonal Architecture.**
-
-### SOLID Principles (Enforced)
-
-| Principle | Requirement |
-|-----------|-------------|
-| **S**ingle Responsibility | Each class/module has ONE reason to change |
-| **O**pen/Closed | Open for extension, closed for modification |
-| **L**iskov Substitution | Subtypes must be substitutable for base types |
-| **I**nterface Segregation | Many specific interfaces over one general |
-| **D**ependency Inversion | Depend on abstractions, not concretions |
-
-### Hexagonal Architecture (Ports & Adapters)
+**All code MUST follow SOLID principles and Hexagonal Architecture.**
 
 ```
 src/
 ├── domain/           # Core business logic (NO external dependencies)
-│   ├── station/      # Station entities, services, repository ports
+│   ├── station/      # Station entities, repository ports
 │   ├── platform/     # Platform entities, type strategies
 │   ├── instrument/   # Instrument entities, type registry
-│   └── authorization/# Authorization domain (v11.0.0-alpha.30)
-│       ├── Role.js           # Role value object
-│       ├── User.js           # User entity with station access
-│       └── AuthorizationService.js  # Permission decisions
+│   └── authorization/# Role, User, AuthorizationService
 │
 ├── application/      # Use cases (orchestration layer)
-│   ├── commands/     # Write operations (CreatePlatform, DeleteInstrument)
-│   └── queries/      # Read operations (GetStationDashboard, ListPlatforms)
+│   ├── commands/     # Write operations
+│   └── queries/      # Read operations
 │
-└── infrastructure/   # External adapters (framework-specific)
-    ├── persistence/  # Database adapters (D1Repository implementations)
-    ├── http/         # API routes, controllers, middleware
-    └── auth/         # Authentication adapters (uses domain authorization)
+└── infrastructure/   # External adapters
+    ├── persistence/  # D1Repository implementations
+    ├── http/         # Controllers, routes, middleware
+    └── auth/         # Authentication adapters
 ```
-
-### Type System Patterns
-
-| Entity | Pattern | Reason |
-|--------|---------|--------|
-| **Platform Types** | Strategy (code-based) | Different behavior (naming, auto-creation) |
-| **Instrument Types** | Registry (config-driven) | Different data schemas (load from YAML) |
 
 ### Code Rules
 
-1. **Domain layer has ZERO external dependencies** - no database, HTTP, or framework code
-2. **Repository interfaces (ports) live in domain** - implementations (adapters) in infrastructure
-3. **Use cases orchestrate domain logic** - never put business logic in controllers
-4. **Config-driven over code-driven** - use YAML for instrument types, validation rules
-5. **No monolithic files** - split into focused, single-responsibility modules
-
----
-
-## Current Version: 15.6.11 - Session Persistence for CF Access (2026-02-16)
-
-> **Architecture Credit**: This subdomain-based architecture design is based on
-> architectural knowledge shared by **Flights for Biodiversity Sweden AB**
-> (https://github.com/flightsforbiodiversity).
-
-**✅ STATUS: PRODUCTION READY**
-**🌐 Public Portal:** https://sitesspectral.work
-**🔐 Admin Portal:** https://admin.sitesspectral.work
-**📍 Station Portals:** https://{station}.sitesspectral.work
-**🔗 Worker URL:** https://sites-spectral-instruments.jose-beltran.workers.dev
-**📅 Last Updated:** 2026-02-16
-**🚀 API Version:** V11 (via `/api/latest` alias)
-**🔒 Auth Methods:** Cloudflare Access OTP, Magic Links, httpOnly Cookies
-**♿ Accessibility:** WCAG 2.4.3 Modal Focus Trap
-**📚 Standard Vocabularies:** Darwin Core, ICOS, Copernicus aligned
-**🧪 Test Coverage:** 1268 tests across 52 test files
-**📍 Stations:** 9 SITES member stations (7 original + ALN, HYL)
-**🔒 Security Audit:** All P0/P1/P2 items complete (2026-02-11 audit)
-
-### What's New in v15.6.11
-
-**Session Persistence for CF Access Users (SEC-007)** - Fixed session persistence so admin users don't need to re-authenticate via OTP when CF Access JWT expires.
-
-**Problem Solved:**
-- Previously, CF Access authentication only relied on short-lived CF Access JWTs
-- When JWT expired (based on CF Access policy), users had to re-enter OTP
-- This caused friction for admins making multiple updates
-
-**Solution Implemented:**
-- When CF Access authentication succeeds, an internal session cookie is now issued
-- Cookie persists for 24 hours across all subdomains (`Domain=.sitesspectral.work`)
-- Uses the same httpOnly secure cookie mechanism as password and magic link auth
-- Backward compatible with existing authentication flows
-
-**Authentication Session Flow:**
-
-| Auth Method | Initial Auth | Session Persistence |
-|-------------|--------------|---------------------|
-| CF Access OTP | Email OTP | Internal cookie (24h) |
-| Password | Password | Internal cookie (24h) |
-| Magic Link | Email link | Internal cookie (24h) |
-
-**Technical Implementation:**
-```javascript
-// In worker.js - Issue session cookie for CF Access users
-if (user && user.auth_provider === 'cloudflare_access') {
-  const existingCookie = getTokenFromCookie(request);
-  if (!existingCookie) {
-    const internalToken = await generateToken(user, env);
-    response.headers.set('Set-Cookie', createAuthCookie(internalToken, request));
-  }
-}
-```
-
-### What's New in v15.6.10
-
-**Security Audit Complete** - All remediation items from the 2026-02-11 comprehensive security audit have been implemented:
-
-| Priority | Items | Description |
-|----------|-------|-------------|
-| **P0** | 5 items | Cookie security, magic link validation, race conditions |
-| **P1** | 6 items | UAV authorization, API validation, pilot audit trail |
-| **P2** | 2 items | Multi-use token audit trail, IP pinning |
-
-**New Security Features:**
-- Centralized API validation with sort field whitelists
-- Magic link audit trail (`magic_link_usage_log` table)
-- IP pinning for multi-use magic links
-- Pilot status audit trail for compliance
-- UAV authorization domain service
-
-### What's New in v15.0.0
-
-**Subdomain-Based Portal Architecture** - Migration from single-domain to subdomain-based architecture with Cloudflare Access authentication:
-
-| Portal | Domain | Authentication |
-|--------|--------|----------------|
-| Public | `sitesspectral.work` | None (public dashboard) |
-| Admin | `admin.sitesspectral.work` | CF Access OTP |
-| Station | `{station}.sitesspectral.work` | CF Access / Magic Link |
-
-**New Authentication Methods:**
-- **Cloudflare Access JWT**: Passwordless email OTP
-- **Magic Links**: Time-limited tokens for internal users
-- **Dual-Auth**: CF Access priority, falls back to legacy cookies
-
-**New Roles:**
-- `uav-pilot` - UAV operators with mission/flight logging
-- `station-internal` - Internal read-only via magic link
-
-**UAV Management System:**
-- Pilot registry with certifications
-- Mission planning and execution
-- Flight logging with telemetry
-- Battery inventory tracking
-
-### What's New in v14.1.0
-
-**Alnarp & Hyltemossa Stations with Management Tracking** - Added two new SITES stations with enhanced platform management tracking:
-
-| Station | Acronym | Platforms | Notes |
-|---------|---------|-----------|-------|
-| Alnarp | ALN | 5 (2 SITES Spectral, 2 Perennial Crops, 1 Sat) | MGeo managed |
-| Hyltemossa | HYL | 2 (fully ICOS) | SITES Spectral processing support |
-
-**New Schema Fields:**
-- `stations.sites_member` - Boolean for SITES membership filtering
-- `stations.icos_member` / `icos_class` - ICOS membership tracking
-- `platforms.managing_institution` / `managing_department` - Institutional ownership
-- `platforms.thematic_program` - Program affiliation (SITES Spectral, ICOS Sweden, etc.)
-
-**Alnarp Platforms (ALN):**
-| Platform | Type | Manager | Instruments |
-|----------|------|---------|-------------|
-| ALN_AGR_TWR01 | Fixed Tower | SITES Spectral/MGeo | PHE01, MS01 |
-| ALN_DJI_M3M_UAV01 | UAV | SITES Spectral/MGeo | MS01, RGB01 |
-| ALN_ESA_S2A_SAT01 | Satellite | SITES Spectral/MGeo | MSI01 |
-| ALN_AGR_TWR02 | Fixed Tower | ICOS Sweden | (placeholder - awaiting ICOS data) |
-| ALN_AGR_TWR03 | Fixed Tower | ICOS Sweden | (placeholder - awaiting ICOS data) |
-
-### What's New in v14.0.3
-
-**Duplicate Platform Prevention Dialog** - User-friendly confirmation when creating platforms that conflict with existing ones:
-
-| Component | Description |
-|-----------|-------------|
-| **Conflict Detection** | Backend returns HTTP 409 with conflict details and suggestions |
-| **Confirmation Dialog** | Frontend shows modal with conflict info and suggested alternative |
-| **XSS-Safe Implementation** | Uses `createElement`/`textContent` (no innerHTML) |
-| **All Platform Types** | Works for Fixed, UAV, Satellite, Mobile, USV, UUV |
-
-**User Flow:**
-1. User tries to create platform with duplicate name/code
-2. Modal dialog shows: "Similar Platform Exists"
-3. Displays conflict details and suggested alternative
-4. User chooses "Use Suggestion" (auto-retry) or "Cancel" (manual edit)
-
-### What's New in v14.0.1
-
-**Complete Role Matching in Redirect Logic** - Fixed infinite login loops for all user roles:
-
-| Role | Redirect Target |
-|------|-----------------|
-| `admin` | `/sites-dashboard.html` |
-| `sites-admin` | `/sites-dashboard.html` |
-| `station-admin` | `/station-dashboard.html?station={acronym}` |
-| `station` | `/station-dashboard.html?station={acronym}` |
-| `readonly` | `/sites-dashboard.html` |
-| (fallback) | `/sites-dashboard.html` (safe default) |
-
-**Root Cause Fixed:** The `redirectUser()` function previously only handled `admin` and `station` roles, with default redirect to `/login.html` causing infinite loops for other roles.
-
-**Files Updated:**
-- `public/login.html` - Complete role matching
-- `public/index.html` - Complete role matching + redirect validation
-- `public/js/dashboard.js` - `redirectBasedOnRole()` handles all roles
-- `public/js/legacy/api-v1.js` - `isAdmin()` includes `sites-admin`, added `isStationAdmin()`, `canEdit()`
-
-### What's New in v13.26.0
-
-**Config-Driven Instrument Types** - Instrument type definitions moved from hardcoded JS to YAML configuration with build-time code generation:
-
-| Component | Description |
-|-----------|-------------|
-| **Source of Truth** | `yamls/instruments/instrument-types.yaml` |
-| **Build Step** | `generateInstrumentTypesModule()` in `scripts/build.js` |
-| **Generated Module** | `src/domain/instrument/instrument-types.generated.js` |
-| **Registry Import** | `InstrumentTypeRegistry.js` imports from generated module |
-
-**Benefits:**
-- Single source of truth in YAML
-- Edit config without changing source code
-- Build-time generation (no runtime YAML parsing)
-- Consistent with platform types pattern
-
-### What's New in v13.0.0
-
-**PRODUCTION READY** - Major release consolidating v12.x improvements:
-
-| Phase | Description | Result |
-|-------|-------------|--------|
-| **Phase 4** | Test Coverage | 587 tests, 34 files |
-| **Phase 5** | Code Quality | API version cleanup, centralized utilities |
-| **Phase 6** | Promise Handling | Global error handlers, Promise.allSettled |
-
-**Documentation Changes:**
-- Changelog split: v12+ in main, v11 and earlier in [[docs/legacy/CHANGELOG_V11_AND_EARLIER|legacy]]
-- Obsidian-compatible markdown with wiki-style links
-- Updated architecture documentation
-
-### v12.0.0 Breaking Change (inherited)
-
-**Mount type codes normalized:**
-- `PL` → `TWR` (Tower/Mast)
-- `BL` → `BLD` (Building)
-- `GL` → `GND` (Ground Level)
-
-### What's New in v12.0.0
-
-**BREAKING CHANGE**: All mount type codes normalized to consistent 3 letters:
-- `PL` → `TWR` (Tower/Mast - standard aviation/infrastructure abbreviation)
-- `BL` → `BLD` (Building - common abbreviation)
-- `GL` → `GND` (Ground Level - standard abbreviation)
-
-**Impact**:
-- Platform `normalized_name` values change (e.g., `SVB_FOR_PL01` → `SVB_FOR_TWR01`)
-- Instrument `normalized_name` values change (e.g., `SVB_FOR_PL01_PHE01` → `SVB_FOR_TWR01_PHE01`)
-- API responses reflect new naming convention
-- Database Migration 0042 applies changes automatically
-
-### What's New in v11.0.0-alpha.31
-
-- **Station Users Read-Only**: Regular station users (e.g., `svartberget`) can only view data
-- **Station Admins CRUD**: Only `*-admin` users can create/update/delete at their station
-- **Global Admins Full Access**: `admin` and `sites-admin` can delete stations
-- **57 Authorization Tests**: Comprehensive test coverage for all permission scenarios
-
-### What's New in v11.0.0-alpha.6
-
-- **Vocabulary Mapping Documentation**: Darwin Core, ICOS, Copernicus alignment documentation
-- **YAML Configurations**: station-types, mount-types-extended, measurement-objectives, vocabulary-mappings
-- **Standard Compliance**: CC-BY-4.0 license metadata, ICOS station types, Darwin Core location fields
-
-### What's New in v11.0.0-alpha.5
-
-- **Phase 5 Frontend Migration**: Vue.js API updated from V10 to V11
-- **MaintenanceTimeline Component**: Timeline visualization with status badges and quick-complete actions
-- **CalibrationTimeline Component**: Calibration timeline with expiry warnings and quality scoring
-
-### What's New in v11.0.0-alpha.4
-
-- **V8 Calibration Workflow**: 55+ field comprehensive calibration records
-- **Panel Tracking**: Spectralon panel serial numbers, condition tracking
-- **Ambient Conditions**: Cloud cover (including "intermittent"), solar angle optimization
-- **Cleaning Workflow**: Before/after cleaning calibrations per session
-
-### What's New in v10.0.0-alpha.17
-
-- **ROI Drawing Tool**: Interactive canvas-based polygon drawing
-- **Legacy ROI System**: Preserves ROI numbers for L2/L3 data integrity
-- **Permission-based Editing**: Station users create new ROIs, super admins can override
-
-### What's New in v10.0.0-alpha.16
-
-- **Admin Panel**: Complete user management with role-based access
-- **Role System**: SUPER_ADMIN_ROLES, station-admin, station user hierarchy
-- **Settings View**: Tabbed interface for users, settings, activity log
-
-### What's New in v10.0.0-alpha.13-15
-
-- **ROI Management (alpha.13)**: Full CRUD with canvas viewer
-- **Map Integration (alpha.14)**: Leaflet-based station mapping
-- **Data Export (alpha.15)**: CSV/JSON export with role-based access
+1. **Domain layer has ZERO external dependencies**
+2. **Repository interfaces live in domain** - implementations in infrastructure
+3. **Use cases orchestrate domain logic** - no business logic in controllers
+4. **Config-driven over code-driven** - use YAML for configuration
+5. **No monolithic files** - focused, single-responsibility modules
 
 ---
 
 ## Quick Reference
 
-### Supported Platform Types (v8.4.0)
+### Platform Types
 
-| Type | Code | Icon | Status | Description |
-|------|------|------|--------|-------------|
-| Fixed | `fixed` | `fa-tower-observation` | Active | Towers, masts, permanent installations |
-| UAV | `uav` | `fa-crosshairs` | Active | Drones with auto-instrument creation |
-| Satellite | `satellite` | `fa-satellite` | Active | Earth observation platforms |
-| Mobile | `mobile` | `fa-truck` | Coming Soon | Portable sensors, temporal deployments |
-| USV | `usv` | `fa-ship` | Coming Soon | Surface vehicles for aquatic surveys |
-| UUV | `uuv` | `fa-water` | Coming Soon | Underwater vehicles |
+| Type | Code | Status |
+|------|------|--------|
+| Fixed | `fixed` | Active |
+| UAV | `uav` | Active |
+| Satellite | `satellite` | Active |
+| Mobile | `mobile` | Coming Soon |
 
-### UAV Auto-Instrument Creation (v8.3.0+)
+### Entity Naming
 
-When creating UAV platforms, instruments are auto-created with known specifications:
+| Entity | Format | Example |
+|--------|--------|---------|
+| Station | `{ACRONYM}` | SVB, ANS |
+| Platform (Fixed) | `{STATION}_{ECOSYSTEM}_{MOUNT}{##}` | SVB_FOR_TWR01 |
+| Instrument | `{PLATFORM}_{TYPE}{##}` | SVB_FOR_TWR01_PHE01 |
 
-| Vendor | Models | Type |
-|--------|--------|------|
-| DJI | M3M, P4M, M30T, M300, M350 | Multispectral/RGB/Thermal |
-| MicaSense | RedEdge-MX, Altum-PT | Multispectral |
-| Parrot | Sequoia+ | Multispectral |
-| Headwall | Nano-Hyperspec | Hyperspectral |
+### Mount Types (v12.0.0+)
 
-### Future Platform Types
+| Code | Name |
+|------|------|
+| TWR | Tower/Mast |
+| BLD | Building |
+| GND | Ground Level |
+| UAV | UAV Position |
+| SAT | Satellite |
 
-See `docs/FUTURE_PLATFORM_TYPES.md` for detailed specifications:
-- **Mobile**: Portable NDVI, LAI, hyperspectral, LiDAR with temporal deployment tracking
-- **USV**: Autonomous boats for lake/coastal surveys
-- **UUV**: ROVs/AUVs for underwater surveys
-
-### Supported Instrument Types
-
-| Type | Icon | Modal Builder | Key Fields |
-|------|------|---------------|------------|
-| Phenocam | 📷 | `buildPhenocamModalHTML()` | camera_brand, camera_model, resolution, interval |
-| Multispectral | 📡 | `buildMSSensorModalHTML()` | number_of_channels, orientation, datalogger |
-| PAR Sensor | ☀️ | `buildPARSensorModalHTML()` | spectral_range, calibration_coefficient |
-| NDVI Sensor | 🌿 | `buildNDVISensorModalHTML()` | red_wavelength_nm, nir_wavelength_nm |
-| PRI Sensor | 🔬 | `buildPRISensorModalHTML()` | band1_wavelength_nm (~531), band2_wavelength_nm (~570) |
-| Hyperspectral | 🌈 | `buildHyperspectralModalHTML()` | spectral_range_start/end_nm, spectral_resolution_nm |
-
-### Modal Architecture
-
-**Router Function** (`station.html`):
-```javascript
-function showInstrumentEditModal(instrument) {
-    const category = getInstrumentCategory(instrument.instrument_type);
-
-    if (category === 'phenocam') modalHTML = renderPhenocamEditForm(instrument, isAdmin);
-    else if (category === 'multispectral') modalHTML = renderMSSensorEditForm(instrument, isAdmin);
-    else if (category === 'par') modalHTML = renderPARSensorEditForm(instrument, isAdmin);
-    else if (category === 'ndvi') modalHTML = renderNDVISensorEditForm(instrument, isAdmin);
-    else if (category === 'pri') modalHTML = renderPRISensorEditForm(instrument, isAdmin);
-    else if (category === 'hyperspectral') modalHTML = renderHyperspectralEditForm(instrument, isAdmin);
-}
-```
-
-**Standard Modal Structure (6 Sections):**
-1. **General Information** - name, normalized_id, status, measurement_status, legacy_acronym
-2. **Type-Specific Specifications** - varies by instrument type
-3. **Position & Orientation** - lat/lon, height, viewing_direction, azimuth, nadir
-4. **Timeline & Deployment** - type, ecosystem, deployment_date, calibration_date, years
-5. **System Configuration** - power_source, data_transmission, warranty, quality_score
-6. **Documentation** - description, installation_notes, maintenance_notes
+See: [Quick Reference Guide](docs/QUICK_REFERENCE.md)
 
 ---
 
-## Development Workflow
+## Development
 
-### Build and Deploy
-
-```bash
-npm run dev                 # Start local development server
-npm run build              # Build application
-npm run build:bump         # Build with automatic version increment
-npm run deploy             # Build and deploy to production
-npm run deploy:bump        # Build with version bump and deploy
-```
-
-### Database Operations
+### Commands
 
 ```bash
-npm run db:migrate         # Apply migrations to remote database
-npm run db:migrate:local   # Apply migrations to local database
-npm run db:studio          # Open database studio interface
-
-# Direct queries
-npx wrangler d1 execute spectral_stations_db --remote --command="SELECT * FROM stations;"
+npm run dev          # Local development
+npm run build        # Build application
+npm run deploy       # Deploy to production
+npm run db:migrate   # Apply database migrations
+npm test             # Run tests
 ```
 
 ### Deployment Checklist
 
 1. Bump version in `package.json`
 2. Update `CHANGELOG.md`
-3. Update `CLAUDE.md` if needed
-4. Run `npm run deploy`
-5. Commit with descriptive message
+3. Run `npm run deploy`
+4. Commit with descriptive message
 
 ---
 
@@ -423,730 +115,137 @@ npx wrangler d1 execute spectral_stations_db --remote --command="SELECT * FROM s
 ```
 public/
 ├── index.html              # Login redirect
-├── login.html              # Authentication portal
-├── station.html            # Main application (instrument modals here)
-├── css/styles.css          # Application styles
+├── login.html              # Authentication
+├── station-dashboard.html  # Station view
+├── sites-dashboard.html    # Admin view
 └── js/
-    ├── api.js                  # API communication with auth
-    ├── navigation.js           # Breadcrumbs with URL sanitization
-    ├── station-dashboard.js    # Dashboard logic
-    ├── core/
-    │   ├── app.js              # App initialization, image error handler
-    │   ├── config-service.js   # YAML configuration loader
-    │   ├── debug.js            # Environment-aware debug utilities (v8.5.6)
-    │   └── rate-limit.js       # Debounce/throttle/submission guard (v8.5.6)
-    ├── instruments/
-    │   ├── phenocam/
-    │   │   └── phenocam-card.js  # XSS-safe card rendering
-    │   └── ms/
-    │       └── ms-card.js        # Multispectral card rendering
-    └── aoi/
-        └── aoi-drawing-tools.js  # AOI polygon drawing
+    ├── api.js              # API client
+    ├── dashboard.js        # Dashboard logic
+    └── core/               # Utilities
 
 src/
-├── worker.js               # Cloudflare Worker entry
-├── auth.js                 # JWT HMAC-SHA256 authentication (v8.5.4)
-├── api-handler.js          # API routing with CSRF protection (v8.5.7)
-├── utils/
-│   ├── validation.js       # Input sanitization framework (v8.5.7)
-│   ├── csrf.js             # CSRF protection middleware (v8.5.7)
-│   ├── responses.js        # Standardized API responses
-│   ├── database.js         # D1 database utilities
-│   ├── logging.js          # Request logging
-│   └── rate-limiting.js    # Server-side rate limiting
-└── handlers/
-    ├── stations.js         # Station CRUD
-    ├── platforms.js        # Platform CRUD with sanitization
-    ├── instruments/
-    │   ├── index.js        # Instrument router
-    │   ├── get.js          # Read operations
-    │   ├── mutate.js       # Create/Update with sanitization
-    │   └── utils.js        # Instrument utilities
-    ├── rois.js             # ROI management with sanitization
-    └── export.js           # Data export
-
-docs/
-├── STATION_USER_GUIDE.md   # End-user documentation
-├── PRODUCTION_SYNC_GUIDE.md # Sync procedures
-├── roi/                    # ROI documentation
-└── deprecated/             # Legacy documentation
+├── worker.js               # CF Worker entry
+├── api-handler.js          # API routing
+├── auth/                   # Authentication
+├── utils/                  # Utilities
+├── handlers/               # API handlers
+└── infrastructure/         # Adapters
+    └── http/controllers/   # HTTP controllers
 ```
 
 ---
 
-## Naming Conventions
+## Security
 
-### Entity Naming
+### Authentication Methods
 
-| Entity | Format | Example |
-|--------|--------|---------|
-| Station | `{ACRONYM}` | SVB, ANS, LON, GRI |
-| Platform (Fixed) | `{STATION}_{ECOSYSTEM}_{MOUNT_TYPE}` | SVB_FOR_TWR01 |
-| Platform (UAV) | `{STATION}_{VENDOR}_{MODEL}_{MOUNT_TYPE}` | SVB_DJI_M3M_UAV01 |
-| Platform (Satellite) | `{STATION}_{AGENCY}_{SATELLITE}_{SENSOR}` | SVB_ESA_S2A_MSI |
-| Instrument | `{PLATFORM}_{TYPE}{##}` | SVB_FOR_TWR01_PHE01 |
-| ROI | `ROI_##` | ROI_01, ROI_02 |
+| Method | Use Case | Session |
+|--------|----------|---------|
+| CF Access OTP | Admin/Station portals | 24h cookie |
+| Password | All portals | 24h cookie |
+| Magic Link | Station users | 24h cookie |
 
-### Mount Type Codes (v12.0.0+)
+### Key Security Features
 
-The `mount_type_code` field describes the **physical mounting structure type** (not geographic location).
+- CSRF Protection via Origin/Referer validation
+- Input Sanitization Framework
+- httpOnly JWT Cookies with SameSite=Lax
+- Rate Limiting
+- XSS Prevention
 
-**All codes normalized to consistent 3 letters** in v12.0.0:
-
-| Code | Name | Legacy | Description | Platform Types |
-|------|------|--------|-------------|----------------|
-| **TWR** | Tower/Mast | PL | Elevated structures (>1.5m height) | fixed |
-| **BLD** | Building | BL | Rooftop or facade mounted | fixed |
-| **GND** | Ground Level | GL | Installations below 1.5m height | fixed |
-| **UAV** | UAV Position | - | Drone flight position identifier | uav |
-| **SAT** | Satellite | - | Virtual position for satellite data | satellite |
-| **MOB** | Mobile | - | Portable platform position | mobile |
-| **USV** | Surface Vehicle | - | Unmanned surface vehicle position | usv |
-| **UUV** | Underwater Vehicle | - | Unmanned underwater vehicle position | uuv |
-
-> **Note**: In v9.x and earlier, this field was called `location_code`. Renamed to `mount_type_code` in v10.0.0 for semantic clarity. **Codes normalized to 3 letters in v12.0.0** (breaking change).
-
-### Instrument Type Codes
-
-| Code | Type | Platform | Example |
-|------|------|----------|---------|
-| PHE | Phenocam | fixed | SVB_FOR_TWR01_PHE01 |
-| MS | Multispectral Sensor | fixed, uav, satellite | SVB_FOR_TWR01_MS01 |
-| RGB | RGB Camera | uav | ANS_DJI_M3M_UAV01_RGB02 |
-| PAR | PAR Sensor | fixed | SVB_MIR_TWR03_PAR01 |
-| NDVI | NDVI Sensor | fixed | ANS_FOR_TWR01_NDVI01 |
-| PRI | PRI Sensor | fixed | LON_AGR_TWR01_PRI01 |
-| HYP | Hyperspectral Sensor | fixed, uav, satellite | GRI_FOR_TWR01_HYP01 |
-| TIR | Thermal Camera | fixed, uav, satellite | ANS_DJI_M3M_UAV01_TIR01 |
-| LID | LiDAR | uav, satellite | SVB_DJI_M350_UAV01_LID01 |
-| SAR | Radar (SAR) | satellite | SVB_ESA_S1A_SAR01 |
-
-> **Note on Phenocam vs RGB Camera (v11.0.0-alpha.28)**:
-> - **Phenocam (PHE)**: Fixed installation digital cameras for repeat photography and phenology monitoring
-> - **RGB Camera (RGB)**: UAV-mounted aerial RGB cameras for high-resolution visible imaging
-> These are distinct instrument types with different use cases.
-
-### Ecosystem Codes (12 Types)
-
-| Code | Ecosystem | Code | Ecosystem |
-|------|-----------|------|-----------|
-| FOR | Forest | GRA | Grassland |
-| AGR | Arable Land | HEA | Heathland |
-| MIR | Mires | ALP | Alpine Forest |
-| LAK | Lake | CON | Coniferous Forest |
-| WET | Wetland | DEC | Deciduous Forest |
-| MAR | Marshland | PEA | Peatland |
+See: [Security Documentation](docs/security/)
 
 ---
 
-## Database Schema
+## Database
 
 ### Core Tables
 
 ```sql
-stations (id, acronym, display_name, description, latitude, longitude, ...)
-platforms (id, station_id, normalized_name, display_name, ecosystem_code, mount_type_code, ...)
+stations (id, acronym, display_name, latitude, longitude, ...)
+platforms (id, station_id, normalized_name, ecosystem_code, mount_type_code, ...)
 instruments (id, platform_id, normalized_name, instrument_type, status, ...)
-instrument_rois (id, instrument_id, roi_name, polygon_points, color, ...)
-```
-
-### ROI Legacy Fields (v10.0.0-alpha.17)
-
-```sql
--- Migration: 0036_roi_legacy_and_drawing.sql
-ALTER TABLE instrument_rois ADD COLUMN is_legacy BOOLEAN DEFAULT false;
-ALTER TABLE instrument_rois ADD COLUMN legacy_date DATETIME;
-ALTER TABLE instrument_rois ADD COLUMN replaced_by_roi_id INTEGER REFERENCES instrument_rois(id);
-ALTER TABLE instrument_rois ADD COLUMN timeseries_broken BOOLEAN DEFAULT false;
-ALTER TABLE instrument_rois ADD COLUMN legacy_reason TEXT;
-
--- Indexes
-CREATE INDEX idx_instrument_rois_is_legacy ON instrument_rois(is_legacy);
-CREATE INDEX idx_instrument_rois_legacy_date ON instrument_rois(legacy_date);
-CREATE INDEX idx_instrument_rois_timeseries_broken ON instrument_rois(timeseries_broken);
-```
-
-### User Management
-
-```sql
+instrument_rois (id, instrument_id, roi_name, polygon_points, ...)
 users (id, username, role, station_id, ...)
-user_sessions (id, user_id, token, expires_at, ...)
-activity_log (id, user_id, action, entity_type, entity_id, ...)
 ```
 
-### Roles
-
-| Role | Permissions |
-|------|-------------|
-| admin | Full access to all stations and features |
-| station | Edit instruments/ROIs for assigned station |
-| readonly | View-only access |
-
----
-
-## Key Features
-
-### Instrument Management
-- **Type-Specific Modals**: Each instrument type has dedicated edit modal
-- **Tabbed Interface**: Platform cards organize instruments by type
-- **Full CRUD**: Create, read, update, delete for all entities
-- **Validation**: Real-time input validation with helpful error messages
-
-### ROI System (v10.0.0-alpha.17)
-
-#### Drawing Tool
-- **Interactive Canvas**: Click to add points, double-click to close polygon
-- **Edit Mode**: Drag vertices to modify existing ROIs
-- **Visual Feedback**: Dashed line to cursor, highlight on hover
-- **Color Presets**: 8 presets + custom RGB with live preview
-- **Keyboard Shortcuts**: Right-click undo, Escape cancel
-
-#### Legacy System
-- **Data Integrity**: Preserves ROI numbers for L2/L3 phenocam products
-- **Station User Flow**: Edit creates new ROI, marks old as legacy
-- **Admin Override**: Super admins can edit directly with double confirmation
-- **Flags**: `is_legacy`, `legacy_date`, `replaced_by_roi_id`, `timeseries_broken`
-
-#### Permission Hierarchy
-| Role | Edit Behavior |
-|------|---------------|
-| Station User | Must create new ROI (old → legacy) |
-| Station Admin | Must create new ROI (old → legacy) |
-| Super Admin | Can override with warning (`timeseries_broken` flag set) |
-
-#### Components
-- `ROIDrawingCanvas.vue` - Interactive polygon drawing
-- `ROIViewer.vue` - Canvas display with legacy toggle
-- `ROIList.vue` - Active/Legacy tabs
-- `ROICard.vue` - Legacy badge, timeseries warning
-- `ROIFormModal.vue` - Two-step flow (draw → details)
-- `LegacyROIWarningModal.vue` - Station user warning
-- `AdminOverrideConfirmModal.vue` - Type 'CONFIRM' to proceed
-
-### Data Export
-- **Formats**: CSV, TSV, JSON
-- **Filtering**: By station, date range, instrument type
-- **API**: `GET /api/export/station/{acronym}`
-
----
-
-## Security Architecture (v8.5.3-8.5.7)
-
-### Authentication & Authorization
-- **JWT with HMAC-SHA256**: Secure token signing (v8.5.4)
-- **Role-based access control (RBAC)**: admin, station, readonly roles
-- **Session management**: Token expiration and refresh
-- **Activity logging**: Full audit trail for all operations
-
-### CSRF Protection (v8.5.7)
-Located in `src/utils/csrf.js`:
-```javascript
-import { csrfProtect, createCSRFErrorResponse } from './utils/csrf.js';
-
-// Validates Origin/Referer headers for state-changing requests
-const csrfResult = csrfProtect(request);
-if (!csrfResult.isValid) {
-    return createCSRFErrorResponse(csrfResult.error);
-}
-```
-
-**Features:**
-- Origin/Referer header validation
-- Whitelist of allowed origins (production + development)
-- Form submission content-type detection
-- Automatic bypass for auth/health endpoints
-
-### Input Sanitization Framework (v8.5.7)
-Located in `src/utils/validation.js`:
-
-| Function | Purpose | Example |
-|----------|---------|---------|
-| `sanitizeString()` | Remove control chars, trim, max length | `sanitizeString(input, { maxLength: 200 })` |
-| `sanitizeInteger()` | Validate and bound integers | `sanitizeInteger(value, { min: 1, max: 100 })` |
-| `sanitizeFloat()` | Validate floats with precision | `sanitizeFloat(value, { decimals: 6 })` |
-| `sanitizeCoordinate()` | Lat/lon with 6 decimal precision | `sanitizeCoordinate(lat, 'latitude')` |
-| `sanitizeIdentifier()` | Alphanumeric + underscores | `sanitizeIdentifier(name)` |
-| `sanitizeAcronym()` | Uppercase 2-10 chars | `sanitizeAcronym('SVB')` |
-| `sanitizeJSON()` | Safe JSON parsing | `sanitizeJSON(pointsData)` |
-| `sanitizeEnum()` | Whitelist validation | `sanitizeEnum(status, ['Active', 'Inactive'])` |
-| `sanitizeDate()` | ISO date format | `sanitizeDate('2025-01-15')` |
-| `sanitizeURL()` | Protocol-restricted URLs | `sanitizeURL(websiteUrl)` |
-
-**Schema-based Sanitization:**
-```javascript
-import { sanitizeRequestBody, PLATFORM_SCHEMA } from './utils/validation.js';
-
-// Sanitize entire request body using predefined schema
-const sanitizedData = sanitizeRequestBody(rawData, PLATFORM_SCHEMA);
-```
-
-**Pre-defined Schemas:**
-- `STATION_SCHEMA` - Station fields
-- `PLATFORM_SCHEMA` - Platform fields
-- `INSTRUMENT_SCHEMA` - Instrument fields
-- `ROI_SCHEMA` - ROI fields
-
-### XSS Prevention (v8.5.5-8.5.6)
-
-**Event Delegation Pattern:**
-```javascript
-// BAD: Inline onerror handler (XSS vulnerable)
-<img onerror="this.parentElement.classList.add('no-image')">
-
-// GOOD: Data attribute + event delegation (v8.5.6)
-<img data-fallback="true">
-
-// In app.js - capture phase listener
-window.addEventListener('error', (event) => {
-    if (event.target?.tagName === 'IMG' && event.target.dataset.fallback === 'true') {
-        event.target.parentElement?.classList.add('no-image');
-        event.target.style.display = 'none';
-    }
-}, true);
-```
-
-**Safe DOM Methods:**
-```javascript
-// BAD: innerHTML with user data
-element.innerHTML = `<a href="${userUrl}">${userName}</a>`;
-
-// GOOD: createElement + textContent (v8.5.6)
-const link = document.createElement('a');
-link.href = sanitizeUrl(userUrl);
-link.textContent = userName;  // Safe - auto-escapes
-element.appendChild(link);
-```
-
-**URL Sanitization:**
-```javascript
-// Prevent javascript: protocol injection
-function _sanitizeUrl(url) {
-    if (!url) return '/';
-    if (url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
-    }
-    return '/';
-}
-```
-
-### Debug Utilities (v8.5.6)
-Located in `public/js/core/debug.js`:
-```javascript
-// Environment-aware logging - only logs in development
-Debug.log('Processing data:', data);      // Only in dev
-Debug.warn('Deprecated function');        // Always shows
-Debug.error('Critical failure', error);   // Always shows
-
-// Category-based logging
-const apiDebug = Debug.withCategory('API');
-apiDebug.log('Request sent');  // [API] Request sent
-
-// Performance timing
-Debug.time('dataLoad');
-// ... operation
-Debug.timeEnd('dataLoad');  // dataLoad: 145.23ms
-```
-
-### Rate Limiting (v8.5.6)
-Located in `public/js/core/rate-limit.js`:
-```javascript
-// Debounce for input fields
-const debouncedSearch = debounce(searchFunction, 300);
-
-// Throttle for scroll/resize
-const throttledUpdate = throttle(updateFunction, 1000);
-
-// Form submission guard (prevents double-clicks)
-const guardedSubmit = RateLimit.submissionGuard.guard(
-    'instrument-form',
-    submitFunction,
-    'Please wait before submitting again'
-);
-```
-
-### Code Quality
-- Prefer clean, functional code over backward compatibility
-- Use absolute imports
-- Always bump version and update changelog before commit
-- Use git worktrees for parallel development
-- Remove console.log statements before production (57 removed in v8.5.6)
-
-### Data Integrity
-- Input validation on all user inputs (schema-based)
-- Foreign key constraints with CASCADE (v8.5.5)
-- JSON parsing with try-catch error handling
-- Database backups before destructive operations
-
----
-
-## Environment Setup
-
-```bash
-# No root access - everything local to user
-# Python: Use uv with Python 3.12.9
-# Always source virtual environment from project folder
-# Use Cloudflare API directly for database queries
-```
-
-### Temporal Scripts
-- Use `tmp/` folder inside project (gitignored)
-- Never use system `/tmp/` for project scripts
+See: [Database Schema](docs/DATABASE_SCHEMA.md)
 
 ---
 
 ## Documentation Index
 
-### V15 Documentation (Current)
+| Document | Purpose |
+|----------|---------|
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [Quick Reference](docs/QUICK_REFERENCE.md) | Platform/instrument types, naming |
+| [Version History](docs/VERSION_HISTORY.md) | Release summaries |
+| [Feature Matrix](docs/FEATURE_MATRIX.md) | Feature status by version |
+| [API Reference](docs/API_REFERENCE.md) | API endpoints |
+| [Database Schema](docs/DATABASE_SCHEMA.md) | Table structure |
+
+### Security Documentation
 
 | Document | Purpose |
 |----------|---------|
-| `docs/architecture/SUBDOMAIN_ARCHITECTURE.md` | Subdomain portal architecture overview |
-| `docs/security/CLOUDFLARE_ACCESS_INTEGRATION.md` | CF Access JWT verification setup |
-| `docs/MAGIC_LINK_SYSTEM.md` | Magic link token system |
-| `docs/UAV_PILOT_SYSTEM.md` | UAV pilot and mission management |
+| [Session Persistence](docs/security/SESSION_PERSISTENCE.md) | CF Access session fix (v15.6.11) |
+| [CF Access Integration](docs/security/CLOUDFLARE_ACCESS_INTEGRATION.md) | Cloudflare Access setup |
+| [Authentication v14](docs/security/AUTHENTICATION_v14.md) | Cookie auth system |
+| [Magic Link System](docs/MAGIC_LINK_SYSTEM.md) | Token-based auth |
 
-### V14 Documentation (Inherited)
-
-| Document | Purpose |
-|----------|---------|
-| `docs/security/AUTHENTICATION_v14.md` | httpOnly cookie auth, role redirect logic |
-| `docs/PLATFORM_DUPLICATE_PREVENTION.md` | Duplicate platform prevention dialog |
-
-### V11+ Documentation (Inherited)
+### Architecture Documentation
 
 | Document | Purpose |
 |----------|---------|
-| `CHANGELOG.md` | Version history and release notes |
-| `docs/ARCHITECTURE_VISUALIZATION.md` | Clean Architecture rings, Hexagonal diagrams |
-| `docs/PORT_VERSIONING.md` | Port versioning strategy |
-| `docs/openapi/openapi.yaml` | OpenAPI 3.0 specification |
-| `docs/adr/README.md` | Architectural Decision Records index |
-| `docs/VOCABULARY_MAPPING.md` | Darwin Core, ICOS, Copernicus alignment |
-| `docs/STATION_USER_GUIDE.md` | End-user guide |
-| `docs/FUTURE_PLATFORM_TYPES.md` | Mobile, USV, UUV platform specifications |
-| `docs/roi/ROI_README.md` | ROI system documentation |
-| `docs/PRODUCTION_SYNC_GUIDE.md` | Deployment procedures |
-| `docs/security/AUTHORIZATION_ARCHITECTURE_DIAGRAM.md` | Authorization flow diagrams |
-| `docs/security/AUTHORIZATION_SECURITY_ANALYSIS.md` | Security analysis documentation |
-
-### Legacy Documentation (V1-V10)
-
-| Document | Purpose |
-|----------|---------|
-| `docs/legacy/v1-v10/` | All pre-V11 documentation archived |
-| `docs/legacy/README.md` | Legacy archive index |
-
-### Security Documentation in CHANGELOG.md
-
-| Version | Security Focus |
-|---------|----------------|
-| v8.5.7 | Input Sanitization Framework, CSRF Protection |
-| v8.5.6 | XSS Prevention, Debug Utilities, Rate Limiting |
-| v8.5.5 | Database CASCADE Fixes, Card XSS Fixes |
-| v8.5.4 | JWT HMAC-SHA256, AOI Authentication |
-| v8.5.3 | Modal Null Checks, Loading States |
+| [Subdomain Architecture](docs/architecture/SUBDOMAIN_ARCHITECTURE.md) | Portal structure |
+| [Architecture Visualization](docs/ARCHITECTURE_VISUALIZATION.md) | Hexagonal diagrams |
+| [Vocabulary Mapping](docs/VOCABULARY_MAPPING.md) | Darwin Core, ICOS alignment |
 
 ---
 
-## YAML Configuration System (v8.5.0+)
+## YAML Configuration
 
-All hardcoded configurations have been moved to YAML files:
+### Backend (Build-Time)
 
-### Backend Configuration (Build-Time Generation)
+| Config | Generated Module |
+|--------|------------------|
+| `yamls/instruments/instrument-types.yaml` | `src/domain/instrument/instrument-types.generated.js` |
 
-| Config File | Purpose | Generated Module |
-|-------------|---------|------------------|
-| `yamls/instruments/instrument-types.yaml` | Instrument types, categories, field schemas | `src/domain/instrument/instrument-types.generated.js` |
+### Frontend (Runtime)
 
-**Build-Time Code Generation (v13.27.0+):**
-
-```
-yamls/instruments/instrument-types.yaml
-        ↓ npm run build (generateInstrumentTypesModule)
-src/domain/instrument/instrument-types.generated.js
-        ↓ import
-InstrumentTypeRegistry.js
-```
-
-The generated module exports `INSTRUMENT_TYPES` and `CATEGORIES` which are imported by the registry.
-
-### Frontend Configuration (Runtime Loading)
-
-| Config File | Purpose |
-|-------------|---------|
-| `yamls/ui/platform-types.yaml` | Platform icons, colors, gradients |
-| `yamls/ui/instrument-types.yaml` | Instrument icons, colors, patterns (UI only) |
-| `yamls/ui/status-indicators.yaml` | Status codes with styling |
-| `yamls/ui/sensor-orientations.yaml` | Sensor orientations |
-| `yamls/sensors/uav-sensors.yaml` | UAV sensor specifications |
+| Config | Purpose |
+|--------|---------|
+| `yamls/ui/platform-types.yaml` | Platform icons, colors |
+| `yamls/ui/instrument-types.yaml` | Instrument icons |
 | `yamls/core/ecosystems.yaml` | Ecosystem codes |
-| `yamls/core/validation-rules.yaml` | Validation constraints |
 
 Access via `window.SitesConfig`:
 ```javascript
 SitesConfig.getPlatformType('uav')
 SitesConfig.getStatusColor('Active')
-SitesConfig.detectInstrumentCategory('Phenocam')
 ```
 
 ---
 
-## Vocabulary & Standard Alignment (v11.0.0+)
+## Agent Teams
 
-SITES Spectral V11 aligns terminology with international standards for interoperability.
+Key agents for this project:
 
-### Standards Referenced
+| Agent | Best For |
+|-------|----------|
+| `@hexi` | Hexagonal architecture, SOLID principles |
+| `@cascade` | Backend, Cloudflare Workers |
+| `@shield` | Security, CSRF, XSS, JWT |
+| `@quarry` | Database schema, migrations |
+| `@forge` | Cross-app ecosystem |
 
-| Standard | Focus | Documentation |
-|----------|-------|---------------|
-| **Darwin Core** | Biodiversity data exchange | `docs/VOCABULARY_MAPPING.md` |
-| **ICOS** | Carbon cycle observation | https://www.icos-cp.eu/ |
-| **Copernicus** | Earth observation | https://dataspace.copernicus.eu/ |
-| **SITES** | Swedish ecosystem science | https://www.fieldsites.se/ |
-
-### Station Type Classification (ICOS Aligned)
-
-| Code | Name | ICOS Domain | Description |
-|------|------|-------------|-------------|
-| **TER** | Terrestrial Ecosystem | ecosystem | Forests, grasslands, wetlands |
-| **ATM** | Atmospheric | atmosphere | GHG monitoring |
-| **AQA** | Aquatic | ocean | Lake/river monitoring |
-| **INT** | Integrated | multiple | Multi-domain stations |
-
-### Mount Type Vocabulary Mapping
-
-Legacy codes remain primary; standard names added for interoperability:
-
-| Code | Name | Standard Name | ICOS Equivalent |
-|------|------|---------------|-----------------|
-| **PL** | Pole/Tower/Mast | tower | flux_tower |
-| **BL** | Building | building | building_station |
-| **GL** | Ground Level | ground | ground_station |
-| **UAV** | UAV Position | aerial | - |
-| **SAT** | Satellite | satellite | - |
-| **MOB** | Mobile | mobile | mobile_station |
-| **USV** | Surface Vehicle | surface_vehicle | - |
-| **UUV** | Underwater Vehicle | subsurface | - |
-
-### Darwin Core Location Fields
-
-Stations include Darwin Core metadata:
-- `dwc_locationID` - Unique identifier (e.g., `urn:sites:station:SVB`)
-- `dwc_decimalLatitude` / `dwc_decimalLongitude` - WGS84 coordinates
-- `dwc_geodeticDatum` - `EPSG:4326`
-- `dwc_countryCode` - ISO 3166-1 code (e.g., `SE`)
-
-### License Metadata
-
-All SITES Spectral data uses **CC-BY-4.0**, compatible with ICOS and SITES open data policies.
-
-### Vocabulary YAML Files
-
-| Config File | Purpose |
-|-------------|---------|
-| `yamls/core/station-types.yaml` | ICOS-aligned station classification |
-| `yamls/core/mount-types-extended.yaml` | Standard vocabulary mount types |
-| `yamls/core/measurement-objectives.yaml` | ICOS measurement variables |
-| `yamls/core/vocabulary-mappings.yaml` | Darwin Core, ICOS, Copernicus term mappings |
-
-See `docs/VOCABULARY_MAPPING.md` for complete documentation.
+See: [Full Agent Matrix](~/.claude/AGENTS_MATRIX.md)
 
 ---
 
-## Production Information
+## Environment Notes
 
-| Property | Value |
-|----------|-------|
-| Public Portal | https://sitesspectral.work |
-| Admin Portal | https://admin.sitesspectral.work |
-| Station Portals | https://{station}.sitesspectral.work |
-| Worker URL | https://sites-spectral-instruments.jose-beltran.workers.dev |
-| Current Version | 15.6.11 |
-| Last Deployed | 2026-02-16 |
-| Status | Production Ready |
-| Environment | Cloudflare Workers + D1 Database + CF Access |
-| Authentication | Cloudflare Access OTP, Magic Links, httpOnly Cookies |
-| Active Platform Types | Fixed, UAV, Satellite |
-| Coming Soon | Mobile, USV, UUV |
-| Test Coverage | 1268 tests across 52 files |
-| Security Audit | All P0/P1/P2 items complete (2026-02-11) |
-
-### v15.6.x Security Features
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **CF Access Session Persistence** | v15.6.11 | ✅ Active |
-| **Centralized API Validation** | v15.6.6 | ✅ Active |
-| **Sort Field Whitelists** | v15.6.9 | ✅ Active |
-| **Magic Link Audit Trail** | v15.6.8 | ✅ Active |
-| **IP Pinning for Magic Links** | v15.6.8 | ✅ Active |
-| **Pilot Status Audit Trail** | v15.6.8 | ✅ Active |
-| **UAV Authorization Service** | v15.6.7 | ✅ Active |
-| **Email Service (MailChannels)** | v15.6.6 | ✅ Active |
-| **Request Body Validation** | v15.6.6 | ✅ Active |
-
-### v15.0.0 Features
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **Subdomain Portal Architecture** | v15.0.0 | ✅ Active |
-| **Cloudflare Access JWT Auth** | v15.0.0 | ✅ Active |
-| **Magic Link System** | v15.0.0 | ✅ Active |
-| **UAV Pilot Management** | v15.0.0 | ✅ Active |
-| **UAV Mission Planning** | v15.0.0 | ✅ Active |
-| **Flight Log System** | v15.0.0 | ✅ Active |
-| **New Roles (uav-pilot, station-internal)** | v15.0.0 | ✅ Active |
-| **Public API Endpoints** | v15.0.0 | ✅ Active |
-
-### v14.0.x Features (Inherited)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **Duplicate Platform Prevention Dialog** | v14.0.3 | ✅ Active |
-| **httpOnly Cookie Authentication** | v14.0.0 | ✅ Active |
-| **Centralized Auth Verification** | v14.0.0 | ✅ Active |
-| **Complete Role Redirect Logic** | v14.0.1 | ✅ Active |
-| **5-Role Support (admin, sites-admin, station-admin, station, readonly)** | v14.0.1 | ✅ Active |
-
-### v13.26.0 Features (Inherited)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **Config-Driven Instrument Types** | v13.26.0 | ✅ Active |
-| **YAML-to-JS Build Generation** | v13.26.0 | ✅ Active |
-| **10 Instrument Types in YAML** | v13.26.0 | ✅ Active |
-| **6 Categories in YAML** | v13.26.0 | ✅ Active |
-
-### v13.0.0 Features (Inherited)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **Production Ready Codebase** | v13.0.0 | ✅ Active |
-| **653 Test Coverage** | v13.0.0 | ✅ Active |
-| **Promise Error Handling** | v13.0.0 | ✅ Active |
-| **API Version Cleanup** | v13.0.0 | ✅ Active |
-| **Legacy Changelog Archived** | v13.0.0 | ✅ Active |
-
-### v12.x Features (Inherited)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **CORS Origin Whitelist** | v12.0.7 | ✅ Active |
-| **PBKDF2 Password Hashing** | v12.0.7 | ✅ Active |
-| **httpOnly JWT Cookies** | v12.0.7 | ✅ Active |
-| **Modal Focus Trap (WCAG)** | v12.0.7 | ✅ Active |
-| **Normalized Mount Type Codes** | v12.0.0 | ✅ BREAKING |
-
-### v11.0.0 Features (Inherited)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| Station Users Read-Only | v11.0.0-alpha.31 | ✅ Active |
-| Domain Authorization | v11.0.0-alpha.30 | ✅ Active |
-| Station-Specific Admin | v11.0.0-alpha.30 | ✅ Active |
-| Authorization Tests | v11.0.0-alpha.31 | ✅ 57 tests pass |
-| Post-Migration Testing | v11.0.0-alpha.7 | ✅ 185/186 tests pass |
-| V11 Integration Tests | v11.0.0-alpha.7 | ✅ Active |
-| Legacy Docs Archived | v11.0.0-alpha.7 | ✅ docs/legacy/v1-v10 |
-| Vocabulary Mapping | v11.0.0-alpha.6 | ✅ Active |
-| Darwin Core Alignment | v11.0.0-alpha.6 | ✅ Active |
-| ICOS Station Types | v11.0.0-alpha.6 | ✅ Active |
-| Maintenance Timeline | v11.0.0-alpha.5 | ✅ Active |
-| Calibration Timeline | v11.0.0-alpha.5 | ✅ Active |
-| V8 Calibration Workflow | v11.0.0-alpha.4 | ✅ Active |
-| Maintenance Domain | v11.0.0-alpha.3 | ✅ Active |
-| Calibration Domain | v11.0.0-alpha.3 | ✅ Active |
-
-### v10.0.0 Features (Inherited)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| ROI Drawing Tool | v10.0.0-alpha.17 | ✅ Active |
-| Legacy ROI System | v10.0.0-alpha.17 | ✅ Active |
-| Admin Panel | v10.0.0-alpha.16 | ✅ Active |
-| Role Management | v10.0.0-alpha.16 | ✅ Active |
-| Data Export | v10.0.0-alpha.15 | ✅ Active |
-| Map Integration | v10.0.0-alpha.14 | ✅ Active |
-| ROI Management | v10.0.0-alpha.13 | ✅ Active |
-| Testing Infrastructure | v10.0.0-alpha.12 | ✅ Active |
-
-### Security Features (v8.5.3-v12.0.7)
-
-| Feature | Version | Status |
-|---------|---------|--------|
-| **CORS Origin Whitelist** | v12.0.7 | ✅ Active |
-| **PBKDF2 Password Hashing** | v12.0.7 | ✅ Active |
-| **httpOnly JWT Cookies** | v12.0.7 | ✅ Active |
-| **Modal Focus Trap (WCAG 2.4.3)** | v12.0.7 | ✅ Active |
-| JWT HMAC-SHA256 Signing | v8.5.4 | ✅ Active |
-| XSS Prevention (Event Delegation) | v8.5.6 | ✅ Active |
-| XSS Prevention (DOM Methods) | v8.5.6 | ✅ Active |
-| CSRF Protection | v8.5.7 | ✅ Active |
-| Input Sanitization Framework | v8.5.7 | ✅ Active |
-| Debug Utilities | v8.5.6 | ✅ Active |
-| Rate Limiting | v8.5.6 | ✅ Active |
-| CASCADE Constraints | v8.5.5 | ✅ Active |
-
----
-
-## Jobelab Agent Teams (129 agents)
-
-Specialized AI agents are available for domain-specific tasks.
-
-### Repository Locations
-
-| Repository | Path | Agents |
-|------------|------|--------|
-| **Jobelab Agents Management** | `~/jobelab-agents-management/` | 129 total |
-| **SITES Spectral Agents** | `.claude/agents/` (symlinked) | Project-specific |
-| **Full Agent Matrix** | `.claude/AGENTS_MATRIX.md` | Complete team overview |
-| **Cross-Team Coordinator** | `.claude/conductor.md` | @conductor |
-
-### Team Hierarchy
-
-```
-@conductor (Coach - cross-team coordination)
-    ├── Jobelab-Exclusive (25 agents) - Leadership, business, operations
-    ├── Helix (87 agents) - Technical Core
-    │   ├── Watershed (15): @river, @brook, @eddy, @shield, @misty
-    │   ├── Spectral (18): @prism, @aurora, @spectrum, @lumen, @photon
-    │   ├── Terrestrial (51): @terra, @verdant, @sentinel, @cascade, @hexi
-    │   └── Aerospace (3): @sora, @uspace, @flightops
-    ├── SITES Spectral (Context) - Uses Helix with SITES domain
-    └── BEAT (17 agents) - Automotive
-```
-
-### Key Agents for Instruments Registry
-
-| Agent | Invoke | Best For |
-|-------|--------|----------|
-| **Conductor** | `@conductor` | Cross-team coordination, complex tasks |
-| **Hexi** | `@hexi` | Hexagonal architecture, SOLID principles |
-| **Cascade** | `@cascade` | Backend architecture, Cloudflare Workers |
-| **Shield** | `@shield` | Security, CSRF, XSS prevention, JWT |
-| **Quarry** | `@quarry` | D1 database schema, SQL migrations |
-| **Forge** | `@forge` | Cross-app ecosystem development |
-| **Terra** | `@terra` | Earth observation, GEE, Copernicus |
-| **Verdant** | `@verdant` | Vegetation phenology, TIMESAT |
-| **Marina** | `@marina` | Scientific validation (MANDATORY) |
-
-### Quick Invocation
-
-```bash
-# Cross-team coordination
-@conductor "Build biodiversity monitoring platform"
-
-# Technical work
-@cascade "Build data pipeline"
-@hexi "Architecture review"
-@shield "Security audit"
-
-# Scientific validation
-@marina "Validate scientific claims"
-```
-
-### Full Documentation
-- Full matrix: `.claude/AGENTS_MATRIX.md`
-- Conductor: `.claude/conductor.md`
-- SITES agents: `.claude/AGENTS.md`
-- Jobelab management: `.claude/jobelab-agents-management/`
+- No root access - everything local to user
+- Python: Use uv with Python 3.12.9
+- Use `tmp/` folder inside project (gitignored), never system `/tmp/`
+- Use Cloudflare API directly for database queries
