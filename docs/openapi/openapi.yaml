@@ -35,7 +35,7 @@ info:
     - Darwin Core (biodiversity data)
     - ICOS (carbon observation)
     - Copernicus (Earth observation)
-  version: 15.0.1
+  version: 15.6.4
   contact:
     name: SITES Spectral Support
     url: https://www.fieldsites.se/
@@ -94,7 +94,7 @@ tags:
     description: UAV pilot registration and certification management (v15.0.0+)
   - name: UAV Missions
     description: UAV mission planning and execution workflow (v15.0.0+)
-  - name: UAV Flights
+  - name: UAV Flight Logs
     description: UAV flight logging and telemetry (v15.0.0+)
   - name: UAV Batteries
     description: UAV battery inventory and health tracking (v15.0.0+)
@@ -1697,9 +1697,9 @@ paths:
   # ============================================
   # UAV FLIGHT LOG ENDPOINTS (v15.0.0+)
   # ============================================
-  /uav/flights:
+  /uav/flight-logs:
     get:
-      tags: [UAV Flights]
+      tags: [UAV Flight Logs]
       summary: List flight logs
       parameters:
         - $ref: '#/components/parameters/PageParam'
@@ -1724,7 +1724,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FlightLogListResponse'
     post:
-      tags: [UAV Flights]
+      tags: [UAV Flight Logs]
       summary: Log new flight
       requestBody:
         required: true
@@ -1740,9 +1740,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/FlightLogResponse'
 
-  /uav/flights/{id}:
+  /uav/flight-logs/{id}:
     get:
-      tags: [UAV Flights]
+      tags: [UAV Flight Logs]
       summary: Get flight details
       parameters:
         - name: id
@@ -1758,7 +1758,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FlightLogResponse'
     put:
-      tags: [UAV Flights]
+      tags: [UAV Flight Logs]
       summary: Update flight log
       parameters:
         - name: id
@@ -1780,9 +1780,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/FlightLogResponse'
 
-  /uav/flights/{id}/incident:
+  /uav/flight-logs/{id}/incident:
     post:
-      tags: [UAV Flights]
+      tags: [UAV Flight Logs]
       summary: Report incident
       description: Report an incident that occurred during the flight.
       parameters:
@@ -1990,6 +1990,593 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InfoResponse'
+
+  # ============================================
+  # AOI ENDPOINTS (v15.6.4+)
+  # ============================================
+  /aois:
+    get:
+      tags: [AOIs]
+      summary: List areas of interest
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: AOI list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AOI'
+    post:
+      tags: [AOIs]
+      summary: Create area of interest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AOICreate'
+      responses:
+        '201':
+          description: AOI created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AOIResponse'
+
+  /aois/{id}:
+    get:
+      tags: [AOIs]
+      summary: Get AOI details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: AOI details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AOIResponse'
+    put:
+      tags: [AOIs]
+      summary: Update AOI
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AOIUpdate'
+      responses:
+        '200':
+          description: AOI updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AOIResponse'
+    delete:
+      tags: [AOIs]
+      summary: Delete AOI
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: AOI deleted
+
+  /aois/station/{stationId}:
+    get:
+      tags: [AOIs]
+      summary: Get AOIs by station
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Station AOIs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AOI'
+
+  /aois/export/geojson:
+    get:
+      tags: [AOIs]
+      summary: Export AOIs as GeoJSON
+      parameters:
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: GeoJSON export
+          content:
+            application/geo+json:
+              schema:
+                type: object
+
+  /aois/import/geojson:
+    post:
+      tags: [AOIs]
+      summary: Import AOIs from GeoJSON
+      requestBody:
+        required: true
+        content:
+          application/geo+json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: AOIs imported
+
+  /aois/import/kml:
+    post:
+      tags: [AOIs]
+      summary: Import AOIs from KML
+      requestBody:
+        required: true
+        content:
+          application/vnd.google-earth.kml+xml:
+            schema:
+              type: string
+      responses:
+        '201':
+          description: AOIs imported
+
+  # ============================================
+  # CAMPAIGN ENDPOINTS (v15.6.4+)
+  # ============================================
+  /campaigns:
+    get:
+      tags: [Campaigns]
+      summary: List campaigns
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: station_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+    post:
+      tags: [Campaigns]
+      summary: Create campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignCreate'
+      responses:
+        '201':
+          description: Campaign created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+
+  /campaigns/{id}:
+    get:
+      tags: [Campaigns]
+      summary: Get campaign details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+    put:
+      tags: [Campaigns]
+      summary: Update campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignUpdate'
+      responses:
+        '200':
+          description: Campaign updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+    delete:
+      tags: [Campaigns]
+      summary: Delete campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign deleted
+
+  /campaigns/station/{stationId}:
+    get:
+      tags: [Campaigns]
+      summary: Get campaigns by station
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Station campaigns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+
+  /campaigns/active:
+    get:
+      tags: [Campaigns]
+      summary: Get active campaigns
+      responses:
+        '200':
+          description: Active campaigns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Campaign'
+
+  /campaigns/{id}/start:
+    post:
+      tags: [Campaigns]
+      summary: Start campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+
+  /campaigns/{id}/complete:
+    post:
+      tags: [Campaigns]
+      summary: Complete campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+
+  # ============================================
+  # PRODUCT ENDPOINTS (v15.6.4+)
+  # ============================================
+  /products:
+    get:
+      tags: [Products]
+      summary: List data products
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: instrument_id
+          in: query
+          schema:
+            type: integer
+        - name: processing_level
+          in: query
+          schema:
+            type: string
+            enum: [L0, L1, L2, L3]
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+    post:
+      tags: [Products]
+      summary: Register data product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        '201':
+          description: Product registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+
+  /products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    put:
+      tags: [Products]
+      summary: Update product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    delete:
+      tags: [Products]
+      summary: Delete product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product deleted
+
+  /products/doi/{doi}:
+    get:
+      tags: [Products]
+      summary: Get product by DOI
+      parameters:
+        - name: doi
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+
+  /products/instrument/{instrumentId}:
+    get:
+      tags: [Products]
+      summary: Get products by instrument
+      parameters:
+        - name: instrumentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Instrument products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+  /products/campaign/{campaignId}:
+    get:
+      tags: [Products]
+      summary: Get products by campaign
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+  /products/processing-level/{level}:
+    get:
+      tags: [Products]
+      summary: Get products by processing level
+      parameters:
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [L0, L1, L2, L3]
+      responses:
+        '200':
+          description: Products by level
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+  /products/{id}/quality-score:
+    post:
+      tags: [Products]
+      summary: Set product quality score
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quality_score:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+      responses:
+        '200':
+          description: Quality score set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+
+  /products/{id}/promote-quality:
+    post:
+      tags: [Products]
+      summary: Promote product quality level
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Quality promoted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
 
 components:
   securitySchemes:
@@ -4003,3 +4590,352 @@ components:
             $ref: '#/components/schemas/Battery'
         meta:
           $ref: '#/components/schemas/Pagination'
+
+    # ============================================
+    # AOI SCHEMAS (v15.6.4+)
+    # ============================================
+    AOI:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        geometry:
+          type: object
+          description: GeoJSON geometry object
+        geometry_type:
+          type: string
+          enum: [point, polygon, multipolygon]
+        station_id:
+          type: integer
+        ecosystem_code:
+          $ref: '#/components/schemas/EcosystemCode'
+        platform_type_code:
+          $ref: '#/components/schemas/PlatformType'
+        platform_id:
+          type: integer
+        mission_type:
+          type: string
+          enum: [monitoring, survey, calibration]
+        mission_recurrence:
+          type: string
+          enum: [daily, weekly, monthly, seasonal, one_time]
+        source_format:
+          type: string
+          enum: [manual, geojson, kml]
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AOICreate:
+      type: object
+      required: [name, geometry, geometry_type, station_id]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 1000
+        geometry:
+          type: object
+          description: GeoJSON geometry object
+        geometry_type:
+          type: string
+          enum: [point, polygon, multipolygon]
+        station_id:
+          type: integer
+        ecosystem_code:
+          $ref: '#/components/schemas/EcosystemCode'
+        platform_type_code:
+          $ref: '#/components/schemas/PlatformType'
+        platform_id:
+          type: integer
+        mission_type:
+          type: string
+          enum: [monitoring, survey, calibration]
+        mission_recurrence:
+          type: string
+          enum: [daily, weekly, monthly, seasonal, one_time]
+        metadata:
+          type: object
+
+    AOIUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 1000
+        geometry:
+          type: object
+        geometry_type:
+          type: string
+          enum: [point, polygon, multipolygon]
+        ecosystem_code:
+          $ref: '#/components/schemas/EcosystemCode'
+        platform_type_code:
+          $ref: '#/components/schemas/PlatformType'
+        platform_id:
+          type: integer
+        mission_type:
+          type: string
+          enum: [monitoring, survey, calibration]
+        mission_recurrence:
+          type: string
+          enum: [daily, weekly, monthly, seasonal, one_time]
+        metadata:
+          type: object
+
+    AOIResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/AOI'
+
+    # ============================================
+    # CAMPAIGN SCHEMAS (v15.6.4+)
+    # ============================================
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        station_id:
+          type: integer
+        status:
+          type: string
+          enum: [planned, active, completed, cancelled]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        objective:
+          type: string
+        principal_investigator:
+          type: string
+        funding_source:
+          type: string
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CampaignCreate:
+      type: object
+      required: [name, station_id, start_date]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        station_id:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        objective:
+          type: string
+          maxLength: 500
+        principal_investigator:
+          type: string
+          maxLength: 100
+        funding_source:
+          type: string
+          maxLength: 200
+        metadata:
+          type: object
+
+    CampaignUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        objective:
+          type: string
+          maxLength: 500
+        principal_investigator:
+          type: string
+          maxLength: 100
+        funding_source:
+          type: string
+          maxLength: 200
+        status:
+          type: string
+          enum: [planned, active, completed, cancelled]
+        metadata:
+          type: object
+
+    CampaignResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Campaign'
+
+    # ============================================
+    # PRODUCT SCHEMAS (v15.6.4+)
+    # ============================================
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        doi:
+          type: string
+          description: Digital Object Identifier
+        instrument_id:
+          type: integer
+        campaign_id:
+          type: integer
+        processing_level:
+          type: string
+          enum: [L0, L1, L2, L3]
+        data_format:
+          type: string
+        file_size_bytes:
+          type: integer
+        file_path:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        quality_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        quality_level:
+          type: string
+          enum: [preliminary, validated, research, publication]
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProductCreate:
+      type: object
+      required: [name, instrument_id, processing_level]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        doi:
+          type: string
+          maxLength: 255
+        instrument_id:
+          type: integer
+        campaign_id:
+          type: integer
+        processing_level:
+          type: string
+          enum: [L0, L1, L2, L3]
+        data_format:
+          type: string
+          maxLength: 50
+        file_size_bytes:
+          type: integer
+        file_path:
+          type: string
+          maxLength: 500
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        doi:
+          type: string
+          maxLength: 255
+        campaign_id:
+          type: integer
+        processing_level:
+          type: string
+          enum: [L0, L1, L2, L3]
+        data_format:
+          type: string
+          maxLength: 50
+        file_size_bytes:
+          type: integer
+        file_path:
+          type: string
+          maxLength: 500
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    ProductResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Product'
