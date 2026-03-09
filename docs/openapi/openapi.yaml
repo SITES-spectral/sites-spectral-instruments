@@ -1694,6 +1694,107 @@ paths:
               schema:
                 $ref: '#/components/schemas/MissionResponse'
 
+  /uav/missions/{id}/pilots:
+    get:
+      tags: [UAV Missions]
+      summary: Get pilots assigned to mission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of assigned pilots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PilotResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [UAV Missions]
+      summary: Assign pilot to mission
+      description: |
+        Assign a pilot to a mission. The pilot must have a valid certificate,
+        valid insurance, and be authorized to fly at the mission's station.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pilot_id]
+              properties:
+                pilot_id:
+                  type: integer
+                  description: ID of the pilot to assign
+                role:
+                  type: string
+                  enum: [pilot, observer, trainee]
+                  default: pilot
+      responses:
+        '201':
+          description: Pilot assigned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assigned:
+                    type: boolean
+                    example: true
+        '400':
+          description: Pilot already assigned, certificate/insurance expired, or not authorized for station
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /uav/missions/{id}/pilots/{pilotId}:
+    delete:
+      tags: [UAV Missions]
+      summary: Remove pilot from mission
+      description: Remove a previously assigned pilot from a mission.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Mission ID
+        - name: pilotId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Pilot ID to remove
+      responses:
+        '200':
+          description: Pilot removed from mission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  removed:
+                    type: boolean
+                    example: true
+        '400':
+          description: Pilot is not assigned to this mission
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # ============================================
   # UAV FLIGHT LOG ENDPOINTS (v15.0.0+)
   # ============================================
