@@ -68,6 +68,7 @@ export {
   CompleteMission,
   AbortMission,
   AssignPilotToMission,
+  RemovePilotFromMission,
   CreateFlightLog,
   UpdateFlightLog,
   DeleteFlightLog,
