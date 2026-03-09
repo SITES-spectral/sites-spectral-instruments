@@ -22,6 +22,7 @@ export { StartMission } from './StartMission.js';
 export { CompleteMission } from './CompleteMission.js';
 export { AbortMission } from './AbortMission.js';
 export { AssignPilotToMission } from './AssignPilotToMission.js';
+export { RemovePilotFromMission } from './RemovePilotFromMission.js';
 
 // Flight Log commands
 export { CreateFlightLog } from './CreateFlightLog.js';

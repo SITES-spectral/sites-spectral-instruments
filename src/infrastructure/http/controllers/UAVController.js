@@ -525,6 +525,35 @@ export class UAVController {
     }
   }
 
+  /**
+   * DELETE /uav/missions/:id/pilots/:pilotId - Remove pilot from mission
+   */
+  async removePilotFromMission(request, missionId, pilotId) {
+    const { response } = await this.auth.authenticateAndAuthorize(
+      request, 'uav_missions', 'write'
+    );
+    if (response) return response;
+
+    const missionIdResult = parsePathId(missionId, 'mission_id');
+    if (!missionIdResult.valid) return missionIdResult.error;
+
+    const pilotIdResult = parsePathId(pilotId, 'pilot_id');
+    if (!pilotIdResult.valid) return pilotIdResult.error;
+
+    try {
+      await this.commands.removePilotFromMission.execute({
+        missionId: missionIdResult.value,
+        pilotId: pilotIdResult.value
+      });
+      return createSuccessResponse({ removed: true });
+    } catch (error) {
+      if (error.message.includes('not found')) {
+        return createNotFoundResponse(error.message);
+      }
+      return createErrorResponse(error.message, 400);
+    }
+  }
+
   // =============================================
   // FLIGHT LOGS
   // =============================================
@@ -971,7 +1000,7 @@ export class UAVController {
         return this.handlePilots(request, method, id, subResource, subId, url);
 
       case 'missions':
-        return this.handleMissions(request, method, id, subResource, url);
+        return this.handleMissions(request, method, id, subResource, subId, url);
 
       case 'flight-logs':
         return this.handleFlightLogs(request, method, id, subResource, url);
@@ -1029,7 +1058,7 @@ export class UAVController {
   /**
    * Handle missions routes
    */
-  async handleMissions(request, method, id, subResource, url) {
+  async handleMissions(request, method, id, subResource, subId, url) {
     // GET /uav/missions/pending
     if (method === 'GET' && id === 'pending') {
       return this.getPendingMissions(request);
@@ -1085,8 +1114,13 @@ export class UAVController {
       return this.updateMission(request, id);
     }
 
+    // DELETE /uav/missions/:id/pilots/:pilotId
+    if (method === 'DELETE' && id && subResource === 'pilots' && subId) {
+      return this.removePilotFromMission(request, id, subId);
+    }
+
     // DELETE /uav/missions/:id
-    if (method === 'DELETE' && id) {
+    if (method === 'DELETE' && id && !subResource) {
       return this.deleteMission(request, id);
     }
 

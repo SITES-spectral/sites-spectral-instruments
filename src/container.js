@@ -93,6 +93,7 @@ import {
   CompleteMission,
   AbortMission,
   AssignPilotToMission,
+  RemovePilotFromMission,
   CreateFlightLog,
   UpdateFlightLog,
   DeleteFlightLog,
@@ -310,6 +311,7 @@ function createCommands(deps) {
     completeMission: new CompleteMission(deps),
     abortMission: new AbortMission(deps),
     assignPilotToMission: new AssignPilotToMission(deps),
+    removePilotFromMission: new RemovePilotFromMission(deps),
     // UAV Flight Log (v15.0.0)
     createFlightLog: new CreateFlightLog(deps),
     updateFlightLog: new UpdateFlightLog(deps),

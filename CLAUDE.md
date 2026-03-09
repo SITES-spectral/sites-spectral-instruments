@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Current Version: 15.7.0
+## Current Version: 15.7.1
 
 | Property | Value |
 |----------|-------|
 | **Status** | Production Ready |
 | **Admin Portal** | https://admin.sitesspectral.work |
 | **Public Portal** | https://sitesspectral.work |
-| **Last Updated** | 2026-02-16 |
+| **Last Updated** | 2026-03-09 |
 | **Test Coverage** | 1268 tests |
 | **Stations** | 12 (9 SITES + 3 Guest) |
 | **Platforms** | 30 |
@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Recent Changes
 
+- **v15.7.1**: Fix station portal showing public-only data — now uses authenticated dashboard API for full platform/instrument details
 - **v15.7.0**: Database audit, 3 guest stations (ALN, HYL, NOR), 40 ROIs migrated ([docs](docs/audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md))
 - **v15.6.11**: CF Access session persistence ([docs](docs/security/SESSION_PERSISTENCE.md))
 - **v15.6.10**: Security audit complete (P0/P1/P2)

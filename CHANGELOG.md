@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.7.1] - 2026-03-09
+
+### Fixed
+
+- **Station Portal: Platforms & Instruments now visible** — Fixed critical bug where station subdomain portals (`{station}.sitesspectral.work`) were using the public API (counts only) instead of the authenticated dashboard API (full data). Station portal now calls `GET /api/v11/stations/{acronym}/dashboard` which returns all platforms with nested instrument details.
+- **`loadInstruments()` was always empty** — Previous implementation looped over platforms but always set `this.instruments[platform.id] = []`, leaving instrument lists blank. Replaced with `loadDashboardData()` that retrieves complete platform+instrument data in a single API call.
+- **Instrument cards now show real data** — Each platform card now renders actual instrument name, type, and active/inactive status instead of the "Login to view details" placeholder.
+- **Stats updated** — Instrument count and active count now reflect actual instrument data from the dashboard response.
+- **`DELETE /api/v11/uav/missions/:id/pilots/:pilotId` now functional** — The route was documented and had SQL in the repository but was missing the command class, controller method, and correct routing. The catch-all `DELETE && id` rule was eating the request before the pilot-specific check ran. Fixed by: adding `RemovePilotFromMission` command, passing `subId` to `handleMissions()`, and ordering the pilot DELETE route before the mission DELETE catch-all.
+
+---
+
 ## [15.7.0] - 2026-02-16
 
 ### Added - Database Audit & Data Migration

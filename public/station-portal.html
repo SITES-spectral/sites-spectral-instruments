@@ -615,8 +615,7 @@
                 }
 
                 try {
-                    await this.loadStationData(stationAcronym);
-                    await this.loadInstruments(stationAcronym);
+                    await this.loadDashboardData(stationAcronym);
                     this.render();
                 } catch (error) {
                     console.error('Failed to load station:', error);
@@ -679,30 +678,19 @@
                 return counts;
             },
 
-            async loadStationData(acronym) {
-                const response = await fetch('/api/public/station/' + encodeURIComponent(acronym.toLowerCase()));
-                const data = await response.json();
+            async loadDashboardData(acronym) {
+                const response = await fetch('/api/v11/stations/' + encodeURIComponent(acronym.toLowerCase()) + '/dashboard');
+                if (!response.ok) {
+                    throw new Error('Failed to load station dashboard: ' + response.status);
+                }
+                const json = await response.json();
 
-                if (!data.success) {
+                if (!json.data) {
                     throw new Error('Station not found');
                 }
 
-                this.station = data.station;
-                this.platforms = data.platforms || [];
-            },
-
-            async loadInstruments(acronym) {
-                // Load instruments for each platform
-                for (const platform of this.platforms) {
-                    try {
-                        const response = await fetch('/api/public/station/' + encodeURIComponent(acronym.toLowerCase()));
-                        // For now, we'll use instrument_count from platforms
-                        // Full instrument data would need authenticated API
-                        this.instruments[platform.id] = [];
-                    } catch (e) {
-                        console.warn('Could not load instruments for platform:', platform.id);
-                    }
-                }
+                this.station = json.data.station;
+                this.platforms = json.data.platforms || [];
             },
 
             render() {
@@ -1022,43 +1010,51 @@
 
                 body.appendChild(meta);
 
-                // Instruments summary
+                // Instruments list
                 const instruments = document.createElement('div');
                 instruments.className = 'instruments-list';
 
+                const platformInstruments = platform.instruments || [];
                 const instHeader = document.createElement('h4');
-                instHeader.textContent = 'Instruments (' + (platform.instrument_count || 0) + ')';
+                instHeader.textContent = 'Instruments (' + platformInstruments.length + ')';
                 instruments.appendChild(instHeader);
 
-                // Placeholder for instruments (would need auth API for full data)
-                if (platform.instrument_count > 0) {
-                    const placeholder = document.createElement('div');
-                    placeholder.className = 'instrument-item';
+                if (platformInstruments.length > 0) {
+                    platformInstruments.forEach(instrument => {
+                        const item = document.createElement('div');
+                        item.className = 'instrument-item';
 
-                    const info = document.createElement('div');
-                    info.className = 'instrument-info';
+                        const info = document.createElement('div');
+                        info.className = 'instrument-info';
 
-                    const icon = document.createElement('div');
-                    icon.className = 'instrument-icon default';
-                    const iconI = document.createElement('i');
-                    iconI.className = 'fas fa-camera';
-                    icon.appendChild(iconI);
-                    info.appendChild(icon);
+                        const icon = document.createElement('div');
+                        icon.className = 'instrument-icon ' + this.getInstrumentIconClass(instrument.instrument_type);
+                        const iconI = document.createElement('i');
+                        iconI.className = this.getInstrumentFaIcon(instrument.instrument_type);
+                        icon.appendChild(iconI);
+                        info.appendChild(icon);
 
-                    const text = document.createElement('div');
-                    const nameEl = document.createElement('div');
-                    nameEl.className = 'instrument-name';
-                    nameEl.textContent = platform.instrument_count + ' instrument(s)';
-                    text.appendChild(nameEl);
+                        const text = document.createElement('div');
+                        const nameEl = document.createElement('div');
+                        nameEl.className = 'instrument-name';
+                        nameEl.textContent = instrument.display_name || instrument.normalized_name;
+                        text.appendChild(nameEl);
 
-                    const typeEl = document.createElement('div');
-                    typeEl.className = 'instrument-type';
-                    typeEl.textContent = 'Login to view details';
-                    text.appendChild(typeEl);
+                        const typeEl = document.createElement('div');
+                        typeEl.className = 'instrument-type';
+                        typeEl.textContent = instrument.instrument_type || 'Unknown';
+                        text.appendChild(typeEl);
 
-                    info.appendChild(text);
-                    placeholder.appendChild(info);
-                    instruments.appendChild(placeholder);
+                        info.appendChild(text);
+                        item.appendChild(info);
+
+                        const statusEl = document.createElement('div');
+                        statusEl.className = 'instrument-status ' + (instrument.status === 'Active' ? 'active' : 'inactive');
+                        statusEl.textContent = instrument.status || 'Unknown';
+                        item.appendChild(statusEl);
+
+                        instruments.appendChild(item);
+                    });
                 } else {
                     const empty = document.createElement('p');
                     empty.style.cssText = 'font-size: 13px; color: #9ca3af;';
@@ -1091,7 +1087,7 @@
 
                 const p2 = document.createElement('p');
                 p2.style.cssText = 'margin-top: 8px; font-size: 12px;';
-                p2.textContent = 'Version 15.1.0';
+                p2.textContent = 'Version 15.7.1';
                 footer.appendChild(p2);
 
                 return footer;
@@ -1163,12 +1159,39 @@
                 }
             },
 
+            getInstrumentIconClass(type) {
+                const classes = {
+                    'PHE': 'phenocam',
+                    'MS': 'multispectral',
+                    'NDVI': 'ndvi',
+                    'PRI': 'ndvi',
+                    'PAR': 'par',
+                    'HYP': 'multispectral'
+                };
+                return classes[type] || 'default';
+            },
+
+            getInstrumentFaIcon(type) {
+                const icons = {
+                    'PHE': 'fas fa-camera',
+                    'MS': 'fas fa-layer-group',
+                    'NDVI': 'fas fa-seedling',
+                    'PRI': 'fas fa-seedling',
+                    'PAR': 'fas fa-sun',
+                    'HYP': 'fas fa-rainbow'
+                };
+                return icons[type] || 'fas fa-microchip';
+            },
+
             getTotalInstruments() {
-                return this.platforms.reduce((sum, p) => sum + (p.instrument_count || 0), 0);
+                return this.platforms.reduce((sum, p) => sum + (p.instruments ? p.instruments.length : (p.instrument_count || 0)), 0);
             },
 
             getActiveCount() {
-                return this.platforms.filter(p => p.status === 'Active').length;
+                return this.platforms.reduce((sum, p) => {
+                    if (!p.instruments) return sum;
+                    return sum + p.instruments.filter(i => i.status === 'Active').length;
+                }, 0);
             },
 
             formatStatus(status) {
