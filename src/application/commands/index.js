@@ -70,6 +70,7 @@ export {
   CompleteMission,
   AbortMission,
   AssignPilotToMission,
+  RemovePilotFromMission,
   // Flight Log commands
   CreateFlightLog,
   UpdateFlightLog,
