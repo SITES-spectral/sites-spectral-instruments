@@ -260,3 +260,6 @@ exports/
 reports/
 site/
 docs/_build/
+
+# Private contact documents
+docs/**/*_PRIVATE.md
