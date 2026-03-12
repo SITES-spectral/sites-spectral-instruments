@@ -85,7 +85,7 @@ describe('Cookie Utilities', () => {
     });
 
     it('should include Secure flag for production domain', () => {
-      const request = createMockRequest({ hostname: 'sites.jobelab.com', protocol: 'https:' });
+      const request = createMockRequest({ hostname: 'sitesspectral.work', protocol: 'https:' });
       const cookie = createAuthCookie('test-token', request);
 
       expect(cookie).toContain('Secure');

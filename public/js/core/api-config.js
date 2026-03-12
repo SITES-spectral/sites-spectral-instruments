@@ -46,7 +46,7 @@
      * Known production hostnames
      */
     const PRODUCTION_HOSTS = [
-        'sites.jobelab.com',
+        'sitesspectral.work',
         'sites-spectral-instruments.jose-e5f.workers.dev'
     ];
 
@@ -54,7 +54,7 @@
      * Known staging hostnames
      */
     const STAGING_HOSTS = [
-        'staging.sites.jobelab.com'
+        'staging.sitesspectral.work'
     ];
 
     /**

@@ -335,18 +335,18 @@ frontend:
 # =============================================================================
 
 documentation:
-  base_url: "https://docs.sites.jobelab.com/api"
+  base_url: "https://docs.sitesspectral.work/api"
 
   versions:
     v11:
-      docs_url: "https://docs.sites.jobelab.com/api/v11"
-      changelog_url: "https://docs.sites.jobelab.com/api/v11/changelog"
-      openapi_spec: "https://docs.sites.jobelab.com/api/v11/openapi.yaml"
+      docs_url: "https://docs.sitesspectral.work/api/v11"
+      changelog_url: "https://docs.sitesspectral.work/api/v11/changelog"
+      openapi_spec: "https://docs.sitesspectral.work/api/v11/openapi.yaml"
 
     v10:
-      docs_url: "https://docs.sites.jobelab.com/api/v10"
-      migration_guide: "https://docs.sites.jobelab.com/api/v10-to-v11"
+      docs_url: "https://docs.sitesspectral.work/api/v10"
+      migration_guide: "https://docs.sitesspectral.work/api/v10-to-v11"
 
     v3:
-      docs_url: "https://docs.sites.jobelab.com/api/v3"
-      migration_guide: "https://docs.sites.jobelab.com/api/v3-to-v11"
+      docs_url: "https://docs.sitesspectral.work/api/v3"
+      migration_guide: "https://docs.sitesspectral.work/api/v3-to-v11"

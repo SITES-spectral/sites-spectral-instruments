@@ -16,7 +16,7 @@ import {
 describe('CORS Origin Validation', () => {
   describe('ALLOWED_ORIGINS', () => {
     it('should include production URL', () => {
-      expect(ALLOWED_ORIGINS).toContain('https://sites.jobelab.com');
+      expect(ALLOWED_ORIGINS).toContain('https://sitesspectral.work');
     });
 
     it('should include Cloudflare Workers URL', () => {
@@ -35,7 +35,7 @@ describe('CORS Origin Validation', () => {
 
   describe('isAllowedOrigin', () => {
     it('should return true for allowed production origin', () => {
-      expect(isAllowedOrigin('https://sites.jobelab.com')).toBe(true);
+      expect(isAllowedOrigin('https://sitesspectral.work')).toBe(true);
     });
 
     it('should return true for allowed localhost origin', () => {
@@ -47,7 +47,7 @@ describe('CORS Origin Validation', () => {
     });
 
     it('should return false for similar but not exact match', () => {
-      expect(isAllowedOrigin('https://sites.jobelab.com.evil.com')).toBe(false);
+      expect(isAllowedOrigin('https://sitesspectral.work.evil.com')).toBe(false);
     });
 
     it('should return true for null origin (same-origin or server-to-server)', () => {
@@ -61,7 +61,7 @@ describe('CORS Origin Validation', () => {
 
   describe('getAllowedOrigin', () => {
     it('should return the origin if it is allowed', () => {
-      expect(getAllowedOrigin('https://sites.jobelab.com')).toBe('https://sites.jobelab.com');
+      expect(getAllowedOrigin('https://sitesspectral.work')).toBe('https://sitesspectral.work');
     });
 
     it('should return first allowed origin for unauthorized origin', () => {
@@ -77,11 +77,11 @@ describe('CORS Origin Validation', () => {
     it('should return correct origin for allowed origin request', () => {
       const mockRequest = {
         headers: {
-          get: (name) => name === 'Origin' ? 'https://sites.jobelab.com' : null
+          get: (name) => name === 'Origin' ? 'https://sitesspectral.work' : null
         }
       };
       const { corsHeaders } = createCors(mockRequest);
-      expect(corsHeaders['Access-Control-Allow-Origin']).toBe('https://sites.jobelab.com');
+      expect(corsHeaders['Access-Control-Allow-Origin']).toBe('https://sitesspectral.work');
     });
 
     it('should return first allowed origin for unauthorized origin', () => {
@@ -97,7 +97,7 @@ describe('CORS Origin Validation', () => {
     it('should include Vary: Origin header', () => {
       const mockRequest = {
         headers: {
-          get: () => 'https://sites.jobelab.com'
+          get: () => 'https://sitesspectral.work'
         }
       };
       const { corsHeaders } = createCors(mockRequest);
@@ -107,7 +107,7 @@ describe('CORS Origin Validation', () => {
     it('should include Access-Control-Allow-Credentials', () => {
       const mockRequest = {
         headers: {
-          get: () => 'https://sites.jobelab.com'
+          get: () => 'https://sitesspectral.work'
         }
       };
       const { corsHeaders } = createCors(mockRequest);
@@ -117,7 +117,7 @@ describe('CORS Origin Validation', () => {
     it('should NOT return wildcard (*) origin', () => {
       const mockRequest = {
         headers: {
-          get: () => 'https://sites.jobelab.com'
+          get: () => 'https://sitesspectral.work'
         }
       };
       const { corsHeaders } = createCors(mockRequest);
@@ -134,7 +134,7 @@ describe('CORS Origin Validation', () => {
     it('should return true for allowed origin', () => {
       const mockRequest = {
         headers: {
-          get: (name) => name === 'Origin' ? 'https://sites.jobelab.com' : null
+          get: (name) => name === 'Origin' ? 'https://sitesspectral.work' : null
         }
       };
       expect(validateCorsOrigin(mockRequest)).toBe(true);
@@ -180,12 +180,12 @@ describe('CORS Origin Validation', () => {
     });
 
     it('should block request from subdomain spoof', () => {
-      expect(isAllowedOrigin('https://sites.jobelab.com.attacker.com')).toBe(false);
+      expect(isAllowedOrigin('https://sitesspectral.work.attacker.com')).toBe(false);
     });
 
     it('should block request from protocol downgrade attempt', () => {
       // Our list only has https for production
-      expect(isAllowedOrigin('http://sites.jobelab.com')).toBe(false);
+      expect(isAllowedOrigin('http://sitesspectral.work')).toBe(false);
     });
 
     it('should block request with null string (not null value)', () => {

@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.7.2] - 2026-03-12
+
+### Fixed
+
+- **Complete domain migration from `sites.jobelab.com` to `sitesspectral.work`** — Removed all remaining legacy domain references across source and documentation files:
+  - `public/js/core/api-config.js`: Updated `PRODUCTION_HOSTS` to `sitesspectral.work` and `STAGING_HOSTS` to `staging.sitesspectral.work`
+  - `src/config/allowed-origins.js`: Removed legacy `https://sites.jobelab.com` CORS origin
+  - `src/auth/cookie-utils.js`: Removed legacy hostname check from `isSecureContext()`
+  - `docs/openapi/openapi.yaml`: Removed legacy server entry from OpenAPI spec
+  - `public/terms-of-service.html`: Updated attribution URL to `https://sitesspectral.work`
+
+---
+
 ## [15.7.1] - 2026-03-09
 
 ### Fixed

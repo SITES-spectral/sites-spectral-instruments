@@ -129,7 +129,7 @@
 ```javascript
 createMockRequest({
   method: 'POST',
-  url: 'https://sites.jobelab.com/api/v11/magic-links/create',
+  url: 'https://sitesspectral.work/api/v11/magic-links/create',
   body: { station_id: 1, label: 'Test' },
   headers: { 'CF-Connecting-IP': '192.168.1.1' }
 })

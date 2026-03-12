@@ -502,8 +502,8 @@ describe('Subdomain Routing', () => {
         expect(isAllowedOrigin('https://admin.sitesspectral.work')).toBe(true);
       });
 
-      it('should allow legacy jobelab domain', () => {
-        expect(isAllowedOrigin('https://sites.jobelab.com')).toBe(true);
+      it('should allow root production domain', () => {
+        expect(isAllowedOrigin('https://sitesspectral.work')).toBe(true);
       });
 
       it('should allow workers.dev URLs', () => {

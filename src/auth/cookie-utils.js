@@ -27,8 +27,7 @@ const COOKIE_MAX_AGE = 86400; // 24 hours (matches JWT expiry)
 function isSecureContext(request) {
   const url = new URL(request.url);
   // Production domains are always HTTPS (including all subdomains)
-  if (url.hostname === 'sites.jobelab.com' ||
-      url.hostname === 'sitesspectral.work' ||
+  if (url.hostname === 'sitesspectral.work' ||
       url.hostname.endsWith('.sitesspectral.work') ||
       url.hostname.endsWith('.workers.dev')) {
     return true;

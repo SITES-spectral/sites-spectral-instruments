@@ -22,7 +22,7 @@ function createMockRequest(options = {}) {
     referer = null,
     contentType = 'application/json',
     csrfToken = null,
-    url = 'https://sites.jobelab.com/api/stations'
+    url = 'https://sitesspectral.work/api/stations'
   } = options;
 
   return {
@@ -45,11 +45,11 @@ function createMockRequest(options = {}) {
 describe('CSRF Protection', () => {
   describe('validateRequestOrigin', () => {
     it('should validate allowed production origin', () => {
-      const request = createMockRequest({ origin: 'https://sites.jobelab.com' });
+      const request = createMockRequest({ origin: 'https://sitesspectral.work' });
       const result = validateRequestOrigin(request);
 
       expect(result.isValid).toBe(true);
-      expect(result.origin).toBe('https://sites.jobelab.com');
+      expect(result.origin).toBe('https://sitesspectral.work');
       expect(result.source).toBe('origin');
     });
 
@@ -86,7 +86,7 @@ describe('CSRF Protection', () => {
 
     it('should reject subdomain spoofing attempt', () => {
       const request = createMockRequest({
-        origin: 'https://sites.jobelab.com.attacker.com'
+        origin: 'https://sitesspectral.work.attacker.com'
       });
       const result = validateRequestOrigin(request);
 
@@ -95,7 +95,7 @@ describe('CSRF Protection', () => {
 
     it('should fall back to referer when no origin header', () => {
       const request = createMockRequest({
-        referer: 'https://sites.jobelab.com/dashboard'
+        referer: 'https://sitesspectral.work/dashboard'
       });
       const result = validateRequestOrigin(request);
 
@@ -188,7 +188,7 @@ describe('CSRF Protection', () => {
 
     it('should validate token from query parameter', () => {
       const request = {
-        url: `https://sites.jobelab.com/api/test?_csrf=${expectedToken}`,
+        url: `https://sitesspectral.work/api/test?_csrf=${expectedToken}`,
         headers: { get: () => null }
       };
 
@@ -252,7 +252,7 @@ describe('CSRF Protection', () => {
       it('should allow POST with valid origin', () => {
         const request = createMockRequest({
           method: 'POST',
-          origin: 'https://sites.jobelab.com'
+          origin: 'https://sitesspectral.work'
         });
         const result = csrfProtect(request);
 
@@ -274,7 +274,7 @@ describe('CSRF Protection', () => {
       it('should allow DELETE with valid origin', () => {
         const request = createMockRequest({
           method: 'DELETE',
-          origin: 'https://sites.jobelab.com'
+          origin: 'https://sitesspectral.work'
         });
         const result = csrfProtect(request);
 
@@ -309,7 +309,7 @@ describe('CSRF Protection', () => {
       it('should allow form submission with valid origin', () => {
         const request = createMockRequest({
           method: 'POST',
-          origin: 'https://sites.jobelab.com',
+          origin: 'https://sitesspectral.work',
           contentType: 'application/x-www-form-urlencoded'
         });
         const result = csrfProtect(request);
@@ -409,7 +409,7 @@ describe('CSRF Protection', () => {
     it('should allow legitimate API calls from frontend', () => {
       const request = createMockRequest({
         method: 'POST',
-        origin: 'https://sites.jobelab.com',
+        origin: 'https://sitesspectral.work',
         contentType: 'application/json'
       });
       const result = csrfProtect(request);

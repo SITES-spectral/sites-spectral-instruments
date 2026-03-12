@@ -86,7 +86,7 @@ const mockReadonlyUser = {
 function createMockRequest(options = {}) {
   const {
     method = 'GET',
-    url = 'https://sites.jobelab.com/api/v11/magic-links',
+    url = 'https://sitesspectral.work/api/v11/magic-links',
     body = null,
     headers = {}
   } = options;
@@ -162,7 +162,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'POST',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/create',
+        url: 'https://sitesspectral.work/api/v11/magic-links/create',
         body: { station_id: 1, label: 'Test Link' }
       });
 
@@ -175,7 +175,7 @@ describe('Magic Links Handler', () => {
       const env = createMockEnv();
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/validate?token=abc123'
+        url: 'https://sitesspectral.work/api/v11/magic-links/validate?token=abc123'
       });
 
       // Mock token not found scenario
@@ -193,7 +193,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'POST',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/revoke',
+        url: 'https://sitesspectral.work/api/v11/magic-links/revoke',
         body: { token_id: 1 }
       });
 
@@ -208,7 +208,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -219,7 +219,7 @@ describe('Magic Links Handler', () => {
     it('should return 404 for unknown endpoint', async () => {
       const env = createMockEnv();
       const request = createMockRequest({
-        url: 'https://sites.jobelab.com/api/v11/magic-links/unknown'
+        url: 'https://sitesspectral.work/api/v11/magic-links/unknown'
       });
 
       const response = await handleMagicLinks('GET', ['unknown'], request, env);
@@ -233,7 +233,7 @@ describe('Magic Links Handler', () => {
       const env = createMockEnv();
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/create'
+        url: 'https://sitesspectral.work/api/v11/magic-links/create'
       });
 
       const response = await handleMagicLinks('GET', ['create'], request, env);
@@ -573,7 +573,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -612,7 +612,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/validate'
+        url: 'https://sitesspectral.work/api/v11/magic-links/validate'
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -628,7 +628,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -662,7 +662,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -696,7 +696,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -730,7 +730,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -765,7 +765,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -793,7 +793,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`,
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`,
         headers: {
           'CF-Connecting-IP': '203.0.113.42',
           'User-Agent': 'CustomBrowser/1.0'
@@ -815,7 +815,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${validToken}`
+        url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${validToken}`
       });
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
@@ -1080,7 +1080,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1118,7 +1118,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1141,7 +1141,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1157,7 +1157,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1172,7 +1172,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list?station_id=2'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list?station_id=2'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1192,7 +1192,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       await handleMagicLinks('GET', ['list'], request, env);
@@ -1241,7 +1241,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list?include_revoked=true'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list?include_revoked=true'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1260,7 +1260,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       await handleMagicLinks('GET', ['list'], request, env);
@@ -1309,7 +1309,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list?include_expired=true'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list?include_expired=true'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1328,7 +1328,7 @@ describe('Magic Links Handler', () => {
 
       const request = createMockRequest({
         method: 'GET',
-        url: 'https://sites.jobelab.com/api/v11/magic-links/list'
+        url: 'https://sitesspectral.work/api/v11/magic-links/list'
       });
 
       const response = await handleMagicLinks('GET', ['list'], request, env);
@@ -1475,7 +1475,7 @@ describe('Magic Links Handler', () => {
       for (const { token, expectedStatus } of invalidTokens) {
         const request = createMockRequest({
           method: 'GET',
-          url: `https://sites.jobelab.com/api/v11/magic-links/validate?token=${token}`
+          url: `https://sitesspectral.work/api/v11/magic-links/validate?token=${token}`
         });
 
         const response = await handleMagicLinks('GET', ['validate'], request, env);

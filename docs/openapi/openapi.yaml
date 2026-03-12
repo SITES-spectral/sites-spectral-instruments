@@ -48,8 +48,6 @@ servers:
     description: Production API (v15.0.0+)
   - url: https://admin.sitesspectral.work/api/v11
     description: Admin Portal API
-  - url: https://sites.jobelab.com/api/v11
-    description: Legacy Production API
   - url: https://sites-spectral-instruments.jose-beltran.workers.dev/api/v11
     description: Cloudflare Workers API
   - url: http://localhost:8787/api/v11
