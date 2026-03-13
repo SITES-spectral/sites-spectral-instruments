@@ -53,13 +53,13 @@ describe('CSRF Protection', () => {
       expect(result.source).toBe('origin');
     });
 
-    it('should validate allowed workers.dev origin', () => {
+    it('should reject workers.dev origin (SEC-007)', () => {
       const request = createMockRequest({
         origin: 'https://sites-spectral-instruments.jose-e5f.workers.dev'
       });
       const result = validateRequestOrigin(request);
 
-      expect(result.isValid).toBe(true);
+      expect(result.isValid).toBe(false);
     });
 
     it('should validate localhost development origin', () => {
@@ -112,14 +112,14 @@ describe('CSRF Protection', () => {
       expect(result.isValid).toBe(false);
     });
 
-    it('should handle missing origin and referer gracefully', () => {
+    it('should reject missing origin and referer (SEC-009)', () => {
       const request = createMockRequest({});
       const result = validateRequestOrigin(request);
 
-      // Lenient for same-origin requests
-      expect(result.isValid).toBe(true);
+      // SEC-009: Missing both Origin and Referer is now rejected
+      expect(result.isValid).toBe(false);
       expect(result.source).toBe('none');
-      expect(result.warning).toBe('No origin or referer header');
+      expect(result.error).toBe('Missing Origin and Referer headers');
     });
 
     it('should handle malformed referer URL', () => {
@@ -283,7 +283,7 @@ describe('CSRF Protection', () => {
     });
 
     describe('Form submission protection', () => {
-      it('should block form-urlencoded without origin', () => {
+      it('should block form-urlencoded without origin (SEC-009)', () => {
         const request = createMockRequest({
           method: 'POST',
           contentType: 'application/x-www-form-urlencoded'
@@ -291,8 +291,10 @@ describe('CSRF Protection', () => {
         });
         const result = csrfProtect(request);
 
+        // SEC-009: Missing Origin+Referer now fails at origin validation before
+        // reaching the form-specific check
         expect(result.isValid).toBe(false);
-        expect(result.error).toContain('Form submissions require Origin header');
+        expect(result.error).toContain('Invalid origin');
       });
 
       it('should block multipart/form-data without origin', () => {

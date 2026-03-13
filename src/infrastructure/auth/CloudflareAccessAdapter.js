@@ -11,6 +11,7 @@
  */
 
 import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { Role } from '../../domain/authorization/Role.js';
 
 /**
  * Cloudflare Access team domain for SITES Spectral
@@ -38,23 +39,6 @@ const GLOBAL_ADMIN_EMAILS = [
   'jose.beltran@mgeo.lu.se',
   'lars.eklundh@nateko.lu.se'
 ];
-
-/**
- * Station admin email patterns
- * Maps email domains/patterns to station access
- */
-const STATION_EMAIL_MAPPINGS = {
-  // Abisko
-  'abisko': ['@polar.se', '@naturvardsverket.se'],
-
-  // Asa
-  'asa': ['@slu.se'],
-
-  // Svartberget
-  'svartberget': ['@slu.se', '@svartberget.se'],
-
-  // Add more station mappings as needed
-};
 
 /**
  * Get or create the JWKS key set for verification
@@ -326,32 +310,24 @@ export class CloudflareAccessAdapter {
 
   /**
    * Check if a role has edit privileges
+   * Delegates to centralized Role domain object
    *
    * @param {string} role - User role
    * @returns {boolean}
    */
   hasEditPrivileges(role) {
-    return ['admin', 'sites-admin', 'station-admin'].includes(role);
+    return Role.hasEditPrivileges(role);
   }
 
   /**
    * Get permissions array for a role
+   * Delegates to centralized Role domain object
    *
    * @param {string} role - User role
    * @returns {string[]}
    */
   getPermissionsForRole(role) {
-    const rolePermissions = {
-      'admin': ['read', 'write', 'edit', 'delete', 'admin'],
-      'sites-admin': ['read', 'write', 'edit', 'delete', 'admin'],
-      'station-admin': ['read', 'write', 'edit', 'delete'],
-      'station': ['read'],
-      'uav-pilot': ['read', 'flight-log'],
-      'readonly': ['read'],
-      'station-internal': ['read']
-    };
-
-    return rolePermissions[role] || ['read'];
+    return Role.getPermissions(role);
   }
 
   /**

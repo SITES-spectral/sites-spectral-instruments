@@ -31,18 +31,14 @@ import {
   parsePagination,
   parsePathId
 } from './ControllerUtils.js';
+import { Role } from '../../../domain/authorization/Role.js';
 
 /**
- * Super admin roles that can directly edit ROIs
- */
-// v15.8.4: Added station-admin, removed ghost spectral-admin role (A3+A4 audit fix)
-const SUPER_ADMIN_ROLES = ['admin', 'sites-admin', 'station-admin'];
-
-/**
- * Check if user can directly edit ROIs (super admin only)
+ * Check if user can directly edit ROIs
+ * Uses centralized Role.EDIT_ROLES as single source of truth
  */
 function canDirectlyEditROI(user) {
-  return SUPER_ADMIN_ROLES.includes(user.role);
+  return Role.hasEditPrivileges(user.role);
 }
 
 /**

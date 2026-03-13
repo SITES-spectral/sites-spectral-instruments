@@ -85,17 +85,18 @@ describe('D1StationRepository', () => {
 
       const result = await repository.findByAcronym('ANS');
 
-      expect(chain.bind).toHaveBeenCalledWith('ANS');
+      // Now binds both UPPER(acronym) and LOWER(normalized_name)
+      expect(chain.bind).toHaveBeenCalledWith('ANS', 'ans');
       expect(result.acronym).toBe('ANS');
     });
 
-    it('should uppercase the acronym for lookup', async () => {
+    it('should uppercase the acronym and lowercase normalized_name for lookup', async () => {
       const chain = createMockChain(null);
       mockDb.prepare.mockReturnValue(chain);
 
       await repository.findByAcronym('svb');
 
-      expect(chain.bind).toHaveBeenCalledWith('SVB');
+      expect(chain.bind).toHaveBeenCalledWith('SVB', 'svb');
     });
 
     it('should return null for invalid acronym input', async () => {

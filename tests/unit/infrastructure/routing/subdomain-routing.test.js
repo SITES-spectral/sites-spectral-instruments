@@ -506,9 +506,9 @@ describe('Subdomain Routing', () => {
         expect(isAllowedOrigin('https://sitesspectral.work')).toBe(true);
       });
 
-      it('should allow workers.dev URLs', () => {
-        expect(isAllowedOrigin('https://sites-spectral-instruments.jose-e5f.workers.dev')).toBe(true);
-        expect(isAllowedOrigin('https://sites-spectral-instruments.jose-beltran.workers.dev')).toBe(true);
+      it('should reject workers.dev URLs (SEC-007)', () => {
+        expect(isAllowedOrigin('https://sites-spectral-instruments.jose-e5f.workers.dev')).toBe(false);
+        expect(isAllowedOrigin('https://sites-spectral-instruments.jose-beltran.workers.dev')).toBe(false);
       });
 
       it('should allow localhost development URLs', () => {
@@ -559,11 +559,11 @@ describe('Subdomain Routing', () => {
         expect(isAllowedOrigin('https://hyl.sitesspectral.work')).toBe(true);
       });
 
-      it('should allow any valid subdomain pattern (alphanumeric + hyphens)', () => {
-        // Even if not in station list, pattern is valid
-        expect(isAllowedOrigin('https://future-station.sitesspectral.work')).toBe(true);
-        expect(isAllowedOrigin('https://test123.sitesspectral.work')).toBe(true);
-        expect(isAllowedOrigin('https://station-01.sitesspectral.work')).toBe(true);
+      it('should reject non-enumerated subdomains (SEC-012: no wildcard)', () => {
+        // Only enumerated station subdomains are allowed, not arbitrary patterns
+        expect(isAllowedOrigin('https://future-station.sitesspectral.work')).toBe(false);
+        expect(isAllowedOrigin('https://test123.sitesspectral.work')).toBe(false);
+        expect(isAllowedOrigin('https://station-01.sitesspectral.work')).toBe(false);
       });
 
       it('should reject invalid subdomain characters', () => {
@@ -573,18 +573,17 @@ describe('Subdomain Routing', () => {
         expect(isAllowedOrigin('https://station.with.dots.sitesspectral.work')).toBe(false);
       });
 
-      it('should allow uppercase letters (URL hostname normalization)', () => {
-        // The URL constructor automatically normalizes hostnames to lowercase
-        // https://CAPS.sitesspectral.work -> hostname: caps.sitesspectral.work
-        // This is standard URL behavior per WHATWG URL specification
-        expect(isAllowedOrigin('https://CAPS.sitesspectral.work')).toBe(true);
-        expect(isAllowedOrigin('https://Admin.sitesspectral.work')).toBe(true);
-        expect(isAllowedOrigin('https://MixedCase.sitesspectral.work')).toBe(true);
+      it('should reject uppercase subdomains (exact match, no normalization)', () => {
+        // Origins are matched exactly against the enumerated list (case-sensitive)
+        // In practice, browsers normalize Origin headers to lowercase
+        expect(isAllowedOrigin('https://CAPS.sitesspectral.work')).toBe(false);
+        expect(isAllowedOrigin('https://Admin.sitesspectral.work')).toBe(false);
+        expect(isAllowedOrigin('https://MixedCase.sitesspectral.work')).toBe(false);
       });
 
-      it('should allow workers.dev subdomains (development)', () => {
-        expect(isAllowedOrigin('https://test.workers.dev')).toBe(true);
-        expect(isAllowedOrigin('https://my-worker.some-account.workers.dev')).toBe(true);
+      it('should reject workers.dev subdomains (SEC-007)', () => {
+        expect(isAllowedOrigin('https://test.workers.dev')).toBe(false);
+        expect(isAllowedOrigin('https://my-worker.some-account.workers.dev')).toBe(false);
       });
     });
 
@@ -605,16 +604,13 @@ describe('Subdomain Routing', () => {
         expect(isAllowedOrigin('https://sitesspectral.org')).toBe(false);
       });
 
-      it('should allow http for development (protocol not validated in subdomain pattern)', () => {
-        // Note: The subdomain pattern /^[a-z0-9-]+$/ doesn't check protocol
-        // Protocol enforcement should happen at the infrastructure level (CF Access, load balancer)
-        // For static list, http://sitesspectral.work is not in ALLOWED_ORIGINS (only https)
+      it('should reject http protocol for production origins', () => {
+        // Only https origins are in the enumerated allowed list
         expect(isAllowedOrigin('http://sitesspectral.work')).toBe(false);
 
-        // But dynamic subdomain pattern accepts both http and https
-        // This is intentional for development/testing flexibility
-        expect(isAllowedOrigin('http://admin.sitesspectral.work')).toBe(true);
-        expect(isAllowedOrigin('http://svartberget.sitesspectral.work')).toBe(true);
+        // SEC-012: No wildcard pattern — http subdomain origins are not enumerated
+        expect(isAllowedOrigin('http://admin.sitesspectral.work')).toBe(false);
+        expect(isAllowedOrigin('http://svartberget.sitesspectral.work')).toBe(false);
       });
 
       it('should reject null string (not null value)', () => {
@@ -781,7 +777,7 @@ describe('Subdomain Routing', () => {
         expect(result.isValid).toBe(true);
       });
 
-      it('should block form submission without origin', () => {
+      it('should block form submission without origin (SEC-009)', () => {
         const request = createMockRequest({
           method: 'POST',
           contentType: 'application/x-www-form-urlencoded'
@@ -789,8 +785,9 @@ describe('Subdomain Routing', () => {
         });
         const result = csrfProtect(request);
 
+        // SEC-009: Missing Origin+Referer now fails at origin validation
         expect(result.isValid).toBe(false);
-        expect(result.error).toContain('Form submissions require Origin header');
+        expect(result.error).toContain('Invalid origin');
       });
     });
   });
@@ -860,7 +857,7 @@ describe('Subdomain Routing', () => {
       expect(originValid).toBe(true);
     });
 
-    it('should handle workers.dev URL with subdomain override', () => {
+    it('should reject workers.dev origin even with subdomain override (SEC-007/SEC-008)', () => {
       const request = {
         url: 'https://sites-spectral-instruments.jose-e5f.workers.dev?subdomain=admin',
         headers: {
@@ -876,9 +873,11 @@ describe('Subdomain Routing', () => {
       const portalType = getPortalType(subdomain);
       const originValid = isAllowedOrigin(request.headers.get('Origin'));
 
+      // Local test helper still extracts subdomain from query param
       expect(subdomain).toBe('admin');
       expect(portalType).toBe('admin');
-      expect(originValid).toBe(true);
+      // SEC-007: workers.dev origins are no longer allowed
+      expect(originValid).toBe(false);
     });
 
     it('should validate and protect POST request to station portal', () => {
@@ -960,24 +959,26 @@ describe('Subdomain Routing', () => {
       expect(subdomain).toBe('Admin');
     });
 
-    it('should handle numeric subdomains', () => {
+    it('should handle numeric subdomains (rejected by origin validation)', () => {
       const request = createMockRequest({ host: '123.sitesspectral.work' });
 
       const subdomain = getSubdomain(request);
       const originValid = isAllowedOrigin(`https://${request.headers.get('host')}`);
 
       expect(subdomain).toBe('123');
-      expect(originValid).toBe(true); // Alphanumeric pattern allows numbers
+      // SEC-012: Only enumerated station subdomains are allowed
+      expect(originValid).toBe(false);
     });
 
-    it('should handle hyphenated subdomains', () => {
+    it('should handle hyphenated subdomains (rejected by origin validation)', () => {
       const request = createMockRequest({ host: 'station-01.sitesspectral.work' });
 
       const subdomain = getSubdomain(request);
       const originValid = isAllowedOrigin(`https://${request.headers.get('host')}`);
 
       expect(subdomain).toBe('station-01');
-      expect(originValid).toBe(true); // Pattern allows hyphens
+      // SEC-012: Only enumerated station subdomains are allowed
+      expect(originValid).toBe(false);
     });
   });
 });

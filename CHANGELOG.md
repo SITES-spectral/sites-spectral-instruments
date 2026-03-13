@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.5] - 2026-03-13
+
+### Changed
+
+- **Centralized role→permission mapping** (A1 audit fix) — Created `Role.getPermissions()` and `Role.hasEditPrivileges()` as single source of truth in domain layer. Eliminates duplicated permission maps in `authentication.js`, `CloudflareAccessAdapter.js`, `ROIController.js`, and `magic-links.js`
+- **Removed dead `STATION_EMAIL_MAPPINGS`** (A2 audit fix) — Unused constant in `CloudflareAccessAdapter.js` that was never referenced in code
+
+### Fixed
+
+- **Updated 17 security tests** — Tests now verify the correct post-audit behavior for workers.dev rejection, CSRF default-deny, username fallback removal, and enumerated-only CORS origins
+
+---
+
 ## [15.8.4] - 2026-03-13
 
 ### Fixed

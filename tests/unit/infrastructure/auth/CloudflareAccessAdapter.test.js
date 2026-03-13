@@ -509,11 +509,9 @@ describe('CloudflareAccessAdapter', () => {
       expect(mockEnv.DB.run).toHaveBeenCalled(); // Updates CF Access fields
     });
 
-    it('should find existing user by username if email lookup fails', async () => {
+    it('should return null when email lookup fails (SEC-010: no username fallback)', async () => {
       mockEnv.DB.first
-        .mockResolvedValueOnce(null) // Email lookup fails
-        .mockResolvedValueOnce(mockDatabaseUser); // Username lookup succeeds
-      mockEnv.DB.run.mockResolvedValueOnce({ success: true });
+        .mockResolvedValueOnce(null); // Email lookup fails — no further lookup
 
       const result = await adapter.findOrCreateUser({
         email: 'test@example.com',
@@ -522,7 +520,8 @@ describe('CloudflareAccessAdapter', () => {
         cf_access_identity_id: 'identity-123'
       });
 
-      expect(result).toEqual(mockDatabaseUser);
+      // SEC-010: Username-based fallback removed to prevent privilege escalation
+      expect(result).toBeNull();
     });
 
     it('should update CF Access fields for existing user', async () => {
@@ -904,7 +903,8 @@ describe('CloudflareAccessAdapter', () => {
       });
 
       it('should handle subdomain as null', () => {
-        const user = { role: 'station', station_acronym: 'SVB' };
+        // Must include station_normalized_name to prevent undefined === undefined match
+        const user = { role: 'station', station_acronym: 'SVB', station_normalized_name: 'svartberget' };
         const canAccess = CloudflareAccessAdapter.canAccessPortal(user, 'station', null);
         expect(canAccess).toBe(false);
       });

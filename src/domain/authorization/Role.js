@@ -133,6 +133,38 @@ export class Role {
     return this.isGlobalAdmin() || this.isStationAdmin();
   }
 
+  // Centralized role→permission mapping (single source of truth)
+  static ROLE_PERMISSIONS = {
+    'admin': ['read', 'write', 'edit', 'delete', 'admin'],
+    'sites-admin': ['read', 'write', 'edit', 'delete', 'admin'],
+    'station-admin': ['read', 'write', 'edit', 'delete'],
+    'station': ['read'],
+    'uav-pilot': ['read', 'flight-log'],
+    'station-internal': ['read'],
+    'readonly': ['read']
+  };
+
+  // Roles with edit privileges (can CRUD instruments, platforms, ROIs)
+  static EDIT_ROLES = ['admin', 'sites-admin', 'station-admin'];
+
+  /**
+   * Get permissions for a role string
+   * @param {string} role - Role value
+   * @returns {string[]}
+   */
+  static getPermissions(role) {
+    return Role.ROLE_PERMISSIONS[role] || ['read'];
+  }
+
+  /**
+   * Check if a role string has edit privileges
+   * @param {string} role - Role value
+   * @returns {boolean}
+   */
+  static hasEditPrivileges(role) {
+    return Role.EDIT_ROLES.includes(role);
+  }
+
   /**
    * Check equality with another Role
    * @param {Role} other - Role to compare

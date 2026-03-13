@@ -17,6 +17,7 @@ import {
   getRateLimitHeaders
 } from '../middleware/auth-rate-limiter.js';
 import { CloudflareAccessAdapter } from '../infrastructure/auth/CloudflareAccessAdapter.js';
+import { Role } from '../domain/authorization/Role.js';
 
 /**
  * Handle authentication endpoints
@@ -218,19 +219,9 @@ export async function authenticateUser(username, password, env) {
       return null;
     }
 
-    // Determine permissions based on role
-    const rolePermissions = {
-      'admin': ['read', 'write', 'edit', 'delete', 'admin'],
-      'sites-admin': ['read', 'write', 'edit', 'delete', 'admin'],
-      'station-admin': ['read', 'write', 'edit', 'delete'],
-      'station': ['read'],
-      'uav-pilot': ['read', 'flight-log'],
-      'station-internal': ['read'],
-      'readonly': ['read']
-    };
-
-    const permissions = rolePermissions[user.role] || ['read'];
-    const editPrivileges = ['admin', 'sites-admin', 'station-admin'].includes(user.role);
+    // Use centralized role→permission mapping from domain layer
+    const permissions = Role.getPermissions(user.role);
+    const editPrivileges = Role.hasEditPrivileges(user.role);
 
     // Return authenticated user object
     return {

@@ -19,8 +19,8 @@ describe('CORS Origin Validation', () => {
       expect(ALLOWED_ORIGINS).toContain('https://sitesspectral.work');
     });
 
-    it('should include Cloudflare Workers URL', () => {
-      expect(ALLOWED_ORIGINS).toContain('https://sites-spectral-instruments.jose-e5f.workers.dev');
+    it('should NOT include Cloudflare Workers URL (SEC-007)', () => {
+      expect(ALLOWED_ORIGINS).not.toContain('https://sites-spectral-instruments.jose-e5f.workers.dev');
     });
 
     it('should include localhost development URLs', () => {

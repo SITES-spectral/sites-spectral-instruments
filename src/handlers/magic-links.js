@@ -21,6 +21,7 @@ import { SignJWT } from 'jose';
 import { authRateLimitMiddleware, recordAuthAttempt } from '../middleware/auth-rate-limiter.js';
 import { sanitizeString, sanitizeInteger, sanitizeEnum } from '../utils/validation.js';
 import { sendMagicLinkEmail } from '../services/email-service.js';
+import { Role } from '../domain/authorization/Role.js';
 
 /**
  * Default expiry duration for magic links (7 days in milliseconds)
@@ -238,7 +239,7 @@ async function createMagicLink(request, env) {
   }
 
   // Check permissions - only admins can create magic links
-  const canCreate = ['admin', 'sites-admin', 'station-admin'].includes(user.role);
+  const canCreate = Role.hasEditPrivileges(user.role);
   if (!canCreate) {
     return createForbiddenResponse('Only admins can create magic links');
   }
@@ -620,7 +621,7 @@ async function revokeMagicLink(request, env) {
   }
 
   // Check permissions
-  const canRevoke = ['admin', 'sites-admin', 'station-admin'].includes(user.role);
+  const canRevoke = Role.hasEditPrivileges(user.role);
   if (!canRevoke) {
     return createForbiddenResponse('Only admins can revoke magic links');
   }
@@ -693,7 +694,7 @@ async function listMagicLinks(request, env) {
   }
 
   // Check permissions
-  const canList = ['admin', 'sites-admin', 'station-admin'].includes(user.role);
+  const canList = Role.hasEditPrivileges(user.role);
   if (!canList) {
     return createForbiddenResponse('Only admins can list magic links');
   }
