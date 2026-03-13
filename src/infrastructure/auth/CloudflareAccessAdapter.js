@@ -93,12 +93,21 @@ export class CloudflareAccessAdapter {
 
       // SEC-011: CF_ACCESS_AUD is required to prevent cross-application JWT replay.
       // Without audience validation, any JWT from the same CF Access team is accepted.
+      // CF_ACCESS_AUD supports comma-separated values for multiple CF Access applications
+      // (each station subdomain has its own application with a unique AUD tag).
       if (!this.env.CF_ACCESS_AUD) {
         console.error('CF_ACCESS_AUD environment variable is not set — JWT audience validation disabled');
       }
 
+      // Parse comma-separated AUD values into array for multi-application support
+      let audience = undefined;
+      if (this.env.CF_ACCESS_AUD) {
+        const audValues = this.env.CF_ACCESS_AUD.split(',').map(s => s.trim()).filter(Boolean);
+        audience = audValues.length === 1 ? audValues[0] : audValues;
+      }
+
       const { payload } = await jwtVerify(jwtAssertion, jwks, {
-        audience: this.env.CF_ACCESS_AUD || undefined,
+        audience,
         issuer: `https://${this.teamDomain}`
       });
 
