@@ -18,9 +18,7 @@ export const ALLOWED_ORIGINS = [
   // Production - Admin portal
   'https://admin.sitesspectral.work',
 
-  // Cloudflare Workers dev URLs
-  'https://sites-spectral-instruments.jose-beltran.workers.dev',
-  'https://sites-spectral-instruments.jose-e5f.workers.dev',
+  // SEC-012: Workers.dev URLs removed from CORS — not protected by CF Access
 
   // Local development
   'http://localhost:8787',
@@ -99,30 +97,9 @@ export function isAllowedOrigin(origin) {
     return true;
   }
 
-  // Check dynamic subdomain pattern for sitesspectral.work
-  try {
-    const url = new URL(origin);
-    const host = url.hostname;
-
-    // Allow any subdomain of sitesspectral.work
-    if (host.endsWith('.sitesspectral.work')) {
-      // Extract subdomain
-      const subdomain = host.replace('.sitesspectral.work', '');
-
-      // Validate subdomain format (alphanumeric and hyphens only)
-      if (/^[a-z0-9-]+$/.test(subdomain)) {
-        return true;
-      }
-    }
-
-    // Allow workers.dev subdomains for development
-    if (host.endsWith('.workers.dev')) {
-      return true;
-    }
-
-  } catch (e) {
-    // Invalid URL, fall through to false
-  }
+  // SEC-012: Only allow enumerated station subdomains, not wildcard.
+  // A wildcard would allow DNS-takeover of inactive subdomains to gain CORS trust.
+  // Workers.dev origins removed — CF Access does not protect workers.dev URLs.
 
   return false;
 }

@@ -102,8 +102,13 @@ export class CloudflareAccessAdapter {
       // Verify the JWT signature and claims
       const jwks = getJWKS();
 
+      // SEC-011: CF_ACCESS_AUD is required to prevent cross-application JWT replay.
+      // Without audience validation, any JWT from the same CF Access team is accepted.
+      if (!this.env.CF_ACCESS_AUD) {
+        console.error('CF_ACCESS_AUD environment variable is not set — JWT audience validation disabled');
+      }
+
       const { payload } = await jwtVerify(jwtAssertion, jwks, {
-        // Audience should match your CF Access application ID
         audience: this.env.CF_ACCESS_AUD || undefined,
         issuer: `https://${this.teamDomain}`
       });
@@ -266,14 +271,10 @@ export class CloudflareAccessAdapter {
       // First try to find existing user
       let user = await this.findUserByCFAccessEmail(params.email);
 
-      if (!user) {
-        // Try to find by username (for admin users)
-        user = await this.env.DB.prepare(`
-          SELECT id, username, email, role, station_id
-          FROM users
-          WHERE username = ? AND active = 1
-        `).bind(params.email.split('@')[0]).first();
-      }
+      // SEC-010: Removed username-based fallback lookup.
+      // Matching by email local part (e.g., jose.beltran) allows privilege
+      // escalation via username collision if CF Access admits a different
+      // email domain. Users must be matched by explicit cf_access_email only.
 
       if (user) {
         // Update CF Access fields if needed

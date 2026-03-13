@@ -13,6 +13,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.2] - 2026-03-13
+
+### Security
+
+- **SEC-008: Block `workers.dev` subdomain spoofing** — Removed subdomain override via `X-Subdomain` header and `?subdomain=` query param on `workers.dev` URLs. CF Access does NOT protect `workers.dev`, so this was a full authentication bypass allowing unauthenticated access to station dashboards
+- **SEC-009: CSRF hardening** — Reject state-changing requests (POST/PUT/DELETE) when both Origin and Referer headers are absent. Previously returned `isValid: true`, allowing scripted/curl attacks to bypass CSRF protection
+- **SEC-010: Remove username collision attack vector** — Removed fallback username-based user lookup in `findOrCreateUser()`. Previously, a CF Access user with an email local part matching an existing admin username could escalate to admin privileges
+- **SEC-011: CF Access audience validation warning** — Log error when `CF_ACCESS_AUD` is not set, as this disables JWT audience validation and allows cross-application token replay within the same CF Access team
+- **SEC-012: Replace wildcard CORS with enumerated stations** — Removed `*.sitesspectral.work` wildcard CORS trust and `workers.dev` origins. Only explicitly enumerated station subdomains are now trusted, preventing DNS-takeover CORS abuse
+
+---
+
+## [15.8.1] - 2026-03-13
+
+### Fixed
+
+- **Station portal showing public dashboard**: Fixed critical issue where CF Access authenticated users on station subdomains were redirected to the public portal. The worker now trusts the CF Access gateway — if `Cf-Access-Jwt-Assertion` header is present, the user is authenticated regardless of internal JWT verification result
+- **Auth verify endpoint**: Now returns `email` field for proper user display
+
+### Added
+
+- **User identity badge in station dashboard**: Navbar now displays logged-in user's name and a color-coded privilege badge (Admin/Station Admin/Station User/Viewer) with edit icon for users with write privileges
+
+---
+
 ## [15.8.0] - 2026-03-13
 
 ### Added

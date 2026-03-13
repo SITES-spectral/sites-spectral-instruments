@@ -41,10 +41,12 @@ export function validateRequestOrigin(request) {
         }
     }
 
-    // No origin or referer - could be a direct API call or same-origin
-    // For browser requests, at least one should be present
-    // We'll be lenient here but log for monitoring
-    return { isValid: true, origin: null, source: 'none', warning: 'No origin or referer header' };
+    // No origin or referer (SEC-009)
+    // State-changing requests MUST have Origin or Referer for CSRF validation.
+    // Browser-initiated requests always include at least one of these headers.
+    // Missing both indicates a non-browser client (curl, scripted attack).
+    // GET/HEAD/OPTIONS are safe methods and don't need this check.
+    return { isValid: false, origin: null, source: 'none', error: 'Missing Origin and Referer headers' };
 }
 
 /**

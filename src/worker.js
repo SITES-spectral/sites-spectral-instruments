@@ -1,4 +1,4 @@
-// SITES Spectral Stations & Instruments - Main Worker v15.6.11
+// SITES Spectral Stations & Instruments - Main Worker v15.8.2
 // Hexagonal Architecture with Cloudflare Workers + Subdomain Routing
 // Handles both static assets and API routes with Cloudflare Access authentication
 //
@@ -34,20 +34,10 @@ function getSubdomain(request) {
     return parts[0];
   }
 
-  // For Workers dev URL, use X-Subdomain header (testing) or query param
-  if (host.includes('workers.dev')) {
-    const subdomainHeader = request.headers.get('X-Subdomain');
-    if (subdomainHeader) {
-      return subdomainHeader;
-    }
-
-    // Check query param for testing
-    const url = new URL(request.url);
-    const subdomainParam = url.searchParams.get('subdomain');
-    if (subdomainParam) {
-      return subdomainParam;
-    }
-  }
+  // Workers.dev URLs: subdomain override DISABLED in production (SEC-008)
+  // CF Access does NOT protect workers.dev URLs, so allowing subdomain
+  // spoofing here would bypass all portal authentication.
+  // Only allow in local development (localhost/127.0.0.1).
 
   return null;
 }
@@ -169,31 +159,36 @@ export default {
       }
 
       // === ADMIN and STATION PORTALS ===
-      // Require Cloudflare Access authentication
 
       // Try to get user from CF Access JWT
       const cfAdapter = new CloudflareAccessAdapter(env);
       let user = await cfAdapter.verifyAccessToken(request);
 
-      // If no CF Access token, API endpoints may still use legacy auth
-      // This is handled in handleApiRequest via getUserFromRequest
-
-      // For static assets on protected portals, require CF Access
+      // For static assets (HTML, CSS, JS), serve portal-appropriate pages
+      // Auth is enforced at two levels:
+      //   1. CF Access gateway blocks unauthenticated users at the edge
+      //   2. Frontend JS calls /api/auth/verify for user details and redirects if needed
       if (!url.pathname.startsWith('/api/')) {
-        if (!user) {
-          // No CF Access token - redirect to CF Access login
-          // Cloudflare Access handles this automatically via the WAF rules
-          // If we reach here, it means CF Access is not configured or bypassed
-          return createPortalUnauthorizedResponse(portalType, subdomain);
+
+        // Admin portal: require verified user with admin role
+        if (portalType === 'admin') {
+          if (!user) {
+            return createPortalUnauthorizedResponse(portalType, subdomain);
+          }
+          const canAccess = CloudflareAccessAdapter.canAccessPortal(user, portalType, subdomain);
+          if (!canAccess) {
+            return createPortalForbiddenResponse(portalType, subdomain, user);
+          }
         }
 
-        // Check if user can access this portal
-        const canAccess = CloudflareAccessAdapter.canAccessPortal(user, portalType, subdomain);
-        if (!canAccess) {
-          return createPortalForbiddenResponse(portalType, subdomain, user);
-        }
+        // Station portals: always serve station-dashboard.html
+        // CF Access protects the subdomain at the edge (gateway level).
+        // The CF_Authorization cookie is validated by CF Access before the
+        // request reaches this worker, but the Cf-Access-Jwt-Assertion header
+        // may not always be present (e.g., after cookie-based re-auth).
+        // The frontend calls /api/auth/verify to get user details and
+        // redirects unauthorized users to the public portal.
 
-        // Serve static assets for authenticated portal
         return await handleStaticAssets(request, env, corsHeaders, portalType, subdomain, user);
       }
 
