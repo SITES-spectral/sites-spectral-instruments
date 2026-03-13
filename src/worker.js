@@ -1,4 +1,4 @@
-// SITES Spectral Stations & Instruments - Main Worker v15.8.5
+// SITES Spectral Stations & Instruments - Main Worker v15.8.6
 // Hexagonal Architecture with Cloudflare Workers + Subdomain Routing
 // Handles both static assets and API routes with Cloudflare Access authentication
 //
@@ -121,6 +121,10 @@ export default {
     const url = new URL(request.url);
     const subdomain = getSubdomain(request);
     const portalType = getPortalType(subdomain);
+
+    // Inject CF Access adapter factory for DIP compliance (A5 audit fix)
+    // This allows authentication.js to use the adapter without importing infrastructure
+    env.cfAccessAdapterFactory = (e) => new CloudflareAccessAdapter(e);
 
     // Pass request to createCors for proper origin validation
     const { corsHeaders, handleCors } = createCors(request);

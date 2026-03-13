@@ -727,7 +727,9 @@
          */
         async _loadImageManifest() {
             try {
-                const response = await fetch('/images/stations/instrument-images-manifest.json');
+                const response = await fetch('/images/stations/instrument-images-manifest.json', {
+                    credentials: 'include'
+                });
                 if (response.ok) {
                     this.imageManifest = await response.json();
                     logger.log('Image manifest loaded');
@@ -2585,14 +2587,29 @@
          * @private
          */
         async _logout() {
+            let cfAccessLogoutUrl = null;
             try {
                 // Call logout API to clear server-side session cookie
-                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+                const response = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    cfAccessLogoutUrl = data.cf_access_logout_url;
+                }
             } catch (error) {
                 logger.error('Logout error:', error);
             }
             global.sitesAPI?.clearAuth();
-            // On station portals, redirect to root (triggers CF Access re-auth)
+
+            // L2 audit fix: invalidate CF Access session to prevent shared-device reuse
+            if (cfAccessLogoutUrl) {
+                try {
+                    await fetch(cfAccessLogoutUrl, { credentials: 'include' });
+                } catch (e) {
+                    // Best-effort — CF Access logout may fail cross-origin
+                }
+            }
+
+            // On station portals, redirect to public site
             // On other portals, redirect to login page
             if (this.isStationPortal) {
                 global.location.href = 'https://sitesspectral.work';

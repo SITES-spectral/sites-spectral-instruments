@@ -34,7 +34,11 @@ class SitesSpectralAPI {
         localStorage.setItem(this.tokenKey, token);
     }
 
-    // Set user data
+    // Set user data (L3 audit note: localStorage is for UI display only.
+    // All authorization is enforced server-side via httpOnly cookie JWT.
+    // Client-side role/edit_privileges values are informational and cannot
+    // escalate privileges — tampered values only affect which buttons are
+    // shown, all writes are validated by AuthorizationService on the server.)
     setUser(user) {
         localStorage.setItem(this.userKey, JSON.stringify(user));
     }

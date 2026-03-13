@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.6] - 2026-03-13
+
+### Added
+
+- **Session token revocation** (L1 audit fix) — New `revoked_sessions` D1 table (migration 0051). Tokens now include JTI (JWT ID). On logout and refresh, old tokens are revoked. `getUserFromLegacyAuth` checks revocation before accepting tokens. New `POST /api/auth/refresh` endpoint for safe session renewal.
+- **CF Access logout integration** (L2 audit fix) — Logout API now returns `cf_access_logout_url`. Frontend calls the CF Access logout endpoint to invalidate the `CF_Authorization` cookie on shared devices.
+- **Image manifest credentials** (L4 audit fix) — `_loadImageManifest()` now sends `credentials: 'include'` so manifest loads on protected station portals.
+- **JWKS cache TTL** (L5 audit fix) — JWKS key set cache resets every 6 hours to handle Cloudflare key rotation safely.
+
+### Changed
+
+- **DIP compliance** (A5 audit fix) — `authentication.js` no longer imports `CloudflareAccessAdapter` directly. Worker injects `cfAccessAdapterFactory` via `env`, preserving dependency inversion between application and infrastructure layers.
+- **localStorage audit documentation** (L3 audit fix) — Documented that localStorage user data is informational only; all authorization enforced server-side via httpOnly cookie JWT.
+
+---
+
 ## [15.8.5] - 2026-03-13
 
 ### Changed

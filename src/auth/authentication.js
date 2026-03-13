@@ -16,7 +16,6 @@ import {
   recordAuthAttempt,
   getRateLimitHeaders
 } from '../middleware/auth-rate-limiter.js';
-import { CloudflareAccessAdapter } from '../infrastructure/auth/CloudflareAccessAdapter.js';
 import { Role } from '../domain/authorization/Role.js';
 
 /**
@@ -147,14 +146,24 @@ export async function handleAuth(method, pathSegments, request, env) {
         const user = await getUserFromRequest(request, env);
         if (user) {
           await logSecurityEvent('LOGOUT', user, request, env);
+          // L1 audit fix: revoke the current session token on logout
+          if (user.jti && env.DB) {
+            await revokeToken(user.jti, user.username, env, 'logout');
+          }
         }
 
-        // Clear the httpOnly cookie
+        // Clear the httpOnly session cookie
         const logoutCookie = createLogoutCookie(request);
+
+        // L2 audit fix: provide CF Access logout URL so frontend can
+        // invalidate the CF_Authorization cookie (shared-device protection)
+        const cfAccessTeamDomain = env.CF_ACCESS_TEAM_DOMAIN || 'sitesspectral.cloudflareaccess.com';
+        const cfAccessLogoutUrl = `https://${cfAccessTeamDomain}/cdn-cgi/access/logout`;
 
         return new Response(JSON.stringify({
           success: true,
-          message: 'Logged out successfully'
+          message: 'Logged out successfully',
+          cf_access_logout_url: user?.auth_provider === 'cloudflare_access' ? cfAccessLogoutUrl : null
         }), {
           status: 200,
           headers: {
@@ -176,6 +185,42 @@ export async function handleAuth(method, pathSegments, request, env) {
             'Set-Cookie': logoutCookie
           }
         });
+      }
+
+    case 'refresh':
+      if (method !== 'POST') {
+        return createErrorResponse('Method not allowed', 405);
+      }
+
+      try {
+        // L1 audit fix: refresh session token with revocation of old token
+        const currentUser = await getUserFromRequest(request, env);
+        if (!currentUser) {
+          return createUnauthorizedResponse();
+        }
+
+        // Revoke the old token if it has a JTI
+        if (currentUser.jti && env.DB) {
+          await revokeToken(currentUser.jti, currentUser.username, env);
+        }
+
+        // Generate new token
+        const newToken = await generateToken(currentUser, env);
+        const refreshCookie = createAuthCookie(newToken, request);
+
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Session refreshed'
+        }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': refreshCookie
+          }
+        });
+      } catch (error) {
+        console.error('Token refresh error:', error);
+        return createErrorResponse('Session refresh failed', 500);
       }
 
     default:
@@ -261,6 +306,9 @@ export async function generateToken(user, env) {
     // Create secret key for HMAC-SHA256
     const secret = new TextEncoder().encode(env.JWT_SECRET);
 
+    // Generate unique JWT ID for revocation support (L1 audit fix)
+    const jti = crypto.randomUUID();
+
     // Build JWT with proper signing using jose library
     const jwt = await new SignJWT({
       username: user.username,
@@ -276,6 +324,7 @@ export async function generateToken(user, env) {
       .setExpirationTime('24h')
       .setIssuer('sites-spectral')
       .setSubject(user.username)
+      .setJti(jti)
       .sign(secret);
 
     return jwt;
@@ -323,6 +372,9 @@ export async function getUserFromRequest(request, env) {
 /**
  * Get user from Cloudflare Access JWT
  *
+ * Uses env.cfAccessAdapterFactory (injected by worker) to avoid importing
+ * infrastructure layer directly (DIP compliance — A5 audit fix).
+ *
  * @param {Request} request - The request object
  * @param {Object} env - Environment variables and bindings
  * @returns {Object|null} User object or null if not CF Access auth
@@ -335,8 +387,13 @@ async function getUserFromCFAccess(request, env) {
       return null;
     }
 
-    // Use CloudflareAccessAdapter to verify and map user
-    const cfAdapter = new CloudflareAccessAdapter(env);
+    // Use adapter factory from env (injected by worker) to verify
+    if (!env.cfAccessAdapterFactory) {
+      console.warn('CF Access adapter not available — cfAccessAdapterFactory not injected');
+      return null;
+    }
+
+    const cfAdapter = env.cfAccessAdapterFactory(env);
     const user = await cfAdapter.verifyAccessToken(request);
 
     if (user) {
@@ -397,6 +454,15 @@ async function getUserFromLegacyAuth(request, env) {
       return null;
     }
 
+    // L1 audit fix: check if token has been revoked (e.g., after refresh)
+    if (payload.jti && env.DB) {
+      const revoked = await isTokenRevoked(payload.jti, env);
+      if (revoked) {
+        console.warn(`Revoked token used by ${payload.username} (jti: ${payload.jti})`);
+        return null;
+      }
+    }
+
     // Determine auth provider from payload
     const authProvider = payload.auth_provider || 'database';
 
@@ -410,7 +476,8 @@ async function getUserFromLegacyAuth(request, env) {
       edit_privileges: payload.edit_privileges,
       permissions: payload.permissions,
       auth_provider: authProvider,
-      magic_link_id: payload.magic_link_id
+      magic_link_id: payload.magic_link_id,
+      jti: payload.jti
     };
   } catch (error) {
     // Handle specific JWT errors
@@ -487,6 +554,68 @@ async function loadCredentials(env) {
   } catch (error) {
     console.error('Failed to load credentials:', error);
     return null;
+  }
+}
+
+/**
+ * Get station data by normalized name
+ * @param {string} normalizedName - Station normalized name
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Object|null} Station data or null
+ */
+/**
+ * Check if a token has been revoked (L1 audit fix)
+ * @param {string} jti - JWT ID
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Promise<boolean>}
+ */
+async function isTokenRevoked(jti, env) {
+  try {
+    const result = await env.DB.prepare(
+      'SELECT 1 FROM revoked_sessions WHERE jti = ?'
+    ).bind(jti).first();
+    return !!result;
+  } catch (error) {
+    // If table doesn't exist yet (migration not applied), allow the token
+    console.warn('Revocation check failed (table may not exist):', error.message);
+    return false;
+  }
+}
+
+/**
+ * Revoke a token by recording its JTI (L1 audit fix)
+ * @param {string} jti - JWT ID to revoke
+ * @param {string} username - Username for audit trail
+ * @param {Object} env - Environment variables and bindings
+ * @param {string} reason - Revocation reason
+ */
+async function revokeToken(jti, username, env, reason = 'refresh') {
+  try {
+    // Token expires 24h from now (matches generateToken expiry)
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    await env.DB.prepare(
+      'INSERT OR IGNORE INTO revoked_sessions (jti, user_id, expires_at, reason) VALUES (?, ?, ?, ?)'
+    ).bind(jti, username, expiresAt, reason).run();
+  } catch (error) {
+    // Don't fail the operation if revocation fails (table may not exist yet)
+    console.warn('Token revocation failed:', error.message);
+  }
+}
+
+/**
+ * Clean up expired revocation entries (can be called periodically)
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Promise<number>} Number of entries cleaned
+ */
+export async function cleanupRevokedSessions(env) {
+  try {
+    const result = await env.DB.prepare(
+      "DELETE FROM revoked_sessions WHERE expires_at < datetime('now')"
+    ).run();
+    return result.changes || 0;
+  } catch (error) {
+    console.warn('Revocation cleanup failed:', error.message);
+    return 0;
   }
 }
 

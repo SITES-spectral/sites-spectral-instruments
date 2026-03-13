@@ -27,9 +27,12 @@ const CF_ACCESS_CERTS_URL = `https://${CF_ACCESS_TEAM_DOMAIN}/cdn-cgi/access/cer
 
 /**
  * Cache for the JWKS to avoid repeated fetches
+ * L5 audit fix: TTL-based cache reset every 6 hours to handle key rotation
  * @type {ReturnType<typeof createRemoteJWKSet>|null}
  */
 let jwksCache = null;
+let jwksCacheTimestamp = 0;
+const JWKS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 /**
  * Global admin email whitelist
@@ -42,13 +45,15 @@ const GLOBAL_ADMIN_EMAILS = [
 
 /**
  * Get or create the JWKS key set for verification
- * Uses caching to avoid repeated network requests
+ * Uses TTL-based caching to balance performance with key rotation safety
  *
  * @returns {ReturnType<typeof createRemoteJWKSet>}
  */
 function getJWKS() {
-  if (!jwksCache) {
+  const now = Date.now();
+  if (!jwksCache || (now - jwksCacheTimestamp) > JWKS_CACHE_TTL_MS) {
     jwksCache = createRemoteJWKSet(new URL(CF_ACCESS_CERTS_URL));
+    jwksCacheTimestamp = now;
   }
   return jwksCache;
 }
