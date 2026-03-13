@@ -52,8 +52,10 @@ export function createRouter(env) {
     products: new ProductController(container, env),
     maintenance: new MaintenanceController(container, env),
     calibrations: new CalibrationController(container, env),
-    rois: new ROIController(env.DB, env),
-    users: new UserController(env, container.repositories?.stations),
+    rois: new ROIController(container, env),
+    users: new UserController(container, env),
+    analytics: new AnalyticsController(container, env),
+    export: new ExportController(container, env),
     // UAV Domain (v15.0.0)
     uav: new UAVController(container, env)
   };
@@ -123,12 +125,12 @@ export function createRouter(env) {
             return await controllers.users.handle(request, resourcePath, url);
 
           case 'analytics':
-            // Analytics - V11 hexagonal architecture (v11.0.0-alpha.42)
-            return await AnalyticsController.handle(request, env, request.method, ['analytics', ...resourcePath]);
+            // Analytics - V15.9 hexagonal architecture (DIP-compliant)
+            return await controllers.analytics.handle(request, resourcePath, url);
 
           case 'export':
-            // Export - V11 hexagonal architecture (v11.0.0-alpha.42)
-            return await ExportController.handle(request, env, request.method, ['export', ...resourcePath]);
+            // Export - V15.9 hexagonal architecture (DIP-compliant)
+            return await controllers.export.handle(request, resourcePath, url);
 
           case 'uav':
             // UAV Domain - V15 hexagonal architecture (v15.0.0)
@@ -268,7 +270,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: '15.6.0',
+      version: '15.9.0',
       architecture: 'hexagonal',
       database: 'connected',
       stats: {
@@ -303,7 +305,7 @@ async function handleHealth(env, container) {
     return new Response(JSON.stringify({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      version: '15.6.0',
+      version: '15.9.0',
       architecture: 'hexagonal',
       database: 'disconnected',
       error: error.message
@@ -320,7 +322,7 @@ async function handleHealth(env, container) {
 function handleInfo() {
   return new Response(JSON.stringify({
     name: 'SITES Spectral Instruments API',
-    version: '15.1.0',
+    version: '15.9.0',
     architecture: 'hexagonal',
     description: 'V15 Hexagonal Architecture API with Darwin Core, ICOS, Copernicus vocabulary alignment and UAV domain',
     patterns: [

@@ -13,6 +13,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.9.0] - 2026-03-13
+
+### Added
+
+- **`D1StationRepository.findByNormalizedName()`** — New repository method for station lookup by normalized name, fixing runtime TypeError in `UserService.listUsers()`
+
+### Changed
+
+- **Token revocation: `INSERT OR REPLACE`** (SEC) — Fixes race condition where concurrent logout+refresh could leave a stale token unrevoked due to `INSERT OR IGNORE` silently skipping duplicate JTIs
+- **CF_ACCESS_AUD now mandatory** (SEC) — `CloudflareAccessAdapter` throws if `CF_ACCESS_AUD` is not set, preventing cross-application JWT replay in production
+- **Admin emails from env var** (SEC) — Replaced hardcoded `GLOBAL_ADMIN_EMAILS` with `CF_ACCESS_GLOBAL_ADMINS` environment variable (comma-separated). Falls back to empty array if unset
+- **ROIController DIP compliance** — Receives `roiRepository` from container instead of instantiating `D1ROIRepository` directly
+- **AnalyticsController DIP compliance** — Converted from static class to instance; receives `analyticsRepository` from container
+- **ExportController DIP compliance** — Converted from static class to instance; receives `exportRepository` from container
+- **UserController DIP compliance** — Receives `credentials` port and `stationRepository` from container instead of instantiating `CloudflareCredentialsAdapter` directly
+- **Domain purity** — `UserService` no longer references infrastructure strings (`cloudflare-secret` → `external`)
+- **Version strings updated** — Health, info endpoints now report `15.9.0`
+
+### Removed
+
+- **Dead versioned port infrastructure** — Deleted `UserRepositoryV1.js`, `UserRepositoryV2.js`, `UserRepositoryMigrations.js`, `PortVersion.js`, `VersionedPortAdapter.js`, and `versioning/index.js` (never used in production)
+- **Legacy `adminRepository` alias** — Removed backward-compatibility alias from container; use `container.repositories.admin` directly
+
+---
+
 ## [15.8.7] - 2026-03-13
 
 ### Added

@@ -18,7 +18,6 @@ import {
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 import { ROIService } from '../../../domain/roi/ROIService.js';
-import { D1ROIRepository } from '../../persistence/d1/D1ROIRepository.js';
 import {
   sanitizeRequestBody,
   sanitizeString,
@@ -46,11 +45,11 @@ function canDirectlyEditROI(user) {
  */
 export class ROIController {
   /**
-   * @param {D1Database} db - Cloudflare D1 database instance
+   * @param {Object} container - Dependency injection container
    * @param {Object} env - Cloudflare Worker environment
    */
-  constructor(db, env) {
-    this.roiRepository = new D1ROIRepository(db);
+  constructor(container, env) {
+    this.roiRepository = container.repositories.roi;
     this.roiService = new ROIService(this.roiRepository);
     this.auth = new AuthMiddleware(env);
   }

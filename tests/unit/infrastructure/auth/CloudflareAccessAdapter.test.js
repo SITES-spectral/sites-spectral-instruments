@@ -116,6 +116,7 @@ function createMockEnv(overrides = {}) {
     DB: createMockDB(),
     CF_ACCESS_TEAM_DOMAIN: CF_ACCESS_TEAM_DOMAIN,
     CF_ACCESS_AUD: 'test-audience-id',
+    CF_ACCESS_GLOBAL_ADMINS: GLOBAL_ADMIN_EMAILS.join(','),
     ...overrides
   };
 }

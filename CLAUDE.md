@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Current Version: 15.8.4
+## Current Version: 15.9.0
 
 | Property | Value |
 |----------|-------|

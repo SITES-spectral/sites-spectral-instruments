@@ -594,7 +594,7 @@ async function revokeToken(jti, username, env, reason = 'refresh') {
     // Token expires 24h from now (matches generateToken expiry)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     await env.DB.prepare(
-      'INSERT OR IGNORE INTO revoked_sessions (jti, user_id, expires_at, reason) VALUES (?, ?, ?, ?)'
+      'INSERT OR REPLACE INTO revoked_sessions (jti, user_id, expires_at, reason) VALUES (?, ?, ?, ?)'
     ).bind(jti, username, expiresAt, reason).run();
   } catch (error) {
     // Don't fail the operation if revocation fails (table may not exist yet)

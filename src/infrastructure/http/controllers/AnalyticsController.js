@@ -13,7 +13,6 @@
  */
 
 import { AnalyticsService } from '../../../domain/analytics/AnalyticsService.js';
-import { D1AnalyticsRepository } from '../../persistence/d1/D1AnalyticsRepository.js';
 import { getUserFromRequest } from '../../../auth/authentication.js';
 import {
   createSuccessResponse,
@@ -24,16 +23,25 @@ import {
 
 export class AnalyticsController {
   /**
+   * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
+   */
+  constructor(container, env) {
+    this.analyticsRepository = container.repositories.analytics;
+    this.service = new AnalyticsService(this.analyticsRepository);
+    this.env = env;
+  }
+
+  /**
    * Handle analytics requests
    * @param {Request} request - HTTP request
-   * @param {Object} env - Environment bindings
-   * @param {string} method - HTTP method
-   * @param {string[]} pathSegments - URL path segments
+   * @param {string[]} resourcePath - URL path segments
+   * @param {URL} url - Parsed URL
    * @returns {Promise<Response>}
    */
-  static async handle(request, env, method, pathSegments) {
+  async handle(request, resourcePath, url) {
     // Authenticate user
-    const user = await getUserFromRequest(request, env);
+    const user = await getUserFromRequest(request, this.env);
     if (!user) {
       return createUnauthorizedResponse();
     }
@@ -43,36 +51,32 @@ export class AnalyticsController {
       return createForbiddenResponse('Admin privileges required for system analytics');
     }
 
-    if (method !== 'GET') {
+    if (request.method !== 'GET') {
       return createErrorResponse('Method not allowed', 405);
     }
 
-    // Create repository and service
-    const repository = new D1AnalyticsRepository(env.DB);
-    const service = new AnalyticsService(repository);
-
-    const action = pathSegments[1];
+    const action = resourcePath[0];
 
     try {
       switch (action) {
         case 'overview':
-          return await this.getOverview(service);
+          return await this.getOverview();
 
         case 'stations':
-          return await this.getStationAnalytics(service);
+          return await this.getStationAnalytics();
 
         case 'instruments':
-          return await this.getInstrumentAnalytics(service);
+          return await this.getInstrumentAnalytics();
 
         case 'activity':
-          return await this.getActivityAnalytics(service);
+          return await this.getActivityAnalytics();
 
         case 'health':
-          return await this.getSystemHealth(service);
+          return await this.getSystemHealth();
 
         default:
           // Default: return overview
-          return await this.getOverview(service);
+          return await this.getOverview();
       }
     } catch (error) {
       console.error('Analytics error:', error);
@@ -82,51 +86,46 @@ export class AnalyticsController {
 
   /**
    * Get system overview
-   * @param {AnalyticsService} service
    * @returns {Promise<Response>}
    */
-  static async getOverview(service) {
-    const data = await service.getSystemOverview();
+  async getOverview() {
+    const data = await this.service.getSystemOverview();
     return createSuccessResponse(data);
   }
 
   /**
    * Get station analytics
-   * @param {AnalyticsService} service
    * @returns {Promise<Response>}
    */
-  static async getStationAnalytics(service) {
-    const data = await service.getStationAnalytics();
+  async getStationAnalytics() {
+    const data = await this.service.getStationAnalytics();
     return createSuccessResponse(data);
   }
 
   /**
    * Get instrument analytics
-   * @param {AnalyticsService} service
    * @returns {Promise<Response>}
    */
-  static async getInstrumentAnalytics(service) {
-    const data = await service.getInstrumentAnalytics();
+  async getInstrumentAnalytics() {
+    const data = await this.service.getInstrumentAnalytics();
     return createSuccessResponse(data);
   }
 
   /**
    * Get activity analytics
-   * @param {AnalyticsService} service
    * @returns {Promise<Response>}
    */
-  static async getActivityAnalytics(service) {
-    const data = await service.getActivityAnalytics();
+  async getActivityAnalytics() {
+    const data = await this.service.getActivityAnalytics();
     return createSuccessResponse(data);
   }
 
   /**
    * Get system health
-   * @param {AnalyticsService} service
    * @returns {Promise<Response>}
    */
-  static async getSystemHealth(service) {
-    const data = await service.getSystemHealth();
+  async getSystemHealth() {
+    const data = await this.service.getSystemHealth();
     return createSuccessResponse(data);
   }
 }

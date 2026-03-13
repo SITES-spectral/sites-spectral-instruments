@@ -28,7 +28,7 @@ export class AdminController {
    */
   constructor(container, env) {
     this.queries = container.queries;
-    this.adminRepository = container.adminRepository;
+    this.adminRepository = container.repositories.admin;
     this.auth = new AuthMiddleware(env);
   }
 

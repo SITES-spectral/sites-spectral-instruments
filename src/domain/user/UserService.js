@@ -44,7 +44,7 @@ export class UserService {
         station_name: 'All Stations',
         scope: 'system-wide',
         security_level: 'full-access',
-        created_source: 'cloudflare-secret',
+        created_source: 'external',
         can_edit_online: false,
         warning: null
       });
@@ -70,7 +70,7 @@ export class UserService {
           security_level: stationCreds.edit_privileges ? 'station-edit' : 'station-read-only',
           permissions: stationCreds.permissions || ['read'],
           edit_privileges: stationCreds.edit_privileges || false,
-          created_source: 'cloudflare-secret',
+          created_source: 'external',
           can_edit_online: false,
           warning: null
         });
@@ -80,7 +80,7 @@ export class UserService {
     return {
       users,
       total: users.length,
-      management_note: 'To modify users, update Cloudflare secrets using wrangler CLI or dashboard'
+      management_note: 'Users are managed externally — read-only view'
     };
   }
 

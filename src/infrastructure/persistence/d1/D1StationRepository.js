@@ -54,6 +54,23 @@ export class D1StationRepository {
   }
 
   /**
+   * Find station by normalized name
+   * @param {string} normalizedName
+   * @returns {Promise<Station|null>}
+   */
+  async findByNormalizedName(normalizedName) {
+    if (!normalizedName || typeof normalizedName !== 'string') {
+      return null;
+    }
+    const result = await this.db
+      .prepare('SELECT * FROM stations WHERE LOWER(normalized_name) = ?')
+      .bind(normalizedName.toLowerCase())
+      .first();
+
+    return result ? Station.fromDatabase(result) : null;
+  }
+
+  /**
    * Find all stations with pagination and sorting
    * @param {Object} options
    * @returns {Promise<Station[]>}

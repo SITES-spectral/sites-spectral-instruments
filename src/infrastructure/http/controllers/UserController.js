@@ -16,7 +16,6 @@ import {
 } from '../../../utils/responses.js';
 import { AuthMiddleware } from '../middleware/AuthMiddleware.js';
 import { UserService } from '../../../domain/user/UserService.js';
-import { CloudflareCredentialsAdapter } from '../../auth/CloudflareCredentialsAdapter.js';
 import { logSecurityEvent } from '../../../utils/logging.js';
 
 /**
@@ -24,11 +23,12 @@ import { logSecurityEvent } from '../../../utils/logging.js';
  */
 export class UserController {
   /**
+   * @param {Object} container - Dependency injection container
    * @param {Object} env - Cloudflare Worker environment
-   * @param {Object} stationRepository - Optional station repository for enriching user data
    */
-  constructor(env, stationRepository = null) {
-    const credentialsAdapter = new CloudflareCredentialsAdapter(env);
+  constructor(container, env) {
+    const credentialsAdapter = container.ports.credentials;
+    const stationRepository = container.repositories.station;
     this.userService = new UserService(credentialsAdapter, stationRepository);
     this.auth = new AuthMiddleware(env);
     this.env = env;

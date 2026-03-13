@@ -12,7 +12,6 @@
  */
 
 import { ExportService } from '../../../domain/export/ExportService.js';
-import { D1ExportRepository } from '../../persistence/d1/D1ExportRepository.js';
 import { requireAuthentication } from '../../../auth/permissions.js';
 import {
   createErrorResponse,
@@ -23,26 +22,35 @@ import {
 
 export class ExportController {
   /**
+   * @param {Object} container - Dependency injection container
+   * @param {Object} env - Cloudflare Worker environment
+   */
+  constructor(container, env) {
+    this.exportRepository = container.repositories.export;
+    this.service = new ExportService(this.exportRepository);
+    this.env = env;
+  }
+
+  /**
    * Handle export requests
    * @param {Request} request - HTTP request
-   * @param {Object} env - Environment bindings
-   * @param {string} method - HTTP method
-   * @param {string[]} pathSegments - URL path segments
+   * @param {string[]} resourcePath - URL path segments
+   * @param {URL} url - Parsed URL
    * @returns {Promise<Response>}
    */
-  static async handle(request, env, method, pathSegments) {
-    if (method !== 'GET') {
+  async handle(request, resourcePath, url) {
+    if (request.method !== 'GET') {
       return createMethodNotAllowedResponse();
     }
 
     // Authentication required for all export operations
-    const user = await requireAuthentication(request, env);
+    const user = await requireAuthentication(request, this.env);
     if (user instanceof Response) {
       return user; // Return error response
     }
 
-    const action = pathSegments[1];
-    const identifier = pathSegments[2];
+    const action = resourcePath[0];
+    const identifier = resourcePath[1];
 
     try {
       switch (action) {
@@ -50,7 +58,7 @@ export class ExportController {
           if (!identifier) {
             return createErrorResponse('Station ID required', 400);
           }
-          return await this.handleStationExport(identifier, user, env);
+          return await this.handleStationExport(identifier, user);
 
         default:
           return createErrorResponse('Export type not found', 404);
@@ -65,16 +73,11 @@ export class ExportController {
    * Handle station data export
    * @param {string} identifier - Station identifier
    * @param {Object} user - Authenticated user
-   * @param {Object} env - Environment bindings
    * @returns {Promise<Response>}
    */
-  static async handleStationExport(identifier, user, env) {
-    // Create repository and service
-    const repository = new D1ExportRepository(env.DB);
-    const service = new ExportService(repository);
-
+  async handleStationExport(identifier, user) {
     try {
-      const result = await service.exportStationToCSV(identifier, user);
+      const result = await this.service.exportStationToCSV(identifier, user);
 
       if (!result) {
         return createNotFoundResponse();

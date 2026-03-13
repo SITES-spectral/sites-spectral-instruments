@@ -455,9 +455,6 @@ export function createContainer(env) {
     // Repositories (for direct access if needed)
     repositories,
 
-    // Legacy access pattern (for backward compatibility)
-    adminRepository: repositories.admin,
-
     // Use cases
     commands,
     queries
@@ -527,7 +524,6 @@ export function createTestContainer(overrides = {}) {
     config: EnvironmentConfig.test,
     ports: mockPorts,
     repositories: mockRepositories,
-    adminRepository: mockRepositories.admin,
     commands: createCommands(deps),
     queries: createQueries(deps, mockRepositories.admin)
   };

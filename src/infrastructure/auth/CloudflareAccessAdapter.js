@@ -35,13 +35,16 @@ let jwksCacheTimestamp = 0;
 const JWKS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 /**
- * Global admin email whitelist
- * These users get full admin access via CF Access
+ * Parse global admin emails from environment variable
+ * @param {Object} env - Cloudflare Worker environment
+ * @returns {string[]} Array of lowercase admin emails
  */
-const GLOBAL_ADMIN_EMAILS = [
-  'jose.beltran@mgeo.lu.se',
-  'lars.eklundh@nateko.lu.se'
-];
+function getGlobalAdminEmails(env) {
+  if (!env.CF_ACCESS_GLOBAL_ADMINS) {
+    return [];
+  }
+  return env.CF_ACCESS_GLOBAL_ADMINS.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+}
 
 /**
  * Get or create the JWKS key set for verification
@@ -96,7 +99,7 @@ export class CloudflareAccessAdapter {
       // CF_ACCESS_AUD supports comma-separated values for multiple CF Access applications
       // (each station subdomain has its own application with a unique AUD tag).
       if (!this.env.CF_ACCESS_AUD) {
-        console.error('CF_ACCESS_AUD environment variable is not set — JWT audience validation disabled');
+        throw new Error('CF_ACCESS_AUD is required');
       }
 
       // Parse comma-separated AUD values into array for multi-application support
@@ -150,7 +153,8 @@ export class CloudflareAccessAdapter {
     const emailLower = email.toLowerCase();
 
     // Check if global admin
-    if (GLOBAL_ADMIN_EMAILS.includes(emailLower)) {
+    const globalAdmins = getGlobalAdminEmails(this.env);
+    if (globalAdmins.includes(emailLower)) {
       // Look up or create admin user
       const adminUser = await this.findOrCreateUser({
         email: emailLower,
