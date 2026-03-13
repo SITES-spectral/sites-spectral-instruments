@@ -22,14 +22,14 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=15.7.2">
+    <link rel="stylesheet" href="/css/styles.css?v=15.8.3">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=13.15.0">
     <link rel="stylesheet" href="/css/skeleton.css?v=13.15.0">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="15.7.2">
-    <meta name="build-date" content="2026-03-12">
+    <meta name="app-version" content="15.8.3">
+    <meta name="build-date" content="2026-03-13">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
     <script type="module" src="/dist/dashboard.bundle.js"></script>
@@ -93,6 +93,54 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+        }
+
+        .user-info .user-name {
+            font-weight: 600;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .user-badge.badge-admin {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+        }
+
+        .user-badge.badge-station-admin {
+            background: rgba(96, 165, 250, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(96, 165, 250, 0.4);
+        }
+
+        .user-badge.badge-station {
+            background: rgba(52, 211, 153, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(52, 211, 153, 0.4);
+        }
+
+        .user-badge.badge-viewer {
+            background: rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.4);
         }
 
         .logout-btn {
@@ -3107,6 +3155,11 @@
                 <span class="brand-text">SITES Spectral</span>
             </div>
             <div class="nav-actions">
+                <div class="user-info" id="user-info" style="display: none;">
+                    <i class="fas fa-user-circle" style="font-size: 1.1rem;"></i>
+                    <span class="user-name" id="user-display-name"></span>
+                    <span class="user-badge" id="user-role-badge"></span>
+                </div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
@@ -4872,9 +4925,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=15.7.2"></script>
+    <script src="/js/utils.js?v=15.8.3"></script>
     <!-- Security Utilities (v12.0.9) - XSS prevention -->
-    <script src="/js/core/security.js?v=15.7.2"></script>
+    <script src="/js/core/security.js?v=15.8.3"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=13.27.0"></script>
     <script src="/js/core/config-service.js?v=13.27.0"></script>
@@ -4882,8 +4935,8 @@
     <script src="/js/core/skeleton.js?v=13.27.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=13.27.0"></script>
-    <script src="/js/api.js?v=15.7.2"></script>
-    <script src="/js/components.js?v=15.7.2"></script>
+    <script src="/js/api.js?v=15.8.3"></script>
+    <script src="/js/components.js?v=15.8.3"></script>
     <script src="/js/platform-forms/index.js?v=13.27.0"></script>
     <script src="/js/form-components.js?v=13.27.0"></script>
     <!-- Modular Modal Components (v7.0.1) -->
@@ -4904,15 +4957,15 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=15.7.2"></script>
+    <script src="/js/interactive-map.js?v=15.8.3"></script>
     <!-- Dashboard modules (v13.16.0) -->
     <script src="/js/dashboard/platform-renderer.js?v=13.27.0"></script>
     <script src="/js/dashboard/campaign-panel.js?v=13.27.0"></script>
     <script src="/js/dashboard/product-panel.js?v=13.27.0"></script>
     <script src="/js/dashboard/station-map.js?v=13.27.0"></script>
-    <script src="/js/station-dashboard.js?v=15.7.2"></script>
-    <script src="/js/navigation.js?v=15.7.2"></script>
-    <script src="/js/export.js?v=15.7.2"></script>
+    <script src="/js/station-dashboard.js?v=15.8.3"></script>
+    <script src="/js/navigation.js?v=15.8.3"></script>
+    <script src="/js/export.js?v=15.8.3"></script>
     <script src="/js/platform-modals.js?v=13.27.0"></script>
     <script src="/js/modal-system.js?v=13.27.0"></script>
     <script src="/js/admin-modals.js?v=13.27.0"></script>

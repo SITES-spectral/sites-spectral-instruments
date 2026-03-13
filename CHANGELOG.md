@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.3] - 2026-03-13
+
+### Fixed
+
+- **Frontend `canEdit` uses server `edit_privileges`** — Replaced hardcoded role checks with server-provided `edit_privileges` boolean across `station-dashboard.js` and `api-v1.js`. Fixes: `station` role seeing edit buttons (403 on save), `sites-admin` role not seeing edit buttons
+- **Unified permission checks** — All frontend UI gates (platform edit/delete, empty-state create button, `.admin-only` controls, `_toggleAdminControls`) now use `canEdit` instead of `role === 'admin'`. Station-admin and sites-admin users see full CRUD controls
+- **Session cookie on static page loads** — Worker now issues session cookie when serving station dashboard HTML (not just API responses), ensuring subsequent JS fetch() calls authenticate even if CF Access JWT header isn't forwarded
+- **401 redirect on station portals** — Both V1 and V3 API clients now redirect to `/` (triggers CF Access re-auth) instead of `/login.html` (password form) when session expires on station subdomains
+- **Logout on station portals** — Logout now redirects to public portal (`sitesspectral.work`) instead of password login page
+
+---
+
 ## [15.8.2] - 2026-03-13
 
 ### Security

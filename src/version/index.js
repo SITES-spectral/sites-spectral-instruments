@@ -12,9 +12,9 @@
 
 // Version info is injected at build time
 // DO NOT EDIT - this is auto-generated
-export const VERSION = '15.8.2';
+export const VERSION = '15.8.3';
 export const BUILD_DATE = '2026-03-13';
-export const BUILD_TIMESTAMP = 1773427290790;
+export const BUILD_TIMESTAMP = 1773427992861;
 
 /**
  * Version information object

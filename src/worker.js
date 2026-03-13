@@ -1,4 +1,4 @@
-// SITES Spectral Stations & Instruments - Main Worker v15.8.2
+// SITES Spectral Stations & Instruments - Main Worker v15.8.3
 // Hexagonal Architecture with Cloudflare Workers + Subdomain Routing
 // Handles both static assets and API routes with Cloudflare Access authentication
 //
@@ -183,13 +183,34 @@ export default {
 
         // Station portals: always serve station-dashboard.html
         // CF Access protects the subdomain at the edge (gateway level).
-        // The CF_Authorization cookie is validated by CF Access before the
-        // request reaches this worker, but the Cf-Access-Jwt-Assertion header
-        // may not always be present (e.g., after cookie-based re-auth).
         // The frontend calls /api/auth/verify to get user details and
         // redirects unauthorized users to the public portal.
 
-        return await handleStaticAssets(request, env, corsHeaders, portalType, subdomain, user);
+        // v15.8.3 (F5): Issue session cookie on static page loads for CF Access users.
+        // This ensures subsequent JS fetch() calls have a valid session cookie
+        // even if CF Access doesn't forward the Cf-Access-Jwt-Assertion header.
+        const staticResponse = await handleStaticAssets(request, env, corsHeaders, portalType, subdomain, user);
+
+        if (user && user.auth_provider === 'cloudflare_access') {
+          const existingCookie = getTokenFromCookie(request);
+          if (!existingCookie) {
+            try {
+              const internalToken = await generateToken(user, env);
+              const authCookie = createAuthCookie(internalToken, request);
+              // Create a new response with the cookie header added
+              const responseWithCookie = new Response(staticResponse.body, {
+                status: staticResponse.status,
+                headers: staticResponse.headers
+              });
+              responseWithCookie.headers.set('Set-Cookie', authCookie);
+              return responseWithCookie;
+            } catch (cookieError) {
+              console.warn('Failed to create session cookie on static load:', cookieError);
+            }
+          }
+        }
+
+        return staticResponse;
       }
 
       // === API ROUTES ===

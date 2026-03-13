@@ -362,12 +362,10 @@
                 return;
             }
 
-            // Set edit permission - admins and station-specific users can edit
-            this.canEdit = this.currentUser && (
-                this.currentUser.role === 'admin' ||
-                this.currentUser.role === 'station-admin' ||
-                this.currentUser.role === 'station'
-            );
+            // Set edit permission from server-provided flag (v15.8.3)
+            // The server computes edit_privileges based on the canonical role matrix
+            // in AuthorizationService. Do NOT duplicate role checks on the client.
+            this.canEdit = this.currentUser?.edit_privileges === true;
             logger.log('User edit permission:', this.canEdit);
 
             this._updateUserDisplay();
@@ -415,7 +413,7 @@
                 this._showErrorState('No station data available. Please contact the system administrator.');
                 return;
             }
-            if (this.currentUser?.role === 'admin') {
+            if (['admin', 'sites-admin'].includes(this.currentUser?.role)) {
                 global.location.href = '/sites-dashboard.html';
             } else {
                 global.location.href = '/login.html';
@@ -439,6 +437,57 @@
                     this.currentUser.role.slice(1);
             }
 
+            // Update navbar user info badge (v15.8.1)
+            const userInfoEl = document.getElementById('user-info');
+            const displayNameEl = document.getElementById('user-display-name');
+            const roleBadgeEl = document.getElementById('user-role-badge');
+
+            if (userInfoEl && this.currentUser) {
+                userInfoEl.style.display = 'flex';
+
+                if (displayNameEl) {
+                    displayNameEl.textContent = this.currentUser.full_name ||
+                        this.currentUser.email?.split('@')[0] ||
+                        this.currentUser.username || 'User';
+                }
+
+                if (roleBadgeEl) {
+                    const role = this.currentUser.role || 'viewer';
+                    const roleLabels = {
+                        'admin': 'Admin',
+                        'sites-admin': 'SITES Admin',
+                        'station-admin': 'Station Admin',
+                        'station': 'Station User',
+                        'uav-pilot': 'UAV Pilot',
+                        'readonly': 'Viewer',
+                        'station-internal': 'Internal'
+                    };
+                    const badgeClasses = {
+                        'admin': 'badge-admin',
+                        'sites-admin': 'badge-admin',
+                        'station-admin': 'badge-station-admin',
+                        'station': 'badge-station',
+                        'uav-pilot': 'badge-station',
+                        'readonly': 'badge-viewer',
+                        'station-internal': 'badge-viewer'
+                    };
+
+                    // Build badge content safely using DOM methods
+                    roleBadgeEl.textContent = '';
+                    roleBadgeEl.className = 'user-badge ' + (badgeClasses[role] || 'badge-viewer');
+
+                    if (this.currentUser.edit_privileges) {
+                        const icon = document.createElement('i');
+                        icon.className = 'fas fa-pen';
+                        icon.style.fontSize = '0.6rem';
+                        roleBadgeEl.appendChild(icon);
+                        roleBadgeEl.appendChild(document.createTextNode(' ' + (roleLabels[role] || role)));
+                    } else {
+                        roleBadgeEl.textContent = roleLabels[role] || role;
+                    }
+                }
+            }
+
             // Expose for backward compatibility
             global.currentUser = this.currentUser;
 
@@ -450,9 +499,11 @@
          * @private
          */
         _toggleAdminControls() {
-            const isAdmin = this.currentUser?.role === 'admin';
+            // v15.8.3: Use canEdit (from server edit_privileges) instead of admin-only check
+            // This ensures sites-admin and station-admin also see admin controls
+            const hasEditAccess = this.canEdit;
             document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = isAdmin ? '' : 'none';
+                el.style.display = hasEditAccess ? '' : 'none';
             });
         }
 
@@ -780,7 +831,7 @@
 
             // Back to dashboard (admin only)
             const backBtn = document.getElementById('back-to-dashboard');
-            if (backBtn && this.currentUser?.role === 'admin') {
+            if (backBtn && ['admin', 'sites-admin'].includes(this.currentUser?.role)) {
                 backBtn.addEventListener('click', () => {
                     global.location.href = '/sites-dashboard.html';
                 });
@@ -1037,7 +1088,7 @@
                 ? 'platforms'
                 : `${this.currentPlatformType} platforms`;
 
-            const addButton = this.currentUser?.role === 'admin' ? `
+            const addButton = this.canEdit ? `
                 <button onclick="sitesStationDashboard.showCreatePlatformModal()" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Create First Platform
                 </button>
@@ -1158,7 +1209,7 @@
                             </button>
                         ` : ''}
 
-                        ${this.currentUser?.role === 'admin' ? `
+                        ${this.canEdit ? `
                             <button class="btn btn-secondary btn-sm" onclick="sitesStationDashboard.editPlatform('${platform.id}')">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
@@ -2535,10 +2586,17 @@
          */
         async _logout() {
             try {
-                await global.sitesAPI.logout();
+                // Call logout API to clear server-side session cookie
+                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
             } catch (error) {
                 logger.error('Logout error:', error);
-                global.sitesAPI?.clearAuth();
+            }
+            global.sitesAPI?.clearAuth();
+            // On station portals, redirect to root (triggers CF Access re-auth)
+            // On other portals, redirect to login page
+            if (this.isStationPortal) {
+                global.location.href = 'https://sitesspectral.work';
+            } else {
                 global.location.href = '/login.html';
             }
         }

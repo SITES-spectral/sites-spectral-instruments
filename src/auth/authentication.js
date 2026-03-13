@@ -118,6 +118,7 @@ export async function handleAuth(method, pathSegments, request, env) {
           valid: true,  // Added for frontend compatibility
           user: {
             username: user.username,
+            email: user.email,
             role: user.role,
             station_acronym: user.station_acronym,
             station_normalized_name: user.station_normalized_name,

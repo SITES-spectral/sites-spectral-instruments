@@ -96,11 +96,10 @@ class SitesSpectralAPI {
         return user && user.role === 'station';
     }
 
-    // Check if user has any edit permission (admin, sites-admin, station-admin, or station)
+    // Check if user has edit permission (from server-provided edit_privileges)
     canEdit() {
         const user = this.getUser();
-        if (!user) return false;
-        return ['admin', 'sites-admin', 'station-admin', 'station'].includes(user.role);
+        return user?.edit_privileges === true;
     }
 
     // Get authenticated headers
@@ -118,9 +117,14 @@ class SitesSpectralAPI {
     // Handle API errors with enhanced error messages
     async handleApiError(response, error = null) {
         if (response && response.status === 401) {
-            console.warn('Authentication expired, redirecting to login');
+            console.warn('Authentication expired');
             this.clearAuth();
-            window.location.href = '/login.html';
+            // On station portals, redirect to root (triggers CF Access re-auth)
+            // On admin/other portals, redirect to login page
+            const host = window.location.hostname;
+            const isStationPortal = host.endsWith('.sitesspectral.work') &&
+                !host.startsWith('admin.') && host !== 'sitesspectral.work';
+            window.location.href = isStationPortal ? '/' : '/login.html';
             return;
         }
 
@@ -262,8 +266,12 @@ class SitesSpectralAPI {
         // Clear local state
         this.clearAuth();
 
-        // Redirect to login page (not root, to avoid auto-redirect loop)
-        window.location.href = '/login.html';
+        // On station portals, redirect to public portal (CF Access session persists)
+        // On other portals, redirect to login page
+        const host = window.location.hostname;
+        const isStationPortal = host.endsWith('.sitesspectral.work') &&
+            !host.startsWith('admin.') && host !== 'sitesspectral.work';
+        window.location.href = isStationPortal ? 'https://sitesspectral.work' : '/login.html';
     }
 
     // Station methods with enhanced error handling

@@ -415,13 +415,17 @@
          * @param {Response} response - Fetch response
          */
         async _handleV3Error(response) {
-            // Handle 401 by redirecting to login
+            // Handle 401 — redirect based on portal type
             if (response.status === 401) {
                 logger.warn('V3 API: Authentication expired');
                 if (this._baseAPI) {
                     this._baseAPI.clearAuth();
                 }
-                global.location.href = '/login.html';
+                // On station portals, redirect to root (triggers CF Access re-auth)
+                const host = global.location.hostname;
+                const isStationPortal = host.endsWith('.sitesspectral.work') &&
+                    !host.startsWith('admin.') && host !== 'sitesspectral.work';
+                global.location.href = isStationPortal ? '/' : '/login.html';
                 return;
             }
 
