@@ -430,10 +430,13 @@ export class CloudflareAccessAdapter {
       }
 
       // Station admins/users can access their own station
+      // v15.8.4: Compare against normalized_name (e.g., 'svartberget') not acronym ('SVB')
+      // since subdomains use full station names
       if (['station-admin', 'station'].includes(user.role)) {
         const stationSubdomain = subdomain?.toLowerCase();
+        const userStationName = user.station_normalized_name?.toLowerCase();
         const userStationAcronym = user.station_acronym?.toLowerCase();
-        return stationSubdomain === userStationAcronym;
+        return stationSubdomain === userStationName || stationSubdomain === userStationAcronym;
       }
 
       // UAV pilots can access their authorized stations

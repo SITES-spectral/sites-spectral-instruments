@@ -35,7 +35,8 @@ import {
 /**
  * Super admin roles that can directly edit ROIs
  */
-const SUPER_ADMIN_ROLES = ['admin', 'sites-admin', 'spectral-admin'];
+// v15.8.4: Added station-admin, removed ghost spectral-admin role (A3+A4 audit fix)
+const SUPER_ADMIN_ROLES = ['admin', 'sites-admin', 'station-admin'];
 
 /**
  * Check if user can directly edit ROIs (super admin only)

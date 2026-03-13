@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.4] - 2026-03-13
+
+### Fixed
+
+- **`canAccessPortal` station comparison** — Now compares subdomain against `station_normalized_name` (e.g., `svartberget`) instead of `station_acronym` (`SVB`). Previously always returned false for station users, blocking enforcement if re-enabled
+- **ROI permissions for station-admin** — Added `station-admin` to `SUPER_ADMIN_ROLES` in ROIController, matching the AuthorizationService PERMISSION_MATRIX that already grants station-admin write/delete on ROIs
+- **Removed ghost `spectral-admin` role** — Removed from ROIController `SUPER_ADMIN_ROLES` (not defined in Role.js or AuthorizationService, could never be assigned)
+
+---
+
 ## [15.8.3] - 2026-03-13
 
 ### Fixed
