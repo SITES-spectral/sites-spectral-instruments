@@ -329,9 +329,7 @@ src/
 │   │   ├── events/                  # Domain events
 │   │   │   ├── DomainEvent.js
 │   │   │   └── index.js
-│   │   └── versioning/              # Port versioning
-│   │       ├── PortVersion.js
-│   │       └── VersionedPortAdapter.js
+│   │   └── (versioning/ removed in v15.9.0)
 │   └── [other domains...]
 │
 ├── application/                     # Ring 2: Use Cases
@@ -493,6 +491,6 @@ src/
 ## See Also
 
 - [ADR Index](./adr/README.md)
-- [Port Versioning Strategy](./PORT_VERSIONING.md)
+- [Port Versioning Strategy](./legacy/PORT_VERSIONING_v13.5.md) (archived)
 - [OpenAPI Specification](./openapi/openapi.yaml)
 - [CLAUDE.md](../CLAUDE.md)

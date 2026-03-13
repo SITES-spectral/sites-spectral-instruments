@@ -2,7 +2,7 @@
 
 This folder contains archived documentation and changelogs from SITES Spectral versions prior to v13.0.0, as well as superseded implementation documentation.
 
-**Current Active Version**: v13.26.0+ (Production Ready Codebase)
+**Current Active Version**: v15.9.0 (Production Ready Codebase)
 
 ---
 
@@ -13,6 +13,12 @@ This folder contains archived documentation and changelogs from SITES Spectral v
 | File | Description |
 |------|-------------|
 | [[CHANGELOG_V11_AND_EARLIER|CHANGELOG_V11_AND_EARLIER.md]] | Complete changelog for v11.x and earlier versions |
+
+### Port Versioning Archive (v15.9.0)
+
+| File | Description |
+|------|-------------|
+| `PORT_VERSIONING_v13.5.md` | Port versioning strategy (removed in v15.9.0, see [ADR-009](../adr/ADR-009-v15.9-architecture-hardening.md)) |
 
 ### v13.25 Instrument Types Archive (`v13.25-instrument-types/`)
 
@@ -42,6 +48,8 @@ Documentation from pre-V11 versions:
 
 | Version | Period | Key Milestone |
 |---------|--------|---------------|
+| **v15.9.0** | Mar 2026 | Architecture hardening, dead code removal |
+| **v15.0.0** | Jan 2026 | Subdomain architecture, UAV domain |
 | **v13.26.0** | Dec 2025 | Config-Driven Instrument Types (YAML) |
 | **v13.0.0** | Dec 2025 | Production Ready - 653 tests, Phase 4-6 complete |
 | **v12.0.0** | Dec 2025 | Normalized Mount Type Codes (BREAKING) |
@@ -84,5 +92,5 @@ For current documentation, see the main project:
 
 ---
 
-**Last Updated**: 2025-12-29
-**Archived By**: v13.26.0 Release
+**Last Updated**: 2026-03-13
+**Archived By**: v15.9.0 Release

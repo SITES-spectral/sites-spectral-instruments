@@ -4,17 +4,18 @@ This directory contains architecture audits performed by @hexi (Architecture Gua
 
 ---
 
-## Latest Audit: v15.0.0 (2026-01-24)
+## Latest Audit: v15.8.7 (2026-03-13) — Remediated in v15.9.0
 
-**Overall Score**: 82/100 ✅ Production Ready with Recommended Improvements
+**Overall Score**: 145/160 (91%) ✅ Production Ready
 
 ### Quick Links
 
 | Document | Purpose | Audience |
 |----------|---------|----------|
 | [Quick Reference](./QUICK_REFERENCE.md) | Single-page cheat sheet | All developers |
-| [Audit Summary](./AUDIT_SUMMARY.md) | Executive summary with action plan | Team leads, architects |
-| [Full Audit Report](./2026-01-24-architecture-audit-v15.md) | Comprehensive analysis | Architects, senior developers |
+| [Audit Summary](./AUDIT_SUMMARY.md) | Executive summary with action plan (v15.9.0 updated) | Team leads, architects |
+| [Full Audit 2026-03-13](./2026-03-13-COMPREHENSIVE-ARCHITECTURE-SECURITY-AUDIT.md) | Latest comprehensive analysis (v15.8.7) | Architects, senior developers |
+| [Full Audit 2026-01-24](./2026-01-24-architecture-audit-v15.md) | Previous comprehensive analysis (v15.0.0) | Reference |
 
 ---
 
@@ -62,31 +63,35 @@ Use this for:
 4. **Security-First** - CF Access, magic links, RBAC
 5. **Repository Pattern** - Clean port/adapter separation
 
-### ❌ Critical Issues (Fix in Sprint 1)
+### ✅ Resolved in v15.9.0
 
-1. **Missing Application Layer** - Business logic in handlers
-2. **CalibrationRecord.js** - 798 lines (4x limit)
-3. **Zero UAV Tests** - Pilot, Mission, FlightLog untested
-4. **Missing ADRs** - No documentation for v15.0.0 decisions
+1. **3 Critical Security Issues** — Token revocation race, mandatory AUD, admin emails externalized
+2. **4 DIP Violations** — All controllers now receive deps from DI container
+3. **Runtime TypeError** — `findByNormalizedName` added to D1StationRepository
+4. **Dead Code Removed** — 6 versioned port files (~1,120 lines), ADR-007 deprecated
+5. **Domain Purity** — Infrastructure strings removed from UserService
 
-### 🟡 Important Issues (Fix in Sprint 2)
+### 🟡 Remaining Issues (P2)
 
-5. **Hardcoded Configuration** - Admin emails, expiry durations
-6. **CloudflareAccessAdapter** - Business logic in infrastructure
-7. **Large Files** - Product.js (503 lines), ProductService.js (484 lines)
+1. **Admin shadow system** — `src/admin/admin-*.js` bypasses domain validation
+2. **Auth layer placement** — `src/auth/` should be in `src/infrastructure/auth/`
+3. **UAVController SRP** — 1,236 lines, needs splitting
+4. **Ecosystems handler** — Hardcodes YAML values
 
 ---
 
 ## Score Breakdown
 
-| Category | Score | Status | Target |
-|----------|-------|--------|--------|
-| SOLID Compliance | 25/30 | ⚠️ Good | 28/30 |
-| Hexagonal Architecture | 22/25 | ✅ Excellent | 25/25 |
-| Configuration-Driven | 14/15 | ✅ Excellent | 15/15 |
-| Test Coverage | 12/15 | ✅ Good | 14/15 |
-| Documentation Quality | 9/15 | ⚠️ Needs improvement | 13/15 |
-| **TOTAL** | **82/100** | **Production Ready** | **95/100** |
+| Category | Score | Status |
+|----------|-------|--------|
+| Hexagonal Architecture | 18/25 | ⚠️ Admin shadow system, auth placement |
+| SOLID Compliance | 26/30 | ✅ DIP violations resolved |
+| Security Posture | 25/25 | ✅ All critical items resolved |
+| Authorization Pipeline | 24/25 | ✅ Excellent RBAC |
+| Test Coverage | 25/25 | ✅ 1283 tests passing |
+| Config-Driven Design | 12/15 | ✅ Good |
+| CQRS Pattern | 15/15 | ✅ Clean |
+| **TOTAL** | **145/160** | **91% — Production Ready** |
 
 ---
 
@@ -133,8 +138,10 @@ Want to improve the score fast?
 
 | Date | Version | Score | Auditor | Key Changes |
 |------|---------|-------|---------|-------------|
+| 2026-03-13 | v15.9.0 | 145/160 | @hexi | DIP fixes, security hardening, dead code removal |
+| 2026-03-13 | v15.8.7 | 129/160 | @hexi | Comprehensive audit, 3 critical + 4 DIP findings |
+| 2026-02-11 | v15.6.x | — | @hexi | Security audit |
 | 2026-01-24 | v15.0.0 | 82/100 | @hexi | Cloudflare Access, UAV domain |
-| *Future* | v16.0.0 | TBD | @hexi | After Sprint 1-2 refactoring |
 
 ---
 
@@ -170,7 +177,7 @@ Focus on:
 
 ### Architecture Documentation
 - [Architecture Visualization](../ARCHITECTURE_VISUALIZATION.md) - Hexagonal diagrams
-- [Port Versioning Strategy](../PORT_VERSIONING.md) - Versioned ports pattern
+- [Port Versioning Strategy](../legacy/PORT_VERSIONING_v13.5.md) - Versioned ports pattern (archived)
 - [ADR Index](../adr/README.md) - Architecture Decision Records
 
 ### SITES Spectral Standards
@@ -223,5 +230,5 @@ Focus on:
 
 ---
 
-**Last Updated**: 2026-01-24
-**Next Audit**: After Sprint 1 (target: 2026-02-14)
+**Last Updated**: 2026-03-13
+**Next Audit**: After remaining P2 items (admin shadow system, UAVController split)

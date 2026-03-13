@@ -2,7 +2,7 @@
 
 ## Status
 
-**Accepted**
+**Deprecated** — Superseded by ADR-009. All versioned port infrastructure removed in v15.9.0.
 
 ## Context
 
