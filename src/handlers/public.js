@@ -73,6 +73,7 @@ async function getPublicStations(request, env) {
       SELECT
         s.id,
         s.acronym,
+        s.normalized_name,
         s.display_name,
         s.description,
         s.latitude,
@@ -104,7 +105,7 @@ async function getPublicStations(request, env) {
       ...station,
       sites_member: !!station.sites_member,
       icos_member: !!station.icos_member,
-      portal_url: `https://${station.acronym.toLowerCase()}.sitesspectral.work`,
+      portal_url: `https://${(station.normalized_name || station.acronym).toLowerCase()}.sitesspectral.work`,
       operational_status: getOperationalStatus(station)
     }));
 
@@ -259,6 +260,7 @@ async function getPublicStationDetails(stationId, env) {
       SELECT
         s.id,
         s.acronym,
+        s.normalized_name,
         s.display_name,
         s.description,
         s.latitude,
@@ -270,8 +272,8 @@ async function getPublicStationDetails(stationId, env) {
         s.icos_member,
         s.icos_class
       FROM stations s
-      WHERE s.id = ? OR LOWER(s.acronym) = LOWER(?)
-    `).bind(stationId, stationId).first();
+      WHERE s.id = ? OR LOWER(s.acronym) = LOWER(?) OR LOWER(s.normalized_name) = LOWER(?)
+    `).bind(stationId, stationId, stationId).first();
 
     if (!station) {
       return createNotFoundResponse('Station not found');
@@ -307,7 +309,7 @@ async function getPublicStationDetails(stationId, env) {
         ...station,
         sites_member: !!station.sites_member,
         icos_member: !!station.icos_member,
-        portal_url: `https://${station.acronym.toLowerCase()}.sitesspectral.work`,
+        portal_url: `https://${(station.normalized_name || station.acronym).toLowerCase()}.sitesspectral.work`,
         operational_status: getOperationalStatus(station)
       },
       platforms: platforms.results.map(p => ({

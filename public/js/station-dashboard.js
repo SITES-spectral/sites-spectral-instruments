@@ -179,9 +179,22 @@
          * @private
          */
         async _init() {
-            // Get station acronym from URL
+            // Get station acronym from URL param or subdomain
             const urlParams = new URLSearchParams(global.location.search);
             this.stationAcronym = urlParams.get('station');
+
+            // If no URL param, detect from subdomain (station portal mode)
+            if (!this.stationAcronym) {
+                const host = global.location.hostname;
+                const parts = host.split('.');
+                if (parts.length === 3 && parts[1] === 'sitesspectral' && parts[2] === 'work') {
+                    const subdomain = parts[0].toLowerCase();
+                    if (subdomain !== 'admin' && subdomain !== 'www') {
+                        this.stationAcronym = subdomain;
+                        this.isStationPortal = true;
+                    }
+                }
+            }
 
             // Wait for DOM
             if (document.readyState === 'loading') {
@@ -299,23 +312,45 @@
             const api = global.sitesAPI;
 
             // Verify authentication with server (async)
-            // This sends the httpOnly cookie and validates the session
+            // This sends the httpOnly cookie and CF Access JWT to validate the session
             if (api?.verifyAuth) {
                 const isAuth = await api.verifyAuth();
                 if (!isAuth) {
+                    // On station portals, CF Access handles authentication
+                    // If verify fails, the user may still be authenticated via CF Access
+                    // but not have a legacy cookie. Try a direct verify as fallback.
+                    if (this.isStationPortal) {
+                        logger.warn('Legacy auth failed on station portal, trying CF Access verify...');
+                        const cfAuthOk = await this._verifyCFAccess();
+                        if (!cfAuthOk) {
+                            logger.warn('CF Access auth failed, redirecting to public portal');
+                            global.location.href = 'https://sitesspectral.work';
+                            return;
+                        }
+                    } else {
+                        logger.warn('User not authenticated, redirecting to login');
+                        global.location.href = '/login.html';
+                        return;
+                    }
+                }
+            } else if (!api?.isAuthenticated()) {
+                if (this.isStationPortal) {
+                    const cfAuthOk = await this._verifyCFAccess();
+                    if (!cfAuthOk) {
+                        global.location.href = 'https://sitesspectral.work';
+                        return;
+                    }
+                } else {
                     logger.warn('User not authenticated, redirecting to login');
                     global.location.href = '/login.html';
                     return;
                 }
-            } else if (!api?.isAuthenticated()) {
-                // Fallback for older API without verifyAuth
-                logger.warn('User not authenticated, redirecting to login');
-                global.location.href = '/login.html';
-                return;
             }
 
             // Get user from V1 API (storage - now populated by verifyAuth)
-            this.currentUser = global.sitesAPI?.getUser() || null;
+            if (!this.currentUser) {
+                this.currentUser = global.sitesAPI?.getUser() || null;
+            }
             logger.log('Current user:', this.currentUser);
             logger.log('Requesting station:', this.stationAcronym);
 
@@ -327,9 +362,10 @@
                 return;
             }
 
-            // Set edit permission
+            // Set edit permission - admins and station-specific users can edit
             this.canEdit = this.currentUser && (
                 this.currentUser.role === 'admin' ||
+                this.currentUser.role === 'station-admin' ||
                 this.currentUser.role === 'station'
             );
             logger.log('User edit permission:', this.canEdit);
@@ -338,10 +374,47 @@
         }
 
         /**
+         * Verify authentication via CF Access (fallback for station portals)
+         * Directly calls the auth/verify API endpoint which handles CF Access JWT
+         * @private
+         * @returns {Promise<boolean>}
+         */
+        async _verifyCFAccess() {
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) return false;
+
+                const data = await response.json();
+                if (data.success && data.user) {
+                    // Store user in API and local state
+                    this.currentUser = data.user;
+                    if (global.sitesAPI?.setUser) {
+                        global.sitesAPI.setUser(data.user);
+                    }
+                    logger.log('CF Access auth successful:', data.user.username);
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                logger.error('CF Access verify error:', error);
+                return false;
+            }
+        }
+
+        /**
          * Redirect to appropriate location based on user role
          * @private
          */
         _redirectToAppropriateLocation() {
+            // On station portal, don't redirect away — show error instead
+            if (this.isStationPortal) {
+                this._showErrorState('No station data available. Please contact the system administrator.');
+                return;
+            }
             if (this.currentUser?.role === 'admin') {
                 global.location.href = '/sites-dashboard.html';
             } else {
@@ -406,7 +479,12 @@
                     // V1 fallback
                     const response = await global.sitesAPI.getStations();
                     const stations = Array.isArray(response) ? response : (response.stations || []);
-                    this.stationData = stations.find(s => s.acronym === this.stationAcronym);
+                    const acronymLower = this.stationAcronym?.toLowerCase();
+                    this.stationData = stations.find(s =>
+                        s.acronym === this.stationAcronym ||
+                        s.acronym?.toLowerCase() === acronymLower ||
+                        s.normalized_name?.toLowerCase() === acronymLower
+                    );
                 }
 
                 if (!this.stationData) {

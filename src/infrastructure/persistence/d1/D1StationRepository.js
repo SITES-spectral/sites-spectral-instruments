@@ -44,9 +44,10 @@ export class D1StationRepository {
     if (!acronym || typeof acronym !== 'string') {
       return null;
     }
+    // Search by acronym first, then by normalized_name (for subdomain lookups)
     const result = await this.db
-      .prepare('SELECT * FROM stations WHERE acronym = ?')
-      .bind(acronym.toUpperCase())
+      .prepare('SELECT * FROM stations WHERE UPPER(acronym) = ? OR LOWER(normalized_name) = ?')
+      .bind(acronym.toUpperCase(), acronym.toLowerCase())
       .first();
 
     return result ? Station.fromDatabase(result) : null;

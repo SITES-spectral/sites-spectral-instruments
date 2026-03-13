@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.0] - 2026-03-13
+
+### Added
+
+- **Authenticated Station Portals**: Station subdomains (`{station}.sitesspectral.work`) now serve the full station dashboard with edit capabilities for authorized users (platforms, instruments, ROIs, campaigns, products)
+  - CF Access authenticated users see the same station dashboard as the admin portal, scoped to their station
+  - Subdomain auto-detection: no `?station=` param needed — station resolved from hostname
+  - CF Access JWT fallback auth: station portals authenticate via CF Access when legacy cookie is absent
+  - `station-admin` role added to edit permission checks
+- **José Beltrán added to Abisko CF Access policy** via Cloudflare API
+
+### Fixed
+
+- **Portal URLs use full station names**: All portal URLs now use `normalized_name` (e.g., `abisko.sitesspectral.work`) instead of 3-letter acronyms (`ans.sitesspectral.work`)
+  - Backend: `src/handlers/public.js`, `src/handlers/magic-links.js` — portal_url uses `normalized_name`
+  - Frontend: `index.html`, `public-dashboard.html` — fallback URL uses `normalized_name`
+  - Repository: `D1StationRepository.findByAcronym()` now also searches by `normalized_name`
+  - Public API station detail query now matches by `normalized_name` in addition to `acronym` and `id`
+- **Map popup "View Station Portal" button** — improved styling with `!important` color overrides to prevent Leaflet CSS from making text unreadable
+- **Unauthorized station portal access** redirects to `https://sitesspectral.work` (public portal) instead of returning JSON error
+
+### Changed
+
+- **Station portal page**: `worker.js` now serves `station-dashboard.html` (full CRUD) instead of `station-portal.html` (read-only) for authenticated station portal users
+- **CORS allowed origins**: Added missing station alternates (`bol`, `erk`, `rbd`, `skc`) and guest station `norunda`/`nor`
+
+---
+
 ## [15.7.2] - 2026-03-12
 
 ### Fixed

@@ -92,16 +92,8 @@ function createPortalUnauthorizedResponse(portalType, subdomain) {
   }
 
   if (portalType === 'station') {
-    return new Response(JSON.stringify({
-      error: 'Unauthorized',
-      message: `Station portal (${subdomain}) requires authentication`,
-      portal: 'station',
-      station: subdomain,
-      hint: 'Please authenticate via Cloudflare Access or magic link'
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Redirect unauthorized station portal users to the public portal
+    return Response.redirect('https://sitesspectral.work', 302);
   }
 
   return new Response('Unauthorized', { status: 401 });
@@ -116,6 +108,11 @@ function createPortalUnauthorizedResponse(portalType, subdomain) {
  * @returns {Response}
  */
 function createPortalForbiddenResponse(portalType, subdomain, user) {
+  // Redirect unauthorized station portal users to the public portal
+  if (portalType === 'station') {
+    return Response.redirect('https://sitesspectral.work', 302);
+  }
+
   return new Response(JSON.stringify({
     error: 'Forbidden',
     message: `You do not have access to this ${portalType} portal`,
@@ -280,8 +277,8 @@ async function handleStaticAssets(request, env, corsHeaders, portalType = 'publi
       default: '/sites-dashboard.html'
     },
     station: {
-      '/': '/station-portal.html',
-      default: '/station-portal.html'
+      '/': '/station-dashboard.html',
+      default: '/station-dashboard.html'
     }
   };
 

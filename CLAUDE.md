@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Current Version: 15.7.2
+## Current Version: 15.8.0
 
 | Property | Value |
 |----------|-------|
@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Recent Changes
 
+- **v15.8.0**: Authenticated station portals with full CRUD, portal URLs use full station names, unauthorized users redirected to public
 - **v15.7.2**: Complete domain migration — removed all remaining `sites.jobelab.com` references from src, public, and docs
 - **v15.7.1**: Fix station portal showing public-only data — now uses authenticated dashboard API for full platform/instrument details
 - **v15.7.0**: Database audit, 3 guest stations (ALN, HYL, NOR), 40 ROIs migrated ([docs](docs/audits/2026-02-16-INSTRUMENT-PLATFORM-ROI-AUDIT.md))

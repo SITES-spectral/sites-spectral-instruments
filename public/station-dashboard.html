@@ -4930,9 +4930,20 @@
         let satelliteLayer = null;
         let osmLayer = null;
 
-        // Get station acronym from URL parameter
+        // Get station acronym from URL parameter or subdomain (station portal mode)
         const urlParams = new URLSearchParams(window.location.search);
-        const stationAcronym = urlParams.get('station');
+        let stationAcronym = urlParams.get('station');
+
+        // If no URL param, detect from subdomain (e.g., abisko.sitesspectral.work)
+        if (!stationAcronym) {
+            const hostParts = window.location.hostname.split('.');
+            if (hostParts.length === 3 && hostParts[1] === 'sitesspectral' && hostParts[2] === 'work') {
+                const subdomain = hostParts[0].toLowerCase();
+                if (subdomain !== 'admin' && subdomain !== 'www') {
+                    stationAcronym = subdomain;
+                }
+            }
+        }
 
         // NOTE: Platform Type Filtering functions (filterPlatformsByType, updatePlatformTypeCounts)
         // are now defined in station-dashboard.js at the TOP of the file to ensure they're

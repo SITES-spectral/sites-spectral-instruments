@@ -38,22 +38,28 @@ const STATION_ACRONYMS = [
   'ans',        // Abisko alternate
   'asa',
   'bolmen',
+  'bol',        // Bolmen alternate
   'erken',
+  'erk',        // Erken alternate
   'grimso',
   'gri',        // Grimso alternate
   'lonnstorp',
   'lon',        // Lonnstorp alternate
   'robacksdalen',
   'rob',        // Robacksdalen alternate
+  'rbd',        // Robacksdalen alternate
   'skogaryd',
   'sko',        // Skogaryd alternate
+  'skc',        // Skogaryd alternate
   'svartberget',
   'svb',        // Svartberget alternate
-  // New stations (v14.1.0)
+  // Guest stations (v14.1.0+)
   'alnarp',
   'aln',        // Alnarp alternate
   'hyltemossa',
   'hyl',        // Hyltemossa alternate
+  'norunda',
+  'nor',        // Norunda alternate
 ];
 
 /**

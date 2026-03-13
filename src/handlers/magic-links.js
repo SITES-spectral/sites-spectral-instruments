@@ -298,11 +298,11 @@ async function createMagicLink(request, env) {
 
     // Get station acronym for URL
     const station = await env.DB.prepare(`
-      SELECT acronym FROM stations WHERE id = ?
+      SELECT acronym, normalized_name FROM stations WHERE id = ?
     `).bind(station_id).first();
 
-    // Build magic link URL
-    const baseUrl = `https://${station?.acronym?.toLowerCase() || 'station'}.sitesspectral.work`;
+    // Build magic link URL - use full station name, not acronym
+    const baseUrl = `https://${(station?.normalized_name || station?.acronym)?.toLowerCase() || 'station'}.sitesspectral.work`;
     const magicLinkUrl = `${baseUrl}/auth/magic?token=${token}`;
 
     // Log the event

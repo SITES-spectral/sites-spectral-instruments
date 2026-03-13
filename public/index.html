@@ -360,22 +360,27 @@
             color: #6b7280;
         }
 
-        .popup-link {
+        .popup-link,
+        .popup-link:visited,
+        .popup-link:active {
             display: block;
             text-align: center;
             margin-top: 12px;
-            padding: 8px;
+            padding: 10px 12px;
             background: #047857;
-            color: white;
+            color: #ffffff !important;
             border-radius: 6px;
-            text-decoration: none;
+            text-decoration: none !important;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.3px;
             transition: background 0.15s;
         }
 
         .popup-link:hover {
             background: #065f46;
+            color: #ffffff !important;
+            text-decoration: none !important;
         }
 
         /* Loading State */
@@ -829,7 +834,7 @@
                 container.appendChild(stats);
 
                 // Portal link - sanitize URL
-                const portalUrl = this.sanitizeUrl(station.portal_url || ('https://' + (station.acronym || 'unknown').toLowerCase() + '.sitesspectral.work'));
+                const portalUrl = this.sanitizeUrl(station.portal_url || ('https://' + (station.normalized_name || station.acronym || 'unknown').toLowerCase() + '.sitesspectral.work'));
                 const link = document.createElement('a');
                 link.className = 'popup-link';
                 link.href = portalUrl;
