@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.7] - 2026-03-13
+
+### Added
+
+- **CF_ACCESS_AUD audience validation** (SEC-011) — Set `CF_ACCESS_AUD` wrangler secret with all 14 CF Access application audience tags. JWT verification now rejects tokens from other CF Access teams or applications. Supports comma-separated AUDs for multi-application validation (each station subdomain has its own CF Access app).
+
+---
+
 ## [15.8.6] - 2026-03-13
 
 ### Added
