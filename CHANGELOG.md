@@ -13,6 +13,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.0.0] - 2026-04-09
+
+### BREAKING CHANGES
+
+- **Removed `/api/version` endpoint** — was exposing version, architecture, and documentation details to unauthenticated users
+- **Magic link defaults changed** — expiry reduced from 7 days to 24 hours; single_use now defaults to `true`
+- **500 error responses no longer include `message` field** — prevents internal error detail leakage
+- **JWT `username` claim removed** — use `sub` claim exclusively (M9)
+
+### Security Fixes (Penetration Test v15.10.0)
+
+#### Critical
+- **C1: HTTP Security Headers** — Added CSP, X-Frame-Options (DENY), X-Content-Type-Options (nosniff), HSTS, Referrer-Policy, Permissions-Policy to all responses via `src/utils/security-headers.js`
+- **C2/C3: Magic Link Race Conditions** — Replaced SELECT-then-UPDATE with atomic D1 `.batch()` for token validation; eliminates single-use and multi-use race windows
+- **C4: Source Maps Disabled** — `vite.config.js` sourcemap set to `false` for production builds
+
+#### High
+- **H1: Token Revocation Enforced** — `revokeToken()` now throws on failure; token refresh fails if old token cannot be revoked
+- **H2: JWKS Cache TTL Reduced** — From 6 hours to 1 hour for faster key rotation response
+- **H3: Rate Limit IP Spoofing Fixed** — Removed `X-Forwarded-For`/`X-Real-IP` fallbacks; only trusts `CF-Connecting-IP`
+- **H4: Magic Link Token Not Returned on Email Failure** — Prevents token leakage via error responses
+- **H5: Error Message Leakage Fixed** — 500 responses return generic message, not `error.message`
+- **H6: Health Endpoint Stripped** — Removed version, architecture, features, API details from `/api/health`
+- **H7: Version Endpoint Removed** — `/api/version` returns 404
+
+#### Medium
+- **M1: LIKE Wildcard Escaping** — Added `ESCAPE '\\'` and `%`/`_` escaping to all 6 D1 repositories with LIKE queries
+- **M3: Magic Link Defaults Hardened** — 24h expiry (was 7d), single_use=true by default
+- **M5: CSV Formula Injection Prevention** — Fields starting with `=`, `+`, `-`, `@` prefixed with `'` in CSV export
+- **M9: JWT Username Claim Removed** — `sub` claim is authoritative; removes redundancy
+- **M10: Clock Skew Tolerance** — 30-second tolerance in magic link expiry check
+- **M12: CSRF Narrowed** — Only `/api/auth/login` exempted from CSRF; logout/refresh now require CSRF validation
+
+#### Low
+- **L4: Full JWT Audit Hash** — Removed 32-char truncation; stores full 64-char SHA-256 hash
+
+---
+
 ## [15.10.0] - 2026-04-09
 
 ### Fixed

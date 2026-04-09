@@ -21,8 +21,8 @@ export default defineConfig({
         // Don't empty outDir on rebuild (preserve other assets)
         emptyOutDir: true,
 
-        // Generate source maps for debugging
-        sourcemap: true,
+        // Source maps disabled in production (C4 security fix)
+        sourcemap: false,
 
         // Generate manifest for server-side rendering
         manifest: true,

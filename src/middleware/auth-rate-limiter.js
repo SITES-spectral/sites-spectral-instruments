@@ -45,12 +45,9 @@ const RATE_LIMITS = {
  * @returns {string}
  */
 function getClientIP(request) {
-  return (
-    request.headers.get('CF-Connecting-IP') ||
-    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
-    request.headers.get('X-Real-IP') ||
-    'unknown'
-  );
+  // v16.0.0 (H3): Only trust CF-Connecting-IP — set by Cloudflare edge, cannot be spoofed.
+  // X-Forwarded-For and X-Real-IP can be forged by clients to bypass rate limiting.
+  return request.headers.get('CF-Connecting-IP') || 'unknown';
 }
 
 /**

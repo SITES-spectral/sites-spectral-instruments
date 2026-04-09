@@ -144,10 +144,10 @@ export class D1CampaignRepository {
     const results = await this.db
       .prepare(`
         SELECT * FROM acquisition_campaigns
-        WHERE participants_json LIKE ?
+        WHERE participants_json LIKE ? ESCAPE '\\'
         ORDER BY planned_start_datetime DESC
       `)
-      .bind(`%${userId}%`)
+      .bind(`%${String(userId).replace(/[\\%_]/g, '\\$&')}%`)
       .all();
 
     // Filter results to ensure exact match in JSON array

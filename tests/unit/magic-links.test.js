@@ -111,7 +111,8 @@ function createMockRequest(options = {}) {
 function createMockEnv() {
   const mockDb = {
     prepare: vi.fn(),
-    exec: vi.fn()
+    exec: vi.fn(),
+    batch: vi.fn()
   };
 
   // Chain methods for D1 prepare().bind().run()
@@ -136,6 +137,12 @@ function createMockEnv() {
     first: mockFirst,
     all: mockAll
   });
+
+  // Default batch mock: [updateResult, selectResult]
+  mockDb.batch.mockResolvedValue([
+    { meta: { changes: 0 }, success: true },
+    { results: [], success: true }
+  ]);
 
   return {
     DB: mockDb,
@@ -178,8 +185,11 @@ describe('Magic Links Handler', () => {
         url: 'https://sitesspectral.work/api/v11/magic-links/validate?token=abc123'
       });
 
-      // Mock token not found scenario
-      env._mockHelpers.mockFirst.mockResolvedValue(null);
+      // Mock token not found via batch (0 changes, empty select)
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 0 }, success: true },
+        { results: [], success: true }
+      ]);
 
       const response = await handleMagicLinks('GET', ['validate'], request, env);
 
@@ -566,10 +576,17 @@ describe('Magic Links Handler', () => {
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         single_use: 0,
         used_at: null,
-        revoked_at: null
+        revoked_at: null,
+        use_count: 1,
+        ip_pinning_enabled: 0,
+        first_use_ip: null
       };
 
-      env._mockHelpers.mockFirst.mockResolvedValue(mockMagicLink);
+      // v16.0.0: validateMagicLink uses DB.batch() for atomic UPDATE+SELECT
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 1 }, success: true },
+        { results: [mockMagicLink], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -589,11 +606,8 @@ describe('Magic Links Handler', () => {
       // Verify Set-Cookie header
       expect(response.headers.get('Set-Cookie')).toContain('auth=');
 
-      // Verify token was marked as used
-      const updateCall = env.DB.prepare.mock.calls.find(call =>
-        call[0].includes('UPDATE magic_link_tokens') && call[0].includes('used_at')
-      );
-      expect(updateCall).toBeDefined();
+      // Verify batch was called (atomic UPDATE+SELECT)
+      expect(env.DB.batch).toHaveBeenCalled();
 
       // Verify security logging
       expect(logSecurityEvent).toHaveBeenCalledWith(
@@ -624,7 +638,11 @@ describe('Magic Links Handler', () => {
 
     it('should reject non-existent token', async () => {
       const env = createMockEnv();
-      env._mockHelpers.mockFirst.mockResolvedValue(null);
+      // batch returns 0 changes (token not found), empty select
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 0 }, success: true },
+        { results: [], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -658,7 +676,11 @@ describe('Magic Links Handler', () => {
         revoked_at: null
       };
 
-      env._mockHelpers.mockFirst.mockResolvedValue(expiredMagicLink);
+      // batch: 0 changes (expired), select returns the expired token for logging
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 0 }, success: true },
+        { results: [expiredMagicLink], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -692,7 +714,11 @@ describe('Magic Links Handler', () => {
         revoked_at: new Date().toISOString() // Revoked
       };
 
-      env._mockHelpers.mockFirst.mockResolvedValue(revokedMagicLink);
+      // batch: 0 changes (revoked), select returns the revoked token for logging
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 0 }, success: true },
+        { results: [revokedMagicLink], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -726,7 +752,11 @@ describe('Magic Links Handler', () => {
         revoked_at: null
       };
 
-      env._mockHelpers.mockFirst.mockResolvedValue(usedMagicLink);
+      // batch: 0 changes (already used single-use), select returns the used token
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 0 }, success: true },
+        { results: [usedMagicLink], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -758,10 +788,17 @@ describe('Magic Links Handler', () => {
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         single_use: 0,
         used_at: new Date().toISOString(), // Already used but multi-use
-        revoked_at: null
+        revoked_at: null,
+        use_count: 2,
+        ip_pinning_enabled: 0,
+        first_use_ip: null
       };
 
-      env._mockHelpers.mockFirst.mockResolvedValue(multiUseMagicLink);
+      // batch: 1 change (multi-use token updated), select returns token
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 1 }, success: true },
+        { results: [multiUseMagicLink], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -786,10 +823,16 @@ describe('Magic Links Handler', () => {
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         single_use: 0,
         used_at: null,
-        revoked_at: null
+        revoked_at: null,
+        use_count: 1,
+        ip_pinning_enabled: 0,
+        first_use_ip: null
       };
 
-      env._mockHelpers.mockFirst.mockResolvedValue(mockMagicLink);
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 1 }, success: true },
+        { results: [mockMagicLink], success: true }
+      ]);
 
       const request = createMockRequest({
         method: 'GET',
@@ -811,7 +854,7 @@ describe('Magic Links Handler', () => {
 
     it('should handle database errors during validation', async () => {
       const env = createMockEnv();
-      env._mockHelpers.mockFirst.mockRejectedValue(new Error('Database error'));
+      env.DB.batch.mockRejectedValue(new Error('Database error'));
 
       const request = createMockRequest({
         method: 'GET',
@@ -1462,7 +1505,11 @@ describe('Magic Links Handler', () => {
 
     it('should prevent token enumeration attacks', async () => {
       const env = createMockEnv();
-      env._mockHelpers.mockFirst.mockResolvedValue(null);
+      // batch returns 0 changes for all invalid tokens
+      env.DB.batch.mockResolvedValue([
+        { meta: { changes: 0 }, success: true },
+        { results: [], success: true }
+      ]);
 
       const invalidTokens = [
         { token: 'invalid-token', expectedStatus: 401 },

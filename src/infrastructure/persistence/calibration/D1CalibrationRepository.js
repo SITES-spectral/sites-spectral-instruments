@@ -129,8 +129,8 @@ export class D1CalibrationRepository extends CalibrationRepository {
     }
 
     if (filters.performedBy) {
-      sql += ' AND performed_by LIKE ?';
-      params.push(`%${filters.performedBy}%`);
+      sql += " AND performed_by LIKE ? ESCAPE '\\'";
+      params.push(`%${filters.performedBy.replace(/[\\%_]/g, '\\$&')}%`);
     }
 
     if (filters.panelType) {
@@ -305,10 +305,10 @@ export class D1CalibrationRepository extends CalibrationRepository {
     const results = await this.db
       .prepare(`
         SELECT * FROM calibration_records
-        WHERE laboratory LIKE ?
+        WHERE laboratory LIKE ? ESCAPE '\\'
         ORDER BY calibration_date DESC
       `)
-      .bind(`%${laboratory}%`)
+      .bind(`%${laboratory.replace(/[\\%_]/g, '\\$&')}%`)
       .all();
 
     return results.results.map(row => CalibrationRecord.fromRow(row));

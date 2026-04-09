@@ -183,10 +183,10 @@ export class D1ProductRepository {
     const results = await this.db
       .prepare(`
         SELECT * FROM products
-        WHERE product_name LIKE ? OR description LIKE ?
+        WHERE product_name LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\'
         ORDER BY source_date DESC
       `)
-      .bind(`%${keyword}%`, `%${keyword}%`)
+      .bind(`%${keyword.replace(/[\\%_]/g, '\\$&')}%`, `%${keyword.replace(/[\\%_]/g, '\\$&')}%`)
       .all();
 
     return results.results.map(row => this.mapToEntity(row));

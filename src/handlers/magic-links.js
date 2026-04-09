@@ -26,7 +26,7 @@ import { Role } from '../domain/authorization/Role.js';
 /**
  * Default expiry duration for magic links (7 days in milliseconds)
  */
-const DEFAULT_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours (v16.0.0: reduced from 7 days)
 
 /**
  * Generate a cryptographically secure random token
@@ -108,11 +108,11 @@ function validateMagicLinkInput(body) {
       sanitized.expires_in_days = days;
     }
   } else {
-    sanitized.expires_in_days = 7; // default
+    sanitized.expires_in_days = 1; // default (v16.0.0: reduced from 7)
   }
 
-  // Optional: single_use (boolean)
-  sanitized.single_use = body.single_use === true || body.single_use === 'true' || body.single_use === 1;
+  // Optional: single_use (boolean, default: true for security — v16.0.0)
+  sanitized.single_use = body.single_use !== false && body.single_use !== 'false' && body.single_use !== 0;
 
   // Optional: role (readonly or station-internal)
   if (body.role !== undefined) {
@@ -364,21 +364,17 @@ async function createMagicLink(request, env) {
     };
 
     if (recipient_email && send_email) {
-      // Email was requested
       if (emailResult?.success) {
         response.message = `Magic link sent successfully to ${recipient_email}`;
         response.email_sent = true;
-        // Don't include token/URL in response when email is sent (security)
       } else {
-        // Email failed - return token so admin can share manually
-        response.magic_link.token = token;
-        response.magic_link.url = magicLinkUrl;
-        response.message = `Magic link created but email failed to send. Share this URL securely: ${emailResult?.error || 'Unknown error'}`;
+        // v16.0.0 (H4): Never return token in error responses — prevents leakage via logs/caches
+        response.message = 'Magic link created but email delivery failed. Please retry or create a new link.';
         response.email_sent = false;
-        response.email_error = emailResult?.error;
+        response.email_failed = true;
       }
     } else {
-      // No email requested - return token for manual sharing
+      // No email requested - return token for manual sharing (admin-only, single response)
       response.magic_link.token = token;
       response.magic_link.url = magicLinkUrl;
       response.message = 'Magic link created. Share this URL securely - it cannot be retrieved again.';
@@ -472,43 +468,59 @@ async function validateMagicLink(request, env) {
     // Hash the provided token
     const tokenHash = await hashToken(token);
 
-    // Look up the token (including IP pinning and use count fields)
-    const magicLink = await env.DB.prepare(`
+    // v16.0.0 (C2, C3): Atomic UPDATE-then-SELECT using D1 batch()
+    // The UPDATE's WHERE clause enforces all validity checks atomically:
+    // - not revoked, not expired (with 30s clock skew tolerance),
+    // - single-use tokens can only be consumed once
+    // If 0 rows updated, the token is invalid/expired/revoked/already-used.
+    const updateStmt = env.DB.prepare(`
+      UPDATE magic_link_tokens
+      SET used_at = COALESCE(used_at, CURRENT_TIMESTAMP),
+          used_by_ip = ?,
+          used_by_user_agent = ?,
+          first_use_ip = COALESCE(first_use_ip, ?),
+          use_count = use_count + 1
+      WHERE token_hash = ?
+        AND revoked_at IS NULL
+        AND expires_at > datetime('now', '-30 seconds')
+        AND (single_use = 0 OR used_at IS NULL)
+    `).bind(clientIP, userAgent, clientIP, tokenHash);
+
+    const selectStmt = env.DB.prepare(`
       SELECT ml.*, s.acronym as station_acronym, s.normalized_name as station_normalized_name
       FROM magic_link_tokens ml
       JOIN stations s ON ml.station_id = s.id
       WHERE ml.token_hash = ?
-    `).bind(tokenHash).first();
+    `).bind(tokenHash);
 
-    if (!magicLink) {
-      await logSecurityEvent('MAGIC_LINK_INVALID', { token_prefix: token.substring(0, 8) }, request, env);
+    const [updateResult, selectResult] = await env.DB.batch([updateStmt, selectStmt]);
+    const magicLink = selectResult.results?.[0] || null;
+
+    if (!updateResult.meta?.changes || updateResult.meta.changes === 0) {
+      // Token invalid, expired, revoked, or already used (single-use)
+      if (magicLink) {
+        // Token exists but failed validation — log specific reason
+        if (magicLink.revoked_at) {
+          await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'revoked');
+          await logSecurityEvent('MAGIC_LINK_REVOKED_USE_ATTEMPT', { token_id: magicLink.id }, request, env);
+        } else if (new Date(magicLink.expires_at) < new Date()) {
+          await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'expired');
+          await logSecurityEvent('MAGIC_LINK_EXPIRED_USE_ATTEMPT', { token_id: magicLink.id }, request, env);
+        } else if (magicLink.single_use && magicLink.used_at) {
+          await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'already_used');
+          await logSecurityEvent('MAGIC_LINK_REUSE_ATTEMPT', { token_id: magicLink.id }, request, env);
+        }
+      } else {
+        await logSecurityEvent('MAGIC_LINK_INVALID', { token_prefix: token.substring(0, 8) }, request, env);
+      }
       return createUnauthorizedResponse('Invalid or expired magic link');
     }
 
-    // Check if revoked
-    if (magicLink.revoked_at) {
-      await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'revoked');
-      await logSecurityEvent('MAGIC_LINK_REVOKED_USE_ATTEMPT', { token_id: magicLink.id }, request, env);
-      return createUnauthorizedResponse('This magic link has been revoked');
-    }
-
-    // Check if expired
-    if (new Date(magicLink.expires_at) < new Date()) {
-      await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'expired');
-      await logSecurityEvent('MAGIC_LINK_EXPIRED_USE_ATTEMPT', { token_id: magicLink.id }, request, env);
-      return createUnauthorizedResponse('This magic link has expired');
-    }
-
-    // Check if single-use and already used
-    if (magicLink.single_use && magicLink.used_at) {
-      await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'already_used');
-      await logSecurityEvent('MAGIC_LINK_REUSE_ATTEMPT', { token_id: magicLink.id }, request, env);
-      return createUnauthorizedResponse('This magic link has already been used');
-    }
-
-    // ML-006: IP pinning validation for multi-use tokens
+    // ML-006: IP pinning validation for multi-use tokens (post-update check)
     if (!magicLink.single_use && magicLink.ip_pinning_enabled && magicLink.first_use_ip) {
-      if (magicLink.first_use_ip !== clientIP) {
+      // first_use_ip was set by COALESCE — check if this IP matches the original
+      // For first use, first_use_ip was just set to clientIP, so it always matches
+      if (magicLink.first_use_ip !== clientIP && magicLink.use_count > 1) {
         await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, false, 'ip_mismatch');
         await logSecurityEvent('MAGIC_LINK_IP_MISMATCH', {
           token_id: magicLink.id,
@@ -519,31 +531,7 @@ async function validateMagicLink(request, env) {
       }
     }
 
-    // Update token: mark as used, increment use count, and capture first use IP
-    const isFirstUse = !magicLink.used_at;
-    const newUseCount = (magicLink.use_count || 0) + 1;
-
-    if (isFirstUse) {
-      // First use - set used_at and first_use_ip
-      await env.DB.prepare(`
-        UPDATE magic_link_tokens
-        SET used_at = CURRENT_TIMESTAMP,
-            used_by_ip = ?,
-            used_by_user_agent = ?,
-            first_use_ip = ?,
-            use_count = ?
-        WHERE id = ?
-      `).bind(clientIP, userAgent, clientIP, newUseCount, magicLink.id).run();
-    } else {
-      // Subsequent use - just update used_by fields and increment count
-      await env.DB.prepare(`
-        UPDATE magic_link_tokens
-        SET used_by_ip = ?,
-            used_by_user_agent = ?,
-            use_count = ?
-        WHERE id = ?
-      `).bind(clientIP, userAgent, newUseCount, magicLink.id).run();
-    }
+    const isFirstUse = magicLink.use_count <= 1;
 
     // Create a session for this magic link user
     const sessionUser = {
@@ -572,15 +560,16 @@ async function validateMagicLink(request, env) {
       .sign(secret);
 
     // ML-005: Log successful use to audit trail with JWT hash for session correlation
+    // v16.0.0 (L4): Store full SHA-256 hash — no truncation
     const jwtHash = await hashToken(jwt);
-    await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, true, null, jwtHash.substring(0, 32));
+    await logMagicLinkUsage(env, magicLink.id, clientIP, userAgent, true, null, jwtHash);
 
     // Log successful use
     await logSecurityEvent('MAGIC_LINK_USED', {
       token_id: magicLink.id,
       station_id: magicLink.station_id,
       role: magicLink.role,
-      use_count: newUseCount,
+      use_count: magicLink.use_count,
       is_first_use: isFirstUse
     }, request, env);
 

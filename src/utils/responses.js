@@ -94,8 +94,7 @@ export function createNotFoundResponse() {
 export function createInternalServerErrorResponse(error) {
   console.error('Internal Server Error:', error);
   return new Response(JSON.stringify({
-    error: 'Internal server error',
-    message: error.message
+    error: 'Internal server error'
   }), {
     status: 500,
     headers: { 'Content-Type': 'application/json' }

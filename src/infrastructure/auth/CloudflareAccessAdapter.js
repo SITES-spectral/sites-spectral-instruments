@@ -32,7 +32,7 @@ const CF_ACCESS_CERTS_URL = `https://${CF_ACCESS_TEAM_DOMAIN}/cdn-cgi/access/cer
  */
 let jwksCache = null;
 let jwksCacheTimestamp = 0;
-const JWKS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const JWKS_CACHE_TTL_MS = 60 * 60 * 1000; // v16.0.0 (H2): 1 hour (reduced from 6h for faster key rotation)
 
 /**
  * Parse global admin emails from environment variable

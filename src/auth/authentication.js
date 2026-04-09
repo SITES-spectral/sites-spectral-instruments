@@ -199,9 +199,14 @@ export async function handleAuth(method, pathSegments, request, env) {
           return createUnauthorizedResponse();
         }
 
-        // Revoke the old token if it has a JTI
+        // v16.0.0 (H1): Enforce old token revocation before issuing new one
         if (currentUser.jti && env.DB) {
-          await revokeToken(currentUser.jti, currentUser.username, env);
+          try {
+            await revokeToken(currentUser.jti, currentUser.username, env);
+          } catch (revocationError) {
+            console.error('Token revocation failed during refresh:', revocationError);
+            return createErrorResponse('Session refresh failed - please log in again', 500);
+          }
         }
 
         // Generate new token
@@ -310,8 +315,8 @@ export async function generateToken(user, env) {
     const jti = crypto.randomUUID();
 
     // Build JWT with proper signing using jose library
+    // v16.0.0 (M9): username is carried exclusively in the 'sub' claim
     const jwt = await new SignJWT({
-      username: user.username,
       role: user.role,
       station_acronym: user.station_acronym,
       station_normalized_name: user.station_normalized_name,
@@ -448,8 +453,11 @@ async function getUserFromLegacyAuth(request, env) {
       issuer: 'sites-spectral'
     });
 
+    // v16.0.0 (M9): username from 'sub' claim exclusively
+    const username = payload.sub || payload.username;
+
     // Check required fields
-    if (!payload.username || !payload.role) {
+    if (!username || !payload.role) {
       console.warn('Invalid token: missing required fields');
       return null;
     }
@@ -458,7 +466,7 @@ async function getUserFromLegacyAuth(request, env) {
     if (payload.jti && env.DB) {
       const revoked = await isTokenRevoked(payload.jti, env);
       if (revoked) {
-        console.warn(`Revoked token used by ${payload.username} (jti: ${payload.jti})`);
+        console.warn(`Revoked token used by ${username} (jti: ${payload.jti})`);
         return null;
       }
     }
@@ -468,7 +476,7 @@ async function getUserFromLegacyAuth(request, env) {
 
     // Token validated successfully
     return {
-      username: payload.username,
+      username,
       role: payload.role,
       station_acronym: payload.station_acronym,
       station_normalized_name: payload.station_normalized_name,
@@ -590,16 +598,11 @@ async function isTokenRevoked(jti, env) {
  * @param {string} reason - Revocation reason
  */
 async function revokeToken(jti, username, env, reason = 'refresh') {
-  try {
-    // Token expires 24h from now (matches generateToken expiry)
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    await env.DB.prepare(
-      'INSERT OR REPLACE INTO revoked_sessions (jti, user_id, expires_at, reason) VALUES (?, ?, ?, ?)'
-    ).bind(jti, username, expiresAt, reason).run();
-  } catch (error) {
-    // Don't fail the operation if revocation fails (table may not exist yet)
-    console.warn('Token revocation failed:', error.message);
-  }
+  // v16.0.0 (H1): Let errors propagate — callers must handle revocation failures
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  await env.DB.prepare(
+    'INSERT OR REPLACE INTO revoked_sessions (jti, user_id, expires_at, reason) VALUES (?, ?, ?, ?)'
+  ).bind(jti, username, expiresAt, reason).run();
 }
 
 /**

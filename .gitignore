@@ -8,6 +8,11 @@
 .env.*.local
 wrangler.toml
 secrets/
+
+# Security audit reports (private - never commit)
+docs/security/*PENETRATION*
+docs/security/*PENTEST*
+docs/security/*SECURITY-AUDIT*
 private/
 config/secrets/
 config/private/

@@ -311,7 +311,12 @@ function escapeCSVField(field) {
     return '';
   }
 
-  const stringField = String(field);
+  let stringField = String(field);
+
+  // v16.0.0 (M5): Prevent CSV formula injection — prefix formula-like content
+  if (/^[=+\-@\t\r]/.test(stringField)) {
+    stringField = "'" + stringField;
+  }
 
   // If field contains comma, quote, or newline, wrap in quotes and escape internal quotes
   if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n') || stringField.includes('\r')) {

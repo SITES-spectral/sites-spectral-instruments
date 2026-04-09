@@ -27,8 +27,7 @@ import {
   resolveAPIVersion,
   addVersionHeaders,
   createUnsupportedVersionResponse,
-  getVersionInfo,
-  getAppVersionInfo
+  getVersionInfo
 } from './infrastructure/api/version-resolver.js';
 
 // V11 Hexagonal Controllers for Analytics and Export
@@ -70,9 +69,11 @@ export async function handleApiRequest(request, env, ctx) {
   }
 
   // SECURITY: CSRF Protection for state-changing requests
-  // Skip CSRF check for auth endpoints (login needs to work without existing session)
-  // and health checks (read-only)
-  if (resource !== 'auth' && resource !== 'health') {
+  // v16.0.0 (M12): Only skip CSRF for auth/login (needs to work without session).
+  // auth/logout, auth/refresh, and all other endpoints require CSRF validation.
+  const skipCsrf = resource === 'health' ||
+    (resource === 'auth' && pathSegments[1] === 'login');
+  if (!skipCsrf) {
     const csrfResult = csrfProtect(request);
     if (!csrfResult.isValid) {
       return createCSRFErrorResponse(csrfResult.error);
@@ -175,9 +176,9 @@ export async function handleApiRequest(request, env, ctx) {
       case 'health':
         return await handleHealth(env);
 
-      // === VERSION INFO ===
+      // === VERSION INFO (removed — information disclosure risk) ===
       case 'version':
-        return handleVersion();
+        return createNotFoundResponse();
 
       default:
         return createNotFoundResponse();
@@ -194,67 +195,22 @@ export async function handleApiRequest(request, env, ctx) {
  * @returns {Response} Health status response
  */
 async function handleHealth(env) {
-  const versionInfo = getVersionInfo();
-
   try {
-    // Test database connectivity
     const dbTest = await env.DB.prepare('SELECT 1 as test').first();
 
     return new Response(JSON.stringify({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: versionInfo.current.versionNumber,
-      database: dbTest ? 'connected' : 'disconnected',
-      architecture: 'hexagonal',
-      api: {
-        current: versionInfo.current.version,
-        aliases: versionInfo.aliases,
-        supported: versionInfo.supported.map(v => v.version),
-        recommendation: 'Use /api/latest for production'
-      },
-      features: [
-        'hexagonal-architecture',
-        'cqrs-pattern',
-        'dependency-injection',
-        'domain-driven-design',
-        'api-version-aliases',
-        'maintenance-timeline',
-        'calibration-workflow',
-        'aoi-geospatial',
-        'campaigns',
-        'products',
-        'geojson-kml-import',
-        'darwin-core-vocabulary',
-        'icos-station-types',
-        'copernicus-processing-levels',
-        'cc-by-4-license',
-        'csrf-protection',
-        'input-sanitization',
-        'jwt-hmac-sha256',
-        'roi-drawing-canvas',
-        'roi-legacy-system'
-      ]
+      database: dbTest ? 'connected' : 'disconnected'
     }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Version': versionInfo.current.version,
-        'X-API-Latest-Version': versionInfo.aliases.latest
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
     console.error('Health check failed:', error);
     return new Response(JSON.stringify({
       status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      version: versionInfo.current.versionNumber,
-      error: error.message,
-      database: 'disconnected',
-      architecture: 'hexagonal',
-      api: {
-        current: versionInfo.current.version,
-        recommendation: 'Use /api/latest for production'
-      }
+      timestamp: new Date().toISOString()
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
@@ -262,33 +218,4 @@ async function handleHealth(env) {
   }
 }
 
-/**
- * Version info endpoint
- * Returns application and API version information
- * No authentication required - public endpoint
- *
- * @returns {Response} Version info response
- */
-function handleVersion() {
-  const versionData = getAppVersionInfo();
-
-  return new Response(JSON.stringify({
-    ...versionData,
-    timestamp: new Date().toISOString(),
-    environment: 'production',
-    architecture: 'hexagonal',
-    documentation: {
-      changelog: '/docs/CHANGELOG.md',
-      api: '/api/health',
-      recommendation: 'Use /api/latest for automatic version resolution'
-    }
-  }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-App-Version': versionData.app.version,
-      'X-API-Version': versionData.api.current,
-      'Cache-Control': 'public, max-age=60'
-    }
-  });
-}
+// handleVersion removed in v16.0.0 — information disclosure risk

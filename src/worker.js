@@ -15,6 +15,7 @@ import { handleApiRequest } from './api-handler';
 import { CloudflareAccessAdapter } from './infrastructure/auth/CloudflareAccessAdapter.js';
 import { generateToken } from './auth/authentication.js';
 import { createAuthCookie, getTokenFromCookie } from './auth/cookie-utils.js';
+import { applySecurityHeaders } from './utils/security-headers.js';
 
 /**
  * Get subdomain from Host header
@@ -155,11 +156,11 @@ export default {
             response.headers.set(key, value);
           });
 
-          return response;
+          return applySecurityHeaders(response);
         }
 
         // Static Asset Serving for public portal
-        return await handleStaticAssets(request, env, corsHeaders, portalType);
+        return applySecurityHeaders(await handleStaticAssets(request, env, corsHeaders, portalType));
       }
 
       // === ADMIN and STATION PORTALS ===
@@ -207,14 +208,14 @@ export default {
                 headers: staticResponse.headers
               });
               responseWithCookie.headers.set('Set-Cookie', authCookie);
-              return responseWithCookie;
+              return applySecurityHeaders(responseWithCookie);
             } catch (cookieError) {
               console.warn('Failed to create session cookie on static load:', cookieError);
             }
           }
         }
 
-        return staticResponse;
+        return applySecurityHeaders(staticResponse);
       }
 
       // === API ROUTES ===
@@ -254,20 +255,19 @@ export default {
         }
       }
 
-      return response;
+      return applySecurityHeaders(response);
 
     } catch (error) {
       console.error('Worker error:', error);
-      return new Response(JSON.stringify({
-        error: 'Internal server error',
-        message: error.message
+      return applySecurityHeaders(new Response(JSON.stringify({
+        error: 'Internal server error'
       }), {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders
         }
-      });
+      }));
     }
   }
 };

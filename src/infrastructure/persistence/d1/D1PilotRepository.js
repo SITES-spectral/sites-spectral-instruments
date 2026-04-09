@@ -75,10 +75,10 @@ export class D1PilotRepository {
     const results = await this.db
       .prepare(`
         SELECT * FROM uav_pilots
-        WHERE authorized_stations LIKE ?
+        WHERE authorized_stations LIKE ? ESCAPE '\\'
         ORDER BY full_name ASC
       `)
-      .bind(`%${stationId}%`)
+      .bind(`%${String(stationId).replace(/[\\%_]/g, '\\$&')}%`)
       .all();
 
     // Filter results to ensure exact match in JSON array
