@@ -49,6 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Low
 - **L4: Full JWT Audit Hash** — Removed 32-char truncation; stores full 64-char SHA-256 hash
 
+### Additional Security Fixes (Phase 6)
+
+- **H8: Account-Based Lockout** — Username-based rate limiting (10 attempts/15min, 30min lockout) alongside IP-based limits; prevents distributed credential stuffing
+- **M4: Public API Rate Limiting** — 60 req/min per IP on all `/api/public/*` endpoints; prevents scraping and DoS
+- **M6: Specifications Field Validation** — InstrumentController validates `specifications` is a plain object with 10KB max size
+- **M7: CF Access Email Re-Validation** — After DB lookup, verifies returned `cf_access_email` matches JWT claim (defense-in-depth)
+
 ---
 
 ## [15.10.0] - 2026-04-09

@@ -228,13 +228,22 @@ export class CloudflareAccessAdapter {
     try {
       const result = await this.env.DB.prepare(`
         SELECT u.id, u.username, u.email, u.role, u.station_id,
+               u.cf_access_email,
                s.acronym as station_acronym, s.normalized_name as station_normalized_name
         FROM users u
         LEFT JOIN stations s ON u.station_id = s.id
         WHERE u.cf_access_email = ? AND u.active = 1
       `).bind(email).first();
 
-      return result || null;
+      if (!result) return null;
+
+      // v16.0.0 (M7): Re-validate email matches JWT claim (defense-in-depth)
+      if (result.cf_access_email && result.cf_access_email !== email) {
+        console.warn(`CF Access email mismatch: JWT=${email}, DB=${result.cf_access_email}`);
+        return null;
+      }
+
+      return result;
     } catch (error) {
       console.error('Error finding user by CF Access email:', error);
       return null;

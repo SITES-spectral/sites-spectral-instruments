@@ -14,6 +14,7 @@
  */
 
 import { createErrorResponse, createNotFoundResponse } from '../utils/responses.js';
+import { checkAuthRateLimit } from '../middleware/auth-rate-limiter.js';
 
 /**
  * Handle public API endpoints
@@ -25,6 +26,27 @@ import { createErrorResponse, createNotFoundResponse } from '../utils/responses.
  * @returns {Promise<Response>}
  */
 export async function handlePublicApi(method, pathSegments, request, env) {
+  // v16.0.0 (M4): Rate limit public endpoints (60 req/min per IP)
+  const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+  try {
+    const rateLimit = await checkAuthRateLimit(clientIP, 'public_api', env);
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({
+        error: 'Too many requests. Please try again later.',
+        retry_after_seconds: rateLimit.retryAfter
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimit.retryAfter)
+        }
+      });
+    }
+  } catch {
+    // Rate limit check failed — allow request but log
+    console.warn('Public API rate limit check failed');
+  }
+
   const resource = pathSegments[0];
 
   switch (resource) {

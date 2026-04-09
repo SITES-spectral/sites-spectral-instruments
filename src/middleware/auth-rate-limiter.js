@@ -36,6 +36,18 @@ const RATE_LIMITS = {
     maxAttempts: 10,
     windowMs: 60 * 1000, // 1 minute
     blockDurationMs: 5 * 60 * 1000 // 5 minutes after limit exceeded
+  },
+  // v16.0.0 (H8): Username-based lockout (independent of IP)
+  login_username: {
+    maxAttempts: 10,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    blockDurationMs: 30 * 60 * 1000 // 30 minutes after limit exceeded
+  },
+  // v16.0.0 (M4): Public API rate limiting
+  public_api: {
+    maxAttempts: 60,
+    windowMs: 60 * 1000, // 1 minute
+    blockDurationMs: 60 * 1000 // 1 minute after limit exceeded
   }
 };
 
@@ -146,16 +158,20 @@ export async function recordAuthAttempt(clientIP, action, success, username, env
       return;
     }
 
-    // Record failed attempt
+    // Record failed attempt (IP-based)
+    const now = new Date().toISOString();
     await env.DB.prepare(`
       INSERT INTO auth_rate_limits (client_ip, action, username, timestamp)
       VALUES (?, ?, ?, ?)
-    `).bind(
-      clientIP,
-      action,
-      username || 'unknown',
-      new Date().toISOString()
-    ).run();
+    `).bind(clientIP, action, username || 'unknown', now).run();
+
+    // v16.0.0 (H8): Also record username-based attempt for account lockout
+    if (action === 'login' && username) {
+      await env.DB.prepare(`
+        INSERT INTO auth_rate_limits (client_ip, action, username, timestamp)
+        VALUES (?, ?, ?, ?)
+      `).bind(`username:${username}`, 'login_username', username, now).run();
+    }
 
     // Cleanup old entries (older than 1 hour) to prevent table bloat
     // Run occasionally (1 in 10 requests)
@@ -183,13 +199,31 @@ export async function recordAuthAttempt(clientIP, action, success, username, env
 export async function authRateLimitMiddleware(action, request, env) {
   const clientIP = getClientIP(request);
 
+  // IP-based rate limit check
   const rateLimit = await checkAuthRateLimit(clientIP, action, env);
 
   if (!rateLimit.allowed) {
-    // Log rate limit violation
     console.warn(`Rate limit exceeded for ${action} from IP: ${clientIP}`);
-
     return createRateLimitResponse(rateLimit.retryAfter);
+  }
+
+  // v16.0.0 (H8): Username-based lockout for login action
+  if (action === 'login') {
+    try {
+      const body = await request.clone().json();
+      const username = body?.username;
+      if (username) {
+        const usernameLimit = await checkAuthRateLimit(
+          `username:${username}`, 'login_username', env
+        );
+        if (!usernameLimit.allowed) {
+          console.warn(`Account locked for username: ${username}`);
+          return createRateLimitResponse(usernameLimit.retryAfter);
+        }
+      }
+    } catch {
+      // Body parse failure — continue with IP-only limiting
+    }
   }
 
   // Add rate limit headers to be included in response

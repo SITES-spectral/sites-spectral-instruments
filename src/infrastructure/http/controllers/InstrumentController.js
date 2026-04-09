@@ -200,7 +200,7 @@ export class InstrumentController {
         displayName: body.display_name || body.displayName,
         description: body.description,
         status: body.status,
-        specifications: body.specifications || {}
+        specifications: this._validateSpecifications(body.specifications)
       });
 
       return createSuccessResponse({ data: instrument.toJSON() }, 201);
@@ -248,7 +248,7 @@ export class InstrumentController {
         description: body.description,
         status: body.status,
         measurementStatus: body.measurement_status || body.measurementStatus,
-        specifications: body.specifications
+        specifications: body.specifications !== undefined ? this._validateSpecifications(body.specifications) : undefined
       });
 
       return createSuccessResponse({ data: updatedInstrument.toJSON() });
@@ -352,5 +352,22 @@ export class InstrumentController {
     }
 
     return createNotFoundResponse();
+  }
+
+  /**
+   * Validate specifications field (v16.0.0 M6)
+   * @param {*} specs - Specifications input
+   * @returns {Object} Validated specifications object
+   */
+  _validateSpecifications(specs) {
+    if (specs === null || specs === undefined) return {};
+    if (typeof specs !== 'object' || Array.isArray(specs)) {
+      throw new Error('specifications must be a JSON object');
+    }
+    const json = JSON.stringify(specs);
+    if (json.length > 10000) {
+      throw new Error('specifications exceeds maximum size (10KB)');
+    }
+    return specs;
   }
 }
