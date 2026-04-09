@@ -17,7 +17,7 @@ describe('Password Hasher', () => {
   describe('hashPassword', () => {
     it('should return a string in salt:hash format', async () => {
       const hash = await hashPassword('test-password');
-      expect(hash).toMatch(/^[a-f0-9]{32}:[a-f0-9]{64}$/);
+      expect(hash).toMatch(/^\d+:[a-f0-9]{32}:[a-f0-9]{64}$/);
     });
 
     it('should generate different hashes for the same password (random salt)', async () => {
@@ -40,18 +40,18 @@ describe('Password Hasher', () => {
 
     it('should handle special characters', async () => {
       const hash = await hashPassword('p@$$w0rd!#$%^&*()');
-      expect(hash).toMatch(/^[a-f0-9]{32}:[a-f0-9]{64}$/);
+      expect(hash).toMatch(/^\d+:[a-f0-9]{32}:[a-f0-9]{64}$/);
     });
 
     it('should handle unicode characters', async () => {
       const hash = await hashPassword('пароль密码كلمة');
-      expect(hash).toMatch(/^[a-f0-9]{32}:[a-f0-9]{64}$/);
+      expect(hash).toMatch(/^\d+:[a-f0-9]{32}:[a-f0-9]{64}$/);
     });
 
     it('should handle very long passwords', async () => {
       const longPassword = 'a'.repeat(1000);
       const hash = await hashPassword(longPassword);
-      expect(hash).toMatch(/^[a-f0-9]{32}:[a-f0-9]{64}$/);
+      expect(hash).toMatch(/^\d+:[a-f0-9]{32}:[a-f0-9]{64}$/);
     });
   });
 
@@ -204,7 +204,7 @@ describe('Password Hasher', () => {
         hashPassword('password')
       ]);
 
-      const salts = hashes.map(h => h.split(':')[0]);
+      const salts = hashes.map(h => h.split(':')[1]); // v16.0.0: iterations:salt:hash
       const uniqueSalts = new Set(salts);
 
       // All salts should be unique

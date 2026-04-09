@@ -9,7 +9,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { createErrorResponse, createUnauthorizedResponse } from '../utils/responses.js';
 import { logSecurityEvent } from '../utils/logging.js';
-import { verifyPassword } from './password-hasher.js';
+import { verifyPassword, needsRehash, hashPassword } from './password-hasher.js';
 import { createAuthCookie, createLogoutCookie, getTokenFromCookie } from './cookie-utils.js';
 import {
   authRateLimitMiddleware,
@@ -267,6 +267,19 @@ export async function authenticateUser(username, password, env) {
     if (!passwordValid) {
       console.warn(`Invalid password for user: ${username}`);
       return null;
+    }
+
+    // v16.0.0 (L1): Transparent rehash if using legacy iteration count
+    if (needsRehash(user.password_hash)) {
+      try {
+        const newHash = await hashPassword(password);
+        await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+          .bind(newHash, user.id).run();
+        console.log(`Rehashed password for user ${username} (upgraded PBKDF2 iterations)`);
+      } catch (rehashError) {
+        // Non-fatal — user can still log in, will rehash next time
+        console.warn(`Password rehash failed for ${username}:`, rehashError.message);
+      }
     }
 
     // Use centralized role→permission mapping from domain layer

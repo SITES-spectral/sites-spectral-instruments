@@ -11,7 +11,8 @@
 
 const ALGORITHM = 'PBKDF2';
 const HASH_ALGORITHM = 'SHA-256';
-const ITERATIONS = 100000;
+const ITERATIONS = 600000; // v16.0.0 (L1): NIST SP 800-63B recommends 600,000+
+const LEGACY_ITERATIONS = 100000; // Pre-v16.0.0 hash format
 const KEY_LENGTH = 256; // bits
 const SALT_LENGTH = 16; // bytes
 
@@ -51,9 +52,10 @@ function hexToBytes(hex) {
  * Derive a key from password and salt using PBKDF2
  * @param {string} password - Plain text password
  * @param {Uint8Array} salt - Salt bytes
+ * @param {number} iterations - PBKDF2 iteration count
  * @returns {Promise<ArrayBuffer>} - Derived key
  */
-async function deriveKey(password, salt) {
+async function deriveKey(password, salt, iterations = ITERATIONS) {
   const encoder = new TextEncoder();
   const passwordKey = await crypto.subtle.importKey(
     'raw',
@@ -67,7 +69,7 @@ async function deriveKey(password, salt) {
     {
       name: ALGORITHM,
       salt: salt,
-      iterations: ITERATIONS,
+      iterations: iterations,
       hash: HASH_ALGORITHM
     },
     passwordKey,
@@ -77,10 +79,11 @@ async function deriveKey(password, salt) {
 
 /**
  * Hash a password with a random salt
- * Returns format: salt:hash (both in hex)
+ * v16.0.0: Format "iterations:salt:hash" (e.g., "600000:abcd...:ef01...")
+ * Legacy format "salt:hash" assumed 100,000 iterations
  *
  * @param {string} password - Plain text password
- * @returns {Promise<string>} - Hashed password in format "salt:hash"
+ * @returns {Promise<string>} - Hashed password in format "iterations:salt:hash"
  */
 export async function hashPassword(password) {
   if (!password || typeof password !== 'string') {
@@ -88,10 +91,10 @@ export async function hashPassword(password) {
   }
 
   const salt = generateSalt();
-  const derivedKey = await deriveKey(password, salt);
+  const derivedKey = await deriveKey(password, salt, ITERATIONS);
   const hash = new Uint8Array(derivedKey);
 
-  return `${bytesToHex(salt)}:${bytesToHex(hash)}`;
+  return `${ITERATIONS}:${bytesToHex(salt)}:${bytesToHex(hash)}`;
 }
 
 /**
@@ -102,32 +105,60 @@ export async function hashPassword(password) {
  * @param {string} storedHash - Stored hash in format "salt:hash"
  * @returns {Promise<boolean>} - True if password matches
  */
+/**
+ * Parse stored hash into components.
+ * Supports v16.0.0 format "iterations:salt:hash" and legacy "salt:hash".
+ * @param {string} storedHash
+ * @returns {{ iterations: number, saltHex: string, hashHex: string, needsRehash: boolean } | null}
+ */
+function parseStoredHash(storedHash) {
+  const parts = storedHash.split(':');
+
+  if (parts.length === 3) {
+    // v16.0.0 format: iterations:salt:hash
+    const iterations = parseInt(parts[0], 10);
+    if (isNaN(iterations) || iterations < 1000) return null;
+    return {
+      iterations,
+      saltHex: parts[1],
+      hashHex: parts[2],
+      needsRehash: iterations < ITERATIONS
+    };
+  }
+
+  if (parts.length === 2) {
+    // Legacy format: salt:hash (assumed 100,000 iterations)
+    return {
+      iterations: LEGACY_ITERATIONS,
+      saltHex: parts[0],
+      hashHex: parts[1],
+      needsRehash: true
+    };
+  }
+
+  return null;
+}
+
 export async function verifyPassword(password, storedHash) {
   if (!password || !storedHash) {
     return false;
   }
 
-  // All passwords must be in hashed format (salt:hash)
-  // Plain text password support was removed in v15.4.0 for security
   if (!storedHash.includes(':')) {
-    // Invalid format - not a properly hashed password
-    console.warn('Password verification failed: invalid hash format (not salt:hash)');
+    console.warn('SECURITY_ALERT: Invalid password hash format — possible plaintext or corruption');
     return false;
   }
 
   try {
-    const [saltHex, hashHex] = storedHash.split(':');
-    if (!saltHex || !hashHex) {
-      return false;
-    }
+    const parsed = parseStoredHash(storedHash);
+    if (!parsed) return false;
 
-    const salt = hexToBytes(saltHex);
-    const storedHashBytes = hexToBytes(hashHex);
+    const salt = hexToBytes(parsed.saltHex);
+    const storedHashBytes = hexToBytes(parsed.hashHex);
 
-    const derivedKey = await deriveKey(password, salt);
+    const derivedKey = await deriveKey(password, salt, parsed.iterations);
     const computedHash = new Uint8Array(derivedKey);
 
-    // Timing-safe comparison
     return timingSafeEqual(
       bytesToHex(computedHash),
       bytesToHex(storedHashBytes)
@@ -136,6 +167,17 @@ export async function verifyPassword(password, storedHash) {
     console.error('Password verification error:', error);
     return false;
   }
+}
+
+/**
+ * Check if a stored hash needs rehashing (uses fewer iterations than current)
+ * @param {string} storedHash
+ * @returns {boolean}
+ */
+export function needsRehash(storedHash) {
+  if (!storedHash || !storedHash.includes(':')) return false;
+  const parsed = parseStoredHash(storedHash);
+  return parsed?.needsRehash ?? false;
 }
 
 /**
@@ -172,15 +214,23 @@ export function isPasswordHashed(storedPassword) {
     return false;
   }
 
-  // Hashed passwords have format: salt(32 hex chars):hash(64 hex chars)
   const parts = storedPassword.split(':');
-  if (parts.length !== 2) {
-    return false;
+
+  // v16.0.0 format: iterations:salt:hash
+  if (parts.length === 3) {
+    const [iter, salt, hash] = parts;
+    return /^\d+$/.test(iter) && salt.length === 32 && hash.length === 64 &&
+      /^[a-f0-9]+$/.test(salt) && /^[a-f0-9]+$/.test(hash);
   }
 
-  const [salt, hash] = parts;
-  // Salt is 16 bytes = 32 hex chars, hash is 32 bytes = 64 hex chars
-  return salt.length === 32 && hash.length === 64 && /^[a-f0-9]+$/.test(salt) && /^[a-f0-9]+$/.test(hash);
+  // Legacy format: salt:hash
+  if (parts.length === 2) {
+    const [salt, hash] = parts;
+    return salt.length === 32 && hash.length === 64 &&
+      /^[a-f0-9]+$/.test(salt) && /^[a-f0-9]+$/.test(hash);
+  }
+
+  return false;
 }
 
 // Export for testing
