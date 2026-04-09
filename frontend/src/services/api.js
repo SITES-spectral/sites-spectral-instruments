@@ -2,44 +2,12 @@
  * API Service
  *
  * V11 API client for SITES Spectral backend (Hexagonal Architecture).
- * Handles authentication, error handling, and response parsing.
- *
- * V11 Features:
- * - Maintenance tracking for platforms and instruments
- * - Calibration tracking for multispectral/hyperspectral sensors
- * - AOI with GeoJSON/KML import
- * - Campaign management
- * - Product management
+ * Authentication is handled via httpOnly cookies (credentials: 'include').
  *
  * @module services/api
  */
 
 const API_BASE = '/api/v11';
-
-/**
- * Get stored auth token
- * @returns {string|null}
- */
-function getToken() {
-  return localStorage.getItem('auth_token');
-}
-
-/**
- * Build request headers
- * @returns {Headers}
- */
-function buildHeaders() {
-  const headers = new Headers({
-    'Content-Type': 'application/json'
-  });
-
-  const token = getToken();
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  return headers;
-}
 
 /**
  * Handle API response
@@ -50,10 +18,8 @@ async function handleResponse(response) {
   const data = await response.json();
 
   if (!response.ok) {
-    // Handle authentication errors
     if (response.status === 401) {
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+      window.location.href = '/login.html';
       throw new Error('Session expired. Please login again.');
     }
 
@@ -64,15 +30,9 @@ async function handleResponse(response) {
 }
 
 /**
- * Core API client
+ * Core API client — all requests use httpOnly cookie auth
  */
 export const api = {
-  /**
-   * GET request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} [params] - Query parameters
-   * @returns {Promise<Object>}
-   */
   async get(endpoint, params = {}) {
     const url = new URL(`${API_BASE}${endpoint}`, window.location.origin);
     Object.entries(params).forEach(([key, value]) => {
@@ -83,50 +43,35 @@ export const api = {
 
     const response = await fetch(url.toString(), {
       method: 'GET',
-      headers: buildHeaders()
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
     });
 
     return handleResponse(response);
   },
 
-  /**
-   * POST request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @returns {Promise<Object>}
-   */
   async post(endpoint, data = {}) {
     const response = await fetch(`${API_BASE}${endpoint}`, {
       method: 'POST',
-      headers: buildHeaders(),
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(data)
     });
 
     return handleResponse(response);
   },
 
-  /**
-   * PUT request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @returns {Promise<Object>}
-   */
   async put(endpoint, data = {}) {
     const response = await fetch(`${API_BASE}${endpoint}`, {
       method: 'PUT',
-      headers: buildHeaders(),
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(data)
     });
 
     return handleResponse(response);
   },
 
-  /**
-   * DELETE request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} [params] - Query parameters
-   * @returns {Promise<Object>}
-   */
   async delete(endpoint, params = {}) {
     const url = new URL(`${API_BASE}${endpoint}`, window.location.origin);
     Object.entries(params).forEach(([key, value]) => {
@@ -137,7 +82,8 @@ export const api = {
 
     const response = await fetch(url.toString(), {
       method: 'DELETE',
-      headers: buildHeaders()
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
     });
 
     return handleResponse(response);
@@ -303,10 +249,9 @@ export const aoiApi = {
     if (metadata.missionType) formData.append('mission_type', metadata.missionType);
     if (metadata.recurrence) formData.append('recurrence', metadata.recurrence);
 
-    const token = getToken();
     const response = await fetch(`${API_BASE}/aois/import/geojson`, {
       method: 'POST',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      credentials: 'include',
       body: formData
     });
     return handleResponse(response);
@@ -319,10 +264,9 @@ export const aoiApi = {
     if (metadata.missionType) formData.append('mission_type', metadata.missionType);
     if (metadata.recurrence) formData.append('recurrence', metadata.recurrence);
 
-    const token = getToken();
     const response = await fetch(`${API_BASE}/aois/import/kml`, {
       method: 'POST',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      credentials: 'include',
       body: formData
     });
     return handleResponse(response);
@@ -425,18 +369,29 @@ export const authApi = {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ username, password })
     });
     return handleResponse(response);
   },
-  logout: () => {
-    localStorage.removeItem('auth_token');
-    window.location.href = '/login';
+  logout: async () => {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+    window.location.href = '/login.html';
   },
   me: async () => {
     const response = await fetch('/api/auth/me', {
       method: 'GET',
-      headers: buildHeaders()
+      credentials: 'include'
+    });
+    return handleResponse(response);
+  },
+  verify: async () => {
+    const response = await fetch('/api/auth/verify', {
+      method: 'GET',
+      credentials: 'include'
     });
     return handleResponse(response);
   }

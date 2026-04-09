@@ -19,7 +19,7 @@ import { Modal, confirm, alert as alertModal, closeAll as closeAllModals, getAct
 import { Skeleton } from '@components/skeleton.js';
 
 // API
-import { API, V3Response, isAuthenticated, getAuthHeaders, setAuthToken, clearAuthToken } from '@api/client.js';
+import { API, V3Response, isAuthenticated, verifyAuth, getAuthHeaders, setAuthToken, clearAuthToken, clearAuth } from '@api/client.js';
 
 /**
  * Dashboard state management
@@ -35,12 +35,20 @@ const DashboardState = {
 
 /**
  * Initialize dashboard
+ * Uses server-side auth verification via httpOnly cookie.
  */
 async function initializeDashboard() {
-    // Check authentication
-    if (!isAuthenticated()) {
-        window.location.href = '/login.html';
-        return;
+    // Verify authentication with server (sends httpOnly cookie)
+    const user = await verifyAuth();
+    if (!user) {
+        // On station portals, CF Access handles auth — don't redirect to login
+        const host = window.location.hostname;
+        const isStationPortal = host.endsWith('.sitesspectral.work') &&
+            !host.startsWith('admin.') && host !== 'sitesspectral.work' && host !== 'www.sitesspectral.work';
+        if (!isStationPortal) {
+            window.location.href = '/login.html';
+            return;
+        }
     }
 
     // Set up global error handler for images
@@ -112,7 +120,7 @@ async function loadPlatform(platformId) {
  * Logout handler
  */
 function logout() {
-    clearAuthToken();
+    clearAuth();
     window.location.href = '/login.html';
 }
 
@@ -170,9 +178,11 @@ export {
     API,
     V3Response,
     isAuthenticated,
+    verifyAuth,
     getAuthHeaders,
     setAuthToken,
     clearAuthToken,
+    clearAuth,
 
     // Dashboard functions
     loadStation,
@@ -180,7 +190,7 @@ export {
     logout,
 };
 
-// Global namespace for backward compatibility
+// Global namespace
 window.SitesDashboard = {
     // State
     state: DashboardState,
@@ -199,9 +209,11 @@ window.SitesDashboard = {
     // API
     API,
     isAuthenticated,
+    verifyAuth,
     getAuthHeaders,
     setAuthToken,
     clearAuthToken,
+    clearAuth,
 
     // Helpers
     escapeHtml,

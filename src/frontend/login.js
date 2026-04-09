@@ -2,19 +2,19 @@
  * SITES Spectral - Login Entry Point (ES6 Module)
  *
  * Entry point for the login page.
- * Minimal bundle with only authentication functionality.
+ * Uses httpOnly cookie authentication (credentials: 'include').
  *
  * @module login
- * @version 13.15.0
+ * @version 15.10.0
  */
 
 import { escapeHtml, sanitizeUrl } from '@core/security.js';
 import { APP_VERSION } from '@core/config.js';
 import { Toast, showToast, error as toastError } from '@components/toast.js';
-import { setAuthToken, clearAuthToken } from '@api/client.js';
+import { setAuthUser, clearAuth } from '@api/client.js';
 
 /**
- * Login form handler
+ * Login form handler — httpOnly cookie based
  */
 class LoginHandler {
     constructor() {
@@ -24,9 +24,6 @@ class LoginHandler {
         this.isSubmitting = false;
     }
 
-    /**
-     * Initialize login handler
-     */
     init() {
         this.form = document.getElementById('login-form');
         this.submitButton = document.getElementById('login-submit');
@@ -36,25 +33,31 @@ class LoginHandler {
             this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         }
 
-        // Check for existing token
-        this.checkExistingAuth();
+        // Check existing session via httpOnly cookie
+        this.checkExistingSession();
     }
 
     /**
-     * Check if user is already authenticated
+     * Check if user already has a valid session cookie
      */
-    checkExistingAuth() {
-        const token = localStorage.getItem('sites_auth_token');
-        if (token) {
-            // Redirect to dashboard
-            window.location.href = '/sites-dashboard.html';
+    async checkExistingSession() {
+        try {
+            const response = await fetch('/api/auth/verify', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (data.valid && data.user) {
+                setAuthUser(data.user);
+                this.redirectUser(data.user);
+            }
+        } catch {
+            // No valid session, stay on login page
         }
     }
 
-    /**
-     * Handle form submission
-     * @param {Event} e - Submit event
-     */
     async handleSubmit(e) {
         e.preventDefault();
 
@@ -78,9 +81,8 @@ class LoginHandler {
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ username, password }),
             });
 
@@ -90,11 +92,14 @@ class LoginHandler {
                 throw new Error(data.error || 'Login failed');
             }
 
-            if (data.token) {
-                setAuthToken(data.token);
-                window.location.href = '/sites-dashboard.html';
+            if (data.success && data.user) {
+                // Token is in httpOnly cookie, store user for UI display
+                setAuthUser(data.user);
+                showToast('Login successful!', 'success');
+
+                setTimeout(() => this.redirectUser(data.user), 500);
             } else {
-                throw new Error('No token received');
+                throw new Error('Login failed');
             }
         } catch (error) {
             this.showError(error.message || 'Login failed. Please try again.');
@@ -106,9 +111,33 @@ class LoginHandler {
     }
 
     /**
-     * Show error message
-     * @param {string} message - Error message
+     * Redirect user based on role
+     * @param {Object} user - Authenticated user
      */
+    redirectUser(user) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+
+        const isValidRedirect = redirect &&
+            redirect.startsWith('/') &&
+            !redirect.startsWith('//') &&
+            !redirect.toLowerCase().includes('javascript:') &&
+            !redirect.toLowerCase().includes('data:');
+
+        if (isValidRedirect) {
+            window.location.href = redirect;
+            return;
+        }
+
+        if (user.role === 'admin' || user.role === 'sites-admin') {
+            window.location.href = '/sites-dashboard.html';
+        } else if (user.station_acronym) {
+            window.location.href = `/station-dashboard.html?station=${user.station_acronym}`;
+        } else {
+            window.location.href = '/sites-dashboard.html';
+        }
+    }
+
     showError(message) {
         if (this.errorContainer) {
             this.errorContainer.textContent = message;
@@ -116,9 +145,6 @@ class LoginHandler {
         }
     }
 
-    /**
-     * Clear error message
-     */
     clearError() {
         if (this.errorContainer) {
             this.errorContainer.textContent = '';
@@ -126,10 +152,6 @@ class LoginHandler {
         }
     }
 
-    /**
-     * Set loading state
-     * @param {boolean} loading - Loading state
-     */
     setLoading(loading) {
         if (this.submitButton) {
             this.submitButton.disabled = loading;
@@ -147,7 +169,6 @@ if (document.readyState === 'loading') {
     loginHandler.init();
 }
 
-// Export for use in other modules
 export {
     LoginHandler,
     escapeHtml,
@@ -156,13 +177,9 @@ export {
     Toast,
     showToast,
     toastError,
-    setAuthToken,
-    clearAuthToken,
 };
 
-// Global namespace for backward compatibility
+// Global namespace
 window.SitesLogin = {
     handler: loginHandler,
-    setAuthToken,
-    clearAuthToken,
 };

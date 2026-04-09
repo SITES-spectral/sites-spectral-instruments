@@ -125,64 +125,89 @@ const API_DEFAULTS = {
 };
 
 /**
- * Token storage key
+ * User storage key (non-sensitive display data only)
  */
-const TOKEN_STORAGE_KEY = 'sites_auth_token';
+const USER_STORAGE_KEY = 'sites_spectral_user';
 
 /**
- * Get stored authentication token
- * @returns {string|null}
+ * Get stored user data (for UI display only — auth is via httpOnly cookie)
+ * @returns {Object|null}
  */
-function getStoredToken() {
+function getStoredUser() {
     try {
-        return localStorage.getItem(TOKEN_STORAGE_KEY);
+        const data = localStorage.getItem(USER_STORAGE_KEY);
+        return data ? JSON.parse(data) : null;
     } catch {
         return null;
     }
 }
 
 /**
- * Store authentication token
- * @param {string} token - JWT token
+ * Store user data for UI display
+ * @param {Object} user - User object from server
  */
-export function setAuthToken(token) {
+export function setAuthUser(user) {
     try {
-        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     } catch {
         // localStorage not available
     }
 }
 
 /**
- * Clear authentication token
+ * Clear stored user data
  */
-export function clearAuthToken() {
+export function clearAuth() {
     try {
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        localStorage.removeItem(USER_STORAGE_KEY);
     } catch {
         // localStorage not available
     }
 }
 
+// Legacy aliases
+export const setAuthToken = setAuthUser;
+export const clearAuthToken = clearAuth;
+
 /**
- * Check if user is authenticated
+ * Check if user has cached session (synchronous, for UI hints only).
+ * Actual auth is enforced server-side via httpOnly cookie.
  * @returns {boolean}
  */
 export function isAuthenticated() {
-    return !!getStoredToken();
+    return !!getStoredUser();
 }
 
 /**
- * Get authentication headers
+ * Verify authentication with server (async, authoritative check).
+ * Sends httpOnly cookie via credentials:'include'.
+ * On success, caches user data in localStorage for UI.
+ * @returns {Promise<Object|null>} User object or null
+ */
+export async function verifyAuth() {
+    try {
+        const response = await fetch('/api/auth/verify', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (data.valid && data.user) {
+            setAuthUser(data.user);
+            return data.user;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Get authentication headers (cookie-based — no Authorization header needed)
  * @returns {Object}
  */
 export function getAuthHeaders() {
-    const token = getStoredToken();
-    const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
+    return { 'Content-Type': 'application/json' };
 }
 
 /**
@@ -218,7 +243,7 @@ function buildQueryString(params) {
 async function handleApiError(response) {
     // Handle 401 by redirecting to login
     if (response.status === 401) {
-        clearAuthToken();
+        clearAuth();
         window.location.href = '/login.html';
         return;
     }
@@ -281,11 +306,12 @@ async function fetchApi(endpoint, options = {}, requireAuth = true) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    const headers = requireAuth ? getAuthHeaders() : { 'Content-Type': 'application/json' };
+    const headers = { 'Content-Type': 'application/json' };
 
     const config = {
         ...options,
         signal: controller.signal,
+        credentials: 'include',
         headers: {
             ...headers,
             ...(options.headers || {})
@@ -955,8 +981,11 @@ export async function fetchAllPages(fetchFn, filters = {}, limit = null, maxPage
 export const API = {
     // Auth
     setAuthToken,
+    setAuthUser,
     clearAuthToken,
+    clearAuth,
     isAuthenticated,
+    verifyAuth,
     getAuthHeaders,
 
     // Stations

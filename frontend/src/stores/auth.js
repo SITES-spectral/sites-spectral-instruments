@@ -28,9 +28,9 @@ export const ADMIN_ROLES = ['admin', 'sites-admin', 'spectral-admin'];
 export const ADMIN_USERNAMES = ['admin', 'sites-admin', 'spectral-admin'];
 
 export const useAuthStore = defineStore('auth', () => {
-  // State
+  // State — auth token is in httpOnly cookie, not localStorage
   const user = ref(null);
-  const token = ref(localStorage.getItem('auth_token'));
+  const token = ref(null); // Populated by server verification, not localStorage
   const redirectPath = ref('/');
 
   // Check if user has admin privileges
@@ -61,8 +61,8 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value.role === 'station' || !!user.value.station_id;
   });
 
-  // Getters
-  const isAuthenticated = computed(() => !!token.value && !!user.value);
+  // Getters — auth determined by user being set (token is in httpOnly cookie)
+  const isAuthenticated = computed(() => !!user.value);
   const userRole = computed(() => {
     if (isAdmin.value) return 'admin';
     if (isStationAdmin.value) return 'station-admin';
@@ -135,12 +135,17 @@ export const useAuthStore = defineStore('auth', () => {
    */
   async function login(username, password) {
     try {
-      const response = await api.post('/auth/login', { username, password });
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
 
-      if (response.success) {
-        token.value = response.token;
-        user.value = response.user;
-        localStorage.setItem('auth_token', response.token);
+      if (response.ok && data.success && data.user) {
+        token.value = 'httponly-cookie'; // Marker — actual token is in httpOnly cookie
+        user.value = data.user;
         return true;
       }
 
@@ -154,27 +159,40 @@ export const useAuthStore = defineStore('auth', () => {
   /**
    * Logout user
    */
-  function logout() {
+  async function logout() {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch {
+      // Best-effort logout
+    }
     token.value = null;
     user.value = null;
-    localStorage.removeItem('auth_token');
   }
 
   /**
-   * Initialize auth state from stored token
+   * Initialize auth state by verifying session with server
    * @returns {Promise<boolean>}
    */
   async function initialize() {
-    if (!token.value) return false;
-
     try {
-      const response = await api.get('/auth/me');
-      if (response.success) {
-        user.value = response.user;
+      const response = await fetch('/api/auth/verify', {
+        method: 'GET',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        logout();
+        return false;
+      }
+      const data = await response.json();
+      if (data.valid && data.user) {
+        token.value = 'httponly-cookie';
+        user.value = data.user;
         return true;
       }
 
-      // Token invalid, clear it
       logout();
       return false;
     } catch (error) {

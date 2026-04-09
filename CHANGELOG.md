@@ -13,6 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.10.0] - 2026-04-09
+
+### Fixed
+
+- **CRITICAL: Dashboard auth completely broken** — ES module bundles (`dashboard.bundle.js`, `login.bundle.js`, `api.bundle.js`) were never updated for httpOnly cookie migration, causing all authenticated dashboards to fail
+  - **`src/frontend/api/client.js`**: Added `credentials: 'include'` to all `fetchApi()` calls so httpOnly cookies are sent with API requests
+  - **`src/frontend/api/client.js`**: Replaced broken `isAuthenticated()` (checked `localStorage('sites_auth_token')` which was never set) with `verifyAuth()` — async server-side session verification via `/api/auth/verify`
+  - **`src/frontend/dashboard.js`**: Replaced synchronous localStorage check with async `verifyAuth()` — prevents premature redirect to login before session cookie can be validated
+  - **`src/frontend/login.js`**: Removed expectation of `data.token` in login response (server returns httpOnly cookie, not body token); now checks `data.success` and `data.user`; added role-based redirect (admin vs station user)
+
+### Changed
+
+- **Bundle auth architecture**: All three entry bundles (main, login, dashboard) now use cookie-based auth exclusively — no localStorage tokens, no Authorization headers
+- **`clearAuth()` / `setAuthUser()`**: New canonical functions in API client; localStorage stores only non-sensitive user display data (`sites_spectral_user`), never tokens
+
+---
+
 ## [15.9.0] - 2026-03-13
 
 ### Added
