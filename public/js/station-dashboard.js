@@ -2613,6 +2613,21 @@
                 logger.error('Logout error:', error);
             }
             global.sitesAPI?.clearAuth();
+            sessionStorage.removeItem('sites_spectral_auth_retry');
+
+            // Station portals: end CF Access session entirely, then close tab
+            if (this.isStationPortal) {
+                if (cfAccessLogoutUrl) {
+                    try {
+                        await fetch(cfAccessLogoutUrl, { credentials: 'include' });
+                    } catch (e) {
+                        // Best-effort
+                    }
+                }
+                // Redirect to CF Access logout which clears the access cookie
+                global.location.href = '/cdn-cgi/access/logout';
+                return;
+            }
 
             // L2 audit fix: invalidate CF Access session to prevent shared-device reuse
             if (cfAccessLogoutUrl) {
@@ -2623,7 +2638,6 @@
                 }
             }
 
-            // Redirect to login page on all portals
             global.location.href = '/login.html';
         }
 

@@ -226,10 +226,37 @@ export default {
         }
 
         // Station portals: CF Access is the sole authentication.
-        // Never serve login.html — redirect to dashboard root instead.
-        // This prevents any frontend JS redirect-to-login loops.
-        if (portalType === 'station' && url.pathname === '/login.html') {
-          return Response.redirect(`https://${subdomain}.sitesspectral.work/`, 302);
+        // Force ALL HTML page requests to serve station-dashboard.html.
+        // Only static assets (js, css, images, fonts, yamls) pass through normally.
+        // This prevents redirect loops from JS code trying to navigate to login/admin pages.
+        if (portalType === 'station') {
+          const isStaticAsset = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|yaml|map)(\?|$)/.test(url.pathname);
+          if (!isStaticAsset && url.pathname !== '/cdn-cgi/access/logout') {
+            // Override path to always serve station-dashboard.html
+            const dashboardUrl = new URL('/station-dashboard.html', request.url);
+            const overriddenRequest = new Request(dashboardUrl.toString(), request);
+            const staticResponse = await handleStaticAssets(overriddenRequest, env, corsHeaders, portalType, subdomain, user);
+
+            // Issue session cookie for CF Access users
+            if (user && user.auth_provider === 'cloudflare_access') {
+              const existingCookie = getTokenFromCookie(request);
+              if (!existingCookie) {
+                try {
+                  const internalToken = await generateToken(user, env);
+                  const authCookie = createAuthCookie(internalToken, request);
+                  const responseWithCookie = new Response(staticResponse.body, {
+                    status: staticResponse.status,
+                    headers: staticResponse.headers
+                  });
+                  responseWithCookie.headers.set('Set-Cookie', authCookie);
+                  return applySecurityHeaders(responseWithCookie);
+                } catch (cookieError) {
+                  console.warn('Failed to create session cookie:', cookieError);
+                }
+              }
+            }
+            return applySecurityHeaders(staticResponse);
+          }
         }
 
         // v15.8.3 (F5): Issue session cookie on static page loads for CF Access users.
