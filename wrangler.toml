@@ -29,6 +29,12 @@ binding = "DB"
 database_name = "spectral_stations_db"
 database_id = "29a77ad6-c5ff-4088-af08-478df12159b4"
 
+# Public-facing database (read-only for public dashboard, synced from DB)
+[[d1_databases]]
+binding = "PUBLIC_DB"
+database_name = "spectral_public_db"
+database_id = "7664d732-4a11-4e04-b7c9-006271542e02"
+
 # R2 Object Storage for Sensor Documentation
 [[r2_buckets]]
 bucket_name = "sites-spectral-docs"

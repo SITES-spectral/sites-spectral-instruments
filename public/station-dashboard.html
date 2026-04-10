@@ -22,14 +22,14 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/design-system.css?v=13.15.0">
-    <link rel="stylesheet" href="/css/styles.css?v=16.0.0">
+    <link rel="stylesheet" href="/css/styles.css?v=16.1.0">
     <link rel="stylesheet" href="/css/form-enhancements.css?v=13.15.0">
     <link rel="stylesheet" href="/css/skeleton.css?v=13.15.0">
     <link rel="stylesheet" href="/css/mobile-enhancements.css?v=13.15.0">
 
     <!-- Version Meta -->
-    <meta name="app-version" content="16.0.0">
-    <meta name="build-date" content="2026-04-09">
+    <meta name="app-version" content="16.1.0">
+    <meta name="build-date" content="2026-04-10">
 
     <!-- ES6 Module Bundle (Migration Phase) -->
     <script type="module" src="/dist/dashboard.bundle.js"></script>
@@ -4925,9 +4925,9 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/utils.js?v=16.0.0"></script>
+    <script src="/js/utils.js?v=16.1.0"></script>
     <!-- Security Utilities (v12.0.9) - XSS prevention -->
-    <script src="/js/core/security.js?v=16.0.0"></script>
+    <script src="/js/core/security.js?v=16.1.0"></script>
     <!-- Configuration System (v8.5.0) -->
     <script src="/js/core/config-loader.js?v=13.27.0"></script>
     <script src="/js/core/config-service.js?v=13.27.0"></script>
@@ -4935,8 +4935,8 @@
     <script src="/js/core/skeleton.js?v=13.27.0"></script>
     <!-- API: Legacy V1 base + V3 extensions -->
     <script src="/js/legacy/api-v1.js?v=13.27.0"></script>
-    <script src="/js/api.js?v=16.0.0"></script>
-    <script src="/js/components.js?v=16.0.0"></script>
+    <script src="/js/api.js?v=16.1.0"></script>
+    <script src="/js/components.js?v=16.1.0"></script>
     <script src="/js/platform-forms/index.js?v=13.27.0"></script>
     <script src="/js/form-components.js?v=13.27.0"></script>
     <!-- Modular Modal Components (v7.0.1) -->
@@ -4957,15 +4957,15 @@
     <!-- js-yaml for YAML parsing -->
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <!-- Application scripts that depend on Leaflet -->
-    <script src="/js/interactive-map.js?v=16.0.0"></script>
+    <script src="/js/interactive-map.js?v=16.1.0"></script>
     <!-- Dashboard modules (v13.16.0) -->
     <script src="/js/dashboard/platform-renderer.js?v=13.27.0"></script>
     <script src="/js/dashboard/campaign-panel.js?v=13.27.0"></script>
     <script src="/js/dashboard/product-panel.js?v=13.27.0"></script>
     <script src="/js/dashboard/station-map.js?v=13.27.0"></script>
-    <script src="/js/station-dashboard.js?v=16.0.0"></script>
-    <script src="/js/navigation.js?v=16.0.0"></script>
-    <script src="/js/export.js?v=16.0.0"></script>
+    <script src="/js/station-dashboard.js?v=16.1.0"></script>
+    <script src="/js/navigation.js?v=16.1.0"></script>
+    <script src="/js/export.js?v=16.1.0"></script>
     <script src="/js/platform-modals.js?v=13.27.0"></script>
     <script src="/js/modal-system.js?v=13.27.0"></script>
     <script src="/js/admin-modals.js?v=13.27.0"></script>
@@ -5082,16 +5082,16 @@
                     stationData = station;
                     await showStationData();
                 } else if (response.status === 401) {
-                    // Token expired, redirect to login
+                    // Token expired — on station portals, reload to re-establish CF Access session
                     localStorage.removeItem('sites_spectral_user');
                     localStorage.removeItem('sites_spectral_token');
                     window.location.href = '/login.html';
                 } else if (response.status === 404) {
-                    showError('Station not found');
+                    showError('Station not found: ' + stationAcronym);
                 } else if (response.status === 403) {
                     showError('Access denied to this station');
                 } else {
-                    showError('Failed to load station data');
+                    showError('Failed to load station data (status: ' + response.status + ')');
                 }
 
             } catch (error) {

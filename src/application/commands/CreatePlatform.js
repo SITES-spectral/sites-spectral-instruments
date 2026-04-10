@@ -41,10 +41,11 @@ export class CreatePlatform {
    * @param {import('../../domain/platform/PlatformRepository.js').PlatformRepository} dependencies.platformRepository
    * @param {import('../../domain/instrument/InstrumentRepository.js').InstrumentRepository} dependencies.instrumentRepository
    */
-  constructor({ stationRepository, platformRepository, instrumentRepository }) {
+  constructor({ stationRepository, platformRepository, instrumentRepository, publicDataSync }) {
     this.stationRepository = stationRepository;
     this.platformRepository = platformRepository;
     this.instrumentRepository = instrumentRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -169,6 +170,11 @@ export class CreatePlatform {
           }
         }
       }
+    }
+
+    // Sync counts to public database
+    if (this.publicDataSync) {
+      await this.publicDataSync.syncStationCounts(input.stationId);
     }
 
     return {

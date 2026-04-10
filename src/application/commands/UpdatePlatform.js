@@ -25,8 +25,9 @@ export class UpdatePlatform {
    * @param {Object} dependencies
    * @param {import('../../domain/platform/PlatformRepository.js').PlatformRepository} dependencies.platformRepository
    */
-  constructor({ platformRepository }) {
+  constructor({ platformRepository, publicDataSync }) {
     this.platformRepository = platformRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -65,7 +66,14 @@ export class UpdatePlatform {
     // Update timestamp
     platform.updatedAt = new Date().toISOString();
 
-    // Persist and return
-    return await this.platformRepository.save(platform);
+    // Persist
+    const saved = await this.platformRepository.save(platform);
+
+    // Sync counts to public database
+    if (this.publicDataSync && saved.stationId) {
+      await this.publicDataSync.syncStationCounts(saved.stationId);
+    }
+
+    return saved;
   }
 }

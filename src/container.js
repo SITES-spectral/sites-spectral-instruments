@@ -35,7 +35,9 @@ import {
   // Metrics Adapters
   NoOpMetricsAdapter,
   // Auth Adapters
-  CloudflareCredentialsAdapter
+  CloudflareCredentialsAdapter,
+  // Sync Adapters (v16.1.0)
+  D1PublicDataSyncAdapter
 } from './infrastructure/index.js';
 
 // ===== APPLICATION LAYER (USE CASES) =====
@@ -209,11 +211,17 @@ function createPorts(env) {
   // Credentials Port
   const credentials = new CloudflareCredentialsAdapter(env);
 
+  // Public Data Sync Port (v16.1.0)
+  const publicDataSync = env.PUBLIC_DB
+    ? new D1PublicDataSyncAdapter(env.DB, env.PUBLIC_DB)
+    : null;
+
   return {
     logger,
     metrics,
     eventBus,
     credentials,
+    publicDataSync,
     config
   };
 }
@@ -431,7 +439,8 @@ export function createContainer(env) {
     // Ports
     logger: ports.logger,
     metrics: ports.metrics,
-    eventBus: ports.eventBus
+    eventBus: ports.eventBus,
+    publicDataSync: ports.publicDataSync
   };
 
   // ===== USE CASES =====
@@ -449,7 +458,8 @@ export function createContainer(env) {
       logger: ports.logger,
       metrics: ports.metrics,
       eventBus: ports.eventBus,
-      credentials: ports.credentials
+      credentials: ports.credentials,
+      publicDataSync: ports.publicDataSync
     },
 
     // Repositories (for direct access if needed)
@@ -494,7 +504,8 @@ export function createTestContainer(overrides = {}) {
     logger: overrides.logger || new StructuredConsoleLogger({ minLevel: 'error' }),
     metrics: overrides.metrics || new NoOpMetricsAdapter(),
     eventBus: overrides.eventBus || new InMemoryEventBus(),
-    credentials: overrides.credentials || null
+    credentials: overrides.credentials || null,
+    publicDataSync: overrides.publicDataSync || null
   };
 
   const deps = {
@@ -516,7 +527,8 @@ export function createTestContainer(overrides = {}) {
     batteryRepository: mockRepositories.battery,
     logger: mockPorts.logger,
     metrics: mockPorts.metrics,
-    eventBus: mockPorts.eventBus
+    eventBus: mockPorts.eventBus,
+    publicDataSync: mockPorts.publicDataSync
   };
 
   return {

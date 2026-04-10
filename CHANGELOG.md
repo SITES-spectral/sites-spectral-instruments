@@ -13,6 +13,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.1.0] - 2026-04-10
+
+### BREAKING CHANGES
+
+- **Public API now reads from separate public database** — `PUBLIC_DB` binding required in wrangler.toml; falls back to `DB` during migration
+- **Public API `/api/public/stations` no longer returns `portal_url`** — station portal URLs removed from public responses
+- **Public API `/api/public/station/:id` simplified** — no longer returns platform list or instrument type summary; only aggregate counts
+- **Public API `/api/public/metrics` simplified** — removed `platforms_by_type` and `instruments_by_type` (internal data); returns station-level metrics only
+- **`index.html` deleted** — worker routes `/` to `public-dashboard.html`; `index.html` was dead code
+
+### Added
+
+- **Public database isolation** — new `PUBLIC_DB` D1 binding with denormalized `public_stations` table, isolating public-facing data from the internal instruments database
+- **PublicDataSyncPort** (`src/domain/shared/ports/PublicDataSyncPort.js`) — domain port interface for public data synchronization
+- **D1PublicDataSyncAdapter** (`src/infrastructure/sync/D1PublicDataSyncAdapter.js`) — infrastructure adapter implementing sync to public DB with `syncStation()`, `removeStation()`, `syncStationCounts()`, and `fullSync()` methods
+- **Automatic public DB sync** — all station/platform/instrument create, update, and delete commands now sync changes to the public database via the PublicDataSyncPort
+- **Station portal access hardening** — unauthorized access to station subdomains now returns a proper 401/403 HTML page instead of redirecting to the public portal
+- **Public DB migration** (`migrations/public/0001_create_public_stations.sql`) — schema for the public-facing denormalized stations table
+- **Seed script** (`scripts/seed-public-db.sql`) — initial population of public DB from main DB
+
+### Removed
+
+- **"View Station Portal" button** from public dashboard map popups — no public navigation to authenticated portals
+- **"Admin Login" link** from public dashboard header
+- **`portal_url` field** from all public API responses
+- **Platform/instrument type breakdowns** from public metrics endpoint
+- **`public/index.html`** — dead code, worker serves `public-dashboard.html`
+
+### Security
+
+- **Public database isolation** — public dashboard no longer queries the internal instruments database directly
+- **Portal access hardening** — station portals return 401/403 HTML instead of redirecting to public, preventing information leakage about portal existence
+
+---
+
 ## [16.0.0] - 2026-04-09
 
 ### BREAKING CHANGES

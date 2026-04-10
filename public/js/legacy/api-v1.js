@@ -270,12 +270,8 @@ class SitesSpectralAPI {
         // Clear local state
         this.clearAuth();
 
-        // On station portals, redirect to public portal (CF Access session persists)
-        // On other portals, redirect to login page
-        const host = window.location.hostname;
-        const isStationPortal = host.endsWith('.sitesspectral.work') &&
-            !host.startsWith('admin.') && host !== 'sitesspectral.work';
-        window.location.href = isStationPortal ? 'https://sitesspectral.work' : '/login.html';
+        // Redirect to login page on all portals
+        window.location.href = '/login.html';
     }
 
     // Station methods with enhanced error handling

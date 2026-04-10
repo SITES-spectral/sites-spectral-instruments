@@ -2,15 +2,16 @@
  * Public API Handler
  * No-authentication endpoints for public dashboard and status
  *
- * Provides read-only access to station status, platform counts,
- * and system health without requiring authentication.
+ * Reads from the public-only database (PUBLIC_DB) which contains
+ * denormalized station data synced from the main database.
+ * The main database is never exposed to public queries.
  *
  * Architecture Credit: This subdomain-based architecture design is based on
  * architectural knowledge shared by Flights for Biodiversity Sweden AB
  * (https://github.com/flightsforbiodiversity)
  *
  * @module handlers/public
- * @version 15.0.0
+ * @version 16.1.0
  */
 
 import { createErrorResponse, createNotFoundResponse } from '../utils/responses.js';
@@ -80,6 +81,17 @@ export async function handlePublicApi(method, pathSegments, request, env) {
 }
 
 /**
+ * Get the public database binding, with fallback to main DB
+ * during migration period before PUBLIC_DB is created.
+ *
+ * @param {Object} env - Environment variables and bindings
+ * @returns {Object} D1 database binding
+ */
+function getPublicDb(env) {
+  return env.PUBLIC_DB || env.DB;
+}
+
+/**
  * Get list of all stations with public information
  *
  * @param {Request} request - The request object
@@ -88,46 +100,32 @@ export async function handlePublicApi(method, pathSegments, request, env) {
  */
 async function getPublicStations(request, env) {
   try {
+    const db = getPublicDb(env);
     const url = new URL(request.url);
     const sitesOnly = url.searchParams.get('sites_member') === 'true';
 
     let query = `
       SELECT
-        s.id,
-        s.acronym,
-        s.normalized_name,
-        s.display_name,
-        s.description,
-        s.latitude,
-        s.longitude,
-        s.elevation_m,
-        s.status,
-        s.country,
-        s.sites_member,
-        s.icos_member,
-        s.icos_class,
-        (SELECT COUNT(*) FROM platforms p WHERE p.station_id = s.id) as platform_count,
-        (SELECT COUNT(*) FROM instruments i
-         JOIN platforms p ON i.platform_id = p.id
-         WHERE p.station_id = s.id) as instrument_count
-      FROM stations s
+        id, acronym, normalized_name, display_name, description,
+        latitude, longitude, elevation_m, status, country,
+        sites_member, icos_member, icos_class,
+        platform_count, instrument_count
+      FROM public_stations
       WHERE 1=1
     `;
 
     if (sitesOnly) {
-      query += ' AND s.sites_member = 1';
+      query += ' AND sites_member = 1';
     }
 
-    query += ' ORDER BY s.display_name';
+    query += ' ORDER BY display_name';
 
-    const result = await env.DB.prepare(query).all();
+    const result = await db.prepare(query).all();
 
-    // Add operational status indicator
     const stations = result.results.map(station => ({
       ...station,
       sites_member: !!station.sites_member,
       icos_member: !!station.icos_member,
-      portal_url: `https://${(station.normalized_name || station.acronym).toLowerCase()}.sitesspectral.work`,
       operational_status: getOperationalStatus(station)
     }));
 
@@ -139,7 +137,7 @@ async function getPublicStations(request, env) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300' // 5 minute cache
+        'Cache-Control': 'public, max-age=300'
       }
     });
 
@@ -157,22 +155,24 @@ async function getPublicStations(request, env) {
  */
 async function getPublicHealth(env) {
   try {
-    // Test database connectivity
-    const dbTest = await env.DB.prepare('SELECT 1 as test').first();
+    const db = getPublicDb(env);
 
-    // Get basic counts
-    const counts = await env.DB.prepare(`
+    // Test database connectivity
+    const dbTest = await db.prepare('SELECT 1 as test').first();
+
+    // Get counts from denormalized public_stations
+    const counts = await db.prepare(`
       SELECT
-        (SELECT COUNT(*) FROM stations) as stations,
-        (SELECT COUNT(*) FROM platforms) as platforms,
-        (SELECT COUNT(*) FROM instruments) as instruments
+        COUNT(*) as stations,
+        COALESCE(SUM(platform_count), 0) as platforms,
+        COALESCE(SUM(instrument_count), 0) as instruments
+      FROM public_stations
     `).first();
 
     return new Response(JSON.stringify({
       status: dbTest ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       database: dbTest ? 'connected' : 'disconnected',
-      version: env.APP_VERSION || '15.0.0',
       counts: {
         stations: counts?.stations || 0,
         platforms: counts?.platforms || 0,
@@ -182,7 +182,7 @@ async function getPublicHealth(env) {
       status: dbTest ? 200 : 503,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=60' // 1 minute cache
+        'Cache-Control': 'public, max-age=60'
       }
     });
 
@@ -201,60 +201,47 @@ async function getPublicHealth(env) {
 
 /**
  * Get public metrics summary
+ * Station-level metrics only — platform/instrument type breakdowns are internal data
  *
  * @param {Object} env - Environment variables and bindings
  * @returns {Promise<Response>}
  */
 async function getPublicMetrics(env) {
   try {
-    // Get platform counts by mount type (v15.0.1: fixed column name)
-    const platformsByType = await env.DB.prepare(`
-      SELECT mount_type_code as platform_type, COUNT(*) as count
-      FROM platforms
-      GROUP BY mount_type_code
-    `).all();
+    const db = getPublicDb(env);
 
-    // Get instrument counts by type
-    const instrumentsByType = await env.DB.prepare(`
-      SELECT instrument_type, COUNT(*) as count
-      FROM instruments
-      GROUP BY instrument_type
-    `).all();
-
-    // Get station counts by status
-    const stationsByStatus = await env.DB.prepare(`
+    // Station counts by status
+    const stationsByStatus = await db.prepare(`
       SELECT status, COUNT(*) as count
-      FROM stations
+      FROM public_stations
       GROUP BY status
     `).all();
 
-    // Get active instruments count
-    const activeInstruments = await env.DB.prepare(`
-      SELECT COUNT(*) as count
-      FROM instruments
-      WHERE status = 'Active'
+    // Aggregate totals
+    const totals = await db.prepare(`
+      SELECT
+        COUNT(*) as total_stations,
+        COALESCE(SUM(platform_count), 0) as total_platforms,
+        COALESCE(SUM(instrument_count), 0) as total_instruments
+      FROM public_stations
     `).first();
 
     return new Response(JSON.stringify({
       success: true,
       timestamp: new Date().toISOString(),
       metrics: {
-        platforms_by_type: Object.fromEntries(
-          platformsByType.results.map(r => [r.platform_type, r.count])
-        ),
-        instruments_by_type: Object.fromEntries(
-          instrumentsByType.results.map(r => [r.instrument_type, r.count])
-        ),
         stations_by_status: Object.fromEntries(
           stationsByStatus.results.map(r => [r.status || 'unknown', r.count])
         ),
-        active_instruments: activeInstruments?.count || 0
+        total_stations: totals?.total_stations || 0,
+        total_platforms: totals?.total_platforms || 0,
+        total_instruments: totals?.total_instruments || 0
       }
     }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300' // 5 minute cache
+        'Cache-Control': 'public, max-age=300'
       }
     });
 
@@ -277,53 +264,21 @@ async function getPublicStationDetails(stationId, env) {
   }
 
   try {
-    // Try to find by ID or acronym
-    const station = await env.DB.prepare(`
+    const db = getPublicDb(env);
+
+    const station = await db.prepare(`
       SELECT
-        s.id,
-        s.acronym,
-        s.normalized_name,
-        s.display_name,
-        s.description,
-        s.latitude,
-        s.longitude,
-        s.elevation_m,
-        s.status,
-        s.country,
-        s.sites_member,
-        s.icos_member,
-        s.icos_class
-      FROM stations s
-      WHERE s.id = ? OR LOWER(s.acronym) = LOWER(?) OR LOWER(s.normalized_name) = LOWER(?)
+        id, acronym, normalized_name, display_name, description,
+        latitude, longitude, elevation_m, status, country,
+        sites_member, icos_member, icos_class,
+        platform_count, instrument_count
+      FROM public_stations
+      WHERE id = ? OR LOWER(acronym) = LOWER(?) OR LOWER(normalized_name) = LOWER(?)
     `).bind(stationId, stationId, stationId).first();
 
     if (!station) {
       return createNotFoundResponse('Station not found');
     }
-
-    // Get platform summary (no sensitive details)
-    // v15.0.1: Fixed column names to match actual schema
-    const platforms = await env.DB.prepare(`
-      SELECT
-        p.id,
-        p.normalized_name,
-        p.display_name,
-        p.mount_type_code,
-        p.status,
-        (SELECT COUNT(*) FROM instruments i WHERE i.platform_id = p.id) as instrument_count
-      FROM platforms p
-      WHERE p.station_id = ?
-      ORDER BY p.display_name
-    `).bind(station.id).all();
-
-    // Get instrument type summary (no sensitive details)
-    const instrumentSummary = await env.DB.prepare(`
-      SELECT instrument_type, COUNT(*) as count
-      FROM instruments i
-      JOIN platforms p ON i.platform_id = p.id
-      WHERE p.station_id = ?
-      GROUP BY instrument_type
-    `).bind(station.id).all();
 
     return new Response(JSON.stringify({
       success: true,
@@ -331,22 +286,13 @@ async function getPublicStationDetails(stationId, env) {
         ...station,
         sites_member: !!station.sites_member,
         icos_member: !!station.icos_member,
-        portal_url: `https://${(station.normalized_name || station.acronym).toLowerCase()}.sitesspectral.work`,
         operational_status: getOperationalStatus(station)
-      },
-      platforms: platforms.results.map(p => ({
-        ...p,
-        platform_type: p.mount_type_code, // Map to expected field name
-        instruments: p.instrument_count
-      })),
-      instrument_summary: Object.fromEntries(
-        instrumentSummary.results.map(r => [r.instrument_type, r.count])
-      )
+      }
     }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300' // 5 minute cache
+        'Cache-Control': 'public, max-age=300'
       }
     });
 

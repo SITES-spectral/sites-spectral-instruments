@@ -360,28 +360,6 @@
             color: #6b7280;
         }
 
-        .popup-link,
-        .popup-link:visited,
-        .popup-link:active {
-            display: block;
-            text-align: center;
-            margin-top: 12px;
-            padding: 10px 12px;
-            background: #047857;
-            color: #ffffff !important;
-            border-radius: 6px;
-            text-decoration: none !important;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            transition: background 0.15s;
-        }
-
-        .popup-link:hover {
-            background: #065f46;
-            color: #ffffff !important;
-            text-decoration: none !important;
-        }
 
         /* Loading State */
         .loading {
@@ -414,15 +392,6 @@
             gap: 8px;
         }
 
-        /* Hide admin link on public page */
-        .admin-link {
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .admin-link a {
-            color: rgba(255, 255, 255, 0.9);
-        }
     </style>
 </head>
 <body>
@@ -480,7 +449,6 @@
             <div class="map-section">
                 <div class="section-header">
                     <h2><i class="fas fa-map-marked-alt"></i> Station Network Map</h2>
-                    <span class="admin-link"><a href="/login.html">Admin Login</a></span>
                 </div>
                 <div class="map-container">
                     <div id="map"></div>
@@ -509,7 +477,7 @@
             <a href="https://www.fieldsites.se/" target="_blank" rel="noopener">Swedish Infrastructure for Ecosystem Science (SITES)</a>
         </p>
         <p style="margin-top: 8px; font-size: 12px;">
-            Version 15.1.0 |
+            Version 16.1.0 |
             <a href="/terms-of-service.html">Terms</a> |
             <a href="/privacy-policy.html">Privacy</a>
         </p>
@@ -833,29 +801,22 @@
 
                 container.appendChild(stats);
 
-                // Portal link - sanitize URL
-                const portalUrl = this.sanitizeUrl(station.portal_url || ('https://' + (station.normalized_name || station.acronym || 'unknown').toLowerCase() + '.sitesspectral.work'));
-                const link = document.createElement('a');
-                link.className = 'popup-link';
-                link.href = portalUrl;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
+                // SITES Spectral program link
+                const programLink = document.createElement('a');
+                programLink.href = 'https://www.fieldsites.se/thematic-programs/sites-spectral';
+                programLink.target = '_blank';
+                programLink.rel = 'noopener noreferrer';
+                programLink.style.cssText = 'display:block;text-align:center;margin-top:12px;padding:8px 12px;background:#047857;color:#fff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;transition:background 0.15s;';
+                programLink.onmouseover = function() { this.style.background = '#065f46'; };
+                programLink.onmouseout = function() { this.style.background = '#047857'; };
                 const linkIcon = document.createElement('i');
-                linkIcon.className = 'fas fa-external-link-alt';
-                link.appendChild(linkIcon);
-                link.appendChild(document.createTextNode(' View Station Portal'));
-                container.appendChild(link);
+                linkIcon.className = 'fas fa-leaf';
+                linkIcon.style.marginRight = '6px';
+                programLink.appendChild(linkIcon);
+                programLink.appendChild(document.createTextNode('SITES Spectral Program'));
+                container.appendChild(programLink);
 
                 return container;
-            },
-
-            sanitizeUrl(url) {
-                if (!url) return '#';
-                // Only allow http/https protocols
-                if (url.startsWith('https://') || url.startsWith('http://')) {
-                    return url;
-                }
-                return '#';
             }
         };
 

@@ -16,9 +16,10 @@ export class DeletePlatform {
    * @param {import('../../domain/platform/PlatformRepository.js').PlatformRepository} dependencies.platformRepository
    * @param {import('../../domain/instrument/InstrumentRepository.js').InstrumentRepository} dependencies.instrumentRepository
    */
-  constructor({ platformRepository, instrumentRepository }) {
+  constructor({ platformRepository, instrumentRepository, publicDataSync }) {
     this.platformRepository = platformRepository;
     this.instrumentRepository = instrumentRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -45,6 +46,13 @@ export class DeletePlatform {
     }
 
     // Delete platform
-    return await this.platformRepository.delete(id);
+    const result = await this.platformRepository.delete(id);
+
+    // Sync counts to public database
+    if (this.publicDataSync && platform.stationId) {
+      await this.publicDataSync.syncStationCounts(platform.stationId);
+    }
+
+    return result;
   }
 }

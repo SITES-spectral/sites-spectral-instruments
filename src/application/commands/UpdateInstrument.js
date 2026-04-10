@@ -24,8 +24,10 @@ export class UpdateInstrument {
    * @param {Object} dependencies
    * @param {import('../../domain/instrument/InstrumentRepository.js').InstrumentRepository} dependencies.instrumentRepository
    */
-  constructor({ instrumentRepository }) {
+  constructor({ instrumentRepository, platformRepository, publicDataSync }) {
     this.instrumentRepository = instrumentRepository;
+    this.platformRepository = platformRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -68,7 +70,17 @@ export class UpdateInstrument {
     // Update timestamp
     instrument.updatedAt = new Date().toISOString();
 
-    // Persist and return
-    return await this.instrumentRepository.save(instrument);
+    // Persist
+    const saved = await this.instrumentRepository.save(instrument);
+
+    // Sync counts to public database
+    if (this.publicDataSync && saved.platformId) {
+      const platform = await this.platformRepository.findById(saved.platformId);
+      if (platform?.stationId) {
+        await this.publicDataSync.syncStationCounts(platform.stationId);
+      }
+    }
+
+    return saved;
   }
 }

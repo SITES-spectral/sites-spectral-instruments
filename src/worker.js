@@ -83,8 +83,10 @@ function createPortalUnauthorizedResponse(portalType, subdomain) {
   }
 
   if (portalType === 'station') {
-    // Redirect unauthorized station portal users to the public portal
-    return Response.redirect('https://sitesspectral.work', 302);
+    return new Response(getAccessRequiredHtml('Unauthorized', 'This station portal requires authorized access via Cloudflare Access. Please contact your station administrator to request access.'), {
+      status: 401,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    });
   }
 
   return new Response('Unauthorized', { status: 401 });
@@ -99,9 +101,11 @@ function createPortalUnauthorizedResponse(portalType, subdomain) {
  * @returns {Response}
  */
 function createPortalForbiddenResponse(portalType, subdomain, user) {
-  // Redirect unauthorized station portal users to the public portal
   if (portalType === 'station') {
-    return Response.redirect('https://sitesspectral.work', 302);
+    return new Response(getAccessRequiredHtml('Access Denied', 'You do not have permission to access this station portal. Please contact your station administrator.'), {
+      status: 403,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    });
   }
 
   return new Response(JSON.stringify({
@@ -115,6 +119,41 @@ function createPortalForbiddenResponse(portalType, subdomain, user) {
     status: 403,
     headers: { 'Content-Type': 'application/json' }
   });
+}
+
+/**
+ * Generate self-contained HTML page for access-denied responses
+ *
+ * @param {string} title - Page title
+ * @param {string} message - Message body
+ * @returns {string} HTML string
+ */
+function getAccessRequiredHtml(title, message) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title} - SITES Spectral</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f3f4f6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.card{background:white;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:48px;max-width:480px;text-align:center}
+.icon{width:64px;height:64px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;color:#dc2626}
+h1{font-size:1.5rem;font-weight:600;color:#111827;margin-bottom:12px}
+p{color:#6b7280;line-height:1.6;font-size:0.95rem}
+.footer{margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:0.8rem;color:#9ca3af}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="icon">&#128274;</div>
+<h1>${title}</h1>
+<p>${message}</p>
+<div class="footer">SITES Spectral Network</div>
+</div>
+</body>
+</html>`;
 }
 
 export default {
@@ -186,10 +225,12 @@ export default {
           }
         }
 
-        // Station portals: always serve station-dashboard.html
-        // CF Access protects the subdomain at the edge (gateway level).
-        // The frontend calls /api/auth/verify to get user details and
-        // redirects unauthorized users to the public portal.
+        // Station portals: CF Access is the sole authentication.
+        // Never serve login.html — redirect to dashboard root instead.
+        // This prevents any frontend JS redirect-to-login loops.
+        if (portalType === 'station' && url.pathname === '/login.html') {
+          return Response.redirect(`https://${subdomain}.sitesspectral.work/`, 302);
+        }
 
         // v15.8.3 (F5): Issue session cookie on static page loads for CF Access users.
         // This ensures subsequent JS fetch() calls have a valid session cookie
@@ -351,15 +392,13 @@ async function handleStaticAssets(request, env, corsHeaders, portalType = 'publi
     }
 
     if (asset.ok) {
-      const response = new Response(asset.body, {
-        status: asset.status,
-        headers: {
-          ...asset.headers,
-          'X-Portal-Type': portalType,
-          ...corsHeaders
-        }
+      // Preserve headers from ASSETS binding (Headers objects aren't spreadable)
+      const headers = new Headers(asset.headers);
+      headers.set('X-Portal-Type', portalType);
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        headers.set(key, value);
       });
-      return response;
+      return new Response(asset.body, { status: asset.status, headers });
     }
 
   } catch (error) {

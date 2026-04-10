@@ -15,8 +15,10 @@ export class DeleteInstrument {
    * @param {Object} dependencies
    * @param {import('../../domain/instrument/InstrumentRepository.js').InstrumentRepository} dependencies.instrumentRepository
    */
-  constructor({ instrumentRepository }) {
+  constructor({ instrumentRepository, platformRepository, publicDataSync }) {
     this.instrumentRepository = instrumentRepository;
+    this.platformRepository = platformRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -46,7 +48,19 @@ export class DeleteInstrument {
       }
     }
 
+    // Look up station before deletion
+    const platform = instrument.platformId
+      ? await this.platformRepository.findById(instrument.platformId)
+      : null;
+
     // Delete instrument (and ROIs if cascade=true)
-    return await this.instrumentRepository.delete(id, options.cascade);
+    const result = await this.instrumentRepository.delete(id, options.cascade);
+
+    // Sync counts to public database
+    if (this.publicDataSync && platform?.stationId) {
+      await this.publicDataSync.syncStationCounts(platform.stationId);
+    }
+
+    return result;
   }
 }

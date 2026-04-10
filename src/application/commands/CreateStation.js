@@ -28,8 +28,9 @@ export class CreateStation {
    * @param {Object} dependencies
    * @param {import('../../domain/station/StationRepository.js').StationRepository} dependencies.stationRepository
    */
-  constructor({ stationRepository }) {
+  constructor({ stationRepository, publicDataSync }) {
     this.stationRepository = stationRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -57,7 +58,14 @@ export class CreateStation {
       contactEmail: input.contactEmail
     });
 
-    // Persist and return
-    return await this.stationRepository.save(station);
+    // Persist
+    const saved = await this.stationRepository.save(station);
+
+    // Sync to public database
+    if (this.publicDataSync) {
+      await this.publicDataSync.syncStation(saved.id);
+    }
+
+    return saved;
   }
 }

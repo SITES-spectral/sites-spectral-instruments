@@ -29,9 +29,10 @@ export class CreateInstrument {
    * @param {import('../../domain/platform/PlatformRepository.js').PlatformRepository} dependencies.platformRepository
    * @param {import('../../domain/instrument/InstrumentRepository.js').InstrumentRepository} dependencies.instrumentRepository
    */
-  constructor({ platformRepository, instrumentRepository }) {
+  constructor({ platformRepository, instrumentRepository, publicDataSync }) {
     this.platformRepository = platformRepository;
     this.instrumentRepository = instrumentRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -89,8 +90,9 @@ export class CreateInstrument {
     });
 
     // Save and return - handle UNIQUE constraint (race condition protection)
+    let saved;
     try {
-      return await this.instrumentRepository.save(instrument);
+      saved = await this.instrumentRepository.save(instrument);
     } catch (error) {
       // TOCTOU Race Condition: Another request may have created the same instrument
       // between our existence check and save. Handle UNIQUE constraint gracefully.
@@ -102,5 +104,12 @@ export class CreateInstrument {
       }
       throw error;
     }
+
+    // Sync counts to public database
+    if (this.publicDataSync && platform.stationId) {
+      await this.publicDataSync.syncStationCounts(platform.stationId);
+    }
+
+    return saved;
   }
 }

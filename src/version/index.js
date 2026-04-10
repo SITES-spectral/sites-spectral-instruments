@@ -6,15 +6,15 @@
  * DO NOT EDIT MANUALLY - run 'npm run build' to update.
  *
  * @module version
- * @generated 2026-04-09
+ * @generated 2026-04-10
  * @see scripts/build.js
  */
 
 // Version info is injected at build time
 // DO NOT EDIT - this is auto-generated
-export const VERSION = '16.0.0';
-export const BUILD_DATE = '2026-04-09';
-export const BUILD_TIMESTAMP = 1775764431402;
+export const VERSION = '16.1.0';
+export const BUILD_DATE = '2026-04-10';
+export const BUILD_TIMESTAMP = 1775809535401;
 
 /**
  * Version information object

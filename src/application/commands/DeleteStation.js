@@ -16,9 +16,10 @@ export class DeleteStation {
    * @param {import('../../domain/station/StationRepository.js').StationRepository} dependencies.stationRepository
    * @param {import('../../domain/platform/PlatformRepository.js').PlatformRepository} dependencies.platformRepository
    */
-  constructor({ stationRepository, platformRepository }) {
+  constructor({ stationRepository, platformRepository, publicDataSync }) {
     this.stationRepository = stationRepository;
     this.platformRepository = platformRepository;
+    this.publicDataSync = publicDataSync;
   }
 
   /**
@@ -45,6 +46,13 @@ export class DeleteStation {
     }
 
     // Delete station
-    return await this.stationRepository.delete(id);
+    const result = await this.stationRepository.delete(id);
+
+    // Remove from public database
+    if (this.publicDataSync) {
+      await this.publicDataSync.removeStation(id);
+    }
+
+    return result;
   }
 }

@@ -311,36 +311,50 @@
             // Use V1 API for authentication (has verifyAuth method)
             const api = global.sitesAPI;
 
-            // Verify authentication with server (async)
-            // This sends the httpOnly cookie and CF Access JWT to validate the session
-            if (api?.verifyAuth) {
-                const isAuth = await api.verifyAuth();
-                if (!isAuth) {
-                    // On station portals, CF Access handles authentication
-                    // If verify fails, the user may still be authenticated via CF Access
-                    // but not have a legacy cookie. Try a direct verify as fallback.
-                    if (this.isStationPortal) {
-                        logger.warn('Legacy auth failed on station portal, trying CF Access verify...');
-                        const cfAuthOk = await this._verifyCFAccess();
-                        if (!cfAuthOk) {
-                            logger.warn('CF Access auth failed, redirecting to public portal');
-                            global.location.href = 'https://sitesspectral.work';
-                            return;
-                        }
-                    } else {
+            // Station portals: CF Access is the sole authentication mechanism.
+            // After CF Access OTP, the worker sets a session cookie on the HTML response.
+            // Try CF Access verify first, then legacy cookie, then retry once via reload.
+            if (this.isStationPortal) {
+                let authenticated = false;
+
+                // Try CF Access verify (reads session cookie set by worker)
+                const cfAuthOk = await this._verifyCFAccess();
+                if (cfAuthOk) {
+                    authenticated = true;
+                } else if (api?.verifyAuth) {
+                    // Fallback: try legacy cookie auth
+                    authenticated = await api.verifyAuth();
+                }
+
+                if (!authenticated) {
+                    // Session cookie may not be ready yet on first load.
+                    // Reload once to let the worker re-issue the cookie from CF Access JWT.
+                    const retryKey = 'sites_spectral_auth_retry';
+                    if (!sessionStorage.getItem(retryKey)) {
+                        sessionStorage.setItem(retryKey, '1');
+                        logger.warn('Station portal auth not ready, reloading to establish session...');
+                        global.location.reload();
+                        return;
+                    }
+                    // Already retried — show error, do not redirect away
+                    sessionStorage.removeItem(retryKey);
+                    this._showErrorState('Authentication failed. Please close this tab and re-open the station portal link to re-authenticate via Cloudflare Access.');
+                    return;
+                }
+
+                // Auth succeeded — clear retry flag
+                sessionStorage.removeItem('sites_spectral_auth_retry');
+
+            } else {
+                // Non-station portals: use legacy auth with redirect to login
+                if (api?.verifyAuth) {
+                    const isAuth = await api.verifyAuth();
+                    if (!isAuth) {
                         logger.warn('User not authenticated, redirecting to login');
                         global.location.href = '/login.html';
                         return;
                     }
-                }
-            } else if (!api?.isAuthenticated()) {
-                if (this.isStationPortal) {
-                    const cfAuthOk = await this._verifyCFAccess();
-                    if (!cfAuthOk) {
-                        global.location.href = 'https://sitesspectral.work';
-                        return;
-                    }
-                } else {
+                } else if (!api?.isAuthenticated()) {
                     logger.warn('User not authenticated, redirecting to login');
                     global.location.href = '/login.html';
                     return;
@@ -2609,13 +2623,8 @@
                 }
             }
 
-            // On station portals, redirect to public site
-            // On other portals, redirect to login page
-            if (this.isStationPortal) {
-                global.location.href = 'https://sitesspectral.work';
-            } else {
-                global.location.href = '/login.html';
-            }
+            // Redirect to login page on all portals
+            global.location.href = '/login.html';
         }
 
         // ========================================

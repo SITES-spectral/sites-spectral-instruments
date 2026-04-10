@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Current Version: 16.0.0
+## Current Version: 16.1.0
 
 | Property | Value |
 |----------|-------|
 | **Status** | Production Ready |
 | **Admin Portal** | https://admin.sitesspectral.work |
 | **Public Portal** | https://sitesspectral.work |
-| **Last Updated** | 2026-03-13 |
+| **Last Updated** | 2026-04-10 |
 | **Test Coverage** | 1268 tests |
 | **Stations** | 12 (9 SITES + 3 Guest) |
 | **Platforms** | 30 |

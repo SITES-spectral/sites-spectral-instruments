@@ -46,6 +46,10 @@ export { StructuredConsoleLogger } from './logging/StructuredConsoleLogger.js';
 
 export { NoOpMetricsAdapter } from './metrics/NoOpMetricsAdapter.js';
 
+// ===== SYNC ADAPTERS =====
+
+export { D1PublicDataSyncAdapter } from './sync/D1PublicDataSyncAdapter.js';
+
 // ===== AUTH ADAPTERS =====
 
 export { CloudflareCredentialsAdapter } from './auth/CloudflareCredentialsAdapter.js';
