@@ -62,7 +62,7 @@ export class CampaignController {
     // Validate sorting
     const { sortBy, sortOrder } = parseSorting(url, CAMPAIGN_SORT_FIELDS, 'planned_start_datetime');
 
-    const stationId = url.searchParams.get('station_id');
+    const stationParam = url.searchParams.get('station') || url.searchParams.get('station_id');
     const platformId = url.searchParams.get('platform_id');
     const status = url.searchParams.get('status');
     const campaignType = url.searchParams.get('campaign_type');
@@ -70,23 +70,46 @@ export class CampaignController {
     const startDate = url.searchParams.get('start_date');
     const endDate = url.searchParams.get('end_date');
 
-    const result = await this.queries.listCampaigns.execute({
-      page,
-      limit,
-      stationId: stationId ? parseInt(stationId, 10) : undefined,
-      platformId: platformId ? parseInt(platformId, 10) : undefined,
-      status,
-      campaignType,
-      coordinatorId: coordinatorId ? parseInt(coordinatorId, 10) : undefined,
-      startDate,
-      endDate,
-      sortBy,
-      sortOrder
-    });
+    // Resolve station parameter: accept acronym or numeric ID
+    let stationId;
+    if (stationParam) {
+      if (!isNaN(stationParam)) {
+        stationId = parseInt(stationParam, 10);
+      } else {
+        const station = await this.queries.getStation.byAcronym(stationParam);
+        stationId = station?.id;
+      }
+    }
+
+    // Route to the appropriate query method based on filters
+    let campaigns;
+    try {
+      if (stationId) {
+        campaigns = await this.queries.listCampaigns.byStation(stationId);
+      } else if (platformId) {
+        campaigns = await this.queries.listCampaigns.byPlatform(parseInt(platformId, 10));
+      } else if (status) {
+        campaigns = await this.queries.listCampaigns.byStatus(status);
+      } else {
+        campaigns = await this.queries.listCampaigns.all();
+      }
+    } catch (error) {
+      // Table may not exist yet — return empty results
+      if (error.message?.includes('no such table')) {
+        return createSuccessResponse({ data: [], meta: { page, limit, total: 0, totalPages: 0 } });
+      }
+      throw error;
+    }
+
+    // Manual pagination
+    const items = Array.isArray(campaigns) ? campaigns : (campaigns?.items || []);
+    const total = items.length;
+    const start = (page - 1) * limit;
+    const paged = items.slice(start, start + limit);
 
     return createSuccessResponse({
-      data: result.items.map(c => c.toJSON()),
-      meta: result.pagination
+      data: paged.map(c => typeof c.toJSON === 'function' ? c.toJSON() : c),
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
     });
   }
 

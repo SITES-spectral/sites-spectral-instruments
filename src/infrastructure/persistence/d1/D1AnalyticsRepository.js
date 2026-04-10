@@ -96,10 +96,10 @@ export class D1AnalyticsRepository extends AnalyticsRepository {
   async getDeploymentTimeline() {
     const result = await this.db.prepare(`
       SELECT
-        strftime('%Y', deployment_date) as year,
+        strftime('%Y', created_at) as year,
         COUNT(*) as count
       FROM instruments
-      WHERE deployment_date IS NOT NULL
+      WHERE created_at IS NOT NULL
       GROUP BY year
       ORDER BY year ASC
     `).all();
@@ -170,11 +170,11 @@ export class D1AnalyticsRepository extends AnalyticsRepository {
   async getDeploymentTrends(months = 24) {
     const result = await this.db.prepare(`
       SELECT
-        strftime('%Y-%m', deployment_date) as month,
+        strftime('%Y-%m', created_at) as month,
         instrument_type,
         COUNT(*) as count
       FROM instruments
-      WHERE deployment_date IS NOT NULL
+      WHERE created_at IS NOT NULL
       GROUP BY month, instrument_type
       ORDER BY month DESC
       LIMIT ?
@@ -239,11 +239,11 @@ export class D1AnalyticsRepository extends AnalyticsRepository {
     const result = await this.db.prepare(`
       SELECT
         CASE
-          WHEN instrument_height_m < 2 THEN '0-2m'
-          WHEN instrument_height_m >= 2 AND instrument_height_m < 5 THEN '2-5m'
-          WHEN instrument_height_m >= 5 AND instrument_height_m < 10 THEN '5-10m'
-          WHEN instrument_height_m >= 10 AND instrument_height_m < 20 THEN '10-20m'
-          WHEN instrument_height_m >= 20 THEN '20m+'
+          WHEN camera_mount_height < 2 THEN '0-2m'
+          WHEN camera_mount_height >= 2 AND camera_mount_height < 5 THEN '2-5m'
+          WHEN camera_mount_height >= 5 AND camera_mount_height < 10 THEN '5-10m'
+          WHEN camera_mount_height >= 10 AND camera_mount_height < 20 THEN '10-20m'
+          WHEN camera_mount_height >= 20 THEN '20m+'
           ELSE 'Unknown'
         END as height_range,
         COUNT(*) as count
@@ -412,11 +412,11 @@ export class D1AnalyticsRepository extends AnalyticsRepository {
       `).first(),
       this.db.prepare(`
         SELECT COUNT(*) as count FROM instruments
-        WHERE deployment_date IS NULL
+        WHERE created_at IS NULL
       `).first(),
       this.db.prepare(`
         SELECT COUNT(*) as count FROM instruments
-        WHERE instrument_height_m IS NULL
+        WHERE camera_mount_height IS NULL
       `).first(),
       this.db.prepare(`
         SELECT COUNT(DISTINCT i.id) as count

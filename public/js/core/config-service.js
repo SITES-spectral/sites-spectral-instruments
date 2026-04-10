@@ -238,6 +238,7 @@
          * @returns {Object|null}
          */
         getStatus(code) {
+            if (!code) return null;
             const statuses = this.getStatuses();
             // Find by code property (case-insensitive)
             for (const [key, status] of Object.entries(statuses)) {

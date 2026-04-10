@@ -3,14 +3,7 @@
 // WCAG 2.4.3 Compliant with focus trap support
 // Uses core/focus-trap.js for accessible keyboard navigation
 
-// XSS Prevention: Use centralized escapeHtml with inline fallback
-const _escapeHtml = (text) => {
-    if (window.SitesSecurity?.escapeHtml) return window.SitesSecurity.escapeHtml(text);
-    if (text === null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(text);
-    return div.innerHTML;
-};
+// XSS Prevention: _escapeHtml declared in form-components.js (loaded first)
 
 class BaseModal {
     constructor(config) {

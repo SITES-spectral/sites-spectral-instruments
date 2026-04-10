@@ -47,8 +47,7 @@ export class D1InstrumentRepository {
           i.*,
           p.normalized_name as platform_name,
           p.display_name as platform_display_name,
-          p.platform_type,
-          p.ecosystem_code,
+          p.mount_type_code,
           s.acronym as station_acronym,
           s.display_name as station_display_name
         FROM instruments i
@@ -67,8 +66,7 @@ export class D1InstrumentRepository {
       platform: {
         normalized_name: result.platform_name,
         display_name: result.platform_display_name,
-        platform_type: result.platform_type,
-        ecosystem_code: result.ecosystem_code
+        mount_type_code: result.mount_type_code
       },
       station: {
         acronym: result.station_acronym,

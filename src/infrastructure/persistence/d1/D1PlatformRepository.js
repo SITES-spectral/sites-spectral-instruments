@@ -107,12 +107,15 @@ export class D1PlatformRepository {
       params.push(stationId);
     }
     if (platformType) {
-      conditions.push('p.platform_type = ?');
-      params.push(platformType);
-    }
-    if (ecosystemCode) {
-      conditions.push('p.ecosystem_code = ?');
-      params.push(ecosystemCode);
+      // Map platform type names to mount_type_code prefixes
+      const typePrefixes = { fixed: ['TWR', 'BLD', 'GND'], uav: ['UAV'], satellite: ['SAT'], mobile: ['MOB'] }[platformType.toLowerCase()];
+      if (typePrefixes) {
+        conditions.push("(" + typePrefixes.map(() => "p.mount_type_code LIKE ?").join(" OR ") + ")");
+        typePrefixes.forEach(p => params.push(p + '%'));
+      } else {
+        conditions.push('p.mount_type_code = ?');
+        params.push(platformType);
+      }
     }
 
     const whereClause = conditions.length > 0
@@ -120,7 +123,7 @@ export class D1PlatformRepository {
       : '';
 
     // Whitelist allowed sort columns
-    const allowedSortColumns = ['id', 'normalized_name', 'display_name', 'platform_type', 'created_at'];
+    const allowedSortColumns = ['id', 'normalized_name', 'display_name', 'mount_type_code', 'created_at'];
     const safeSort = allowedSortColumns.includes(sortBy) ? sortBy : 'normalized_name';
     const safeOrder = sortOrder.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
@@ -155,12 +158,14 @@ export class D1PlatformRepository {
       params.push(filter.stationId);
     }
     if (filter.platformType) {
-      conditions.push('platform_type = ?');
-      params.push(filter.platformType);
-    }
-    if (filter.ecosystemCode) {
-      conditions.push('ecosystem_code = ?');
-      params.push(filter.ecosystemCode);
+      const typePrefixes = { fixed: ['TWR', 'BLD', 'GND'], uav: ['UAV'], satellite: ['SAT'], mobile: ['MOB'] }[filter.platformType.toLowerCase()];
+      if (typePrefixes) {
+        conditions.push("(" + typePrefixes.map(() => "mount_type_code LIKE ?").join(" OR ") + ")");
+        typePrefixes.forEach(p => params.push(p + '%'));
+      } else {
+        conditions.push('mount_type_code = ?');
+        params.push(filter.platformType);
+      }
     }
 
     const whereClause = conditions.length > 0
@@ -236,8 +241,6 @@ export class D1PlatformRepository {
           UPDATE platforms SET
             display_name = ?,
             description = ?,
-            platform_type = ?,
-            ecosystem_code = ?,
             mount_type_code = ?,
             latitude = ?,
             longitude = ?,
@@ -248,8 +251,6 @@ export class D1PlatformRepository {
         .bind(
           data.display_name,
           data.description,
-          data.platform_type,
-          data.ecosystem_code,
           mountTypeCode,
           data.latitude,
           data.longitude,
@@ -266,18 +267,16 @@ export class D1PlatformRepository {
         .prepare(`
           INSERT INTO platforms (
             station_id, normalized_name, display_name, description,
-            platform_type, ecosystem_code, mount_type_code,
+            mount_type_code,
             latitude, longitude, status,
             created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `)
         .bind(
           data.station_id,
           data.normalized_name,
           data.display_name,
           data.description,
-          data.platform_type,
-          data.ecosystem_code,
           mountTypeCode,
           data.latitude,
           data.longitude,

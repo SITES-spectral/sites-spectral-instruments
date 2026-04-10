@@ -61,6 +61,7 @@ export class ProductController {
     // Validate sorting
     const { sortBy, sortOrder } = parseSorting(url, PRODUCT_SORT_FIELDS, 'product_date');
 
+    const stationParam = url.searchParams.get('station') || url.searchParams.get('station_id');
     const instrumentId = url.searchParams.get('instrument_id');
     const campaignId = url.searchParams.get('campaign_id');
     const type = url.searchParams.get('type');
@@ -72,26 +73,52 @@ export class ProductController {
     const keyword = url.searchParams.get('keyword');
     const isPublic = url.searchParams.get('is_public');
 
-    const result = await this.queries.listProducts.execute({
-      page,
-      limit,
-      instrumentId: instrumentId ? parseInt(instrumentId, 10) : undefined,
-      campaignId: campaignId ? parseInt(campaignId, 10) : undefined,
-      type,
-      processingLevel,
-      qualityControlLevel,
-      minQualityScore: minQualityScore ? parseFloat(minQualityScore) : undefined,
-      startDate,
-      endDate,
-      keyword,
-      isPublic: isPublic !== undefined ? isPublic === 'true' : undefined,
-      sortBy,
-      sortOrder
-    });
+    // Resolve station parameter: accept acronym or numeric ID
+    let stationId;
+    if (stationParam) {
+      if (!isNaN(stationParam)) {
+        stationId = parseInt(stationParam, 10);
+      } else {
+        const station = await this.queries.getStation.byAcronym(stationParam);
+        stationId = station?.id;
+      }
+    }
+
+    // Route to the appropriate query method based on filters
+    let products;
+    try {
+      if (instrumentId) {
+        products = await this.queries.listProducts.byInstrument(parseInt(instrumentId, 10));
+      } else if (campaignId) {
+        products = await this.queries.listProducts.byCampaign(parseInt(campaignId, 10));
+      } else if (type) {
+        products = await this.queries.listProducts.byType(type);
+      } else if (processingLevel) {
+        products = await this.queries.listProducts.byProcessingLevel(processingLevel);
+      } else if (keyword) {
+        products = await this.queries.listProducts.byKeyword(keyword);
+      } else if (isPublic === 'true') {
+        products = await this.queries.listProducts.public();
+      } else {
+        products = await this.queries.listProducts.all();
+      }
+    } catch (error) {
+      // Table may not exist yet — return empty results
+      if (error.message?.includes('no such table')) {
+        return createSuccessResponse({ data: [], meta: { page, limit, total: 0, totalPages: 0 } });
+      }
+      throw error;
+    }
+
+    // Manual pagination
+    const items = Array.isArray(products) ? products : (products?.items || []);
+    const total = items.length;
+    const start = (page - 1) * limit;
+    const paged = items.slice(start, start + limit);
 
     return createSuccessResponse({
-      data: result.items.map(p => p.toJSON()),
-      meta: result.pagination
+      data: paged.map(p => typeof p.toJSON === 'function' ? p.toJSON() : p),
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
     });
   }
 
