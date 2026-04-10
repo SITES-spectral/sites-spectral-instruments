@@ -2615,8 +2615,14 @@
             global.sitesAPI?.clearAuth();
             sessionStorage.removeItem('sites_spectral_auth_retry');
 
-            // Station portals: end CF Access session entirely, then close tab
+            // Station portals: end CF Access session, then go to public site
             if (this.isStationPortal) {
+                // Clear CF Access session cookie via logout endpoint
+                try {
+                    await fetch('/cdn-cgi/access/logout', { credentials: 'include' });
+                } catch (e) {
+                    // Best-effort
+                }
                 if (cfAccessLogoutUrl) {
                     try {
                         await fetch(cfAccessLogoutUrl, { credentials: 'include' });
@@ -2624,8 +2630,7 @@
                         // Best-effort
                     }
                 }
-                // Redirect to CF Access logout which clears the access cookie
-                global.location.href = '/cdn-cgi/access/logout';
+                global.location.href = 'https://sitesspectral.work';
                 return;
             }
 

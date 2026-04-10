@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.1.1] - 2026-04-10
+
+### Fixed
+
+- **17 database schema mismatches** — removed references to non-existent columns (`platform_type`, `ecosystem_code`, `deployment_date`, `instrument_height_m`, etc.) and tables (`acquisition_campaigns`, `products`, `areas_of_interest`) across D1PlatformRepository, D1InstrumentRepository, D1ExportRepository, D1AnalyticsRepository
+- **CampaignController/ProductController 500 errors** — controllers called non-existent `.execute()` method; now route to proper query methods (`byStation`, `byPlatform`, etc.) with graceful handling for missing tables
+- **Platform type filtering** — map frontend type names (`fixed`, `uav`, `satellite`, `mobile`) to `mount_type_code` prefixes (`TWR/BLD/GND`, `UAV`, `SAT`, `MOB`)
+- **modal-system.js SyntaxError** — removed duplicate `_escapeHtml` declaration that crashed the module and blocked `FormModal` class
+- **config-service.js TypeError** — added null guard in `getStatus()` for undefined status codes
+- **Station portal SPA routing** — worker now serves `station-dashboard.html` for ALL HTML page requests on station subdomains, eliminating redirect loops from scattered JS auth-failure handlers
+- **Station portal logout** — clears CF Access session via `/cdn-cgi/access/logout` then redirects to public site (`sitesspectral.work`)
+- **CF Access JWT gateway-trusted fallback** — when full JWT cryptographic verification fails (AUD mismatch), decode payload directly from the gateway-validated header to establish session
+
+---
+
 ## [16.1.0] - 2026-04-10
 
 ### BREAKING CHANGES
